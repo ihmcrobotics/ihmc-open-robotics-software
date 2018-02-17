@@ -19,6 +19,9 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 
 public class RobotConfigurationData extends Packet<RobotConfigurationData>
 {
+   public static final byte ROBOT_MOTION_STATUS_STANDING = 0;
+   public static final byte ROBOT_MOTION_STATUS_IN_MOTION = 1;
+
    public long timestamp = 0;
    public long sensorHeadPPSTimestamp;
    public int jointNameHash;

@@ -7,6 +7,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
 {
    private static final boolean DEBUG = false;
 
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    public boolean autoExposure;
 
    public boolean autoGain;
@@ -142,7 +145,7 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
    @Override
    public String toString()
    {
-      return " source(fromUI?)" + fromUI + " " + RobotSide.fromByte(robotSide).name() + " gain " + gain + " fps " + frameRate + " shutter " + shutter + " exposure " + exposure
-            + " autoExposure/autoGain/autoShutter " + autoExposure + autoGain + autoShutter;
+      return " source(fromUI?)" + fromUI + " " + RobotSide.fromByte(robotSide).name() + " gain " + gain + " fps " + frameRate + " shutter " + shutter
+            + " exposure " + exposure + " autoExposure/autoGain/autoShutter " + autoExposure + autoGain + autoShutter;
    }
 }

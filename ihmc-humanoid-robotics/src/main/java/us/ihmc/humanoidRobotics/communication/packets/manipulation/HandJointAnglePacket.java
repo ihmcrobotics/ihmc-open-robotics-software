@@ -8,6 +8,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    public byte robotSide;
    public double[] jointAngles;
    public boolean connected;

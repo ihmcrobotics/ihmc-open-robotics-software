@@ -4,6 +4,9 @@ import us.ihmc.communication.packets.Packet;
 
 public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
 {
+   public static final byte NORMAL = 0;
+   public static final byte FROZEN = 1;
+
    public byte requestedStateEstimatorMode;
 
    public StateEstimatorModePacket()

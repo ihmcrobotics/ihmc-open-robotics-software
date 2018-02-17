@@ -18,12 +18,19 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class FootstepDataMessage extends Packet<FootstepDataMessage>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
+   public static final byte TRAJECTORY_TYPE_DEFAULT = 0;
+   public static final byte TRAJECTORY_TYPE_OBSTACLE_CLEARANCE = 1;
+   public static final byte TRAJECTORY_TYPE_CUSTOM = 2;
+   public static final byte TRAJECTORY_TYPE_WAYPOINTS = 3;
+
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public byte robotSide;
    @RosExportedField(documentation = "Specifies the position of the footstep (sole frame) in world frame.")

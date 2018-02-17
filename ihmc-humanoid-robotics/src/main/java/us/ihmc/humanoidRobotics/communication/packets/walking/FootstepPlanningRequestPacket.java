@@ -12,6 +12,15 @@ import us.ihmc.robotics.geometry.RotationTools;
 
 public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningRequestPacket>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
+   public static final byte FOOTSTEP_PLANNER_TYPE_PLANAR_REGION_BIPEDAL = 0;
+   public static final byte FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP = 1;
+   public static final byte FOOTSTEP_PLANNER_TYPE_A_STAR = 2;
+   public static final byte FOOTSTEP_PLANNER_TYPE_SIMPLE_BODY_PATH = 3;
+   public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = 4;
+
    public static final int NO_PLAN_ID = -1;
 
    public byte initialStanceRobotSide;

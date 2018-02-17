@@ -11,6 +11,9 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/arm_desired_joint_accelerations")
 public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAccelerationsMessage>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public byte robotSide;
    @RosExportedField(documentation = "The desired joint acceleration information.")

@@ -13,6 +13,12 @@ import us.ihmc.euclid.tuple4D.Quaternion;
       + "and orientation of the footstep in world cooredinates. ", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/output/footstep_status")
 public class FootstepStatusMessage extends SettablePacket<FootstepStatusMessage>
 {
+   public static final byte FOOTSTEP_STATUS_STARTED = 0;
+   public static final byte FOOTSTEP_STATUS_COMPLETED = 1;
+
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    @RosExportedField(documentation = "The current footstep status enum value.")
    public byte footstepStatus;
    @RosExportedField(documentation = "footstepIndex starts at 0 and monotonically increases with each completed footstep in a given\n"

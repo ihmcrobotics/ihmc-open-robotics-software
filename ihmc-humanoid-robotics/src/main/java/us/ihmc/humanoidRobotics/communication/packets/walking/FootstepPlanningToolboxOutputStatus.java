@@ -13,6 +13,13 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlanningToolboxOutputStatus extends SettablePacket<FootstepPlanningToolboxOutputStatus>
 {
+   public static final byte FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION = 0;
+   public static final byte FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION = 1;
+   public static final byte FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION = 2;
+   public static final byte FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS = 3;
+   public static final byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = 4;
+   public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = 5;
+
    public FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
    public byte footstepPlanningResult;
    public int planId = FootstepPlanningRequestPacket.NO_PLAN_ID;

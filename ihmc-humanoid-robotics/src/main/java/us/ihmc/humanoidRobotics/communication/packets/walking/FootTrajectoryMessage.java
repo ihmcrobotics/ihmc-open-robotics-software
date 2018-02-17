@@ -15,6 +15,9 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
       topic = "/control/foot_trajectory")
 public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    @RosExportedField(documentation = "Specifies which foot will execute the trajectory.")
    public byte robotSide;
    @RosExportedField(documentation = "The position/orientation trajectory information.")

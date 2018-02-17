@@ -11,6 +11,13 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 @RosMessagePacket(documentation = "Specifies a specific electric motor in the Atlas forearm to power on or off.", rosPackage = "ihmc_atlas_ros", topic = "/control/enable_electric_motor")
 public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEnablePacket>
 {
+   public static final byte L_ARM_WRY = 0;
+   public static final byte L_ARM_WRX = 1;
+   public static final byte L_ARM_WRY2 = 2;
+   public static final byte R_ARM_WRY = 3;
+   public static final byte R_ARM_WRX = 4;
+   public static final byte R_ARM_WRY2 = 5;
+
    @RosExportedField(documentation = "The Enum value of the motor to enable")
    public byte atlasElectricMotorPacketEnumEnable;
 

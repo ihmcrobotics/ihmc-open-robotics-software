@@ -10,6 +10,15 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
       + "it is up to the user to ensure stability.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/high_level_state")
 public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
 {
+   public static final byte DO_NOTHING_BEHAVIOR = 0;
+   public static final byte STAND_PREP_STATE = 1;
+   public static final byte STAND_READY = 2;
+   public static final byte FREEZE_STATE = 3;
+   public static final byte STAND_TRANSITION_STATE = 4;
+   public static final byte WALKING = 5;
+   public static final byte DIAGNOSTICS = 6;
+   public static final byte CALIBRATION = 7;
+
    @RosExportedField(documentation = "The enum value of the current high level state of the robot.")
    public byte highLevelControllerName;
 

@@ -4,6 +4,9 @@ import us.ihmc.communication.packets.Packet;
 
 public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControlModeMessage>
 {
+   public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_STAND_PREP = 0;
+   public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_FREEZE = 1;
+
    public byte requestedAtlasLowLevelControlMode;
 
    public AtlasLowLevelControlModeMessage()

@@ -16,6 +16,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class LegCompliancePacket extends Packet<LegCompliancePacket>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    /**
     * maximum allowed force (ratio) from velocity control in the range of [0.0, 1.0]. 1.0 is the
     * maximum stiffness (default) value tuned for fast walking, 0.0 refers to zero velocity control
