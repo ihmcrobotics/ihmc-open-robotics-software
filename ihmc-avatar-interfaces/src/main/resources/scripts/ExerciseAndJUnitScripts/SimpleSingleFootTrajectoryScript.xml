@@ -40,7 +40,7 @@
       <dataReferenceFrameId>0</dataReferenceFrameId>
       <useCustomControlFrame>false</useCustomControlFrame>
     </se3Trajectory>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage>
   <long>1492627391854</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>

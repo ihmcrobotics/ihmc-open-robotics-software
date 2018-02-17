@@ -10,7 +10,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>18226637407</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
-    <robotSide>LEFT</robotSide>
+    <robotSide>0</robotSide>
     <position>
       <x>-0.0013761152128051683</x>
       <y>0.2809062277044566</y>
@@ -25,7 +25,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>31737665390</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
-    <robotSide>LEFT</robotSide>
+    <robotSide>0</robotSide>
     <position>
       <x>-0.4861862094932677</x>
       <y>0.237541116394179</y>
@@ -40,7 +40,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>10999084456</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>RIGHT</robotSide>
+    <robotSide>1</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
@@ -76,7 +76,7 @@
   </us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
   <long>12333501457</long>
   <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPosePacket>
-    <robotSide>LEFT</robotSide>
+    <robotSide>0</robotSide>
     <dataType>JOINT_ANGLES</dataType>
     <referenceFrame>CHEST</referenceFrame>
     <toHomePosition>false</toHomePosition>
