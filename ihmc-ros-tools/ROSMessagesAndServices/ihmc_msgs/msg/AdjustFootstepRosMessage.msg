@@ -3,7 +3,7 @@
 # currently swinging to reach the footstep to be adjusted).
 
 # Specifies which foot is expected to be executing the footstep to be adjusted.
-uint8 robot_side
+int8 robot_side
 
 # Specifies the adjusted position of the footstep. It is expressed in world frame.
 geometry_msgs/Point location
@@ -29,10 +29,4 @@ float64 execution_delay_time
 # a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.
 int64 unique_id
 
-
-# This message utilizes "enums". Enum value information for this message follows.
-
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
 

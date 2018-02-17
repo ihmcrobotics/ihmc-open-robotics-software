@@ -1111,7 +1111,7 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static FootstepStatusMessage nextFootstepStatus(Random random)
+   public static FootstepStatusMessage nextFootstepStatusMessage(Random random)
    {
       FootstepStatusMessage next = new FootstepStatusMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);

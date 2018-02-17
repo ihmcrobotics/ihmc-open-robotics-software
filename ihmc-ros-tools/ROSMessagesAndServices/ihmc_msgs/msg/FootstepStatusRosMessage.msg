@@ -3,14 +3,14 @@
 # and orientation of the footstep in world cooredinates. 
 
 # The current footstep status enum value.
-uint8 status
+int8 footstep_status
 
 # footstepIndex starts at 0 and monotonically increases with each completed footstep in a given
 # FootstepDataListMessage.
 int32 footstep_index
 
 # The robot side (left or right) that this footstep status correlates to.
-uint8 robot_side
+int8 robot_side
 
 # desiredFootPositionInWorld gives the position of the desired position sent to the controller as
 # opposed to where the foot actually landed
@@ -34,14 +34,4 @@ geometry_msgs/Quaternion actual_foot_orientation_in_world
 # a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.
 int64 unique_id
 
-
-# This message utilizes "enums". Enum value information for this message follows.
-
-# "status" enum values:
-uint8 STARTED=0 # execution of a footstep has begun. actualFootPositionInWorld and actualFootOrientationInWorld should be ignored in this state
-uint8 COMPLETED=1 # a footstep is completed
-
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
 

@@ -33,7 +33,7 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
          + " If previousMessageId == 0, the controller will not check for the ID of the last received message.")
    public long previousMessageId = Packet.INVALID_MESSAGE_ID;
 
-   /** the time to delay this message on the controller side before being executed **/
+   @RosExportedField(documentation = "The time to delay this message on the controller side before being executed.")
    public double executionDelayTime;
 
    /**
