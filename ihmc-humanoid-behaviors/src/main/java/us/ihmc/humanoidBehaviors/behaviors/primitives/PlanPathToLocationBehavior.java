@@ -136,8 +136,8 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             if (footPlanStatusQueue.isNewPacketAvailable())
             {
                footstepPlanningToolboxOutputStatus = footPlanStatusQueue.getLatestPacket();
-               if (footstepPlanningToolboxOutputStatus.planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION.toByte()
-                     || footstepPlanningToolboxOutputStatus.planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION.toByte())
+               if (footstepPlanningToolboxOutputStatus.footstepPlanningResult == FootstepPlanningResult.OPTIMAL_SOLUTION.toByte()
+                     || footstepPlanningToolboxOutputStatus.footstepPlanningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION.toByte())
                {
                   planningSuccess = true;
                   footstepDataListMessage = footstepPlanningToolboxOutputStatus.footstepDataList;

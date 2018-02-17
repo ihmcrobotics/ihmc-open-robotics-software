@@ -452,7 +452,7 @@ public final class RandomHumanoidMessages
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.robotSide = RobotSide.generateRandomRobotSide(random).toByte();
       next.executionDelayTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
-      next.request = RandomNumbers.nextEnum(random, LoadBearingRequest.class).toByte();
+      next.loadBearingRequest = RandomNumbers.nextEnum(random, LoadBearingRequest.class).toByte();
       return next;
    }
 
@@ -518,7 +518,7 @@ public final class RandomHumanoidMessages
    {
       HumanoidBehaviorTypePacket next = new HumanoidBehaviorTypePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.behaviorType = RandomNumbers.nextEnum(random, HumanoidBehaviorType.class).toByte();
+      next.humanoidBehaviorType = RandomNumbers.nextEnum(random, HumanoidBehaviorType.class).toByte();
       return next;
    }
 
@@ -581,8 +581,8 @@ public final class RandomHumanoidMessages
    {
       HighLevelStateChangeStatusMessage next = new HighLevelStateChangeStatusMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.initialState = RandomNumbers.nextEnum(random, HighLevelControllerName.class).toByte();
-      next.endState = RandomNumbers.nextEnum(random, HighLevelControllerName.class).toByte();
+      next.initialHighLevelControllerName = RandomNumbers.nextEnum(random, HighLevelControllerName.class).toByte();
+      next.endHighLevelControllerName = RandomNumbers.nextEnum(random, HighLevelControllerName.class).toByte();
       return next;
    }
 
@@ -594,7 +594,7 @@ public final class RandomHumanoidMessages
       next.thetaStart = random.nextDouble();
       next.maxSuboptimality = random.nextDouble();
       next.goals = nextFootstepDataMessages(random);
-      next.requestType = RandomNumbers.nextEnum(random, FootstepPlanRequestType.class).toByte();
+      next.footstepPlanRequestType = RandomNumbers.nextEnum(random, FootstepPlanRequestType.class).toByte();
       return next;
    }
 
@@ -654,7 +654,7 @@ public final class RandomHumanoidMessages
    {
       AtlasLowLevelControlModeMessage next = new AtlasLowLevelControlModeMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.requestedControlMode = RandomNumbers.nextEnum(random, AtlasLowLevelControlMode.class).toByte();
+      next.requestedAtlasLowLevelControlMode = RandomNumbers.nextEnum(random, AtlasLowLevelControlMode.class).toByte();
       return next;
    }
 
@@ -662,7 +662,7 @@ public final class RandomHumanoidMessages
    {
       BehaviorControlModeResponsePacket next = new BehaviorControlModeResponsePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.requestedControl = RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class).toByte();
+      next.behaviorControlModeEnumRequest = RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class).toByte();
       return next;
    }
 
@@ -837,7 +837,7 @@ public final class RandomHumanoidMessages
       HandDesiredConfigurationMessage next = new HandDesiredConfigurationMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
-      next.handDesiredConfiguration = RandomNumbers.nextEnum(random, HandConfiguration.class).toByte();
+      next.desiredHandConfiguration = RandomNumbers.nextEnum(random, HandConfiguration.class).toByte();
       return next;
    }
 
@@ -845,7 +845,7 @@ public final class RandomHumanoidMessages
    {
       WalkingStatusMessage next = new WalkingStatusMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.status = RandomNumbers.nextEnum(random, WalkingStatus.class).toByte();
+      next.walkingStatus = RandomNumbers.nextEnum(random, WalkingStatus.class).toByte();
       return next;
    }
 
@@ -987,7 +987,7 @@ public final class RandomHumanoidMessages
       next.fromUI = random.nextBoolean();
       next.gain = random.nextDouble();
       next.shutter = random.nextDouble();
-      next.side = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
+      next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       return next;
    }
 
@@ -1018,7 +1018,7 @@ public final class RandomHumanoidMessages
    {
       GoHomeMessage next = new GoHomeMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.bodyPart = RandomNumbers.nextEnum(random, HumanoidBodyPart.class).toByte();
+      next.humanoidBodyPart = RandomNumbers.nextEnum(random, HumanoidBodyPart.class).toByte();
       next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       next.trajectoryTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
       return next;
@@ -1055,7 +1055,7 @@ public final class RandomHumanoidMessages
    {
       BDIBehaviorStatusPacket next = new BDIBehaviorStatusPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.currentBehavior = RandomNumbers.nextEnum(random, BDIRobotBehavior.class).toByte();
+      next.currentBDIRobotBehavior = RandomNumbers.nextEnum(random, BDIRobotBehavior.class).toByte();
       return next;
    }
 
@@ -1085,7 +1085,7 @@ public final class RandomHumanoidMessages
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.footstepDataList = RandomHumanoidMessages.nextFootstepDataListMessage(random);
       int result = random.nextInt(FootstepPlanningResult.values.length);
-      next.planningResult = FootstepPlanningResult.values[result].toByte();
+      next.footstepPlanningResult = FootstepPlanningResult.values[result].toByte();
       next.planId = random.nextInt();
 
       next.bodyPath = new Point2D[random.nextInt(10)];
@@ -1115,7 +1115,7 @@ public final class RandomHumanoidMessages
    {
       FootstepStatusMessage next = new FootstepStatusMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.status = RandomNumbers.nextEnum(random, FootstepStatus.class).toByte();
+      next.footstepStatus = RandomNumbers.nextEnum(random, FootstepStatus.class).toByte();
       next.footstepIndex = RandomNumbers.nextIntWithEdgeCases(random, 0.1);
       next.robotSide = RobotSide.generateRandomRobotSide(random).toByte();
       next.desiredFootPositionInWorld = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
@@ -1137,7 +1137,7 @@ public final class RandomHumanoidMessages
    {
       BDIBehaviorCommandPacket next = new BDIBehaviorCommandPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.atlasRobotBehavior = RandomNumbers.nextEnum(random, BDIRobotBehavior.class).toByte();
+      next.atlasBDIRobotBehavior = RandomNumbers.nextEnum(random, BDIRobotBehavior.class).toByte();
       next.stop = random.nextBoolean();
       return next;
    }
@@ -1175,7 +1175,7 @@ public final class RandomHumanoidMessages
    {
       BehaviorControlModePacket next = new BehaviorControlModePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.requestedControl = RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class).toByte();
+      next.behaviorControlModeEnumRequest = RandomNumbers.nextEnum(random, BehaviorControlModeEnum.class).toByte();
       return next;
    }
 
@@ -1183,7 +1183,7 @@ public final class RandomHumanoidMessages
    {
       AtlasElectricMotorEnablePacket next = new AtlasElectricMotorEnablePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.motorEnableEnum = RandomNumbers.nextEnum(random, AtlasElectricMotorPacketEnum.class).toByte();
+      next.atlasElectricMotorPacketEnumEnable = RandomNumbers.nextEnum(random, AtlasElectricMotorPacketEnum.class).toByte();
       next.enable = random.nextBoolean();
       return next;
    }
@@ -1192,7 +1192,7 @@ public final class RandomHumanoidMessages
    {
       HighLevelStateMessage next = new HighLevelStateMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.highLevelState = RandomNumbers.nextEnum(random, HighLevelControllerName.class).toByte();
+      next.highLevelControllerName = RandomNumbers.nextEnum(random, HighLevelControllerName.class).toByte();
       return next;
    }
 

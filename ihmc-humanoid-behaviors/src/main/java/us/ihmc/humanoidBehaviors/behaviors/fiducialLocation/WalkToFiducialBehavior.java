@@ -45,7 +45,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
       if (!recievedPlan.getBooleanValue() && footstepPlanQueue.isNewPacketAvailable())
       {
          FootstepPlanningToolboxOutputStatus latestPacket = footstepPlanQueue.getLatestPacket();
-         planValid.set(FootstepPlanningResult.fromByte(latestPacket.planningResult).validForExecution());
+         planValid.set(FootstepPlanningResult.fromByte(latestPacket.footstepPlanningResult).validForExecution());
 
          if (planValid.getBooleanValue())
          {

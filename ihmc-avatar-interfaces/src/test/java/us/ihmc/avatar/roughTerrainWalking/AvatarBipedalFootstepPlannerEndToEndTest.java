@@ -266,9 +266,9 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       }
 
       FootstepPlanningToolboxOutputStatus outputStatus = this.outputStatus.get();
-      if(!FootstepPlanningResult.fromByte(outputStatus.planningResult).validForExecution())
+      if(!FootstepPlanningResult.fromByte(outputStatus.footstepPlanningResult).validForExecution())
       {
-         throw new RuntimeException("Footstep plan not valid for execution: " + outputStatus.planningResult);
+         throw new RuntimeException("Footstep plan not valid for execution: " + outputStatus.footstepPlanningResult);
       }
 
       planCompleted = false;
@@ -330,7 +330,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
 
    private void listenForWalkingComplete(WalkingStatusMessage walkingStatusMessage)
    {
-      if(walkingStatusMessage.status == WalkingStatus.COMPLETED.toByte())
+      if(walkingStatusMessage.walkingStatus == WalkingStatus.COMPLETED.toByte())
       {
          planCompleted = true;
       }

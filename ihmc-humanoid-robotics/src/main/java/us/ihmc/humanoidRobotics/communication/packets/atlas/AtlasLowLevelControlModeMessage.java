@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControlModeMessage>
 {
-   public byte requestedControlMode;
+   public byte requestedAtlasLowLevelControlMode;
 
    public AtlasLowLevelControlModeMessage()
    {
@@ -14,22 +14,22 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
    public void set(AtlasLowLevelControlModeMessage other)
    {
       setPacketInformation(other);
-      requestedControlMode = other.requestedControlMode;
+      requestedAtlasLowLevelControlMode = other.requestedAtlasLowLevelControlMode;
    }
 
    public void setRequestedControlMode(byte requestedControlMode)
    {
-      this.requestedControlMode = requestedControlMode;
+      this.requestedAtlasLowLevelControlMode = requestedControlMode;
    }
 
    public byte getRequestedControlMode()
    {
-      return requestedControlMode;
+      return requestedAtlasLowLevelControlMode;
    }
 
    @Override
    public boolean epsilonEquals(AtlasLowLevelControlModeMessage other, double epsilon)
    {
-      return requestedControlMode == other.requestedControlMode;
+      return requestedAtlasLowLevelControlMode == other.requestedAtlasLowLevelControlMode;
    }
 }

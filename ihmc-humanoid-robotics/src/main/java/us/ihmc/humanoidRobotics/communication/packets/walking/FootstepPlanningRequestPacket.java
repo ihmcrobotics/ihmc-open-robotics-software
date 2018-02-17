@@ -14,12 +14,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 {
    public static final int NO_PLAN_ID = -1;
 
-   public byte initialStanceSide;
+   public byte initialStanceRobotSide;
    public Point3D32 stanceFootPositionInWorld;
    public Quaternion32 stanceFootOrientationInWorld;
    public Point3D32 goalPositionInWorld;
    public Quaternion32 goalOrientationInWorld;
-   public byte requestedPlannerType;
+   public byte requestedFootstepPlannerType;
    public double timeout;
    public PlanarRegionsListMessage planarRegionsListMessage;
 
@@ -33,12 +33,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    @Override
    public void set(FootstepPlanningRequestPacket other)
    {
-      initialStanceSide = other.initialStanceSide;
+      initialStanceRobotSide = other.initialStanceRobotSide;
       stanceFootPositionInWorld = new Point3D32(other.stanceFootPositionInWorld);
       stanceFootOrientationInWorld = new Quaternion32(other.stanceFootOrientationInWorld);
       goalPositionInWorld = new Point3D32(other.goalPositionInWorld);
       goalOrientationInWorld = new Quaternion32(other.goalOrientationInWorld);
-      requestedPlannerType = other.requestedPlannerType;
+      requestedFootstepPlannerType = other.requestedFootstepPlannerType;
       timeout = other.timeout;
       planarRegionsListMessage = new PlanarRegionsListMessage();
       planarRegionsListMessage.set(other.planarRegionsListMessage);
@@ -49,7 +49,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
    public void set(FramePose3D initialStanceFootPose, byte initialStanceSide, FramePose3D goalPose, byte requestedPlannerType)
    {
-      this.initialStanceSide = initialStanceSide;
+      this.initialStanceRobotSide = initialStanceSide;
 
       FramePoint3D initialFramePoint = new FramePoint3D(initialStanceFootPose.getPosition());
       initialFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
@@ -67,7 +67,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goalFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       goalOrientationInWorld = new Quaternion32(goalFrameOrientation);
 
-      this.requestedPlannerType = requestedPlannerType;
+      this.requestedFootstepPlannerType = requestedPlannerType;
    }
 
    public void setTimeout(double timeout)
@@ -93,7 +93,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    @Override
    public boolean epsilonEquals(FootstepPlanningRequestPacket other, double epsilon)
    {
-      if (initialStanceSide != other.initialStanceSide)
+      if (initialStanceRobotSide != other.initialStanceRobotSide)
          return false;
       if (!stanceFootPositionInWorld.epsilonEquals(other.stanceFootPositionInWorld, (float) epsilon))
          return false;
@@ -103,7 +103,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
          return false;
       if (!RotationTools.quaternionEpsilonEquals(goalOrientationInWorld, other.goalOrientationInWorld, (float) epsilon))
          return false;
-      if (this.requestedPlannerType != other.requestedPlannerType)
+      if (this.requestedFootstepPlannerType != other.requestedFootstepPlannerType)
          return false;
       if (planId != other.planId)
          return false;

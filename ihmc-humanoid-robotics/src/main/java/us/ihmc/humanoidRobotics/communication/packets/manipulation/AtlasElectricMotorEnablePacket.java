@@ -12,7 +12,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEnablePacket>
 {
    @RosExportedField(documentation = "The Enum value of the motor to enable")
-   public byte motorEnableEnum;
+   public byte atlasElectricMotorPacketEnumEnable;
 
    @RosExportedField(documentation = "Boolean for enable state; true for enable, false for disable.")
    public boolean enable;
@@ -24,14 +24,14 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
 
    public byte getMotorEnableEnum()
    {
-      return motorEnableEnum;
+      return atlasElectricMotorPacketEnumEnable;
    }
 
    @Override
    public void set(AtlasElectricMotorEnablePacket other)
    {
       setPacketInformation(other);
-      motorEnableEnum = other.motorEnableEnum;
+      atlasElectricMotorPacketEnumEnable = other.atlasElectricMotorPacketEnumEnable;
       enable = other.enable;
    }
 
@@ -43,6 +43,6 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
    @Override
    public boolean epsilonEquals(AtlasElectricMotorEnablePacket other, double epsilon)
    {
-      return (this.motorEnableEnum == other.motorEnableEnum) && (this.enable == other.enable);
+      return (this.atlasElectricMotorPacketEnumEnable == other.atlasElectricMotorPacketEnumEnable) && (this.enable == other.enable);
    }
 }

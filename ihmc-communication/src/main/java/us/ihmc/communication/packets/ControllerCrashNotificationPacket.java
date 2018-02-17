@@ -2,7 +2,7 @@ package us.ihmc.communication.packets;
 
 public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNotificationPacket>
 {
-   public byte location;
+   public byte controllerCrashLocation;
    public String stacktrace;
    
    public ControllerCrashNotificationPacket()
@@ -13,7 +13,7 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
    @Override
    public void set(ControllerCrashNotificationPacket other)
    {
-      location = other.location;
+      controllerCrashLocation = other.controllerCrashLocation;
       stacktrace = other.stacktrace;
       setPacketInformation(other);
    }

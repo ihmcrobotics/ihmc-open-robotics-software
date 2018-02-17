@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 public class FootstepStatusMessage extends SettablePacket<FootstepStatusMessage>
 {
    @RosExportedField(documentation = "The current footstep status enum value.")
-   public byte status;
+   public byte footstepStatus;
    @RosExportedField(documentation = "footstepIndex starts at 0 and monotonically increases with each completed footstep in a given\n"
          + "FootstepDataListMessage.")
    public int footstepIndex;
@@ -41,7 +41,7 @@ public class FootstepStatusMessage extends SettablePacket<FootstepStatusMessage>
    @Override
    public void set(FootstepStatusMessage other)
    {
-      status = other.status;
+      footstepStatus = other.footstepStatus;
       footstepIndex = other.footstepIndex;
       robotSide = other.robotSide;
 
@@ -79,7 +79,7 @@ public class FootstepStatusMessage extends SettablePacket<FootstepStatusMessage>
 
    public byte getStatus()
    {
-      return status;
+      return footstepStatus;
    }
 
    public int getFootstepIndex()
@@ -90,7 +90,7 @@ public class FootstepStatusMessage extends SettablePacket<FootstepStatusMessage>
    @Override
    public String toString()
    {
-      return "FootstepStatus{" + status + ", index: " + footstepIndex + "}";
+      return "FootstepStatus{" + footstepStatus + ", index: " + footstepIndex + "}";
    }
 
    public Point3D getDesiredFootPositionInWorld()
@@ -133,7 +133,7 @@ public class FootstepStatusMessage extends SettablePacket<FootstepStatusMessage>
 
    public void setStatus(byte status)
    {
-      this.status = status;
+      this.footstepStatus = status;
    }
 
    public void setFootstepIndex(int footstepIndex)

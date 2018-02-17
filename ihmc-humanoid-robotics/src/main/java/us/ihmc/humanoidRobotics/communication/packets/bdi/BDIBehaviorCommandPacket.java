@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
 {
-   public byte atlasRobotBehavior;
+   public byte atlasBDIRobotBehavior;
    public boolean stop = false;
 
    public BDIBehaviorCommandPacket()
@@ -15,7 +15,7 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
    public void set(BDIBehaviorCommandPacket other)
    {
       setPacketInformation(other);
-      atlasRobotBehavior = other.atlasRobotBehavior;
+      atlasBDIRobotBehavior = other.atlasBDIRobotBehavior;
       stop = other.stop;
    }
 
@@ -28,6 +28,6 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
    @Override
    public boolean epsilonEquals(BDIBehaviorCommandPacket other, double epsilon)
    {
-      return (other.atlasRobotBehavior == atlasRobotBehavior) && (other.stop == stop);
+      return (other.atlasBDIRobotBehavior == atlasBDIRobotBehavior) && (other.stop == stop);
    }
 }

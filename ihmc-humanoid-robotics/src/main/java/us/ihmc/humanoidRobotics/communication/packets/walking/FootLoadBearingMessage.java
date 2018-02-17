@@ -15,7 +15,7 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    @RosExportedField(documentation = "Needed to identify a side dependent end-effector.")
    public byte robotSide;
    @RosExportedField(documentation = "Wether the end-effector should be loaded or unloaded.")
-   public byte request;
+   public byte loadBearingRequest;
    
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
@@ -33,7 +33,7 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    public void set(FootLoadBearingMessage other)
    {
       robotSide = other.robotSide;
-      request = other.request;
+      loadBearingRequest = other.loadBearingRequest;
       setPacketInformation(other);
    }
 
@@ -44,7 +44,7 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
 
    public byte getRequest()
    {
-      return request;
+      return loadBearingRequest;
    }
    
    /**
@@ -78,7 +78,7 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    {
       return "Foot load bearing:"
             + "\nrobotSide = " + robotSide
-            + "\nrequest = " + request;
+            + "\nrequest = " + loadBearingRequest;
    }
 
    /** {@inheritDoc} */

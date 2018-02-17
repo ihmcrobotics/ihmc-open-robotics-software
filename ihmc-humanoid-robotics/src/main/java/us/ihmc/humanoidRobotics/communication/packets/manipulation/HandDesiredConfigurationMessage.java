@@ -13,7 +13,7 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory")
    public byte robotSide;
    @RosExportedField(documentation = "Specifies the grasp to perform")
-   public byte handDesiredConfiguration;
+   public byte desiredHandConfiguration;
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -28,13 +28,13 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    public void set(HandDesiredConfigurationMessage other)
    {
       robotSide = other.robotSide;
-      handDesiredConfiguration = other.handDesiredConfiguration;
+      desiredHandConfiguration = other.desiredHandConfiguration;
       setPacketInformation(other);
    }
 
    public byte getHandDesiredConfiguration()
    {
-      return handDesiredConfiguration;
+      return desiredHandConfiguration;
    }
 
    public byte getRobotSide()
@@ -51,7 +51,7 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    @Override
    public String toString()
    {
-      return RobotSide.fromByte(robotSide).toString() + " State= " + HandConfiguration.fromByte(handDesiredConfiguration).toString();
+      return RobotSide.fromByte(robotSide).toString() + " State= " + HandConfiguration.fromByte(desiredHandConfiguration).toString();
    }
 
    @Override

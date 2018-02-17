@@ -179,7 +179,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
          if(newPacketAvailable)
          {
             FootstepPlanningToolboxOutputStatus latestPacket = planningOutputStatusQueue.getLatestPacket();
-            boolean validForExecution = FootstepPlanningResult.fromByte(latestPacket.planningResult).validForExecution();
+            boolean validForExecution = FootstepPlanningResult.fromByte(latestPacket.footstepPlanningResult).validForExecution();
             if(validForExecution)
             {
                planToExecute = latestPacket.footstepDataList;
@@ -211,7 +211,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
 
          WalkToGoalBehaviorPacket walkToGoalBehaviorPacket = walkToGoalPacketQueue.poll();
          referenceFrames.updateFrames();
-         RobotSide goalSide = RobotSide.fromByte(walkToGoalBehaviorPacket.goalSide);
+         RobotSide goalSide = RobotSide.fromByte(walkToGoalBehaviorPacket.goalRobotSide);
          FramePose3D initialPose = new FramePose3D(referenceFrames.getSoleFrame(goalSide));
          tempFinalPose.setToZero();
          tempFinalPose.setX(walkToGoalBehaviorPacket.xGoal);

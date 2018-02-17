@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacket>
 {
-   public byte behaviorType;
+   public byte humanoidBehaviorType;
 
    // empty constructor for deserialization
    public HumanoidBehaviorTypePacket()
@@ -14,18 +14,18 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
    @Override
    public void set(HumanoidBehaviorTypePacket other)
    {
-      behaviorType = other.behaviorType;
+      humanoidBehaviorType = other.humanoidBehaviorType;
       setPacketInformation(other);
    }
 
    public byte getBehaviorType()
    {
-      return behaviorType;
+      return humanoidBehaviorType;
    }
 
    @Override
    public boolean epsilonEquals(HumanoidBehaviorTypePacket other, double epsilon)
    {
-      return behaviorType == other.behaviorType;
+      return humanoidBehaviorType == other.humanoidBehaviorType;
    }
 }

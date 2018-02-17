@@ -132,7 +132,7 @@ public class QueuedControllerCommandGenerator implements Updatable
          @Override
          public void receivedNewMessageStatus(FootstepStatusMessage footstepStatus)
          {
-            switch (FootstepStatus.fromByte(footstepStatus.status))
+            switch (FootstepStatus.fromByte(footstepStatus.footstepStatus))
             {
             case COMPLETED:
             {

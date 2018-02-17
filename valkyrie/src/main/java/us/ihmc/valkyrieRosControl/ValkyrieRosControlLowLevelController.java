@@ -133,9 +133,9 @@ public class ValkyrieRosControlLowLevelController
          {
             if (statusMessage != null)
             {
-               currentHighLevelControllerState.set(HighLevelControllerName.fromByte(statusMessage.endState));
+               currentHighLevelControllerState.set(HighLevelControllerName.fromByte(statusMessage.endHighLevelControllerName));
 
-               if (statusMessage.initialState == HighLevelControllerName.CALIBRATION.toByte())
+               if (statusMessage.initialHighLevelControllerName == HighLevelControllerName.CALIBRATION.toByte())
                   writeTorqueOffsets();
             }
          }

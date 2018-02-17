@@ -316,7 +316,7 @@ public class MessageTools
    public static ControllerCrashNotificationPacket createControllerCrashNotificationPacket(ControllerCrashLocation location, String stackTrace)
    {
       ControllerCrashNotificationPacket message = new ControllerCrashNotificationPacket();
-      message.location = location.toByte();
+      message.controllerCrashLocation = location.toByte();
       message.stacktrace = stackTrace;
       return message;
    }
@@ -333,7 +333,7 @@ public class MessageTools
    public static ToolboxStateMessage createToolboxStateMessage(ToolboxState requestedState)
    {
       ToolboxStateMessage message = new ToolboxStateMessage();
-      message.requestedState = requestedState.toByte();
+      message.requestedToolboxState = requestedState.toByte();
       return message;
    }
 
@@ -356,7 +356,7 @@ public class MessageTools
                                                                                        PacketDestination destination)
    {
       RequestPlanarRegionsListMessage message = new RequestPlanarRegionsListMessage();
-      message.requestType = requestType.toByte();
+      message.planarRegionsRequestType = requestType.toByte();
       message.boundingBoxInWorldForRequest = boundingBoxInWorldForRequest;
       if (destination != null)
          message.setDestination(destination);
