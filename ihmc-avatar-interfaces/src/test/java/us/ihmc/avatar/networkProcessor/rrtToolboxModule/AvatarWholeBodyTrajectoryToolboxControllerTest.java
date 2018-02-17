@@ -661,7 +661,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private static Graphics3DObject createTrajectoryMessageVisualization(ReachingManifoldMessage reachingMessage, double radius, AppearanceDefinition appearance)
    {
       int configurationValueResolution = 20;
-      int numberOfPoints = (int) Math.pow(configurationValueResolution, reachingMessage.manifoldConfigurationSpaces.length);
+      int numberOfPoints = (int) Math.pow(configurationValueResolution, reachingMessage.manifoldConfigurationSpaceNames.length);
       int radialResolution = 16;
 
       SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(numberOfPoints, radialResolution, radius);
@@ -671,21 +671,21 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       for (int i = 0; i < numberOfPoints; i++)
       {
          Pose3D originPose = new Pose3D(reachingMessage.manifoldOriginPosition, reachingMessage.manifoldOriginOrientation);
-         double[] configurationValues = new double[reachingMessage.manifoldConfigurationSpaces.length];
-         int[] configurationIndex = new int[reachingMessage.manifoldConfigurationSpaces.length];
+         double[] configurationValues = new double[reachingMessage.manifoldConfigurationSpaceNames.length];
+         int[] configurationIndex = new int[reachingMessage.manifoldConfigurationSpaceNames.length];
 
          int tempIndex = i;
-         for (int j = reachingMessage.manifoldConfigurationSpaces.length; j > 0; j--)
+         for (int j = reachingMessage.manifoldConfigurationSpaceNames.length; j > 0; j--)
          {
             configurationIndex[j - 1] = (int) (tempIndex / Math.pow(configurationValueResolution, j - 1));
             tempIndex = (int) (tempIndex % Math.pow(configurationValueResolution, j - 1));
          }
 
-         for (int j = 0; j < reachingMessage.manifoldConfigurationSpaces.length; j++)
+         for (int j = 0; j < reachingMessage.manifoldConfigurationSpaceNames.length; j++)
          {
             configurationValues[j] = (reachingMessage.manifoldUpperLimits[j] - reachingMessage.manifoldLowerLimits[j]) / (configurationValueResolution - 1)
                   * configurationIndex[j] + reachingMessage.manifoldLowerLimits[j];
-            switch (ConfigurationSpaceName.fromByte(reachingMessage.manifoldConfigurationSpaces[j]))
+            switch (ConfigurationSpaceName.fromByte(reachingMessage.manifoldConfigurationSpaceNames[j]))
             {
             case X:
                originPose.appendTranslation(configurationValues[j], 0.0, 0.0);

@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class BehaviorControlModeResponsePacket extends Packet<BehaviorControlModeResponsePacket>
 {
-   public byte requestedControl;
+   public byte behaviorControlModeEnumRequest;
 
    // empty constructor for deserialization
    public BehaviorControlModeResponsePacket()
@@ -15,17 +15,17 @@ public class BehaviorControlModeResponsePacket extends Packet<BehaviorControlMod
    public void set(BehaviorControlModeResponsePacket other)
    {
       setPacketInformation(other);
-      requestedControl = other.requestedControl;
+      behaviorControlModeEnumRequest = other.behaviorControlModeEnumRequest;
    }
 
    public byte getRequestedControl()
    {
-      return requestedControl;
+      return behaviorControlModeEnumRequest;
    }
 
    @Override
    public boolean epsilonEquals(BehaviorControlModeResponsePacket other, double epsilon)
    {
-      return this.requestedControl == other.requestedControl;
+      return this.behaviorControlModeEnumRequest == other.behaviorControlModeEnumRequest;
    }
 }

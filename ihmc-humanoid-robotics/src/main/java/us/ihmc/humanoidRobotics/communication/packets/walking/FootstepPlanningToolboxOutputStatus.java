@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class FootstepPlanningToolboxOutputStatus extends SettablePacket<FootstepPlanningToolboxOutputStatus>
 {
    public FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
-   public byte planningResult;
+   public byte footstepPlanningResult;
    public int planId = FootstepPlanningRequestPacket.NO_PLAN_ID;
 
    public PlanarRegionsListMessage planarRegionsListMessage = null;
@@ -57,7 +57,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    @Override
    public boolean epsilonEquals(FootstepPlanningToolboxOutputStatus other, double epsilon)
    {
-      if (planningResult != other.planningResult)
+      if (footstepPlanningResult != other.footstepPlanningResult)
          return false;
       if (planId != other.planId)
          return false;
@@ -119,7 +119,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    @Override
    public void set(FootstepPlanningToolboxOutputStatus other)
    {
-      planningResult = other.planningResult;
+      footstepPlanningResult = other.footstepPlanningResult;
       footstepDataList.destination = other.footstepDataList.destination;
       footstepDataList.getQueueingProperties().set(other.footstepDataList.getQueueingProperties());
       footstepDataList.footstepDataList = new ArrayList<>();

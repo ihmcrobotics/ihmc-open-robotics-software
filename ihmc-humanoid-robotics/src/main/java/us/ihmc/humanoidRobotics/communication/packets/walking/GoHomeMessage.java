@@ -10,7 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 public class GoHomeMessage extends Packet<GoHomeMessage>
 {
    @RosExportedField(documentation = "Specifies the part of the body the user wants to move back to it home configuration.")
-   public byte bodyPart;
+   public byte humanoidBodyPart;
    @RosExportedField(documentation = "Needed to identify a side dependent end-effector.")
    public byte robotSide;
    @RosExportedField(documentation = "How long the trajectory will spline from the current desired to the home configuration.")
@@ -27,7 +27,7 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
    @Override
    public void set(GoHomeMessage other)
    {
-      bodyPart = other.bodyPart;
+      humanoidBodyPart = other.humanoidBodyPart;
       robotSide = other.robotSide;
       trajectoryTime = other.trajectoryTime;
       executionDelayTime = other.executionDelayTime;
@@ -36,7 +36,7 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
 
    public byte getBodyPart()
    {
-      return bodyPart;
+      return humanoidBodyPart;
    }
 
    public byte getRobotSide()
@@ -72,7 +72,7 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
    @Override
    public boolean epsilonEquals(GoHomeMessage other, double epsilon)
    {
-      if (bodyPart != other.bodyPart)
+      if (humanoidBodyPart != other.humanoidBodyPart)
          return false;
       if (robotSide != other.robotSide)
          return false;

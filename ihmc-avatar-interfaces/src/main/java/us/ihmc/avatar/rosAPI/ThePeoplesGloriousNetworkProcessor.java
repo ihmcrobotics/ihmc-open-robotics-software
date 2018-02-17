@@ -259,7 +259,7 @@ public class ThePeoplesGloriousNetworkProcessor
          @Override
          public void receivedPacket(ControllerCrashNotificationPacket packet)
          {
-            System.err.println("Controller crashed at " + packet.location);
+            System.err.println("Controller crashed at " + packet.controllerCrashLocation);
             System.err.println("StackTrace: " + packet.stacktrace);
          }
       });

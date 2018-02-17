@@ -5,12 +5,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
 {
-   public byte action;
+   public byte walkToGoalAction;
    public double xGoal;
    public double yGoal;
    public double thetaGoal;
 
-   public byte goalSide;
+   public byte goalRobotSide;
 
    public WalkToGoalBehaviorPacket()
    {
@@ -20,11 +20,11 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
    @Override
    public void set(WalkToGoalBehaviorPacket other)
    {
-      action = other.action;
+      walkToGoalAction = other.walkToGoalAction;
       xGoal = other.xGoal;
       yGoal = other.yGoal;
       thetaGoal = other.thetaGoal;
-      goalSide = other.goalSide;
+      goalRobotSide = other.goalRobotSide;
       setPacketInformation(other);
    }
 
@@ -35,7 +35,7 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
 
    public byte getGoalSide()
    {
-      return goalSide;
+      return goalRobotSide;
    }
 
    @Override
@@ -48,7 +48,7 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
       {
          ret = Math.abs(thisData[i] - otherData[i]) < epsilon;
       }
-      ret &= this.goalSide == other.goalSide;
+      ret &= this.goalRobotSide == other.goalRobotSide;
       return ret;
    }
 
@@ -60,7 +60,7 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
       ret += "x: " + xGoal + "\n";
       ret += "y: " + yGoal + "\n";
       ret += "theta: " + thetaGoal + "\n";
-      ret += "side: " + RobotSide.fromByte(goalSide).toString() + "\n";
+      ret += "side: " + RobotSide.fromByte(goalRobotSide).toString() + "\n";
 
       return ret;
    }

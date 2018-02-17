@@ -12,9 +12,9 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 public class HighLevelStateChangeStatusMessage extends SettablePacket<HighLevelStateChangeStatusMessage>
 {
    @RosExportedField(documentation = "initialState gives the controller's state prior to transition")
-   public byte initialState;
+   public byte initialHighLevelControllerName;
    @RosExportedField(documentation = "endState gives the state the controller has transitioned into")
-   public byte endState;
+   public byte endHighLevelControllerName;
    
    public HighLevelStateChangeStatusMessage()
    {
@@ -23,33 +23,33 @@ public class HighLevelStateChangeStatusMessage extends SettablePacket<HighLevelS
 
    public void setStateChange(byte initialState, byte endState)
    {
-      this.initialState = initialState;
-      this.endState = endState;
+      this.initialHighLevelControllerName = initialState;
+      this.endHighLevelControllerName = endState;
    }
 
    @Override
    public void set(HighLevelStateChangeStatusMessage other)
    {
       destination = other.destination;
-      initialState = other.initialState;
-      endState = other.endState;
+      initialHighLevelControllerName = other.initialHighLevelControllerName;
+      endHighLevelControllerName = other.endHighLevelControllerName;
       setPacketInformation(other);
    }
 
    public byte getInitialState()
    {
-      return initialState;
+      return initialHighLevelControllerName;
    }
    
    public byte getEndState()
    {
-      return endState;
+      return endHighLevelControllerName;
    }
    
    @Override
    public boolean epsilonEquals(HighLevelStateChangeStatusMessage other, double epsilon)
    {
-      return initialState == other.initialState && endState == other.endState;
+      return initialHighLevelControllerName == other.initialHighLevelControllerName && endHighLevelControllerName == other.endHighLevelControllerName;
    }
 
 }

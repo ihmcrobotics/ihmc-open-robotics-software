@@ -94,7 +94,7 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
          @Override
          public void receivedNewMessageStatus(FootstepStatusMessage footstepStatus)
          {
-            switch (FootstepStatus.fromByte(footstepStatus.status))
+            switch (FootstepStatus.fromByte(footstepStatus.footstepStatus))
             {
             case COMPLETED:
                computeAndSubmitFootsteps();

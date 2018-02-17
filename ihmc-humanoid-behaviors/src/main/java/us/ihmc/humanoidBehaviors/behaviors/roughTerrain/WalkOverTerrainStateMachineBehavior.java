@@ -104,8 +104,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       stateMachine.addState(planFromDoubleSupportState);
       stateMachine.addState(planFromSingleSupportState);
 
-      StateTransitionCondition planFromDoubleSupportToWait = () -> plannerResult.get() != null && !FootstepPlanningResult.fromByte(plannerResult.get().planningResult).validForExecution();
-      StateTransitionCondition planFromDoubleSupportToWalking = () -> plannerResult.get() != null && FootstepPlanningResult.fromByte(plannerResult.get().planningResult).validForExecution();
+      StateTransitionCondition planFromDoubleSupportToWait = () -> plannerResult.get() != null && !FootstepPlanningResult.fromByte(plannerResult.get().footstepPlanningResult).validForExecution();
+      StateTransitionCondition planFromDoubleSupportToWalking = () -> plannerResult.get() != null && FootstepPlanningResult.fromByte(plannerResult.get().footstepPlanningResult).validForExecution();
 
       planFromDoubleSupportState.addStateTransition(WalkOverTerrainState.WAIT, planFromDoubleSupportToWait);
       planFromDoubleSupportState.addStateTransition(WalkOverTerrainState.PLAN_FROM_SINGLE_SUPPORT, planFromDoubleSupportToWalking);
@@ -300,7 +300,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       public void doAction()
       {
          FootstepStatusMessage footstepStatus = this.footstepStatus.getAndSet(null);
-         if(footstepStatus != null && footstepStatus.status == FootstepStatus.STARTED.toByte())
+         if(footstepStatus != null && footstepStatus.footstepStatus == FootstepStatus.STARTED.toByte())
          {
             Point3D touchdownPosition = footstepStatus.getDesiredFootPositionInWorld();
             Quaternion touchdownOrientation = footstepStatus.getDesiredFootOrientationInWorld();
@@ -310,7 +310,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
          }
 
          FootstepPlanningToolboxOutputStatus plannerResult = WalkOverTerrainStateMachineBehavior.this.plannerResult.get();
-         if(plannerResult != null && FootstepPlanningResult.fromByte(plannerResult.planningResult).validForExecution())
+         if(plannerResult != null && FootstepPlanningResult.fromByte(plannerResult.footstepPlanningResult).validForExecution())
          {
             sendFootstepPlan();
          }
@@ -329,7 +329,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       boolean doneWalking()
       {
-         return (walkingStatus.get() != null) && (walkingStatus.get().status == WalkingStatus.COMPLETED.toByte());
+         return (walkingStatus.get() != null) && (walkingStatus.get().walkingStatus == WalkingStatus.COMPLETED.toByte());
       }
    }
 

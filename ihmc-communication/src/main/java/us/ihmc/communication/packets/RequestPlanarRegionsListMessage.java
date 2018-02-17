@@ -4,7 +4,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 
 public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlanarRegionsListMessage>
 {
-   public byte requestType;
+   public byte planarRegionsRequestType;
    public BoundingBox3D boundingBoxInWorldForRequest;
 
    public RequestPlanarRegionsListMessage()
@@ -14,7 +14,7 @@ public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlana
    @Override
    public void set(RequestPlanarRegionsListMessage other)
    {
-      requestType = other.requestType;
+      planarRegionsRequestType = other.planarRegionsRequestType;
       boundingBoxInWorldForRequest = other.boundingBoxInWorldForRequest;
       setDestination(other.getDestination());
       setPacketInformation(other);
@@ -22,12 +22,12 @@ public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlana
 
    public byte getRequestType()
    {
-      return requestType;
+      return planarRegionsRequestType;
    }
 
    public void setRequestType(byte requestType)
    {
-      this.requestType = requestType;
+      this.planarRegionsRequestType = requestType;
    }
 
    public boolean hasBoundingBox()
@@ -43,6 +43,6 @@ public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlana
    @Override
    public boolean epsilonEquals(RequestPlanarRegionsListMessage other, double epsilon)
    {
-      return requestType == other.requestType;
+      return planarRegionsRequestType == other.planarRegionsRequestType;
    }
 }

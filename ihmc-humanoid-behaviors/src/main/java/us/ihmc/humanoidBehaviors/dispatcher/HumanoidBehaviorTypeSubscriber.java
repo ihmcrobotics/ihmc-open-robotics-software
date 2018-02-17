@@ -38,6 +38,6 @@ public class HumanoidBehaviorTypeSubscriber implements PacketConsumer<HumanoidBe
    public void receivedPacket(HumanoidBehaviorTypePacket object)
    {
       packetReference.set(object);
-      PrintTools.info("Received behavior packet of type: " + object.behaviorType);
+      PrintTools.info("Received behavior packet of type: " + object.humanoidBehaviorType);
    }
 }

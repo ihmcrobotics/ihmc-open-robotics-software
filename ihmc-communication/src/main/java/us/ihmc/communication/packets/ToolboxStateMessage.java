@@ -2,7 +2,7 @@ package us.ihmc.communication.packets;
 
 public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
 {
-   public byte requestedState;
+   public byte requestedToolboxState;
 
    public ToolboxStateMessage()
    {
@@ -12,23 +12,23 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
    @Override
    public void set(ToolboxStateMessage other)
    {
-      requestedState = other.requestedState;
+      requestedToolboxState = other.requestedToolboxState;
       set(other);
    }
 
    public void setRequestedState(byte requestedState)
    {
-      this.requestedState = requestedState;
+      this.requestedToolboxState = requestedState;
    }
 
    public byte getRequestedState()
    {
-      return requestedState;
+      return requestedToolboxState;
    }
 
    @Override
    public boolean epsilonEquals(ToolboxStateMessage other, double epsilon)
    {
-      return requestedState == other.requestedState;
+      return requestedToolboxState == other.requestedToolboxState;
    }
 }

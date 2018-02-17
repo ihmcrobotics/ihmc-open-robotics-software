@@ -144,7 +144,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
       }
 
       FootstepStatusMessage footstepStatus = this.footstepStatusMessage.getAndSet(null);
-      if(footstepStatus != null && footstepStatus.status == FootstepStatus.COMPLETED.toByte())
+      if(footstepStatus != null && footstepStatus.footstepStatus == FootstepStatus.COMPLETED.toByte())
       {
          stepsAlongPath.increment();
       }

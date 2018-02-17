@@ -10,7 +10,7 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
 {
    @RosExportedField(documentation = "Status of walking. Either STARTED, COMPLETED, or ABORT_REQUESTED.")
-   public byte status;
+   public byte walkingStatus;
 
    public WalkingStatusMessage()
    {
@@ -19,23 +19,23 @@ public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
    @Override
    public void set(WalkingStatusMessage other)
    {
-      status = other.status;
+      walkingStatus = other.walkingStatus;
       setPacketInformation(other);
    }
 
    public void setWalkingStatus(byte status)
    {
-      this.status = status;
+      this.walkingStatus = status;
    }
 
    public byte getWalkingStatus()
    {
-      return status;
+      return walkingStatus;
    }
 
    @Override
    public boolean epsilonEquals(WalkingStatusMessage other, double epsilon)
    {
-      return status == other.status;
+      return walkingStatus == other.walkingStatus;
    }
 }

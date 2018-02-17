@@ -211,7 +211,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
       if (newestPacket != null)
       {
          //TODO: update current location and predicted location from the feedback
-         if (newestPacket.status == FootstepStatus.STARTED.toByte())
+         if (newestPacket.footstepStatus == FootstepStatus.STARTED.toByte())
          {
             stepCompleted.set(false);
             debugPrintln("Number of requested steps: " + stepsRequested.size());
@@ -222,7 +222,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
             sendUpdateStart(predictedLocation);
             expectedIndex++;
          }
-         else if (newestPacket.status == FootstepStatus.COMPLETED.toByte())
+         else if (newestPacket.footstepStatus == FootstepStatus.COMPLETED.toByte())
          {
             stepCompleted.set(true);
             currentLocation = predictedLocation;
@@ -369,25 +369,25 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
       WalkToGoalBehaviorPacket newestPacket = inputListeningQueue.poll();
       if (newestPacket != null)
       {
-         if (newestPacket.action == WalkToGoalAction.FIND_PATH.toByte())
+         if (newestPacket.walkToGoalAction == WalkToGoalAction.FIND_PATH.toByte())
          {
             set(newestPacket.getGoalPosition()[0], newestPacket.getGoalPosition()[1], newestPacket.getGoalPosition()[2], RobotSide.fromByte(newestPacket.getGoalSide()));
             requestFootstepPlan();
             hasInputBeenSet.set(true);
             debugPrintln("Requesting path");
          }
-         else if (newestPacket.action == WalkToGoalAction.EXECUTE.toByte())
+         else if (newestPacket.walkToGoalAction == WalkToGoalAction.EXECUTE.toByte())
          {
             debugPrintln("Executing path");
             sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(false));
             executePlan.set(true);
          }
-         else if (newestPacket.action == WalkToGoalAction.EXECUTE_UNKNOWN.toByte())
+         else if (newestPacket.walkToGoalAction == WalkToGoalAction.EXECUTE_UNKNOWN.toByte())
          {
             executeUnknownFirstStep.set(true);
             debugPrintln("First step now allowed to be unknown");
          }
-         else if (newestPacket.action == WalkToGoalAction.STOP.toByte())
+         else if (newestPacket.walkToGoalAction == WalkToGoalAction.STOP.toByte())
          {
             executePlan.set(false);
             sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(true));
