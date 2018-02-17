@@ -7,10 +7,14 @@ import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.DisableOnDebug;
+import org.junit.rules.Timeout;
 import org.reflections.Reflections;
 import org.ros.internal.message.Message;
 
@@ -34,8 +38,12 @@ import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class IHMCROSTranslationRuntimeToolsTest
 {
+   @Rule
+   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(1, TimeUnit.MINUTES));
+
+   @SuppressWarnings({"rawtypes", "unchecked"})
    @ContinuousIntegrationTest(estimatedDuration = 16.5)
-   @Test(timeout = 120000)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testBidirectionalConversionWithRandomConstructors()
    {
       Reflections reflections = new Reflections("us.ihmc");
