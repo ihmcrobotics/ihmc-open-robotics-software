@@ -45,7 +45,7 @@ public class PacketCodeQualityTest
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test
+   @Test(timeout = Integer.MAX_VALUE)
    public void testPacketStaticFieldsAreFinal()
    {
       boolean verbose = true;
@@ -89,7 +89,7 @@ public class PacketCodeQualityTest
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test
+   @Test(timeout = Integer.MAX_VALUE)
    public void testPacketHaveNoEnum()
    {
       boolean verbose = true;
@@ -137,7 +137,7 @@ public class PacketCodeQualityTest
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test
+   @Test(timeout = Integer.MAX_VALUE)
    public void testPacketByteFieldNameRefersToEnumType() throws NoSuchFieldException, SecurityException
    {
       boolean verbose = false;
@@ -208,7 +208,7 @@ public class PacketCodeQualityTest
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test
+   @Test(timeout = Integer.MAX_VALUE)
    public void testPacketWithByteFieldDeclareEnumValuesAsStaticByteFields() throws NoSuchFieldException, SecurityException
    {
       boolean verbose = true;
@@ -344,7 +344,7 @@ public class PacketCodeQualityTest
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test
+   @Test(timeout = Integer.MAX_VALUE)
    public void testOnlyEmptyAndCopyConstructor()
    {
       boolean verbose = false;
@@ -402,7 +402,7 @@ public class PacketCodeQualityTest
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test
+   @Test(timeout = Integer.MAX_VALUE)
    public void testNoRandomConstructor()
    {
       boolean printPacketTypesWithRandomConstructor = false;
@@ -431,7 +431,7 @@ public class PacketCodeQualityTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test
+   @Test(timeout = Integer.MAX_VALUE)
    public void testAllPacketFieldsArePublic()
    {
       IHMCCommunicationKryoNetClassList classList = new IHMCCommunicationKryoNetClassList();
