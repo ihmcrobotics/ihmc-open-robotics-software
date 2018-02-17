@@ -29,7 +29,12 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
    public OneDoFJointTrajectoryMessage(OneDoFJointTrajectoryMessage other)
    {
-      set(other);
+      trajectoryPoints = new TrajectoryPoint1DMessage[other.getNumberOfTrajectoryPoints()];
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+      {
+         trajectoryPoints[i] = new TrajectoryPoint1DMessage(other.getTrajectoryPoint(i));
+      }
+      weight = other.getWeight();
    }
 
    @Override

@@ -55,7 +55,14 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> imp
 
    public SO3TrajectoryMessage(SO3TrajectoryMessage other)
    {
-      set(other);
+      taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[other.getNumberOfTrajectoryPoints()];
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+         taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
+
+      setUniqueId(other.getUniqueId());
+      setDestination(other.getDestination());
+      frameInformation.set(other.getFrameInformation());
+      queueingProperties.set(other.queueingProperties);
    }
 
    public void getTrajectoryPoints(FrameSO3TrajectoryPointList trajectoryPointListToPack)
