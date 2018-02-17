@@ -3,7 +3,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.29440461071291935</x>
           <y>1.6494504572255966</y>
@@ -17,7 +17,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.019809939451074593</x>
           <y>1.625279820071834</y>
@@ -43,7 +43,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.2882413729431554</x>
           <y>1.5996797834682757</y>
@@ -69,7 +69,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.05593061478874838</x>
           <y>1.3019430185689702</y>
@@ -83,7 +83,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.3050277836651182</x>
           <y>1.2646786937132988</y>
@@ -97,7 +97,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.07393522984237116</x>
           <y>0.868427934065698</y>
@@ -111,7 +111,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.29958132664531223</x>
           <y>0.8685946120800453</y>
@@ -125,7 +125,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.07339031623592648</x>
           <y>0.4706240677259015</y>
@@ -139,7 +139,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.30085776318532553</x>
           <y>0.4653318920287557</y>
@@ -153,7 +153,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.07420356491389361</x>
           <y>0.04916806063086665</y>
@@ -167,7 +167,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.30825941879757757</x>
           <y>0.047760089818898566</y>
@@ -181,7 +181,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.07248238975192928</x>
           <y>-0.36390635413313466</y>
@@ -195,7 +195,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.3128495227444989</x>
           <y>-0.34461176419401585</y>
@@ -209,7 +209,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.07170406408865235</x>
           <y>-0.761368517520377</y>
@@ -223,7 +223,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.3218863915464937</x>
           <y>-0.7644986962640472</y>
@@ -237,7 +237,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.06759308284689675</x>
           <y>-1.1686517121066935</y>
@@ -251,7 +251,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.3290967115956662</x>
           <y>-1.1800334481739394</y>
@@ -277,7 +277,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.3636451049923557</x>
           <y>-0.8019663203005825</y>
@@ -303,7 +303,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>1.258178773774904E-4</x>
           <y>-0.7824786014126535</y>
@@ -329,7 +329,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.3112811583088673</x>
           <y>-0.3713626314124403</y>
@@ -355,7 +355,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.015498514359880602</x>
           <y>-0.3325787940173417</y>
@@ -381,7 +381,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.3270637970933339</x>
           <y>0.005739458063066749</y>
@@ -407,7 +407,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.010322669896672423</x>
           <y>0.058896391751145805</y>
@@ -433,7 +433,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.3169166925269788</x>
           <y>0.4712499441952256</y>
@@ -459,7 +459,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.016491326455429015</x>
           <y>0.48364399179943174</y>
@@ -485,7 +485,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.3366568998425677</x>
           <y>0.8801091260430689</y>
@@ -511,7 +511,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.0212157455100348</x>
           <y>0.8397370248114437</y>
@@ -537,7 +537,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.2984387182151531</x>
           <y>1.2311091210876164</y>
@@ -563,7 +563,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>0.007015718242311647</x>
           <y>1.234588952522322</y>
@@ -589,7 +589,7 @@
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataList>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>-0.24820432651049298</x>
           <y>1.577430586526904</y>
@@ -603,7 +603,7 @@
         </orientation>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepData>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>-0.01212354010174227</x>
           <y>1.5522355882462997</y>
