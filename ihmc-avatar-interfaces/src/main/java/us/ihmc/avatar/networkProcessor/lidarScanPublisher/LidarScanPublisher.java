@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.PacketConsumer;
@@ -41,7 +42,6 @@ import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -201,7 +201,7 @@ public class LidarScanPublisher
          @Override
          public void consumeObject(SimulatedLidarScanPacket packet)
          {
-            LidarScanParameters lidarScanParameters = packet.getLidarScanParameters();
+            LidarScanParameters lidarScanParameters = MessageTools.toLidarScanParameters(packet.getLidarScanParameters());
             float[] ranges = packet.getRanges();
             int sensorId = packet.getSensorId();
             LidarScan scan = new LidarScan(lidarScanParameters, ranges, sensorId);

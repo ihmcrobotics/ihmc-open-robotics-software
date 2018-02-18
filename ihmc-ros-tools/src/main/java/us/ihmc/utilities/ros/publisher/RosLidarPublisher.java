@@ -3,6 +3,7 @@ package us.ihmc.utilities.ros.publisher;
 import org.ros.message.Time;
 
 import std_msgs.Header;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
@@ -34,7 +35,7 @@ public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>
       header.setSeq(seq++);
       message.setHeader(header);
       
-      LidarScanParameters parameters = lidarScan.getLidarScanParameters();
+      LidarScanParameters parameters = MessageTools.toLidarScanParameters(lidarScan.getLidarScanParameters());
       message.setAngleMin(parameters.getSweepYawMin());
       message.setAngleMax(parameters.getSweepYawMax());
       message.setAngleIncrement(parameters.getAngleIncrement());

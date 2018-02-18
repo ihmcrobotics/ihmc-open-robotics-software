@@ -3,13 +3,12 @@ package us.ihmc.communication.packets;
 import java.util.Arrays;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 {
    public float[] ranges;
    public int sensorId;
-   public LidarScanParameters params;
+   public LidarScanParametersMessage params;
 
    public SimulatedLidarScanPacket()
    {
@@ -43,7 +42,7 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       return params.getTimestamp();
    }
 
-   public LidarScanParameters getLidarScanParameters()
+   public LidarScanParametersMessage getLidarScanParameters()
    {
       return params;
    }

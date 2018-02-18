@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.HeatMapPacket;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.LidarScanParametersMessage;
 import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
@@ -102,7 +103,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMan
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -1218,8 +1218,26 @@ public final class RandomHumanoidMessages
 
       next.sensorId = random.nextInt();
 
-      next.params = new LidarScanParameters(random);
+      next.params = nextLidarScanParametersMessage(random);
       return next;
+   }
+
+   public static LidarScanParametersMessage nextLidarScanParametersMessage(Random random)
+   {
+      LidarScanParametersMessage next = new LidarScanParametersMessage();
+      next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
+      next.timestamp = random.nextLong();
+      next.sweepYawMax = random.nextFloat();
+      next.sweepYawMin = random.nextFloat();
+      next.heightPitchMax = random.nextFloat();
+      next.heightPitchMin = random.nextFloat();
+      next.timeIncrement = random.nextFloat();
+      next.scanTime = random.nextFloat();
+      next.minRange = random.nextFloat();
+      next.maxRange = random.nextFloat();
+      next.pointsPerSweep = random.nextInt();
+      next.scanHeight = random.nextInt();
+      return null;
    }
 
    public static ManualHandControlPacket nextManualHandControlPacket(Random random)
