@@ -27,6 +27,7 @@ import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 import org.reflections.Reflections;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.Packet;
@@ -54,6 +55,34 @@ public class PacketCodeQualityTest
 {
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
+   public void testPacketsHaveUniqueSimpleNameBasedHashCode()
+   { // This test won't fail on Arrays or Lists
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      TIntObjectHashMap<Class> allPacketSimpleNameBasedHashCode = new TIntObjectHashMap<>();
+      int numberOfCollisions = 0;
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         int simpleNameBasedHashCode = packetType.getSimpleName().hashCode();
+         if (allPacketSimpleNameBasedHashCode.containsKey(simpleNameBasedHashCode))
+         {
+            numberOfCollisions++;
+            if (verbose)
+            {
+               PrintTools.error("Hash-code collision between: " + packetType.getSimpleName() + " and " + allPacketSimpleNameBasedHashCode.get(simpleNameBasedHashCode).getSimpleName());
+            }
+         }
+      }
+
+      assertEquals("Found hash code collisions.", 0, numberOfCollisions);
+   }
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)

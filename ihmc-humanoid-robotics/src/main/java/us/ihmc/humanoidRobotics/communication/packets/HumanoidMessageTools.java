@@ -2008,7 +2008,7 @@ public class HumanoidMessageTools
    public static ClearDelayQueueMessage createClearDelayQueueMessage(Class<? extends Packet<?>> clazz)
    {
       ClearDelayQueueMessage message = new ClearDelayQueueMessage();
-      message.clazz = clazz;
+      message.classSimpleNameBasedHashCode = clazz.getSimpleName().hashCode();
       return message;
    }
 
