@@ -37,7 +37,18 @@ public class MessageTools
       SimulatedLidarScanPacket message = new SimulatedLidarScanPacket();
       message.ranges = ranges;
       message.sensorId = sensorId;
-      message.params = params;
+      message.params = new LidarScanParametersMessage();
+      message.params.timestamp = params.timestamp;
+      message.params.sweepYawMax = params.sweepYawMax;
+      message.params.sweepYawMin = params.sweepYawMin;
+      message.params.heightPitchMax = params.heightPitchMax;
+      message.params.heightPitchMin = params.heightPitchMin;
+      message.params.timeIncrement = params.timeIncrement;
+      message.params.scanTime = params.scanTime;
+      message.params.minRange = params.minRange;
+      message.params.maxRange = params.maxRange;
+      message.params.pointsPerSweep = params.pointsPerSweep;
+      message.params.scanHeight = params.scanHeight;
       return message;
    }
 
@@ -302,7 +313,8 @@ public class MessageTools
       return createRequestPlanarRegionsListMessage(requestType, null, null);
    }
 
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType, BoundingBox3D boundingBoxInWorldForRequest)
+   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType,
+                                                                                       BoundingBox3D boundingBoxInWorldForRequest)
    {
       return createRequestPlanarRegionsListMessage(requestType, boundingBoxInWorldForRequest, null);
    }
@@ -312,7 +324,8 @@ public class MessageTools
       return createRequestPlanarRegionsListMessage(requestType, null, destination);
    }
 
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType, BoundingBox3D boundingBoxInWorldForRequest,
+   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType,
+                                                                                       BoundingBox3D boundingBoxInWorldForRequest,
                                                                                        PacketDestination destination)
    {
       RequestPlanarRegionsListMessage message = new RequestPlanarRegionsListMessage();
@@ -338,5 +351,11 @@ public class MessageTools
    public static <T extends Enum<T>> T fromByteToEnum(byte value, Class<T> enumType)
    {
       return enumType.getEnumConstants()[(int) value];
+   }
+
+   public static LidarScanParameters toLidarScanParameters(LidarScanParametersMessage message)
+   {
+      return new LidarScanParameters(message.pointsPerSweep, message.scanHeight, message.sweepYawMin, message.sweepYawMax, message.heightPitchMin,
+                                     message.heightPitchMax, message.timeIncrement, message.minRange, message.maxRange, message.scanTime, message.timestamp);
    }
 }
