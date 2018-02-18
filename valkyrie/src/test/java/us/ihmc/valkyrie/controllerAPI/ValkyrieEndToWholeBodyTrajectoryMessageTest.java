@@ -34,7 +34,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 13.1)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 200000)
    public void testIssue47BadPelvisTrajectoryMessage() throws Exception
    {
@@ -58,7 +58,7 @@ public class ValkyrieEndToWholeBodyTrajectoryMessageTest extends EndToEndWholeBo
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 19.1)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 200000)
    public void testSingleWaypointUsingMessageOfMessagesWithDelays() throws Exception
    {
