@@ -317,7 +317,12 @@ public class MessageTools
    {
       RequestPlanarRegionsListMessage message = new RequestPlanarRegionsListMessage();
       message.planarRegionsRequestType = requestType.toByte();
-      message.boundingBoxInWorldForRequest = boundingBoxInWorldForRequest;
+      message.boundingBoxInWorldForRequest = new BoundingBox3DMessage();
+      if (boundingBoxInWorldForRequest != null)
+      {
+         message.boundingBoxInWorldForRequest.minPoint.set(boundingBoxInWorldForRequest.getMinPoint());
+         message.boundingBoxInWorldForRequest.maxPoint.set(boundingBoxInWorldForRequest.getMaxPoint());
+      }
       if (destination != null)
          message.setDestination(destination);
       return message;
