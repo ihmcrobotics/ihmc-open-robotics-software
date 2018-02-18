@@ -16,7 +16,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
    @Test(timeout = 180000)
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
@@ -32,7 +32,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 120000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
@@ -40,7 +40,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 40.0)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
    @Test(timeout = 180000)
    public void testQueuedMessages() throws Exception
    {
@@ -48,7 +48,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test(timeout = 80000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
@@ -64,7 +64,7 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 120000)
    public void testSingleTrajectoryPoint() throws Exception
    {
