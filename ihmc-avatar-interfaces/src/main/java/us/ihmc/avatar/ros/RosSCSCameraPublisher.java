@@ -4,6 +4,7 @@ import org.ros.message.Time;
 
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
@@ -71,6 +72,6 @@ public class RosSCSCameraPublisher implements ObjectConsumer<LocalVideoPacket>
          return;
       }
       
-      cameraInfoPublishers[sensorId].publish(frameId, videoObject.getIntrinsicParameters(), time);
+      cameraInfoPublishers[sensorId].publish(frameId, HumanoidMessageTools.toIntrinsicParameters(videoObject.getIntrinsicParameters()), time);
    }
 }

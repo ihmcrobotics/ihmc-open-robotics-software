@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.BoundingBoxesPacket;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -1001,7 +1000,24 @@ public final class RandomHumanoidMessages
       random.nextBytes(next.data);
       next.position = EuclidCoreRandomTools.nextPoint3D(random);
       next.orientation = EuclidCoreRandomTools.nextQuaternion(random);
-      next.intrinsicParameters = new IntrinsicParameters();
+      next.intrinsicParameters = nextIntrinsicParametersMessage(random);
+      return next;
+   }
+
+   public static IntrinsicParametersMessage nextIntrinsicParametersMessage(Random random)
+   {
+      IntrinsicParametersMessage next = new IntrinsicParametersMessage();
+      next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
+      next.width = random.nextInt();
+      next.height = random.nextInt();
+      next.fx = random.nextDouble();
+      next.fy = random.nextDouble();
+      next.skew = random.nextDouble();
+      next.cx = random.nextDouble();
+      next.cy = random.nextDouble();
+      next.radial = RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0);
+      next.t1 = random.nextDouble();
+      next.t2 = random.nextDouble();
       return next;
    }
 

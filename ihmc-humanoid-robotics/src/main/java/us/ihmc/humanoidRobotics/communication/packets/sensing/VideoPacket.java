@@ -2,13 +2,13 @@ package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
 import java.util.Arrays;
 
-import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.packets.HighBandwidthPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.humanoidRobotics.communication.packets.IntrinsicParametersMessage;
 import us.ihmc.robotics.geometry.RotationTools;
 
 @HighBandwidthPacket
@@ -27,7 +27,7 @@ public class VideoPacket extends Packet<VideoPacket>
    public byte[] data;
    public Point3D position;
    public Quaternion orientation;
-   public IntrinsicParameters intrinsicParameters;
+   public IntrinsicParametersMessage intrinsicParameters;
 
    public VideoPacket()
    {
@@ -41,7 +41,7 @@ public class VideoPacket extends Packet<VideoPacket>
       data = Arrays.copyOf(other.data, other.data.length);
       position = new Point3D(other.position);
       orientation = new Quaternion(other.orientation);
-      intrinsicParameters = new IntrinsicParameters(other.intrinsicParameters);
+      intrinsicParameters = new IntrinsicParametersMessage(other.intrinsicParameters);
    }
 
    @Override
@@ -71,7 +71,7 @@ public class VideoPacket extends Packet<VideoPacket>
       return data;
    }
 
-   public IntrinsicParameters getIntrinsicParameters()
+   public IntrinsicParametersMessage getIntrinsicParameters()
    {
       return intrinsicParameters;
    }

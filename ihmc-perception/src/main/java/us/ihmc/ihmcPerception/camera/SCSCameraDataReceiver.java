@@ -5,6 +5,7 @@ import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,6 +38,6 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
       {
          System.out.println(getClass().getName() + ": received local video packet!");
       }
-      updateImage(VideoSource.getMultisenseSourceFromRobotSide(robotSide), object.getImage(), object.getTimeStamp(), object.getIntrinsicParameters());
+      updateImage(VideoSource.getMultisenseSourceFromRobotSide(robotSide), object.getImage(), object.getTimeStamp(), HumanoidMessageTools.toIntrinsicParameters(object.getIntrinsicParameters()));
    }
 }
