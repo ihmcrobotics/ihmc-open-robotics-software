@@ -33,6 +33,18 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.Vector2D32;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -42,6 +54,95 @@ public class PacketCodeQualityTest
 {
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
+   public void testPacketsDeclarePrimitiveOrMessageTypeFields()
+   { // This test won't fail on Arrays or Lists
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+
+      Map<Class<? extends Packet>, List<Class>> packetTypesWithIllegalFieldTypes = new HashMap<>();
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            Field[] fields = packetType.getDeclaredFields();
+            for (Field field : fields)
+            {
+               if (Modifier.isStatic(field.getModifiers()))
+                  continue;
+
+               Class<?> typeToCheck = field.getType();
+
+               while (typeToCheck.isArray())
+                  typeToCheck = typeToCheck.getComponentType();
+               if (Packet.class.isAssignableFrom(typeToCheck))
+                  continue;
+               if (isPrimitive(typeToCheck))
+                  continue;
+               if (String.class.isAssignableFrom(typeToCheck))
+                  continue;
+               if (List.class.isAssignableFrom(typeToCheck))
+                  continue;
+               if (euclidTypes.contains(typeToCheck))
+                  continue;
+               if (!packetTypesWithIllegalFieldTypes.containsKey(packetType))
+                  packetTypesWithIllegalFieldTypes.put(packetType, new ArrayList<>());
+               packetTypesWithIllegalFieldTypes.get(packetType).add(typeToCheck);
+            }
+         }
+         catch (Exception e)
+         {
+            PrintTools.error("Problem with packet: " + packetType.getSimpleName());
+            e.printStackTrace();
+         }
+      }
+
+      if (verbose)
+      {
+         if (!packetTypesWithIllegalFieldTypes.isEmpty())
+         {
+            System.out.println();
+            System.out.println();
+            PrintTools.error("List of packet with illegal field type:");
+            packetTypesWithIllegalFieldTypes.entrySet().forEach(type -> PrintTools.error(type.getKey().getSimpleName() + ": "
+                  + type.getValue().stream().map(Class::getSimpleName).collect(Collectors.toList())));
+         }
+      }
+
+      assertTrue("Found illegal field types in Packet sub-types.", packetTypesWithIllegalFieldTypes.isEmpty());
+   }
+
+   private static final Set<Class<?>> euclidTypes = new HashSet<>();
+   static
+   {
+      euclidTypes.add(Point3D32.class);
+      euclidTypes.add(Vector3D32.class);
+      euclidTypes.add(Point3D.class);
+      euclidTypes.add(Vector3D.class);
+      euclidTypes.add(Point2D32.class);
+      euclidTypes.add(Vector2D32.class);
+      euclidTypes.add(Point2D.class);
+      euclidTypes.add(Vector2D.class);
+      euclidTypes.add(Quaternion.class);
+      euclidTypes.add(Quaternion32.class);
+      euclidTypes.add(Pose2D.class);
+      euclidTypes.add(Pose3D.class);
+   }
+
+   private static boolean isPrimitive(Class<?> clazz)
+   { // TODO figure out if arrays of primitive are acceptable.
+      if (clazz.isPrimitive())
+         return true;
+      if (clazz.isArray() && clazz.getComponentType().isPrimitive())
+         return true;
+      return false;
+   }
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
