@@ -17,11 +17,11 @@ public class SimulationConstructionSetParameters
 
    public SimulationConstructionSetParameters()
    {
-      parameters.put(SHOW_SPLASH_SCREEN, new BooleanHolder("false"));
-      parameters.put(CREATE_SCS_GUI, new BooleanHolder("false"));
-      parameters.put(SHOW_SCS_WINDOWS, new BooleanHolder("false"));
+      parameters.put(SHOW_SPLASH_SCREEN, new BooleanHolder("true"));
+      parameters.put(CREATE_SCS_GUI, new BooleanHolder("true"));
+      parameters.put(SHOW_SCS_WINDOWS, new BooleanHolder("true"));
       parameters.put(SCS_DATA_BUFFER_SIZE, new IntHolder("8192"));
-      parameters.put(SHOW_SCS_YOGRAPHICS, new BooleanHolder("false"));
+      parameters.put(SHOW_SCS_YOGRAPHICS, new BooleanHolder("true"));
       parameters.put(SCS_YOGRAPHICS_GLOBALSCALE, new DoubleHolder("1.0"));
    }
 
