@@ -8,10 +8,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class DetectedObjectSubscriber implements PacketConsumer<DetectedObjectPacket>
 {
@@ -75,11 +75,12 @@ public class DetectedObjectSubscriber implements PacketConsumer<DetectedObjectPa
       if (detectedObject != null)
       {
          id.set(detectedObject.id);
-         pose.set(detectedObject.pose);
+         RigidBodyTransform transform = new RigidBodyTransform(detectedObject.pose.getOrientation(), detectedObject.pose.getPosition());
+         pose.set(transform);
 
          for (DetectedObjectListener listener : listOfListeners)
          {
-            listener.updatePose(detectedObject.pose, detectedObject.id);
+            listener.updatePose(transform, detectedObject.id);
          }
       }
    }

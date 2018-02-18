@@ -53,7 +53,7 @@ public final class LoadBearingCommand implements Command<LoadBearingCommand, Loa
    {
       load = message.getLoad();
       coefficientOfFriction = message.getCoefficientOfFriction();
-      bodyFrameToContactFrame.set(message.getBodyFrameToContactFrame());
+      message.getBodyFrameToContactFrame().get(bodyFrameToContactFrame);
       contactNormalInWorldFrame.set(message.getContactNormalInWorldFrame());
    }
 

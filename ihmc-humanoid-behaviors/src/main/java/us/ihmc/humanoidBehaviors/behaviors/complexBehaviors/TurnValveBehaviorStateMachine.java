@@ -2,9 +2,9 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine.TurnValveBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.examples.GetUserValidationBehavior;
@@ -19,8 +19,8 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBe
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -157,7 +157,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          protected void setBehaviorInput()
          {
             PoseReferenceFrame valvePose = new PoseReferenceFrame("TurnValveReferenceFrame", ReferenceFrame.getWorldFrame());
-            valvePose.setPoseAndUpdate(new RigidBodyTransform(searchForValveBehavior.getLocation()));
+            valvePose.setPoseAndUpdate(new Pose3D(searchForValveBehavior.getLocation()));
             graspAndTurnValveBehavior.setGrabLocation(valvePose, searchForValveBehavior.getValveRadius());
          }
       };
@@ -220,7 +220,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    private FramePoint3D offsetPointFromValve(Vector3D32 point)
    {
       PoseReferenceFrame valvePose = new PoseReferenceFrame("valveFrame", ReferenceFrame.getWorldFrame());
-      valvePose.setPoseAndUpdate(new RigidBodyTransform(searchForValveBehavior.getLocation()));
+      valvePose.setPoseAndUpdate(new Pose3D(searchForValveBehavior.getLocation()));
 
       FramePoint3D point1 = new FramePoint3D(valvePose, point);
       return point1;

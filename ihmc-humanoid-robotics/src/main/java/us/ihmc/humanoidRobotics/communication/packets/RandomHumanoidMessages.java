@@ -21,6 +21,7 @@ import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -28,8 +29,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
+import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlModeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorCommandPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
@@ -69,7 +70,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPac
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AbortWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
@@ -80,9 +80,11 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPa
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
@@ -94,14 +96,12 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PrepareForLocomoti
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -257,7 +257,7 @@ public final class RandomHumanoidMessages
       next.angularWeightMatrix = nextWeightMatrix3DMessage(random);
       next.linearWeightMatrix = nextWeightMatrix3DMessage(random);
       next.useCustomControlFrame = random.nextBoolean();
-      next.controlFramePose = EuclidCoreRandomTools.nextQuaternionBasedTransform(random);
+      next.controlFramePose = EuclidGeometryRandomTools.nextPose3D(random);
       next.queueingProperties = nextQueueableMessage(random);
       return next;
    }
@@ -355,7 +355,7 @@ public final class RandomHumanoidMessages
       next.selectionMatrix = nextSelectionMatrix3DMessage(random);
       next.weightMatrix = nextWeightMatrix3DMessage(random);
       next.useCustomControlFrame = random.nextBoolean();
-      next.controlFramePose = EuclidCoreRandomTools.nextQuaternionBasedTransform(random);
+      next.controlFramePose = EuclidGeometryRandomTools.nextPose3D(random);
       next.queueingProperties = nextQueueableMessage(random);
       return next;
    }
@@ -429,7 +429,7 @@ public final class RandomHumanoidMessages
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.load = random.nextBoolean();
       next.coefficientOfFriction = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
-      next.bodyFrameToContactFrame = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      next.bodyFrameToContactFrame = EuclidGeometryRandomTools.nextPose3D(random);
       next.contactNormalInWorldFrame = EuclidCoreRandomTools.nextVector3D(random);
       return next;
    }
@@ -700,7 +700,7 @@ public final class RandomHumanoidMessages
       next.frameInformation = nextFrameInformation(random);
       next.weightMatrix = nextWeightMatrix3DMessage(random);
       next.useCustomControlFrame = random.nextBoolean();
-      next.controlFramePose = EuclidCoreRandomTools.nextQuaternionBasedTransform(random);
+      next.controlFramePose = EuclidGeometryRandomTools.nextPose3D(random);
       next.queueingProperties = nextQueueableMessage(random);
       return next;
    }
@@ -900,7 +900,7 @@ public final class RandomHumanoidMessages
    {
       DetectedObjectPacket next = new DetectedObjectPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.pose = EuclidCoreRandomTools.nextRigidBodyTransform(random);
+      next.pose = EuclidGeometryRandomTools.nextPose3D(random);
       next.id = random.nextInt(255);
       return next;
    }
@@ -1037,7 +1037,8 @@ public final class RandomHumanoidMessages
    {
       StampedPosePacket next = new StampedPosePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.transform = new TimeStampedTransform3D(EuclidCoreRandomTools.nextRigidBodyTransform(random), random.nextLong());
+      next.pose = EuclidGeometryRandomTools.nextPose3D(random);
+      next.timeStamp = random.nextLong();
       next.confidenceFactor = random.nextDouble();
       next.frameId = Integer.toHexString(random.nextInt());
       return next;
