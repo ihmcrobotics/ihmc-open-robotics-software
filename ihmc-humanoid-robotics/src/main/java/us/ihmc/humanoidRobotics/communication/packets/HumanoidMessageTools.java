@@ -435,6 +435,11 @@ public class HumanoidMessageTools
 
    public static DoorLocationPacket createDoorLocationPacket(RigidBodyTransform doorTransformToWorld)
    {
+      return createDoorLocationPacket(new Pose3D(doorTransformToWorld));
+   }
+
+   public static DoorLocationPacket createDoorLocationPacket(Pose3D doorTransformToWorld)
+   {
       DoorLocationPacket message = new DoorLocationPacket();
       message.doorTransformToWorld = doorTransformToWorld;
       return message;
@@ -1804,7 +1809,8 @@ public class HumanoidMessageTools
    {
       StampedPosePacket message = new StampedPosePacket();
       message.frameId = frameId;
-      message.transform = transform;
+      message.pose = new Pose3D(transform.getTransform3D());
+      message.timeStamp = transform.getTimeStamp();
       message.confidenceFactor = confidenceFactor;
       return message;
    }
@@ -1841,7 +1847,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static DetectedObjectPacket createDetectedObjectPacket(RigidBodyTransform pose, int id)
+   public static DetectedObjectPacket createDetectedObjectPacket(Pose3D pose, int id)
    {
       DetectedObjectPacket message = new DetectedObjectPacket();
       message.pose = pose;
@@ -2015,7 +2021,15 @@ public class HumanoidMessageTools
    public static ValveLocationPacket createValveLocationPacket(RigidBodyTransform valveTransformToWorld, double valveRadius)
    {
       ValveLocationPacket message = new ValveLocationPacket();
-      message.valveTransformToWorld = valveTransformToWorld;
+      message.valvePoseInWorld = new Pose3D(valveTransformToWorld);
+      message.valveRadius = valveRadius;
+      return message;
+   }
+
+   public static ValveLocationPacket createValveLocationPacket(Pose3D valvePoseInWorld, double valveRadius)
+   {
+      ValveLocationPacket message = new ValveLocationPacket();
+      message.valvePoseInWorld = valvePoseInWorld;
       message.valveRadius = valveRadius;
       return message;
    }

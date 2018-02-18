@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -244,7 +245,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
 
       PoseReferenceFrame doorPose = new PoseReferenceFrame("doorFrame", ReferenceFrame.getWorldFrame());
-      doorPose.setPoseAndUpdate(new RigidBodyTransform(searchForDoorBehavior.getLocation()));
+      doorPose.setPoseAndUpdate(new Pose3D(searchForDoorBehavior.getLocation()));
 
       FramePoint3D point1 = new FramePoint3D(doorPose, point);
       return point1;
@@ -254,7 +255,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    {
 
       PoseReferenceFrame doorPose = new PoseReferenceFrame("DoorReferenceFrame", ReferenceFrame.getWorldFrame());
-      doorPose.setPoseAndUpdate(new RigidBodyTransform(searchForDoorBehavior.getLocation()));
+      doorPose.setPoseAndUpdate(new Pose3D(searchForDoorBehavior.getLocation()));
 
       RobotSide startStep = RobotSide.LEFT;
 

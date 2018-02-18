@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -14,7 +15,7 @@ public final class LoadBearingMessage extends Packet<LoadBearingMessage>
    public double coefficientOfFriction = 0.0;
 
    /** Sets the transform of the contact frame in the frame of the end effector body. */
-   public RigidBodyTransform bodyFrameToContactFrame = new RigidBodyTransform();
+   public Pose3D bodyFrameToContactFrame = new Pose3D();
 
    /** Sets the contact normal used by the controller to load the contact point. */
    public Vector3D contactNormalInWorldFrame = new Vector3D();
@@ -29,7 +30,7 @@ public final class LoadBearingMessage extends Packet<LoadBearingMessage>
    {
       load = other.load;
       coefficientOfFriction = other.coefficientOfFriction;
-      bodyFrameToContactFrame = new RigidBodyTransform(other.bodyFrameToContactFrame);
+      bodyFrameToContactFrame = new Pose3D(other.bodyFrameToContactFrame);
       contactNormalInWorldFrame = new Vector3D(other.contactNormalInWorldFrame);
       setPacketInformation(other);
    }
@@ -64,7 +65,7 @@ public final class LoadBearingMessage extends Packet<LoadBearingMessage>
       return coefficientOfFriction;
    }
 
-   public RigidBodyTransform getBodyFrameToContactFrame()
+   public Pose3D getBodyFrameToContactFrame()
    {
       return bodyFrameToContactFrame;
    }

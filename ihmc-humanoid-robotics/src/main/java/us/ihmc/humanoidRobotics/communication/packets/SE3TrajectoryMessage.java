@@ -7,9 +7,9 @@ import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -42,7 +42,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
    public boolean useCustomControlFrame = false;
 
    @RosExportedField(documentation = "Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
-   public QuaternionBasedTransform controlFramePose;
+   public Pose3D controlFramePose;
    @RosExportedField(documentation = "Properties for queueing trajectories.")
    public QueueableMessage queueingProperties = new QueueableMessage();
 
@@ -89,7 +89,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
       useCustomControlFrame = other.useCustomControlFrame;
       if (other.controlFramePose != null)
       {
-         controlFramePose = new QuaternionBasedTransform(other.controlFramePose);
+         controlFramePose = new Pose3D(other.controlFramePose);
       }
 
       queueingProperties.set(other.queueingProperties);
@@ -454,15 +454,15 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
    public void setControlFramePosition(Point3DReadOnly controlFramePosition)
    {
       if (controlFramePose == null)
-         controlFramePose = new QuaternionBasedTransform();
-      controlFramePose.setTranslation(controlFramePosition);
+         controlFramePose = new Pose3D();
+      controlFramePose.setPosition(controlFramePosition);
    }
 
    public void setControlFrameOrientation(QuaternionReadOnly controlFrameOrientation)
    {
       if (controlFramePose == null)
-         controlFramePose = new QuaternionBasedTransform();
-      controlFramePose.setRotation(controlFrameOrientation);
+         controlFramePose = new Pose3D();
+      controlFramePose.setOrientation(controlFrameOrientation);
    }
 
    public boolean useCustomControlFrame()
@@ -475,7 +475,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> imp
       if (controlFramePose == null)
          controlFrameTransformToPack.setToNaN();
       else
-         controlFrameTransformToPack.set(controlFramePose);
+         controlFramePose.get(controlFrameTransformToPack);
    }
 
    public void setQueueingProperties(QueueableMessage queueingProperties)
