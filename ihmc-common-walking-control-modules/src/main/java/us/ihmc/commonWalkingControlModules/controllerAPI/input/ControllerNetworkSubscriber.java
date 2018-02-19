@@ -15,7 +15,6 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
@@ -50,7 +49,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final AtomicReference<MessageFilter> messageFilter = new AtomicReference<>(null);
 
    /** All the possible status message that can be sent to the communicator. */
-   private final List<Class<? extends SettablePacket<?>>> listOfSupportedStatusMessages;
+   private final List<Class<? extends Packet<?>>> listOfSupportedStatusMessages;
 
    /** All the possible messages that can be sent to the communicator. */
    private final List<Class<? extends Packet<?>>> listOfSupportedControlMessages;
@@ -59,7 +58,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
     * Local buffers for each message to ensure proper copying from the controller thread to the
     * communication thread.
     */
-   private final Map<Class<? extends SettablePacket<?>>, ConcurrentRingBuffer<? extends SettablePacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
+   private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends Packet<?>>> statusMessageClassToBufferMap = new HashMap<>();
 
    public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
                                       PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
@@ -137,7 +136,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    }
 
    @SuppressWarnings("unchecked")
-   private <T extends SettablePacket<T>> void createAllStatusMessageBuffers()
+   private <T extends Packet<T>> void createAllStatusMessageBuffers()
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
@@ -209,13 +208,13 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       GlobalStatusMessageListener globalStatusMessageListener = new GlobalStatusMessageListener()
       {
          @Override
-         public void receivedNewMessageStatus(SettablePacket<?> statusMessage)
+         public void receivedNewMessageStatus(Packet<?> statusMessage)
          {
             copyData(statusMessage);
          }
 
          @SuppressWarnings("unchecked")
-         private <T extends SettablePacket<T>> void copyData(SettablePacket<?> statusMessage)
+         private <T extends Packet<T>> void copyData(Packet<?> statusMessage)
          {
             ConcurrentRingBuffer<T> buffer = (ConcurrentRingBuffer<T>) statusMessageClassToBufferMap.get(statusMessage.getClass());
             T next = buffer.next();
@@ -234,10 +233,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
-         ConcurrentRingBuffer<? extends SettablePacket<?>> buffer = statusMessageClassToBufferMap.get(listOfSupportedStatusMessages.get(i));
+         ConcurrentRingBuffer<? extends Packet<?>> buffer = statusMessageClassToBufferMap.get(listOfSupportedStatusMessages.get(i));
          if (buffer.poll())
          {
-            SettablePacket<?> statusMessage;
+            Packet<?> statusMessage;
             while ((statusMessage = buffer.read()) != null)
             {
                packetCommunicator.send(statusMessage);
