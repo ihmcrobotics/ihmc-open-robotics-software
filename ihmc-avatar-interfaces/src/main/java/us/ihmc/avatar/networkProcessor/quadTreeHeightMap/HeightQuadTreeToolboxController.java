@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -194,10 +195,10 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          if (expectedRobotConfigurationDataHash != robotConfigurationData.jointNameHash)
             throw new RuntimeException("Received a " + RobotConfigurationData.class.getSimpleName() + " that does not match the fullRobotModel.");
 
-         float[] newJointAngles = robotConfigurationData.getJointAngles();
-         for (int i = 0; i < newJointAngles.length; i++)
+         TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
+         for (int i = 0; i < newJointAngles.size(); i++)
          {
-            oneDoFJoints[i].setQ(newJointAngles[i]);
+            oneDoFJoints[i].setQ(newJointAngles.get(i));
          }
 
          Vector3D32 translation = robotConfigurationData.getPelvisTranslation();

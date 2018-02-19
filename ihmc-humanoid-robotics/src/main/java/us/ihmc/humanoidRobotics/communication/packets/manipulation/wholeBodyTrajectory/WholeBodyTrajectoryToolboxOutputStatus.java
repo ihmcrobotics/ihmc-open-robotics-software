@@ -1,7 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.idl.PreallocatedList;
 
 public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTrajectoryToolboxOutputStatus>
 {
@@ -16,8 +19,9 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
     */
    public int planningResult = 0;
 
-   public double[] trajectoryTimes;
-   public KinematicsToolboxOutputStatus[] robotConfigurations;
+   public TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
+   public PreallocatedList<KinematicsToolboxOutputStatus> robotConfigurations = new PreallocatedList<>(KinematicsToolboxOutputStatus.class,
+                                                                                                       KinematicsToolboxOutputStatus::new, 50);
 
    public WholeBodyTrajectoryToolboxOutputStatus()
    {
@@ -34,24 +38,8 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
    {
       setPlanningResult(other.planningResult);
 
-      if (other.robotConfigurations != null)
-      {
-         int numberOfConfigurations = other.robotConfigurations.length;
-
-         trajectoryTimes = new double[numberOfConfigurations];
-         robotConfigurations = new KinematicsToolboxOutputStatus[numberOfConfigurations];
-
-         for (int i = 0; i < numberOfConfigurations; i++)
-         {
-            trajectoryTimes[i] = other.trajectoryTimes[i];
-            robotConfigurations[i] = new KinematicsToolboxOutputStatus(other.robotConfigurations[i]);
-         }
-      }
-      else
-      {
-         trajectoryTimes = null;
-         robotConfigurations = null;
-      }
+      MessageTools.copyData(other.trajectoryTimes, trajectoryTimes);
+      MessageTools.copyData(other.robotConfigurations, robotConfigurations);
       setPacketInformation(other);
    }
 
@@ -65,40 +53,35 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       this.planningResult = planningResult;
    }
 
-   public KinematicsToolboxOutputStatus[] getRobotConfigurations()
+   public PreallocatedList<KinematicsToolboxOutputStatus> getRobotConfigurations()
    {
       return robotConfigurations;
    }
 
    public void setRobotConfigurations(KinematicsToolboxOutputStatus[] robotConfigurations)
    {
-      int numberOfConfigurations = robotConfigurations.length;
-
-      this.robotConfigurations = new KinematicsToolboxOutputStatus[numberOfConfigurations];
-      for (int i = 0; i < numberOfConfigurations; i++)
-      {
-         this.robotConfigurations[i] = new KinematicsToolboxOutputStatus(robotConfigurations[i]);
-      }
+      MessageTools.copyData(robotConfigurations, this.robotConfigurations);
    }
 
-   public double[] getTrajectoryTimes()
+   public TDoubleArrayList getTrajectoryTimes()
    {
       return trajectoryTimes;
    }
 
    public void setTrajectoryTimes(double[] trajectoryTimes)
    {
-      this.trajectoryTimes = trajectoryTimes;
+      this.trajectoryTimes.reset();
+      this.trajectoryTimes.add(trajectoryTimes);
    }
 
    public double getTrajectoryTime()
    {
-      return trajectoryTimes[trajectoryTimes.length - 1];
+      return trajectoryTimes.get(trajectoryTimes.size() - 1);
    }
 
    public KinematicsToolboxOutputStatus getLastRobotConfiguration()
    {
-      return robotConfigurations[robotConfigurations.length - 1];
+      return robotConfigurations.get(robotConfigurations.size() - 1);
    }
 
    @Override
@@ -109,21 +92,10 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
          return false;
       }
 
-      int numberOfConfigurations = robotConfigurations.length;
-
-      if (numberOfConfigurations != other.robotConfigurations.length)
-      {
+      if (MessageTools.epsilonEquals(trajectoryTimes, other.trajectoryTimes, epsilon))
          return false;
-      }
-
-      for (int i = 0; i < numberOfConfigurations; i++)
-      {
-         if (!robotConfigurations[i].epsilonEquals(other.robotConfigurations[i], epsilon))
-         {
-            return false;
-         }
-      }
-
+      if (MessageTools.epsilonEquals(robotConfigurations, other.robotConfigurations, epsilon))
+         return false;
       return true;
    }
 }

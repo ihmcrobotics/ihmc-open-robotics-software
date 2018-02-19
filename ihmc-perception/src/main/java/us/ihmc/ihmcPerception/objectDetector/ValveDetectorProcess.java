@@ -52,14 +52,14 @@ public class ValveDetectorProcess implements PacketConsumer<VideoPacket>
       executorService.submit(() ->
                              {
                                 Pair<List<Rectangle>, ValveDetector.HeatMap> rectanglesAndHeatMaps = valveDetector
-                                      .detect(jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData()));
+                                      .detect(jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData().toArray()));
 
                                 rectanglesAndHeatMaps.getLeft().sort((r1, r2) -> -Integer.compare(r1.width * r1.height, r2.width * r2.height));
 
                                 HeatMapPacket heatMapPacket = new HeatMapPacket();
                                 heatMapPacket.width = rectanglesAndHeatMaps.getRight().w;
                                 heatMapPacket.height = rectanglesAndHeatMaps.getRight().h;
-                                heatMapPacket.data = rectanglesAndHeatMaps.getRight().data;
+                                heatMapPacket.data.add(rectanglesAndHeatMaps.getRight().data);
                                 heatMapPacket.name.append("Valve");
 
                                 int[] packedBoxes = rectanglesAndHeatMaps.getLeft().stream()

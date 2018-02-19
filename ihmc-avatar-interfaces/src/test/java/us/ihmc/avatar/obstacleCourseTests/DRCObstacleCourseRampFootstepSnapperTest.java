@@ -13,6 +13,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -34,6 +35,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnapping
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.quadTree.Box;
@@ -46,7 +48,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiRobotTestInterface
 {
@@ -150,8 +151,10 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       Point2D boundingBoxMin = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       Point2D boundingBoxMax = new Point2D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 
-      for (FootstepDataMessage footstepData : corruptedFootstepDataList.getDataList())
+      PreallocatedList<FootstepDataMessage> dataList = corruptedFootstepDataList.getDataList();
+      for (int i = 0; i < dataList.size(); i++)
       {
+         FootstepDataMessage footstepData = dataList.get(i);
          double footstepX = footstepData.getLocation().getX();
          double footstepY = footstepData.getLocation().getY();
 
@@ -213,15 +216,17 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       if (!VISUALIZE)
          return;
 
-      for (FootstepDataMessage footstepData : corruptedFootstepDataList.getDataList())
+      PreallocatedList<FootstepDataMessage> dataList = corruptedFootstepDataList.getDataList();
+      for (int i = 0; i < dataList.size(); i++)
       {
-            Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-            staticLinkGraphics.translate(new Vector3D(footstepData.location));
-            RotationMatrix rotationMatrix = new RotationMatrix();
-            rotationMatrix.set(footstepData.getOrientation());
-            staticLinkGraphics.rotate(rotationMatrix);
-            staticLinkGraphics.addCoordinateSystem(0.15, YoAppearance.Red());
-            scs.addStaticLinkGraphics(staticLinkGraphics);
+         FootstepDataMessage footstepData = dataList.get(i);
+         Graphics3DObject staticLinkGraphics = new Graphics3DObject();
+         staticLinkGraphics.translate(new Vector3D(footstepData.location));
+         RotationMatrix rotationMatrix = new RotationMatrix();
+         rotationMatrix.set(footstepData.getOrientation());
+         staticLinkGraphics.rotate(rotationMatrix);
+         staticLinkGraphics.addCoordinateSystem(0.15, YoAppearance.Red());
+         scs.addStaticLinkGraphics(staticLinkGraphics);
       }
    }
 

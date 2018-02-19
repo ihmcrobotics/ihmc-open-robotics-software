@@ -53,7 +53,7 @@ public class KinematicsToolboxOutputConverter
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         float q = solution.getJointAngles()[i];
+         float q = solution.getJointAngles().get(i);
          OneDoFJoint joint = oneDoFJoints[i];
          joint.setQ(q);
       }

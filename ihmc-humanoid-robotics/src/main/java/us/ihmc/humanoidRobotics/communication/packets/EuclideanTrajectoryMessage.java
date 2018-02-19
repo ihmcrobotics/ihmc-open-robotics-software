@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -22,7 +23,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage>
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
-   public EuclideanTrajectoryPointMessage[] taskspaceTrajectoryPoints;
+   public PreallocatedList<EuclideanTrajectoryPointMessage> taskspaceTrajectoryPoints = new PreallocatedList<>(EuclideanTrajectoryPointMessage.class, EuclideanTrajectoryPointMessage::new, 100);
 
    @RosExportedField(documentation = "The selection matrix for each axis.")
    public SelectionMatrix3DMessage selectionMatrix = new SelectionMatrix3DMessage();
@@ -50,13 +51,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
    public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage other)
    {
-      int numberOfPoints = other.getNumberOfTrajectoryPoints();
-      taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
-      }
-
+      MessageTools.copyData(other.taskspaceTrajectoryPoints, taskspaceTrajectoryPoints);
       setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
       frameInformation.set(other.getFrameInformation());
@@ -78,15 +73,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    @Override
    public void set(EuclideanTrajectoryMessage other)
    {
-      if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
-         throw new RuntimeException("Must the same number of waypoints.");
-      int numberOfPoints = other.getNumberOfTrajectoryPoints();
-      taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
-      }
-
+      MessageTools.copyData(other.taskspaceTrajectoryPoints, taskspaceTrajectoryPoints);
       selectionMatrix.set(other.selectionMatrix);
       frameInformation.set(other.getFrameInformation());
       weightMatrix.set(other.weightMatrix);
@@ -105,12 +92,12 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    public void getTrajectoryPoints(FrameEuclideanTrajectoryPointList trajectoryPointListToPack)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, trajectoryPointListToPack.getReferenceFrame());
-      EuclideanTrajectoryPointMessage[] trajectoryPointMessages = getTrajectoryPoints();
-      int numberOfPoints = trajectoryPointMessages.length;
+      PreallocatedList<EuclideanTrajectoryPointMessage> trajectoryPointMessages = getTrajectoryPoints();
+      int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         EuclideanTrajectoryPointMessage euclideanTrajectoryPointMessage = trajectoryPointMessages[i];
+         EuclideanTrajectoryPointMessage euclideanTrajectoryPointMessage = trajectoryPointMessages.get(i);
          trajectoryPointListToPack.addTrajectoryPoint(euclideanTrajectoryPointMessage.time, euclideanTrajectoryPointMessage.position,
                                                       euclideanTrajectoryPointMessage.linearVelocity);
       }
@@ -132,7 +119,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createEuclideanTrajectoryPointMessage(time, position, linearVelocity);
+      taskspaceTrajectoryPoints.get(trajectoryPointIndex).set(HumanoidMessageTools.createEuclideanTrajectoryPointMessage(time, position, linearVelocity));
    }
 
    /**
@@ -151,7 +138,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createEuclideanTrajectoryPointMessage(time, position, linearVelocity);
+      taskspaceTrajectoryPoints.get(trajectoryPointIndex).set(HumanoidMessageTools.createEuclideanTrajectoryPointMessage(time, position, linearVelocity));
    }
 
    /**
@@ -206,7 +193,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
    public final int getNumberOfTrajectoryPoints()
    {
-      return taskspaceTrajectoryPoints.length;
+      return taskspaceTrajectoryPoints.size();
    }
 
    /**
@@ -214,7 +201,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
     * 
     * @return
     */
-   public final EuclideanTrajectoryPointMessage[] getTrajectoryPoints()
+   public final PreallocatedList<EuclideanTrajectoryPointMessage> getTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints;
    }
@@ -222,12 +209,12 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    public final EuclideanTrajectoryPointMessage getTrajectoryPoint(int trajectoryPointIndex)
    {
       rangeCheck(trajectoryPointIndex);
-      return taskspaceTrajectoryPoints[trajectoryPointIndex];
+      return taskspaceTrajectoryPoints.get(trajectoryPointIndex);
    }
 
    public final EuclideanTrajectoryPointMessage getLastTrajectoryPoint()
    {
-      return taskspaceTrajectoryPoints[taskspaceTrajectoryPoints.length - 1];
+      return taskspaceTrajectoryPoints.get(taskspaceTrajectoryPoints.size() - 1);
    }
 
    public final double getTrajectoryTime()
@@ -342,14 +329,8 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
          return false;
       }
 
-      if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
+      if (!MessageTools.epsilonEquals(taskspaceTrajectoryPoints, other.taskspaceTrajectoryPoints, epsilon))
          return false;
-
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-      {
-         if (!taskspaceTrajectoryPoints[i].epsilonEquals(other.taskspaceTrajectoryPoints[i], epsilon))
-            return false;
-      }
 
       return true;
    }

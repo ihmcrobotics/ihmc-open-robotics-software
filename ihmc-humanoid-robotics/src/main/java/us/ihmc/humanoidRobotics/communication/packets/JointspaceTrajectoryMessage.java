@@ -1,16 +1,18 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
+import us.ihmc.idl.PreallocatedList;
 
 @RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/jointspace_trajectory")
 public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMessage>
 {
    @RosExportedField(documentation = "List of points in the trajectory.")
-   public OneDoFJointTrajectoryMessage[] jointTrajectoryMessages;
+   public PreallocatedList<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = new PreallocatedList<>(OneDoFJointTrajectoryMessage.class, OneDoFJointTrajectoryMessage::new, 10);
    @RosExportedField(documentation = "Properties for queueing trajectories.")
    public QueueableMessage queueingProperties = new QueueableMessage();
 
@@ -25,46 +27,33 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
 
    /**
     * Clone constructor.
-    * @param trajectoryMessage message to clone.
+    * @param other message to clone.
     */
-   public JointspaceTrajectoryMessage(JointspaceTrajectoryMessage trajectoryMessage)
+   public JointspaceTrajectoryMessage(JointspaceTrajectoryMessage other)
    {
-      setUniqueId(trajectoryMessage.getUniqueId());
-      setDestination(trajectoryMessage.getDestination());
-      queueingProperties.set(trajectoryMessage.queueingProperties);
-      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[trajectoryMessage.getNumberOfJoints()];
-
-      for (int i = 0; i < getNumberOfJoints(); i++)
-      {
-         if(trajectoryMessage.jointTrajectoryMessages[i] != null)
-         {
-            jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(trajectoryMessage.jointTrajectoryMessages[i]);
-         }
-      }
+      setUniqueId(other.getUniqueId());
+      setDestination(other.getDestination());
+      queueingProperties.set(other.queueingProperties);
+      MessageTools.copyData(other.jointTrajectoryMessages, jointTrajectoryMessages);
    }
 
    @Override
    public void set(JointspaceTrajectoryMessage other)
    {
       queueingProperties.set(other.queueingProperties);
-      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[other.jointTrajectoryMessages.length];
-      for (int i = 0; i < jointTrajectoryMessages.length; i++)
-      {
-         jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage();
-         jointTrajectoryMessages[i].set(other.jointTrajectoryMessages[i]);
-      }
+      MessageTools.copyData(other.jointTrajectoryMessages, jointTrajectoryMessages);
       setPacketInformation(other);
    }
 
    /**
     * Set the trajectory points to be executed by this joint.
     * @param jointIndex index of the joint that will go through the trajectory points.
-    * @param trajectory1DMessage joint trajectory points to be executed.
+    * @param oneDoFJointTrajectoryMessage joint trajectory points to be executed.
     */
-   public void setTrajectory1DMessage(int jointIndex, OneDoFJointTrajectoryMessage trajectory1DMessage)
+   public void setTrajectory1DMessage(int jointIndex, OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage)
    {
       rangeCheck(jointIndex);
-      jointTrajectoryMessages[jointIndex] = trajectory1DMessage;
+      jointTrajectoryMessages.get(jointIndex).set(oneDoFJointTrajectoryMessage);
    }
 
    /**
@@ -78,33 +67,33 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
    public void setTrajectoryPoint(int jointIndex, int trajectoryPointIndex, double time, double position, double velocity)
    {
       rangeCheck(jointIndex);
-      jointTrajectoryMessages[jointIndex].setTrajectoryPoint(trajectoryPointIndex, time, position, velocity);
+      jointTrajectoryMessages.get(jointIndex).setTrajectoryPoint(trajectoryPointIndex, time, position, velocity);
    }
    
    public void setQPWeight(int jointIndex, double weight)
    {
       rangeCheck(jointIndex);
-      jointTrajectoryMessages[jointIndex].setWeight(weight);
+      jointTrajectoryMessages.get(jointIndex).setWeight(weight);
    }
 
    public int getNumberOfJoints()
    {
-      return jointTrajectoryMessages.length;
+      return jointTrajectoryMessages.size();
    }
 
    public OneDoFJointTrajectoryMessage getJointTrajectoryPointList(int jointIndex)
    {
       rangeCheck(jointIndex);
-      return jointTrajectoryMessages[jointIndex];
+      return jointTrajectoryMessages.get(jointIndex);
    }
 
    public int getNumberOfJointTrajectoryPoints(int jointIndex)
    {
       rangeCheck(jointIndex);
-      return jointTrajectoryMessages[jointIndex].getNumberOfTrajectoryPoints();
+      return jointTrajectoryMessages.get(jointIndex).getNumberOfTrajectoryPoints();
    }
 
-   public OneDoFJointTrajectoryMessage[] getTrajectoryPointLists()
+   public PreallocatedList<OneDoFJointTrajectoryMessage> getTrajectoryPointLists()
    {
       return jointTrajectoryMessages;
    }
@@ -112,14 +101,14 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
    public TrajectoryPoint1DMessage getJointTrajectoryPoint(int jointIndex, int trajectoryPointIndex)
    {
       rangeCheck(jointIndex);
-      return jointTrajectoryMessages[jointIndex].getTrajectoryPoint(trajectoryPointIndex);
+      return jointTrajectoryMessages.get(jointIndex).getTrajectoryPoint(trajectoryPointIndex);
    }
 
    public void getFinalJointAngles(double[] finalJointAnglesToPack)
    {
       for (int i = 0; i < getNumberOfJoints(); i++)
       {
-         finalJointAnglesToPack[i] = jointTrajectoryMessages[i].getLastTrajectoryPoint().position;
+         finalJointAnglesToPack[i] = jointTrajectoryMessages.get(i).getLastTrajectoryPoint().position;
       }
    }
 
@@ -128,7 +117,7 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
       double trajectoryTime = 0.0;
       for (int i = 0; i < getNumberOfJoints(); i++)
       {
-         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointTrajectoryMessages[i];
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointTrajectoryMessages.get(i);
          if(oneDoFJointTrajectoryMessage != null)
          {
             trajectoryTime = Math.max(trajectoryTime, oneDoFJointTrajectoryMessage.getLastTrajectoryPoint().time);
@@ -139,10 +128,10 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
 
    public void setJointTrajectoryMessages(OneDoFJointTrajectoryMessage[] jointTrajectoryMessages)
    {
-      this.jointTrajectoryMessages = jointTrajectoryMessages;
+      MessageTools.copyData(jointTrajectoryMessages, this.jointTrajectoryMessages);
    }
 
-   public OneDoFJointTrajectoryMessage[] getJointTrajectoryMessages()
+   public PreallocatedList<OneDoFJointTrajectoryMessage> getJointTrajectoryMessages()
    {
       return jointTrajectoryMessages;
    }
@@ -176,14 +165,14 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
       if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
          return false;
 
-      if (jointTrajectoryMessages.length != other.jointTrajectoryMessages.length)
+      if (jointTrajectoryMessages.size() != other.jointTrajectoryMessages.size())
       {
          return false;
       }
 
-      for (int i = 0; i < jointTrajectoryMessages.length; i++)
+      for (int i = 0; i < jointTrajectoryMessages.size(); i++)
       {
-         if (!jointTrajectoryMessages[i].epsilonEquals(other.jointTrajectoryMessages[i], epsilon))
+         if (!jointTrajectoryMessages.get(i).epsilonEquals(other.jointTrajectoryMessages.get(i), epsilon))
          {
             return false;
          }

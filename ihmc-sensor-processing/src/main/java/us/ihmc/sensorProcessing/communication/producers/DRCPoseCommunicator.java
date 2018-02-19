@@ -213,11 +213,13 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
          if (sensorRawOutputMapReadOnly != null)
          {
+            configData.imuSensorData.clear();
+
             List<? extends IMUSensorReadOnly> imuRawOutputs = sensorRawOutputMapReadOnly.getIMURawOutputs();
             for (int sensorNumber = 0; sensorNumber < imuRawOutputs.size(); sensorNumber++)
             {
                IMUSensorReadOnly imuSensor = imuRawOutputs.get(sensorNumber);
-               IMUPacket imuPacketToPack = configData.getImuPacketForSensor(sensorNumber);
+               IMUPacket imuPacketToPack = configData.imuSensorData.add();
 
                imuSensor.getLinearAccelerationMeasurement(imuLinearAccelerations[sensorNumber]);
                imuSensor.getOrientationMeasurement(imuOrientationsAsMatrix[sensorNumber]);

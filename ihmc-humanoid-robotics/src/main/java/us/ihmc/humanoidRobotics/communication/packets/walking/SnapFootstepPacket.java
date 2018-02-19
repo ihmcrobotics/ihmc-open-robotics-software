@@ -1,9 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.idl.PreallocatedList;
 
 public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
 {
@@ -11,9 +12,9 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
    //   public static final byte VALID_UNCHANGED_STEP = 1;
    //   public static final byte VALID_SNAPPED_STEP = 2;
    //   public static final byte BAD_STEP = 3;
-   public ArrayList<FootstepDataMessage> footstepData;
-   public int[] footstepOrder;
-   public byte[] flag;
+   public PreallocatedList<FootstepDataMessage> footstepData = new PreallocatedList<>(FootstepDataMessage.class, FootstepDataMessage::new, 10);
+   public TIntArrayList footstepOrder = new TIntArrayList();
+   public TByteArrayList flag = new TByteArrayList();
 
    public SnapFootstepPacket()
    {
@@ -23,30 +24,23 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
    @Override
    public void set(SnapFootstepPacket other)
    {
-      footstepData = new ArrayList<>();
-      for (FootstepDataMessage otherStep : other.footstepData)
-      {
-         FootstepDataMessage step = new FootstepDataMessage();
-         step.set(otherStep);
-         footstepData.add(step);
-      }
-
-      footstepOrder = Arrays.copyOf(other.footstepOrder, other.footstepOrder.length);
-      flag = Arrays.copyOf(other.flag, other.flag.length);
+      MessageTools.copyData(other.footstepData, footstepData);
+      MessageTools.copyData(other.footstepOrder, footstepOrder);
+      MessageTools.copyData(other.flag, flag);
       setPacketInformation(other);
    }
 
-   public ArrayList<FootstepDataMessage> getFootstepData()
+   public PreallocatedList<FootstepDataMessage> getFootstepData()
    {
       return this.footstepData;
    }
 
-   public int[] getFootstepOrder()
+   public TIntArrayList getFootstepOrder()
    {
       return footstepOrder;
    }
 
-   public byte[] getFlag()
+   public TByteArrayList getFlag()
    {
       return flag;
    }
@@ -59,19 +53,12 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
    @Override
    public boolean epsilonEquals(SnapFootstepPacket other, double epsilon)
    {
-      boolean ret = true;
-      if(this.footstepData.size() != other.footstepData.size())
-      {
+      if (!MessageTools.epsilonEquals(footstepData, other.footstepData, epsilon))
          return false;
-      }
-
-      for (int i = 0; i < footstepData.size(); i++)
-      {
-         ret &= this.footstepData.get(i).epsilonEquals(other.footstepData.get(i), epsilon);
-         ret &= this.footstepOrder[i] == other.footstepOrder[i];
-         ret &= this.flag[i] == other.flag[i];
-      }
-
-      return ret;
+      if (!footstepOrder.equals(other.footstepOrder))
+         return false;
+      if (!flag.equals(other.flag))
+         return false;
+      return true;
    }
 }

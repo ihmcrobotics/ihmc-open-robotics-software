@@ -108,7 +108,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
 
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {
-         IMUPacket imuPacket = robotConfigurationData.getImuPacketForSensor(sensorNumber);
+         IMUPacket imuPacket = robotConfigurationData.imuSensorData.add();
          imuPacket.set(RandomGeometry.nextVector3D32(random), RandomGeometry.nextQuaternion32(random), RandomGeometry.nextVector3D32(random));
       }
       

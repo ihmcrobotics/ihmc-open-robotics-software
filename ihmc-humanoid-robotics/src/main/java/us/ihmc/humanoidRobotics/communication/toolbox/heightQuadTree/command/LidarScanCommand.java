@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -42,15 +43,15 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
       message.getLidarPose(lidarPose);
 
       int index = 0;
-      float[] newPointCloud = message.scan;
+      TFloatArrayList newPointCloud = message.scan;
       scan.clear();
 
-      while (index < newPointCloud.length)
+      while (index < newPointCloud.size())
       {
          Point3D32 point = scan.add();
-         point.setX(newPointCloud[index++]);
-         point.setY(newPointCloud[index++]);
-         point.setZ(newPointCloud[index++]);
+         point.setX(newPointCloud.get(index++));
+         point.setY(newPointCloud.get(index++));
+         point.setZ(newPointCloud.get(index++));
       }
    }
 

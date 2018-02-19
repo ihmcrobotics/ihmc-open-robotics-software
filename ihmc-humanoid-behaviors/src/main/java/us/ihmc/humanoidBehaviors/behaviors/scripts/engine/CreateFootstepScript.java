@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -15,7 +16,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CreateFootstepScript
@@ -153,12 +153,7 @@ public class CreateFootstepScript
       footstep.location = new Point3D(x, y, ankleHeight);
       footstep.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       // set contact points
-      footstep.predictedContactPoints = new ArrayList<>();
-      for (int i = 0; i < contactPoints.length; i++)
-      {
-         Point2D contactPoint = new Point2D(contactPoints[i]);
-         footstep.predictedContactPoints.add(contactPoint);
-      }
+      MessageTools.copyData(contactPoints, footstep.predictedContactPoints);
 
       return footstep;
    }

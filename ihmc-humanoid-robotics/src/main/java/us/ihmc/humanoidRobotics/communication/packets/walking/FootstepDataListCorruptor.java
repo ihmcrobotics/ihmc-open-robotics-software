@@ -28,9 +28,9 @@ public class FootstepDataListCorruptor
    {
       FootstepDataListMessage ret = HumanoidMessageTools.createFootstepDataListMessage(footstepDataList.defaultSwingDuration, footstepDataList.defaultTransferDuration);
       
-      for (FootstepDataMessage footstepData : footstepDataList.footstepDataList)
+      for (int i = 0; i < footstepDataList.footstepDataList.size(); i++)
       {
-         ret.add(corruptFootstepData(footstepData));
+         ret.add(corruptFootstepData(footstepDataList.get(i)));
       }
       
       return ret;

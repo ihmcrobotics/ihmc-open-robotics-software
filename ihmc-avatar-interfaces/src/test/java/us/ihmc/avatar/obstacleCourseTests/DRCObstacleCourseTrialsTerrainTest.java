@@ -3,6 +3,7 @@ package us.ihmc.avatar.obstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -21,7 +22,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -222,7 +225,12 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);
       ThreadTools.sleep(1000);
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingToTheSlopesSideways(scriptedFootstepGenerator);
-      footstepDataList.getDataList().addAll(createFootstepsForSteppingOverTheSlopesEdgeSideways(scriptedFootstepGenerator).getDataList());
+      PreallocatedList<FootstepDataMessage> dataList = createFootstepsForSteppingOverTheSlopesEdgeSideways(scriptedFootstepGenerator).getDataList();
+      for (int i = 0; i < dataList.size(); i++)
+      {
+         FootstepDataMessage step = dataList.get(i);
+         footstepDataList.getDataList().add(step);
+      }
       drcSimulationTestHelper.send(footstepDataList);
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();

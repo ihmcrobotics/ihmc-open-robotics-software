@@ -1,7 +1,6 @@
 package us.ihmc.communication.packets;
 
-import java.util.Arrays;
-
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.tools.ArrayTools;
 
 /**
@@ -9,7 +8,7 @@ import us.ihmc.tools.ArrayTools;
  */
 public class HeatMapPacket extends Packet<HeatMapPacket>
 {
-   public float[] data;
+   public TFloatArrayList data = new TFloatArrayList();
    public int width, height;
    public StringBuilder name = new StringBuilder();
 
@@ -19,7 +18,7 @@ public class HeatMapPacket extends Packet<HeatMapPacket>
 
    public HeatMapPacket(HeatMapPacket other)
    {
-      this.data = Arrays.copyOf(other.data, other.data.length);
+      MessageTools.copyData(other.data, data);
       this.width = other.width;
       this.height = other.height;
       this.name.append(other.name);
@@ -28,7 +27,7 @@ public class HeatMapPacket extends Packet<HeatMapPacket>
    @Override
    public void set(HeatMapPacket other)
    {
-      this.data = Arrays.copyOf(other.data, other.data.length);
+      MessageTools.copyData(other.data, data);
       this.width = other.width;
       this.height = other.height;
       this.name.setLength(0);
@@ -43,6 +42,6 @@ public class HeatMapPacket extends Packet<HeatMapPacket>
       boolean heightEquals = other.height == this.height;
       boolean nameEquals = (name == null && other.name == null) || (name != null && name.equals(other.name));
 
-      return nameEquals && widthEquals && heightEquals && ArrayTools.deltaEquals(this.data, other.data, (float) epsilon);
+      return nameEquals && widthEquals && heightEquals && ArrayTools.deltaEquals(this.data.toArray(), other.data.toArray(), (float) epsilon);
    }
 }

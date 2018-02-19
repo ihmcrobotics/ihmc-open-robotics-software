@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -22,7 +23,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
-   public SE3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
+   public PreallocatedList<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = new PreallocatedList<>(SE3TrajectoryPointMessage.class, SE3TrajectoryPointMessage::new, 100);
    @RosExportedField(documentation = "The selection matrix for each axis of the angular part.")
    public SelectionMatrix3DMessage angularSelectionMatrix;
    @RosExportedField(documentation = "The selection matrix for each axis of the linear part.")
@@ -52,13 +53,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
 
    public SE3TrajectoryMessage(SE3TrajectoryMessage other)
    {
-      int numberOfPoints = other.getNumberOfTrajectoryPoints();
-      taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
-      }
-
+      MessageTools.copyData(other.taskspaceTrajectoryPoints, taskspaceTrajectoryPoints);
       setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
 
@@ -96,10 +91,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
    @Override
    public void set(SE3TrajectoryMessage other)
    {
-      if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
-         throw new RuntimeException("Must the same number of waypoints.");
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-         taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
+      MessageTools.copyData(other.taskspaceTrajectoryPoints, taskspaceTrajectoryPoints);
       frameInformation.set(other.getFrameInformation());
       queueingProperties.set(other.queueingProperties);
       setPacketInformation(other);
@@ -108,12 +100,12 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
    public void getTrajectoryPoints(FrameSE3TrajectoryPointList trajectoryPointListToPack)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, trajectoryPointListToPack.getReferenceFrame());
-      SE3TrajectoryPointMessage[] trajectoryPointMessages = getTrajectoryPoints();
-      int numberOfPoints = trajectoryPointMessages.length;
+      PreallocatedList<SE3TrajectoryPointMessage> trajectoryPointMessages = getTrajectoryPoints();
+      int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         SE3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages[i];
+         SE3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages.get(i);
          trajectoryPointListToPack.addTrajectoryPoint(se3TrajectoryPointMessage.time, se3TrajectoryPointMessage.position, se3TrajectoryPointMessage.orientation,
                                                       se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
       }
@@ -139,7 +131,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createSE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
+      taskspaceTrajectoryPoints.get(trajectoryPointIndex).set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity));
    }
 
    /**
@@ -162,7 +154,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createSE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
+      taskspaceTrajectoryPoints.get(trajectoryPointIndex).set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity));
    }
 
    /**
@@ -227,10 +219,10 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
 
    public final int getNumberOfTrajectoryPoints()
    {
-      return taskspaceTrajectoryPoints.length;
+      return taskspaceTrajectoryPoints.size();
    }
 
-   public final SE3TrajectoryPointMessage[] getTrajectoryPoints()
+   public final PreallocatedList<SE3TrajectoryPointMessage> getTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints;
    }
@@ -238,12 +230,12 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
    public final SE3TrajectoryPointMessage getTrajectoryPoint(int trajectoryPointIndex)
    {
       rangeCheck(trajectoryPointIndex);
-      return taskspaceTrajectoryPoints[trajectoryPointIndex];
+      return taskspaceTrajectoryPoints.get(trajectoryPointIndex);
    }
 
    public final SE3TrajectoryPointMessage getLastTrajectoryPoint()
    {
-      return taskspaceTrajectoryPoints[taskspaceTrajectoryPoints.length - 1];
+      return taskspaceTrajectoryPoints.get(taskspaceTrajectoryPoints.size() - 1);
    }
 
    public final double getTrajectoryTime()
@@ -418,14 +410,8 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
          return false;
       }
 
-      if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
+      if (!MessageTools.epsilonEquals(taskspaceTrajectoryPoints, other.taskspaceTrajectoryPoints, epsilon))
          return false;
-
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-      {
-         if (!taskspaceTrajectoryPoints[i].epsilonEquals(other.taskspaceTrajectoryPoints[i], epsilon))
-            return false;
-      }
 
       return true;
    }

@@ -20,6 +20,7 @@ import ihmc_msgs.PelvisTrajectoryRosMessage;
 import ihmc_msgs.Point2dRosMessage;
 import ihmc_msgs.QueueableRosMessage;
 import ihmc_msgs.WholeBodyTrajectoryRosMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -35,6 +36,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.ros.msgToPacket.converter.CustomFieldConversions;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
@@ -140,7 +142,7 @@ public class IHMCROSTranslationRuntimeTools
          }
       }
 
-      footsteps.footstepDataList = stepData;
+      MessageTools.copyData(stepData, footsteps.footstepDataList);
 
       return footsteps;
    }
@@ -320,7 +322,7 @@ public class IHMCROSTranslationRuntimeTools
       List<Point2dRosMessage> predictedContatcPointsRos = new ArrayList<>();
       if (footstep.predictedContactPoints != null)
       {
-         for (Point2D predictedContactPoint : footstep.predictedContactPoints)
+         for (Point2D predictedContactPoint : footstep.predictedContactPoints.toArray())
          {
             predictedContatcPointsRos.add(GenericROSTranslationTools.convertPoint2d(predictedContactPoint));
          }
@@ -329,7 +331,7 @@ public class IHMCROSTranslationRuntimeTools
       List<Point> positionWaypoints = new ArrayList<>();
       if (footstep.getCustomPositionWaypoints() != null)
       {
-         for (Point3D trajectoryWaypoint : footstep.getCustomPositionWaypoints())
+         for (Point3D trajectoryWaypoint : footstep.getCustomPositionWaypoints().toArray())
          {
             positionWaypoints.add(GenericROSTranslationTools.convertPoint3D(trajectoryWaypoint));
          }
@@ -365,8 +367,10 @@ public class IHMCROSTranslationRuntimeTools
       }
 
       List<FootstepDataRosMessage> convertedFootsteps = new ArrayList<>();
-      for (FootstepDataMessage footstepDataMessage : footstepList.footstepDataList)
+      PreallocatedList<FootstepDataMessage> footstepDataList = footstepList.footstepDataList;
+      for (int i = 0; i < footstepDataList.size(); i++)
       {
+         FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
          try
          {
             convertedFootsteps.add((FootstepDataRosMessage) convertToRosMessage(footstepDataMessage));

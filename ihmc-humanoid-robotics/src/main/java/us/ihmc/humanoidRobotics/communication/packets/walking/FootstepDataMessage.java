@@ -1,9 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -18,6 +19,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
@@ -43,7 +45,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public ArrayList<Point2D> predictedContactPoints;
+   public PreallocatedList<Point2D> predictedContactPoints = new PreallocatedList<>(Point2D.class, Point2D::new, 10);
 
    @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.")
    public byte trajectoryType = TrajectoryType.DEFAULT.toByte();
@@ -53,11 +55,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    @RosExportedField(documentation = "In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The waypoints define sole positions."
          + "The controller will compute times and velocities at the waypoints. This is a convinient way to shape the trajectory of the swing. If full control over the swing"
          + "trajectory is desired use the trajectory type WAYPOINTS instead. The position waypoints are expected in the trajectory frame.")
-   public Point3D[] positionWaypoints = new Point3D[0];
+   public PreallocatedList<Point3D> positionWaypoints = new PreallocatedList<>(Point3D.class, Point3D::new, 2);
    @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, swing waypoints can be specified here. The waypoints do not include the"
          + "start point (which is set to the current foot state at lift-off) and the touch down point (which is specified by the location and orientation fields)."
          + "All waypoints are for the sole frame and expressed in the trajectory frame. The maximum number of points can be found in the Footstep class.")
-   public SE3TrajectoryPointMessage[] swingTrajectory = null;
+   public PreallocatedList<SE3TrajectoryPointMessage> swingTrajectory = new PreallocatedList<>(SE3TrajectoryPointMessage.class, SE3TrajectoryPointMessage::new,
+                                                                                               50);
    @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, this value can be used to specify the trajectory blend duration "
          + " in seconds. If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning "
          + " the desired blend duration) will be adjusted to account for the initial error between the actual and expected position and orientation of the "
@@ -85,40 +88,22 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    {
    }
 
-   public FootstepDataMessage(FootstepDataMessage footstepData)
+   public FootstepDataMessage(FootstepDataMessage other)
    {
-      this.robotSide = footstepData.robotSide;
-      this.location = new Point3D(footstepData.location);
-      this.orientation = new Quaternion(footstepData.orientation);
+      this.robotSide = other.robotSide;
+      this.location = new Point3D(other.location);
+      this.orientation = new Quaternion(other.orientation);
       this.orientation.checkIfUnitary();
-
-      if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
-      {
-         this.predictedContactPoints = null;
-      }
-      else
-      {
-         this.predictedContactPoints = new ArrayList<>();
-         for (Point2D contactPoint : footstepData.predictedContactPoints)
-         {
-            this.predictedContactPoints.add(new Point2D(contactPoint));
-         }
-      }
-      this.trajectoryType = footstepData.trajectoryType;
-      this.swingHeight = footstepData.swingHeight;
-      this.swingTrajectoryBlendDuration = footstepData.swingTrajectoryBlendDuration;
-
-      if (footstepData.positionWaypoints != null)
-      {
-         this.positionWaypoints = new Point3D[footstepData.positionWaypoints.length];
-         for (int i = 0; i < footstepData.positionWaypoints.length; i++)
-            positionWaypoints[i] = new Point3D(footstepData.positionWaypoints[i]);
-      }
-
-      this.swingDuration = footstepData.swingDuration;
-      this.transferDuration = footstepData.transferDuration;
-      this.touchdownDuration = footstepData.touchdownDuration;
-      this.executionDelayTime = footstepData.executionDelayTime;
+      MessageTools.copyData(other.predictedContactPoints, predictedContactPoints);
+      MessageTools.copyData(other.positionWaypoints, positionWaypoints);
+      MessageTools.copyData(other.swingTrajectory, swingTrajectory);
+      this.trajectoryType = other.trajectoryType;
+      this.swingHeight = other.swingHeight;
+      this.swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
+      this.swingDuration = other.swingDuration;
+      this.transferDuration = other.transferDuration;
+      this.touchdownDuration = other.touchdownDuration;
+      this.executionDelayTime = other.executionDelayTime;
    }
 
    @Override
@@ -127,33 +112,21 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       robotSide = other.robotSide;
       location = new Point3D(other.location);
       orientation = new Quaternion(other.orientation);
-      if (other.predictedContactPoints != null)
-      {
-         predictedContactPoints = new ArrayList<>();
-         other.predictedContactPoints.stream().map(Point2D::new).forEach(predictedContactPoints::add);
-      }
-
+      MessageTools.copyData(other.predictedContactPoints, predictedContactPoints);
+      MessageTools.copyData(other.positionWaypoints, positionWaypoints);
+      MessageTools.copyData(other.swingTrajectory, swingTrajectory);
       trajectoryType = other.trajectoryType;
       swingHeight = other.swingHeight;
-      if (other.positionWaypoints != null)
-      {
-         positionWaypoints = Arrays.stream(other.positionWaypoints).map(Point3D::new).toArray(Point3D[]::new);
-      }
-
-      if (other.swingTrajectory != null)
-      {
-         swingTrajectory = new SE3TrajectoryPointMessage[other.swingTrajectory.length];
-         for (int i = 0; i < swingTrajectory.length; i++)
-         {
-            swingTrajectory[i] = new SE3TrajectoryPointMessage();
-            swingTrajectory[i].set(other.swingTrajectory[i]);
-         }
-      }
+      swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
+      swingDuration = other.swingDuration;
+      transferDuration = other.transferDuration;
+      touchdownDuration = other.touchdownDuration;
+      executionDelayTime = other.executionDelayTime;
 
       setPacketInformation(other);
    }
 
-   public ArrayList<Point2D> getPredictedContactPoints()
+   public PreallocatedList<Point2D> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
@@ -222,9 +195,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       this.swingTrajectoryBlendDuration = swingTrajectoryBlendDuration;
    }
 
-   public void setPredictedContactPoints(ArrayList<Point2D> predictedContactPoints)
+   public void setPredictedContactPoints(List<Point2D> predictedContactPoints)
    {
-      this.predictedContactPoints = predictedContactPoints;
+      MessageTools.copyData(predictedContactPoints, this.predictedContactPoints);
    }
 
    public byte getTrajectoryType()
@@ -237,24 +210,24 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       this.trajectoryType = trajectoryType;
    }
 
-   public Point3D[] getCustomPositionWaypoints()
+   public PreallocatedList<Point3D> getCustomPositionWaypoints()
    {
       return positionWaypoints;
    }
 
    public void setCustomPositionWaypoints(Point3D[] trajectoryWaypoints)
    {
-      this.positionWaypoints = trajectoryWaypoints;
+      MessageTools.copyData(trajectoryWaypoints, this.positionWaypoints);
    }
 
-   public SE3TrajectoryPointMessage[] getSwingTrajectory()
+   public PreallocatedList<SE3TrajectoryPointMessage> getSwingTrajectory()
    {
       return swingTrajectory;
    }
 
    public void setSwingTrajectory(SE3TrajectoryPointMessage[] swingTrajectory)
    {
-      this.swingTrajectory = swingTrajectory;
+      MessageTools.copyData(swingTrajectory, this.swingTrajectory);
    }
 
    public void setTimings(double swingDuration, double transferDuration)
@@ -344,7 +317,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
 
       if (positionWaypoints != null)
       {
-         ret += "waypoints = " + positionWaypoints.length + "\n";
+         ret += "waypoints = " + positionWaypoints.size() + "\n";
       }
       else
       {
@@ -355,75 +328,31 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    }
 
    @Override
-   public boolean epsilonEquals(FootstepDataMessage footstepData, double epsilon)
+   public boolean epsilonEquals(FootstepDataMessage other, double epsilon)
    {
-      boolean robotSideEquals = robotSide == footstepData.robotSide;
-      boolean locationEquals = location.epsilonEquals(footstepData.location, epsilon);
+      boolean robotSideEquals = robotSide == other.robotSide;
+      boolean locationEquals = location.epsilonEquals(other.location, epsilon);
 
-      boolean orientationEquals = orientation.epsilonEquals(footstepData.orientation, epsilon);
+      boolean orientationEquals = orientation.epsilonEquals(other.orientation, epsilon);
       if (!orientationEquals)
       {
          Quaternion temp = new Quaternion();
          temp.setAndNegate(orientation);
-         orientationEquals = temp.epsilonEquals(footstepData.orientation, epsilon);
+         orientationEquals = temp.epsilonEquals(other.orientation, epsilon);
       }
 
-      boolean contactPointsEqual = true;
+      boolean contactPointsEqual = MessageTools.epsilonEquals(predictedContactPoints, other.predictedContactPoints, epsilon);
+      boolean trajectoryWaypointsEqual = MessageTools.epsilonEquals(positionWaypoints, other.positionWaypoints, epsilon);
+      boolean swingTrajectoriesEqual = MessageTools.epsilonEquals(swingTrajectory, other.swingTrajectory, epsilon);
 
-      if ((this.predictedContactPoints == null) && (footstepData.predictedContactPoints != null))
-         contactPointsEqual = false;
-      else if ((this.predictedContactPoints != null) && (footstepData.predictedContactPoints == null))
-         contactPointsEqual = false;
-      else if (this.predictedContactPoints != null)
-      {
-         int size = predictedContactPoints.size();
-         if (size != footstepData.predictedContactPoints.size())
-            contactPointsEqual = false;
-         else
-         {
-            for (int i = 0; i < size; i++)
-            {
-               Point2D pointOne = predictedContactPoints.get(i);
-               Point2D pointTwo = footstepData.predictedContactPoints.get(i);
+      boolean sameTimings = MathTools.epsilonCompare(swingDuration, other.swingDuration, epsilon);
+      sameTimings = sameTimings && MathTools.epsilonCompare(transferDuration, other.transferDuration, epsilon);
+      sameTimings = sameTimings && MathTools.epsilonCompare(touchdownDuration, other.touchdownDuration, epsilon);
 
-               if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
-                  contactPointsEqual = false;
-            }
-         }
-      }
-
-      boolean trajectoryWaypointsEqual = true;
-
-      if ((this.positionWaypoints == null) && (footstepData.positionWaypoints != null))
-         trajectoryWaypointsEqual = false;
-      else if ((this.positionWaypoints != null) && (footstepData.positionWaypoints == null))
-         trajectoryWaypointsEqual = false;
-      else if (this.positionWaypoints != null)
-      {
-         int size = positionWaypoints.length;
-         if (size != footstepData.positionWaypoints.length)
-            trajectoryWaypointsEqual = false;
-         else
-         {
-            for (int i = 0; i < size; i++)
-            {
-               Point3D pointOne = positionWaypoints[i];
-               Point3D pointTwo = footstepData.positionWaypoints[i];
-
-               if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
-                  trajectoryWaypointsEqual = false;
-            }
-         }
-      }
-
-      boolean sameTimings = MathTools.epsilonCompare(swingDuration, footstepData.swingDuration, epsilon);
-      sameTimings = sameTimings && MathTools.epsilonCompare(transferDuration, footstepData.transferDuration, epsilon);
-      sameTimings = sameTimings && MathTools.epsilonCompare(touchdownDuration, footstepData.touchdownDuration, epsilon);
-
-      boolean swingTrajectoryBlendDurationEquals = MathTools.epsilonCompare(swingTrajectoryBlendDuration, footstepData.swingTrajectoryBlendDuration, epsilon);
+      boolean swingTrajectoryBlendDurationEquals = MathTools.epsilonCompare(swingTrajectoryBlendDuration, other.swingTrajectoryBlendDuration, epsilon);
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings
-            && swingTrajectoryBlendDurationEquals;
+            && swingTrajectoryBlendDurationEquals && swingTrajectoriesEqual;
    }
 
    /** {@inheritDoc} */

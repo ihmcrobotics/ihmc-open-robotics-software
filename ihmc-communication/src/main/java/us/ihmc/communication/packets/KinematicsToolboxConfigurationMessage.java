@@ -1,13 +1,12 @@
 package us.ihmc.communication.packets;
 
-import java.util.Arrays;
-
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.ArrayTools;
 
 /**
  * {@link KinematicsToolboxConfigurationMessage} is part of the API of the
@@ -36,12 +35,12 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
     * belongs to. The name-based hash code can be obtained from
     * {@link OneDoFJoint#getNameBasedHashCode()}.
     */
-   public long[] privilegedJointNameBasedHashCodes;
+   public TLongArrayList privilegedJointNameBasedHashCodes = new TLongArrayList();
    /**
     * When provided, the solver will attempt to find the solution that is the closest to the
     * privileged configuration.
     */
-   public float[] privilegedJointAngles;
+   public TFloatArrayList privilegedJointAngles = new TFloatArrayList();
 
    public KinematicsToolboxConfigurationMessage()
    {
@@ -55,10 +54,8 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
          privilegedRootJointPosition = new Point3D32(other.privilegedRootJointPosition);
       if (other.privilegedRootJointOrientation != null)
          privilegedRootJointOrientation = new Quaternion32(other.privilegedRootJointOrientation);
-      if (other.privilegedJointNameBasedHashCodes != null)
-         privilegedJointNameBasedHashCodes = Arrays.copyOf(other.privilegedJointNameBasedHashCodes, other.privilegedJointNameBasedHashCodes.length);
-      if (other.privilegedJointAngles != null)
-         privilegedJointAngles = Arrays.copyOf(other.privilegedJointAngles, other.privilegedJointAngles.length);
+      MessageTools.copyData(other.privilegedJointNameBasedHashCodes, privilegedJointNameBasedHashCodes);
+      MessageTools.copyData(other.privilegedJointAngles, privilegedJointAngles);
       setPacketInformation(other);
    }
 
@@ -124,13 +121,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if (jointNameBasedHashCodes.length != jointAngles.length)
          throw new IllegalArgumentException("The two arrays jointAngles and jointNameBasedHashCodes have to be of same length.");
 
-      if (privilegedJointNameBasedHashCodes == null)
-         privilegedJointNameBasedHashCodes = new long[jointNameBasedHashCodes.length];
-      System.arraycopy(jointNameBasedHashCodes, 0, privilegedJointNameBasedHashCodes, 0, jointNameBasedHashCodes.length);
-
-      if (privilegedJointAngles == null)
-         privilegedJointAngles = new float[jointAngles.length];
-      System.arraycopy(jointAngles, 0, privilegedJointAngles, 0, jointAngles.length);
+      privilegedJointNameBasedHashCodes.reset();
+      privilegedJointNameBasedHashCodes.add(jointNameBasedHashCodes);
+      privilegedJointAngles.reset();
+      privilegedJointAngles.add(jointAngles);
    }
 
    /**
@@ -172,12 +166,12 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       return privilegedRootJointOrientation;
    }
 
-   public long[] getPrivilegedJointNameBasedHashCodes()
+   public TLongArrayList getPrivilegedJointNameBasedHashCodes()
    {
       return privilegedJointNameBasedHashCodes;
    }
 
-   public float[] getPrivilegedJointAngles()
+   public TFloatArrayList getPrivilegedJointAngles()
    {
       return privilegedJointAngles;
    }
@@ -196,7 +190,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    @Override
    public boolean epsilonEquals(KinematicsToolboxConfigurationMessage other, double epsilon)
    {
-      if (!Arrays.equals(privilegedJointNameBasedHashCodes, other.privilegedJointNameBasedHashCodes))
+      if (!privilegedJointNameBasedHashCodes.equals(other.privilegedJointNameBasedHashCodes))
          return false;
 
       if (privilegedRootJointPosition == null ^ other.privilegedRootJointPosition == null)
@@ -211,7 +205,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       if (privilegedJointAngles == other.privilegedJointAngles)
          return true;
-      else if (!ArrayTools.deltaEquals(privilegedJointAngles, other.privilegedJointAngles, (float) epsilon))
+      else if (!MessageTools.epsilonEquals(privilegedJointAngles, other.privilegedJointAngles, (float) epsilon))
          return false;
 
       return true;

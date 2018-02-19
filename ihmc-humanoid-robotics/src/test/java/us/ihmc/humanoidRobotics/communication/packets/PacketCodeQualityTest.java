@@ -27,6 +27,7 @@ import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 import org.reflections.Reflections;
 
+import gnu.trove.list.TByteList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -424,7 +425,7 @@ public class PacketCodeQualityTest
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
 
-               boolean isEnum = byte.class == typeToCheck;
+               boolean isEnum = byte.class == typeToCheck || TByteList.class.isAssignableFrom(typeToCheck);
 
                if (isEnum)
                {
@@ -496,7 +497,7 @@ public class PacketCodeQualityTest
                Class<?> typeToCheck = field.getType();
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
-               if (byte.class != typeToCheck)
+               if (byte.class != typeToCheck &&  !TByteList.class.isAssignableFrom(typeToCheck))
                   continue;
                String expectedToContainEnumName = field.getName().toLowerCase();
                Set<Entry<String, Class<? extends Enum>>> potentialMatchingEnums = nameToEnumMap.entrySet().stream()

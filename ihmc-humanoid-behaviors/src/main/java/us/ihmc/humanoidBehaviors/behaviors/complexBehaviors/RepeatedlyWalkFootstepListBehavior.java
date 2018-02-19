@@ -1,15 +1,20 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -18,11 +23,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 {
@@ -104,7 +104,12 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
       backwardFootstepList.clear();
 
       ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<>();
-      footstepDataList.addAll(forwardFootstepList.getDataList());
+      PreallocatedList<FootstepDataMessage> dataList = forwardFootstepList.getDataList();
+      for (int i = 0; i < dataList.size(); i++)
+      {
+         FootstepDataMessage step = dataList.get(i);
+         footstepDataList.add(step);
+      }
       footstepDataList.remove(footstepDataList.size() - 1);
 
       Collections.reverse(footstepDataList);

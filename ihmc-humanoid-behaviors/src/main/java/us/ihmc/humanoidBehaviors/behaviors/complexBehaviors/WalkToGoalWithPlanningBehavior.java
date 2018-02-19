@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
-import java.util.List;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanReques
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -67,7 +68,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
    private FootstepDataMessage currentLocation;
    private FootstepDataMessage predictedLocation;
    private FootstepPathPlanPacket currentPlan;
-   private List<FootstepDataMessage> stepsRequested;
+   private PreallocatedList<FootstepDataMessage> stepsRequested;
    private int expectedIndex = 0;
    private RobotSide lastSide = null;
 
@@ -116,14 +117,14 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
 
       if (executePlan.getBooleanValue() && hasNewPlan.getBooleanValue() && (!stepCompleted.getBooleanValue() || allStepsCompleted.getBooleanValue()))
       {
-         if (planValid(currentPlan) && (!currentPlan.footstepUnknown.get(1) || executeUnknownFirstStep.getBooleanValue()))
+         if (planValid(currentPlan) && (currentPlan.footstepUnknown.get(1) == 0 || executeUnknownFirstStep.getBooleanValue()))
          {
             processNextStep();
             return;
          }
       }
 
-      if (currentPlan != null && currentPlan.footstepUnknown != null && (currentPlan.footstepUnknown.isEmpty() || currentPlan.footstepUnknown.get(1))
+      if (currentPlan != null && currentPlan.footstepUnknown != null && (currentPlan.footstepUnknown.isEmpty() || currentPlan.footstepUnknown.get(1) == 1)
             && requestQuickSearch.getBooleanValue())
       {
          //no plan or next step unknown, need a new plan fast
@@ -166,15 +167,12 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
          return;
       int size = plan.pathPlan.size();
       SnapFootstepPacket planVisualizationPacket = new SnapFootstepPacket();
-      planVisualizationPacket.footstepData = new ArrayList<FootstepDataMessage>();
-      planVisualizationPacket.footstepOrder = new int[size];
-      planVisualizationPacket.flag = new byte[size];
 
       for (int i = 0; i < size; i++)
       {
-         planVisualizationPacket.footstepData.add(plan.pathPlan.get(i));
-         planVisualizationPacket.footstepOrder[i] = i;
-         planVisualizationPacket.flag[i] = (byte) (plan.footstepUnknown.get(i) ? 0 : 2);
+         planVisualizationPacket.footstepData.add().set(plan.pathPlan.get(i));
+         planVisualizationPacket.footstepOrder.add(i);
+         planVisualizationPacket.flag.add((byte) (plan.footstepUnknown.get(i) == 1 ? 0 : 2));
       }
       planVisualizationPacket.setDestination(PacketDestination.NETWORK_PROCESSOR);
       sendPacket(planVisualizationPacket);
@@ -193,8 +191,8 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
       }
       while (plan.pathPlan.size() > 0 && !approximatelyEqual(plan.pathPlan.get(0), predictedLocation))
       {
-         plan.pathPlan.remove(0);
-         plan.footstepUnknown.remove(0);
+         MessageTools.removeElement(plan.pathPlan, 0);
+         plan.footstepUnknown.removeAt(0);
       }
       if (plan.pathPlan.size() < 2)
          return false;
@@ -265,10 +263,10 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
    private void takeStep()
    {
       //remove current location from plan, element 1 is next step
-      currentPlan.pathPlan.remove(0);
-      currentPlan.footstepUnknown.remove(0);
+      MessageTools.removeElement(currentPlan.pathPlan, 0);
+      currentPlan.footstepUnknown.removeAt(0);
       //element 1 is now element 0
-      if (currentPlan.footstepUnknown.get(0) && !executeUnknownFirstStep.getBooleanValue())
+      if (currentPlan.footstepUnknown.get(0) == 1 && !executeUnknownFirstStep.getBooleanValue())
          return;
 
       sendStepsToController();
@@ -339,7 +337,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
             outgoingFootsteps.footstepDataList.add(currentPlan.pathPlan.get(i));
             executeUnknownFirstStep.set(false);
          }
-         else if (!currentPlan.footstepUnknown.get(i))
+         else if (currentPlan.footstepUnknown.get(i) == 0)
          {
             outgoingFootsteps.footstepDataList.add(currentPlan.pathPlan.get(i));
          }
@@ -349,7 +347,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
          }
          debugPrintln("Step Added To Send: " + outgoingFootsteps.footstepDataList.get(i));
          if (outgoingFootsteps.footstepDataList.get(i).predictedContactPoints != null
-               && outgoingFootsteps.footstepDataList.get(i).predictedContactPoints.isEmpty())
+               && outgoingFootsteps.footstepDataList.get(i).predictedContactPoints.size() == 0)
          {
             debugPrintln("Support Points are: " + outgoingFootsteps.footstepDataList.get(i).predictedContactPoints.toString());
             throw new RuntimeException("attempting to send footstep with empty list of support points");

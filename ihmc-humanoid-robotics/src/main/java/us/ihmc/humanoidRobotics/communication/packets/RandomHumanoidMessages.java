@@ -1,5 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextPoint2D;
+import static us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus.MAXIMUM_NUMBER_OF_VERTICES;
+
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -12,18 +15,19 @@ import us.ihmc.communication.packets.HeatMapPacket;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.LidarScanParametersMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
+import us.ihmc.communication.packets.SpatialVectorMessage;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -103,7 +107,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMan
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -181,7 +184,7 @@ public final class RandomHumanoidMessages
    {
       OneDoFJointTrajectoryMessage next = new OneDoFJointTrajectoryMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.trajectoryPoints = nextTrajectoryPoint1DMessages(random);
+      MessageTools.copyData(nextTrajectoryPoint1DMessages(random), next.trajectoryPoints);
       next.weight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       return next;
    }
@@ -204,7 +207,7 @@ public final class RandomHumanoidMessages
       JointspaceTrajectoryMessage next = new JointspaceTrajectoryMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.queueingProperties = nextQueueableMessage(random);
-      next.jointTrajectoryMessages = nextOneDoFJointTrajectoryMessages(random);
+      MessageTools.copyData(nextOneDoFJointTrajectoryMessages(random), next.jointTrajectoryMessages);
       return next;
    }
 
@@ -248,7 +251,7 @@ public final class RandomHumanoidMessages
    {
       SE3TrajectoryMessage next = new SE3TrajectoryMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.taskspaceTrajectoryPoints = nextSE3TrajectoryPointMessages(random);
+      MessageTools.copyData(nextSE3TrajectoryPointMessages(random), next.taskspaceTrajectoryPoints);
       next.angularSelectionMatrix = nextSelectionMatrix3DMessage(random);
       next.linearSelectionMatrix = nextSelectionMatrix3DMessage(random);
       next.frameInformation = nextFrameInformation(random);
@@ -348,7 +351,7 @@ public final class RandomHumanoidMessages
    {
       SO3TrajectoryMessage next = new SO3TrajectoryMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.taskspaceTrajectoryPoints = nextSO3TrajectoryPointMessages(random);
+      MessageTools.copyData(nextSO3TrajectoryPointMessages(random), next.taskspaceTrajectoryPoints);
       next.frameInformation = nextFrameInformation(random);
       next.selectionMatrix = nextSelectionMatrix3DMessage(random);
       next.weightMatrix = nextWeightMatrix3DMessage(random);
@@ -461,19 +464,17 @@ public final class RandomHumanoidMessages
       next.robotSide = RobotSide.generateRandomRobotSide(random).toByte();
       next.location = EuclidCoreRandomTools.nextPoint3D(random);
       next.orientation = EuclidCoreRandomTools.nextQuaternion(random);
-      next.predictedContactPoints = new ArrayList<>();
       IntStream.range(0, random.nextInt(10)).forEach(i -> next.predictedContactPoints.add(EuclidCoreRandomTools.nextPoint2D(random)));
       next.trajectoryType = RandomNumbers.nextEnum(random, TrajectoryType.class).toByte();
       next.swingHeight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       if (next.trajectoryType == TrajectoryType.CUSTOM.toByte())
       {
-         next.positionWaypoints = new Point3D[2];
-         next.positionWaypoints[0] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-         next.positionWaypoints[1] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
+         next.positionWaypoints.add().set(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
+         next.positionWaypoints.add().set(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
       }
       else if (next.trajectoryType == TrajectoryType.WAYPOINTS.toByte())
       {
-         next.swingTrajectory = nextSE3TrajectoryPointMessages(random);
+         MessageTools.copyData(nextSE3TrajectoryPointMessages(random), next.swingTrajectory);
       }
       next.swingTrajectoryBlendDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       next.swingDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
@@ -500,7 +501,7 @@ public final class RandomHumanoidMessages
    {
       FootstepDataListMessage next = new FootstepDataListMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.footstepDataList = nextFootstepDataMessages(random);
+      MessageTools.copyData(nextFootstepDataMessages(random), next.footstepDataList);
       next.executionTiming = RandomNumbers.nextEnum(random, ExecutionTiming.class).toByte();
       next.defaultSwingDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       next.defaultTransferDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
@@ -554,9 +555,9 @@ public final class RandomHumanoidMessages
       next.timestamp = random.nextLong();
       next.sensorHeadPPSTimestamp = random.nextLong();
       next.jointNameHash = random.nextInt(10000);
-      next.jointAngles = RandomNumbers.nextFloatArray(random, size, 1.0f);
-      next.jointVelocities = RandomNumbers.nextFloatArray(random, size, 1.0f);
-      next.jointTorques = RandomNumbers.nextFloatArray(random, size, 1.0f);
+      next.jointAngles.add(RandomNumbers.nextFloatArray(random, size, 1.0f));
+      next.jointVelocities.add(RandomNumbers.nextFloatArray(random, size, 1.0f));
+      next.jointTorques.add(RandomNumbers.nextFloatArray(random, size, 1.0f));
       next.rootTranslation = EuclidCoreRandomTools.nextVector3D32(random);
       next.pelvisLinearVelocity = EuclidCoreRandomTools.nextVector3D32(random);
       next.pelvisAngularVelocity = EuclidCoreRandomTools.nextVector3D32(random);
@@ -564,14 +565,23 @@ public final class RandomHumanoidMessages
       next.pelvisLinearAcceleration = EuclidCoreRandomTools.nextVector3D32(random);
 
       size = Math.abs(random.nextInt(1000));
-      next.momentAndForceDataAllForceSensors = new float[size][Wrench.SIZE];
-      for (int i = 0; i < next.momentAndForceDataAllForceSensors.length; i++)
-         next.momentAndForceDataAllForceSensors[i] = RandomNumbers.nextFloatArray(random, Wrench.SIZE, 1.0f);
-      next.imuSensorData = nextIMUPackets(random);
+      for (int i = 0; i < next.momentAndForceDataAllForceSensors.size(); i++)
+         next.momentAndForceDataAllForceSensors.add().set(createRandomSpatialVectorMessage(random));
+      for (IMUPacket imuPacket : nextIMUPackets(random))
+         next.imuSensorData.add().set(imuPacket);
       next.robotMotionStatus = RandomNumbers.nextEnum(random, RobotMotionStatus.class).toByte();
       next.lastReceivedPacketTypeID = random.nextInt(1000);
       next.lastReceivedPacketUniqueId = random.nextLong();
       next.lastReceivedPacketRobotTimestamp = random.nextLong();
+      return next;
+   }
+
+   public static SpatialVectorMessage createRandomSpatialVectorMessage(Random random)
+   {
+      SpatialVectorMessage next = new SpatialVectorMessage();
+      next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
+      next.angularPart.set(EuclidCoreRandomTools.nextVector3D(random));
+      next.linearPart.set(EuclidCoreRandomTools.nextVector3D(random));
       return next;
    }
 
@@ -591,7 +601,7 @@ public final class RandomHumanoidMessages
       next.startFootstep = nextFootstepDataMessage(random);
       next.thetaStart = random.nextDouble();
       next.maxSuboptimality = random.nextDouble();
-      next.goals = nextFootstepDataMessages(random);
+      MessageTools.copyData(nextFootstepDataMessages(random), next.goals);
       next.footstepPlanRequestType = RandomNumbers.nextEnum(random, FootstepPlanRequestType.class).toByte();
       return next;
    }
@@ -602,7 +612,7 @@ public final class RandomHumanoidMessages
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.height = RandomNumbers.nextInt(random, -100, 100);
       next.width = RandomNumbers.nextInt(random, -100, 100);
-      next.data = RandomNumbers.nextFloatArray(random, next.height * next.width, 1.0f);
+      next.data.add(RandomNumbers.nextFloatArray(random, next.height * next.width, 1.0f));
       next.name.append(Integer.toHexString(random.nextInt()));
       return next;
    }
@@ -613,20 +623,13 @@ public final class RandomHumanoidMessages
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       int boxesToGenerate = random.nextInt(20);
 
-      next.labels = new StringBuilder[boxesToGenerate];
-
       for (int i = 0; i < boxesToGenerate; i++)
       {
-         next.labels[i].append(Integer.toHexString(random.nextInt()));
-         next.boundingBoxXCoordinates = new int[boxesToGenerate];
-         next.boundingBoxYCoordinates = new int[boxesToGenerate];
-         next.boundingBoxWidths = new int[boxesToGenerate];
-         next.boundingBoxHeights = new int[boxesToGenerate];
-
-         next.boundingBoxXCoordinates[i] = RandomNumbers.nextInt(random, -1000, 1000);
-         next.boundingBoxYCoordinates[i] = RandomNumbers.nextInt(random, -1000, 1000);
-         next.boundingBoxWidths[i] = RandomNumbers.nextInt(random, 0, 1000);
-         next.boundingBoxHeights[i] = RandomNumbers.nextInt(random, 0, 1000);
+         next.labels.add().append(Integer.toHexString(random.nextInt()));
+         next.boundingBoxXCoordinates.add(RandomNumbers.nextInt(random, -1000, 1000));
+         next.boundingBoxYCoordinates.add(RandomNumbers.nextInt(random, -1000, 1000));
+         next.boundingBoxWidths.add(RandomNumbers.nextInt(random, 0, 1000));
+         next.boundingBoxHeights.add(RandomNumbers.nextInt(random, 0, 1000));
       }
       return next;
    }
@@ -693,7 +696,7 @@ public final class RandomHumanoidMessages
    {
       EuclideanTrajectoryMessage next = new EuclideanTrajectoryMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.taskspaceTrajectoryPoints = nextEuclideanTrajectoryPointMessages(random);
+      MessageTools.copyData(nextEuclideanTrajectoryPointMessages(random), next.taskspaceTrajectoryPoints);
       next.selectionMatrix = nextSelectionMatrix3DMessage(random);
       next.frameInformation = nextFrameInformation(random);
       next.weightMatrix = nextWeightMatrix3DMessage(random);
@@ -755,8 +758,8 @@ public final class RandomHumanoidMessages
       PointCloudWorldPacket next = new PointCloudWorldPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.timestamp = random.nextLong();
-      next.groundQuadTreeSupport = RandomNumbers.nextFloatArray(random, random.nextInt(), 100.0f);
-      next.decayingWorldScan = RandomNumbers.nextFloatArray(random, random.nextInt(), 100.0f);
+      next.groundQuadTreeSupport.add(RandomNumbers.nextFloatArray(random, random.nextInt(), 100.0f));
+      next.decayingWorldScan.add(RandomNumbers.nextFloatArray(random, random.nextInt(), 100.0f));
       next.defaultGroundHeight = random.nextFloat();
       return next;
    }
@@ -767,13 +770,12 @@ public final class RandomHumanoidMessages
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.goalsValid = random.nextBoolean();
       next.start = nextFootstepDataMessage(random);
-      next.originalGoals = nextFootstepDataMessages(random);
-      next.pathPlan = nextFootstepDataMessages(random);
-      next.footstepUnknown = new ArrayList<>();
+      MessageTools.copyData(nextFootstepDataMessages(random), next.originalGoals);
+      MessageTools.copyData(nextFootstepDataMessages(random), next.pathPlan);
       int size = Math.abs(random.nextInt(1000));
       for (int i = 0; i < size; i++)
       {
-         next.footstepUnknown.add(random.nextBoolean());
+         next.footstepUnknown.add((byte) random.nextInt(2));
       }
       next.subOptimality = random.nextDouble();
       next.pathCost = random.nextDouble();
@@ -816,16 +818,8 @@ public final class RandomHumanoidMessages
       next.desiredCapturePoint = RandomGeometry.nextPoint2D(random, max, max);
       next.centerOfMass = RandomGeometry.nextPoint3D(random, max, max, max);
 
-      next.leftFootSupportPolygonLength = Math.abs(random.nextInt(CapturabilityBasedStatus.MAXIMUM_NUMBER_OF_VERTICES));
-      for (int i = 0; i < next.leftFootSupportPolygonLength; i++)
-      {
-         next.leftFootSupportPolygonStore[i] = RandomGeometry.nextPoint2D(random, max, max);
-      }
-      next.rightFootSupportPolygonLength = Math.abs(random.nextInt(CapturabilityBasedStatus.MAXIMUM_NUMBER_OF_VERTICES));
-      for (int i = 0; i < next.rightFootSupportPolygonLength; i++)
-      {
-         next.rightFootSupportPolygonStore[i] = RandomGeometry.nextPoint2D(random, max, max);
-      }
+      IntStream.range(0, MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> nextPoint2D(random)).forEach(next.leftFootSupportPolygon.add()::set);
+      IntStream.range(0, MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> nextPoint2D(random)).forEach(next.rightFootSupportPolygon.add()::set);
 
       return next;
    }
@@ -888,9 +882,9 @@ public final class RandomHumanoidMessages
          footsteps.add(footstepData);
       }
 
-      next.footstepData = footsteps;
-      next.footstepOrder = footstepOrder;
-      next.flag = flag;
+      MessageTools.copyData(footsteps, next.footstepData);
+      next.footstepOrder.add(footstepOrder);
+      next.flag.add(flag);
       return next;
    }
 
@@ -907,7 +901,7 @@ public final class RandomHumanoidMessages
    {
       DesiredAccelerationsMessage next = new DesiredAccelerationsMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
-      next.desiredJointAccelerations = RandomNumbers.nextDoubleArray(random, random.nextInt(16) + 1, 1.0);
+      next.desiredJointAccelerations.add(RandomNumbers.nextDoubleArray(random, random.nextInt(16) + 1, 1.0));
       next.queueingProperties = nextQueueableMessage(random);
       return next;
    }
@@ -966,7 +960,7 @@ public final class RandomHumanoidMessages
       KinematicsToolboxOutputStatus next = new KinematicsToolboxOutputStatus();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.jointNameHash = random.nextInt();
-      next.desiredJointAngles = RandomNumbers.nextFloatArray(random, random.nextInt(100), 1.0f);
+      next.desiredJointAngles.add(RandomNumbers.nextFloatArray(random, random.nextInt(100), 1.0f));
       next.desiredRootTranslation = EuclidCoreRandomTools.nextVector3D32(random);
       next.desiredRootOrientation = EuclidCoreRandomTools.nextQuaternion32(random);
       next.solutionQuality = random.nextDouble();
@@ -995,8 +989,9 @@ public final class RandomHumanoidMessages
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.videoSource = RandomNumbers.nextEnum(random, VideoSource.class).toByte();
       next.timeStamp = random.nextLong();
-      next.data = new byte[random.nextInt((int) (Math.pow(2, 20) - 19))];
-      random.nextBytes(next.data);
+      byte[] data = new byte[random.nextInt((int) (Math.pow(2, 20) - 19))];
+      random.nextBytes(data);
+      next.data.add(data);
       next.position = EuclidCoreRandomTools.nextPoint3D(random);
       next.orientation = EuclidCoreRandomTools.nextQuaternion(random);
       next.intrinsicParameters = nextIntrinsicParametersMessage(random);
@@ -1014,7 +1009,7 @@ public final class RandomHumanoidMessages
       next.skew = random.nextDouble();
       next.cx = random.nextDouble();
       next.cy = random.nextDouble();
-      next.radial = RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0);
+      next.radial.add(RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0));
       next.t1 = random.nextDouble();
       next.t2 = random.nextDouble();
       return next;
@@ -1025,7 +1020,7 @@ public final class RandomHumanoidMessages
       LocalizationPointMapPacket next = new LocalizationPointMapPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.timestamp = random.nextLong();
-      next.localizationPointMap = RandomNumbers.nextFloatArray(random, random.nextInt(10000), 1.0f);
+      next.localizationPointMap.add(RandomNumbers.nextFloatArray(random, random.nextInt(10000), 1.0f));
       return next;
    }
 
@@ -1089,8 +1084,7 @@ public final class RandomHumanoidMessages
       next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
       next.location = EuclidCoreRandomTools.nextPoint3D(random);
       next.orientation = EuclidCoreRandomTools.nextQuaternion(random);
-      next.predictedContactPoints = new ArrayList<>();
-      IntStream.range(0, random.nextInt(10)).forEach(i -> next.predictedContactPoints.add(EuclidCoreRandomTools.nextPoint2D(random)));
+      IntStream.range(0, random.nextInt(10)).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.predictedContactPoints.add()::set);
       next.executionDelayTime = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       return next;
    }
@@ -1104,25 +1098,12 @@ public final class RandomHumanoidMessages
       next.footstepPlanningResult = FootstepPlanningResult.values[result].toByte();
       next.planId = random.nextInt();
 
-      next.bodyPath = new Point2D[random.nextInt(10)];
-      for (int i = 0; i < next.bodyPath.length; i++)
+      for (int i = 0; i < random.nextInt(10); i++)
       {
-         next.bodyPath[i] = EuclidCoreRandomTools.nextPoint2D(random);
+         next.bodyPath.add().set(EuclidCoreRandomTools.nextPoint2D(random));
       }
 
       next.lowLevelPlannerGoal = new Pose2D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-
-      next.navigableExtrusions = new Point3D[random.nextInt(40) + 1][];
-      for (int i = 0; i < next.navigableExtrusions.length; i++)
-      {
-         int numberOfPoints = random.nextInt(5) + 1;
-         next.navigableExtrusions[i] = new Point3D[numberOfPoints];
-
-         for (int j = 0; j < numberOfPoints; j++)
-         {
-            next.navigableExtrusions[i][j] = EuclidCoreRandomTools.nextPoint3D(random);
-         }
-      }
 
       return next;
    }
@@ -1172,7 +1153,7 @@ public final class RandomHumanoidMessages
       LegCompliancePacket next = new LegCompliancePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
-      next.maxVelocityDeltas = RandomNumbers.nextFloatArray(random, random.nextInt(1000), 1.0f);
+      next.maxVelocityDeltas.add(RandomNumbers.nextFloatArray(random, random.nextInt(1000), 1.0f));
       return next;
    }
 
@@ -1181,7 +1162,7 @@ public final class RandomHumanoidMessages
       HandJointAnglePacket next = new HandJointAnglePacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.robotSide = RandomNumbers.nextEnum(random, RobotSide.class).toByte();
-      next.jointAngles = RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0);
+      next.jointAngles.add(RandomNumbers.nextDoubleArray(random, random.nextInt(1000), 1.0));
       next.connected = random.nextBoolean();
       next.calibrated = random.nextBoolean();
       return next;
@@ -1225,10 +1206,9 @@ public final class RandomHumanoidMessages
       SimulatedLidarScanPacket next = new SimulatedLidarScanPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       int size = Math.abs(random.nextInt(1000000));
-      next.ranges = new float[size];
-      for (int i = 0; i < next.ranges.length; i++)
+      for (int i = 0; i < size; i++)
       {
-         next.ranges[i] = random.nextFloat();
+         next.ranges.add(random.nextFloat());
       }
 
       next.sensorId = random.nextInt();

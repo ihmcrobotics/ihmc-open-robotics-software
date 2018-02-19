@@ -1,24 +1,25 @@
 package us.ihmc.communication.packets;
 
-import java.util.Arrays;
 import java.util.List;
 
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.commons.MathTools;
 
 public class LidarScanMessage extends Packet<LidarScanMessage>
 {
    public long robotTimestamp;
    public Point3D32 lidarPosition;
    public Quaternion32 lidarOrientation;
-   public float[] scan;
+   public TFloatArrayList scan = new TFloatArrayList();
 
    public LidarScanMessage()
    {
@@ -31,7 +32,7 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
       robotTimestamp = other.robotTimestamp;
       lidarPosition = new Point3D32(other.lidarPosition);
       lidarOrientation = new Quaternion32(other.lidarOrientation);
-      scan = Arrays.copyOf(other.scan, other.scan.length);
+      MessageTools.copyData(other.scan, scan);
       setPacketInformation(other);
    }
 
@@ -62,34 +63,19 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
 
    public void setScan(float[] scan)
    {
-      this.scan = scan;
+      this.scan.reset();
+      this.scan.add(scan);
    }
 
-   public void setScan(Point3D[] scan)
+   public void setScan(Point3DReadOnly[] scan)
    {
-      this.scan = new float[scan.length * 3];
+      this.scan.reset();
 
-      int index = 0;
-
-      for (Point3D scanPoint : scan)
+      for (Point3DReadOnly scanPoint : scan)
       {
-         this.scan[index++] = (float) scanPoint.getX();
-         this.scan[index++] = (float) scanPoint.getY();
-         this.scan[index++] = (float) scanPoint.getZ();
-      }
-   }
-
-   public void setScan(Point3D32[] scan)
-   {
-      this.scan = new float[scan.length * 3];
-
-      int index = 0;
-
-      for (Point3D32 scanPoint : scan)
-      {
-         this.scan[index++] = scanPoint.getX32();
-         this.scan[index++] = scanPoint.getY32();
-         this.scan[index++] = scanPoint.getZ32();
+         this.scan.add((float) scanPoint.getX());
+         this.scan.add((float) scanPoint.getY());
+         this.scan.add((float) scanPoint.getZ());
       }
    }
 
@@ -130,7 +116,7 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
 
    public int getNumberOfScanPoints()
    {
-      return scan.length / 3;
+      return scan.size() / 3;
    }
 
    public Point3D32 getScanPoint3f(int index)
@@ -140,12 +126,12 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
       return scanPoint;
    }
 
-   public void getScanPoint(int index, Point3D32 scanPointToPack)
+   public void getScanPoint(int index, Point3DBasics scanPointToPack)
    {
       index *= 3;
-      scanPointToPack.setX(scan[index++]);
-      scanPointToPack.setY(scan[index++]);
-      scanPointToPack.setZ(scan[index++]);
+      scanPointToPack.setX(scan.get(index++));
+      scanPointToPack.setY(scan.get(index++));
+      scanPointToPack.setZ(scan.get(index++));
    }
 
    public Point3D getScanPoint3d(int index)
@@ -153,14 +139,6 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
       Point3D scanPoint = new Point3D();
       getScanPoint(index, scanPoint);
       return scanPoint;
-   }
-
-   public void getScanPoint(int index, Point3D scanPointToPack)
-   {
-      index *= 3;
-      scanPointToPack.setX(scan[index++]);
-      scanPointToPack.setY(scan[index++]);
-      scanPointToPack.setZ(scan[index++]);
    }
 
    public FramePoint3D getScanFramePoint(int index)
@@ -174,9 +152,7 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
    {
       index *= 3;
       scanPointToPack.setToZero(ReferenceFrame.getWorldFrame());
-      scanPointToPack.setX(scan[index++]);
-      scanPointToPack.setY(scan[index++]);
-      scanPointToPack.setZ(scan[index++]);
+      getScanPoint(index, (Point3DBasics) scanPointToPack);
    }
 
    public Point3D32[] getScanPoint3fs()
@@ -231,13 +207,8 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
          return false;
       if (!lidarOrientation.epsilonEquals(other.lidarOrientation, (float) epsilon))
          return false;
-      if (scan.length != other.scan.length)
+      if (!MessageTools.epsilonEquals(scan, other.scan, epsilon))
          return false;
-      for (int i = 0; i < scan.length; i++)
-      {
-         if (!MathTools.epsilonEquals(scan[i], other.scan[i], epsilon))
-            return false;
-      }
       return true;
    }
 }

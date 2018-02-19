@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.idl.PreallocatedList;
 
 @RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
@@ -32,7 +33,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public List<Point2D> predictedContactPoints;
+   public PreallocatedList<Point2D> predictedContactPoints = new PreallocatedList<>(Point2D.class, Point2D::new, 10);
 
    @RosExportedField(documentation = "The time to delay this command on the controller side before being executed.")
    public double executionDelayTime;
@@ -58,22 +59,11 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       orientation = new Quaternion(other.orientation);
       executionDelayTime = other.executionDelayTime;
       orientation.checkIfUnitary();
-      if (other.predictedContactPoints == null || other.predictedContactPoints.isEmpty())
-      {
-         predictedContactPoints = null;
-      }
-      else
-      {
-         predictedContactPoints = new ArrayList<>();
-         for (Point2D contactPoint : other.predictedContactPoints)
-         {
-            predictedContactPoints.add(new Point2D(contactPoint));
-         }
-      }
+      MessageTools.copyData(other.predictedContactPoints, predictedContactPoints);
       setPacketInformation(other);
    }
 
-   public List<Point2D> getPredictedContactPoints()
+   public PreallocatedList<Point2D> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
@@ -124,7 +114,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 
    public void setPredictedContactPoints(List<Point2D> predictedContactPoints)
    {
-      this.predictedContactPoints = predictedContactPoints;
+      MessageTools.copyData(predictedContactPoints, this.predictedContactPoints);
    }
 
    /**

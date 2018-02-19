@@ -307,7 +307,9 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       public void setFootstepList(FootstepDataListMessage footMessage)
       {
          this.footstepListMessage = footMessage;
-         this.footstepList = this.footstepListMessage.getDataList();
+         this.footstepList = new ArrayList<>();
+         for (int i = 0; i < this.footstepListMessage.getDataList().size(); i++)
+            footstepList.add(this.footstepListMessage.getDataList().get(i));
       }
    }
 }

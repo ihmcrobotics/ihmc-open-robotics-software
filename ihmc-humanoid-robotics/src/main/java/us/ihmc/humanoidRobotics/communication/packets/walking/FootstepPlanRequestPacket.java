@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.ArrayList;
-
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.idl.PreallocatedList;
 
 public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 {
@@ -14,7 +14,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    public double thetaStart;
    public double maxSuboptimality = 1;
 
-   public ArrayList<FootstepDataMessage> goals = new ArrayList<FootstepDataMessage>();
+   public PreallocatedList<FootstepDataMessage> goals = new PreallocatedList<>(FootstepDataMessage.class, FootstepDataMessage::new, 20);
 
    public byte footstepPlanRequestType;
 
@@ -30,15 +30,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
       startFootstep.set(other.startFootstep);
       thetaStart = other.thetaStart;
       maxSuboptimality = other.maxSuboptimality;
-
-      goals = new ArrayList<>();
-      for (int i = 0; i < other.goals.size(); i++)
-      {
-         FootstepDataMessage footstep = new FootstepDataMessage();
-         footstep.set(other.goals.get(i));
-         goals.add(footstep);
-      }
-
+      MessageTools.copyData(other.goals, goals);
       footstepPlanRequestType = other.footstepPlanRequestType;
 
       setPacketInformation(other);

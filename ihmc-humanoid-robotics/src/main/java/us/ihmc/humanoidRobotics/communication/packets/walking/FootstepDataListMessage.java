@@ -1,10 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.ArrayList;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -13,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
@@ -26,7 +26,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    public static final byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = 1;
 
    @RosExportedField(documentation = "Defines the list of footstep to perform.")
-   public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
+   public PreallocatedList<FootstepDataMessage> footstepDataList = new PreallocatedList<>(FootstepDataMessage.class, FootstepDataMessage::new, 30);
 
    @RosExportedField(documentation = "When CONTROL_DURATIONS is chosen:"
          + "\n The controller will try to achieve the swingDuration and the transferDuration specified in the message. If a"
@@ -73,8 +73,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 
    public FootstepDataListMessage(FootstepDataListMessage other)
    {
-      for(FootstepDataMessage otherFootstep : other.footstepDataList)
-         footstepDataList.add(new FootstepDataMessage(otherFootstep));
+      MessageTools.copyData(other.footstepDataList, footstepDataList);
       executionTiming = other.executionTiming;
       defaultSwingDuration = other.defaultSwingDuration;
       defaultTransferDuration = other.defaultTransferDuration;
@@ -89,14 +88,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    @Override
    public void set(FootstepDataListMessage other)
    {
-      footstepDataList = new ArrayList<>();
-      for (FootstepDataMessage otherFootstep : other.footstepDataList)
-      {
-         FootstepDataMessage footstep = new FootstepDataMessage();
-         footstep.set(otherFootstep);
-         footstepDataList.add(footstep);
-      }
-
+      MessageTools.copyData(other.footstepDataList, footstepDataList);
       executionTiming = other.executionTiming;
       defaultSwingDuration = other.defaultSwingDuration;
       defaultTransferDuration = other.defaultTransferDuration;
@@ -110,14 +102,14 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       setPacketInformation(other);      
    }
 
-   public ArrayList<FootstepDataMessage> getDataList()
+   public PreallocatedList<FootstepDataMessage> getDataList()
    {
       return footstepDataList;
    }
 
    public void add(FootstepDataMessage footstepData)
    {
-      this.footstepDataList.add(footstepData);
+      this.footstepDataList.add().set(footstepData);
    }
 
    public void clear()
