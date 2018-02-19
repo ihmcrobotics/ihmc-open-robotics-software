@@ -8,7 +8,7 @@
                         <parameter name="zetaSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
                         <parameter name="maximumFeedbackSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
                         <parameter name="maximumFeedbackRateSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-                        <parameter name="zetaNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.4000000000000001"/>
+                        <parameter name="zetaNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.4"/>
                         <parameter name="maximumFeedbackNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="6.0"/>
                         <parameter name="maximumFeedbackRateNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="60.0"/>
                         <parameter name="kpArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
@@ -18,17 +18,17 @@
                     </registry>
                     <registry name="RigidBodyGains">
                         <parameter name="zetaXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                        <parameter name="zetaZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.22000000000000003"/>
+                        <parameter name="zetaZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.22"/>
                         <parameter name="maximumFeedbackChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="6.0"/>
                         <parameter name="maximumFeedbackRateChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="60.0"/>
-                        <parameter name="zetaXYZHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.4000000000000001"/>
+                        <parameter name="zetaXYZHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.4"/>
                         <parameter name="maximumFeedbackHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="6.0"/>
                         <parameter name="maximumFeedbackRateHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="60.0"/>
                         <parameter name="kpXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
                         <parameter name="zetaXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="maximumFeedbackHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
                         <parameter name="maximumFeedbackRateHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-                        <parameter name="zetaXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.20000000000000004"/>
+                        <parameter name="zetaXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.2"/>
                         <parameter name="zetaZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                         <parameter name="maximumFeedbackPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="12.0"/>
                         <parameter name="maximumFeedbackRatePelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="180.0"/>
