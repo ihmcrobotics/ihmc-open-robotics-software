@@ -35,6 +35,12 @@ public class GuiParameter extends GuiElement
       this.valueOptions = valueOptions;
    }
 
+   /**
+    * This constructor creates a "shallow" copy of the provided parameter. The new parameter
+    * will not have a parent and {@link #getParent()} will return {@code null}. However, the
+    * unique name of the parameter {@link #getUniqueName()} will include the full namespace
+    * of the original parameter.
+    */
    public GuiParameter(GuiParameter other)
    {
       super(other.getName(), null, other.getUniqueName());
