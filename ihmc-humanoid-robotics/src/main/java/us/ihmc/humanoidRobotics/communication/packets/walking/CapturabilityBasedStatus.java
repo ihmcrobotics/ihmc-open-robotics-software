@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Arrays;
 
-import us.ihmc.communication.packets.SettablePacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class CapturabilityBasedStatus extends SettablePacket<CapturabilityBasedStatus>
+public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 {
    public static final int MAXIMUM_NUMBER_OF_VERTICES = 8;
 

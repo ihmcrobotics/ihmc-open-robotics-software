@@ -7,8 +7,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.interfaces.Transformable;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -20,8 +18,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
       "This class is used to build trajectory messages in taskspace. It holds the only the rotational information for one trajectory point (orientation & angular velocity). "
       + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and SE3TrajectoryPointMessage (rotational AND translational)",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
-public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage> implements Transformable
-      //implements SO3TrajectoryPointInterface<SO3TrajectoryPointMessage>, TransformableDataObject<SO3TrajectoryPointMessage>
+public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
 {
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
@@ -110,20 +107,6 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
          return false;
 
       return true;
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      transform.transform(orientation);
-      transform.transform(angularVelocity);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      transform.inverseTransform(orientation);
-      transform.inverseTransform(angularVelocity);
    }
 
    @Override

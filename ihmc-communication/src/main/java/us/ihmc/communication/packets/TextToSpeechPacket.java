@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public class TextToSpeechPacket extends SettablePacket<TextToSpeechPacket>
+public class TextToSpeechPacket extends Packet<TextToSpeechPacket>
 {
    public static final String FOOTSTEP_COMPLETED = "Finished Taking Footstep";
    public static final String FINISHED_WALKING = "Finished walking";

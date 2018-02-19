@@ -1,13 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 
 @RosMessagePacket(documentation = "This message notifies the user of a change in the high level state. This message's primary\n"
       + "use is to signal a requested state change is completed.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/output/high_level_state_change")
-public class HighLevelStateChangeStatusMessage extends SettablePacket<HighLevelStateChangeStatusMessage>
+public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChangeStatusMessage>
 {
    public static final byte DO_NOTHING_BEHAVIOR = 0;
    public static final byte STAND_PREP_STATE = 1;

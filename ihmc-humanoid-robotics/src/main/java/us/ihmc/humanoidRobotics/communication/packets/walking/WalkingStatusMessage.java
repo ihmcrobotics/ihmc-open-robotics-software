@@ -1,13 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import us.ihmc.communication.packets.SettablePacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 
 @RosMessagePacket(documentation = "This class is used to report the status of walking.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/output/walking_status")
-public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
+public class WalkingStatusMessage extends Packet<WalkingStatusMessage>
 {
    public static final byte STARTED = 0;
    public static final byte COMPLETED = 1;

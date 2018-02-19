@@ -3,7 +3,6 @@ package us.ihmc.communication.packets;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * A QueueableMessage is a {@link Packet} that can be queued for execution inside the controller. It
@@ -14,7 +13,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
  * @param <T> Type of the final implementation of this message.
  */
 @RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/queueable_properties")
-public final class QueueableMessage extends Packet<QueueableMessage> implements EpsilonComparable<QueueableMessage>
+public final class QueueableMessage extends Packet<QueueableMessage>
 {
    public static final byte EXECUTION_MODE_OVERRIDE = 0;
    public static final byte EXECUTION_MODE_QUEUE = 1;

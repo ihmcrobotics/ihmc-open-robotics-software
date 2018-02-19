@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlanarRegionsListMessage>
+public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegionsListMessage>
 {
    public static final byte SINGLE_UPDATE = 0;
    public static final byte CONTINUOUS_UPDATE = 1;
