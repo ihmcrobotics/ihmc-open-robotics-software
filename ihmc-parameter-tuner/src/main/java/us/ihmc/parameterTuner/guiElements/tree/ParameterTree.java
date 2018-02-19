@@ -76,7 +76,7 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       else
       {
          addRecursive(registry, root, status);
-         root.expandChildrenIfEmpty();
+         root.expandChildrenForSmallRegistries();
       }
    }
 
