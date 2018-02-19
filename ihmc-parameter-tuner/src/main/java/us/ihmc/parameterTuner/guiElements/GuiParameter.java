@@ -191,4 +191,13 @@ public class GuiParameter extends GuiElement
       resetState = createCopy(null);
    }
 
+   @Override
+   public String toString()
+   {
+      String ret = getUniqueName();
+      ret += "\ntype: " + type;
+      ret += "\nvalue: " + value.getValueSafe();
+      return ret;
+   }
+
 }
