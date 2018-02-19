@@ -376,7 +376,7 @@ public class DRCSimulationTestHelper
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
    }
-
+   
    public void createVideo(String videoName)
    {
       if (simulationTestingParameters.getCreateSCSVideos())
@@ -413,7 +413,7 @@ public class DRCSimulationTestHelper
    public void setupCameraForUnitTest(boolean enableTracking, Point3D cameraFix, Point3D cameraPosition)
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-
+      
       cameraConfiguration.setCameraFix(cameraFix);
       cameraConfiguration.setCameraPosition(cameraPosition);
       cameraConfiguration.setCameraTracking(enableTracking, true, true, false);
