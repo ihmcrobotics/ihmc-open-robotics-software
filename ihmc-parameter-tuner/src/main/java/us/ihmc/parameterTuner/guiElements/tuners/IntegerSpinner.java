@@ -1,5 +1,10 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 
 public class IntegerSpinner extends NumericSpinner<Integer>
@@ -26,8 +31,8 @@ public class IntegerSpinner extends NumericSpinner<Integer>
    }
 
    @Override
-   public String[] getSpecialStringOptions()
+   public List<ImmutablePair<String, String>> getSpecialStringOptions()
    {
-      return new String[] {};
+      return new ArrayList<>();
    }
 }
