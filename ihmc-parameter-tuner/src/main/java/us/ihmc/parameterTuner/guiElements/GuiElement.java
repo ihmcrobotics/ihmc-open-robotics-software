@@ -5,14 +5,17 @@ public abstract class GuiElement
    private final String name;
    private final GuiRegistry parent;
    private final String uniqueName;
-   private final int hash;
 
    public GuiElement(String name, GuiRegistry parent)
    {
+      this(name, parent, createUniqueName(name, parent));
+   }
+
+   public GuiElement(String name, GuiRegistry parent, String uniqueName)
+   {
       this.name = name;
       this.parent = parent;
-      this.uniqueName = createUniqueName();
-      this.hash = createHashCode();
+      this.uniqueName = uniqueName;
    }
 
    public String getName()
@@ -30,7 +33,7 @@ public abstract class GuiElement
       return parent;
    }
 
-   private String createUniqueName()
+   public static String createUniqueName(String name, GuiRegistry parent)
    {
       if (parent == null)
       {
@@ -40,39 +43,5 @@ public abstract class GuiElement
       {
          return parent.getUniqueName() + ":" + name;
       }
-   }
-
-   private int createHashCode()
-   {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + ((uniqueName == null) ? 0 : uniqueName.hashCode());
-      return result;
-   }
-
-   @Override
-   public int hashCode()
-   {
-      return hash;
-   }
-
-   @Override
-   public boolean equals(Object obj)
-   {
-      if (this == obj)
-         return true;
-      if (obj == null)
-         return false;
-      if (getClass() != obj.getClass())
-         return false;
-      GuiElement other = (GuiElement) obj;
-      if (uniqueName == null)
-      {
-         if (other.uniqueName != null)
-            return false;
-      }
-      else if (!uniqueName.equals(other.uniqueName))
-         return false;
-      return true;
    }
 }

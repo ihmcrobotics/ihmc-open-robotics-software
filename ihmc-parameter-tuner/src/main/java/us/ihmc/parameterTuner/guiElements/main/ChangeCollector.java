@@ -18,7 +18,7 @@ public class ChangeCollector implements ParameterChangeListener
       // this is called on parameter changes (they happen in the Plattform.runLater(Runnable) thread)
       if (recordingChange)
       {
-         changedParameters.put(parameter.getUniqueName(), parameter.createCopy());
+         changedParameters.put(parameter.getUniqueName(), new GuiParameter(parameter));
       }
    }
 

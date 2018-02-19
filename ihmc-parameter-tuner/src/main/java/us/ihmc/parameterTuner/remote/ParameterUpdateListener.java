@@ -85,7 +85,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
             public void notifyOfParameterChange(YoParameter<?> changedParameter)
             {
                String yoName = getUniqueName(changedParameter);
-               GuiParameter newGuiParameter = guiParametersByYoName.get(yoName).createCopy();
+               GuiParameter newGuiParameter = new GuiParameter(guiParametersByYoName.get(yoName));
                newGuiParameter.setValue(changedParameter.getValueAsString());
                serverChangedParameters.put(newGuiParameter.getUniqueName(), newGuiParameter);
             }
