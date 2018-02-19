@@ -9,10 +9,10 @@ public class ParameterTreeItem extends TreeItem<ParameterTreeValue>
    public ParameterTreeItem(ParameterTreeValue parameterTreeValue)
    {
       super(parameterTreeValue);
-      expandedProperty().addListener((observable, oldValue, newValue) -> expandChildrenIfEmpty());
+      expandedProperty().addListener((observable, oldValue, newValue) -> expandChildrenForSmallRegistries());
    }
 
-   public void expandChildrenIfEmpty()
+   public void expandChildrenForSmallRegistries()
    {
       getChildren().stream().filter(child -> !hasParameters(child, minParametersToExpand)).forEach(child -> child.setExpanded(true));
    }
