@@ -88,7 +88,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtForFootstep = false;
 
-   private boolean createYoVariableServer = true;
+   private boolean createYoVariableServer = false;
 
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
