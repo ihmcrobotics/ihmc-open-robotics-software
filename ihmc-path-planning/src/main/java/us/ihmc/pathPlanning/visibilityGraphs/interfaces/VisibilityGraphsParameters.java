@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.commons.MathTools;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dijkstra.DijkstraVisibilityGraphPlanner;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.JGraphTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -178,6 +179,6 @@ public interface VisibilityGraphsParameters
    default VisibilityGraphPathPlanner getPathPlanner()
    {
       return new DijkstraVisibilityGraphPlanner();
-//      return JGraphTools::calculatePathOnVisibilityGraph;
+//      return JGraphTools.getJGraphPlanner();
    }
 }
