@@ -1413,12 +1413,7 @@ public class HumanoidMessageTools
                                                    QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
    {
       FisheyePacket message = new FisheyePacket();
-      message.videoSource = videoSource.toByte();
-      message.timeStamp = timeStamp;
-      message.data = data;
-      message.position = new Point3D(position);
-      message.orientation = new Quaternion(orientation);
-      message.intrinsicParameters = toIntrinsicParametersMessage(intrinsicParameters);
+      message.videoPacket = createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters);
       return message;
    }
 

@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import us.ihmc.communication.packets.SettablePacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
  */
 @RosMessagePacket(documentation = "This message gives the status of the current footstep from the controller as well as the position\n"
       + "and orientation of the footstep in world cooredinates. ", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/output/footstep_status")
-public class FootstepStatusMessage extends SettablePacket<FootstepStatusMessage>
+public class FootstepStatusMessage extends Packet<FootstepStatusMessage>
 {
    public static final byte FOOTSTEP_STATUS_STARTED = 0;
    public static final byte FOOTSTEP_STATUS_COMPLETED = 1;
