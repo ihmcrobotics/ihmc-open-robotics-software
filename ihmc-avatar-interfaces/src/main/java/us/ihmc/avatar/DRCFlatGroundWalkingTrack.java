@@ -32,6 +32,9 @@ public class DRCFlatGroundWalkingTrack
 
    private final AvatarSimulation avatarSimulation;
 
+   private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
+         && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
+
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
                                     boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
@@ -83,6 +86,7 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(null);
+      avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       initialize();
       avatarSimulation.start();
