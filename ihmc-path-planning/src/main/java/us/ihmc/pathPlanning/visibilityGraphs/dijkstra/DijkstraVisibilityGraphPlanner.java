@@ -16,11 +16,9 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
    private final HashMap<ConnectionPoint3D, ConnectionData> incomingBestEdge = new HashMap<>();
 
    private PriorityQueue<ConnectionPoint3D> stack;
-   private ConnectionPoint3D closestPointToGoal;
 
    private void initialize(ConnectionPoint3D startPoint)
    {
-      closestPointToGoal = startPoint;
       nodeCosts.put(startPoint, 0.0);
       stack = new PriorityQueue<>(new ConnectionPointComparator(nodeCosts));
       stack.add(startPoint);
@@ -56,14 +54,21 @@ public class DijkstraVisibilityGraphPlanner implements VisibilityGraphPathPlanne
       buildVisibilityMap(visibilityMapHolders);
       initialize(startPoint);
 
+      ConnectionPoint3D closestPointToGoal = startPoint;
+      double closestDistanceToGoalSquared = startPoint.distanceSquared(goalPoint);
+
       stackLoop:
       while(!stack.isEmpty())
       {
          ConnectionPoint3D sourcePoint = stack.poll();
 
          HashSet<ConnectionData> connections = visibilityMap.computeIfAbsent(sourcePoint, (p) -> new HashSet<>());
-         if(sourcePoint.distance(goalPoint) < closestPointToGoal.distance(goalPoint))
+         double distanceToGoalSquared = sourcePoint.distanceSquared(goalPoint);
+         if(distanceToGoalSquared < closestDistanceToGoalSquared)
+         {
             closestPointToGoal = sourcePoint;
+            closestDistanceToGoalSquared = distanceToGoalSquared;
+         }
 
          for (ConnectionData connectionData : connections)
          {
