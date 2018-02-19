@@ -35,7 +35,7 @@
 							</children>
 						</HBox>
 						<ParameterTree VBox.vgrow="ALWAYS" fx:id="tree" />
-						<StackPane fx:id="inputPane" />
+						<StackPane fx:id="inputPane" alignment="CENTER_LEFT" />
 					</children>
 				</VBox>
 				<ScrollPane fx:id="scrollPane">
