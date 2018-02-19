@@ -101,4 +101,13 @@ public class GuiRegistry extends GuiElement
       });
       return copy;
    }
+
+   @Override
+   public String toString()
+   {
+      String ret = getUniqueName();
+      ret += "\n" + parameters.size() + " parameters";
+      ret += "\n" + registries.size() + " registries";
+      return ret;
+   }
 }
