@@ -1,12 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Arrays;
-
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -19,20 +19,12 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
    public Point3D centerOfMass = new Point3D();
 
-   public int leftFootSupportPolygonLength;
-   public Point2D[] leftFootSupportPolygonStore = new Point2D[MAXIMUM_NUMBER_OF_VERTICES];
-   public int rightFootSupportPolygonLength;
-   public Point2D[] rightFootSupportPolygonStore = new Point2D[MAXIMUM_NUMBER_OF_VERTICES];
+   public PreallocatedList<Point2D> leftFootSupportPolygon = new PreallocatedList<>(Point2D.class, Point2D::new, MAXIMUM_NUMBER_OF_VERTICES);
+   public PreallocatedList<Point2D> rightFootSupportPolygon = new PreallocatedList<>(Point2D.class, Point2D::new, MAXIMUM_NUMBER_OF_VERTICES);
 
    public CapturabilityBasedStatus()
    {
       // Empty constructor for serialization
-      for (int i = 0; i < MAXIMUM_NUMBER_OF_VERTICES; i++)
-      {
-         leftFootSupportPolygonStore[i] = new Point2D();
-         rightFootSupportPolygonStore[i] = new Point2D();
-
-      }
    }
 
    @Override
@@ -40,13 +32,8 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
    {
       capturePoint.set(other.capturePoint);
       desiredCapturePoint.set(other.desiredCapturePoint);
-      leftFootSupportPolygonLength = other.leftFootSupportPolygonLength;
-      rightFootSupportPolygonLength = other.rightFootSupportPolygonLength;
-      for (int i = 0; i < MAXIMUM_NUMBER_OF_VERTICES; i++)
-      {
-         leftFootSupportPolygonStore[i].set(other.leftFootSupportPolygonStore[i]);
-         rightFootSupportPolygonStore[i].set(other.rightFootSupportPolygonStore[i]);
-      }
+      MessageTools.copyData(other.leftFootSupportPolygon, leftFootSupportPolygon);
+      MessageTools.copyData(other.rightFootSupportPolygon, rightFootSupportPolygon);
       setPacketInformation(other);
    }
 
@@ -61,22 +48,22 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
       if (robotSide == RobotSide.LEFT)
       {
-         leftFootSupportPolygonLength = numberOfVertices;
+         leftFootSupportPolygon.clear();
       }
       else
       {
-         rightFootSupportPolygonLength = numberOfVertices;
+         rightFootSupportPolygon.clear();
       }
 
       for (int i = 0; i < numberOfVertices; i++)
       {
          if (robotSide == RobotSide.LEFT)
          {
-            footPolygon.getVertex(i, leftFootSupportPolygonStore[i]);
+            footPolygon.getVertex(i, leftFootSupportPolygon.add());
          }
          else
          {
-            footPolygon.getVertex(i, rightFootSupportPolygonStore[i]);
+            footPolygon.getVertex(i, rightFootSupportPolygon.add());
          }
       }
    }
@@ -93,25 +80,25 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
    public FrameConvexPolygon2d getFootSupportPolygon(RobotSide robotSide)
    {
-      if (robotSide == RobotSide.LEFT && leftFootSupportPolygonLength != 0)
-         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), Arrays.copyOf(leftFootSupportPolygonStore, leftFootSupportPolygonLength));
-      else if (rightFootSupportPolygonStore != null)
-         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), Arrays.copyOf(rightFootSupportPolygonStore, rightFootSupportPolygonLength));
+      if (robotSide == RobotSide.LEFT && leftFootSupportPolygon.size() > 0)
+         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), leftFootSupportPolygon.toArray());
+      else if (rightFootSupportPolygon != null)
+         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), rightFootSupportPolygon.toArray());
       else
          return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame());
    }
 
    public boolean isInDoubleSupport()
    {
-      return leftFootSupportPolygonLength != 0 & rightFootSupportPolygonLength != 0;
+      return leftFootSupportPolygon.size() != 0 & rightFootSupportPolygon.size() != 0;
    }
 
    public boolean isSupportFoot(RobotSide robotside)
    {
       if (robotside == RobotSide.LEFT)
-         return leftFootSupportPolygonLength != 0;
+         return leftFootSupportPolygon.size() != 0;
       else
-         return rightFootSupportPolygonLength != 0;
+         return rightFootSupportPolygon.size() != 0;
    }
 
    @Override
@@ -123,32 +110,10 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
       ret &= this.centerOfMass.epsilonEquals(other.centerOfMass, epsilon);
 
-      ret &= this.leftFootSupportPolygonLength == other.leftFootSupportPolygonLength;
-      ret &= this.rightFootSupportPolygonLength == other.rightFootSupportPolygonLength;
-
-      if (leftFootSupportPolygonStore == null || other.leftFootSupportPolygonStore == null)
-      {
-         ret &= leftFootSupportPolygonStore == null && other.leftFootSupportPolygonStore == null;
-      }
-      else
-      {
-         for (int i = 0; i < leftFootSupportPolygonStore.length; i++)
-         {
-            ret &= this.leftFootSupportPolygonStore[i].epsilonEquals(other.leftFootSupportPolygonStore[i], epsilon);
-         }
-      }
-
-      if (rightFootSupportPolygonStore == null || other.rightFootSupportPolygonStore == null)
-      {
-         ret &= rightFootSupportPolygonStore == null && other.rightFootSupportPolygonStore == null;
-      }
-      else
-      {
-         for (int i = 0; i < rightFootSupportPolygonStore.length; i++)
-         {
-            ret &= this.rightFootSupportPolygonStore[i].epsilonEquals(other.rightFootSupportPolygonStore[i], epsilon);
-         }
-      }
+      if (!MessageTools.epsilonEquals(leftFootSupportPolygon, other.leftFootSupportPolygon, epsilon))
+         return false;
+      if (!MessageTools.epsilonEquals(rightFootSupportPolygon, other.rightFootSupportPolygon, epsilon))
+         return false;
 
       return ret;
    }

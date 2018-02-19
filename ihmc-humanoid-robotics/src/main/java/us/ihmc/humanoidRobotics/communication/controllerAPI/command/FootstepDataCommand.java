@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -77,27 +78,27 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       position.setIncludingFrame(worldFrame, message.getLocation());
       orientation.setIncludingFrame(worldFrame, message.getOrientation());
 
-      Point3D[] originalPositionWaypointList = message.getCustomPositionWaypoints();
+      PreallocatedList<Point3D> originalPositionWaypointList = message.getCustomPositionWaypoints();
       customPositionWaypoints.clear();
       if (originalPositionWaypointList != null)
       {
-         for (int i = 0; i < originalPositionWaypointList.length; i++)
-            customPositionWaypoints.add().setIncludingFrame(trajectoryFrame, originalPositionWaypointList[i]);
+         for (int i = 0; i < originalPositionWaypointList.size(); i++)
+            customPositionWaypoints.add().setIncludingFrame(trajectoryFrame, originalPositionWaypointList.get(i));
       }
 
-      SE3TrajectoryPointMessage[] messageSwingTrajectory = message.getSwingTrajectory();
+      PreallocatedList<SE3TrajectoryPointMessage> messageSwingTrajectory = message.getSwingTrajectory();
       swingTrajectory.clear();
       if (messageSwingTrajectory != null)
       {
-         for (int i = 0; i < messageSwingTrajectory.length; i++)
+         for (int i = 0; i < messageSwingTrajectory.size(); i++)
          {
             FrameSE3TrajectoryPoint point = swingTrajectory.add();
             point.setToZero(trajectoryFrame);
-            messageSwingTrajectory[i].packData(point);
+            messageSwingTrajectory.get(i).packData(point);
          }
       }
 
-      ArrayList<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
+      PreallocatedList<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
       {

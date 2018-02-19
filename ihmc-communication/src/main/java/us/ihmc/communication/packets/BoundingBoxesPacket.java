@@ -1,14 +1,18 @@
 package us.ihmc.communication.packets;
 
-import java.util.Arrays;
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.idl.PreallocatedList;
 
 /**
  *
  */
 public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
 {
-   public int[] boundingBoxXCoordinates, boundingBoxYCoordinates, boundingBoxWidths, boundingBoxHeights;
-   public StringBuilder[] labels;
+   public TIntArrayList boundingBoxXCoordinates = new TIntArrayList();
+   public TIntArrayList boundingBoxYCoordinates = new TIntArrayList();
+   public TIntArrayList boundingBoxWidths = new TIntArrayList();
+   public TIntArrayList boundingBoxHeights = new TIntArrayList();
+   public PreallocatedList<StringBuilder> labels = new PreallocatedList<>(StringBuilder.class, StringBuilder::new, 10);
 
    public BoundingBoxesPacket()
    {
@@ -17,29 +21,29 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
 
    public BoundingBoxesPacket(BoundingBoxesPacket other)
    {
-      this.labels = other.labels;
-      this.boundingBoxXCoordinates = other.boundingBoxXCoordinates;
-      this.boundingBoxYCoordinates = other.boundingBoxYCoordinates;
-      this.boundingBoxWidths = other.boundingBoxWidths;
-      this.boundingBoxHeights = other.boundingBoxHeights;
+      MessageTools.copyData(other.labels, labels);
+      MessageTools.copyData(other.boundingBoxXCoordinates, boundingBoxXCoordinates);
+      MessageTools.copyData(other.boundingBoxYCoordinates, boundingBoxYCoordinates);
+      MessageTools.copyData(other.boundingBoxWidths, boundingBoxWidths);
+      MessageTools.copyData(other.boundingBoxHeights, boundingBoxHeights);
    }
 
    @Override
    public void set(BoundingBoxesPacket other)
    {
       setPacketInformation(other);
-      this.labels = other.labels;
-      this.boundingBoxXCoordinates = other.boundingBoxXCoordinates;
-      this.boundingBoxYCoordinates = other.boundingBoxYCoordinates;
-      this.boundingBoxWidths = other.boundingBoxWidths;
-      this.boundingBoxHeights = other.boundingBoxHeights;
+      MessageTools.copyData(other.labels, labels);
+      MessageTools.copyData(other.boundingBoxXCoordinates, boundingBoxXCoordinates);
+      MessageTools.copyData(other.boundingBoxYCoordinates, boundingBoxYCoordinates);
+      MessageTools.copyData(other.boundingBoxWidths, boundingBoxWidths);
+      MessageTools.copyData(other.boundingBoxHeights, boundingBoxHeights);
    }
 
    @Override
    public boolean epsilonEquals(BoundingBoxesPacket other, double epsilon)
    {
-      return Arrays.equals(labels, other.labels) && Arrays.equals(this.boundingBoxHeights, other.boundingBoxHeights)
-            && Arrays.equals(this.boundingBoxWidths, other.boundingBoxWidths) && Arrays.equals(this.boundingBoxXCoordinates, other.boundingBoxXCoordinates)
-            && Arrays.equals(this.boundingBoxYCoordinates, other.boundingBoxYCoordinates);
+      return labels.equals(other.labels) && this.boundingBoxHeights.equals(other.boundingBoxHeights)
+            && this.boundingBoxWidths.equals(other.boundingBoxWidths) && this.boundingBoxXCoordinates.equals(other.boundingBoxXCoordinates)
+            && this.boundingBoxYCoordinates.equals(other.boundingBoxYCoordinates);
    }
 }

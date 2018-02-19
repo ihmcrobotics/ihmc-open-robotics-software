@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
-import java.util.Arrays;
-
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
@@ -13,9 +12,9 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.tools.ArrayTools;
 
 public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajectoryMessage>
 {
@@ -24,8 +23,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
     * to retrieve the desired end-effector to be controlled.
     */
    public long endEffectorNameBasedHashCode;
-   public double[] waypointTimes;
-   public Pose3D[] waypoints;
+   public TDoubleArrayList waypointTimes = new TDoubleArrayList();
+   public PreallocatedList<Pose3D> waypoints = new PreallocatedList<>(Pose3D.class, Pose3D::new, 50);
    public SelectionMatrix3DMessage angularSelectionMatrix = new SelectionMatrix3DMessage();
    public SelectionMatrix3DMessage linearSelectionMatrix = new SelectionMatrix3DMessage();
    /**
@@ -55,8 +54,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    public void set(WaypointBasedTrajectoryMessage other)
    {
       endEffectorNameBasedHashCode = other.endEffectorNameBasedHashCode;
-      waypointTimes = Arrays.copyOf(other.waypointTimes, other.waypointTimes.length);
-      waypoints = Arrays.stream(other.waypoints).map(Pose3D::new).toArray(Pose3D[]::new);
+      MessageTools.copyData(other.waypointTimes, waypointTimes);
+      MessageTools.copyData(other.waypoints, waypoints);
       angularSelectionMatrix.set(other.angularSelectionMatrix);
       linearSelectionMatrix.set(other.linearSelectionMatrix);
       if (other.controlFramePositionInEndEffector != null)
@@ -71,8 +70,9 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       if (waypointTimes.length != waypoints.length)
          throw new RuntimeException("Inconsistent array lengths.");
 
-      this.waypointTimes = waypointTimes;
-      this.waypoints = waypoints;
+      this.waypointTimes.reset();
+      this.waypointTimes.add(waypointTimes);
+      MessageTools.copyData(waypoints, this.waypoints);
    }
 
    public void setWeight(double weight)
@@ -249,25 +249,25 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
    public double getWaypointTime(int i)
    {
-      return waypointTimes[i];
+      return waypointTimes.get(i);
    }
 
    public double getLastWaypointTime()
    {
-      return waypointTimes[getNumberOfWaypoints() - 1];
+      return waypointTimes.get(getNumberOfWaypoints() - 1);
    }
 
-   public double[] getWaypointTimes()
+   public TDoubleArrayList getWaypointTimes()
    {
       return waypointTimes;
    }
 
    public Pose3D getWaypoint(int i)
    {
-      return waypoints[i];
+      return waypoints.get(i);
    }
 
-   public Pose3D[] getWaypoints()
+   public PreallocatedList<Pose3D> getWaypoints()
    {
       return waypoints;
    }
@@ -275,21 +275,21 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    public Pose3D getPose(double time)
    {
       if (time <= 0.0)
-         return waypoints[0];
+         return waypoints.get(0);
 
-      else if (time >= waypointTimes[waypointTimes.length - 1])
-         return waypoints[waypoints.length - 1];
+      else if (time >= waypointTimes.get(waypointTimes.size() - 1))
+         return waypoints.get(waypoints.size() - 1);
 
       else
       {
          double timeGap = 0.0;
 
          int indexOfFrame = 0;
-         int numberOfTrajectoryTimes = waypointTimes.length;
+         int numberOfTrajectoryTimes = waypointTimes.size();
 
          for (int i = 0; i < numberOfTrajectoryTimes; i++)
          {
-            timeGap = time - waypointTimes[i];
+            timeGap = time - waypointTimes.get(i);
             if (timeGap < 0)
             {
                indexOfFrame = i;
@@ -297,11 +297,11 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
             }
          }
 
-         Pose3D poseOne = waypoints[indexOfFrame - 1];
-         Pose3D poseTwo = waypoints[indexOfFrame];
+         Pose3D poseOne = waypoints.get(indexOfFrame - 1);
+         Pose3D poseTwo = waypoints.get(indexOfFrame);
 
-         double timeOne = waypointTimes[indexOfFrame - 1];
-         double timeTwo = waypointTimes[indexOfFrame];
+         double timeOne = waypointTimes.get(indexOfFrame - 1);
+         double timeTwo = waypointTimes.get(indexOfFrame);
 
          double alpha = (time - timeOne) / (timeTwo - timeOne);
 
@@ -323,7 +323,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
    public int getNumberOfWaypoints()
    {
-      return waypoints.length;
+      return waypoints.size();
    }
 
    public void getControlFramePose(RigidBody endEffector, FramePose3D controlFramePoseToPack)
@@ -343,15 +343,10 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       if (getNumberOfWaypoints() != other.getNumberOfWaypoints())
          return false;
 
-      if (!ArrayTools.deltaEquals(waypointTimes, other.waypointTimes, epsilon))
+      if (!MessageTools.epsilonEquals(waypointTimes, other.waypointTimes, epsilon))
          return false;
-
-      for (int i = 0; i < getNumberOfWaypoints(); i++)
-      {
-         if (!waypoints[i].epsilonEquals(other.waypoints[i], epsilon))
-            return false;
-      }
-
+      if (!MessageTools.epsilonEquals(waypoints, other.waypoints, epsilon))
+         return false;
       if (!angularSelectionMatrix.epsilonEquals(other.angularSelectionMatrix, epsilon))
          return false;
       if (!linearSelectionMatrix.epsilonEquals(other.linearSelectionMatrix, epsilon))

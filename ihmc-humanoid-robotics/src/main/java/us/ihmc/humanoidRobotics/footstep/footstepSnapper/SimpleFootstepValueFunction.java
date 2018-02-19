@@ -34,10 +34,10 @@ public class SimpleFootstepValueFunction implements FootstepValueFunction
          return Double.NEGATIVE_INFINITY;
 
       double value = slopeGain * offHorizontalAngle;
-      if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
+      if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.size() == 0)
          return Double.NEGATIVE_INFINITY;
 
-      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(footstepData.getPredictedContactPoints());
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(footstepData.getPredictedContactPoints().toArray());
       supportPolygon.update();
       double inPlaneArea = supportPolygon.getArea();
       double horizonalArea = inPlaneArea * footstepNormal.getZ();

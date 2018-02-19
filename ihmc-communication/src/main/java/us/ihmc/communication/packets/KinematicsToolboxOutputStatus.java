@@ -1,5 +1,6 @@
 package us.ihmc.communication.packets;
 
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -8,12 +9,11 @@ import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.ArrayTools;
 
 public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutputStatus>
 {
    public int jointNameHash;
-   public float[] desiredJointAngles;
+   public TFloatArrayList desiredJointAngles = new TFloatArrayList();
 
    public Vector3D32 desiredRootTranslation = new Vector3D32();
    public Quaternion32 desiredRootOrientation = new Quaternion32();
@@ -34,22 +34,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    @Override
    public void set(KinematicsToolboxOutputStatus other)
    {
-      if (desiredJointAngles == null)
-      {
-         desiredJointAngles = new float[other.desiredJointAngles.length];
-         jointNameHash = other.jointNameHash;
-      }
-      else
-      {
-         if (other.desiredJointAngles.length != desiredJointAngles.length)
-            throw new RuntimeException("Array size does not match");
-
-         if (jointNameHash != other.jointNameHash)
-            throw new RuntimeException("Joint name hashes are different.");
-      }
-
-      for (int i = 0; i < desiredJointAngles.length; i++)
-         desiredJointAngles[i] = other.desiredJointAngles[i];
+      jointNameHash = other.jointNameHash;
+      MessageTools.copyData(other.desiredJointAngles, desiredJointAngles);
 
       desiredRootTranslation.set(other.desiredRootTranslation);
       desiredRootOrientation.set(other.desiredRootOrientation);
@@ -62,15 +48,13 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
    public void getDesiredJointState(FloatingInverseDynamicsJoint rootJointToUpdate, OneDoFJoint[] jointsToUpdate)
    {
-      if (jointsToUpdate.length != desiredJointAngles.length)
-         throw new RuntimeException("Array size does not match");
       int jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(jointsToUpdate);
 
       if (jointNameHash != this.jointNameHash)
          throw new RuntimeException("The robots are different.");
 
-      for (int i = 0; i < desiredJointAngles.length; i++)
-         jointsToUpdate[i].setQ(desiredJointAngles[i]);
+      for (int i = 0; i < desiredJointAngles.size(); i++)
+         jointsToUpdate[i].setQ(desiredJointAngles.get(i));
 
       rootJointToUpdate.setPosition(desiredRootTranslation);
       rootJointToUpdate.setRotation(desiredRootOrientation);
@@ -78,25 +62,25 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
    public void setDesiredJointState(FloatingInverseDynamicsJoint rootJoint, OneDoFJoint[] newJointData, boolean useQDesired)
    {
-      if (newJointData.length != desiredJointAngles.length)
-         throw new RuntimeException("Array size does not match");
       int jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(newJointData);
 
       if (jointNameHash != this.jointNameHash)
          throw new RuntimeException("The robots are different.");
 
+      desiredJointAngles.reset();
+
       if (useQDesired)
       {
-         for (int i = 0; i < desiredJointAngles.length; i++)
+         for (int i = 0; i < desiredJointAngles.size(); i++)
          {
-            desiredJointAngles[i] = (float) newJointData[i].getqDesired();
+            desiredJointAngles.add((float) newJointData[i].getqDesired());
          }
       }
       else
       {
-         for (int i = 0; i < desiredJointAngles.length; i++)
+         for (int i = 0; i < desiredJointAngles.size(); i++)
          {
-            desiredJointAngles[i] = (float) newJointData[i].getQ();
+            desiredJointAngles.add((float) newJointData[i].getQ());
          }
       }
 
@@ -112,7 +96,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       this.solutionQuality = solutionQuality;
    }
 
-   public float[] getJointAngles()
+   public TFloatArrayList getJointAngles()
    {
       return desiredJointAngles;
    }
@@ -140,13 +124,12 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       KinematicsToolboxOutputStatus interplateOutputStatus = new KinematicsToolboxOutputStatus();
 
-      interplateOutputStatus.desiredJointAngles = new float[outputStatusOne.desiredJointAngles.length];
-      float[] jointAngles1 = outputStatusOne.getJointAngles();
-      float[] jointAngles2 = outputStatusTwo.getJointAngles();
+      TFloatArrayList jointAngles1 = outputStatusOne.getJointAngles();
+      TFloatArrayList jointAngles2 = outputStatusTwo.getJointAngles();
 
-      for (int i = 0; i < interplateOutputStatus.desiredJointAngles.length; i++)
+      for (int i = 0; i < jointAngles1.size(); i++)
       {
-         interplateOutputStatus.desiredJointAngles[i] = (float) EuclidCoreTools.interpolate(jointAngles1[i], jointAngles2[i], alpha);
+         interplateOutputStatus.desiredJointAngles.add((float) EuclidCoreTools.interpolate(jointAngles1.get(i), jointAngles2.get(i), alpha));
       }
 
       Vector3D32 rootTranslation1 = outputStatusOne.getPelvisTranslation();
@@ -178,8 +161,13 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if (!MathTools.epsilonEquals(solutionQuality, other.solutionQuality, epsilon))
          return false;
 
-      if (!ArrayTools.deltaEquals(desiredJointAngles, other.desiredJointAngles, (float) epsilon))
+      if (desiredJointAngles.size() != other.desiredJointAngles.size())
          return false;
+      for (int i = 0; i < desiredJointAngles.size(); i++)
+      {
+         if (!MathTools.epsilonEquals(desiredJointAngles.get(i), other.desiredJointAngles.get(i), epsilon))
+            return false;
+      }
 
       return true;
    }

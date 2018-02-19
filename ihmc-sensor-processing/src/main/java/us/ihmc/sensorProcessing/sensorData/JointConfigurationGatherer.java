@@ -3,8 +3,10 @@ package us.ihmc.sensorProcessing.sensorData;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import us.ihmc.communication.packets.SpatialVectorMessage;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -99,10 +101,13 @@ public class JointConfigurationGatherer
       jointConfigurationData.setTimestamp(timestamp);
       jointConfigurationData.setSensorHeadPPSTimestamp(sensorHeadPPSTimestamp);
 
+      PreallocatedList<SpatialVectorMessage> momentAndForceDataAllForceSensors = jointConfigurationData.momentAndForceDataAllForceSensors;
+      momentAndForceDataAllForceSensors.clear();
+
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)
       {
-         float[] forceAndMomentVector = jointConfigurationData.getMomentAndForceVectorForSensor(sensorNumber);
-         forceSensorDataList.get(sensorNumber).getWrench(forceAndMomentVector);
+         SpatialVectorMessage wrench = momentAndForceDataAllForceSensors.add();
+         forceSensorDataList.get(sensorNumber).getWrench(wrench.angularPart, wrench.linearPart);
       }
    }
 

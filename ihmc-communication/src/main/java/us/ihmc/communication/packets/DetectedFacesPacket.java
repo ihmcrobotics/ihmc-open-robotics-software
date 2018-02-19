@@ -1,13 +1,12 @@
 package us.ihmc.communication.packets;
 
-import java.util.Arrays;
-
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.idl.PreallocatedList;
 
 public class DetectedFacesPacket extends Packet<DetectedFacesPacket>
 {
-   public StringBuilder[] ids;
-   public Point3D[] positions;
+   public PreallocatedList<StringBuilder> ids = new PreallocatedList<>(StringBuilder.class, StringBuilder::new, 10);
+   public PreallocatedList<Point3D> positions = new PreallocatedList<>(Point3D.class, Point3D::new, 10);
 
    public DetectedFacesPacket()
    {
@@ -16,17 +15,17 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket>
    @Override
    public void set(DetectedFacesPacket other)
    {
-      ids = Arrays.copyOf(other.ids, other.ids.length);
-      positions = Arrays.stream(other.positions).map(Point3D::new).toArray(Point3D[]::new);
+      MessageTools.copyData(other.ids, ids);
+      MessageTools.copyData(other.positions, positions);
       setPacketInformation(other);
    }
 
-   public StringBuilder[] getIds()
+   public PreallocatedList<StringBuilder> getIds()
    {
       return ids;
    }
 
-   public Point3D[] getPositions()
+   public PreallocatedList<Point3D> getPositions()
    {
       return positions;
    }
@@ -34,13 +33,10 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket>
    @Override
    public boolean epsilonEquals(DetectedFacesPacket other, double epsilon)
    {
-      boolean ret = true;
-
-      for (int i = 0; i < ids.length; i++)
-      {
-         ret &= ids[i].equals(other.getIds()[i]) && positions[i].epsilonEquals(other.getPositions()[i], epsilon);
-      }
-
-      return ret;
+      if (!ids.equals(other.ids))
+         return false;
+      if (!MessageTools.epsilonEquals(positions, other.positions, epsilon))
+         return false;
+      return true;
    }
 }

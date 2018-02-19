@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
@@ -34,10 +33,11 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
@@ -426,14 +426,17 @@ public class DesiredFootstepTest
       public void receivedPacket(FootstepDataListMessage packet)
       {
          boolean adjustable = packet.areFootstepsAdjustable;
-         for (FootstepDataMessage footstepData : packet.footstepDataList)
+         PreallocatedList<FootstepDataMessage> footstepDataList = packet.footstepDataList;
+         for (int i = 0; i < footstepDataList.size(); i++)
          {
-            List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
+            FootstepDataMessage footstepData = footstepDataList.get(i);
+            PreallocatedList<Point2D> contactPoints = footstepData.getPredictedContactPoints();
             if (contactPoints != null && contactPoints.size() == 0)
                contactPoints = null;
             FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
 
-            Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable, contactPoints);
+            Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable);
+            footstep.setPredictedContactPoints(contactPoints.toArray());
             footstep.setTrajectoryType(TrajectoryType.fromByte(footstepData.getTrajectoryType()));
             footstep.setSwingHeight(footstepData.getSwingHeight());
             reconstructedFootstepPath.add(footstep);

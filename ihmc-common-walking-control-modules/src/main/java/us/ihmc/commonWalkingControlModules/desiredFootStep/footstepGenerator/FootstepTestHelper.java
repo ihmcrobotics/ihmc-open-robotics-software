@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -76,7 +75,12 @@ public class FootstepTestHelper
 
    public List<Footstep> convertToFootsteps(FootstepDataListMessage footstepDataListMessage)
    {
-      return footstepDataListMessage.footstepDataList.stream().map(this::convertToFootstep).collect(Collectors.toList());
+      List<Footstep> ret = new ArrayList<>();
+      for (int i = 0; i < footstepDataListMessage.footstepDataList.size(); i++)
+      {
+         ret.add(convertToFootstep(footstepDataListMessage.footstepDataList.get(i)));
+      }
+      return ret;
    }
 
    public Footstep convertToFootstep(FootstepDataMessage footstepDataMessage)
@@ -85,8 +89,8 @@ public class FootstepTestHelper
       RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
       FramePose3D solePose = new FramePose3D(worldFrame, footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
       Footstep footstep = new Footstep(robotSide, solePose);
-      if (footstepDataMessage.getPredictedContactPoints() != null && !footstepDataMessage.getPredictedContactPoints().isEmpty())
-         footstep.setPredictedContactPoints(footstepDataMessage.getPredictedContactPoints());
+      if (footstepDataMessage.getPredictedContactPoints() != null && footstepDataMessage.getPredictedContactPoints().size() != 0)
+         footstep.setPredictedContactPoints(footstepDataMessage.getPredictedContactPoints().toArray());
       else
          footstep.setPredictedContactPoints(contactableFeet.get(robotSide).getContactPoints2d());
 

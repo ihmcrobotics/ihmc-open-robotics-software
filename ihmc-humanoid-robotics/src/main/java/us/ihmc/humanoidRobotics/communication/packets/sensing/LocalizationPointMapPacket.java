@@ -1,16 +1,16 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import java.util.Arrays;
-
+import gnu.trove.list.array.TFloatArrayList;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacket>
 {
    public long timestamp;
-   public float[] localizationPointMap;
+   public TFloatArrayList localizationPointMap = new TFloatArrayList();
 
    public LocalizationPointMapPacket()
    {
@@ -21,34 +21,35 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
    public void set(LocalizationPointMapPacket other)
    {
       timestamp = other.timestamp;
-      localizationPointMap = Arrays.copyOf(other.localizationPointMap, other.localizationPointMap.length);
+      MessageTools.copyData(other.localizationPointMap, localizationPointMap);
       setPacketInformation(other);
    }
 
-   public void setLocalizationPointMap(Point3D[] pointCloud)
+   public void setLocalizationPointMap(Point3DReadOnly[] pointCloud)
    {
-      localizationPointMap = new float[pointCloud.length * 3];
+      localizationPointMap.reset();
+
       for (int i = 0; i < pointCloud.length; i++)
       {
-         Point3D point = pointCloud[i];
-         localizationPointMap[3 * i] = (float) point.getX();
-         localizationPointMap[3 * i + 1] = (float) point.getY();
-         localizationPointMap[3 * i + 2] = (float) point.getZ();
+         Point3DReadOnly point = pointCloud[i];
+         localizationPointMap.add((float) point.getX());
+         localizationPointMap.add((float) point.getY());
+         localizationPointMap.add((float) point.getZ());
       }
    }
 
    public Point3D32[] getPointMap()
    {
 
-      int numberOfPoints = localizationPointMap.length / 3;
+      int numberOfPoints = localizationPointMap.size() / 3;
 
       Point3D32[] points = new Point3D32[numberOfPoints];
       for (int i = 0; i < numberOfPoints; i++)
       {
          Point3D32 point = new Point3D32();
-         point.setX(localizationPointMap[3 * i]);
-         point.setY(localizationPointMap[3 * i + 1]);
-         point.setZ(localizationPointMap[3 * i + 2]);
+         point.setX(localizationPointMap.get(3 * i));
+         point.setY(localizationPointMap.get(3 * i + 1));
+         point.setZ(localizationPointMap.get(3 * i + 2));
          points[i] = point;
       }
 
@@ -58,18 +59,17 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
    @Override
    public boolean epsilonEquals(LocalizationPointMapPacket other, double epsilon)
    {
-      boolean ret = timestamp == other.timestamp;
-      for (int i = 0; i < localizationPointMap.length; i++)
-      {
-         ret &= localizationPointMap[i] == other.localizationPointMap[i];
-      }
-      return ret;
+      if (timestamp != other.timestamp)
+         return false;
+      if (!MessageTools.epsilonEquals(localizationPointMap, other.localizationPointMap, epsilon))
+         return false;
+      return true;
    }
 
    @Override
    public String toString()
    {
-      return "PointCloudWorldPacket [timestamp=" + timestamp + " points, localizationPointMap=" + localizationPointMap.length / 3 + "]";
+      return "PointCloudWorldPacket [timestamp=" + timestamp + " points, localizationPointMap=" + localizationPointMap.size() / 3 + "]";
    }
 
    public long getTimestamp()

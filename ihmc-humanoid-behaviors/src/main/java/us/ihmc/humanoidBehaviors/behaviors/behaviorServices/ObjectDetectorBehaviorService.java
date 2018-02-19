@@ -174,7 +174,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 
       public void queueVideoPacket(VideoPacket packet)
       {
-         imagesQueue.add(jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData()));
+         imagesQueue.add(jpegDecompressor.decompressJPEGDataToBufferedImage(packet.getData().toArray()));
 
          if(waiting)
          {

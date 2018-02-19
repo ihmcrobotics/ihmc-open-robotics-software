@@ -384,15 +384,14 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
          armTrajectoryMessage.robotSide = robotSide.toByte();
          double[] armConfig = straightArmConfigs.get(robotSide);
-         armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
          for (int i = 0; i < armConfig.length; i++)
          {
             TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
             trajectoryPoint.position = armConfig[i];
             trajectoryPoint.time = 0.5;
             OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
-            jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
-            armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages[i] = jointTrajectory;
+            jointTrajectory.trajectoryPoints.add().set(trajectoryPoint);
+            armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.add().set(jointTrajectory);
          }
          drcSimulationTestHelper.send(armTrajectoryMessage);
       }

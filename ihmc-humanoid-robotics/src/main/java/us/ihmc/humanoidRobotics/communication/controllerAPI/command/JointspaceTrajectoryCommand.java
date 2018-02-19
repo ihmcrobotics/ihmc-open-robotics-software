@@ -5,6 +5,7 @@ import java.util.Random;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 
@@ -57,12 +58,12 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
       }
    }
 
-   private void set(OneDoFJointTrajectoryMessage[] trajectoryPointListArray)
+   private void set(PreallocatedList<OneDoFJointTrajectoryMessage> trajectoryPointListArray)
    {
-      for (int i = 0; i < trajectoryPointListArray.length; i++)
+      for (int i = 0; i < trajectoryPointListArray.size(); i++)
       {
          OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = jointTrajectoryInputs.add();
-         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray[i];
+         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray.get(i);
          if (oneJointTrajectoryMessage != null)
          {
             oneJointTrajectoryMessage.getTrajectoryPoints(oneDoFJointTrajectoryCommand);

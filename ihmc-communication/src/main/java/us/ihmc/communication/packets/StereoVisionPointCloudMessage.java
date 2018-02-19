@@ -1,9 +1,10 @@
 package us.ihmc.communication.packets;
 
 import java.awt.Color;
-import java.util.Arrays;
 import java.util.List;
 
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,8 +16,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloudMessage>
 {
    public long robotTimestamp;
-   public float[] pointCloud;
-   public int[] colors;
+   public TFloatArrayList pointCloud = new TFloatArrayList();
+   public TIntArrayList colors = new TIntArrayList();
 
    public StereoVisionPointCloudMessage()
    {
@@ -27,8 +28,8 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    public void set(StereoVisionPointCloudMessage other)
    {
       robotTimestamp = other.robotTimestamp;
-      pointCloud = Arrays.copyOf(other.pointCloud, other.pointCloud.length);
-      colors = Arrays.copyOf(other.colors, other.colors.length);
+      MessageTools.copyData(other.pointCloud, pointCloud);
+      MessageTools.copyData(other.colors, colors);
       setPacketInformation(other);
    }
 
@@ -39,8 +40,10 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
    public void setPointCloudData(float[] pointCloudData, int[] colors)
    {
-      this.pointCloud = pointCloudData;
-      this.colors = colors;
+      this.pointCloud.reset();
+      this.pointCloud.add(pointCloudData);
+      this.colors.reset();
+      this.colors.add(colors);
 
       if (pointCloudData.length != colors.length)
       {
@@ -50,28 +53,26 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
    public void setPointCloudData(Point3DReadOnly[] pointCloudData, Color[] colors)
    {
-      this.pointCloud = new float[pointCloudData.length * 3];
-
-      int index = 0;
+      this.pointCloud.reset();
 
       for (Point3DReadOnly scanPoint : pointCloudData)
       {
-         this.pointCloud[index++] = (float) scanPoint.getX();
-         this.pointCloud[index++] = (float) scanPoint.getY();
-         this.pointCloud[index++] = (float) scanPoint.getZ();
+         this.pointCloud.add(scanPoint.getX32());
+         this.pointCloud.add(scanPoint.getY32());
+         this.pointCloud.add(scanPoint.getZ32());
       }
 
-      this.colors = new int[colors.length];
+      this.colors.reset();;
 
       for (int i = 0; i < colors.length; i++)
       {
-         this.colors[i] = colors[i].getRGB();
+         this.colors.add(colors[i].getRGB());
       }
    }
 
    public int getNumberOfPointCloudPoints()
    {
-      return pointCloud.length / 3;
+      return pointCloud.size() / 3;
    }
 
    public Point3D32 getPoint3D32(int index)
@@ -84,9 +85,9 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    public void getPoint(int index, Point3DBasics scanPointToPack)
    {
       index *= 3;
-      scanPointToPack.setX(pointCloud[index++]);
-      scanPointToPack.setY(pointCloud[index++]);
-      scanPointToPack.setZ(pointCloud[index++]);
+      scanPointToPack.setX(pointCloud.get(index++));
+      scanPointToPack.setY(pointCloud.get(index++));
+      scanPointToPack.setZ(pointCloud.get(index++));
    }
 
    public Point3D getScanPoint3d(int index)
@@ -107,9 +108,9 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    {
       index *= 3;
       scanPointToPack.setToZero(ReferenceFrame.getWorldFrame());
-      scanPointToPack.setX(pointCloud[index++]);
-      scanPointToPack.setY(pointCloud[index++]);
-      scanPointToPack.setZ(pointCloud[index++]);
+      scanPointToPack.setX(pointCloud.get(index++));
+      scanPointToPack.setY(pointCloud.get(index++));
+      scanPointToPack.setZ(pointCloud.get(index++));
    }
 
    public Point3D32[] getPoint3D32s()
@@ -157,18 +158,18 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
          pointsToPack.add(getFramePoint(index));
    }
 
-   public int[] getColors()
+   public TIntArrayList getColors()
    {
       return colors;
    }
 
    public Color[] getAwtColors()
    {
-      Color[] colors = new Color[this.colors.length];
+      Color[] colors = new Color[this.colors.size()];
 
-      for (int i = 0; i < this.colors.length; i++)
+      for (int i = 0; i < this.colors.size(); i++)
       {
-         colors[i] = new Color(this.colors[i]);
+         colors[i] = new Color(this.colors.get(i));
       }
 
       return colors;
@@ -178,14 +179,14 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    @Override
    public boolean epsilonEquals(StereoVisionPointCloudMessage other, double epsilon)
    {
-      if (pointCloud.length != other.pointCloud.length)
+      if (pointCloud.size() != other.pointCloud.size())
          return false;
-      for (int i = 0; i < pointCloud.length; i++)
+      for (int i = 0; i < pointCloud.size(); i++)
       {
-         if (!MathTools.epsilonEquals(pointCloud[i], other.pointCloud[i], epsilon))
+         if (!MathTools.epsilonEquals(pointCloud.get(i), other.pointCloud.get(i), epsilon))
             return false;
       }
 
-      return Arrays.equals(colors, other.colors);
+      return colors.equals(other.colors);
    }
 }

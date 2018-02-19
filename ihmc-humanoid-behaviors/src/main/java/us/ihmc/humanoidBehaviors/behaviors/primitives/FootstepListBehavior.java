@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
@@ -20,6 +21,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -267,7 +269,12 @@ public class FootstepListBehavior extends AbstractBehavior
          WalkingControllerParameters walkingControllerParameters)
    {
       ArrayList<Double> footStepLengths = new ArrayList<Double>();
-      footstepDataList.addAll(footStepList.getDataList());
+      PreallocatedList<FootstepDataMessage> dataList = footStepList.getDataList();
+      for (int i = 0; i < dataList.size(); i++)
+      {
+         FootstepDataMessage step = dataList.get(i);
+         footstepDataList.add(step);
+      }
 
       FootstepDataMessage firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
 

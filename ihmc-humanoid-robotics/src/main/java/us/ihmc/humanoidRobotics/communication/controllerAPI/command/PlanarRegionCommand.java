@@ -2,17 +2,16 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PlanarRegionMessage;
+import us.ihmc.communication.packets.Polygon2DMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-
-import java.util.List;
 
 public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarRegionMessage>
 {
@@ -53,17 +52,19 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       fromLocalToWorldTransform.set(regionOrientation, regionOrigin);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
-      Point2D32[] originalConcaveHullVertices = message.getConcaveHullVertices();
+      Polygon2DMessage concaveHullMessage = message.getConcaveHull();
       concaveHullsVertices.clear();
-      for (int i = 0; i < originalConcaveHullVertices.length; i++)
-         concaveHullsVertices.add().set(originalConcaveHullVertices[i]);
+      for (int i = 0; i < concaveHullMessage.getVertices().size(); i++)
+         concaveHullsVertices.add().set(concaveHullMessage.getVertices().get(i));
 
-      List<Point2D32[]> convexPolygonsVertices = message.getConvexPolygonsVertices();
+      PreallocatedList<Polygon2DMessage> convexPolygonsMessage = message.getConvexPolygons();
       convexPolygons.clear();
-      for (int i = 0; i < convexPolygonsVertices.size(); i++)
+      for (int i = 0; i < convexPolygonsMessage.size(); i++)
       {
-         Point2D32[] convexPolygonVertices = convexPolygonsVertices.get(i);
-         convexPolygons.add().addVertices(convexPolygonVertices, convexPolygonVertices.length);
+         Polygon2DMessage convexPolygonMessage = convexPolygonsMessage.get(i);
+         ConvexPolygon2D convexPolygon = convexPolygons.add();
+         for (int vertexIndex = 0; vertexIndex < convexPolygonMessage.getVertices().size(); vertexIndex++)
+            convexPolygon.addVertex(convexPolygonMessage.getVertices().get(vertexIndex));
          convexPolygons.getLast().update();
       }
 

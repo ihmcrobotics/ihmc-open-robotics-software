@@ -14,6 +14,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -755,9 +756,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       initialConfiguration.desiredRootTranslation.set(currentRobotConfiguration.getPelvisTranslation());
 
       initialConfiguration.jointNameHash = currentRobotConfiguration.jointNameHash;
-      int length = currentRobotConfiguration.jointAngles.length;
-      initialConfiguration.desiredJointAngles = new float[length];
-      System.arraycopy(currentRobotConfiguration.jointAngles, 0, initialConfiguration.desiredJointAngles, 0, length);
+      int length = currentRobotConfiguration.jointAngles.size();
+      MessageTools.copyData(currentRobotConfiguration.jointAngles, initialConfiguration.desiredJointAngles);
 
       PrintTools.info("update config done");
       return true;

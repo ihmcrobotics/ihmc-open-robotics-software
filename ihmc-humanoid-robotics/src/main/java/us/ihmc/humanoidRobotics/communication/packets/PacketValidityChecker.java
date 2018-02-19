@@ -29,6 +29,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -104,7 +105,7 @@ public abstract class PacketValidityChecker
       if (trajectoryType == TrajectoryType.WAYPOINTS)
       {
          String messageClassName = message.getClass().getSimpleName();
-         SE3TrajectoryPointMessage[] swingTrajectory = message.getSwingTrajectory();
+         PreallocatedList<SE3TrajectoryPointMessage> swingTrajectory = message.getSwingTrajectory();
 
          if (swingTrajectory == null)
          {
@@ -112,21 +113,21 @@ public abstract class PacketValidityChecker
             return errorMessage;
          }
 
-         if (swingTrajectory.length > Footstep.maxNumberOfSwingWaypoints)
+         if (swingTrajectory.size() > Footstep.maxNumberOfSwingWaypoints)
          {
-            String errorMessage = messageClassName + " has " + swingTrajectory.length + " waypoints. Up to " + Footstep.maxNumberOfSwingWaypoints + " are allowed.";
+            String errorMessage = messageClassName + " has " + swingTrajectory.size() + " waypoints. Up to " + Footstep.maxNumberOfSwingWaypoints + " are allowed.";
             return errorMessage;
          }
 
-         double lastTime = swingTrajectory[0].getTime();
+         double lastTime = swingTrajectory.get(0).getTime();
          if (lastTime < 0.0)
          {
             String errorMessage = messageClassName + "'s swing trajectory can not start at time below zero.";
             return errorMessage;
          }
-         for (int waypointIdx = 1; waypointIdx < swingTrajectory.length; waypointIdx++)
+         for (int waypointIdx = 1; waypointIdx < swingTrajectory.size(); waypointIdx++)
          {
-            double waypointTime = swingTrajectory[waypointIdx].getTime();
+            double waypointTime = swingTrajectory.get(waypointIdx).getTime();
             if (waypointTime <= lastTime)
             {
                String errorMessage = messageClassName + "'s swing trajectory has non-increasing waypoint times.";
@@ -147,7 +148,7 @@ public abstract class PacketValidityChecker
             return errorMessage;
          }
 
-         if (message.getSwingTrajectoryBlendDuration() > 0.0 && message.getSwingTrajectory()[0].getTime() > 1.0e-5)
+         if (message.getSwingTrajectoryBlendDuration() > 0.0 && message.getSwingTrajectory().get(0).getTime() > 1.0e-5)
          {
             String errorMessage = messageClassName + "'s swing trajectory blend duration is greater than zero, initial waypoint at t = 0.0 is missing.";
             return errorMessage;
@@ -157,7 +158,7 @@ public abstract class PacketValidityChecker
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          String messageClassName = message.getClass().getSimpleName();
-         Point3D[] positionWaypoints = message.getCustomPositionWaypoints();
+         PreallocatedList<Point3D> positionWaypoints = message.getCustomPositionWaypoints();
          if (positionWaypoints == null)
          {
             String errorMessage = messageClassName + "'s type is custom but no position waypoints were specified.";
@@ -412,7 +413,7 @@ public abstract class PacketValidityChecker
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
-         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = message.getTrajectoryPointLists()[jointIndex];
+         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = message.getTrajectoryPointLists().get(jointIndex);
          if(oneJointTrajectoryMessage != null)
          {
             errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
@@ -865,7 +866,7 @@ public abstract class PacketValidityChecker
       {
          return "desired acceleration buffer null";
       }
-      if(message.getDesiredJointAccelerations().length  == 0)
+      if(message.getDesiredJointAccelerations().size()  == 0)
       {
          return "desired acceleration buffer empty";
       }
