@@ -111,7 +111,6 @@ public class DRCSimulationTestHelper
       if (testEnvironment != null)
          this.testEnvironment = testEnvironment;
       simulationStarter = new DRCSimulationStarter(robotModel, this.testEnvironment);
-      simulationStarter.setCreateYoVariableServer(false);
 
       fullRobotModel = robotModel.createFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -131,7 +130,6 @@ public class DRCSimulationTestHelper
    {
       this.testEnvironment = testEnvironment;
       simulationStarter = new DRCSimulationStarter(robotModel, testEnvironment);
-      simulationStarter.setCreateYoVariableServer(false);
    }
 
    public void createSimulation(String name)
@@ -378,7 +376,7 @@ public class DRCSimulationTestHelper
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
    }
-   
+
    public void createVideo(String videoName)
    {
       if (simulationTestingParameters.getCreateSCSVideos())
@@ -415,7 +413,7 @@ public class DRCSimulationTestHelper
    public void setupCameraForUnitTest(boolean enableTracking, Point3D cameraFix, Point3D cameraPosition)
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-      
+
       cameraConfiguration.setCameraFix(cameraFix);
       cameraConfiguration.setCameraPosition(cameraPosition);
       cameraConfiguration.setCameraTracking(enableTracking, true, true, false);

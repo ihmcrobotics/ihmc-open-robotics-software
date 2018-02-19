@@ -396,7 +396,7 @@ public class AvatarSimulationFactory
       doSmoothJointTorquesAtControllerStateChanges.setDefaultValue(false);
       addActualCMPVisualization.setDefaultValue(true);
       createCollisionMeshes.setDefaultValue(false);
-      createYoVariableServer.setDefaultValue(true);
+      createYoVariableServer.setDefaultValue(false);
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
