@@ -27,11 +27,6 @@ public class ParameterSavingTools
 {
    public static void save(File file, List<Registry> registries) throws IOException
    {
-      if (file.exists() && !confirmSave())
-      {
-         return;
-      }
-
       Parameters parameterRoot = new Parameters();
       parameterRoot.setRegistries(registries);
       try
@@ -53,12 +48,16 @@ public class ParameterSavingTools
       }
    }
 
-   public static boolean confirmSave()
+   public static boolean confirmSave(boolean isModified, boolean isMerge, String fileName)
    {
+      String string = "Saving to " + fileName + ".";
+      string += isModified ? "\nSaving modified parameters only." : "\nSaving all parameters.";
+      string += isMerge ? "\nMerging parameters with existing file." : "\nOverwriting all parameters in file.";
+
       Alert alert = new Alert(AlertType.CONFIRMATION);
       alert.setTitle("Confirmation Dialog");
       alert.setHeaderText("Confirm Save");
-      alert.setContentText("Are you sure you want to save?");
+      alert.setContentText(string);
       Optional<ButtonType> result = alert.showAndWait();
       return result.get() == ButtonType.OK;
    }
