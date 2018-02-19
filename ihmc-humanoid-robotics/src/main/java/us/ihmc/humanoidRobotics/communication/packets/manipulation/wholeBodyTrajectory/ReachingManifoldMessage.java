@@ -12,6 +12,13 @@ import us.ihmc.tools.ArrayTools;
  */
 public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
 {
+   public static final byte CONFIGURATION_SPACE_NAME_X = 0;
+   public static final byte CONFIGURATION_SPACE_NAME_Y = 1;
+   public static final byte CONFIGURATION_SPACE_NAME_Z = 2;
+   public static final byte CONFIGURATION_SPACE_NAME_ROLL = 3;
+   public static final byte CONFIGURATION_SPACE_NAME_PITCH = 4;
+   public static final byte CONFIGURATION_SPACE_NAME_YAW = 5;
+
    public long endEffectorNameBasedHashCode;
    public Point3D manifoldOriginPosition;
    public Quaternion manifoldOriginOrientation;

@@ -7,6 +7,13 @@ import us.ihmc.tools.ArrayTools;
 
 public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyExplorationConfigurationMessage>
 {
+   public static final byte CONFIGURATION_SPACE_NAME_X = 0;
+   public static final byte CONFIGURATION_SPACE_NAME_Y = 1;
+   public static final byte CONFIGURATION_SPACE_NAME_Z = 2;
+   public static final byte CONFIGURATION_SPACE_NAME_ROLL = 3;
+   public static final byte CONFIGURATION_SPACE_NAME_PITCH = 4;
+   public static final byte CONFIGURATION_SPACE_NAME_YAW = 5;
+
    public long rigidBodyNameBasedHashCode;
    public byte[] configurationSpaceNamesToExplore;
 
