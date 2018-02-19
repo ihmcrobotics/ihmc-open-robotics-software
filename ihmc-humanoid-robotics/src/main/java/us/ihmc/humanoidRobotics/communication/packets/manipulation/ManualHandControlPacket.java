@@ -11,11 +11,6 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
    public static final int VELOCITY = 0;
    public static final int POSITION = 1;
 
-   public static enum HandType
-   {
-      IROBOT, ROBOTIQ
-   }
-
    public byte robotSide;
    public double index;
    public double middle;
@@ -63,16 +58,6 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       ret &= Math.abs(getControlType() - other.getControlType()) < epsilon;
 
       return ret;
-   }
-
-   public double[] getCommands(HandType hand)
-   {
-      if (hand == HandType.IROBOT)
-         return new double[] {index, middle, thumb, 0, spread};
-      else if (hand == HandType.ROBOTIQ)
-         return new double[] {thumb, index, middle, spread};
-      else
-         return new double[] {index, middle, thumb, spread};
    }
 
    public double getIndex()
