@@ -15,14 +15,13 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 public abstract class WalkingControllerParameters extends AbstractHighLevelControllerParameters
 {
    private final LegConfigurationParameters legConfigurationParameters;
-   private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
    private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
    private final LeapOfFaithParameters leapOfFaithParameters;
 
    public WalkingControllerParameters()
    {
-      jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
+      super();
       dynamicReachabilityParameters = new DynamicReachabilityParameters();
       pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
       leapOfFaithParameters = new LeapOfFaithParameters();
@@ -526,14 +525,6 @@ public abstract class WalkingControllerParameters extends AbstractHighLevelContr
    public double getMaxSwingInitialAngularVelocityMagnitude()
    {
       return Double.POSITIVE_INFINITY;
-   }
-
-   /**
-    * Returns the parameters used in the privileged configuration handler.
-    */
-   public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
-   {
-      return jointPrivilegedConfigurationParameters;
    }
 
    /**

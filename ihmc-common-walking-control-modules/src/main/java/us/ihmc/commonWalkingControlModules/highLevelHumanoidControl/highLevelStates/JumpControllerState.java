@@ -67,6 +67,8 @@ public class JumpControllerState extends HighLevelControllerState
          controllerCoreToolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies,
                                                                  controllerCoreToolbox.getContactablePlaneBodies());
       }
+      
+      controllerCoreToolbox.setJointPrivilegedConfigurationParameters(jumpingControlParameters.getJointPrivilegedConfigurationParameters());
 
       jumpController = new JumpHighLevelHumanoidController(commandInputManager, statusOutputManager, controllerCoreToolbox, controllerToolbox, jumpingControlParameters,
                                                            jumpingControlManagerFactory);

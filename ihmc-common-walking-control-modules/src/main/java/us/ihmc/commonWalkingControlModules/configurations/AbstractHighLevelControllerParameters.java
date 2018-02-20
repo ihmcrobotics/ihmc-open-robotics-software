@@ -18,8 +18,15 @@ import us.ihmc.robotics.screwTheory.RigidBody;
  * lower body locomotion controllers.
  *
  */
-public class AbstractHighLevelControllerParameters
+public abstract class AbstractHighLevelControllerParameters
 {
+   private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+
+   public AbstractHighLevelControllerParameters()
+   {
+      jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
+   }
+   
    /**
     * Returns a list of joint control gains for groups of joints.
     * <p>
@@ -122,4 +129,14 @@ public class AbstractHighLevelControllerParameters
    {
       return new HashMap<String, Pose3D>();
    }
+   
+   /**
+    * Returns the parameters used in the privileged configuration handler.
+    */
+   public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
+   {
+      return jointPrivilegedConfigurationParameters;
+   }
+
+
 }

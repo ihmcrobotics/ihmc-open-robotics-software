@@ -10,8 +10,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JumpControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.AbstractJumpingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.FlightState;
@@ -23,6 +24,8 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -51,7 +54,8 @@ public class JumpHighLevelHumanoidController
    private final GravityCompensationManager gravityCompensationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
    private final SideDependentList<RigidBodyControlManager> footManagers = new SideDependentList<>();
-
+   
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(PlaneContactStateCommand.class);
 
    public JumpHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
@@ -98,23 +102,22 @@ public class JumpHighLevelHumanoidController
          RigidBody foot = fullRobotModel.getFoot(side);
          if (foot != null)
          {
-//            ReferenceFrame footControlFrame = fullRobotModel.getSoleFrame(side);
-//            RigidBodyControlManager footManager = jumpingControlManagerFactory.getOrCreateRigidBodyManager(foot, pelvis, footControlFrame, pelvisFrame,
-//                                                                                                           trajectoryControlFrames);
-//            footManagers.put(side, footManager);
+            ReferenceFrame footControlFrame = fullRobotModel.getSoleFrame(side);
+            RigidBodyControlManager footManager = jumpingControlManagerFactory.getOrCreateRigidBodyManager(foot, pelvis, footControlFrame, pelvisFrame,
+                                                                                                           trajectoryControlFrames);
+            footManagers.put(side, footManager);
          }
       }
 
       setupStateMachine();
    }
-
+   
    // TODO Hacked for now to default to the flight state
    private void setupStateMachine()
    {
       FlightState flightState = new FlightState(controlCoreToolbox, controllerToolbox, wholeBodyMomentumManager, gravityCompensationManager, handManagers,
                                                 footManagers);
       stateMachine.addState(flightState);
-      stateMachine.setCurrentState(JumpStateEnum.FLIGHT);
    }
 
    public void doAction()
@@ -134,6 +137,8 @@ public class JumpHighLevelHumanoidController
       controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getCoMAccelerationCommand());
       controllerCoreCommand.addInverseDynamicsCommand(gravityCompensationManager.getRootJointAccelerationCommand());
 
+      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
@@ -159,8 +164,24 @@ public class JumpHighLevelHumanoidController
 
    public void initialize()
    {
+      stateMachine.setCurrentState(JumpStateEnum.FLIGHT);
       controllerCoreCommand.requestReinitialization();
       controllerToolbox.initialize();
+      
+      privilegedConfigurationCommand.clear();
+      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
+         for (int i = 0; i < armJointNames.length; i++)
+            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+
+         LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
+         for (int i = 0; i < legJointNames.length; i++)
+            privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, legJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+      }
+
    }
 
    public ControllerCoreCommand getControllerCoreCommand()
