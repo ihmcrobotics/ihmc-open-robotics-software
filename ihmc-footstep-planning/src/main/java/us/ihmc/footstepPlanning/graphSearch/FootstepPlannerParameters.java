@@ -169,7 +169,7 @@ public interface FootstepPlannerParameters
     */
    public default double getMinimumFootholdPercent()
    {
-      return 0.1;
+      return 0.9;
    }
 
    /**

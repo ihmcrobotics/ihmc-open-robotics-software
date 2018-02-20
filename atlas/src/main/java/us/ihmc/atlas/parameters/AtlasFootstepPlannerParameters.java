@@ -56,6 +56,6 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    @Override
    public double getMinimumDistanceFromCliffBottoms()
    {
-      return 0.5;
+      return 0.15;
    }
 }
