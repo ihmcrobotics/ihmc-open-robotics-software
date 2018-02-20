@@ -60,6 +60,61 @@ public class PacketCodeQualityTest
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = Integer.MAX_VALUE)
+   public void testPacketsUsePreallocatedListOnly()
+   { // This test won't fail on Arrays or Lists
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+
+      Map<Class<? extends Packet>, List<Class>> packetTypesWithIterableOrArrayField = new HashMap<>();
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            Field[] fields = packetType.getDeclaredFields();
+            for (Field field : fields)
+            {
+               if (Modifier.isStatic(field.getModifiers()))
+                  continue;
+
+               Class<?> typeToCheck = field.getType();
+
+               if (typeToCheck.isArray() || Iterable.class.isAssignableFrom(typeToCheck))
+               {
+                  if (!packetTypesWithIterableOrArrayField.containsKey(packetType))
+                     packetTypesWithIterableOrArrayField.put(packetType, new ArrayList<>());
+                  packetTypesWithIterableOrArrayField.get(packetType).add(typeToCheck);
+               }
+
+            }
+         }
+         catch (Exception e)
+         {
+            PrintTools.error("Problem with packet: " + packetType.getSimpleName());
+            e.printStackTrace();
+         }
+      }
+
+      if (verbose)
+      {
+         if (!packetTypesWithIterableOrArrayField.isEmpty())
+         {
+            System.out.println();
+            System.out.println();
+            PrintTools.error("List of packet with illegal field type:");
+            packetTypesWithIterableOrArrayField.entrySet().forEach(type -> PrintTools.error(type.getKey().getSimpleName() + ": "
+                  + type.getValue().stream().map(Class::getSimpleName).collect(Collectors.toList())));
+         }
+      }
+
+      assertTrue("Found illegal field types in Packet sub-types.", packetTypesWithIterableOrArrayField.isEmpty());
+   }
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testPacketOnlyExtendPacketClass()
    {
       boolean verbose = true;
