@@ -70,4 +70,16 @@ public class DefaultFootstepPlanningParameters implements FootstepPlannerParamet
    {
       return 0.01;
    }
+
+   @Override
+   public double getCliffHeightToAvoid()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMinimumDistanceFromCliffBottoms()
+   {
+      return 0.15;
+   }
 }
