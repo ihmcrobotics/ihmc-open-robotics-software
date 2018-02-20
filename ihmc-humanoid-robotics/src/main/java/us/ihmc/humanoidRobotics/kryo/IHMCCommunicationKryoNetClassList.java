@@ -7,6 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.packets.BoundingBox3DMessage;
 import us.ihmc.communication.packets.BoundingBoxesPacket;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
@@ -21,6 +22,7 @@ import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.LidarScanMessage;
+import us.ihmc.communication.packets.LidarScanParametersMessage;
 import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
@@ -40,7 +42,6 @@ import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Orientation2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -66,6 +67,7 @@ import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMe
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
+import us.ihmc.humanoidRobotics.communication.packets.IntrinsicParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
 import us.ihmc.humanoidRobotics.communication.packets.LoadBearingMessage;
@@ -206,6 +208,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Video data
       registerPacketClass(VideoPacket.class);
       registerPacketClass(SimulatedLidarScanPacket.class);
+      registerPacketField(IntrinsicParametersMessage.class);
+      registerPacketField(LidarScanParametersMessage.class);
 
       registerPacketClass(IMUPacket.class);
       registerPacketField(IMUPacket[].class);
@@ -387,7 +391,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Vector3D32.class);
       registerPacketField(Point2D32.class);
       registerPacketField(Point2D32[].class);
-      registerPacketField(BoundingBox3D.class);
+      registerPacketField(BoundingBox3DMessage.class);
 
       //SCS
       registerPacketClass(SCSListenerPacket.class);
