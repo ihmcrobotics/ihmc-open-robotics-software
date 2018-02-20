@@ -33,8 +33,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FeetManager
 {
@@ -59,7 +59,7 @@ public class FeetManager
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final FramePoint3D tempSolePosition = new FramePoint3D();
-   private final YoDouble blindFootstepsHeightOffset = new YoDouble("blindFootstepsHeightOffset", registry);
+   private final DoubleParameter blindFootstepsHeightOffset;
 
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                       PIDSE3GainsReadOnly swingFootGains, PIDSE3GainsReadOnly holdFootGains, PIDSE3GainsReadOnly toeOffFootGains,
@@ -104,7 +104,8 @@ public class FeetManager
          footControlModules.put(robotSide, footControlModule);
       }
 
-      blindFootstepsHeightOffset.set(walkingControllerParameters.getSwingTrajectoryParameters().getBlindFootstepsHeightOffset());
+      double defaultBlindFootstepsHeightOffset = walkingControllerParameters.getSwingTrajectoryParameters().getBlindFootstepsHeightOffset();
+      blindFootstepsHeightOffset = new DoubleParameter("blindFootstepsHeightOffset", registry, defaultBlindFootstepsHeightOffset);
 
       parentRegistry.addChild(registry);
    }
@@ -142,7 +143,7 @@ public class FeetManager
       {
          tempSolePosition.setToZero(soleZUpFrames.get(footstep.getRobotSide().getOppositeSide()));
          tempSolePosition.changeFrame(footstep.getFootstepPose().getReferenceFrame());
-         footstep.setZ(tempSolePosition.getZ() + blindFootstepsHeightOffset.getDoubleValue());
+         footstep.setZ(tempSolePosition.getZ() + blindFootstepsHeightOffset.getValue());
       }
    }
 

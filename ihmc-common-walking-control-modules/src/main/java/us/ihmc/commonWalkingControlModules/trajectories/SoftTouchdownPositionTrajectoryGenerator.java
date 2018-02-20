@@ -3,13 +3,13 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoSpline3D;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
-import us.ihmc.robotics.trajectories.providers.VectorProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -26,8 +26,8 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    private final ReferenceFrame referenceFrame;
 
    private final PositionProvider initialPositionSource;
-   private final VectorProvider velocitySource;
-   private final VectorProvider accelerationSource;
+   private final FrameVector3DReadOnly touchdownVelocity;
+   private final FrameVector3DReadOnly touchdownAcceleration;
    
    private final DoubleProvider startTimeProvider;
    
@@ -45,7 +45,8 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    private final YoSpline3D trajectory;
 
    public SoftTouchdownPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, PositionProvider initialPositionProvider,
-           VectorProvider velocityProvider, VectorProvider accelerationProvider, DoubleProvider startTimeProvider, YoVariableRegistry parentRegistry)
+                                                   FrameVector3DReadOnly touchdownVelocity, FrameVector3DReadOnly touchdownAcceleration, DoubleProvider startTimeProvider,
+                                                   YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + namePostFix);
       parentRegistry.addChild(registry);
@@ -64,8 +65,8 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       this.referenceFrame = referenceFrame;
 
       initialPositionSource = initialPositionProvider;
-      velocitySource = velocityProvider;
-      accelerationSource = accelerationProvider;
+      this.touchdownVelocity = touchdownVelocity;
+      this.touchdownAcceleration = touchdownAcceleration;
       
       this.startTimeProvider = startTimeProvider;
       
@@ -96,8 +97,8 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       this.referenceFrame = referenceFrame;
       
       initialPositionSource = null;
-      velocitySource = null;
-      accelerationSource = null;
+      touchdownVelocity = null;
+      touchdownAcceleration = null;
       this.startTimeProvider = null;
       
       startTime = new YoDouble(namePrefix + "startTime", registry);
@@ -109,18 +110,18 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
    @Override
    public void initialize()
    {
-	  double t0 = startTimeProvider.getValue();
-     startTime.set(startTimeProvider.getValue());
-     timeIntoTouchdown.set(0.0);
+      double t0 = startTimeProvider.getValue();
+      startTime.set(startTimeProvider.getValue());
+      timeIntoTouchdown.set(0.0);
         
-     initialPositionSource.getPosition(p0);
-     p0.changeFrame(referenceFrame);
+      initialPositionSource.getPosition(p0);
+      p0.changeFrame(referenceFrame);
      
-     velocitySource.get(pd0);
-     pd0.changeFrame(referenceFrame);
+      pd0.setIncludingFrame(touchdownVelocity);
+      pd0.changeFrame(referenceFrame);
 
-     accelerationSource.get(pdd0);
-     pdd0.changeFrame(referenceFrame);
+      pdd0.setIncludingFrame(touchdownAcceleration);
+      pdd0.changeFrame(referenceFrame);
      
       trajectory.setQuadraticUsingInitialVelocityAndAcceleration(t0, tf, p0, pd0, pdd0);
    }

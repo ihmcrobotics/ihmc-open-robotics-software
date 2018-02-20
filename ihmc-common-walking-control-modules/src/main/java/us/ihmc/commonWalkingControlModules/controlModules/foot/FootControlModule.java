@@ -24,8 +24,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
+import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
@@ -116,16 +115,13 @@ public class FootControlModule
 
       setupContactStatesMap();
 
-      Vector3D touchdownVelocity = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownVelocity());
-      YoFrameVector yoTouchdownVelocity = new YoFrameVector(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
-      yoTouchdownVelocity.set(touchdownVelocity);
+      Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownVelocity());
+      FrameParameterVector3D touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(),
+                                                                            defaultTouchdownVelocity, registry);
 
-      Vector3D touchdownAcceleration = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownAcceleration());
-      YoFrameVector yoTouchdownAcceleration = new YoFrameVector(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), registry);
-      yoTouchdownAcceleration.set(touchdownAcceleration);
-
-      YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(yoTouchdownVelocity);
-      YoVelocityProvider touchdownAccelerationProvider = new YoVelocityProvider(yoTouchdownAcceleration);
+      Vector3D defaultTouchdownAcceleration = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownAcceleration());
+      FrameParameterVector3D touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(),
+                                                                                defaultTouchdownAcceleration, registry);
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
 
@@ -135,13 +131,13 @@ public class FootControlModule
       supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
       states.add(supportState);
 
-      swingState = new SwingState(footControlHelper, yoTouchdownVelocity, yoTouchdownAcceleration, swingFootControlGains, registry);
+      swingState = new SwingState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
       states.add(swingState);
       
       touchdownState = new TouchDownState(footControlHelper, swingFootControlGains, registry);
       states.add(touchdownState);
 
-      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocityProvider, touchdownAccelerationProvider, swingFootControlGains, registry);
+      moveViaWaypointsState = new MoveViaWaypointsState(footControlHelper, touchdownVelocity, touchdownAcceleration, swingFootControlGains, registry);
       states.add(moveViaWaypointsState);
 
       setupStateMachine(states);
