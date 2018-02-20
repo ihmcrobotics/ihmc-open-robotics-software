@@ -22,7 +22,6 @@ public class IHMCCommunicationKryoNetClassListTest
 
       for (Class<?> packetClass : packetClassList)
       {
-         System.out.println("Checking " + packetClass.getSimpleName());
          assertTrue("The class " + packetClass.getSimpleName() + " is not a packet", Packet.class.isAssignableFrom(packetClass));
       }
    }
