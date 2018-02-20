@@ -6,6 +6,11 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.BoundingBox3DMessage;
 import us.ihmc.communication.packets.BoundingBoxesPacket;
@@ -29,6 +34,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessage;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
+import us.ihmc.communication.packets.Polygon2DMessage;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
@@ -182,6 +188,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueM
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestMessage;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -194,6 +201,13 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 {
    public IHMCCommunicationKryoNetClassList()
    {
+      registerPacketField(TDoubleArrayList.class);
+      registerPacketField(TIntArrayList.class);
+      registerPacketField(TLongArrayList.class);
+      registerPacketField(TFloatArrayList.class);
+      registerPacketField(TByteArrayList.class);
+      registerPacketField(PreallocatedList.class);
+
       registerPacketClass(Packet.class);
 
       registerPacketField(StringBuilder.class);
@@ -389,6 +403,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Point2D32.class);
       registerPacketField(Point2D32[].class);
       registerPacketField(BoundingBox3DMessage.class);
+      registerPacketField(Polygon2DMessage.class);
 
       //SCS
       registerPacketClass(SCSListenerPacket.class);
