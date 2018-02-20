@@ -11,6 +11,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.idl.PreallocatedList;
 
 public class IHMCCommunicationKryoNetClassListTest
 {
@@ -56,7 +57,11 @@ public class IHMCCommunicationKryoNetClassListTest
       while (typeToCheck.isArray())
          typeToCheck = typeToCheck.getComponentType();
 
-      if (Enum.class.isAssignableFrom(typeToCheck) || ArrayList.class.isAssignableFrom(typeToCheck))
+      if (Enum.class.isAssignableFrom(typeToCheck))
+         return;
+      if (ArrayList.class.isAssignableFrom(typeToCheck))
+         return;
+      if (PreallocatedList.class.isAssignableFrom(typeToCheck))
          return;
 
       for (Field subField : typeToCheck.getDeclaredFields())
