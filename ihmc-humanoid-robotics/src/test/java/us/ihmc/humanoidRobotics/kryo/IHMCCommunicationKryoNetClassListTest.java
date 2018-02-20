@@ -14,7 +14,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class IHMCCommunicationKryoNetClassListTest
 {
-   @Test
+   @Test(timeout = 30000)
    public void testAllClassesRegisteredArePackets()
    {
       IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
@@ -27,7 +27,7 @@ public class IHMCCommunicationKryoNetClassListTest
       }
    }
 
-   @Test
+   @Test(timeout = 30000)
    public void testAllPacketFieldsAreRegistered()
    {
       IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
