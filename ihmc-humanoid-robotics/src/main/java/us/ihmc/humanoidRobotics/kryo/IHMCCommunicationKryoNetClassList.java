@@ -103,8 +103,8 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
+import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeLeafMessage;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeNodeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
@@ -500,8 +500,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // New quadTree
       registerPacketClass(HeightQuadTreeToolboxRequestMessage.class);
       registerPacketClass(HeightQuadTreeMessage.class);
-      registerPacketField(HeightQuadTreeNodeMessage.class);
-      registerPacketField(HeightQuadTreeNodeMessage[].class);
+      registerPacketField(Point3D32.class);
+      registerPacketField(HeightQuadTreeLeafMessage.class);
+      registerPacketField(HeightQuadTreeLeafMessage[].class);
 
       // Lidar messages
       registerPacketClass(LidarScanMessage.class);
