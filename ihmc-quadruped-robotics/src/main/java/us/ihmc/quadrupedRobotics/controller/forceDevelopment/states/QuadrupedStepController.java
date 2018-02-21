@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
@@ -16,22 +15,15 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStream;
-import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
-import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
-import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -43,7 +35,6 @@ import java.util.ArrayList;
 public class QuadrupedStepController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final int STEP_SEQUENCE_CAPACITY = 100;
    private final QuadrupedStepStream stepStream;
    private final YoDouble robotTimestamp;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -56,7 +47,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 1);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
-   private final DoubleParameter haltTransitionDurationParameter = parameterFactory.createDouble("haltTransitionDuration", 1.0);
    private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.075);
    private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
    private final DoubleParameter coefficientOfFrictionParameter = parameterFactory.createDouble("coefficientOfFriction", 0.5);
@@ -76,7 +66,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    // step planner
-   private static final int MAXIMUM_STEP_QUEUE_SIZE = 100;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrantDependentList<YoFramePoint> groundPlanePositions;
 
@@ -87,12 +76,8 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final QuadrupedStepCrossoverProjection crossoverProjection;
 
    private final FramePoint3D stepGoalPosition;
-   //private final RecyclingArrayList<YoQuadrupedTimedStep> stepSequence;
 
    // inputs
-   //private final YoDouble haltTime = new YoDouble("haltTime", registry);
-   //private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
-
    private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
    private final YoBoolean onTouchDownTriggered = new YoBoolean("onTouchDownTriggered", registry);
 
@@ -131,19 +116,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
       stepGoalPosition = new FramePoint3D();
-      /*
-      stepSequence = new RecyclingArrayList<>(MAXIMUM_STEP_QUEUE_SIZE, new GenericTypeBuilder<YoQuadrupedTimedStep>()
-      {
-         private int stepNumber = 0;
-         @Override
-         public YoQuadrupedTimedStep newInstance()
-         {
-            YoQuadrupedTimedStep step = new YoQuadrupedTimedStep("stepSequence" + stepNumber, registry);
-            stepNumber++;
-            return step;
-         }
-      });
-      */
 
       balanceManager = new QuadrupedBalanceManager(controllerToolbox, stepMessageHandler.getStepSequence(), postureProvider, dcmTransitionTrajectory, registry);
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
@@ -168,40 +140,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       {
          feetManager.triggerStep(activeSteps.get(i));
       }
-      /*
-      for (int i = 0; i < stepSequence.size(); i++)
-      {
-         RobotQuadrant robotQuadrant = stepSequence.get(i).getRobotQuadrant();
-         double currentTime = robotTimestamp.getDoubleValue();
-         double startTime = stepSequence.get(i).getTimeInterval().getStartTime();
-         double endTime = stepSequence.get(i).getTimeInterval().getEndTime();
-         if (startTime < currentTime && currentTime < endTime)
-         {
-            feetManager.triggerStep(robotQuadrant, stepSequence.get(i));
-         }
-      }
-      */
    }
-
-   /*
-   private void computeStepSequence()
-   {
-      // update step plan
-      stepSequence.clear();
-      for (int i = 0; i < stepStream.getSteps().size(); i++)
-      {
-         if (!haltFlag.getBooleanValue() || stepStream.getSteps().get(i).getTimeInterval().getEndTime() < haltTime.getDoubleValue())
-         {
-            YoQuadrupedTimedStep step = stepSequence.add();
-            step.set(stepStream.getSteps().get(i));
-            step.getGoalPosition(stepGoalPosition);
-            stepGoalPosition.changeFrame(worldFrame);
-            stepGoalPosition.add(accumulatedStepAdjustment);
-            step.setGoalPosition(stepGoalPosition);
-         }
-      }
-   }
-   */
 
    private void computeStepAdjustment()
    {
@@ -229,26 +168,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
             crossoverProjection.project(stepGoalPosition, taskSpaceEstimates.getSolePosition(), robotQuadrant);
             groundPlaneEstimator.projectZ(stepGoalPosition);
             feetManager.adjustStep(robotQuadrant, stepGoalPosition);
-
          }
-         /*
-         for (int i = 0; i < stepSequence.size(); i++)
-         {
-            RobotQuadrant robotQuadrant = stepSequence.get(i).getRobotQuadrant();
-            double currentTime = robotTimestamp.getDoubleValue();
-            double startTime = stepSequence.get(i).getTimeInterval().getStartTime();
-            double endTime = stepSequence.get(i).getTimeInterval().getEndTime();
-            if (startTime < currentTime && currentTime < endTime)
-            {
-               stepSequence.get(i).getGoalPosition(stepGoalPosition);
-               stepGoalPosition.changeFrame(worldFrame);
-               stepGoalPosition.add(instantaneousStepAdjustment);
-               crossoverProjection.project(stepGoalPosition, taskSpaceEstimates.getSolePosition(), robotQuadrant);
-               groundPlaneEstimator.projectZ(stepGoalPosition);
-               feetManager.adjustStep(robotQuadrant, stepGoalPosition);
-            }
-         }
-         */
       }
    }
 
@@ -273,7 +193,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       stepStream.onEntry();
 
       // initialize state
-      //haltFlag.set(false);
       stepMessageHandler.initialize();
       onLiftOffTriggered.set(false);
       onTouchDownTriggered.set(false);
@@ -322,8 +241,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    @Override
    public ControllerEvent process()
    {
-      //double currentTime = robotTimestamp.getDoubleValue();
-      //if (stepSequence.size() == 0 || stepSequence.getLast().getTimeInterval().getEndTime() < currentTime)
       if (stepMessageHandler.isDoneWithStepSequence())
       {
          return ControllerEvent.DONE;
@@ -347,7 +264,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       groundPlaneEstimator.compute();
 
       // update step plan
-      //computeStepSequence();
       stepMessageHandler.consumeIncomingSteps();
       stepMessageHandler.adjustStepQueue(accumulatedStepAdjustment);
 
@@ -395,13 +311,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
    public void halt()
    {
-      /*
-      if (haltFlag.getBooleanValue() == false)
-      {
-         haltFlag.set(true);
-         haltTime.set(robotTimestamp.getDoubleValue() + haltTransitionDurationParameter.get());
-      }
-      */
       stepMessageHandler.halt();
    }
 
