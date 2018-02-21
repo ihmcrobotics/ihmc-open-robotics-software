@@ -37,7 +37,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class QuadrupedStepController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static int STEP_SEQUENCE_CAPACITY = 100;
+   private static final int STEP_SEQUENCE_CAPACITY = 100;
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedStepStream stepStream;
    private final YoDouble robotTimestamp;
@@ -62,10 +62,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
    private final DoubleParameter coefficientOfFrictionParameter = parameterFactory.createDouble("coefficientOfFriction", 0.5);
 
-   // frames
-
    // feedback controllers
-   private final FramePoint3D dcmPositionEstimate;
    private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
    private final QuadrupedBodyOrientationController bodyOrientationController;
 
@@ -81,7 +78,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    // step planner
-   private static int MAXIMUM_STEP_QUEUE_SIZE = 100;
+   private static final int MAXIMUM_STEP_QUEUE_SIZE = 100;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrantDependentList<YoFramePoint> groundPlanePositions;
 
@@ -116,7 +113,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
 
       // feedback controllers
-      dcmPositionEstimate = new FramePoint3D();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
       feetManager = controlManagerFactory.getOrCreateFeetManager();
@@ -154,16 +150,13 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
                }
             });
 
-      balanceManager = new QuadrupedBalanceManager(controllerToolbox, stepSequence, postureProvider, registry, timedContactSequence,
-                                                   dcmTransitionTrajectory, dcmPositionEstimate);
+      balanceManager = new QuadrupedBalanceManager(controllerToolbox, stepSequence, postureProvider, registry, timedContactSequence, dcmTransitionTrajectory);
 
       parentRegistry.addChild(registry);
    }
 
    private void updateGains()
    {
-      balanceManager.updateGains();
-
       bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
       bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
       bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
@@ -276,10 +269,11 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       {
          // compute step adjustment for ongoing steps (proportional to dcm tracking error)
          FramePoint3D dcmPositionSetpoint = balanceManager.getDCMPositionSetpoint();
+         FramePoint3D dcmPositionEstimate = balanceManager.getDCMPositionEstimate();
          dcmPositionSetpoint.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
          dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
-         instantaneousStepAdjustment.set(dcmPositionEstimate);
-         instantaneousStepAdjustment.sub(dcmPositionSetpoint);
+
+         instantaneousStepAdjustment.sub(dcmPositionEstimate, dcmPositionSetpoint);
          instantaneousStepAdjustment.scale(dcmPositionStepAdjustmentGainParameter.get());
          instantaneousStepAdjustment.setZ(0);
 
@@ -328,8 +322,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       onLiftOffTriggered.set(false);
       onTouchDownTriggered.set(false);
       accumulatedStepAdjustment.setToZero();
-
-      // initialize estimates
 
       // update task space estimates
       taskSpaceEstimator.compute(taskSpaceEstimates);
@@ -385,7 +377,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       stepStream.process();
 
       updateGains();
-
 
       // update task space estimates
       taskSpaceEstimator.compute(taskSpaceEstimates);
