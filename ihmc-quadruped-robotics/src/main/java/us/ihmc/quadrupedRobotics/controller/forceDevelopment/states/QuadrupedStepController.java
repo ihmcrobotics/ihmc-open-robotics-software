@@ -23,7 +23,6 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -43,7 +42,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
    private final DoubleArrayParameter comForceCommandWeightsParameter = parameterFactory.createDoubleArray("comForceCommandWeights", 1, 1, 1);
    private final DoubleArrayParameter comTorqueCommandWeightsParameter = parameterFactory.createDoubleArray("comTorqueCommandWeights", 1, 1, 1);
-   private final DoubleParameter dcmPositionStepAdjustmentGainParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentGain", 1.5);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 1);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
@@ -71,8 +69,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
 
-   private final YoFrameVector instantaneousStepAdjustment;
-   private final YoFrameVector accumulatedStepAdjustment;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
 
    private final FramePoint3D stepGoalPosition;
@@ -111,8 +107,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
          groundPlanePositions.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
       }
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
-      instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
-      accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
       stepGoalPosition = new FramePoint3D();
@@ -144,18 +138,10 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
    private void computeStepAdjustment()
    {
+      balanceManager.computeStepAdjustment();
+
       if (robotTimestamp.getDoubleValue() > dcmTransitionTrajectory.getEndTime())
       {
-         // compute step adjustment for ongoing steps (proportional to dcm tracking error)
-         FramePoint3D dcmPositionSetpoint = balanceManager.getDCMPositionSetpoint();
-         FramePoint3D dcmPositionEstimate = balanceManager.getDCMPositionEstimate();
-         dcmPositionSetpoint.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
-         dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
-
-         instantaneousStepAdjustment.sub(dcmPositionEstimate, dcmPositionSetpoint);
-         instantaneousStepAdjustment.scale(dcmPositionStepAdjustmentGainParameter.get());
-         instantaneousStepAdjustment.setZ(0);
-
          // adjust nominal step goal positions in foot state machine
          ArrayList<YoQuadrupedTimedStep> activeSteps = stepMessageHandler.getActiveSteps();
          for (int i = 0; i < activeSteps.size(); i++)
@@ -164,7 +150,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
             RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
             activeStep.getGoalPosition(stepGoalPosition);
             stepGoalPosition.changeFrame(worldFrame);
-            stepGoalPosition.add(instantaneousStepAdjustment);
+            stepGoalPosition.add(balanceManager.getInstantaneousStepAdjustment());
             crossoverProjection.project(stepGoalPosition, taskSpaceEstimates.getSolePosition(), robotQuadrant);
             groundPlaneEstimator.projectZ(stepGoalPosition);
             feetManager.adjustStep(robotQuadrant, stepGoalPosition);
@@ -196,7 +182,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       stepMessageHandler.initialize();
       onLiftOffTriggered.set(false);
       onTouchDownTriggered.set(false);
-      accumulatedStepAdjustment.setToZero();
 
       // update task space estimates
       taskSpaceEstimator.compute(taskSpaceEstimates);
@@ -230,7 +215,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
       // compute step plan
       stepMessageHandler.consumeIncomingSteps();
-      stepMessageHandler.adjustStepQueue(accumulatedStepAdjustment);
+      stepMessageHandler.adjustStepQueue(balanceManager.getAccumulatedStepAdjustment());
 
       // compute step adjustment
       computeStepAdjustment();
@@ -265,7 +250,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
       // update step plan
       stepMessageHandler.consumeIncomingSteps();
-      stepMessageHandler.adjustStepQueue(accumulatedStepAdjustment);
+      stepMessageHandler.adjustStepQueue(balanceManager.getAccumulatedStepAdjustment());
 
       // update step adjustment
       computeStepAdjustment();
@@ -294,8 +279,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       if (onTouchDownTriggered.getBooleanValue())
       {
          onTouchDownTriggered.set(false);
-         accumulatedStepAdjustment.add(instantaneousStepAdjustment);
-         accumulatedStepAdjustment.setZ(0);
+         balanceManager.completedStep();
       }
       return null;
    }
