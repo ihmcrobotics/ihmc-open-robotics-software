@@ -395,7 +395,7 @@ public class DesiredFootstepTest
       {
          FootstepStatusMessage footstepStatus = sentFootstepStatus.get(i);
          FootstepStatusMessage reconstructedFootstepStatus = receivedFootsteps.get(i);
-         assertTrue(footstepStatus.getStatus() == reconstructedFootstepStatus.getStatus());
+         assertTrue(footstepStatus.getFootstepStatus() == reconstructedFootstepStatus.getFootstepStatus());
       }
    }
 
@@ -405,7 +405,7 @@ public class DesiredFootstepTest
 
       for (Footstep footstep : footsteps)
       {
-         footstepsData.add(HumanoidMessageTools.createFootstepDataMessage(footstep));
+         footstepsData.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(footstep));
       }
 
       return footstepsData;
@@ -471,7 +471,7 @@ public class DesiredFootstepTest
       @Override
       public void receivedPacket(PauseWalkingMessage packet)
       {
-         reconstructedCommands.add(packet.isPaused());
+         reconstructedCommands.add(packet.getPause());
       }
 
       public ArrayList<Boolean> getReconstructedCommands()

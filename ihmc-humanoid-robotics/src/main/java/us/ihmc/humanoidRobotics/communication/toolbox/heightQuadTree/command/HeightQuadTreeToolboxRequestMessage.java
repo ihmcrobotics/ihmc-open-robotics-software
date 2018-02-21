@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
 
 public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeToolboxRequestMessage>
 {
@@ -13,24 +12,6 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public static HeightQuadTreeToolboxRequestMessage clearRequest(PacketDestination destination)
-   {
-      HeightQuadTreeToolboxRequestMessage clearMessage = new HeightQuadTreeToolboxRequestMessage();
-      clearMessage.setDestination(destination);
-      clearMessage.requestClearQuadTree = true;
-      clearMessage.requestQuadTreeUpdate = false;
-      return clearMessage;
-   }
-
-   public static HeightQuadTreeToolboxRequestMessage requestQuadTreeUpdate(PacketDestination destination)
-   {
-      HeightQuadTreeToolboxRequestMessage requestMessage = new HeightQuadTreeToolboxRequestMessage();
-      requestMessage.setDestination(destination);
-      requestMessage.requestClearQuadTree = false;
-      requestMessage.requestQuadTreeUpdate = true;
-      return requestMessage;
-   }
-
    @Override
    public void set(HeightQuadTreeToolboxRequestMessage other)
    {
@@ -39,12 +20,12 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
       setPacketInformation(other);
    }
 
-   public boolean isClearQuadTreeRequested()
+   public boolean getRequestClearQuadTree()
    {
       return requestClearQuadTree;
    }
 
-   public boolean isQuadTreeUpdateRequested()
+   public boolean getRequestQuadTreeUpdate()
    {
       return requestQuadTreeUpdate;
    }

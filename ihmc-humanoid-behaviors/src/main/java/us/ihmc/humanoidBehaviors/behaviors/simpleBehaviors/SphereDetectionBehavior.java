@@ -91,7 +91,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
    {
       if (pointCloudQueue.isNewPacketAvailable())
       {
-         findBallsAndSaveResult(pointCloudQueue.getLatestPacket().getDecayingWorldScan());
+         findBallsAndSaveResult(HumanoidMessageTools.getDecayingWorldScan(pointCloudQueue.getLatestPacket()));
       }
    }
 
@@ -136,10 +136,10 @@ public class SphereDetectionBehavior extends AbstractBehavior
       {
          points3d[i] = new Point3D(points[i]);
       }
-      pointCloudWorldPacket.setDecayingWorldScan(points3d);
+      HumanoidMessageTools.setDecayingWorldScan(pointCloudWorldPacket, points3d);
       Point3D[] groundQuadTree = new Point3D[1];
       groundQuadTree[0] = new Point3D();
-      pointCloudWorldPacket.setGroundQuadTreeSupport(groundQuadTree);
+      HumanoidMessageTools.setGroundQuadTreeSupport(pointCloudWorldPacket, groundQuadTree);
 
       sendPacket(pointCloudWorldPacket);
    }

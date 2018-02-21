@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.List;
-
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
@@ -10,37 +8,29 @@ import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.idl.RecyclingArrayListPubSub;
-import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
-import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 @RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/so3_trajectory")
 public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame to define what frame the points are expressed in")
-   public RecyclingArrayListPubSub<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = new RecyclingArrayListPubSub<>(SO3TrajectoryPointMessage.class, SO3TrajectoryPointMessage::new, 5);
+   public RecyclingArrayListPubSub<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = new RecyclingArrayListPubSub<>(SO3TrajectoryPointMessage.class,
+                                                                                                                         SO3TrajectoryPointMessage::new, 5);
 
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
 
    @RosExportedField(documentation = "The selection matrix for each axis.")
-   public SelectionMatrix3DMessage selectionMatrix;
+   public SelectionMatrix3DMessage selectionMatrix = new SelectionMatrix3DMessage();
 
    @RosExportedField(documentation = "The weight matrix for each axis.")
-   public WeightMatrix3DMessage weightMatrix;
+   public WeightMatrix3DMessage weightMatrix = new WeightMatrix3DMessage();
 
    @RosExportedField(documentation = "Flag that tells the controller whether the use of a custom control frame is requested.")
    public boolean useCustomControlFrame = false;
 
    @RosExportedField(documentation = "Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
-   public Pose3D controlFramePose;
+   public Pose3D controlFramePose = new Pose3D();
 
    @RosExportedField(documentation = "Properties for queueing trajectories.")
    public QueueableMessage queueingProperties = new QueueableMessage();
@@ -56,221 +46,30 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
 
    public SO3TrajectoryMessage(SO3TrajectoryMessage other)
    {
-      MessageTools.copyData(other.taskspaceTrajectoryPoints, taskspaceTrajectoryPoints);
-      setUniqueId(other.getUniqueId());
-      setDestination(other.getDestination());
-      frameInformation.set(other.getFrameInformation());
-      queueingProperties.set(other.queueingProperties);
+      set(other);
    }
 
-   public void getTrajectoryPoints(FrameSO3TrajectoryPointList trajectoryPointListToPack)
-   {
-      FrameInformation.checkIfDataFrameIdsMatch(frameInformation, trajectoryPointListToPack.getReferenceFrame());
-
-      List<SO3TrajectoryPointMessage> trajectoryPointMessages = getTrajectoryPoints();
-      int numberOfPoints = trajectoryPointMessages.size();
-
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         SO3TrajectoryPointMessage so3TrajectoryPointMessage = trajectoryPointMessages.get(i);
-         trajectoryPointListToPack.addTrajectoryPoint(so3TrajectoryPointMessage.time, so3TrajectoryPointMessage.orientation,
-                                                      so3TrajectoryPointMessage.angularVelocity);
-      }
-   }
-
+   @Override
    public void set(SO3TrajectoryMessage other)
    {
       MessageTools.copyData(other.taskspaceTrajectoryPoints, taskspaceTrajectoryPoints);
       frameInformation.set(other.getFrameInformation());
+      selectionMatrix.set(other.selectionMatrix);
+      weightMatrix.set(other.weightMatrix);
+      useCustomControlFrame = other.useCustomControlFrame;
+      controlFramePose.set(other.controlFramePose);
       queueingProperties.set(other.queueingProperties);
+      setPacketInformation(other);
    }
 
-   /**
-    * Create a trajectory point.
-    *
-    * @param trajectoryPointIndex index of the trajectory point to create.
-    * @param time time at which the trajectory point has to be reached. The time is relative to when
-    *           the trajectory starts.
-    * @param orientation define the desired 3D orientation to be reached at this trajectory point.
-    *           It is should be expressed in the frame defined by referenceFrameId
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
-    *           point. It is should be expressed in the frame defined by referenceFrameId
-    */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity,
-                                        ReferenceFrame expressedInReferenceFrame)
-   {
-      FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
-      rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints.get(trajectoryPointIndex).set(HumanoidMessageTools.createSO3TrajectoryPointMessage(time, orientation, angularVelocity));
-   }
-
-   /**
-    * Create a trajectory point.
-    *
-    * @param trajectoryPointIndex index of the trajectory point to create.
-    * @param time time at which the trajectory point has to be reached. The time is relative to when
-    *           the trajectory starts.
-    * @param orientation define the desired 3D orientation to be reached at this trajectory point.
-    *           It is should be expressed in the frame defined by referenceFrameId
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory
-    *           point. It is should be expressed in the frame defined by referenceFrameId
-    */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity,
-                                        long expressedInReferenceFrameId)
-   {
-      FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
-      rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints.get(trajectoryPointIndex).set(HumanoidMessageTools.createSO3TrajectoryPointMessage(time, orientation, angularVelocity));
-   }
-
-   /**
-    * Sets the selection matrix to use for executing this message.
-    * <p>
-    * The selection matrix is used to determinate which degree of freedom of the end-effector should
-    * be controlled. When it is NOT provided, the controller will assume that all the degrees of
-    * freedom of the end-effector should be controlled.
-    * </p>
-    * <p>
-    * The selection frame coming along with the given selection matrix is used to determine to what
-    * reference frame the selected axes are referring to. For instance, if only the hand height in
-    * world should be controlled on the linear z component of the selection matrix should be
-    * selected and the reference frame should be world frame. When no reference frame is provided
-    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
-    * frame if not defined otherwise.
-    * </p>
-    *
-    * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
-    *           modified.
-    */
-   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
-   {
-      if (this.selectionMatrix == null)
-         this.selectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix);
-      else
-         this.selectionMatrix.set(selectionMatrix);
-   }
-
-   /**
-    * Sets the weight matrix to use for executing this message.
-    * <p>
-    * The weight matrix is used to set the qp weights for the controlled degrees of freedom of the
-    * end-effector. When it is not provided, or when the weights are set to Double.NaN, the
-    * controller will use the default QP Weights set for each axis.
-    * </p>
-    * <p>
-    * The weight frame coming along with the given weight matrix is used to determine to what
-    * reference frame the weights are referring to.
-    * </p>
-    *
-    * @param weightMatrix the weight matrix to use when executing this trajectory message. parameter
-    *           is not modified.
-    */
-   public void setWeightMatrix(WeightMatrix3D weightMatrix)
-   {
-      if (this.weightMatrix == null)
-         this.weightMatrix = MessageTools.createWeightMatrix3DMessage(weightMatrix);
-      else
-         this.weightMatrix.set(weightMatrix);
-   }
-
-   public final int getNumberOfTrajectoryPoints()
-   {
-      return taskspaceTrajectoryPoints.size();
-   }
-
-   public final RecyclingArrayListPubSub<SO3TrajectoryPointMessage> getTrajectoryPoints()
+   public final RecyclingArrayListPubSub<SO3TrajectoryPointMessage> getTaskspaceTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints;
    }
 
-   public final SO3TrajectoryPointMessage getTrajectoryPoint(int trajectoryPointIndex)
-   {
-      rangeCheck(trajectoryPointIndex);
-      return taskspaceTrajectoryPoints.get(trajectoryPointIndex);
-   }
-
-   public final SO3TrajectoryPointMessage getLastTrajectoryPoint()
-   {
-      return taskspaceTrajectoryPoints.getLast();
-   }
-
-   public final double getTrajectoryTime()
-   {
-      return getLastTrajectoryPoint().time;
-   }
-
-   public boolean hasSelectionMatrix()
-   {
-      return selectionMatrix != null;
-   }
-
-   public void getSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
-   {
-      selectionMatrixToPack.resetSelection();
-      if (selectionMatrix != null)
-         selectionMatrix.getSelectionMatrix(selectionMatrixToPack);
-   }
-
-   public boolean hasWeightMatrix()
-   {
-      return weightMatrix != null;
-   }
-
-   public void getWeightMatrix(WeightMatrix3D weightMatrixToPack)
-   {
-      weightMatrixToPack.clear();
-      if (weightMatrix != null)
-         weightMatrix.getWeightMatrix(weightMatrixToPack);
-   }
-
    public FrameInformation getFrameInformation()
    {
-      if (frameInformation == null)
-         frameInformation = new FrameInformation();
       return frameInformation;
-   }
-
-   /**
-    * Returns the unique ID referring to the selection frame to use with the selection matrix of
-    * this message.
-    * <p>
-    * If this message does not have a selection matrix, this method returns
-    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
-    * </p>
-    *
-    * @return the selection frame ID for the selection matrix.
-    */
-   public long getSelectionFrameId()
-   {
-      if (selectionMatrix != null)
-         return selectionMatrix.getSelectionFrameId();
-      else
-         return NameBasedHashCodeTools.NULL_HASHCODE;
-   }
-
-   /**
-    * Returns the unique ID referring to the weight frame to use with the weight matrix of this
-    * message.
-    * <p>
-    * If this message does not have a weight matrix, this method returns
-    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
-    * </p>
-    *
-    * @return the weight frame ID for the weight matrix.
-    */
-   public long getWeightMatrixFrameId()
-   {
-      if (weightMatrix != null)
-         return weightMatrix.getWeightFrameId();
-      else
-         return NameBasedHashCodeTools.NULL_HASHCODE;
-   }
-
-   private void rangeCheck(int trajectoryPointIndex)
-   {
-      if (trajectoryPointIndex >= getNumberOfTrajectoryPoints() || trajectoryPointIndex < 0)
-         throw new IndexOutOfBoundsException("Trajectory point index: " + trajectoryPointIndex + ", number of trajectory points: "
-               + getNumberOfTrajectoryPoints());
    }
 
    /** {@inheritDoc} */
@@ -284,7 +83,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
    public String toString()
    {
       if (taskspaceTrajectoryPoints != null)
-         return getClass().getSimpleName() + ": number of SO3 trajectory points = " + getNumberOfTrajectoryPoints() + "\n" + frameInformation.toString();
+         return getClass().getSimpleName() + ": number of SO3 trajectory points = " + taskspaceTrajectoryPoints.size() + "\n" + frameInformation.toString();
       else
          return getClass().getSimpleName() + ": no SO3 trajectory points";
    }
@@ -321,31 +120,9 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
       this.useCustomControlFrame = useCustomControlFrame;
    }
 
-   public void setControlFramePosition(Point3DReadOnly controlFramePosition)
-   {
-      if (controlFramePose == null)
-         controlFramePose = new Pose3D();
-      controlFramePose.setPosition(controlFramePosition);
-   }
-
-   public void setControlFrameOrientation(QuaternionReadOnly controlFrameOrientation)
-   {
-      if (controlFramePose == null)
-         controlFramePose = new Pose3D();
-      controlFramePose.setOrientation(controlFrameOrientation);
-   }
-
-   public boolean useCustomControlFrame()
+   public boolean getUseCustomControlFrame()
    {
       return useCustomControlFrame;
-   }
-
-   public void getControlFramePose(RigidBodyTransform controlFrameTransformToPack)
-   {
-      if (controlFramePose == null)
-         controlFrameTransformToPack.setToNaN();
-      else
-         controlFramePose.get(controlFrameTransformToPack);
    }
 
    public void setQueueingProperties(QueueableMessage queueingProperties)

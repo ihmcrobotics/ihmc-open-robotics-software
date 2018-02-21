@@ -48,7 +48,7 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
       setPacketInformation(other);
    }
 
-   public byte getBehaviorType()
+   public byte getHumanoidBehaviorType()
    {
       return humanoidBehaviorType;
    }

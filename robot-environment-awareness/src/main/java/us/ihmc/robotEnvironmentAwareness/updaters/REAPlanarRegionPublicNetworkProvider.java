@@ -63,7 +63,7 @@ public class REAPlanarRegionPublicNetworkProvider
       {
          RequestPlanarRegionsListMessage request = requestsToProcess.poll();
          PacketDestination source = PacketDestination.fromOrdinal(request.getSource());
-         PlanarRegionsRequestType requestType = PlanarRegionsRequestType.fromByte(request.getRequestType());
+         PlanarRegionsRequestType requestType = PlanarRegionsRequestType.fromByte(request.getPlanarRegionsRequestType());
          switch (requestType)
          {
          case CONTINUOUS_UPDATE:

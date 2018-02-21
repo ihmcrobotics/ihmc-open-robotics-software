@@ -20,12 +20,12 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
       set(other);
    }
 
-   public void setRequestedState(byte requestedState)
+   public void setRequestedToolboxState(byte requestedState)
    {
       this.requestedToolboxState = requestedState;
    }
 
-   public byte getRequestedState()
+   public byte getRequestedToolboxState()
    {
       return requestedToolboxState;
    }

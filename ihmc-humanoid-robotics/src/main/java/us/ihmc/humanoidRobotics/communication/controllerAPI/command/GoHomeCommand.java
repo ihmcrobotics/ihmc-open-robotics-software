@@ -79,7 +79,7 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
       executionDelayTime = message.executionDelayTime;
       trajectoryTime = message.getTrajectoryTime();
 
-      HumanoidBodyPart bodyPart = HumanoidBodyPart.fromByte(message.getBodyPart());
+      HumanoidBodyPart bodyPart = HumanoidBodyPart.fromByte(message.getHumanoidBodyPart());
       if (bodyPart.isRobotSideNeeded())
       {
          RobotSide robotSide = RobotSide.fromByte(message.getRobotSide());

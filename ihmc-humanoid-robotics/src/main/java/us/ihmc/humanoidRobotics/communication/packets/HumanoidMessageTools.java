@@ -7,6 +7,7 @@ import java.util.List;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
@@ -18,17 +19,21 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.Vector2D32;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlModeMessage;
@@ -50,6 +55,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalAction
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
@@ -75,19 +81,20 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.FisheyePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
@@ -120,7 +127,11 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMan
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
+import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
@@ -129,7 +140,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 
 public class HumanoidMessageTools
 {
@@ -263,31 +273,10 @@ public class HumanoidMessageTools
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * 
     * @param robotSide is used to define which arm is performing the trajectory.
-    * @param numberOfJoints number of joints that will be executing the message.
     */
-   public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints)
+   public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide)
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
-      message.jointspaceTrajectory = createJointspaceTrajectoryMessage(numberOfJoints);
-      message.robotSide = robotSide.toByte();
-      return message;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory points. This constructor
-    * only allocates memory for the trajectories, you need to call
-    * {@link #setTrajectoryPoint(int, int, double, double, double)} for each joint and trajectory
-    * point afterwards. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param robotSide is used to define which arm is performing the trajectory.
-    * @param numberOfJoints number of joints that will be executing the message.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static ArmTrajectoryMessage createArmTrajectoryMessage(RobotSide robotSide, int numberOfJoints, int numberOfTrajectoryPoints)
-   {
-      ArmTrajectoryMessage message = new ArmTrajectoryMessage();
-      message.jointspaceTrajectory = createJointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
       message.robotSide = robotSide.toByte();
       return message;
    }
@@ -334,27 +323,6 @@ public class HumanoidMessageTools
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.se3Trajectory = createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame);
-      message.robotSide = robotSide.toByte();
-      return message;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point. By default this
-    * constructor sets the trajectory frame to {@link CommonReferenceFrameIds#CHEST_FRAME} and the
-    * data frame to World This constructor only allocates memory for the trajectory points, you need
-    * to call
-    * {@link #setTrajectoryPoint(int, double, Point3D, QuaternionReadOnly, Vector3D, Vector3D)} for
-    * each trajectory point afterwards. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param robotSide is used to define which hand is performing the trajectory.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static HandTrajectoryMessage createHandTrajectoryMessage(RobotSide robotSide, int numberOfTrajectoryPoints)
-   {
-      HandTrajectoryMessage message = new HandTrajectoryMessage();
-      message.se3Trajectory = createSE3TrajectoryMessage(numberOfTrajectoryPoints);
       message.robotSide = robotSide.toByte();
       return message;
    }
@@ -466,7 +434,8 @@ public class HumanoidMessageTools
                                                                                            HighLevelControllerName endState)
    {
       HighLevelStateChangeStatusMessage message = new HighLevelStateChangeStatusMessage();
-      message.setStateChange(initialState == null ? -1 : initialState.toByte(), endState == null ? -1 : endState.toByte());
+      message.setInitialHighLevelControllerName(initialState == null ? -1 : initialState.toByte());
+      message.setEndHighLevelControllerName(endState == null ? -1 : endState.toByte());
       return message;
    }
 
@@ -475,15 +444,11 @@ public class HumanoidMessageTools
     */
    public static RigidBodyExplorationConfigurationMessage createRigidBodyExplorationConfigurationMessage(RigidBody rigidBody)
    {
-      RigidBodyExplorationConfigurationMessage message = new RigidBodyExplorationConfigurationMessage();
-      message.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
-
       ConfigurationSpaceName[] configurations = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.YAW,
             ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
       double[] regionAmplitude = new double[] {0, 0, 0, 0, 0, 0};
-      message.setExplorationConfigurationSpaces(ConfigurationSpaceName.toBytes(configurations), regionAmplitude);
 
-      return message;
+      return createRigidBodyExplorationConfigurationMessage(rigidBody, configurations, regionAmplitude);
    }
 
    /**
@@ -505,7 +470,22 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
 
       message.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
-      message.setExplorationConfigurationSpaces(ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore), explorationRangeAmplitudes);
+      byte[] degreesOfFreedomToExplore1 = ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore);
+      if (degreesOfFreedomToExplore1.length != explorationRangeAmplitudes.length)
+         throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
+               + ", explorationRangeLowerLimits.length = ");
+
+      message.configurationSpaceNamesToExplore.reset();
+      message.explorationRangeUpperLimits.reset();
+      message.explorationRangeLowerLimits.reset();
+
+      message.configurationSpaceNamesToExplore.add(degreesOfFreedomToExplore1);
+
+      for (int i = 0; i < degreesOfFreedomToExplore1.length; i++)
+      {
+         message.explorationRangeUpperLimits.add(explorationRangeAmplitudes[i]);
+         message.explorationRangeLowerLimits.add(-explorationRangeAmplitudes[i]);
+      }
 
       return message;
    }
@@ -520,8 +500,18 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
 
       message.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
-      message.setExplorationConfigurationSpaces(ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore), explorationRangeUpperLimits,
-                                                explorationRangeLowerLimits);
+      byte[] degreesOfFreedomToExplore1 = ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore);
+      if (degreesOfFreedomToExplore1.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore1.length != explorationRangeLowerLimits.length)
+         throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore1.length
+               + ", explorationRangeLowerLimits.length = ");
+      
+      message.configurationSpaceNamesToExplore.reset();
+      message.explorationRangeUpperLimits.reset();
+      message.explorationRangeLowerLimits.reset();
+      
+      message.configurationSpaceNamesToExplore.add(degreesOfFreedomToExplore1);
+      message.explorationRangeUpperLimits.add(explorationRangeUpperLimits);
+      message.explorationRangeLowerLimits.add(explorationRangeLowerLimits);
 
       return message;
    }
@@ -538,13 +528,6 @@ public class HumanoidMessageTools
       footstepUnknown.stream().map(b -> b ? 1 : 0).forEach(message.footstepUnknown::add);
       message.subOptimality = subOptimality;
       message.pathCost = cost;
-      return message;
-   }
-
-   public static MomentumTrajectoryMessage createMomentumTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      MomentumTrajectoryMessage message = new MomentumTrajectoryMessage();
-      message.angularMomentumTrajectory = createEuclideanTrajectoryMessage(numberOfTrajectoryPoints);
       return message;
    }
 
@@ -573,11 +556,22 @@ public class HumanoidMessageTools
    {
       WaypointBasedTrajectoryMessage message = new WaypointBasedTrajectoryMessage();
       message.endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      message.setWaypoints(waypointTimes, waypoints);
+      if (waypointTimes.length != waypoints.length)
+         throw new RuntimeException("Inconsistent array lengths.");
+
+      message.waypointTimes.reset();
+      message.waypointTimes.add(waypointTimes);
+      MessageTools.copyData(waypoints, message.waypoints);
       if (selectionMatrix != null)
       {
-         message.angularSelectionMatrix.set(selectionMatrix.getAngularPart());
-         message.linearSelectionMatrix.set(selectionMatrix.getLinearPart());
+         message.angularSelectionMatrix.selectionFrameId = MessageTools.toFrameId(selectionMatrix.getAngularSelectionFrame());
+         message.angularSelectionMatrix.xSelected = selectionMatrix.isAngularXSelected();
+         message.angularSelectionMatrix.ySelected = selectionMatrix.isAngularYSelected();
+         message.angularSelectionMatrix.zSelected = selectionMatrix.isAngularZSelected();
+         message.linearSelectionMatrix.selectionFrameId = MessageTools.toFrameId(selectionMatrix.getLinearSelectionFrame());
+         message.linearSelectionMatrix.xSelected = selectionMatrix.isLinearXSelected();
+         message.linearSelectionMatrix.ySelected = selectionMatrix.isLinearYSelected();
+         message.linearSelectionMatrix.zSelected = selectionMatrix.isLinearZSelected();
       }
       return message;
    }
@@ -595,23 +589,6 @@ public class HumanoidMessageTools
    {
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
       message.se3Trajectory = createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame());
-      return message;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point. Set the id of the
-    * message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}. This constructor only allocates memory for
-    * the trajectory points, you need to call
-    * {@link #setTrajectoryPoint(int, double, Point3DReadOnly, QuaternionReadOnly, Vector3DReadOnly, Vector3DReadOnly)}
-    * for each trajectory point afterwards.
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static PelvisTrajectoryMessage createPelvisTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
-      message.se3Trajectory = createSE3TrajectoryMessage(numberOfTrajectoryPoints);
       return message;
    }
 
@@ -719,51 +696,35 @@ public class HumanoidMessageTools
       return message;
    }
 
-   /**
-    * Use this constructor to build a message with more than one trajectory point. This constructor
-    * only allocates memory for the trajectories, you need to call
-    * {@link #setTrajectory1DMessage(int, OneDoFJointTrajectoryMessage)} for each joint afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param numberOfJoints number of joints that will be executing the message.
-    */
-   public static NeckTrajectoryMessage createNeckTrajectoryMessage(int numberOfJoints)
-   {
-      NeckTrajectoryMessage message = new NeckTrajectoryMessage();
-      message.jointspaceTrajectory = createJointspaceTrajectoryMessage(numberOfJoints);
-      return message;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory points. This constructor
-    * only allocates memory for the trajectories, you need to call
-    * {@link #setTrajectoryPoint(int, int, double, double, double)} for each joint and trajectory
-    * point afterwards. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param numberOfJoints number of joints that will be executing the message.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static NeckTrajectoryMessage createNeckTrajectoryMessage(int numberOfJoints, int numberOfTrajectoryPoints)
-   {
-      NeckTrajectoryMessage message = new NeckTrajectoryMessage();
-      message.jointspaceTrajectory = createJointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
-      return message;
-   }
-
    public static FootstepPlanningRequestPacket createFootstepPlanningRequestPacket(FramePose3D initialStanceFootPose, RobotSide initialStanceSide,
                                                                                    FramePose3D goalPose)
    {
-      FootstepPlanningRequestPacket message = new FootstepPlanningRequestPacket();
-      message.set(initialStanceFootPose, initialStanceSide.toByte(), goalPose, FootstepPlannerType.PLANAR_REGION_BIPEDAL.toByte());
-      return message;
+      return createFootstepPlanningRequestPacket(initialStanceFootPose, initialStanceSide, goalPose, FootstepPlannerType.PLANAR_REGION_BIPEDAL);
    }
 
    public static FootstepPlanningRequestPacket createFootstepPlanningRequestPacket(FramePose3D initialStanceFootPose, RobotSide initialStanceSide,
                                                                                    FramePose3D goalPose, FootstepPlannerType requestedPlannerType)
    {
       FootstepPlanningRequestPacket message = new FootstepPlanningRequestPacket();
-      message.set(initialStanceFootPose, initialStanceSide.toByte(), goalPose, requestedPlannerType.toByte());
+      message.initialStanceRobotSide = initialStanceSide.toByte();
+
+      FramePoint3D initialFramePoint = new FramePoint3D(initialStanceFootPose.getPosition());
+      initialFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+      message.stanceFootPositionInWorld = new Point3D32(initialFramePoint);
+
+      FrameQuaternion initialFrameOrientation = new FrameQuaternion(initialStanceFootPose.getOrientation());
+      initialFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      message.stanceFootOrientationInWorld = new Quaternion32(initialFrameOrientation);
+
+      FramePoint3D goalFramePoint = new FramePoint3D(goalPose.getPosition());
+      goalFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+      message.goalPositionInWorld = new Point3D32(goalFramePoint);
+
+      FrameQuaternion goalFrameOrientation = new FrameQuaternion(goalPose.getOrientation());
+      goalFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      message.goalOrientationInWorld = new Quaternion32(goalFrameOrientation);
+
+      message.requestedFootstepPlannerType = requestedPlannerType.toByte();
       return message;
    }
 
@@ -778,23 +739,6 @@ public class HumanoidMessageTools
    {
       PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
       message.so3Trajectory = createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame());
-      return message;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point. Set the id of the
-    * message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}. This constructor only allocates memory for
-    * the trajectory points, you need to call
-    * {@link #setTrajectoryPoint(int, double, Quaternion, Vector3D)} for each trajectory point
-    * afterwards.
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static PelvisOrientationTrajectoryMessage createPelvisOrientationTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      PelvisOrientationTrajectoryMessage message = new PelvisOrientationTrajectoryMessage();
-      message.so3Trajectory = createSO3TrajectoryMessage(numberOfTrajectoryPoints);
       return message;
    }
 
@@ -875,24 +819,7 @@ public class HumanoidMessageTools
                                                                      ReferenceFrame trajectoryFrame)
    {
       ChestTrajectoryMessage message = createChestTrajectoryMessage(trajectoryTime, quaternion, trajectoryFrame);
-      message.so3Trajectory.getFrameInformation().setDataReferenceFrame(dataFrame);
-      return message;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point. By default this
-    * constructor sets the trajectory frame to pelvis z up and the data frame to world This
-    * constructor only allocates memory for the trajectory points, you need to call
-    * {@link #setTrajectoryPoint(int, double, Quaternion, Vector3D)} for each trajectory point
-    * afterwards. Sets the frame to control in to world
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static ChestTrajectoryMessage createChestTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      ChestTrajectoryMessage message = new ChestTrajectoryMessage();
-      message.so3Trajectory = createSO3TrajectoryMessage(numberOfTrajectoryPoints);
+      message.so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(dataFrame));
       return message;
    }
 
@@ -901,7 +828,7 @@ public class HumanoidMessageTools
    {
       HeadTrajectoryMessage message = new HeadTrajectoryMessage();
       message.so3Trajectory = createSO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
-      message.so3Trajectory.getFrameInformation().setDataReferenceFrame(dataFrame);
+      message.so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(dataFrame));
       return message;
    }
 
@@ -935,23 +862,6 @@ public class HumanoidMessageTools
    }
 
    /**
-    * Use this constructor to build a message with more than one trajectory point. By default this
-    * constructor sets the trajectory frame to chest Center of mass frame and the data frame to
-    * world This constructor only allocates memory for the trajectory points, you need to call
-    * {@link #setTrajectoryPoint(int, double, Quaternion, Vector3D)} for each trajectory point
-    * afterwards. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static HeadTrajectoryMessage createHeadTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      HeadTrajectoryMessage message = new HeadTrajectoryMessage();
-      message.so3Trajectory = createSO3TrajectoryMessage(numberOfTrajectoryPoints);
-      return message;
-   }
-
-   /**
     * set a single point
     * 
     * @param trajectoryTime the duration of the trajectory
@@ -979,19 +889,6 @@ public class HumanoidMessageTools
                                                                              ReferenceFrame trajectoryReferenceFrame)
    {
       return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, trajectoryReferenceFrame.getNameBasedHashCode());
-   }
-
-   /**
-    * creates a new empty message with a trajectory point list the size of numberOfTrajectoryPoints
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points in this message
-    */
-   public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      EuclideanTrajectoryMessage message = new EuclideanTrajectoryMessage();
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
-         message.taskspaceTrajectoryPoints.add();
-      return message;
    }
 
    public static MessageOfMessages createMessageOfMessages(List<Packet<?>> messages)
@@ -1037,9 +934,11 @@ public class HumanoidMessageTools
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
       message.euclideanTrajectory = HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight),
                                                                                           trajectoryReferenceFrame.getNameBasedHashCode());
-      message.euclideanTrajectory.frameInformation.setDataReferenceFrame(dataReferenceFrame);
+      message.euclideanTrajectory.frameInformation.setDataReferenceFrameId(MessageTools.toFrameId(dataReferenceFrame));
       message.euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
-      message.euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
+      message.euclideanTrajectory.selectionMatrix.xSelected = false;
+      message.euclideanTrajectory.selectionMatrix.ySelected = false;
+      message.euclideanTrajectory.selectionMatrix.zSelected = true;
       return message;
    }
 
@@ -1055,9 +954,11 @@ public class HumanoidMessageTools
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
       message.euclideanTrajectory = HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime, new Point3D(0.0, 0.0, desiredHeight),
                                                                                           ReferenceFrame.getWorldFrame());
-      message.euclideanTrajectory.frameInformation.setDataReferenceFrame(ReferenceFrame.getWorldFrame());
+      message.euclideanTrajectory.frameInformation.setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       message.euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
-      message.euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
+      message.euclideanTrajectory.selectionMatrix.xSelected = false;
+      message.euclideanTrajectory.selectionMatrix.ySelected = false;
+      message.euclideanTrajectory.selectionMatrix.zSelected = true;
       return message;
    }
 
@@ -1066,16 +967,13 @@ public class HumanoidMessageTools
     * only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint}
     * for each trajectory point afterwards. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
     */
-   public static PelvisHeightTrajectoryMessage createPelvisHeightTrajectoryMessage(int numberOfTrajectoryPoints)
+   public static PelvisHeightTrajectoryMessage createPelvisHeightTrajectoryMessage()
    {
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
-      message.euclideanTrajectory = HumanoidMessageTools.createEuclideanTrajectoryMessage(numberOfTrajectoryPoints);
-      message.euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
-      message.euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
+      message.euclideanTrajectory.selectionMatrix.xSelected = false;
+      message.euclideanTrajectory.selectionMatrix.ySelected = false;
+      message.euclideanTrajectory.selectionMatrix.zSelected = true;
       return message;
    }
 
@@ -1147,14 +1045,6 @@ public class HumanoidMessageTools
       Vector3D zeroAngularVelocity = new Vector3D();
       message.taskspaceTrajectoryPoints.add().set(createSO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity));
       message.frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
-      return message;
-   }
-
-   public static SO3TrajectoryMessage createSO3TrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      SO3TrajectoryMessage message = new SO3TrajectoryMessage();
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
-         message.taskspaceTrajectoryPoints.add();
       return message;
    }
 
@@ -1277,6 +1167,12 @@ public class HumanoidMessageTools
       StateEstimatorModePacket message = new StateEstimatorModePacket();
       message.requestedStateEstimatorMode = requestedOperatingMode.toByte();
       return message;
+   }
+
+   public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(FullHumanoidRobotModel fullRobotModel)
+   {
+      return MessageTools.createKinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel),
+                                                              false);
    }
 
    public static HumanoidBehaviorTypePacket createHumanoidBehaviorTypePacket(HumanoidBehaviorType behaviorType)
@@ -1518,40 +1414,6 @@ public class HumanoidMessageTools
    }
 
    /**
-    * Use this constructor to build a message with more than one trajectory point. This constructor
-    * only allocates memory for the trajectories, you need to call
-    * {@link #setTrajectory1DMessage(int, OneDoFJointTrajectoryMessage)} for each joint afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param numberOfJoints number of joints that will be executing the message.
-    */
-   public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(int numberOfJoints)
-   {
-      JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
-      for (int i = 0; i < numberOfJoints; i++)
-         message.jointTrajectoryMessages.add();
-      return message;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory points. This constructor
-    * only allocates memory for the trajectories, you need to call
-    * {@link #setTrajectoryPoint(int, int, double, double, double)} for each joint and trajectory
-    * point afterwards. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param numberOfJoints number of joints that will be executing the message.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(int numberOfJoints, int numberOfTrajectoryPoints)
-   {
-      JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
-      for (int i = 0; i < numberOfJoints; i++)
-         message.jointTrajectoryMessages.add().set(createOneDoFJointTrajectoryMessage(numberOfTrajectoryPoints));
-      return message;
-   }
-
-   /**
     * Create a message using the given joint trajectory points. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * 
@@ -1619,22 +1481,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   /**
-    * Use this constructor to build a message with more than one trajectory points. This constructor
-    * only allocates memory for the trajectory points, you need to call
-    * {@link #setTrajectoryPoint(int, double, double, double)} for each trajectory point afterwards.
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
-      while (message.trajectoryPoints.size() < numberOfTrajectoryPoints)
-         message.trajectoryPoints.add();
-      return message;
-   }
-
    public static AtlasDesiredPumpPSIPacket createAtlasDesiredPumpPSIPacket(int desiredPumpPsi)
    {
       AtlasDesiredPumpPSIPacket message = new AtlasDesiredPumpPSIPacket();
@@ -1683,50 +1529,11 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static CenterOfMassTrajectoryMessage createCenterOfMassTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      CenterOfMassTrajectoryMessage message = new CenterOfMassTrajectoryMessage();
-      message.euclideanTrajectory = HumanoidMessageTools.createEuclideanTrajectoryMessage(numberOfTrajectoryPoints);
-      return message;
-   }
-
    public static SpineTrajectoryMessage createSpineTrajectoryMessage(JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       SpineTrajectoryMessage message = new SpineTrajectoryMessage();
       message.jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
       message.setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
-      return message;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory points. This constructor
-    * only allocates memory for the trajectories, you need to call
-    * {@link #setTrajectoryPoint(int, int, double, double, double)} for each joint and trajectory
-    * point afterwards. Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param numberOfJoints number of joints that will be executing the message.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static SpineTrajectoryMessage createSpineTrajectoryMessage(int numberOfJoints, int numberOfTrajectoryPoints)
-   {
-      SpineTrajectoryMessage message = new SpineTrajectoryMessage();
-      message.jointspaceTrajectory = HumanoidMessageTools.createJointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
-      return message;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point. This constructor
-    * only allocates memory for the trajectories, you need to call
-    * {@link #setTrajectory1DMessage(int, OneDoFJointTrajectoryMessage)} for each joint afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param numberOfJoints number of joints that will be executing the message.
-    */
-   public static SpineTrajectoryMessage createSpineTrajectoryMessage(int numberOfJoints)
-   {
-      SpineTrajectoryMessage message = new SpineTrajectoryMessage();
-      message.jointspaceTrajectory = HumanoidMessageTools.createJointspaceTrajectoryMessage(numberOfJoints);
       return message;
    }
 
@@ -1795,21 +1602,6 @@ public class HumanoidMessageTools
                                                                  ReferenceFrame trajectoryReferenceFrame)
    {
       return createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame.getNameBasedHashCode());
-   }
-
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-      for (int i = 0; i < numberOfTrajectoryPoints; i++)
-         message.taskspaceTrajectoryPoints.add();
-      return message;
-   }
-
-   public static SE3TrajectoryMessage createSE3TrajectoryMessage(int numberOfPoints, ReferenceFrame trajectoryFrame)
-   {
-      SE3TrajectoryMessage message = createSE3TrajectoryMessage(numberOfPoints);
-      message.getFrameInformation().setTrajectoryReferenceFrame(trajectoryFrame);
-      return message;
    }
 
    public static DetectedObjectPacket createDetectedObjectPacket(Pose3D pose, int id)
@@ -1924,7 +1716,7 @@ public class HumanoidMessageTools
          {
             FramePoint3D framePoint = footstep.getCustomPositionWaypoints().get(i);
             framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            message.positionWaypoints.add().set(framePoint);
+            message.customPositionWaypoints.add().set(framePoint);
          }
       }
 
@@ -2002,25 +1794,6 @@ public class HumanoidMessageTools
       return message;
    }
 
-   /**
-    * Use this constructor to build a message with more than one trajectory point. This constructor
-    * only allocates memory for the trajectory points, you need to call
-    * {@link #setTrajectoryPoint(int, double, Point3D, Quaternion, Vector3D, Vector3D)} for each
-    * trajectory point afterwards. Set the id of the message to
-    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param robotSide is used to define which foot is performing the trajectory.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, int numberOfTrajectoryPoints)
-   {
-      FootTrajectoryMessage message = new FootTrajectoryMessage();
-      message.se3Trajectory = HumanoidMessageTools.createSE3TrajectoryMessage(numberOfTrajectoryPoints);
-      message.robotSide = robotSide.toByte();
-      return message;
-   }
-
    public static FootTrajectoryMessage createFootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, FramePose3D desiredPose)
    {
       return createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPose.getPosition(), desiredPose.getOrientation());
@@ -2080,5 +1853,260 @@ public class HumanoidMessageTools
       intrinsicParameters.t1 = message.t1;
       intrinsicParameters.t2 = message.t2;
       return intrinsicParameters;
+   }
+
+   public static void setGroundQuadTreeSupport(PointCloudWorldPacket pointCloudWorldPacket, Point3DReadOnly[] pointCloud)
+   {
+      pointCloudWorldPacket.groundQuadTreeSupport.reset();
+
+      for (int i = 0; i < pointCloud.length; i++)
+      {
+         Point3DReadOnly point = pointCloud[i];
+         pointCloudWorldPacket.groundQuadTreeSupport.add((float) point.getX());
+         pointCloudWorldPacket.groundQuadTreeSupport.add((float) point.getY());
+         pointCloudWorldPacket.groundQuadTreeSupport.add((float) point.getZ());
+      }
+   }
+
+   public static void setDecayingWorldScan(PointCloudWorldPacket pointCloudWorldPacket, Point3DReadOnly[] pointCloud)
+   {
+      pointCloudWorldPacket.decayingWorldScan.reset();
+
+      for (int i = 0; i < pointCloud.length; i++)
+      {
+         Point3DReadOnly point = pointCloud[i];
+         pointCloudWorldPacket.decayingWorldScan.add((float) point.getX());
+         pointCloudWorldPacket.decayingWorldScan.add((float) point.getY());
+         pointCloudWorldPacket.decayingWorldScan.add((float) point.getZ());
+      }
+   }
+
+   public static Point3D32[] getDecayingWorldScan(PointCloudWorldPacket pointCloudWorldPacket)
+   {
+      int numberOfPoints = pointCloudWorldPacket.decayingWorldScan.size() / 3;
+
+      Point3D32[] points = new Point3D32[numberOfPoints];
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         Point3D32 point = new Point3D32();
+         point.setX(pointCloudWorldPacket.decayingWorldScan.get(3 * i));
+         point.setY(pointCloudWorldPacket.decayingWorldScan.get(3 * i + 1));
+         point.setZ(pointCloudWorldPacket.decayingWorldScan.get(3 * i + 2));
+         points[i] = point;
+      }
+
+      return points;
+   }
+
+   public static HeightQuadTreeToolboxRequestMessage clearRequest(PacketDestination destination)
+   {
+      HeightQuadTreeToolboxRequestMessage clearMessage = new HeightQuadTreeToolboxRequestMessage();
+      clearMessage.setDestination(destination);
+      clearMessage.requestClearQuadTree = true;
+      clearMessage.requestQuadTreeUpdate = false;
+      return clearMessage;
+   }
+
+   public static HeightQuadTreeToolboxRequestMessage requestQuadTreeUpdate(PacketDestination destination)
+   {
+      HeightQuadTreeToolboxRequestMessage requestMessage = new HeightQuadTreeToolboxRequestMessage();
+      requestMessage.setDestination(destination);
+      requestMessage.requestClearQuadTree = false;
+      requestMessage.requestQuadTreeUpdate = true;
+      return requestMessage;
+   }
+
+   public static void packLocalizationPointMap(LocalizationPointMapPacket localizationPointMapPacket, Point3DReadOnly[] pointCloud)
+   {
+      localizationPointMapPacket.localizationPointMap.reset();
+
+      for (int i = 0; i < pointCloud.length; i++)
+      {
+         Point3DReadOnly point = pointCloud[i];
+         localizationPointMapPacket.localizationPointMap.add((float) point.getX());
+         localizationPointMapPacket.localizationPointMap.add((float) point.getY());
+         localizationPointMapPacket.localizationPointMap.add((float) point.getZ());
+      }
+   }
+
+   public static Point3D32[] unpackLocalizationPointMap(LocalizationPointMapPacket localizationPointMapPacket)
+   {
+      int numberOfPoints = localizationPointMapPacket.localizationPointMap.size() / 3;
+
+      Point3D32[] points = new Point3D32[numberOfPoints];
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         Point3D32 point = new Point3D32();
+         point.setX(localizationPointMapPacket.localizationPointMap.get(3 * i));
+         point.setY(localizationPointMapPacket.localizationPointMap.get(3 * i + 1));
+         point.setZ(localizationPointMapPacket.localizationPointMap.get(3 * i + 2));
+         points[i] = point;
+      }
+
+      return points;
+   }
+
+   public static void checkIfDataFrameIdsMatch(FrameInformation frameInformation, ReferenceFrame referenceFrame)
+   {
+      long expectedId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+
+      if (expectedId != referenceFrame.getNameBasedHashCode() && expectedId != referenceFrame.getAdditionalNameBasedHashCode())
+      {
+         String msg = "Argument's hashcode " + referenceFrame + " " + referenceFrame.getNameBasedHashCode() + " does not match " + expectedId;
+         throw new ReferenceFrameMismatchException(msg);
+      }
+   }
+
+   public static void checkIfDataFrameIdsMatch(FrameInformation frameInformation, long otherReferenceFrameId)
+   {
+      long expectedId = HumanoidMessageTools.getDataFrameIDConsideringDefault(frameInformation);
+
+      if (expectedId != otherReferenceFrameId)
+      {
+         String msg = "Argument's hashcode " + otherReferenceFrameId + " does not match " + expectedId;
+         throw new ReferenceFrameMismatchException(msg);
+      }
+   }
+
+   public static long getDataFrameIDConsideringDefault(FrameInformation frameInformation)
+   {
+      long dataId = frameInformation.getDataReferenceFrameId();
+      if (dataId == NameBasedHashCodeTools.DEFAULT_HASHCODE)
+      {
+         dataId = frameInformation.getTrajectoryReferenceFrameId();
+      }
+      return dataId;
+   }
+
+   public static double unpackJointAngle(HandJointAnglePacket handJointAnglePacket, HandJointName jointName)
+   {
+      int index = jointName.getIndex(RobotSide.fromByte(handJointAnglePacket.robotSide));
+      if (index == -1)
+      {
+         return 0;
+      }
+
+      return handJointAnglePacket.jointAngles.get(index);
+   }
+
+   public static void packFootSupportPolygon(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotSide, FrameConvexPolygon2d footPolygon)
+   {
+      int numberOfVertices = footPolygon.getNumberOfVertices();
+
+      if (numberOfVertices > CapturabilityBasedStatus.MAXIMUM_NUMBER_OF_VERTICES)
+      {
+         numberOfVertices = CapturabilityBasedStatus.MAXIMUM_NUMBER_OF_VERTICES;
+      }
+
+      if (robotSide == RobotSide.LEFT)
+      {
+         capturabilityBasedStatus.leftFootSupportPolygon.clear();
+      }
+      else
+      {
+         capturabilityBasedStatus.rightFootSupportPolygon.clear();
+      }
+
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         if (robotSide == RobotSide.LEFT)
+         {
+            footPolygon.getVertex(i, capturabilityBasedStatus.leftFootSupportPolygon.add());
+         }
+         else
+         {
+            footPolygon.getVertex(i, capturabilityBasedStatus.rightFootSupportPolygon.add());
+         }
+      }
+   }
+
+   public static FrameConvexPolygon2d unpackFootSupportPolygon(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT && capturabilityBasedStatus.leftFootSupportPolygon.size() > 0)
+         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), capturabilityBasedStatus.leftFootSupportPolygon);
+      else if (capturabilityBasedStatus.rightFootSupportPolygon != null)
+         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), capturabilityBasedStatus.rightFootSupportPolygon);
+      else
+         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame());
+   }
+
+   public static boolean unpackIsInDoubleSupport(CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      return capturabilityBasedStatus.leftFootSupportPolygon.size() != 0 & capturabilityBasedStatus.rightFootSupportPolygon.size() != 0;
+   }
+
+   public static boolean unpackIsSupportFoot(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotside)
+   {
+      if (robotside == RobotSide.LEFT)
+         return capturabilityBasedStatus.leftFootSupportPolygon.size() != 0;
+      else
+         return capturabilityBasedStatus.rightFootSupportPolygon.size() != 0;
+   }
+
+   public static void packManifold(ReachingManifoldMessage reachingManifoldMessage, byte[] configurationSpaces, double[] lowerLimits, double[] upperLimits)
+   {
+      if (configurationSpaces.length != lowerLimits.length || configurationSpaces.length != upperLimits.length || lowerLimits.length != upperLimits.length)
+         throw new RuntimeException("Inconsistent array lengths: configurationSpaces = " + configurationSpaces.length);
+
+      reachingManifoldMessage.manifoldConfigurationSpaceNames.reset();
+      reachingManifoldMessage.manifoldLowerLimits.reset();
+      reachingManifoldMessage.manifoldUpperLimits.reset();
+      reachingManifoldMessage.manifoldConfigurationSpaceNames.add(configurationSpaces);
+      reachingManifoldMessage.manifoldLowerLimits.add(lowerLimits);
+      reachingManifoldMessage.manifoldUpperLimits.add(upperLimits);
+   }
+
+   public static Pose3D unpackPose(WaypointBasedTrajectoryMessage waypointBasedTrajectoryMessage, double time)
+   {
+      if (time <= 0.0)
+         return waypointBasedTrajectoryMessage.waypoints.get(0);
+
+      else if (time >= waypointBasedTrajectoryMessage.waypointTimes.get(waypointBasedTrajectoryMessage.waypointTimes.size() - 1))
+         return waypointBasedTrajectoryMessage.waypoints.getLast();
+
+      else
+      {
+         double timeGap = 0.0;
+
+         int indexOfFrame = 0;
+         int numberOfTrajectoryTimes = waypointBasedTrajectoryMessage.waypointTimes.size();
+
+         for (int i = 0; i < numberOfTrajectoryTimes; i++)
+         {
+            timeGap = time - waypointBasedTrajectoryMessage.waypointTimes.get(i);
+            if (timeGap < 0)
+            {
+               indexOfFrame = i;
+               break;
+            }
+         }
+
+         Pose3D poseOne = waypointBasedTrajectoryMessage.waypoints.get(indexOfFrame - 1);
+         Pose3D poseTwo = waypointBasedTrajectoryMessage.waypoints.get(indexOfFrame);
+
+         double timeOne = waypointBasedTrajectoryMessage.waypointTimes.get(indexOfFrame - 1);
+         double timeTwo = waypointBasedTrajectoryMessage.waypointTimes.get(indexOfFrame);
+
+         double alpha = (time - timeOne) / (timeTwo - timeOne);
+
+         Pose3D ret = new Pose3D();
+         ret.interpolate(poseOne, poseTwo, alpha);
+
+         return ret;
+      }
+   }
+
+   public static double unpackTrajectoryTime(JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   {
+      double trajectoryTime = 0.0;
+      for (int i = 0; i < jointspaceTrajectoryMessage.jointTrajectoryMessages.size(); i++)
+      {
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.jointTrajectoryMessages.get(i);
+         if(oneDoFJointTrajectoryMessage != null && !oneDoFJointTrajectoryMessage.trajectoryPoints.isEmpty())
+         {
+            trajectoryTime = Math.max(trajectoryTime, oneDoFJointTrajectoryMessage.trajectoryPoints.getLast().time);
+         }
+      }
+      return trajectoryTime;
    }
 }

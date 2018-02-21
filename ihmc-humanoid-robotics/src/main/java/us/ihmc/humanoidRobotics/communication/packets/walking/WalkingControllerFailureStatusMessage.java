@@ -1,36 +1,19 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.Vector2D32;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 
 public class WalkingControllerFailureStatusMessage extends Packet<WalkingControllerFailureStatusMessage>
 {
-   public Vector2D32 fallingDirection;
+   public Vector2D32 fallingDirection = new Vector2D32();
 
    public WalkingControllerFailureStatusMessage()
    {
    }
 
-   public void setFallingDirection(Vector2D32 fallingDirection)
+   public void setFallingDirection(Vector2DReadOnly fallingDirection)
    {
-      this.fallingDirection = fallingDirection;
-   }
-
-   public void setFallingDirection(Vector2D fallingDirection)
-   {
-      if (this.fallingDirection == null)
-         this.fallingDirection = new Vector2D32();
-      this.fallingDirection.set(fallingDirection);
-   }
-   
-   public void setFallingDirection(FrameVector2D fallingDirection)
-   {
-      fallingDirection.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      if (this.fallingDirection == null)
-         this.fallingDirection = new Vector2D32();
       this.fallingDirection.set(fallingDirection);
    }
 

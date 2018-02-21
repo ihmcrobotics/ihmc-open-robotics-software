@@ -17,8 +17,8 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
    public QueueableMessage queueingProperties = new QueueableMessage();
 
    /**
-    * Empty constructor for serialization.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Empty constructor for serialization. Set the id of the message to
+    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public JointspaceTrajectoryMessage()
    {
@@ -27,6 +27,7 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
 
    /**
     * Clone constructor.
+    * 
     * @param other message to clone.
     */
    public JointspaceTrajectoryMessage(JointspaceTrajectoryMessage other)
@@ -45,92 +46,6 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
       setPacketInformation(other);
    }
 
-   /**
-    * Set the trajectory points to be executed by this joint.
-    * @param jointIndex index of the joint that will go through the trajectory points.
-    * @param oneDoFJointTrajectoryMessage joint trajectory points to be executed.
-    */
-   public void setTrajectory1DMessage(int jointIndex, OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage)
-   {
-      rangeCheck(jointIndex);
-      jointTrajectoryMessages.get(jointIndex).set(oneDoFJointTrajectoryMessage);
-   }
-
-   /**
-    * Create a trajectory point.
-    * @param jointIndex index of the joint that will go through the trajectory point.
-    * @param trajectoryPointIndex index of the trajectory point to create.
-    * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-    * @param position define the desired 1D position to be reached at this trajectory point.
-    * @param velocity define the desired 1D velocity to be reached at this trajectory point.
-    */
-   public void setTrajectoryPoint(int jointIndex, int trajectoryPointIndex, double time, double position, double velocity)
-   {
-      rangeCheck(jointIndex);
-      jointTrajectoryMessages.get(jointIndex).setTrajectoryPoint(trajectoryPointIndex, time, position, velocity);
-   }
-   
-   public void setQPWeight(int jointIndex, double weight)
-   {
-      rangeCheck(jointIndex);
-      jointTrajectoryMessages.get(jointIndex).setWeight(weight);
-   }
-
-   public int getNumberOfJoints()
-   {
-      return jointTrajectoryMessages.size();
-   }
-
-   public OneDoFJointTrajectoryMessage getJointTrajectoryPointList(int jointIndex)
-   {
-      rangeCheck(jointIndex);
-      return jointTrajectoryMessages.get(jointIndex);
-   }
-
-   public int getNumberOfJointTrajectoryPoints(int jointIndex)
-   {
-      rangeCheck(jointIndex);
-      return jointTrajectoryMessages.get(jointIndex).getNumberOfTrajectoryPoints();
-   }
-
-   public RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> getTrajectoryPointLists()
-   {
-      return jointTrajectoryMessages;
-   }
-
-   public TrajectoryPoint1DMessage getJointTrajectoryPoint(int jointIndex, int trajectoryPointIndex)
-   {
-      rangeCheck(jointIndex);
-      return jointTrajectoryMessages.get(jointIndex).getTrajectoryPoint(trajectoryPointIndex);
-   }
-
-   public void getFinalJointAngles(double[] finalJointAnglesToPack)
-   {
-      for (int i = 0; i < getNumberOfJoints(); i++)
-      {
-         finalJointAnglesToPack[i] = jointTrajectoryMessages.get(i).getLastTrajectoryPoint().position;
-      }
-   }
-
-   public double getTrajectoryTime()
-   {
-      double trajectoryTime = 0.0;
-      for (int i = 0; i < getNumberOfJoints(); i++)
-      {
-         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointTrajectoryMessages.get(i);
-         if(oneDoFJointTrajectoryMessage != null && oneDoFJointTrajectoryMessage.getNumberOfTrajectoryPoints() > 0)
-         {
-            trajectoryTime = Math.max(trajectoryTime, oneDoFJointTrajectoryMessage.getLastTrajectoryPoint().time);
-         }
-      }
-      return trajectoryTime;
-   }
-
-   public void setJointTrajectoryMessages(OneDoFJointTrajectoryMessage[] jointTrajectoryMessages)
-   {
-      MessageTools.copyData(jointTrajectoryMessages, this.jointTrajectoryMessages);
-   }
-
    public RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> getJointTrajectoryMessages()
    {
       return jointTrajectoryMessages;
@@ -144,12 +59,6 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
    public QueueableMessage getQueueingProperties()
    {
       return queueingProperties;
-   }
-
-   private void rangeCheck(int jointIndex)
-   {
-      if (jointIndex >= getNumberOfJoints() || jointIndex < 0)
-         throw new IndexOutOfBoundsException("Joint index: " + jointIndex + ", number of joints: " + getNumberOfJoints());
    }
 
    /** {@inheritDoc} */

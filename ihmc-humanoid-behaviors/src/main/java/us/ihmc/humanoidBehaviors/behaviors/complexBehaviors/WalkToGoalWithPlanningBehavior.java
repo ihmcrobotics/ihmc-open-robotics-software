@@ -368,7 +368,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
       {
          if (newestPacket.walkToGoalAction == WalkToGoalAction.FIND_PATH.toByte())
          {
-            set(newestPacket.getGoalPosition()[0], newestPacket.getGoalPosition()[1], newestPacket.getGoalPosition()[2], RobotSide.fromByte(newestPacket.getGoalSide()));
+            set(newestPacket.xGoal, newestPacket.yGoal, newestPacket.thetaGoal, RobotSide.fromByte(newestPacket.getGoalRobotSide()));
             requestFootstepPlan();
             hasInputBeenSet.set(true);
             debugPrintln("Requesting path");

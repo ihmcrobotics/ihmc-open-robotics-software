@@ -583,7 +583,7 @@ public class SphereICPPlannerVisualizer
 
          for (FootstepDataListMessage footstepDataList : footstepDataLists)
          {
-            List<FootstepDataMessage> dataList = footstepDataList.getDataList();
+            List<FootstepDataMessage> dataList = footstepDataList.getFootstepDataList();
             for (int i = 0; i < dataList.size(); i++)
             {
                FootstepDataMessage footstepData = dataList.get(i);

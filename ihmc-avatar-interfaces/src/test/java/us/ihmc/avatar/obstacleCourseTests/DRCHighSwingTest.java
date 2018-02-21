@@ -127,14 +127,14 @@ public abstract class DRCHighSwingTest implements MultiRobotTestInterface
       Vector3D verticalVector = new Vector3D(0.0, 0.0, 1.0);
       FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       RotationTools.computeQuaternionFromYawAndZNormal(0.0 / 4.0 * Math.PI, verticalVector, orientation);
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(0.0, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.0, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(0.4, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.8, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(1.6, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(2.0, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(2.0, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(0.0, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.0, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(0.4, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.8, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(1.6, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(2.0, .15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(2.0, -.15, 0.0), new Quaternion(orientation), null, TrajectoryType.OBSTACLE_CLEARANCE, swingHeight));
 
 
       return footstepDataList;

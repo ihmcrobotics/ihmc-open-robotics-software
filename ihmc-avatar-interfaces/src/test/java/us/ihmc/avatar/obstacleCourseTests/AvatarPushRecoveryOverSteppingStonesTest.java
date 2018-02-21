@@ -214,7 +214,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       {
          FramePoint3D placeToStep = new FramePoint3D(ReferenceFrame.getWorldFrame(), locations.get(i));
          FootstepDataMessage data = createFootstepDataMessage(robotSides[i], placeToStep, orientations.get(i));
-         message.add(data);
+         message.footstepDataList.add().set(data);
       }
 
       return message;

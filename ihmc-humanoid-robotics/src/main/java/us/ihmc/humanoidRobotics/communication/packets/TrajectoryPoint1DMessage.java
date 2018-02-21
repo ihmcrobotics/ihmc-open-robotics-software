@@ -47,16 +47,6 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
       this.time = time;
    }
 
-   public void addTimeOffset(double timeOffsetToAdd)
-   {
-      time += timeOffsetToAdd;
-   }
-
-   public void subtractTimeOffset(double timeOffsetToSubtract)
-   {
-      time -= timeOffsetToSubtract;
-   }
-
    public double getTime()
    {
       return time;
@@ -80,35 +70,6 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
    public void setVelocity(double velocity)
    {
       this.velocity = velocity;
-   }
-
-   public void setTimeToZero()
-   {
-      time = 0.0;
-   }
-
-   public void setToZero()
-   {
-      time = 0.0;
-      position = 0.0;
-      velocity = 0.0;
-   }
-
-   public void setTimeToNaN()
-   {
-      time = Double.NaN;
-   }
-
-   public void setToNaN()
-   {
-      time = Double.NaN;
-      position = Double.NaN;
-      velocity = Double.NaN;
-   }
-
-   public boolean containsNaN()
-   {
-      return Double.isNaN(time) || Double.isNaN(position) || Double.isNaN(velocity);
    }
 
    @Override

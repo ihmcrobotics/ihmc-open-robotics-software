@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -82,14 +83,14 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
    private void computeForwardFootstepList()
    {
-      forwardFootstepList.clear();
+      forwardFootstepList.footstepDataList.clear();
 
       RobotSide swingSide = initialSwingSide.getEnumValue();
 
       for (int i = 0; i < numberOfStepsToTake.getIntegerValue(); i++)
       {
          FootstepDataMessage footstepDataMessage = constructFootstepDataMessage(midFootZUpFrame, footstepLength.getDoubleValue() * (i + 1), 0.5 * swingSide.negateIfRightSide(footstepWidth.getDoubleValue()), swingSide);
-         forwardFootstepList.add(footstepDataMessage);
+         forwardFootstepList.footstepDataList.add().set(footstepDataMessage);
 
          swingSide = swingSide.getOppositeSide();
       }
@@ -100,10 +101,10 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
    private void computeBackwardFootstepList()
    {
-      backwardFootstepList.clear();
+      backwardFootstepList.footstepDataList.clear();
 
       ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<>();
-      List<FootstepDataMessage> dataList = forwardFootstepList.getDataList();
+      List<FootstepDataMessage> dataList = forwardFootstepList.getFootstepDataList();
       for (int i = 0; i < dataList.size(); i++)
       {
          FootstepDataMessage step = dataList.get(i);
@@ -117,7 +118,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
       FootstepDataMessage initialStanceFoot = constructFootstepDataMessage(soleFrames.get(initialStanceSide), 0.0, 0.0,
                                                                            initialStanceSide);
       footstepDataList.add(initialStanceFoot);
-      footstepDataList.forEach(backwardFootstepList::add);
+      MessageTools.copyData(footstepDataList, backwardFootstepList.footstepDataList);
 
       backwardFootstepList.setDefaultSwingDuration(swingTime.getDoubleValue());
       backwardFootstepList.setDefaultTransferDuration(transferTime.getDoubleValue());
@@ -153,7 +154,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
          stepsAlongPath.increment();
       }
 
-      if(stepsAlongPath.getIntegerValue() == forwardFootstepList.getDataList().size())
+      if(stepsAlongPath.getIntegerValue() == forwardFootstepList.getFootstepDataList().size())
       {
          stepsAlongPath.set(0);
 

@@ -82,7 +82,8 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
       FootstepDataListMessage footstepMessage1 = new FootstepDataListMessage();
       footstepMessage1.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
-      footstepMessage1.setExecutionMode(ExecutionMode.OVERRIDE);
+      footstepMessage1.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      footstepMessage1.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
       footstepMessage1.setUniqueId(1);
 
       FootstepDataListMessage footstepMessage2 = new FootstepDataListMessage();
@@ -136,11 +137,11 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
          if(stepIndex < 10)
          {
-            footstepMessage1.add(footstepData);
+            footstepMessage1.footstepDataList.add().set(footstepData);
          }
          else
          {
-            footstepMessage2.add(footstepData);
+            footstepMessage2.footstepDataList.add().set(footstepData);
          }
       }
 
@@ -212,32 +213,32 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
             assertEquals(failMessage, expectedStartTimeOfNextStep, time, swingStartTimeEpsilon);
 
-            if (stepCount > footstepMessage1.size() + footstepMessage2.size() - 2)
+            if (stepCount > footstepMessage1.footstepDataList.size() + footstepMessage2.footstepDataList.size() - 2)
             {
                isDone = true;
                return;
             }
 
-            if(stepCount < footstepMessage1.size())
+            if(stepCount < footstepMessage1.footstepDataList.size())
             {
-               double swingTime = footstepMessage1.get(stepCount).getSwingDuration();
+               double swingTime = footstepMessage1.footstepDataList.get(stepCount).getSwingDuration();
 
                double transferTime = Double.NaN;
-               if(stepCount == footstepMessage1.size() - 1)
+               if(stepCount == footstepMessage1.footstepDataList.size() - 1)
                {
-                  transferTime = footstepMessage2.get(0).getTransferDuration();
+                  transferTime = footstepMessage2.footstepDataList.get(0).getTransferDuration();
                }
                else
                {
-                  transferTime = footstepMessage1.get(stepCount + 1).getTransferDuration();
+                  transferTime = footstepMessage1.footstepDataList.get(stepCount + 1).getTransferDuration();
                }
 
                expectedStartTimeOfNextStep += swingTime + transferTime;
             }
             else
             {
-               double swingTime = footstepMessage2.get(stepCount - footstepMessage1.size()).getSwingDuration();
-               double transferTime = footstepMessage2.get(stepCount + 1 - footstepMessage1.size()).getTransferDuration();
+               double swingTime = footstepMessage2.footstepDataList.get(stepCount - footstepMessage1.footstepDataList.size()).getSwingDuration();
+               double transferTime = footstepMessage2.footstepDataList.get(stepCount + 1 - footstepMessage1.footstepDataList.size()).getTransferDuration();
                expectedStartTimeOfNextStep += swingTime + transferTime;
             }
 
@@ -280,7 +281,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(side, location, orientation);
          footstepData.setTransferDuration(minimumTransferTime / 2.0);
-         footsteps.add(footstepData);
+         footsteps.footstepDataList.add().set(footstepData);
       }
 
       drcSimulationTestHelper.send(footsteps);

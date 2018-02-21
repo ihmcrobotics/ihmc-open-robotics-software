@@ -84,20 +84,20 @@ public class ArmTrajectoryCommandTest
       ArmTrajectoryMessage message = RandomHumanoidMessages.nextArmTrajectoryMessage(random);
       armTrajectoryCommand.set(message);
 
-      assertEquals(message.getQueueingProperties().getExecutionDelayTime(), armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
-      assertEquals(ExecutionMode.fromByte(message.getQueueingProperties().getExecutionMode()), armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
-      assertEquals(message.getJointspaceTrajectory().getNumberOfJoints(), armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints());
+      assertEquals(message.jointspaceTrajectory.getQueueingProperties().getExecutionDelayTime(), armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
+      assertEquals(ExecutionMode.fromByte(message.jointspaceTrajectory.getQueueingProperties().getExecutionMode()), armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
+      assertEquals(message.getJointspaceTrajectory().jointTrajectoryMessages.size(), armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints());
 
-      for (int i = 0; i < message.getJointspaceTrajectory().getNumberOfJoints(); i++)
+      for (int i = 0; i < message.getJointspaceTrajectory().jointTrajectoryMessages.size(); i++)
       {
-         int numberOfJointTrajectoryPoints = message.getJointspaceTrajectory().getNumberOfJointTrajectoryPoints(i);
+         int numberOfJointTrajectoryPoints = message.getJointspaceTrajectory().jointTrajectoryMessages.get(i).trajectoryPoints.size();
          OneDoFJointTrajectoryCommand jointTrajectoryPointList = armTrajectoryCommand.getJointspaceTrajectory().getJointTrajectoryPointList(i);
          assertEquals(numberOfJointTrajectoryPoints, jointTrajectoryPointList.getNumberOfTrajectoryPoints());
 
          for (int j = 0; j < numberOfJointTrajectoryPoints; j++)
          {
             SimpleTrajectoryPoint1D trajectoryPoint = jointTrajectoryPointList.getTrajectoryPoint(j);
-            TrajectoryPoint1DMessage jointTrajectoryPoint = message.getJointspaceTrajectory().getJointTrajectoryPoint(i, j);
+            TrajectoryPoint1DMessage jointTrajectoryPoint = message.getJointspaceTrajectory().jointTrajectoryMessages.get(i).trajectoryPoints.get(j);
 
             assertEquals(jointTrajectoryPoint.getPosition(), trajectoryPoint.getPosition(), 1e-9);
             assertEquals(jointTrajectoryPoint.getVelocity(), trajectoryPoint.getVelocity(), 1e-9);

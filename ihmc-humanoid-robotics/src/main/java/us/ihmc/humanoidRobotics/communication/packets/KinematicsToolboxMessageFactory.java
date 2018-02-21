@@ -42,9 +42,16 @@ public class KinematicsToolboxMessageFactory
       FramePose3D currentPose = new FramePose3D(rigidBody.getBodyFixedFrame());
       currentPose.changeFrame(worldFrame);
 
-      message.setDesiredPose(currentPose);
-      message.setSelectionMatrixToIdentity();
-      message.setWeight(DEFAULT_LOW_WEIGHT);
+      message.setDesiredPositionInWorld(currentPose.getPosition());
+      message.setDesiredOrientationInWorld(currentPose.getOrientation());
+      message.angularSelectionMatrix.xSelected = true;
+      message.angularSelectionMatrix.ySelected = true;
+      message.angularSelectionMatrix.zSelected = true;
+      message.linearSelectionMatrix.xSelected = true;
+      message.linearSelectionMatrix.ySelected = true;
+      message.linearSelectionMatrix.zSelected = true;
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
 
       return message;
@@ -68,9 +75,15 @@ public class KinematicsToolboxMessageFactory
       FrameQuaternion currentOrientation = new FrameQuaternion(rigidBody.getBodyFixedFrame());
       currentOrientation.changeFrame(worldFrame);
 
-      message.setDesiredOrientation(currentOrientation);
-      message.setSelectionMatrixForAngularControl();
-      message.setWeight(DEFAULT_LOW_WEIGHT);
+      message.setDesiredOrientationInWorld(currentOrientation);
+      message.angularSelectionMatrix.xSelected = true;
+      message.angularSelectionMatrix.ySelected = true;
+      message.angularSelectionMatrix.zSelected = true;
+      message.linearSelectionMatrix.xSelected = false;
+      message.linearSelectionMatrix.ySelected = false;
+      message.linearSelectionMatrix.zSelected = false;
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
 
       return message;
@@ -97,13 +110,13 @@ public class KinematicsToolboxMessageFactory
       KinematicsToolboxCenterOfMassMessage message = new KinematicsToolboxCenterOfMassMessage();
       CenterOfMassCalculator calculator = new CenterOfMassCalculator(rootBody, worldFrame);
       calculator.compute();
-      message.setDesiredPosition(calculator.getCenterOfMass());
-      message.setWeight(DEFAULT_CENTER_OF_MASS_WEIGHT);
+      message.desiredPositionInWorld.set(calculator.getCenterOfMass());
+      message.getWeights().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_CENTER_OF_MASS_WEIGHT));
 
       SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
       selectionMatrix3D.setAxisSelection(holdX, holdY, holdZ);
 
-      message.setSelectionMatrix(selectionMatrix3D);
+      message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix3D));
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
 
       return message;
@@ -158,7 +171,7 @@ public class KinematicsToolboxMessageFactory
       Quaternion privilegedRootJointOrientation = new Quaternion();
       rootJoint.getRotation(privilegedRootJointOrientation);
 
-      message.setPrivilegedRobotConfiguration(privilegedRootJointPosition, privilegedRootJointOrientation, jointNameBasedHashCodes, privilegedJointAngles);
+      MessageTools.packPrivilegedRobotConfiguration(message, privilegedRootJointPosition, privilegedRootJointOrientation, jointNameBasedHashCodes, privilegedJointAngles);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
 
       return message;

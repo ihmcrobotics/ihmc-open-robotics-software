@@ -73,7 +73,7 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage>
       setPacketInformation(other);
    }
 
-   public byte getStatus()
+   public byte getFootstepStatus()
    {
       return footstepStatus;
    }
@@ -127,7 +127,7 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage>
       this.robotSide = robotSide;
    }
 
-   public void setStatus(byte status)
+   public void setFootstepStatus(byte status)
    {
       this.footstepStatus = status;
    }
@@ -179,7 +179,7 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage>
       if (other instanceof FootstepStatusMessage)
       {
          FootstepStatusMessage otherFoostepStatus = (FootstepStatusMessage) other;
-         boolean sameStatus = otherFoostepStatus.getStatus() == getStatus();
+         boolean sameStatus = otherFoostepStatus.getFootstepStatus() == getFootstepStatus();
          boolean sameIndex = otherFoostepStatus.getFootstepIndex() == getFootstepIndex();
 
          return sameStatus && sameIndex;

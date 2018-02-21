@@ -7,15 +7,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class GlobalDataProducer
 {
@@ -45,8 +44,7 @@ public class GlobalDataProducer
 
    public void notifyInvalidPacketReceived(Class<? extends Packet<?>> packetClass, String error)
    {
-      InvalidPacketNotificationPacket packet = new InvalidPacketNotificationPacket();
-      packet.set(packetClass, error);
+      InvalidPacketNotificationPacket packet = MessageTools.createInvalidPacketNotificationPacket(packetClass, error);
       queueDataToSend(packet);
    }
 

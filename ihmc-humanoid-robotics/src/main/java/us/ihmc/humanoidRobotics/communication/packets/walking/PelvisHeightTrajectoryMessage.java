@@ -30,7 +30,9 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       euclideanTrajectory = new EuclideanTrajectoryMessage();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
+      euclideanTrajectory.selectionMatrix.xSelected = false;
+      euclideanTrajectory.selectionMatrix.ySelected = false;
+      euclideanTrajectory.selectionMatrix.zSelected = true;
    }
 
    /**
@@ -45,7 +47,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       setDestination(other.getDestination());
 
       enableUserPelvisControl = other.enableUserPelvisControl;
-      enableUserPelvisControlDuringWalking = other.isEnableUserPelvisControlDuringWalking();
+      enableUserPelvisControlDuringWalking = other.getEnableUserPelvisControlDuringWalking();
    }
 
    @Override
@@ -64,7 +66,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     * 
     * @return whether or not user mode is enabled.
     */
-   public boolean isEnableUserPelvisControl()
+   public boolean getEnableUserPelvisControl()
    {
       return enableUserPelvisControl;
    }
@@ -85,7 +87,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     * 
     * @return whether or not user mode is enabled while walking
     **/
-   public boolean isEnableUserPelvisControlDuringWalking()
+   public boolean getEnableUserPelvisControlDuringWalking()
    {
       return enableUserPelvisControlDuringWalking;
    }
@@ -149,7 +151,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    public String toString()
    {
       if (euclideanTrajectory.taskspaceTrajectoryPoints != null)
-         return "Pelvis height trajectory: number of trajectory points = " + euclideanTrajectory.getNumberOfTrajectoryPoints();
+         return "Pelvis height trajectory: number of trajectory points = " + euclideanTrajectory.taskspaceTrajectoryPoints.size();
       else
          return "Pelvis height trajectory: no trajectory points   .";
    }

@@ -2,13 +2,10 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.euclid.geometry.Pose2D;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.idl.RecyclingArrayListPubSub;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanningToolboxOutputStatus>
 {
@@ -23,11 +20,11 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public byte footstepPlanningResult;
    public int planId = FootstepPlanningRequestPacket.NO_PLAN_ID;
 
-   public PlanarRegionsListMessage planarRegionsListMessage = null;
+   public PlanarRegionsListMessage planarRegionsList = new PlanarRegionsListMessage();
 
    // body path planner fields
-   public RecyclingArrayListPubSub<Point2D> bodyPath = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 5);
-   public Pose2D lowLevelPlannerGoal;
+   public RecyclingArrayListPubSub<Point2D> bodyPath = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 50);
+   public Pose2D lowLevelPlannerGoal = new Pose2D();
 
    public FootstepPlanningToolboxOutputStatus()
    {
@@ -37,16 +34,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public void setPlanId(int planId)
    {
       this.planId = planId;
-   }
-
-   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
-   {
-      this.planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-   }
-
-   public void setBodyPath(Point2D[] bodyPath)
-   {
-      MessageTools.copyData(bodyPath, this.bodyPath);
    }
 
    public void setLowLevelPlannerGoal(Pose2D lowLevelPlannerGoal)
@@ -62,37 +49,16 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       if (planId != other.planId)
          return false;
 
-      if (!nullAndEpilsonCompare(planarRegionsListMessage, other.planarRegionsListMessage, epsilon))
+      if (!planarRegionsList.epsilonEquals(other.planarRegionsList, epsilon))
          return false;
-      if (!nullAndEpilsonCompare(lowLevelPlannerGoal, other.lowLevelPlannerGoal, epsilon))
+      if (!lowLevelPlannerGoal.epsilonEquals(other.lowLevelPlannerGoal, epsilon))
          return false;
-      if (!bothOrNeitherAreNull(bodyPath, other.bodyPath))
-         return false;
-
       if (!MessageTools.epsilonEquals(bodyPath, other.bodyPath, epsilon))
          return false;
 
       if (!footstepDataList.epsilonEquals(other.footstepDataList, epsilon))
          return false;
 
-      return true;
-   }
-
-   private static <T extends EpsilonComparable<T>> boolean nullAndEpilsonCompare(T object1, T object2, double epsilon)
-   {
-      if (!bothOrNeitherAreNull(object1, object2))
-         return false;
-      else if (object1 != null && !object1.epsilonEquals(object2, epsilon))
-         return false;
-      return true;
-   }
-
-   private static boolean bothOrNeitherAreNull(Object object1, Object object2)
-   {
-      if (object1 == null && object2 != null)
-         return false;
-      else if (object1 != null && object2 == null)
-         return false;
       return true;
    }
 
@@ -106,7 +72,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       footstepDataList.defaultSwingDuration = other.footstepDataList.defaultSwingDuration;
       footstepDataList.defaultTransferDuration = other.footstepDataList.defaultTransferDuration;
       footstepDataList.uniqueId = other.footstepDataList.uniqueId;
-      planarRegionsListMessage = other.planarRegionsListMessage;
+      planarRegionsList = other.planarRegionsList;
       bodyPath = other.bodyPath;
       lowLevelPlannerGoal = other.lowLevelPlannerGoal;
       planId = other.planId;

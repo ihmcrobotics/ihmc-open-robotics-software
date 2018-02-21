@@ -204,9 +204,9 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
          FootstepStatusMessage status = latestFootstepStatus.get(side);
          if(status != null)
          {
-            latestFootstepStatusEnum.get(side).set(status.getStatus());
+            latestFootstepStatusEnum.get(side).set(status.getFootstepStatus());
 
-            if (status.getStatus() == FootstepStatus.STARTED.toByte())
+            if (status.getFootstepStatus() == FootstepStatus.STARTED.toByte())
             {
                currentlySwingingFoot.set(side);
             }
@@ -293,10 +293,11 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
          //         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 
          FootstepDataMessage firstFootstepMessage = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), new us.ihmc.euclid.tuple3D.Point3D(tempFootstepPosePosition), new Quaternion(tempFirstFootstepPoseOrientation));
-         footstepDataListMessage.add(firstFootstepMessage);
+         footstepDataListMessage.footstepDataList.add().set(firstFootstepMessage);
       }
 
-      footstepDataListMessage.setExecutionMode(ExecutionMode.OVERRIDE);
+      footstepDataListMessage.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      footstepDataListMessage.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
       return footstepDataListMessage;
    }
 

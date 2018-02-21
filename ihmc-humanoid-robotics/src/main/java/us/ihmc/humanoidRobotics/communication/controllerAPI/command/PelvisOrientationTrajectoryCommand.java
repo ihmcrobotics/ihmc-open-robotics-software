@@ -40,14 +40,14 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisOrientationTrajectoryMessage message)
    {
-      setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
+      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
       so3Trajectory.set(resolver, message.so3Trajectory);
    }
 
    @Override
    public void set(PelvisOrientationTrajectoryMessage message)
    {
-      setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
+      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
       so3Trajectory.set(message.so3Trajectory);
    }
 

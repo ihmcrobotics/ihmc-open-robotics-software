@@ -131,8 +131,8 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       double stepWidth = getStepWidth();
       double dTheta = stepLength / radius;
       double theta = 0;
-      ArmTrajectoryMessage leftHandMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, getArmDoF());
-      ArmTrajectoryMessage rightHandMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, getArmDoF());
+      ArmTrajectoryMessage leftHandMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT);
+      ArmTrajectoryMessage rightHandMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT);
       ArmJointName[] armJoint = getArmJointNames();
       if (armJoint == null)
       {
@@ -149,18 +149,16 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 
       for (int armJointIndex = 0; armJointIndex < getArmDoF(); armJointIndex++)
       {
-         OneDoFJointTrajectoryMessage leftJointTrajectory = HumanoidMessageTools.createOneDoFJointTrajectoryMessage(getArmTrajectoryPoints());
-         OneDoFJointTrajectoryMessage rightJointTrajectory = HumanoidMessageTools.createOneDoFJointTrajectoryMessage(getArmTrajectoryPoints());
+         OneDoFJointTrajectoryMessage leftJointTrajectory = new OneDoFJointTrajectoryMessage();
+         OneDoFJointTrajectoryMessage rightJointTrajectory = new OneDoFJointTrajectoryMessage();
          for (int trajectoryPointIndex = 0; trajectoryPointIndex < getArmTrajectoryPoints(); trajectoryPointIndex++)
          {
 
-            leftJointTrajectory.setTrajectoryPoint(trajectoryPointIndex, 2 * trajectoryPointIndex + 1,
-                                                   getRandomValidJointAngle(RobotSide.LEFT, armJoint[armJointIndex], fullRobotModel), 0);
-            rightJointTrajectory.setTrajectoryPoint(trajectoryPointIndex, 2 * trajectoryPointIndex + 1,
-                                                    getRandomValidJointAngle(RobotSide.RIGHT, armJoint[armJointIndex], fullRobotModel), 0);
+            leftJointTrajectory.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage((double) (2 * trajectoryPointIndex + 1), getRandomValidJointAngle(RobotSide.LEFT, armJoint[armJointIndex], fullRobotModel), (double) 0));
+            rightJointTrajectory.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage((double) (2 * trajectoryPointIndex + 1), getRandomValidJointAngle(RobotSide.RIGHT, armJoint[armJointIndex], fullRobotModel), (double) 0));
          }
-         leftHandMessage.getJointspaceTrajectory().setTrajectory1DMessage(armJointIndex, leftJointTrajectory);
-         rightHandMessage.getJointspaceTrajectory().setTrajectory1DMessage(armJointIndex, rightJointTrajectory);
+         leftHandMessage.getJointspaceTrajectory().jointTrajectoryMessages.add().set(leftJointTrajectory);
+         rightHandMessage.getJointspaceTrajectory().jointTrajectoryMessages.add().set(rightJointTrajectory);
          leftArmTrajectory.add(leftJointTrajectory);
          rightArmTrajectory.add(rightJointTrajectory);
       }
@@ -219,7 +217,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       footstepData.setLocation(stepLocation);
       footstepData.setOrientation(orient);
       footstepData.setRobotSide(robotSide.toByte());
-      message.add(footstepData);
+      message.footstepDataList.add().set(footstepData);
    }
 
    private void setupCameraBackView()
@@ -305,11 +303,11 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
          double[] expectedJointPos = new double[2 * getArmDoF()];
          for (int i = 0; i < expectedJointPos.length / 2; i++)
          {
-            expectedJointPos[i] = leftArmMessages.get(i).getTrajectoryPoint(armJointCheckPointIndex).getPosition();
+            expectedJointPos[i] = leftArmMessages.get(i).trajectoryPoints.get(armJointCheckPointIndex).getPosition();
          }
          for (int i = 0; i < expectedJointPos.length / 2; i++)
          {
-            expectedJointPos[i + expectedJointPos.length / 2] = rightArmMessages.get(i).getTrajectoryPoint(armJointCheckPointIndex).getPosition();
+            expectedJointPos[i + expectedJointPos.length / 2] = rightArmMessages.get(i).trajectoryPoints.get(armJointCheckPointIndex).getPosition();
          }
          return expectedJointPos;
       }

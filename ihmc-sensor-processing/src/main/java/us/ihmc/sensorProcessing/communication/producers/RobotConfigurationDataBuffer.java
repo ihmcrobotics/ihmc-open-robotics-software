@@ -18,6 +18,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 /**
  * Buffer for RobotConfigurationData. Allows updating a fullrobotmodel based on timestamps. Make
@@ -187,9 +188,9 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          fullRobotModelCache.allJoints[i].setQd(newJointVelocities.get(i));
       }
 
-      Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
+      Vector3D32 translation = robotConfigurationData.getRootTranslation();
       rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-      Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
+      Quaternion32 orientation = robotConfigurationData.getRootOrientation();
       rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
 
       Twist rootJointTwist = new Twist();
@@ -206,7 +207,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       {
          for (int i = 0; i < forceSensorDataHolder.getForceSensorDefinitions().size(); i++)
          {
-            SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.getMomentAndForceVectorForSensor(i);
+            SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.momentAndForceDataAllForceSensors.get(i);
             forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i)).setWrench(momentAndForceVectorForSensor.angularPart,
                                                                                                           momentAndForceVectorForSensor.linearPart);
          }
@@ -238,7 +239,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
             allJoints = FullRobotModelUtils.getAllJointsExcludingHands((FullHumanoidRobotModel) fullRobotModel);
          else
             allJoints = fullRobotModel.getOneDoFJoints();
-         jointNameHash = RobotConfigurationData.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(),
+         jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(),
                                                                        fullRobotModel.getIMUDefinitions());
       }
    }

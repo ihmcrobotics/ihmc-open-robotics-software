@@ -67,8 +67,8 @@ public class HumanoidKinematicsSolver
       RobotConfigurationData configurationData = new RobotConfigurationData();
       configurationData.jointNameHash = kinematicsToolboxOutputStatus.jointNameHash;
       MessageTools.copyData(kinematicsToolboxOutputStatus.desiredJointAngles, configurationData.jointAngles);
-      configurationData.rootTranslation = new Vector3D32(kinematicsToolboxOutputStatus.getPelvisTranslation());
-      configurationData.rootOrientation = new Quaternion32(kinematicsToolboxOutputStatus.getPelvisOrientation());
+      configurationData.rootTranslation = new Vector3D32(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
+      configurationData.rootOrientation = new Quaternion32(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
       setInitialConfiguration(configurationData);
    }
 

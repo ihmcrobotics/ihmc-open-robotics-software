@@ -106,7 +106,7 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       footstepData.setRobotSide(robotSide.toByte());
       footstepData.setSwingDuration(swingTime);
       footstepData.setTransferDuration(transferTime);
-      message.add(footstepData);
+      message.footstepDataList.add().set(footstepData);
    }
 
    protected double getStepLength()
@@ -308,8 +308,8 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
       {
          this.footstepListMessage = footMessage;
          this.footstepList = new ArrayList<>();
-         for (int i = 0; i < this.footstepListMessage.getDataList().size(); i++)
-            footstepList.add(this.footstepListMessage.getDataList().get(i));
+         for (int i = 0; i < this.footstepListMessage.getFootstepDataList().size(); i++)
+            footstepList.add(this.footstepListMessage.getFootstepDataList().get(i));
       }
    }
 }

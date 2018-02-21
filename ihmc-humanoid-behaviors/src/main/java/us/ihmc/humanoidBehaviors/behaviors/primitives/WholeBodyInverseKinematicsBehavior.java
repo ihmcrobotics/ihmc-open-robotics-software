@@ -26,6 +26,7 @@ import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
@@ -258,7 +259,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             RigidBody hand = fullRobotModel.getHand(robotSide);
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
             KinematicsToolboxRigidBodyMessage handMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, handControlFrame, desiredHandPosition, desiredHandOrientation);
-            handMessage.setWeight(20.0);
+            handMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+            handMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
             handMessages.put(robotSide, handMessage);
          }
       }
@@ -272,7 +274,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          Quaternion desiredChestOrientation = new Quaternion(yoDesiredChestOrientation);
          RigidBody chest = fullRobotModel.getChest();
          chestMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(chest, desiredChestOrientation);
-         chestMessage.setWeight(0.02);
+         chestMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
+         chestMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
       }
 
       RigidBody pelvis = fullRobotModel.getPelvis();
@@ -284,16 +287,18 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       if (!yoDesiredPelvisOrientation.containsNaN())
       {
-         pelvisMessage.setDesiredOrientation(yoDesiredPelvisOrientation);
-         pelvisMessage.setWeight(0.02);
+         pelvisMessage.setDesiredOrientationInWorld(yoDesiredPelvisOrientation);
+         pelvisMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
+         pelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
       }
 
       if (!yoDesiredPelvisPosition.containsNaN())
       {
          Point3D desiredPelvisPosition = new Point3D();
          desiredPelvisPosition.set(yoDesiredPelvisPosition);
-         pelvisMessage.setDesiredPosition(desiredPelvisPosition);
-         pelvisMessage.setWeight(0.02);
+         pelvisMessage.setDesiredPositionInWorld(desiredPelvisPosition);
+         pelvisMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
+         pelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
       }
    }
 
@@ -306,7 +311,11 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          {
             if (handMessages.get(robotSide) != null)
             {
-               handMessages.get(robotSide).setSelectionMatrix(handSelectionMatrices.get(robotSide));
+               SelectionMatrix6D selectionMatrix6D = handSelectionMatrices.get(robotSide);
+               KinematicsToolboxRigidBodyMessage r = handMessages.get(robotSide);
+               r.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getAngularPart()));
+               SelectionMatrix3D linearPart = selectionMatrix6D.getLinearPart();
+               r.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(linearPart));
                handMessages.get(robotSide).setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
                sendPacket(handMessages.get(robotSide));
             }
@@ -314,14 +323,18 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
          if (chestMessage != null)
          {
-            chestMessage.setSelectionMatrix(chestSelectionMatrix);
+            chestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(chestSelectionMatrix.getAngularPart()));
+            SelectionMatrix3D linearPart = chestSelectionMatrix.getLinearPart();
+            chestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(linearPart));
             chestMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(chestMessage);
          }
 
          if (pelvisMessage != null)
          {
-            pelvisMessage.setSelectionMatrix(pelvisSelectionMatrix);
+            pelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(pelvisSelectionMatrix.getAngularPart()));
+            SelectionMatrix3D linearPart = pelvisSelectionMatrix.getLinearPart();
+            pelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(linearPart));
             pelvisMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(pelvisMessage);
          }

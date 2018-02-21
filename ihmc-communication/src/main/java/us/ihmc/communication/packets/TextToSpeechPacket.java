@@ -20,7 +20,7 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket>
    {
    }
 
-   public void setbeep(boolean beep)
+   public void setBeep(boolean beep)
    {
       this.beep = beep;
    }

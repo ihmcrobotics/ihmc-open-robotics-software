@@ -59,7 +59,7 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       this.useJointspaceCommand = useJointspaceCommand;
    }
 
-   public boolean isUseJointspaceCommand()
+   public boolean getUseJointspaceCommand()
    {
       return useJointspaceCommand;
    }

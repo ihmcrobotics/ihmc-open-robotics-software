@@ -39,7 +39,7 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
       setDestination(pelvisOrientationTrajectoryMessage.getDestination());
    }
 
-   public boolean isEnableUserPelvisControlDuringWalking()
+   public boolean getEnableUserPelvisControlDuringWalking()
    {
       return enableUserPelvisControlDuringWalking;
    }
@@ -65,7 +65,7 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
          so3Trajectory.setUniqueId(uniqueId);
    }
 
-   public SO3TrajectoryMessage getSO3Trajectory()
+   public SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3Trajectory;
    }
@@ -84,7 +84,7 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
    public String toString()
    {
       if (so3Trajectory.taskspaceTrajectoryPoints != null)
-         return "Pelvis SO3 trajectory: number of SO3 trajectory points = " + so3Trajectory.getNumberOfTrajectoryPoints();
+         return "Pelvis SO3 trajectory: number of SO3 trajectory points = " + so3Trajectory.taskspaceTrajectoryPoints.size();
       else
          return "Pelvis SO3 trajectory: no SO3 trajectory points";
    }

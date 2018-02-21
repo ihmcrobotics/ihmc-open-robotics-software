@@ -99,11 +99,10 @@ public class AtlasAllocationTest implements AllocationTest
       for (int i = 0; i < steps; i++)
       {
          xLocation += stepLength;
-         FootstepDataMessage footstepMessage = new FootstepDataMessage();
+         FootstepDataMessage footstepMessage = footstepListMessage.getFootstepDataList().add();
          footstepMessage.setLocation(new Point3D(xLocation, robotSide.negateIfRightSide(0.15), 0.0));
          footstepMessage.setOrientation(new Quaternion());
          footstepMessage.setRobotSide(robotSide.toByte());
-         footstepListMessage.add(footstepMessage);
          robotSide = robotSide.getOppositeSide();
       }
       return footstepListMessage;

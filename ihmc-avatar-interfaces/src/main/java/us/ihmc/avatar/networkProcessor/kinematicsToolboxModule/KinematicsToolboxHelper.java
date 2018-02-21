@@ -144,9 +144,9 @@ public class KinematicsToolboxHelper
 
       if (desiredRootJoint != null)
       {
-         Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
+         Vector3D32 translation = robotConfigurationData.getRootTranslation();
          desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-         Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
+         Quaternion32 orientation = robotConfigurationData.getRootOrientation();
          desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
          

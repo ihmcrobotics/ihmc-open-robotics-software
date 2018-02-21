@@ -77,8 +77,8 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       setupTest();
 
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, stepWidth / 2.0, 0.0), new FrameQuaternion()));
-      footstepDataListMessage.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(stepLength, -stepWidth / 2.0, 0.0), new FrameQuaternion()));
+      footstepDataListMessage.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, stepWidth / 2.0, 0.0), new FrameQuaternion()));
+      footstepDataListMessage.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(stepLength, -stepWidth / 2.0, 0.0), new FrameQuaternion()));
 
       drcSimulationTestHelper.send(footstepDataListMessage);
 
@@ -95,8 +95,8 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
       setupTest();
 
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.0, -stepWidth, 0.0), new FrameQuaternion()));
-      footstepDataListMessage.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(0.0, stanceWidth - stepWidth, 0.0), new FrameQuaternion()));
+      footstepDataListMessage.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.0, -stepWidth, 0.0), new FrameQuaternion()));
+      footstepDataListMessage.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(0.0, stanceWidth - stepWidth, 0.0), new FrameQuaternion()));
 
       drcSimulationTestHelper.send(footstepDataListMessage);
 
@@ -134,7 +134,7 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
       FootstepDataListMessage message = new FootstepDataListMessage();
 
-      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, 0.5 * stanceWidth, dropHeight), new Quaternion()));
+      message.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, 0.5 * stanceWidth, dropHeight), new Quaternion()));
 
       drcSimulationTestHelper.send(message);
 
@@ -169,8 +169,8 @@ public abstract class AvatarStraightLegSingleStepTest implements MultiRobotTestI
 
       FootstepDataListMessage message = new FootstepDataListMessage();
 
-      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, 0.5 * stanceWidth, dropHeight), new Quaternion()));
-      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(stepLength, -0.5 * stanceWidth, dropHeight), new Quaternion()));
+      message.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(stepLength, 0.5 * stanceWidth, dropHeight), new Quaternion()));
+      message.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(stepLength, -0.5 * stanceWidth, dropHeight), new Quaternion()));
 
       drcSimulationTestHelper.send(message);
 

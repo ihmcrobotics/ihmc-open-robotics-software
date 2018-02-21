@@ -22,7 +22,7 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket>
       setPacketInformation(other);
    }
 
-   public Pose3D getValveTransformToWorld()
+   public Pose3D getValvePoseInWorld()
    {
       return valvePoseInWorld;
    }
@@ -34,7 +34,7 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket>
    
    public boolean epsilonEquals(ValveLocationPacket turnValvePacket, double epsilon)
    {
-      boolean transformEquals = valvePoseInWorld.epsilonEquals(turnValvePacket.getValveTransformToWorld(), epsilon);
+      boolean transformEquals = valvePoseInWorld.epsilonEquals(turnValvePacket.getValvePoseInWorld(), epsilon);
       boolean radiusEquals = valveRadius == turnValvePacket.getValveRadius();
 
       return transformEquals  && radiusEquals;

@@ -38,9 +38,23 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
          clear();
          return;
       }
-      message.getDesiredPosition(desiredPosition);
-      message.getSelectionMatrix(selectionMatrix);
-      message.getWeightVector(weightVector);
+      desiredPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.desiredPositionInWorld);
+      selectionMatrix.clearSelection();
+      selectionMatrix.clearSelection();
+      selectionMatrix.selectXAxis(message.selectionMatrix.xSelected);
+      selectionMatrix.selectYAxis(message.selectionMatrix.ySelected);
+      selectionMatrix.selectZAxis(message.selectionMatrix.zSelected);
+      weightVector.reshape(3, 1);
+      if (message.weights == null)
+      {
+         weightVector.zero();
+      }
+      else
+      {
+         weightVector.set(0, 0, message.weights.getXWeight());
+         weightVector.set(1, 0, message.weights.getYWeight());
+         weightVector.set(2, 0, message.weights.getZWeight());
+      }
    }
 
    public DenseMatrix64F getWeightVector()

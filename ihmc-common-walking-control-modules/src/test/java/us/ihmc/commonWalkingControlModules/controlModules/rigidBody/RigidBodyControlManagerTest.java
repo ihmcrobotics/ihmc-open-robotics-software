@@ -22,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -146,8 +147,9 @@ public class RigidBodyControlManagerTest
       Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
       Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
-      SE3TrajectoryMessage message = HumanoidMessageTools.createSE3TrajectoryMessage(1, worldFrame);
-      message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
+      SE3TrajectoryMessage message = new SE3TrajectoryMessage();
+      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getNameBasedHashCode());
+      message.taskspaceTrajectoryPoints.add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
 
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
       boolean angularXSelected = random.nextBoolean();
@@ -159,7 +161,8 @@ public class RigidBodyControlManagerTest
       boolean linearYSelected = random.nextBoolean();
       boolean linearZSelected = random.nextBoolean();
       selectionMatrix6D.setLinearAxisSelection(linearXSelected, linearYSelected, linearZSelected);
-      message.setSelectionMatrix(selectionMatrix6D);
+      message.angularSelectionMatrix.set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getAngularPart()));
+      message.linearSelectionMatrix.set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getLinearPart()));
 
       WeightMatrix6D weightMatrix = new WeightMatrix6D();
       double angularXWeight = random.nextDouble();
@@ -171,7 +174,8 @@ public class RigidBodyControlManagerTest
       double linearYWeight = random.nextDouble();
       double linearZWeight = random.nextDouble();
       weightMatrix.setLinearWeights(linearXWeight, linearYWeight, linearZWeight);
-      message.setWeightMatrix(weightMatrix);
+      message.angularWeightMatrix.set(MessageTools.createWeightMatrix3DMessage(weightMatrix.getAngularPart()));
+      message.linearWeightMatrix.set(MessageTools.createWeightMatrix3DMessage(weightMatrix.getLinearPart()));
 
       SE3TrajectoryControllerCommand command = new SE3TrajectoryControllerCommand();
       command.set(worldFrame, worldFrame, message);
@@ -297,8 +301,9 @@ public class RigidBodyControlManagerTest
          Vector3D linearVelocity = EuclidCoreRandomTools.nextVector3D(random);
          Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
-         SE3TrajectoryMessage message = HumanoidMessageTools.createSE3TrajectoryMessage(1, worldFrame);
-         message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
+         SE3TrajectoryMessage message = new SE3TrajectoryMessage();
+         message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getNameBasedHashCode());
+         message.taskspaceTrajectoryPoints.add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
          message.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          message.getQueueingProperties().setPreviousMessageId((long) -1);
 
@@ -316,7 +321,8 @@ public class RigidBodyControlManagerTest
          ReferenceFrame angularSelectionFrame = referenceFrames.get(random.nextInt(referenceFrames.size()));
          ReferenceFrame linearSelectionFrame = referenceFrames.get(random.nextInt(referenceFrames.size()));
          selectionMatrix6D.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
-         message.setSelectionMatrix(selectionMatrix6D);
+         message.angularSelectionMatrix.set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getAngularPart()));
+         message.linearSelectionMatrix.set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getLinearPart()));
 
          WeightMatrix6D weightMatrix = new WeightMatrix6D();
          double angularXWeight = random.nextDouble();
@@ -332,7 +338,8 @@ public class RigidBodyControlManagerTest
          ReferenceFrame angularWeightFrame = referenceFrames.get(random.nextInt(referenceFrames.size()));
          ReferenceFrame linearWeightFrame = referenceFrames.get(random.nextInt(referenceFrames.size()));
          weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
-         message.setWeightMatrix(weightMatrix);
+         message.angularWeightMatrix.set(MessageTools.createWeightMatrix3DMessage(weightMatrix.getAngularPart()));
+         message.linearWeightMatrix.set(MessageTools.createWeightMatrix3DMessage(weightMatrix.getLinearPart()));
 
          SE3TrajectoryControllerCommand command = new SE3TrajectoryControllerCommand();
          command.set(resolver, message);
@@ -408,11 +415,12 @@ public class RigidBodyControlManagerTest
       Point3D controlFramePosition = EuclidCoreRandomTools.nextPoint3D(random);
       Quaternion controlFrameOrientation = EuclidCoreRandomTools.nextQuaternion(random);
 
-      SE3TrajectoryMessage message = HumanoidMessageTools.createSE3TrajectoryMessage(1, worldFrame);
-      message.setControlFramePosition(controlFramePosition);
-      message.setControlFrameOrientation(controlFrameOrientation);
+      SE3TrajectoryMessage message = new SE3TrajectoryMessage();
+      message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.getNameBasedHashCode());
+      message.controlFramePose.setPosition(controlFramePosition);
+      message.controlFramePose.setOrientation(controlFrameOrientation);
       message.setUseCustomControlFrame(true);
-      message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
+      message.taskspaceTrajectoryPoints.add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));
 
       SE3TrajectoryControllerCommand command = new SE3TrajectoryControllerCommand();
       command.set(worldFrame, worldFrame, message);

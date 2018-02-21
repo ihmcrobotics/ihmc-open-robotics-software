@@ -28,12 +28,6 @@ public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChan
       this.destination = (byte) PacketDestination.ROS_API.ordinal();
    }
 
-   public void setStateChange(byte initialState, byte endState)
-   {
-      this.initialHighLevelControllerName = initialState;
-      this.endHighLevelControllerName = endState;
-   }
-
    @Override
    public void set(HighLevelStateChangeStatusMessage other)
    {
@@ -43,12 +37,22 @@ public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChan
       setPacketInformation(other);
    }
 
-   public byte getInitialState()
+   public void setInitialHighLevelControllerName(byte initialHighLevelControllerName)
+   {
+      this.initialHighLevelControllerName = initialHighLevelControllerName;
+   }
+
+   public void setEndHighLevelControllerName(byte endHighLevelControllerName)
+   {
+      this.endHighLevelControllerName = endHighLevelControllerName;
+   }
+
+   public byte getInitialHighLevelControllerName()
    {
       return initialHighLevelControllerName;
    }
 
-   public byte getEndState()
+   public byte getEndHighLevelControllerName()
    {
       return endHighLevelControllerName;
    }

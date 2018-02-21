@@ -79,20 +79,20 @@ public class ReachingManifoldCommand
    {
       clear();
 
-      rigidBodyNameBasedashCode = message.getRigidBodyNameBasedHashCode();
+      rigidBodyNameBasedashCode = message.getEndEffectorNameBasedHashCode();
       if (rigidBodyNamedBasedHashMap == null)
          rigidBody = null;
       else
          rigidBody = rigidBodyNamedBasedHashMap.get(rigidBodyNameBasedashCode);
 
-      this.manifoldOriginPosition.set(message.getOriginPosition());
-      this.manifoldOriginOrientation.set(message.getOriginOrientation());
+      this.manifoldOriginPosition.set(message.getManifoldOriginPosition());
+      this.manifoldOriginOrientation.set(message.getManifoldOriginOrientation());
 
-      for (int i = 0; i < message.getDimensionOfManifold(); i++)
+      for (int i = 0; i < message.manifoldConfigurationSpaceNames.size(); i++)
       {
-         manifoldConfigurationSpaces.add(ConfigurationSpaceName.fromByte(message.getDegreeOfManifold(i)));
-         manifoldLowerLimits.add(message.getLowerLimit(i));
-         manifoldUpperLimits.add(message.getUpperLimit(i));
+         manifoldConfigurationSpaces.add(ConfigurationSpaceName.fromByte(message.manifoldConfigurationSpaceNames.get(i)));
+         manifoldLowerLimits.add(message.manifoldLowerLimits.get(i));
+         manifoldUpperLimits.add(message.manifoldUpperLimits.get(i));
       }
    }
 
