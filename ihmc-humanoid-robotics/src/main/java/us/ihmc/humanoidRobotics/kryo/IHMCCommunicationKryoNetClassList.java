@@ -45,9 +45,6 @@ import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.geometry.Orientation2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.transform.QuaternionBasedTransform;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -218,7 +215,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(byte[].class);
       registerPacketField(Point3D.class);
       registerPacketField(Quaternion.class);
-      registerPacketField(RotationMatrix.class);
       registerPacketField(TimeStampedTransform3D.class);
 
       registerPacketField(PacketDestination.class);
@@ -284,7 +280,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SO3TrajectoryMessage.class);
       registerPacketField(EuclideanTrajectoryMessage.class);
       registerPacketField(FrameInformation.class);
-      registerPacketField(QuaternionBasedTransform.class);
       registerPacketField(JointspaceTrajectoryMessage.class);
       registerPacketField(QueueableMessage.class);
       registerPacketField(ExecutionMode.class);
@@ -403,8 +398,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(LidarScanParameters.class);
 
       // Robot pose estimation
-      registerPacketField(RigidBodyTransform.class);
-      registerPacketField(RigidBodyTransform[].class);
       registerPacketClass(StampedPosePacket.class);
 
       //Mocap

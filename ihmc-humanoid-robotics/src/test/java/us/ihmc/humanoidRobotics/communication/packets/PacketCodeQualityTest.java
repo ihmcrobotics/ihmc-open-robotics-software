@@ -34,6 +34,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.Orientation2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -93,6 +94,8 @@ public class PacketCodeQualityTest
 
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      allPacketTypes.removeAll(reaInternalComms);
+      allPacketTypes.remove(LocalVideoPacket.class); // That guy is a packet but does not make it to the network. It will stay on Kryo. 
 
       Map<Class<? extends Packet>, List<Class>> packetTypesWithIllegalFieldTypes = new HashMap<>();
 
@@ -114,11 +117,9 @@ public class PacketCodeQualityTest
                   continue;
                if (isPrimitive(typeToCheck))
                   continue;
-               if (String.class.isAssignableFrom(typeToCheck))
+               if (thirdPartySerializableClasses.contains(typeToCheck))
                   continue;
-               if (List.class.isAssignableFrom(typeToCheck))
-                  continue;
-               if (euclidTypes.contains(typeToCheck))
+               if (allowedEuclidTypes.contains(typeToCheck))
                   continue;
                if (!packetTypesWithIllegalFieldTypes.containsKey(packetType))
                   packetTypesWithIllegalFieldTypes.put(packetType, new ArrayList<>());
@@ -147,25 +148,8 @@ public class PacketCodeQualityTest
       assertTrue("Found illegal field types in Packet sub-types.", packetTypesWithIllegalFieldTypes.isEmpty());
    }
 
-   private static final Set<Class<?>> euclidTypes = new HashSet<>();
-   static
-   {
-      euclidTypes.add(Point3D32.class);
-      euclidTypes.add(Vector3D32.class);
-      euclidTypes.add(Point3D.class);
-      euclidTypes.add(Vector3D.class);
-      euclidTypes.add(Point2D32.class);
-      euclidTypes.add(Vector2D32.class);
-      euclidTypes.add(Point2D.class);
-      euclidTypes.add(Vector2D.class);
-      euclidTypes.add(Quaternion.class);
-      euclidTypes.add(Quaternion32.class);
-      euclidTypes.add(Pose2D.class);
-      euclidTypes.add(Pose3D.class);
-   }
-
    private static boolean isPrimitive(Class<?> clazz)
-   { // TODO figure out if arrays of primitive are acceptable.
+   {
       if (clazz.isPrimitive())
          return true;
       if (clazz.isArray() && clazz.getComponentType().isPrimitive())
@@ -579,9 +563,7 @@ public class PacketCodeQualityTest
 
    private void checkIfAllFieldsArePublic(Class<?> clazz)
    {
-      if (clazz == String.class)
-         return;
-      if (clazz == ArrayList.class)
+      if (thirdPartySerializableClasses.contains(clazz) || allowedEuclidTypes.contains(clazz))
          return;
 
       for (Field field : clazz.getDeclaredFields())
@@ -598,5 +580,40 @@ public class PacketCodeQualityTest
          assertFalse("Class " + clazz.getCanonicalName() + " has final field " + field.getName() + " declared by "
                + field.getDeclaringClass().getCanonicalName(), Modifier.isFinal(field.getModifiers()));
       }
+   }
+
+   @SuppressWarnings("rawtypes")
+   private static final Set<Class<? extends Packet>> reaInternalComms;
+   static
+   {
+      Reflections reflections = new Reflections("us.ihmc.robotEnvironmentAwareness");
+      reaInternalComms = reflections.getSubTypesOf(Packet.class);
+   }
+
+   private static final Set<Class<?>> thirdPartySerializableClasses = new HashSet<>();
+   static
+   {
+      thirdPartySerializableClasses.add(String.class);
+      thirdPartySerializableClasses.add(List.class);
+      thirdPartySerializableClasses.add(ArrayList.class);
+      thirdPartySerializableClasses.add(StringBuilder.class);
+   }
+
+   private static final Set<Class<?>> allowedEuclidTypes = new HashSet<>();
+   static
+   {
+      allowedEuclidTypes.add(Point3D32.class);
+      allowedEuclidTypes.add(Vector3D32.class);
+      allowedEuclidTypes.add(Point3D.class);
+      allowedEuclidTypes.add(Vector3D.class);
+      allowedEuclidTypes.add(Point2D32.class);
+      allowedEuclidTypes.add(Vector2D32.class);
+      allowedEuclidTypes.add(Point2D.class);
+      allowedEuclidTypes.add(Vector2D.class);
+      allowedEuclidTypes.add(Quaternion.class);
+      allowedEuclidTypes.add(Quaternion32.class);
+      allowedEuclidTypes.add(Pose2D.class);
+      allowedEuclidTypes.add(Pose3D.class);
+      allowedEuclidTypes.add(Orientation2D.class);
    }
 }
