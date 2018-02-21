@@ -109,6 +109,9 @@ public class QuadrupedBalanceManager
 
    public void initialize(QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
+      // update model
+      linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
+
       // update dcm estimate
       dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
 
@@ -173,6 +176,9 @@ public class QuadrupedBalanceManager
 
    public void compute(FrameVector3D linearMomentumRateOfChangeToPack, QuadrupedTaskSpaceEstimates taskSpaceEstimates, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
+      // update model
+      linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
+
       // update dcm estimate
       dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
 
@@ -192,5 +198,16 @@ public class QuadrupedBalanceManager
       comPositionControllerSetpoints.getComForceFeedforward().set(linearMomentumRateOfChangeToPack);
       comPositionControllerSetpoints.getComForceFeedforward().setZ(comPositionGravityCompensationParameter.get() * mass * gravity);
       comPositionController.compute(linearMomentumRateOfChangeToPack, comPositionControllerSetpoints, taskSpaceEstimates);
+   }
+
+   public void updateGains()
+   {
+      dcmPositionController.setVrpPositionRateLimit(vrpPositionRateLimitParameter.get());
+      dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
+      dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
+      dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
+      comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
+      comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
+      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
    }
 }
