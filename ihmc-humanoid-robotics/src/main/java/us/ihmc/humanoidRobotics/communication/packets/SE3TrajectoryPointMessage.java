@@ -25,13 +25,13 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
    @RosExportedField(documentation = "Define the desired 3D position to be reached at this trajectory point.")
-   public Point3D position;
+   public Point3D position = new Point3D();
    @RosExportedField(documentation = "Define the desired 3D orientation to be reached at this trajectory point.")
-   public Quaternion orientation;
+   public Quaternion orientation = new Quaternion();
    @RosExportedField(documentation = "Define the desired 3D linear velocity to be reached at this trajectory point.")
-   public Vector3D linearVelocity;
+   public Vector3D linearVelocity = new Vector3D();
    @RosExportedField(documentation = "Define the desired 3D angular velocity to be reached at this trajectory point.")
-   public Vector3D angularVelocity;
+   public Vector3D angularVelocity = new Vector3D();
 
    /**
     * Empty constructor for serialization.

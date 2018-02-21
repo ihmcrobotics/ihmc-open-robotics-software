@@ -21,9 +21,9 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
    @RosExportedField(documentation = "Define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.")
-   public Point3D position;
+   public Point3D position = new Point3D();
    @RosExportedField(documentation = "Define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.")
-   public Vector3D linearVelocity;
+   public Vector3D linearVelocity = new Vector3D();
 
    /**
     * Empty constructor for serialization.
