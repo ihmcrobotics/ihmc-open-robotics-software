@@ -3,9 +3,11 @@ package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -54,12 +56,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final DoubleParameter mpcStepAdjustmentCostParameter = parameterFactory.createDouble("mpcStepAdjustmentCost", 100000);
    private final DoubleParameter mpcCopAdjustmentCostParameter = parameterFactory.createDouble("mpcCopAdjustmentCost", 1);
    private final DoubleParameter mpcMinimumNormalizedContactPressureParameter = parameterFactory.createDouble("mpcMinimumNormalizedContactPressure", 0.1);
-   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory
-         .createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
-   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory
-         .createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
-   private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
-   private final DoubleParameter bodyOrientationMaxIntegralErrorParameter = parameterFactory.createDouble("bodyOrientationMaxIntegralError", 0);
    private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
    private final DoubleArrayParameter comPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("comPositionDerivativeGains", 0, 0, 750);
    private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
@@ -84,8 +80,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final FramePoint3D cmpPositionSetpoint;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
    private final QuadrupedComPositionController comPositionController;
-   private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
-   private final QuadrupedBodyOrientationController bodyOrientationController;
+   private final QuadrupedBodyOrientationManager bodyOrientationManager;
    private final QuadrupedTimedStepController timedStepController;
    private final QuadrupedMpcOptimizationWithLaneChange mpcOptimization;
    private final QuadrupedMpcOptimizationWithLaneChangeSettings mpcSettings;
@@ -110,6 +105,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final FramePoint3D supportCentroid;
    private final FrameVector3D stepAdjustmentVector;
    private final FramePoint3D stepGoalPosition;
+
+   private final FrameQuaternion desiredBodyOrientation = new FrameQuaternion();
 
    // inputs
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
@@ -139,8 +136,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       cmpPositionSetpoint = new FramePoint3D();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
       comPositionController = controllerToolbox.getComPositionController();
-      bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
-      bodyOrientationController = controllerToolbox.getBodyOrientationController();
+
+      bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
       mpcOptimization = new QuadrupedDcmBasedMpcOptimizationWithLaneChange(controllerToolbox.getDcmPositionEstimator(), NUMBER_OF_PREVIEW_STEPS, registry,
             runtimeEnvironment.getGraphicsListRegistry());
       mpcSettings = new QuadrupedMpcOptimizationWithLaneChangeSettings(mpcMaximumPreviewTimeParameter.get(), mpcStepAdjustmentCostParameter.get(),
@@ -207,9 +204,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
       comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
       comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
-      bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
-      bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
-      bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
@@ -242,14 +236,9 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
       // update desired body orientation, angular velocity, and torque
       bodyYawSetpoint += planarVelocityProvider.get().getZ() * controlDT;
-      bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      bodyOrientationControllerSetpoints.getBodyOrientation()
-            .setYawPitchRoll(postureProvider.getBodyOrientationInput().getYaw() + bodyYawSetpoint,
-                             postureProvider.getBodyOrientationInput().getPitch() + groundPlaneEstimator.getPitch(bodyYawSetpoint),
-                             postureProvider.getBodyOrientationInput().getRoll());
-      bodyOrientationControllerSetpoints.getBodyAngularVelocity().setToZero();
-      bodyOrientationControllerSetpoints.getComTorqueFeedforward().setToZero();
-      bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
+      desiredBodyOrientation.setToZero(worldFrame);
+      desiredBodyOrientation.setYawPitchRoll(bodyYawSetpoint, 0.0, 0.0);
+      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation, taskSpaceEstimates);
 
       // update desired contact state and sole forces
       timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerSettings.getContactForceLimits(), taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
@@ -363,8 +352,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       // initialize feedback controllers
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
       comPositionController.reset();
-      bodyOrientationControllerSetpoints.initialize(taskSpaceEstimates);
-      bodyOrientationController.reset();
+      bodyOrientationManager.initialize(taskSpaceEstimates);
       timedStepController.reset();
       timedStepController.registerStepTransitionCallback(this);
 
