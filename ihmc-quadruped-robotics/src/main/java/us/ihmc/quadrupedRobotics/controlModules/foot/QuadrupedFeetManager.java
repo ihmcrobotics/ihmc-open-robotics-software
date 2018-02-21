@@ -2,16 +2,14 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
@@ -78,16 +76,17 @@ public class QuadrupedFeetManager
       }
    }
 
-   public void adjustSteps(List<QuadrupedTimedStep> activeSteps)
+   public void adjustSteps(List<QuadrupedStep> activeSteps)
    {
       for (int i = 0; i < activeSteps.size(); i++)
          adjustStep(activeSteps.get(i));
    }
 
    private final FramePoint3D tempPoint = new FramePoint3D();
-   public void adjustStep(QuadrupedTimedStep step)
+   public void adjustStep(QuadrupedStep step)
    {
       step.getGoalPosition(tempPoint);
+      tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
       footControlModules.get(step.getRobotQuadrant()).adjustStep(tempPoint);
    }
 
