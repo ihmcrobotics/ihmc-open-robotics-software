@@ -210,4 +210,9 @@ public class QuadrupedBalanceManager
       comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
       comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
    }
+
+   public FramePoint3D getDCMPositionSetpoint()
+   {
+      return dcmPositionController.getDCMPositionSetpoint();
+   }
 }
