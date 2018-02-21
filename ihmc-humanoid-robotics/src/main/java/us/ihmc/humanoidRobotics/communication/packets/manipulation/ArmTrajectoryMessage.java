@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
@@ -80,11 +79,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
       return jointspaceTrajectory;
    }
 
-   public QueueableMessage getQueueingProperties()
-   {
-      return jointspaceTrajectory.getQueueingProperties();
-   }
-
    @Override
    public boolean epsilonEquals(ArmTrajectoryMessage other, double epsilon)
    {
@@ -99,7 +93,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
    public String toString()
    {
       if (jointspaceTrajectory.jointTrajectoryMessages != null)
-         return "Arm 1D trajectories: number of joints = " + jointspaceTrajectory.getNumberOfJoints() + ", robotSide = " + robotSide;
+         return "Arm 1D trajectories: number of joints = " + jointspaceTrajectory.jointTrajectoryMessages.size() + ", robotSide = " + robotSide;
       else
          return "Arm 1D trajectories: no joint trajectory, robotSide = " + robotSide;
    }

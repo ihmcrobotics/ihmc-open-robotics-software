@@ -35,7 +35,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
     * 
     * @param classSimpleNameBasedHashCode the hash code of the class you want to clear: {@code classToClear.getSimpleName().hashCode()}.
     */
-   public void setClassToClearSimpleNameBasedHashCode(int classSimpleNameBasedHashCode)
+   public void setClassSimpleNameBasedHashCode(int classSimpleNameBasedHashCode)
    {
       this.classSimpleNameBasedHashCode = classSimpleNameBasedHashCode;
    }
@@ -45,7 +45,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
     * 
     * @param clazz the class to clear
     */
-   public int getClassToClearSimpleNameBasedHashCode()
+   public int getClassSimpleNameBasedHashCode()
    {
       return classSimpleNameBasedHashCode;
    }

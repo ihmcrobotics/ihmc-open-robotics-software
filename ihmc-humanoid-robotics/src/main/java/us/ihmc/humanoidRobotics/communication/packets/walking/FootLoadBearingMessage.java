@@ -46,7 +46,7 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       return robotSide;
    }
 
-   public byte getRequest()
+   public byte getLoadBearingRequest()
    {
       return loadBearingRequest;
    }

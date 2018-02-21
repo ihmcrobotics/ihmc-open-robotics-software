@@ -226,7 +226,9 @@ public class DRCPoseCommunicator implements RawOutputWriter
                imuOrientations[sensorNumber].set(imuOrientationsAsMatrix[sensorNumber]);
                imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocities[sensorNumber]);
 
-               imuPacketToPack.set(imuLinearAccelerations[sensorNumber], imuOrientations[sensorNumber], rawImuAngularVelocities[sensorNumber]);
+               imuPacketToPack.linearAcceleration.set(imuLinearAccelerations[sensorNumber]);
+               imuPacketToPack.orientation.set(imuOrientations[sensorNumber]);
+               imuPacketToPack.angularVelocity.set(rawImuAngularVelocities[sensorNumber]);
             }
          }
 

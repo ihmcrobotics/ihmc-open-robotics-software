@@ -77,7 +77,7 @@ public class ScriptTools
       {
          if (listToEdit.get(i).getScriptObject() instanceof FootstepDataListMessage)
          {
-            if (((FootstepDataListMessage) listToEdit.get(i).getScriptObject()).size() == 0)
+            if (((FootstepDataListMessage) listToEdit.get(i).getScriptObject()).footstepDataList.size() == 0)
                listToEdit.remove(i);
          }
       }
@@ -94,7 +94,7 @@ public class ScriptTools
 
          if (scriptObject.getScriptObject() instanceof PauseWalkingMessage)
          {
-            if (((PauseWalkingMessage) scriptObject.getScriptObject()).isPaused())
+            if (((PauseWalkingMessage) scriptObject.getScriptObject()).getPause())
             {
                if (previousWasPause)
                {
@@ -116,7 +116,7 @@ public class ScriptTools
 
          if (scriptObject.getScriptObject() instanceof FootstepDataListMessage)
          {
-            if (((FootstepDataListMessage) scriptObject.getScriptObject()).size() == 0)
+            if (((FootstepDataListMessage) scriptObject.getScriptObject()).footstepDataList.size() == 0)
                elementsToRemove.add(i);
          }
       }

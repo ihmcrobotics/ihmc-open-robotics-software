@@ -172,7 +172,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
   
    public void handleMultisenseParameters(MultisenseParameterPacket object)
    {
-      if (object.isInitialize())
+      if (object.getInitialize())
       {
          if (rosMainNode.isStarted())
          {
@@ -385,32 +385,32 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       request.getConfig().getDoubles().add(dutyCycleParam);
       }
       
-      if(object.isLedEnable() != ledEnable){
-      ledEnable = object.isLedEnable();
+      if(object.getLedEnable() != ledEnable){
+      ledEnable = object.getLedEnable();
       BoolParameter ledEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
       ledEnableParam.setName("lighting");
       ledEnableParam.setValue(ledEnable);
       request.getConfig().getBools().add(ledEnableParam);
       }
       
-      if(object.isFlashEnable() != flashEnable){
-      flashEnable = object.isFlashEnable();
+      if(object.getFlashEnable() != flashEnable){
+      flashEnable = object.getFlashEnable();
       BoolParameter flashEnableParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
       flashEnableParam.setName("flash");
       flashEnableParam.setValue(flashEnable);
       request.getConfig().getBools().add(flashEnableParam);
       }
       
-      if(object.isAutoExposure() != autoExposure){
-      autoExposure = object.isAutoExposure();
+      if(object.getAutoExposure() != autoExposure){
+      autoExposure = object.getAutoExposure();
       BoolParameter autoExposureParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
       autoExposureParam.setName("auto_exposure");
       autoExposureParam.setValue(autoExposure);
       request.getConfig().getBools().add(autoExposureParam);
       }
       
-      if(object.isAutoWhiteBalance() != autoWhitebalance){
-         autoWhitebalance = object.isAutoWhiteBalance();
+      if(object.getAutoWhiteBalance() != autoWhitebalance){
+         autoWhitebalance = object.getAutoWhiteBalance();
          BoolParameter autoWhiteBalanceParam = NodeConfiguration.newPrivate().getTopicMessageFactory().newFromType(BoolParameter._TYPE);
          autoWhiteBalanceParam.setName("auto_white_balance");
          autoWhiteBalanceParam.setValue(autoWhitebalance);

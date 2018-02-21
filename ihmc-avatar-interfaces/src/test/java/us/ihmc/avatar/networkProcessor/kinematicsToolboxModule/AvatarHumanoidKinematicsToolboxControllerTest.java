@@ -223,7 +223,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
             FramePoint3D desiredPosition = new FramePoint3D(hand.getBodyFixedFrame());
             desiredPosition.changeFrame(worldFrame);
             KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, desiredPosition);
-            message.setWeight(20.0);
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
             commandInputManager.submitMessage(message);
          }
 
@@ -231,8 +232,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
             KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(randomizedFullRobotModel));
             SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
             selectionMatrix.selectZAxis(false);
-            message.setSelectionMatrix(selectionMatrix);
-            message.setWeight(1.0);
+            message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
+            message.getWeights().set(MessageTools.createWeightMatrix3DMessage(1.0));
             commandInputManager.submitMessage(message);
          }
 
@@ -274,7 +275,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
          {
             randomizeArmJointPositions(random, robotSide, randomizedFullRobotModel, 0.4);
             KinematicsToolboxRigidBodyMessage message = holdRigidBodyCurrentPose(randomizedFullRobotModel.getHand(robotSide));
-            message.setWeight(20.0);
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
             commandInputManager.submitMessage(message);
          }
 
@@ -282,8 +284,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
             KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(randomizedFullRobotModel));
             SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
             selectionMatrix.selectZAxis(false);
-            message.setSelectionMatrix(selectionMatrix);
-            message.setWeight(1.0);
+            message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
+            message.getWeights().set(MessageTools.createWeightMatrix3DMessage(1.0));
             commandInputManager.submitMessage(message);
          }
 
@@ -352,7 +354,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
             FramePoint3D desiredPosition = new FramePoint3D(rigidBody.getBodyFixedFrame());
             desiredPosition.changeFrame(worldFrame);
             KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody, desiredPosition);
-            message.setWeight(20.0);
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
             commandInputManager.submitMessage(message);
          }
 
@@ -360,8 +363,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
             KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(randomizedFullRobotModel));
             SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
             selectionMatrix.selectZAxis(false);
-            message.setSelectionMatrix(selectionMatrix);
-            message.setWeight(1.0);
+            message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
+            message.getWeights().set(MessageTools.createWeightMatrix3DMessage(1.0));
             commandInputManager.submitMessage(message);
          }
 
@@ -514,7 +517,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
    {
       OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], new IMUDefinition[0]);
-      robotConfigurationData.setJointState(Arrays.stream(joints).collect(Collectors.toList()));
+      RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
       robotConfigurationData.setRootTranslation(fullRobotModel.getRootJoint().getTranslationForReading());
       robotConfigurationData.setRootOrientation(fullRobotModel.getRootJoint().getRotationForReading());
       return robotConfigurationData;

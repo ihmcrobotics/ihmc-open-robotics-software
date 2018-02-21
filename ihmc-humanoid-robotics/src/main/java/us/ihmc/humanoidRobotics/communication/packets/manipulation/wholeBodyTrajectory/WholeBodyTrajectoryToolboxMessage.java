@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
-import java.util.List;
-
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.RecyclingArrayListPubSub;
@@ -33,41 +31,6 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    public void setConfiguration(WholeBodyTrajectoryToolboxConfigurationMessage configuration)
    {
       this.configuration = configuration;
-   }
-
-   public void addEndEffectorTrajectory(WaypointBasedTrajectoryMessage endEffectorTrajectory)
-   {
-      addEndEffectorTrajectories(endEffectorTrajectory);
-   }
-
-   public void addEndEffectorTrajectories(WaypointBasedTrajectoryMessage... endEffectorTrajectories)
-   {
-      MessageTools.copyData(endEffectorTrajectories, this.endEffectorTrajectories);
-   }
-
-   public void addRigidBodyExplorationConfiguration(RigidBodyExplorationConfigurationMessage explorationConfiguration)
-   {
-      addRigidBodyExplorationConfigurations(explorationConfiguration);
-   }
-
-   public void addRigidBodyExplorationConfigurations(RigidBodyExplorationConfigurationMessage... explorationConfigurations)
-   {
-      MessageTools.copyData(explorationConfigurations, this.explorationConfigurations);
-   }
-
-   public void addReachingManifold(ReachingManifoldMessage reachingManifold)
-   {
-      addReachingManifolds(reachingManifold);
-   }
-
-   public void addReachingManifolds(ReachingManifoldMessage... reachingManifolds)
-   {
-      MessageTools.copyData(reachingManifolds, this.reachingManifolds);
-   }
-
-   public void setEndEffectorTrajectories(List<WaypointBasedTrajectoryMessage> endEffectorTrajectories)
-   {
-      MessageTools.copyData(endEffectorTrajectories, this.endEffectorTrajectories);
    }
 
    public WholeBodyTrajectoryToolboxConfigurationMessage getConfiguration()

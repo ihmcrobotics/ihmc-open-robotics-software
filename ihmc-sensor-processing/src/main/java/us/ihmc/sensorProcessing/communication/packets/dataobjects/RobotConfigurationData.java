@@ -1,23 +1,17 @@
 package us.ihmc.sensorProcessing.communication.packets.dataobjects;
 
-import java.util.List;
-import java.util.zip.CRC32;
-
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.SpatialVectorMessage;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
 
 public class RobotConfigurationData extends Packet<RobotConfigurationData>
 {
@@ -76,34 +70,6 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       setPacketInformation(other);
    }
 
-   public void setJointState(OneDoFJoint[] newJointData)
-   {
-      jointAngles.reset();
-      jointVelocities.reset();
-      jointTorques.reset();
-
-      for (int i = 0; i < newJointData.length; i++)
-      {
-         jointAngles.add((float) newJointData[i].getQ());
-         jointVelocities.add((float) newJointData[i].getQd());
-         jointTorques.add((float) newJointData[i].getTauMeasured());
-      }
-   }
-   
-   public void setJointState(List<? extends OneDoFJoint> newJointData)
-   {
-      jointAngles.reset();
-      jointVelocities.reset();
-      jointTorques.reset();
-
-      for (int i = 0; i < newJointData.size(); i++)
-      {
-         jointAngles.add((float) newJointData.get(i).getQ());
-         jointVelocities.add((float) newJointData.get(i).getQd());
-         jointTorques.add((float) newJointData.get(i).getTauMeasured());
-      }
-   }
-
    public void setRootTranslation(Tuple3DReadOnly rootTranslation)
    {
       this.rootTranslation.set(rootTranslation);
@@ -129,12 +95,12 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       return jointTorques;
    }
 
-   public Vector3D32 getPelvisTranslation()
+   public Vector3D32 getRootTranslation()
    {
       return rootTranslation;
    }
 
-   public Quaternion32 getPelvisOrientation()
+   public Quaternion32 getRootOrientation()
    {
       return rootOrientation;
    }
@@ -174,37 +140,6 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       return timestamp == other.timestamp;
    }
 
-   public SpatialVectorMessage getMomentAndForceVectorForSensor(int sensorNumber)
-   {
-      return momentAndForceDataAllForceSensors.get(sensorNumber);
-   }
-
-   public IMUPacket getImuPacketForSensor(int sensorNumber)
-   {
-      return imuSensorData.get(sensorNumber);
-   }
-
-   public static int calculateJointNameHash(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
-   {
-      CRC32 crc = new CRC32();
-      for (OneDoFJoint joint : joints)
-      {
-         crc.update(joint.getName().getBytes());
-      }
-
-      for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
-      {
-         crc.update(forceSensorDefinition.getSensorName().getBytes());
-      }
-
-      for (IMUDefinition imuDefinition : imuDefinitions)
-      {
-         crc.update(imuDefinition.getName().getBytes());
-      }
-
-      return (int) crc.getValue();
-   }
-
    public void setSensorHeadPPSTimestamp(long sensorHeadPPSTimestamp)
    {
       this.sensorHeadPPSTimestamp = sensorHeadPPSTimestamp;
@@ -235,14 +170,14 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       return pelvisAngularVelocity;
    }
 
-   public void setPelvisLinearVelocity(Vector3D pelvisLinearVelocityToPack)
+   public void setPelvisLinearVelocity(Vector3DReadOnly pelvisLinearVelocity)
    {
-      pelvisLinearVelocity.set(pelvisLinearVelocityToPack);
+      this.pelvisLinearVelocity.set(pelvisLinearVelocity);
    }
 
-   public void setPelvisAngularVelocity(Vector3D pelvisAngularVelocityToPack)
+   public void setPelvisAngularVelocity(Vector3DReadOnly pelvisAngularVelocity)
    {
-      pelvisAngularVelocity.set(pelvisAngularVelocityToPack);
+      this.pelvisAngularVelocity.set(pelvisAngularVelocity);
    }
 
    public Vector3D32 getPelvisLinearAcceleration()
@@ -250,7 +185,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       return pelvisLinearAcceleration;
    }
 
-   public void setPelvisLinearAcceleration(Vector3D pelvisLinearAcceleration)
+   public void setPelvisLinearAcceleration(Vector3DReadOnly pelvisLinearAcceleration)
    {
       this.pelvisLinearAcceleration.set(pelvisLinearAcceleration);
    }

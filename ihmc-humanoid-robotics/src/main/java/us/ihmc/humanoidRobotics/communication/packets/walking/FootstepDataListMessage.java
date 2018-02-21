@@ -15,11 +15,8 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-@RosMessagePacket(documentation =
-      "This message commands the controller to execute a list of footsteps. See FootstepDataMessage for information about defining a footstep."
-      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
-                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
-                  topic = "/control/footstep_list")
+@RosMessagePacket(documentation = "This message commands the controller to execute a list of footsteps. See FootstepDataMessage for information about defining a footstep."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/footstep_list")
 public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 {
    public static final byte EXECUTION_TIMING_CONTROL_DURATIONS = 0;
@@ -63,8 +60,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    public QueueableMessage queueingProperties = new QueueableMessage();
 
    /**
-    * Empty constructor for serialization.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Empty constructor for serialization. Set the id of the message to
+    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public FootstepDataListMessage()
    {
@@ -98,71 +95,44 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       offsetFootstepsWithExecutionError = other.offsetFootstepsWithExecutionError;
       if (other.queueingProperties != null)
          queueingProperties.set(other.queueingProperties);
-      
-      setPacketInformation(other);      
+
+      setPacketInformation(other);
    }
 
-   public RecyclingArrayListPubSub<FootstepDataMessage> getDataList()
+   public RecyclingArrayListPubSub<FootstepDataMessage> getFootstepDataList()
    {
       return footstepDataList;
    }
 
-   public void add(FootstepDataMessage footstepData)
-   {
-      this.footstepDataList.add().set(footstepData);
-   }
-
-   public void clear()
-   {
-      this.footstepDataList.clear();
-   }
-
-   public FootstepDataMessage get(int i)
-   {
-      return this.footstepDataList.get(i);
-   }
-
-   public int size()
-   {
-      return this.footstepDataList.size();
-   }
-
-
    @Override
-   public boolean epsilonEquals(FootstepDataListMessage otherList, double epsilon)
+   public boolean epsilonEquals(FootstepDataListMessage other, double epsilon)
    {
-      if (!queueingProperties.epsilonEquals(otherList.queueingProperties, epsilon))
+      if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
+         return false;
+      if (!MessageTools.epsilonEquals(footstepDataList, other.footstepDataList, epsilon))
          return false;
 
-      for (int i = 0; i < size(); i++)
-      {
-         if (!otherList.get(i).epsilonEquals(get(i), epsilon))
-         {
-            return false;
-         }
-      }
-
-      if (!MathTools.epsilonCompare(this.defaultSwingDuration, otherList.defaultSwingDuration, epsilon))
+      if (!MathTools.epsilonCompare(this.defaultSwingDuration, other.defaultSwingDuration, epsilon))
       {
          return false;
       }
 
-      if (!MathTools.epsilonCompare(this.defaultTransferDuration, otherList.defaultTransferDuration, epsilon))
+      if (!MathTools.epsilonCompare(this.defaultTransferDuration, other.defaultTransferDuration, epsilon))
       {
          return false;
       }
 
-      if (this.executionTiming != otherList.executionTiming)
+      if (this.executionTiming != other.executionTiming)
       {
          return false;
       }
 
-      if (!MathTools.epsilonCompare(this.finalTransferDuration, otherList.finalTransferDuration, epsilon))
+      if (!MathTools.epsilonCompare(this.finalTransferDuration, other.finalTransferDuration, epsilon))
       {
          return false;
       }
 
-      if (this.offsetFootstepsWithExecutionError != otherList.offsetFootstepsWithExecutionError)
+      if (this.offsetFootstepsWithExecutionError != other.offsetFootstepsWithExecutionError)
       {
          return false;
       }
@@ -174,17 +144,18 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    public String toString()
    {
       String startingFootstep = "";
-      int numberOfSteps = this.size();
+      int numberOfSteps = this.footstepDataList.size();
       if (numberOfSteps > 0)
       {
-         startingFootstep = this.get(0).getLocation().toString();
-         Quaternion quat4d = this.get(0).getOrientation();
+         startingFootstep = this.footstepDataList.get(0).getLocation().toString();
+         Quaternion quat4d = this.footstepDataList.get(0).getOrientation();
 
          FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), quat4d);
-         startingFootstep = startingFootstep + ", yaw= " + frameOrientation.getYaw() + ", pitch= " + frameOrientation.getPitch() + ", roll= " + frameOrientation.getRoll();
+         startingFootstep = startingFootstep + ", yaw= " + frameOrientation.getYaw() + ", pitch= " + frameOrientation.getPitch() + ", roll= "
+               + frameOrientation.getRoll();
       }
 
-      if (this.size() == 1)
+      if (this.footstepDataList.size() == 1)
       {
          RobotSide footSide = RobotSide.fromByte(footstepDataList.get(0).getRobotSide());
          String side = "Right Step";
@@ -195,12 +166,10 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       }
       else
       {
-         return ("Starting Footstep: " + startingFootstep + "\n"
-               + "\tExecution Mode: " + ExecutionMode.fromByte(queueingProperties.getExecutionMode()).toString() + "\n"
-               + "\tExecution Timing: " + this.executionTiming + "\n"
-               + "\tTransfer Duration: " + this.defaultTransferDuration + "\n"
-               + "\tSwing Duration: " + this.defaultSwingDuration + "\n"
-               + "\tSize: " + this.size() + " Footsteps");
+         return ("Starting Footstep: " + startingFootstep + "\n" + "\tExecution Mode: "
+               + ExecutionMode.fromByte(queueingProperties.getExecutionMode()).toString() + "\n" + "\tExecution Timing: " + this.executionTiming + "\n"
+               + "\tTransfer Duration: " + this.defaultTransferDuration + "\n" + "\tSwing Duration: " + this.defaultSwingDuration + "\n" + "\tSize: "
+               + this.footstepDataList.size() + " Footsteps");
       }
    }
 
@@ -219,12 +188,6 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       this.finalTransferDuration = finalTransferDuration;
    }
 
-   public void setExecutionMode(ExecutionMode executionMode)
-   {
-      queueingProperties.setExecutionMode(executionMode.toByte());
-      queueingProperties.setPreviousMessageId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
    public void setExecutionTiming(byte executionTiming)
    {
       this.executionTiming = executionTiming;
@@ -233,24 +196,6 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    public byte getExecutionTiming()
    {
       return executionTiming;
-   }
-
-   /**
-    * returns the amount of time this command is delayed on the controller side before executing
-    * @return the time to delay this command in seconds
-    */
-   public double getExecutionDelayTime()
-   {
-      return queueingProperties.getExecutionDelayTime();
-   }
-
-   /**
-    * sets the amount of time this command is delayed on the controller side before executing
-    * @param delayTime the time in seconds to delay after receiving the command before executing
-    */
-   public void setExecutionDelayTime(double delayTime)
-   {
-      queueingProperties.setExecutionDelayTime(delayTime);
    }
 
    public void setTrustHeightOfFootsteps(boolean trustHeight)
@@ -268,7 +213,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       this.offsetFootstepsWithExecutionError = offsetFootstepsWithExecutionError;
    }
 
-   public boolean isOffsetFootstepsWithExecutionError()
+   public boolean getOffsetFootstepsWithExecutionError()
    {
       return offsetFootstepsWithExecutionError;
    }

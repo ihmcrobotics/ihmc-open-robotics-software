@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
@@ -55,11 +54,6 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
    public JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspaceTrajectory;
-   }
-
-   public QueueableMessage getQueueingProperties()
-   {
-      return jointspaceTrajectory.getQueueingProperties();
    }
 
    @Override

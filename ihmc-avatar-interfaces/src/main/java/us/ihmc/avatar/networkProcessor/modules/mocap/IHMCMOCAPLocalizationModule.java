@@ -254,8 +254,8 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
          oneDoFJoints[i].setTau(newJointTorques.get(i));
       }
 
-      pelvisTranslationFromRobotConfigurationData.set(packet.getPelvisTranslation());
-      pelvisOrientationFromRobotConfigurationData.set(packet.getPelvisOrientation());
+      pelvisTranslationFromRobotConfigurationData.set(packet.getRootTranslation());
+      pelvisOrientationFromRobotConfigurationData.set(packet.getRootOrientation());
 
       rootJoint.setPosition(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
       rootJoint.setRotation(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getS());
@@ -344,13 +344,13 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       @Override
       public void receivedPacket(FootstepStatusMessage packet)
       {
-         if(packet.getStatus() == FootstepStatus.COMPLETED.toByte())
+         if(packet.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
             footstepsCompleted.increment();
       }
       
       public void sendFootstepList(FootstepDataListMessage footstepDataListMessage)
       {
-         numberOfFootstepsToTake.set(footstepDataListMessage.getDataList().size());
+         numberOfFootstepsToTake.set(footstepDataListMessage.getFootstepDataList().size());
          footstepsCompleted.set(0);
          packetCommunicator.send(footstepDataListMessage);
       }

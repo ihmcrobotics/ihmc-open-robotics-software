@@ -223,16 +223,16 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       setupCameraForWalkingOntoSlopes(simulationConstructionSet);
       ThreadTools.sleep(1000);
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingToTheSlopesSideways(scriptedFootstepGenerator);
-      List<FootstepDataMessage> dataList = createFootstepsForSteppingOverTheSlopesEdgeSideways(scriptedFootstepGenerator).getDataList();
+      List<FootstepDataMessage> dataList = createFootstepsForSteppingOverTheSlopesEdgeSideways(scriptedFootstepGenerator).getFootstepDataList();
       for (int i = 0; i < dataList.size(); i++)
       {
          FootstepDataMessage step = dataList.get(i);
-         footstepDataList.getDataList().add().set(step);
+         footstepDataList.getFootstepDataList().add().set(step);
       }
       drcSimulationTestHelper.send(footstepDataList);
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footstepDataList.size() * stepTime + 2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footstepDataList.footstepDataList.size() * stepTime + 2.0);
       assertTrue(success);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);

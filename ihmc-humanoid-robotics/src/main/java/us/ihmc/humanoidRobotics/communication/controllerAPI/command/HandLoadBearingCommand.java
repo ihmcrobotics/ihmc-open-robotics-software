@@ -40,7 +40,7 @@ public class HandLoadBearingCommand implements Command<HandLoadBearingCommand, H
       loadBearingCommand.set(message.loadBearingMessage);
       executionDelayTime = message.executionDelayTime;
       robotSide = RobotSide.fromByte(message.robotSide);
-      useJointspaceCommand = message.isUseJointspaceCommand();
+      useJointspaceCommand = message.getUseJointspaceCommand();
       if (message.getJointspaceTrajectory() != null)
       {
          jointspaceTrajectory.set(message.getJointspaceTrajectory());

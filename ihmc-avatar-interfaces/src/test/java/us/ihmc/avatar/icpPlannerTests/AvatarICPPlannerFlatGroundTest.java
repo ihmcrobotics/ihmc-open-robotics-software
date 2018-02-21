@@ -8,6 +8,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -404,7 +405,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
          footstepMessage.setOrientation(new Quaternion());
          footstepMessage.setRobotSide(robotSide.toByte());
 
-         footstepListMessage.add(footstepMessage);
+         footstepListMessage.footstepDataList.add().set(footstepMessage);
          robotSide = robotSide.getOppositeSide();
       }
 
@@ -415,7 +416,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       footstepMessage.setOrientation(new Quaternion());
       footstepMessage.setRobotSide(robotSide.toByte());
 
-      footstepListMessage.add(footstepMessage);
+      footstepListMessage.footstepDataList.add().set(footstepMessage);
       footstepListMessage.setDefaultSwingDuration(swingDuration);
       footstepListMessage.setDefaultTransferDuration(transferDuration);
 
@@ -511,7 +512,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, robotSide, predictedContactPointsInAnkleFrame, placeToStep, setPredictedContactPoints);
-      message.add(footstepData);
+      message.footstepDataList.add().set(footstepData);
 
       drcSimulationTestHelper.send(message);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.2);
@@ -539,7 +540,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       if (setPredictedContactPoints && (contactPointsInAnkleFrame != null))
       {
          ArrayList<Point2D> contactPointsInSoleFrame = transformFromAnkleFrameToSoleFrame(contactPointsInAnkleFrame, ankleFrame, soleFrame);
-         footstepData.setPredictedContactPoints(contactPointsInSoleFrame);
+         MessageTools.copyData(contactPointsInSoleFrame, footstepData.predictedContactPoints);
       }
       return footstepData;
    }

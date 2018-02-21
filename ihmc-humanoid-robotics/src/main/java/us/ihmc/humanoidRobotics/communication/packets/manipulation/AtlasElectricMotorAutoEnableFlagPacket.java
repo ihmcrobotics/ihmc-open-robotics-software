@@ -23,7 +23,7 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
       shouldAutoEnable = other.shouldAutoEnable;
    }
 
-   public boolean shouldAutoEnable()
+   public boolean getShouldAutoEnable()
    {
       return shouldAutoEnable;
    }

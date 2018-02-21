@@ -99,7 +99,7 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
 
       HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
             point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
-      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
+      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
    }

@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -13,7 +10,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation = "Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
@@ -21,28 +17,28 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage>
 {
    @RosExportedField(documentation = "Trajectory for the left hand")
-   public HandTrajectoryMessage leftHandTrajectoryMessage;
+   public HandTrajectoryMessage leftHandTrajectoryMessage = new HandTrajectoryMessage();
    @RosExportedField(documentation = "Trajectory for the right hand")
-   public HandTrajectoryMessage rightHandTrajectoryMessage;
+   public HandTrajectoryMessage rightHandTrajectoryMessage = new HandTrajectoryMessage();
 
    @RosExportedField(documentation = "Trajectory for the left arm joints")
-   public ArmTrajectoryMessage leftArmTrajectoryMessage;
+   public ArmTrajectoryMessage leftArmTrajectoryMessage = new ArmTrajectoryMessage();
    @RosExportedField(documentation = "Trajectory for the right arm joints")
-   public ArmTrajectoryMessage rightArmTrajectoryMessage;
+   public ArmTrajectoryMessage rightArmTrajectoryMessage = new ArmTrajectoryMessage();
 
    @RosExportedField(documentation = "Trajectory for the chest")
-   public ChestTrajectoryMessage chestTrajectoryMessage;
+   public ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
 
    @RosExportedField(documentation = "Trajectory for the pelvis")
-   public PelvisTrajectoryMessage pelvisTrajectoryMessage;
+   public PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage();
 
    @RosExportedField(documentation = "Trajectory for the left foot")
-   public FootTrajectoryMessage leftFootTrajectoryMessage;
+   public FootTrajectoryMessage leftFootTrajectoryMessage = new FootTrajectoryMessage();
    @RosExportedField(documentation = "Trajectory for the right foot")
-   public FootTrajectoryMessage rightFootTrajectoryMessage;
+   public FootTrajectoryMessage rightFootTrajectoryMessage = new FootTrajectoryMessage();
 
    @RosExportedField(documentation = "Trajectory for the head")
-   public HeadTrajectoryMessage headTrajectoryMessage;
+   public HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage();
 
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
@@ -60,74 +56,30 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
 
-      if (other.leftHandTrajectoryMessage != null)
-         leftHandTrajectoryMessage = new HandTrajectoryMessage(other.leftHandTrajectoryMessage);
-      if (other.rightHandTrajectoryMessage != null)
-         rightHandTrajectoryMessage = new HandTrajectoryMessage(other.rightHandTrajectoryMessage);
-      if (other.leftArmTrajectoryMessage != null)
-         leftArmTrajectoryMessage = new ArmTrajectoryMessage(other.leftArmTrajectoryMessage);
-      if (other.rightArmTrajectoryMessage != null)
-         rightArmTrajectoryMessage = new ArmTrajectoryMessage(other.rightArmTrajectoryMessage);
-      if (other.chestTrajectoryMessage != null)
-         chestTrajectoryMessage = new ChestTrajectoryMessage(other.chestTrajectoryMessage);
-      if (other.pelvisTrajectoryMessage != null)
-         pelvisTrajectoryMessage = new PelvisTrajectoryMessage(other.pelvisTrajectoryMessage);
-      if (other.leftFootTrajectoryMessage != null)
-         leftFootTrajectoryMessage = new FootTrajectoryMessage(other.leftFootTrajectoryMessage);
-      if (other.rightFootTrajectoryMessage != null)
-         rightFootTrajectoryMessage = new FootTrajectoryMessage(other.rightFootTrajectoryMessage);
-      if (other.headTrajectoryMessage != null)
-         headTrajectoryMessage = new HeadTrajectoryMessage(other.headTrajectoryMessage);
+      leftHandTrajectoryMessage = new HandTrajectoryMessage(other.leftHandTrajectoryMessage);
+      rightHandTrajectoryMessage = new HandTrajectoryMessage(other.rightHandTrajectoryMessage);
+      leftArmTrajectoryMessage = new ArmTrajectoryMessage(other.leftArmTrajectoryMessage);
+      rightArmTrajectoryMessage = new ArmTrajectoryMessage(other.rightArmTrajectoryMessage);
+      chestTrajectoryMessage = new ChestTrajectoryMessage(other.chestTrajectoryMessage);
+      pelvisTrajectoryMessage = new PelvisTrajectoryMessage(other.pelvisTrajectoryMessage);
+      leftFootTrajectoryMessage = new FootTrajectoryMessage(other.leftFootTrajectoryMessage);
+      rightFootTrajectoryMessage = new FootTrajectoryMessage(other.rightFootTrajectoryMessage);
+      headTrajectoryMessage = new HeadTrajectoryMessage(other.headTrajectoryMessage);
    }
 
    @Override
    public void set(WholeBodyTrajectoryMessage other)
    {
-      if (other.leftHandTrajectoryMessage != null)
-         leftHandTrajectoryMessage = new HandTrajectoryMessage(other.leftHandTrajectoryMessage);
-      if (other.rightHandTrajectoryMessage != null)
-         rightHandTrajectoryMessage = new HandTrajectoryMessage(other.rightHandTrajectoryMessage);
-      if (other.leftArmTrajectoryMessage != null)
-         leftArmTrajectoryMessage = new ArmTrajectoryMessage(other.leftArmTrajectoryMessage);
-      if (other.rightArmTrajectoryMessage != null)
-         rightArmTrajectoryMessage = new ArmTrajectoryMessage(other.rightArmTrajectoryMessage);
-      if (other.chestTrajectoryMessage != null)
-         chestTrajectoryMessage = new ChestTrajectoryMessage(other.chestTrajectoryMessage);
-      if (other.pelvisTrajectoryMessage != null)
-         pelvisTrajectoryMessage = new PelvisTrajectoryMessage(other.pelvisTrajectoryMessage);
-      if (other.leftFootTrajectoryMessage != null)
-         leftFootTrajectoryMessage = new FootTrajectoryMessage(other.leftFootTrajectoryMessage);
-      if (other.rightFootTrajectoryMessage != null)
-         rightFootTrajectoryMessage = new FootTrajectoryMessage(other.rightFootTrajectoryMessage);
-      if (other.headTrajectoryMessage != null)
-         headTrajectoryMessage = new HeadTrajectoryMessage(other.headTrajectoryMessage);
+      leftHandTrajectoryMessage.set(other.leftHandTrajectoryMessage);
+      rightHandTrajectoryMessage.set(other.rightHandTrajectoryMessage);
+      leftArmTrajectoryMessage.set(other.leftArmTrajectoryMessage);
+      rightArmTrajectoryMessage.set(other.rightArmTrajectoryMessage);
+      chestTrajectoryMessage.set(other.chestTrajectoryMessage);
+      pelvisTrajectoryMessage.set(other.pelvisTrajectoryMessage);
+      leftFootTrajectoryMessage.set(other.leftFootTrajectoryMessage);
+      rightFootTrajectoryMessage.set(other.rightFootTrajectoryMessage);
+      headTrajectoryMessage.set(other.headTrajectoryMessage);
       setPacketInformation(other);
-   }
-
-   public HandTrajectoryMessage getHandTrajectoryMessage(RobotSide robotSide)
-   {
-      switch (robotSide)
-      {
-      case LEFT:
-         return leftHandTrajectoryMessage;
-      case RIGHT:
-         return rightHandTrajectoryMessage;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
-   }
-
-   public ArmTrajectoryMessage getArmTrajectoryMessage(RobotSide robotSide)
-   {
-      switch (robotSide)
-      {
-      case LEFT:
-         return leftArmTrajectoryMessage;
-      case RIGHT:
-         return rightArmTrajectoryMessage;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
    }
 
    public ChestTrajectoryMessage getChestTrajectoryMessage()
@@ -140,207 +92,84 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       return pelvisTrajectoryMessage;
    }
 
-   public FootTrajectoryMessage getFootTrajectoryMessage(RobotSide robotSide)
-   {
-      switch (robotSide)
-      {
-      case LEFT:
-         return leftFootTrajectoryMessage;
-      case RIGHT:
-         return rightFootTrajectoryMessage;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
-   }
-
    public HeadTrajectoryMessage getHeadTrajectoryMessage()
    {
       return headTrajectoryMessage;
    }
 
-   public void setHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
+   public void setLeftHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
-      if (handTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
-         handTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
-      switch (RobotSide.fromByte(handTrajectoryMessage.getRobotSide()))
-      {
-      case LEFT:
-         leftHandTrajectoryMessage = handTrajectoryMessage;
-         return;
-      case RIGHT:
-         rightHandTrajectoryMessage = handTrajectoryMessage;
-         return;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
+      leftHandTrajectoryMessage.set(handTrajectoryMessage);
    }
 
-   public void setArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
+   public void setRightHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
-      if (armTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
-         armTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      rightHandTrajectoryMessage.set(handTrajectoryMessage);
+   }
 
-      switch (RobotSide.fromByte(armTrajectoryMessage.getRobotSide()))
-      {
-      case LEFT:
-         leftArmTrajectoryMessage = armTrajectoryMessage;
-         return;
-      case RIGHT:
-         rightArmTrajectoryMessage = armTrajectoryMessage;
-         return;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
+   public void setLeftArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
+   {
+      leftArmTrajectoryMessage.set(armTrajectoryMessage);
+   }
+
+   public void setRightArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
+   {
+      rightArmTrajectoryMessage.set(armTrajectoryMessage);
    }
 
    public void setChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
    {
-      if (chestTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
-         chestTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
-      this.chestTrajectoryMessage = chestTrajectoryMessage;
+      this.chestTrajectoryMessage.set(chestTrajectoryMessage);
    }
 
    public void setPelvisTrajectoryMessage(PelvisTrajectoryMessage pelvisTrajectoryMessage)
    {
-      if (pelvisTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
-         pelvisTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
-      this.pelvisTrajectoryMessage = pelvisTrajectoryMessage;
+      this.pelvisTrajectoryMessage.set(pelvisTrajectoryMessage);
    }
 
-   public void setFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
+   public void setLeftFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
    {
-      if (footTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
-         footTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      leftFootTrajectoryMessage.set(footTrajectoryMessage);
+   }
 
-      switch (RobotSide.fromByte(footTrajectoryMessage.getRobotSide()))
-      {
-      case LEFT:
-         leftFootTrajectoryMessage = footTrajectoryMessage;
-         return;
-      case RIGHT:
-         rightFootTrajectoryMessage = footTrajectoryMessage;
-         return;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
+   public void setRightFootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
+   {
+      rightFootTrajectoryMessage.set(footTrajectoryMessage);
    }
 
    public void setHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
    {
-      if (headTrajectoryMessage.getUniqueId() == INVALID_MESSAGE_ID)
-         headTrajectoryMessage.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
-      this.headTrajectoryMessage = headTrajectoryMessage;
+      this.headTrajectoryMessage.set(headTrajectoryMessage);
    }
 
-   public boolean checkRobotSideConsistency()
+   public HandTrajectoryMessage getLeftHandTrajectoryMessage()
    {
-      if (leftHandTrajectoryMessage != null && RobotSide.fromByte(leftHandTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
-         return false;
-      if (rightHandTrajectoryMessage != null && RobotSide.fromByte(rightHandTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
-         return false;
-      if (leftArmTrajectoryMessage != null && leftArmTrajectoryMessage.getRobotSide() != RobotSide.LEFT.toByte())
-         return false;
-      if (rightArmTrajectoryMessage != null && rightArmTrajectoryMessage.getRobotSide() != RobotSide.RIGHT.toByte())
-         return false;
-      if (leftFootTrajectoryMessage != null && leftFootTrajectoryMessage.getRobotSide() != RobotSide.LEFT.toByte())
-         return false;
-      if (rightFootTrajectoryMessage != null && rightFootTrajectoryMessage.getRobotSide() != RobotSide.RIGHT.toByte())
-         return false;
-
-      return true;
+      return leftHandTrajectoryMessage;
    }
 
-   public void clear()
+   public HandTrajectoryMessage getRightHandTrajectoryMessage()
    {
-      clearHandTrajectoryMessages();
-      clearArmTrajectoryMessages();
-      clearChestTrajectoryMessage();
-      clearPelvisTrajectoryMessage();
-      clearFootTrajectoryMessages();
-      clearHeadTrajectoryMessage();
-      executionDelayTime = 0.0;
+      return rightHandTrajectoryMessage;
    }
 
-   public void clearHandTrajectoryMessages()
+   public ArmTrajectoryMessage getLeftArmTrajectoryMessage()
    {
-      for (RobotSide robotSide : RobotSide.values)
-         clearHandTrajectoryMessage(robotSide);
+      return leftArmTrajectoryMessage;
    }
 
-   public void clearHandTrajectoryMessage(RobotSide robotSide)
+   public ArmTrajectoryMessage getRightArmTrajectoryMessage()
    {
-      switch (robotSide)
-      {
-      case LEFT:
-         leftHandTrajectoryMessage = null;
-         return;
-      case RIGHT:
-         rightHandTrajectoryMessage = null;
-         return;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
+      return rightArmTrajectoryMessage;
    }
 
-   public void clearArmTrajectoryMessages()
+   public FootTrajectoryMessage getLeftFootTrajectoryMessage()
    {
-      for (RobotSide robotSide : RobotSide.values)
-         clearArmTrajectoryMessage(robotSide);
+      return leftFootTrajectoryMessage;
    }
 
-   public void clearArmTrajectoryMessage(RobotSide robotSide)
+   public FootTrajectoryMessage getRightFootTrajectoryMessage()
    {
-      switch (robotSide)
-      {
-      case LEFT:
-         leftArmTrajectoryMessage = null;
-         return;
-      case RIGHT:
-         rightArmTrajectoryMessage = null;
-         return;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
-   }
-
-   public void clearChestTrajectoryMessage()
-   {
-      chestTrajectoryMessage = null;
-   }
-
-   public void clearPelvisTrajectoryMessage()
-   {
-      pelvisTrajectoryMessage = null;
-   }
-
-   public void clearFootTrajectoryMessages()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-         clearFootTrajectoryMessage(robotSide);
-   }
-
-   public void clearFootTrajectoryMessage(RobotSide robotSide)
-   {
-      switch (robotSide)
-      {
-      case LEFT:
-         leftFootTrajectoryMessage = null;
-         return;
-      case RIGHT:
-         rightFootTrajectoryMessage = null;
-         return;
-      default:
-         throw new RuntimeException("Should not get there.");
-      }
-   }
-
-   public void clearHeadTrajectoryMessage()
-   {
-      headTrajectoryMessage = null;
+      return rightFootTrajectoryMessage;
    }
 
    /**
@@ -360,48 +189,29 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
     */
    public void setExecutionDelayTime(double delayTime)
    {
-      this.executionDelayTime = delayTime;
+      executionDelayTime = delayTime;
    }
 
    @Override
    public boolean epsilonEquals(WholeBodyTrajectoryMessage other, double epsilon)
    {
-      if (leftHandTrajectoryMessage == null ^ other.leftHandTrajectoryMessage == null)
+      if (!leftHandTrajectoryMessage.epsilonEquals(other.leftHandTrajectoryMessage, epsilon))
          return false;
-      if (rightHandTrajectoryMessage == null ^ other.rightHandTrajectoryMessage == null)
+      if (!rightHandTrajectoryMessage.epsilonEquals(other.rightHandTrajectoryMessage, epsilon))
          return false;
-      if (leftArmTrajectoryMessage == null ^ other.leftArmTrajectoryMessage == null)
+      if (!leftArmTrajectoryMessage.epsilonEquals(other.leftArmTrajectoryMessage, epsilon))
          return false;
-      if (rightArmTrajectoryMessage == null ^ other.rightArmTrajectoryMessage == null)
+      if (!rightArmTrajectoryMessage.epsilonEquals(other.rightArmTrajectoryMessage, epsilon))
          return false;
-      if (chestTrajectoryMessage == null ^ other.chestTrajectoryMessage == null)
+      if (!chestTrajectoryMessage.epsilonEquals(other.chestTrajectoryMessage, epsilon))
          return false;
-      if (pelvisTrajectoryMessage == null ^ other.pelvisTrajectoryMessage == null)
+      if (!pelvisTrajectoryMessage.epsilonEquals(other.pelvisTrajectoryMessage, epsilon))
          return false;
-      if (headTrajectoryMessage == null ^ other.headTrajectoryMessage == null)
+      if (!headTrajectoryMessage.epsilonEquals(other.headTrajectoryMessage, epsilon))
          return false;
-      if (leftFootTrajectoryMessage == null ^ other.leftFootTrajectoryMessage == null)
+      if (!leftFootTrajectoryMessage.epsilonEquals(other.leftFootTrajectoryMessage, epsilon))
          return false;
-      if (rightFootTrajectoryMessage == null ^ other.rightFootTrajectoryMessage == null)
-         return false;
-
-      if (leftHandTrajectoryMessage != null && !leftHandTrajectoryMessage.epsilonEquals(other.leftHandTrajectoryMessage, epsilon))
-         return false;
-      if (rightHandTrajectoryMessage != null && !rightHandTrajectoryMessage.epsilonEquals(other.rightHandTrajectoryMessage, epsilon))
-         return false;
-      if (leftArmTrajectoryMessage != null && !leftArmTrajectoryMessage.epsilonEquals(other.leftArmTrajectoryMessage, epsilon))
-         return false;
-      if (rightArmTrajectoryMessage != null && !rightArmTrajectoryMessage.epsilonEquals(other.rightArmTrajectoryMessage, epsilon))
-         return false;
-      if (chestTrajectoryMessage != null && !chestTrajectoryMessage.epsilonEquals(other.chestTrajectoryMessage, epsilon))
-         return false;
-      if (pelvisTrajectoryMessage != null && !pelvisTrajectoryMessage.epsilonEquals(other.pelvisTrajectoryMessage, epsilon))
-         return false;
-      if (headTrajectoryMessage != null && !headTrajectoryMessage.epsilonEquals(other.headTrajectoryMessage, epsilon))
-         return false;
-      if (leftFootTrajectoryMessage != null && !leftFootTrajectoryMessage.epsilonEquals(other.leftFootTrajectoryMessage, epsilon))
-         return false;
-      if (rightFootTrajectoryMessage != null && !rightFootTrajectoryMessage.epsilonEquals(other.rightFootTrajectoryMessage, epsilon))
+      if (!rightFootTrajectoryMessage.epsilonEquals(other.rightFootTrajectoryMessage, epsilon))
          return false;
 
       return true;
@@ -414,74 +224,46 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       String errorMessage = PacketValidityChecker.validatePacket(this, true);
       if (errorMessage != null)
          return errorMessage;
-      if (!checkRobotSideConsistency())
+      if (!PacketValidityChecker.testRobotSideConsistency(this))
       {
          errorMessage = "The robotSide of a field is inconsistent with its name.";
          return errorMessage;
       }
 
-      if ((errorMessage = validateIfNeeded(leftHandTrajectoryMessage)) != null)
+      if (leftHandTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = leftHandTrajectoryMessage.validateMessage()) != null)
          return errorMessage;
-      if ((errorMessage = validateIfNeeded(rightHandTrajectoryMessage)) != null)
+      if (rightHandTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = rightHandTrajectoryMessage.validateMessage()) != null)
          return errorMessage;
-      if ((errorMessage = validateIfNeeded(leftArmTrajectoryMessage)) != null)
+      if (leftArmTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = leftArmTrajectoryMessage.validateMessage()) != null)
          return errorMessage;
-      if ((errorMessage = validateIfNeeded(rightArmTrajectoryMessage)) != null)
+      if (rightArmTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = rightArmTrajectoryMessage.validateMessage()) != null)
          return errorMessage;
-      if ((errorMessage = validateIfNeeded(chestTrajectoryMessage)) != null)
+      if (chestTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = chestTrajectoryMessage.validateMessage()) != null)
          return errorMessage;
-      if ((errorMessage = validateIfNeeded(pelvisTrajectoryMessage)) != null)
+      if (pelvisTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = pelvisTrajectoryMessage.validateMessage()) != null)
          return errorMessage;
-      if ((errorMessage = validateIfNeeded(headTrajectoryMessage)) != null)
+      if (headTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = headTrajectoryMessage.validateMessage()) != null)
          return errorMessage;
-      if ((errorMessage = validateIfNeeded(leftFootTrajectoryMessage)) != null)
+      if (leftFootTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = leftFootTrajectoryMessage.validateMessage()) != null)
          return errorMessage;
-      if ((errorMessage = validateIfNeeded(rightFootTrajectoryMessage)) != null)
+      if (rightFootTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = rightFootTrajectoryMessage.validateMessage()) != null)
          return errorMessage;
 
       return null;
-   }
-
-   private String validateIfNeeded(Packet<?> message)
-   {
-      String errorMessage = null;
-
-      if (message != null && message.getUniqueId() != Packet.INVALID_MESSAGE_ID)
-         errorMessage = message.validateMessage();
-
-      return errorMessage;
-   }
-
-   public List<Packet<?>> getPackets()
-   {
-      ArrayList<Packet<?>> wholeBodyPackets = new ArrayList<>();
-      if (leftHandTrajectoryMessage != null)
-         wholeBodyPackets.add(leftHandTrajectoryMessage);
-      if (rightHandTrajectoryMessage != null)
-         wholeBodyPackets.add(rightHandTrajectoryMessage);
-      if (leftArmTrajectoryMessage != null)
-         wholeBodyPackets.add(leftArmTrajectoryMessage);
-      if (rightArmTrajectoryMessage != null)
-         wholeBodyPackets.add(rightArmTrajectoryMessage);
-      if (chestTrajectoryMessage != null)
-         wholeBodyPackets.add(chestTrajectoryMessage);
-      if (pelvisTrajectoryMessage != null)
-         wholeBodyPackets.add(pelvisTrajectoryMessage);
-      if (headTrajectoryMessage != null)
-         wholeBodyPackets.add(headTrajectoryMessage);
-      if (leftFootTrajectoryMessage != null)
-         wholeBodyPackets.add(leftFootTrajectoryMessage);
-      if (rightFootTrajectoryMessage != null)
-         wholeBodyPackets.add(rightFootTrajectoryMessage);
-      return wholeBodyPackets;
    }
 
    @Override
    public String toString()
    {
       String string = getClass().getSimpleName() + ":";
-      for (Packet<?> packet : getPackets())
-         string += "\n" + packet.toString();
+      string += "\n" + leftHandTrajectoryMessage.toString();
+      string += "\n" + rightHandTrajectoryMessage.toString();
+      string += "\n" + leftArmTrajectoryMessage.toString();
+      string += "\n" + rightArmTrajectoryMessage.toString();
+      string += "\n" + pelvisTrajectoryMessage.toString();
+      string += "\n" + headTrajectoryMessage.toString();
+      string += "\n" + leftFootTrajectoryMessage.toString();
+      string += "\n" + rightFootTrajectoryMessage.toString();
       return string;
    }
 }

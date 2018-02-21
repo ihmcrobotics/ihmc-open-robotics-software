@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
@@ -89,8 +90,8 @@ public class ScriptBasedControllerCommandGenerator
       else if (scriptObject instanceof FootTrajectoryMessage)
       {
          FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
-         message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
-         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
+         message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(worldFrame));
+         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
          FootTrajectoryCommand command = new FootTrajectoryCommand();
          command.getSE3Trajectory().set(worldFrame, worldFrame, message.se3Trajectory);
          controllerCommands.add(command);
@@ -99,8 +100,8 @@ public class ScriptBasedControllerCommandGenerator
       {
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          HandTrajectoryMessage message = (HandTrajectoryMessage) scriptObject;
-         message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
-         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
+         message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
+         message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
          HandTrajectoryCommand command = new HandTrajectoryCommand();
          command.getSE3Trajectory().set(worldFrame, chestFrame, message.se3Trajectory);
          controllerCommands.add(command);

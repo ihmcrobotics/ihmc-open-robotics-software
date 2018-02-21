@@ -272,7 +272,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       }
 
       planCompleted = false;
-      if(outputStatus.footstepDataList.size() > 0)
+      if(outputStatus.footstepDataList.footstepDataList.size() > 0)
       {
          drcSimulationTestHelper.send(outputStatus.footstepDataList);
 

@@ -16,6 +16,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 public class JointConfigurationGatherer
 {
@@ -97,7 +98,7 @@ public class JointConfigurationGatherer
       jointConfigurationData.setPelvisLinearAcceleration(rootLinearAcceleration);
       jointConfigurationData.setRootTranslation(rootTranslation);
       jointConfigurationData.setRootOrientation(rootOrientation);
-      jointConfigurationData.setJointState(joints);
+      RobotConfigurationDataFactory.packJointState(jointConfigurationData, joints);
       jointConfigurationData.setTimestamp(timestamp);
       jointConfigurationData.setSensorHeadPPSTimestamp(sensorHeadPPSTimestamp);
 

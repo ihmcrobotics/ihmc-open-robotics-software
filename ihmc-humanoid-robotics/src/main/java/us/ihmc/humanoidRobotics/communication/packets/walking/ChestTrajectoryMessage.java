@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
 {
    @RosExportedField(documentation = "The orientation trajectory information.")
-   public SO3TrajectoryMessage so3Trajectory;
+   public SO3TrajectoryMessage so3Trajectory = new SO3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -39,7 +39,6 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
    @Override
    public void set(ChestTrajectoryMessage other)
    {
-      so3Trajectory = new SO3TrajectoryMessage();
       so3Trajectory.set(other.so3Trajectory);
       setPacketInformation(other);
    }
@@ -52,7 +51,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
          so3Trajectory.setUniqueId(uniqueId);
    }
 
-   public SO3TrajectoryMessage getSO3Trajectory()
+   public SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3Trajectory;
    }

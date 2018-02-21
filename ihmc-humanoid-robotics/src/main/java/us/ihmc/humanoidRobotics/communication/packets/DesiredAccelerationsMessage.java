@@ -31,22 +31,9 @@ public final class DesiredAccelerationsMessage extends Packet<DesiredAcceleratio
       setPacketInformation(other);
    }
 
-   public int getNumberOfJoints()
-   {
-      if (desiredJointAccelerations == null)
-         return 0;
-      else
-         return desiredJointAccelerations.size();
-   }
-
    public TDoubleArrayList getDesiredJointAccelerations()
    {
       return desiredJointAccelerations;
-   }
-
-   public double getDesiredJointAcceleration(int jointIndex)
-   {
-      return desiredJointAccelerations.get(jointIndex);
    }
 
    public QueueableMessage getQueueingProperties()
@@ -72,15 +59,15 @@ public final class DesiredAccelerationsMessage extends Packet<DesiredAcceleratio
    @Override
    public String toString()
    {
-         String ret = "desired accelerations = [";
-         NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
-         for (int i = 0; i < getNumberOfJoints(); i++)
-         {
-            double jointDesiredAcceleration = desiredJointAccelerations.get(i);
-            ret += doubleFormat.format(jointDesiredAcceleration);
-            if (i < getNumberOfJoints() - 1)
-               ret += ", ";
-         }
-         return ret + "].";
+      String ret = "desired accelerations = [";
+      NumberFormat doubleFormat = new DecimalFormat(" 0.00;-0.00");
+      for (int i = 0; i < desiredJointAccelerations.size(); i++)
+      {
+         double jointDesiredAcceleration = desiredJointAccelerations.get(i);
+         ret += doubleFormat.format(jointDesiredAcceleration);
+         if (i < desiredJointAccelerations.size() - 1)
+            ret += ", ";
+      }
+      return ret + "].";
    }
 }

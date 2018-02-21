@@ -26,6 +26,7 @@ import us.ihmc.ihmcPerception.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
 import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
@@ -101,7 +102,7 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
          jointNamesList.add(controllableOneDoFJoints[i].getName());
       }
 
-      jointNameHash = RobotConfigurationData
+      jointNameHash = RobotConfigurationDataFactory
             .calculateJointNameHash(controllableOneDoFJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
 
       rosAPICommunicator.attachListener(RobotConfigurationData.class, this);
@@ -174,7 +175,7 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
 
             rosJointStatePublisher.publish(jointNamesList, jointAngles, jointVelocities, jointTorques, t);
 
-            RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getPelvisOrientation(), robotConfigurationData.getPelvisTranslation());
+            RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
 
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
                                             robotConfigurationData.getPelvisAngularVelocity(), jointMap.getUnsanitizedRootJointInSdf(),

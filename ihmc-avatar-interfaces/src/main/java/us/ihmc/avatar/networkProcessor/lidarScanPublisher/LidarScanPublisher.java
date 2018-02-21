@@ -208,7 +208,7 @@ public class LidarScanPublisher
             // Set the world transforms to nothing, so points are in lidar scan frame
             scan.setWorldTransforms(identityTransform, identityTransform);
             List<Point3D> scanPoints = scan.getAllPoints();
-            long timestamp = packet.getScanStartTime();
+            long timestamp = packet.lidarScanParameters.getTimestamp();
 
             scanDataToPublish.set(new ScanData(timestamp, scanPoints));
          }
@@ -296,12 +296,12 @@ public class LidarScanPublisher
 
                PriorityQueue<Integer> indicesToRemove = new PriorityQueue<>();
 
-               if (requestLidarScanMessage.isRemoveSelfCollisions())
+               if (requestLidarScanMessage.getRemoveSelfCollisions())
                {
                   indicesToRemove.addAll(selfCollisionRemovalIndices);
                }
 
-               if (requestLidarScanMessage.isRemoveShadows())
+               if (requestLidarScanMessage.getRemoveShadows())
                {
                   indicesToRemove.addAll(shadowRemovalIndices);
                }

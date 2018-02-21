@@ -41,16 +41,16 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisTrajectoryMessage message)
    {
-      setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
-      setEnableUserPelvisControl(message.isEnableUserPelvisControl());
+      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
+      setEnableUserPelvisControl(message.getEnableUserPelvisControl());
       se3Trajectory.set(resolver, message.se3Trajectory);
    }
 
    @Override
    public void set(PelvisTrajectoryMessage message)
    {
-      setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
-      setEnableUserPelvisControl(message.isEnableUserPelvisControl());
+      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
+      setEnableUserPelvisControl(message.getEnableUserPelvisControl());
       se3Trajectory.set(message.se3Trajectory);
    }
 

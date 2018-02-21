@@ -97,65 +97,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
          privilegedRootJointOrientation.set(rootJointOrientation);
    }
 
-   /**
-    * When provided, the {@code KinematicsToolboxController} will attempt to find the closest
-    * solution to the privileged configuration.
-    * <p>
-    * Avoid calling this method directly, use instead the {@code KinematicsToolboxInputHelper}.
-    * </p>
-    * <p>
-    * Note that by sending a privileged configuration the solver will get reinitialized to start off
-    * that configuration and thus may delay the convergence to the solution. It is therefore
-    * preferable to send the privileged configuration as soon as possible.
-    * </p>
-    * 
-    * @param jointNameBasedHashCodes allows to safely identify to which joint each angle in
-    *           {@link #privilegedJointAngles} belongs to. The name-based hash code can be obtained
-    *           from {@link OneDoFJoint#getNameBasedHashCode()}. Not modified.
-    * @param jointAngles the privileged joint angles. Not modified.
-    * @throws IllegalArgumentException if the lengths of {@code jointAngles} and
-    *            {@code jointNameBasedHashCodes} are different.
-    */
-   public void setPrivilegedJointAngles(long[] jointNameBasedHashCodes, float[] jointAngles)
-   {
-      if (jointNameBasedHashCodes.length != jointAngles.length)
-         throw new IllegalArgumentException("The two arrays jointAngles and jointNameBasedHashCodes have to be of same length.");
-
-      privilegedJointNameBasedHashCodes.reset();
-      privilegedJointNameBasedHashCodes.add(jointNameBasedHashCodes);
-      privilegedJointAngles.reset();
-      privilegedJointAngles.add(jointAngles);
-   }
-
-   /**
-    * Provides a privileged configuration that the {@code KinematicsToolboxController} will use as a
-    * reference and attempt to find the solution that is the closest.
-    * <p>
-    * Avoid calling this method directly, use instead the {@code KinematicsToolboxInputHelper}.
-    * </p>
-    * <p>
-    * Note that by sending a privileged configuration the solver will get reinitialized to start off
-    * that configuration and thus may delay the convergence to the solution. It is therefore
-    * preferable to send the privileged configuration as soon as possible.
-    * </p>
-    * 
-    * @param rootJointPosition the privileged root joint position. Not modified.
-    * @param rootJointOrientation the privileged root joint orientation. Not modified.
-    * @param jointNameBasedHashCodes allows to safely identify to which joint each angle in
-    *           {@link #privilegedJointAngles} belongs to. The name-based hash code can be obtained
-    *           from {@link OneDoFJoint#getNameBasedHashCode()}. Not modified.
-    * @param jointAngles the privileged joint angles. Not modified.
-    * @throws IllegalArgumentException if the lengths of {@code jointAngles} and
-    *            {@code jointNameBasedHashCodes} are different.
-    */
-   public void setPrivilegedRobotConfiguration(Tuple3DReadOnly rootJointPosition, QuaternionReadOnly rootJointOrientation, long[] jointNameBasedHashCodes,
-                                               float[] jointAngles)
-   {
-      setPrivilegedRootJointPosition(rootJointPosition);
-      setPrivilegedRootJointOrientation(rootJointOrientation);
-      setPrivilegedJointAngles(jointNameBasedHashCodes, jointAngles);
-   }
-
    public Point3D32 getPrivilegedRootJointPosition()
    {
       return privilegedRootJointPosition;

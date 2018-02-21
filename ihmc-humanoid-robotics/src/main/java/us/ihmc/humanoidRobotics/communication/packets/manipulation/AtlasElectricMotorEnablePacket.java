@@ -29,7 +29,7 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
       setDestination(PacketDestination.CONTROLLER.ordinal());
    }
 
-   public byte getMotorEnableEnum()
+   public byte getAtlasElectricMotorPacketEnumEnable()
    {
       return atlasElectricMotorPacketEnumEnable;
    }
@@ -42,7 +42,7 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
       enable = other.enable;
    }
 
-   public boolean isEnabled()
+   public boolean getEnable()
    {
       return enable;
    }

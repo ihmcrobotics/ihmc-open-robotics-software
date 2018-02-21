@@ -36,8 +36,8 @@ public class ClearDelayQueueConverter implements CommandConversionInterface
    {
       ClearDelayQueueCommand clearCommand = (ClearDelayQueueCommand) command;
       ClearDelayQueueMessage clearMessage = (ClearDelayQueueMessage) message;
-      clearCommand.setCommandClassToClear(hashCodeToCommandClasses.get(clearMessage.getClassToClearSimpleNameBasedHashCode()));
-      clearCommand.setMessageClassToClear(hashCodeToMessageClasses.get(clearMessage.getClassToClearSimpleNameBasedHashCode()));
+      clearCommand.setCommandClassToClear(hashCodeToCommandClasses.get(clearMessage.getClassSimpleNameBasedHashCode()));
+      clearCommand.setMessageClassToClear(hashCodeToMessageClasses.get(clearMessage.getClassSimpleNameBasedHashCode()));
       clearCommand.setClearAllDelayBuffers(clearMessage.getClearAllDelayBuffers());
    }
 }

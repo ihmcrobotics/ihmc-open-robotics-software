@@ -100,7 +100,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          footstepData.setLocation(position);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide.toByte());
-         message.add(footstepData);
+         message.footstepDataList.add().set(footstepData);
 
          drcSimulationTestHelper.send(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
@@ -160,7 +160,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
          footstepData.setLocation(position);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide.toByte());
-         message.add(footstepData);
+         message.footstepDataList.add().set(footstepData);
 
          drcSimulationTestHelper.send(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);

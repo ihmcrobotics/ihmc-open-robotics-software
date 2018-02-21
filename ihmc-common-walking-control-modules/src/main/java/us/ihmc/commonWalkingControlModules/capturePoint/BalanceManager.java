@@ -38,6 +38,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -782,7 +783,7 @@ public class BalanceManager
       capturabilityBasedStatus.centerOfMass.set(centerOfMassPosition);
       for (RobotSide robotSide : RobotSide.values)
       {
-         capturabilityBasedStatus.setSupportPolygon(robotSide, footSupportPolygons.get(robotSide));
+         HumanoidMessageTools.packFootSupportPolygon(capturabilityBasedStatus, robotSide, footSupportPolygons.get(robotSide));
       }
 
       return capturabilityBasedStatus;
