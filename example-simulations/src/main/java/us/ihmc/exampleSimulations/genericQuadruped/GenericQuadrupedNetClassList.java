@@ -94,5 +94,7 @@ public class GenericQuadrupedNetClassList extends IHMCCommunicationKryoNetClassL
       registerPacketField(DoubleArrayParameter .class);
       registerPacketField(DoubleParameter.class);
       registerPacketField(StringParameter.class);
+
+      registerPacketClass(QuadrupedSoleWaypointPacket.class);
    }
 }
