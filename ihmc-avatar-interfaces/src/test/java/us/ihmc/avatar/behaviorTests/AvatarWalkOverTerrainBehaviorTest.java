@@ -55,6 +55,7 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
       DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
       networkModuleParameters.enableLocalControllerCommunicator(true);
       networkModuleParameters.enableBehaviorModule(true);
+      networkModuleParameters.enableFootstepPlanningToolbox(true);
       simulationStarter.startSimulation(networkModuleParameters, true);
 
       PacketCommunicator behaviorCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
