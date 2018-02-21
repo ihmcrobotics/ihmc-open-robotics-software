@@ -77,9 +77,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    // frames
    private final ReferenceFrame worldFrame;
 
-   // model
-   private final LinearInvertedPendulumModel lipModel;
-
    // feedback controllers
    private final FramePoint3D dcmPositionEstimate;
    private final DivergentComponentOfMotionController dcmPositionController;
@@ -135,9 +132,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       worldFrame = ReferenceFrame.getWorldFrame();
 
-      // model
-      lipModel = controllerToolbox.getLinearInvertedPendulumModel();
-
       // feedback controllers
       dcmPositionEstimate = new FramePoint3D();
       dcmPositionController = controllerToolbox.getDcmPositionController();
@@ -187,31 +181,18 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
    private void updateGains()
    {
-      dcmPositionController.setVrpPositionRateLimit(vrpPositionRateLimitParameter.get());
-      dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
-      dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
-      dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
-      comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
-      comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
-      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
+      balanceManager.updateGains();
+
       bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
       bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
       bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
+
       taskSpaceControllerSettings.getContactForceLimits().setCoefficientOfFriction(coefficientOfFrictionParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
       taskSpaceControllerSettings.getContactForceOptimizationSettings().setComForceCommandWeights(comForceCommandWeightsParameter.get());
       taskSpaceControllerSettings.getContactForceOptimizationSettings().setComTorqueCommandWeights(comTorqueCommandWeightsParameter.get());
-   }
-
-   private void updateEstimates()
-   {
-      // update model
-      lipModel.setComHeight(postureProvider.getComPositionInput().getZ());
-
-      // update task space estimates
-      taskSpaceEstimator.compute(taskSpaceEstimates);
    }
 
    private void updateSetpoints()
@@ -368,8 +349,9 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       accumulatedStepAdjustment.setToZero();
 
       // initialize estimates
-      lipModel.setComHeight(postureProvider.getComPositionInput().getZ());
-      updateEstimates();
+
+      // update task space estimates
+      taskSpaceEstimator.compute(taskSpaceEstimates);
 
       // initialize feedback controllers
       balanceManager.initialize(taskSpaceEstimates);
@@ -420,8 +402,13 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
          return ControllerEvent.DONE;
       }
       stepStream.process();
+
       updateGains();
-      updateEstimates();
+
+
+      // update task space estimates
+      taskSpaceEstimator.compute(taskSpaceEstimates);
+
       updateSetpoints();
       return null;
    }
