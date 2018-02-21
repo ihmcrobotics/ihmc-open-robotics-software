@@ -69,6 +69,15 @@ public class QuadrupedFeetManager
       footControlModules.get(step.getRobotQuadrant()).triggerStep(step);
    }
 
+   public void triggerSteps(List<YoQuadrupedTimedStep> steps)
+   {
+      for (int i = 0; i < steps.size(); i++)
+      {
+         QuadrupedTimedStep step = steps.get(i);
+         footControlModules.get(step.getRobotQuadrant()).triggerStep(step);
+      }
+   }
+
    public void adjustSteps(List<QuadrupedTimedStep> activeSteps)
    {
       for (int i = 0; i < activeSteps.size(); i++)

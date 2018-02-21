@@ -4,7 +4,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
@@ -13,7 +12,6 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajecto
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
@@ -84,12 +82,11 @@ public class QuadrupedBalanceManager
    private final FramePoint3D tempPoint = new FramePoint3D();
 
    public QuadrupedBalanceManager(QuadrupedForceControllerToolbox toolbox, RecyclingArrayList<YoQuadrupedTimedStep> stepSequence,
-                                  QuadrupedPostureInputProviderInterface postureProvider,
-                                  ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory, YoVariableRegistry parentRegistry)
+                                  QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry)
    {
       this.postureProvider = postureProvider;
       this.stepSequence = stepSequence;
-      this.dcmTransitionTrajectory = dcmTransitionTrajectory;
+      this.dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
 
       robotTimestamp = toolbox.getRuntimeEnvironment().getRobotTimestamp();
       gravity = 9.81;
@@ -241,7 +238,7 @@ public class QuadrupedBalanceManager
       accumulatedStepAdjustment.setZ(0);
    }
 
-   public void computeStepAdjustment()
+   public RecyclingArrayList<QuadrupedTimedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
       adjustedActiveSteps.clear();
       if (robotTimestamp.getDoubleValue() > dcmTransitionTrajectory.getEndTime())
@@ -254,16 +251,29 @@ public class QuadrupedBalanceManager
          instantaneousStepAdjustment.sub(dcmPositionEstimate, dcmPositionSetpoint);
          instantaneousStepAdjustment.scale(dcmPositionStepAdjustmentGainParameter.get());
          instantaneousStepAdjustment.setZ(0);
+
+         // adjust nominal step goal positions in foot state machine
+         for (int i = 0; i < activeSteps.size(); i++)
+         {
+            YoQuadrupedTimedStep activeStep = activeSteps.get(i);
+            QuadrupedTimedStep adjustedStep = adjustedActiveSteps.add();
+            adjustedStep.set(activeStep);
+
+            RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
+            activeStep.getGoalPosition(tempPoint);
+            tempPoint.changeFrame(worldFrame);
+            tempPoint.add(instantaneousStepAdjustment);
+            crossoverProjection.project(tempPoint, taskSpaceEstimates.getSolePosition(), robotQuadrant);
+            groundPlaneEstimator.projectZ(tempPoint);
+            adjustedStep.setGoalPosition(tempPoint);
+         }
       }
+
+      return adjustedActiveSteps;
    }
 
    public FrameVector3DReadOnly getAccumulatedStepAdjustment()
    {
       return accumulatedStepAdjustment;
-   }
-
-   public FrameVector3DReadOnly getInstantaneousStepAdjustment()
-   {
-      return instantaneousStepAdjustment;
    }
 }
