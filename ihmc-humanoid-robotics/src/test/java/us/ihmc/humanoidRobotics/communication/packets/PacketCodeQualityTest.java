@@ -28,6 +28,11 @@ import org.junit.rules.Timeout;
 import org.reflections.Reflections;
 
 import gnu.trove.list.TByteList;
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -51,6 +56,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.idl.PreallocatedList;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.HEALTH)
 public class PacketCodeQualityTest
@@ -67,6 +73,7 @@ public class PacketCodeQualityTest
 
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      allPacketTypes.removeAll(reaInternalComms);
 
       Map<Class<? extends Packet>, List<Class>> packetTypesWithIterableOrArrayField = new HashMap<>();
 
@@ -253,6 +260,14 @@ public class PacketCodeQualityTest
 
                Class<?> typeToCheck = field.getType();
 
+               if (PreallocatedList.class.isAssignableFrom(typeToCheck))
+               {
+                  Packet packetInstance = packetType.newInstance();
+                  Object fieldInstance = field.get(packetInstance);
+                  Field clazzField = typeToCheck.getDeclaredField("clazz");
+                  clazzField.setAccessible(true);
+                  typeToCheck = (Class<?>) clazzField.get(fieldInstance);
+               }
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
                if (Packet.class.isAssignableFrom(typeToCheck))
@@ -737,6 +752,12 @@ public class PacketCodeQualityTest
    {
       thirdPartySerializableClasses.add(List.class);
       thirdPartySerializableClasses.add(ArrayList.class);
+      thirdPartySerializableClasses.add(PreallocatedList.class);
+      thirdPartySerializableClasses.add(TByteArrayList.class);
+      thirdPartySerializableClasses.add(TFloatArrayList.class);
+      thirdPartySerializableClasses.add(TDoubleArrayList.class);
+      thirdPartySerializableClasses.add(TIntArrayList.class);
+      thirdPartySerializableClasses.add(TLongArrayList.class);
       thirdPartySerializableClasses.add(StringBuilder.class);
    }
 
