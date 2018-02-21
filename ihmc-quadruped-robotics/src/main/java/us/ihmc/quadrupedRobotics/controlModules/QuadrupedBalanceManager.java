@@ -63,7 +63,7 @@ public class QuadrupedBalanceManager
    private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 0.5);
 
-   private final FramePoint3D dcmPositionEstimate;
+   private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
    private final FramePoint3D dcmPositionWaypoint = new FramePoint3D();
 
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -76,13 +76,10 @@ public class QuadrupedBalanceManager
 
    public QuadrupedBalanceManager(QuadrupedForceControllerToolbox toolbox, YoPreallocatedList<YoQuadrupedTimedStep> stepSequence,
                                   QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry,
-                                  QuadrupedTimedContactSequence timedContactSequence,
-                                  ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory,
-                                  FramePoint3D dcmPositionEstimate)
+                                  QuadrupedTimedContactSequence timedContactSequence, ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory)
    {
       this.postureProvider = postureProvider;
       this.stepSequence = stepSequence;
-      this.dcmPositionEstimate = dcmPositionEstimate;
 
       robotTimestamp = toolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.gravity = 9.81;
@@ -176,6 +173,8 @@ public class QuadrupedBalanceManager
 
    public void compute(FrameVector3D linearMomentumRateOfChangeToPack, QuadrupedTaskSpaceEstimates taskSpaceEstimates, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
+      updateGains();
+
       // update model
       linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
 
@@ -200,7 +199,7 @@ public class QuadrupedBalanceManager
       comPositionController.compute(linearMomentumRateOfChangeToPack, comPositionControllerSetpoints, taskSpaceEstimates);
    }
 
-   public void updateGains()
+   private void updateGains()
    {
       dcmPositionController.setVrpPositionRateLimit(vrpPositionRateLimitParameter.get());
       dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
@@ -214,5 +213,10 @@ public class QuadrupedBalanceManager
    public FramePoint3D getDCMPositionSetpoint()
    {
       return dcmPositionController.getDCMPositionSetpoint();
+   }
+
+   public FramePoint3D getDCMPositionEstimate()
+   {
+      return dcmPositionEstimate;
    }
 }
