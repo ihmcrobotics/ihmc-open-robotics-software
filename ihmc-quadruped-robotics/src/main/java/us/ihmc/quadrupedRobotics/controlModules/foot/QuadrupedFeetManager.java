@@ -60,8 +60,9 @@ public class QuadrupedFeetManager
       }
    }
 
-   public void triggerStep(RobotQuadrant robotQuadrant, QuadrupedTimedStep stepSequence)
+   public void triggerStep(QuadrupedTimedStep stepSequence)
    {
+      RobotQuadrant robotQuadrant = stepSequence.getRobotQuadrant();
       footControlModules.get(robotQuadrant).triggerStep(stepSequence);
    }
 
