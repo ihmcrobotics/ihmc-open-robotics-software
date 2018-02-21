@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -49,6 +50,11 @@ public class QuadrupedBodyOrientationController
    private final YoFrameOrientation yoBodyOrientationSetpoint;
    private final YoFrameVector yoBodyAngularVelocitySetpoint;
    private final YoFrameVector yoComTorqueFeedforwardSetpoint;
+
+   public QuadrupedBodyOrientationController(QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry registry)
+   {
+      this(controllerToolbox.getReferenceFrames().getBodyFrame(), controllerToolbox.getRuntimeEnvironment().getControlDT(), registry);
+   }
 
    public QuadrupedBodyOrientationController(ReferenceFrame bodyFrame, double controlDT, YoVariableRegistry registry)
    {

@@ -42,7 +42,7 @@ public class QuadrupedBodyOrientationManager
    {
       this.postureProvider = postureProvider;
 
-      controller = controllerToolbox.getBodyOrientationController();
+      controller = new QuadrupedBodyOrientationController(controllerToolbox, registry);
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
       gains = controller.getGains();
 
@@ -79,8 +79,7 @@ public class QuadrupedBodyOrientationManager
       double bodyOrientationYaw = setpoints.getBodyOrientation().getYaw();
       double bodyOrientationPitch = setpoints.getBodyOrientation().getPitch();
       double bodyOrientationRoll = setpoints.getBodyOrientation().getRoll();
-      setpoints.getBodyOrientation()
-                                        .setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch + groundPlaneEstimator.getPitch(bodyOrientationYaw), bodyOrientationRoll);
+      setpoints.getBodyOrientation().setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch + groundPlaneEstimator.getPitch(bodyOrientationYaw), bodyOrientationRoll);
       setpoints.getBodyAngularVelocity().setToZero();
       setpoints.getComTorqueFeedforward().setToZero();
 
