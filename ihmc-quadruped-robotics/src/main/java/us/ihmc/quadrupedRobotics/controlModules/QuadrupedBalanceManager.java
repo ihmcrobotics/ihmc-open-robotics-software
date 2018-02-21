@@ -28,7 +28,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedBalanceManager
 {
-   private static final int STEP_SEQUENCE_CAPACITY = 100;
+   private static final int STEP_SEQUENCE_CAPACITY = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -66,8 +66,7 @@ public class QuadrupedBalanceManager
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
    private final FramePoint3D dcmPositionWaypoint = new FramePoint3D();
 
-   private final GroundPlaneEstimator groundPlaneEstimator;
-   private final QuadrupedTimedContactSequence timedContactSequence;
+   private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(4, 2 * STEP_SEQUENCE_CAPACITY);
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstanceCopTrajectory;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
@@ -75,8 +74,8 @@ public class QuadrupedBalanceManager
    private final RecyclingArrayList<YoQuadrupedTimedStep> stepSequence;
 
    public QuadrupedBalanceManager(QuadrupedForceControllerToolbox toolbox, RecyclingArrayList<YoQuadrupedTimedStep> stepSequence,
-                                  QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry,
-                                  QuadrupedTimedContactSequence timedContactSequence, ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory)
+                                  QuadrupedPostureInputProviderInterface postureProvider,
+                                  ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory, YoVariableRegistry parentRegistry)
    {
       this.postureProvider = postureProvider;
       this.stepSequence = stepSequence;
@@ -85,7 +84,6 @@ public class QuadrupedBalanceManager
       this.gravity = 9.81;
       this.mass = toolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
 
-      this.timedContactSequence = timedContactSequence;
       this.dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, postureProvider.getComPositionInput().getZ());
       piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
       this.dcmTransitionTrajectory = dcmTransitionTrajectory;
@@ -99,7 +97,6 @@ public class QuadrupedBalanceManager
       dcmPositionController = toolbox.getDcmPositionController();
       comPositionController = toolbox.getComPositionController();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
-      groundPlaneEstimator = toolbox.getGroundPlaneEstimator();
 
       parentRegistry.addChild(registry);
    }
@@ -116,6 +113,9 @@ public class QuadrupedBalanceManager
       dcmPositionController.reset();
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
       comPositionController.reset();
+
+      // initialize timed contact sequence
+      timedContactSequence.initialize();
    }
 
    public void initializeDcmSetpoints(QuadrupedTaskSpaceEstimates taskSpaceEstimates, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)

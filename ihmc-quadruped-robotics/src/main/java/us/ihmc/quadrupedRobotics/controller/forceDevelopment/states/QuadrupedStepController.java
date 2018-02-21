@@ -80,7 +80,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrantDependentList<YoFramePoint> groundPlanePositions;
 
-   private final QuadrupedTimedContactSequence timedContactSequence;
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
 
    private final YoFrameVector instantaneousStepAdjustment;
@@ -126,7 +125,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       {
          groundPlanePositions.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
       }
-      timedContactSequence = new QuadrupedTimedContactSequence(4, 2 * STEP_SEQUENCE_CAPACITY);
       dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
       instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
       accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
@@ -147,7 +145,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       });
       */
 
-      balanceManager = new QuadrupedBalanceManager(controllerToolbox, stepMessageHandler.getStepSequence(), postureProvider, registry, timedContactSequence, dcmTransitionTrajectory);
+      balanceManager = new QuadrupedBalanceManager(controllerToolbox, stepMessageHandler.getStepSequence(), postureProvider, dcmTransitionTrajectory, registry);
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
 
       parentRegistry.addChild(registry);
@@ -311,11 +309,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       }
       groundPlaneEstimator.compute();
 
-      // initialize timed contact sequence
-      timedContactSequence.initialize();
-
       // compute step plan
-      //computeStepSequence();
       stepMessageHandler.consumeIncomingSteps();
       stepMessageHandler.adjustStepQueue(accumulatedStepAdjustment);
 
