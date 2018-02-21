@@ -52,7 +52,7 @@ public class QuadrupedBodyOrientationManager
       parentRegistry.addChild(registry);
    }
 
-   public void updateGains()
+   private void updateGains()
    {
       gains.setProportionalGains(bodyOrientationProportionalGainsParameter.get());
       gains.setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
@@ -67,6 +67,8 @@ public class QuadrupedBodyOrientationManager
 
    public void compute(FrameVector3D angularMomentumRateToPack, FrameQuaternionReadOnly bodyOrientationDesired, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
+      updateGains();
+
       bodyOrientationReference.setIncludingFrame(bodyOrientationDesired);
       bodyOrientationReference.changeFrame(bodyOrientationReferenceFrame.getParent());
       bodyOrientationReferenceFrame.setOrientationAndUpdate(bodyOrientationReference);
