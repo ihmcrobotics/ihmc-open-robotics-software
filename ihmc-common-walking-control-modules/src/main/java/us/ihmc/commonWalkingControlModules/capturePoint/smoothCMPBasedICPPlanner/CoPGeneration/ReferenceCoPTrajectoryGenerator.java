@@ -111,6 +111,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final YoBoolean isDoneWalking;
    private final YoBoolean holdDesiredState;
    private final YoBoolean putExitCoPOnToes;
+   private final YoBoolean putExitCoPOnToesWhenSteppingDown;
    private final YoBoolean planIsAvailable;
 
    // Output variables
@@ -205,6 +206,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       this.isDoneWalking = new YoBoolean(fullPrefix + "IsDoneWalking", registry);
       this.holdDesiredState = new YoBoolean(fullPrefix + "HoldDesiredState", parentRegistry);
       this.putExitCoPOnToes = new YoBoolean(fullPrefix + "PutExitCoPOnToes", parentRegistry);
+      this.putExitCoPOnToesWhenSteppingDown = new YoBoolean(fullPrefix + "PutExitCoPOnToesWhenSteppingDown", parentRegistry);
       this.planIsAvailable = new YoBoolean(fullPrefix + "CoPPlanAvailable", parentRegistry);
 
       for (CoPPointName pointName : CoPPointName.values)
@@ -308,6 +310,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       this.footstepLengthThresholdToPutExitCoPOnToes.set(parameters.getStepLengthThresholdForExitCoPOnToes());
       this.putExitCoPOnToes.set(parameters.putExitCoPOnToes());
+      this.putExitCoPOnToesWhenSteppingDown.set(parameters.useExitCoPOnToesForSteppingDown());
       this.exitCoPForwardSafetyMarginOnToes.set(parameters.getExitCoPForwardSafetyMarginOnToes());
 
       EnumMap<CoPPointName, Vector2D> copOffsets = parameters.getCoPOffsetsInFootFrame();
@@ -1074,7 +1077,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          framePointToPack.changeFrame(worldFrame);
          return true;
       }
-      else if (MathTools.isGreaterThanWithPrecision(-supportToSwingStepHeight, footstepHeightThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
+      else if (putExitCoPOnToesWhenSteppingDown.getBooleanValue() && MathTools.isGreaterThanWithPrecision(-supportToSwingStepHeight, footstepHeightThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
                                                     Epsilons.ONE_HUNDREDTH)
             && MathTools.isGreaterThanWithPrecision(supportToSwingStepLength, footstepLengthThresholdToPutExitCoPOnToesSteppingDown.getDoubleValue(),
                                                     Epsilons.ONE_HUNDREDTH))
