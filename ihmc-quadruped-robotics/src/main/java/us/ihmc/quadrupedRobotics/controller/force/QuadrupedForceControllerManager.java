@@ -86,10 +86,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry);
       this.runtimeEnvironment = runtimeEnvironment;
 
-      this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, registry);
-
-      // select control modules
-      controlManagerFactory.getOrCreateFeetManager();
 
       // Initialize input providers.
       postureProvider = new QuadrupedPostureInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
@@ -107,6 +103,12 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.XGAIT, xGaitStepStream);
       stepStreamMultiplexer.addStepStream(QuadrupedForceControllerState.STEP, preplannedStepStream);
       stepStreamMultiplexer.selectStepStream(QuadrupedForceControllerState.XGAIT);
+
+      // Initialize control modules
+      this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, postureProvider, registry);
+
+      controlManagerFactory.getOrCreateFeetManager();
+      controlManagerFactory.getOrCreateBodyOrientationManager();
 
       // Initialize output processor
       StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment.getControlDT(),

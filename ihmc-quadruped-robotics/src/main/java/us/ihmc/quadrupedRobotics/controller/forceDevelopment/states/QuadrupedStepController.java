@@ -138,7 +138,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       });
 
       balanceManager = new QuadrupedBalanceManager(controllerToolbox, stepSequence, postureProvider, registry, timedContactSequence, dcmTransitionTrajectory);
-      bodyOrientationManager = new QuadrupedBodyOrientationManager(controllerToolbox, postureProvider, registry);
+      bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
 
       parentRegistry.addChild(registry);
    }
