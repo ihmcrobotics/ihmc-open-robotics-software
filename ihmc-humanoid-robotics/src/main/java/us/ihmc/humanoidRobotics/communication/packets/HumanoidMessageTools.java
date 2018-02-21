@@ -1448,8 +1448,7 @@ public class HumanoidMessageTools
       LocalVideoPacket message = new LocalVideoPacket();
       message.timeStamp = timeStamp;
       message.image = image;
-      IntrinsicParametersMessage intrinsicParametersMessage = toIntrinsicParametersMessage(intrinsicParameters);
-      message.intrinsicParameters = intrinsicParametersMessage;
+      message.intrinsicParameters = toIntrinsicParametersMessage(intrinsicParameters);
       return message;
    }
 
@@ -2120,7 +2119,8 @@ public class HumanoidMessageTools
       intrinsicParametersMessage.skew = intrinsicParameters.skew;
       intrinsicParametersMessage.cx = intrinsicParameters.cx;
       intrinsicParametersMessage.cy = intrinsicParameters.cy;
-      intrinsicParametersMessage.radial = Arrays.copyOf(intrinsicParameters.radial, intrinsicParameters.radial.length);
+      if (intrinsicParameters.radial != null)
+         intrinsicParametersMessage.radial = Arrays.copyOf(intrinsicParameters.radial, intrinsicParameters.radial.length);
       intrinsicParametersMessage.t1 = intrinsicParameters.t1;
       intrinsicParametersMessage.t2 = intrinsicParameters.t2;
       return intrinsicParametersMessage;
@@ -2136,7 +2136,8 @@ public class HumanoidMessageTools
       intrinsicParameters.skew = message.skew;
       intrinsicParameters.cx = message.cx;
       intrinsicParameters.cy = message.cy;
-      intrinsicParameters.radial = Arrays.copyOf(message.radial, message.radial.length);
+      if (message.radial != null)
+         intrinsicParameters.radial = Arrays.copyOf(message.radial, message.radial.length);
       intrinsicParameters.t1 = message.t1;
       intrinsicParameters.t2 = message.t2;
       return intrinsicParameters;
