@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
@@ -13,7 +12,7 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStream;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
@@ -60,8 +59,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrantDependentList<YoFramePoint> groundPlanePositions;
 
-   private final FramePoint3D stepGoalPosition;
-
    // inputs
    private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
    private final YoBoolean onTouchDownTriggered = new YoBoolean("onTouchDownTriggered", registry);
@@ -90,7 +87,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       {
          groundPlanePositions.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
       }
-      stepGoalPosition = new FramePoint3D();
 
       balanceManager = new QuadrupedBalanceManager(controllerToolbox, stepMessageHandler.getStepSequence(), postureProvider, registry);
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
@@ -106,18 +102,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
       taskSpaceControllerSettings.getContactForceOptimizationSettings().setComForceCommandWeights(comForceCommandWeightsParameter.get());
       taskSpaceControllerSettings.getContactForceOptimizationSettings().setComTorqueCommandWeights(comTorqueCommandWeightsParameter.get());
-   }
-
-   private void computeStepAdjustment()
-   {
-      RecyclingArrayList<QuadrupedTimedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps(), taskSpaceEstimates);
-
-      for (int i = 0; i < adjustedSteps.size(); i++)
-      {
-         adjustedSteps.get(i).getGoalPosition(stepGoalPosition);
-         stepGoalPosition.changeFrame(worldFrame);
-         feetManager.adjustStep(adjustedSteps.get(i).getRobotQuadrant(), stepGoalPosition);
-      }
    }
 
    @Override
@@ -180,7 +164,8 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       stepMessageHandler.adjustStepQueue(balanceManager.getAccumulatedStepAdjustment());
 
       // compute step adjustment
-      computeStepAdjustment();
+      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps(), taskSpaceEstimates);
+      feetManager.adjustSteps(adjustedSteps);
 
       balanceManager.initializeDcmSetpoints(taskSpaceEstimates, taskSpaceControllerSettings);
    }
@@ -215,7 +200,8 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       stepMessageHandler.adjustStepQueue(balanceManager.getAccumulatedStepAdjustment());
 
       // update step adjustment
-      computeStepAdjustment();
+      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps(), taskSpaceEstimates);
+      feetManager.adjustSteps(adjustedSteps);
 
       // update desired horizontal com forces
       balanceManager.compute(taskSpaceControllerCommands.getComForce(), taskSpaceEstimates, taskSpaceControllerSettings);

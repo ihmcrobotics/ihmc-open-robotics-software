@@ -77,7 +77,7 @@ public class QuadrupedBalanceManager
    private final GroundPlaneEstimator groundPlaneEstimator;
 
    private final RecyclingArrayList<YoQuadrupedTimedStep> stepSequence;
-   private final RecyclingArrayList<QuadrupedTimedStep> adjustedActiveSteps;
+   private final RecyclingArrayList<QuadrupedStep> adjustedActiveSteps;
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
@@ -109,12 +109,12 @@ public class QuadrupedBalanceManager
       crossoverProjection = new QuadrupedStepCrossoverProjection(toolbox.getReferenceFrames().getBodyZUpFrame(), minimumStepClearanceParameter.get(),
                                                                  maximumStepStrideParameter.get());
 
-      adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedTimedStep>()
+      adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
       {
          @Override
-         public QuadrupedTimedStep newInstance()
+         public QuadrupedStep newInstance()
          {
-            return new QuadrupedTimedStep();
+            return new QuadrupedStep();
          }
       });
 
@@ -238,7 +238,7 @@ public class QuadrupedBalanceManager
       accumulatedStepAdjustment.setZ(0);
    }
 
-   public RecyclingArrayList<QuadrupedTimedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
+   public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
       adjustedActiveSteps.clear();
       if (robotTimestamp.getDoubleValue() > dcmTransitionTrajectory.getEndTime())
@@ -256,7 +256,7 @@ public class QuadrupedBalanceManager
          for (int i = 0; i < activeSteps.size(); i++)
          {
             YoQuadrupedTimedStep activeStep = activeSteps.get(i);
-            QuadrupedTimedStep adjustedStep = adjustedActiveSteps.add();
+            QuadrupedStep adjustedStep = adjustedActiveSteps.add();
             adjustedStep.set(activeStep);
 
             RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
