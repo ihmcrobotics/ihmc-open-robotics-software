@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -65,6 +67,120 @@ public class PacketCodeQualityTest
 {
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
+   public void testPacketsHaveNoConvenienceMethod()
+   { // This test won't fail for setUniqueId(long) or validateMessage()
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      allPacketTypes.removeAll(reaInternalComms);
+      allPacketTypes.remove(MessageOfMessages.class);
+
+      Map<Class<? extends Packet>, List<Method>> packetTypesWithConvenienceMethods = new TreeMap<>((o1, o2) -> o1.getSimpleName().compareTo(o2.getSimpleName()));
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            Method[] methods = packetType.getDeclaredMethods();
+
+            Map<String, Class<?>> setterNames = new HashMap<>();
+            Map<String, Class<?>> getterNames = new HashMap<>();
+
+            for (Field field : packetType.getDeclaredFields())
+            {
+               String methodSuffix = StringUtils.capitalize(field.getName());
+               setterNames.put("set" + methodSuffix, field.getType());
+               getterNames.put("get" + methodSuffix, field.getType());
+
+               if (field.getType() == StringBuilder.class)
+               {
+                  setterNames.put("set" + methodSuffix, String.class);
+                  getterNames.put("get" + methodSuffix + "AsString", String.class);
+               }
+            }
+
+            for (Method method : methods)
+            {
+               String methodName = method.getName();
+               if (methodName.equals("toString") && method.getParameterCount() == 0 && method.getReturnType() == String.class)
+                  continue;
+               if (methodName.equals("validateMessage") && method.getParameterCount() == 0 && method.getReturnType() == String.class)
+                  continue;
+               if (methodName.equals("setUniqueId") && method.getParameterCount() == 1 && method.getReturnType() == void.class && method.getParameterTypes()[0] == long.class)
+                  continue;
+               if (methodName.equals("epsilonEquals") && method.getParameterCount() == 2 && method.getReturnType() == boolean.class)
+               {
+                  if (method.getParameterTypes()[1] == double.class)
+                  {
+                     Class<?> firstParameterType = method.getParameterTypes()[0];
+                     if (firstParameterType == packetType || firstParameterType == Object.class)
+                        continue;
+                  }
+               }
+
+               if (methodName.equals("equals") && method.getParameterCount() == 1 && method.getReturnType() == boolean.class)
+               {
+                  if (method.getParameterTypes()[0] == Object.class)
+                     continue;
+               }
+
+               if (methodName.equals("set"))
+               {
+                  if (method.getParameterCount() == 1 && method.getReturnType() == void.class)
+                  {
+                     Class<?> firstParameterType = method.getParameterTypes()[0];
+                     // This is due to implementing Settable<T>, the generic parameter gets "lost" at compilation and is replaced with Object :/
+                     if (firstParameterType == packetType || firstParameterType == Object.class)
+                        continue; // The method is an acceptable setter.
+                  }
+               }
+
+               if (setterNames.containsKey(methodName))
+               { // Allowing setters with argument being a super-type of the field.
+                  if (method.getParameterCount() == 1 &&  method.getParameterTypes()[0].isAssignableFrom(setterNames.get(methodName)))
+                  {
+                     if (method.getReturnType() == void.class)
+                        continue; // The method is an acceptable setter.
+                  }
+               }
+
+               if (getterNames.containsKey(methodName))
+               {
+                  if (method.getParameterCount() == 0 && method.getReturnType().isAssignableFrom(getterNames.get(methodName)))
+                     continue; // The method is an acceptable getter.
+               }
+
+               if (!packetTypesWithConvenienceMethods.containsKey(packetType))
+                  packetTypesWithConvenienceMethods.put(packetType, new ArrayList<>());
+               packetTypesWithConvenienceMethods.get(packetType).add(method);
+            }
+         }
+         catch (Exception e)
+         {
+            PrintTools.error("Problem with packet: " + packetType.getSimpleName());
+            e.printStackTrace();
+         }
+      }
+
+      if (verbose)
+      {
+         if (!packetTypesWithConvenienceMethods.isEmpty())
+         {
+            System.out.println();
+            System.out.println();
+            PrintTools.error("List of packet with illegal field type:");
+            packetTypesWithConvenienceMethods.entrySet().forEach(type -> PrintTools.error(type.getKey().getSimpleName() + ": "
+                  + type.getValue().stream().map(Method::getName).collect(Collectors.toList())));
+         }
+      }
+
+      assertTrue("Found illegal field types in Packet sub-types.", packetTypesWithConvenienceMethods.isEmpty());
+   }
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
