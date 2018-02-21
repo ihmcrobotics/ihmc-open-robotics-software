@@ -72,9 +72,9 @@ public class QuadrupedBalanceManager
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
 
-   private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
+   private final RecyclingArrayList<YoQuadrupedTimedStep> stepSequence;
 
-   public QuadrupedBalanceManager(QuadrupedForceControllerToolbox toolbox, YoPreallocatedList<YoQuadrupedTimedStep> stepSequence,
+   public QuadrupedBalanceManager(QuadrupedForceControllerToolbox toolbox, RecyclingArrayList<YoQuadrupedTimedStep> stepSequence,
                                   QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry,
                                   QuadrupedTimedContactSequence timedContactSequence, ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory)
    {
@@ -121,7 +121,7 @@ public class QuadrupedBalanceManager
    public void initializeDcmSetpoints(QuadrupedTaskSpaceEstimates taskSpaceEstimates, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
       double currentTime = robotTimestamp.getDoubleValue();
-      if (stepSequence.size() > 0 && stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime)
+      if (stepSequence.size() > 0 && stepSequence.getLast().getTimeInterval().getEndTime() > currentTime)
       {
          // compute dcm trajectory
          computeDcmTrajectory(taskSpaceEstimates, taskSpaceControllerSettings);
