@@ -370,7 +370,6 @@ public class HumanoidMessageTools
    {
       LegCompliancePacket message = new LegCompliancePacket();
       message.maxVelocityDeltas.add(maxVelocityDeltas);
-      ;
       message.robotSide = robotSide.toByte();
       return message;
    }
@@ -1492,7 +1491,7 @@ public class HumanoidMessageTools
    public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
    {
       JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
-      for (int jointIndex = 0; jointIndex < message.getNumberOfJoints(); jointIndex++)
+      for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
          message.jointTrajectoryMessages.add().set(createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]));
       return message;
    }
@@ -1509,7 +1508,7 @@ public class HumanoidMessageTools
    public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
       JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
-      for (int jointIndex = 0; jointIndex < message.getNumberOfJoints(); jointIndex++)
+      for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
       {
          OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
          oneDoFJointTrajectoryMessage.setWeight(weights[jointIndex]);
