@@ -1,14 +1,16 @@
 package us.ihmc.humanoidRobotics.communication.packets.heightQuadTree;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.idl.PreallocatedList;
 
 public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage>
 {
-   public HeightQuadTreeNodeMessage root;
    public float defaultHeight = Float.NaN;
    public float resolution = Float.NaN;
    public float sizeX = Float.NaN;
    public float sizeY = Float.NaN;
+   public PreallocatedList<HeightQuadTreeLeafMessage> leaves = new PreallocatedList<>(HeightQuadTreeLeafMessage.class, HeightQuadTreeLeafMessage::new, 1000);
 
    public HeightQuadTreeMessage()
    {
@@ -17,8 +19,7 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage>
    @Override
    public void set(HeightQuadTreeMessage other)
    {
-      root = new HeightQuadTreeNodeMessage();
-      root.set(other.root);
+      MessageTools.copyData(other.leaves, leaves);
       defaultHeight = other.defaultHeight;
       resolution = other.resolution;
       sizeX = other.sizeX;
@@ -33,6 +34,6 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage>
          return false;
       if (Float.compare(resolution, other.resolution) != 0)
          return false;
-      return root.epsilonEquals(other.root, epsilon);
+      return MessageTools.epsilonEquals(leaves, other.leaves, epsilon);
    }
 }
