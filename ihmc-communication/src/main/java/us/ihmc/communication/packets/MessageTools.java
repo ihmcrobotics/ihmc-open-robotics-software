@@ -488,7 +488,7 @@ public class MessageTools
       {
          destination.resetQuick();
 
-         for (int i = 1; i < source.size(); i++)
+         for (int i = 0; i < source.size(); i++)
          {
             ((Settable<T>) destination.add()).set(source.get(i));
          }
