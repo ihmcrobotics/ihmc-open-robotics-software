@@ -36,12 +36,11 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedStepController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static int STEP_SEQUENCE_CAPACITY = 100;
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedStepStream stepStream;
    private final YoDouble robotTimestamp;
-   private final double gravity;
-   private final double mass;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
@@ -52,38 +51,27 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
          .createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
    private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
    private final DoubleParameter bodyOrientationMaxIntegralErrorParameter = parameterFactory.createDouble("bodyOrientationMaxIntegralError", 0);
-   private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
-   private final DoubleArrayParameter comPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("comPositionDerivativeGains", 0, 0, 750);
-   private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
-   private final DoubleParameter comPositionMaxIntegralErrorParameter = parameterFactory.createDouble("comPositionMaxIntegralError", 0);
-   private final DoubleParameter comPositionGravityCompensationParameter = parameterFactory.createDouble("comPositionGravityCompensation", 1);
    private final DoubleArrayParameter comForceCommandWeightsParameter = parameterFactory.createDoubleArray("comForceCommandWeights", 1, 1, 1);
    private final DoubleArrayParameter comTorqueCommandWeightsParameter = parameterFactory.createDoubleArray("comTorqueCommandWeights", 1, 1, 1);
-   private final DoubleArrayParameter dcmPositionProportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 1, 1, 0);
-   private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
-   private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
-   private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentGain", 1.5);
-   private final DoubleParameter vrpPositionRateLimitParameter = parameterFactory.createDouble("vrpPositionRateLimit", Double.MAX_VALUE);
    private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 1);
    private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
-   private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 0.5);
    private final DoubleParameter haltTransitionDurationParameter = parameterFactory.createDouble("haltTransitionDuration", 1.0);
    private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.075);
    private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
    private final DoubleParameter coefficientOfFrictionParameter = parameterFactory.createDouble("coefficientOfFriction", 0.5);
 
    // frames
-   private final ReferenceFrame worldFrame;
 
    // feedback controllers
    private final FramePoint3D dcmPositionEstimate;
-   private final DivergentComponentOfMotionController dcmPositionController;
-   private final QuadrupedComPositionController comPositionController;
    private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
    private final QuadrupedBodyOrientationController bodyOrientationController;
+
+   // managers
    private final QuadrupedFeetManager feetManager;
+   private final QuadrupedBalanceManager balanceManager;
 
    // task space controller
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
@@ -110,8 +98,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final FramePoint3D stepGoalPosition;
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
-   private final QuadrupedBalanceManager balanceManager;
-
    // inputs
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
@@ -125,17 +111,12 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       this.postureProvider = postureProvider;
       this.stepStream = stepStream;
       this.robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
-      this.gravity = 9.81;
-      this.mass = controllerToolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
 
       // frames
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      worldFrame = ReferenceFrame.getWorldFrame();
 
       // feedback controllers
       dcmPositionEstimate = new FramePoint3D();
-      dcmPositionController = controllerToolbox.getDcmPositionController();
-      comPositionController = controllerToolbox.getComPositionController();
       bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
       bodyOrientationController = controllerToolbox.getBodyOrientationController();
       feetManager = controlManagerFactory.getOrCreateFeetManager();
@@ -294,7 +275,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       if (robotTimestamp.getDoubleValue() > dcmTransitionTrajectory.getEndTime())
       {
          // compute step adjustment for ongoing steps (proportional to dcm tracking error)
-         FramePoint3D dcmPositionSetpoint = dcmPositionController.getDCMPositionSetpoint();
+         FramePoint3D dcmPositionSetpoint = balanceManager.getDCMPositionSetpoint();
          dcmPositionSetpoint.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
          dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
          instantaneousStepAdjustment.set(dcmPositionEstimate);
