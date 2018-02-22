@@ -13,7 +13,6 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.QuaternionTools;
 
 public class EuclidCoreMissingToolsTest
 {
@@ -61,7 +60,7 @@ public class EuclidCoreMissingToolsTest
 
          // From the combined rotation and the original axis back out the rotation around the original axis.
          fullRotation.multiply(orthogonalRotation, expectedRotation);
-         QuaternionTools.projectRotationOnAxis(fullRotation, axis, actualRotation);
+         EuclidCoreMissingTools.projectRotationOnAxis(fullRotation, axis, actualRotation);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expectedRotation, actualRotation, 1.0e-10);
       }
    }
