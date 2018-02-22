@@ -17,7 +17,6 @@ public class QuadrupedForceControllerToolbox
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrupedComPositionController comPositionController;
-   private final QuadrupedBodyOrientationController bodyOrientationController;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrupedFallDetector fallDetector;
 
@@ -42,7 +41,6 @@ public class QuadrupedForceControllerToolbox
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
       dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
       comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
-      bodyOrientationController = new QuadrupedBodyOrientationController(referenceFrames.getBodyFrame(), runtimeEnvironment.getControlDT(), registry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
    }
@@ -90,11 +88,6 @@ public class QuadrupedForceControllerToolbox
    public QuadrupedComPositionController getComPositionController()
    {
       return comPositionController;
-   }
-
-   public QuadrupedBodyOrientationController getBodyOrientationController()
-   {
-      return bodyOrientationController;
    }
 
    public GroundPlaneEstimator getGroundPlaneEstimator()
