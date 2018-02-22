@@ -292,8 +292,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       final QuadrupedDcmBasedStepController stepController = new QuadrupedDcmBasedStepController(controllerToolbox, controlManagerFactory, inputProvider,
                                                                                                  stepStreamMultiplexer, registry);
                                                                                                  */
-      final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, inputProvider,
-                                                                                         stepStreamMultiplexer, registry);
+      final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, stepStreamMultiplexer, registry);
       final QuadrupedController fallController = new QuadrupedForceBasedFallController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(controllerToolbox, controlManagerFactory,
                                                                                                        soleWaypointInputProvider, registry);

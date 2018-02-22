@@ -24,6 +24,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class QuadrupedBalanceManager
 {
@@ -76,16 +77,15 @@ public class QuadrupedBalanceManager
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final GroundPlaneEstimator groundPlaneEstimator;
 
-   private final RecyclingArrayList<YoQuadrupedTimedStep> stepSequence;
+   private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
    private final RecyclingArrayList<QuadrupedStep> adjustedActiveSteps;
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   public QuadrupedBalanceManager(QuadrupedForceControllerToolbox toolbox, RecyclingArrayList<YoQuadrupedTimedStep> stepSequence,
+   public QuadrupedBalanceManager(QuadrupedForceControllerToolbox toolbox,
                                   QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry)
    {
       this.postureProvider = postureProvider;
-      this.stepSequence = stepSequence;
       this.dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
 
       robotTimestamp = toolbox.getRuntimeEnvironment().getRobotTimestamp();
@@ -121,6 +121,22 @@ public class QuadrupedBalanceManager
       parentRegistry.addChild(registry);
    }
 
+   public void clearStepSequence()
+   {
+      stepSequence.clear();
+   }
+
+   public void addStepToSequence(QuadrupedTimedStep step)
+   {
+      stepSequence.add(step);
+   }
+
+   public void addStepsToSequence(List<? extends QuadrupedTimedStep> steps)
+   {
+      for (int i = 0; i < steps.size(); i++)
+         addStepToSequence(steps.get(i));
+   }
+
    public void initialize(QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
       // update model
@@ -143,7 +159,7 @@ public class QuadrupedBalanceManager
    public void initializeDcmSetpoints(QuadrupedTaskSpaceEstimates taskSpaceEstimates, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
       double currentTime = robotTimestamp.getDoubleValue();
-      if (stepSequence.size() > 0 && stepSequence.getLast().getTimeInterval().getEndTime() > currentTime)
+      if (stepSequence.size() > 0 && stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime)
       {
          // compute dcm trajectory
          computeDcmTrajectory(taskSpaceEstimates, taskSpaceControllerSettings);
