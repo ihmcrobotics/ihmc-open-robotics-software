@@ -23,7 +23,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile "us.ihmc:IHMCRealtime:1.1.2"
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"

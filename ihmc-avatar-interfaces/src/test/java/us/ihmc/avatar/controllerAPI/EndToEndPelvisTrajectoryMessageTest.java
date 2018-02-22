@@ -1130,7 +1130,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double initialPelvisHeight = pelvisPosition.getZ();
 
       Random random = new Random(4929L);
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < 5; i++)
       {
          double offset1 = 0.06 * 2.0 * (random.nextDouble() - 0.5);
          double offset2 = 0.06 * 2.0 * (random.nextDouble() - 0.5);

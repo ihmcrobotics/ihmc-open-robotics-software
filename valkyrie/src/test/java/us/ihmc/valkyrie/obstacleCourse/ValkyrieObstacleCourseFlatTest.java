@@ -72,7 +72,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 58.5)
+   @ContinuousIntegrationTest(estimatedDuration = 70.0)
    @Test(timeout = 300000)
    public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
@@ -152,7 +152,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 199.4)
+   @ContinuousIntegrationTest(estimatedDuration = 220.0)
    @Test(timeout = 500000)
    public void testForMemoryLeaks() throws Exception
    {

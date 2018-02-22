@@ -65,6 +65,8 @@ public class YoVariableDefinitionPubSubType implements us.ihmc.pubsub.TopicDataT
 
 	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 	
 	    return current_alignment - initial_alignment;
 	}
@@ -97,6 +99,8 @@ public class YoVariableDefinitionPubSubType implements us.ihmc.pubsub.TopicDataT
 
 	    current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+	    current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 	
 	    return current_alignment - initial_alignment;
 	}
@@ -126,6 +130,9 @@ public class YoVariableDefinitionPubSubType implements us.ihmc.pubsub.TopicDataT
 	    cdr.write_type_6(data.getMin());
 
 	    cdr.write_type_6(data.getMax());
+
+	    cdr.write_type_c(data.getLoadStatus().ordinal());
+
    }
 
    public static void read(us.ihmc.robotDataLogger.YoVariableDefinition data, us.ihmc.idl.CDR cdr)
@@ -155,6 +162,9 @@ public class YoVariableDefinitionPubSubType implements us.ihmc.pubsub.TopicDataT
 
 	    	data.setMax(cdr.read_type_6());
 	    	
+
+	    	data.setLoadStatus(us.ihmc.robotDataLogger.LoadStatus.values[cdr.read_type_c()]);
+	    	
    }
    
 	@Override
@@ -177,6 +187,8 @@ public class YoVariableDefinitionPubSubType implements us.ihmc.pubsub.TopicDataT
 			    ser.write_type_6("min", data.getMin());
 			    
 			    ser.write_type_6("max", data.getMax());
+			    
+			    ser.write_type_c("loadStatus", data.getLoadStatus());
 			    
 	}
 	
@@ -201,6 +213,9 @@ public class YoVariableDefinitionPubSubType implements us.ihmc.pubsub.TopicDataT
 	    			data.setMin(ser.read_type_6("min"));	
 	    	    
 	    			data.setMax(ser.read_type_6("max"));	
+	    	    
+	    			data.setLoadStatus((us.ihmc.robotDataLogger.LoadStatus)ser.read_type_c("loadStatus", us.ihmc.robotDataLogger.LoadStatus.class));
+	    	
 	    	    
 	}
 

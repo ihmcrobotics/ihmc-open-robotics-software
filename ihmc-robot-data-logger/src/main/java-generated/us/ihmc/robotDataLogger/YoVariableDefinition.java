@@ -30,6 +30,7 @@ public class YoVariableDefinition
         	isParameter_ = other.isParameter_;
         	min_ = other.min_;
         	max_ = other.max_;
+        	loadStatus_ = other.loadStatus_;
 
     }
 
@@ -144,6 +145,17 @@ public class YoVariableDefinition
     }
 
         
+    public void setLoadStatus(us.ihmc.robotDataLogger.LoadStatus loadStatus)
+    {
+        loadStatus_ = loadStatus;
+    }
+
+    public us.ihmc.robotDataLogger.LoadStatus getLoadStatus()
+    {
+        return loadStatus_;
+    }
+
+        
 
 
 
@@ -180,6 +192,9 @@ public class YoVariableDefinition
 
                 
         returnedValue &= this.max_ == otherMyClass.max_;
+
+                
+        returnedValue &= this.loadStatus_ == otherMyClass.loadStatus_;
 
                 
 
@@ -227,6 +242,10 @@ public class YoVariableDefinition
         builder.append("max=");
         builder.append(this.max_);
 
+                builder.append(", ");
+        builder.append("loadStatus=");
+        builder.append(this.loadStatus_);
+
                 
         builder.append("}");
 		return builder.toString();
@@ -241,5 +260,6 @@ public class YoVariableDefinition
     private boolean isParameter_; 
     private double min_; 
     private double max_; 
+    private us.ihmc.robotDataLogger.LoadStatus loadStatus_; 
 
 }

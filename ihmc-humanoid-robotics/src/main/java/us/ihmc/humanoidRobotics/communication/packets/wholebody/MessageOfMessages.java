@@ -3,16 +3,15 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
 
 /**
  *  MessageOfMessages provides a generic way to send a collection of messages to the controller.
  */
-public class MessageOfMessages extends Packet<MessageOfMessages> implements MultiplePacketHolder
+public class MessageOfMessages extends Packet<MessageOfMessages>
 {
    
-   private ArrayList<Packet<?>> packets = new ArrayList<>();
+   public List<Packet<?>> packets = new ArrayList<>();
    
    public MessageOfMessages()
    {
@@ -49,7 +48,6 @@ public class MessageOfMessages extends Packet<MessageOfMessages> implements Mult
       packets.clear();
    }
 
-   @Override
    public List<Packet<?>> getPackets()
    {
       return packets;

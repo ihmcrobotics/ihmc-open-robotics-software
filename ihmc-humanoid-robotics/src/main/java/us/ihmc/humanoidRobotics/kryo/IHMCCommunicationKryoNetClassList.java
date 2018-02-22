@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.kryo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -38,11 +39,16 @@ import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Orientation2D;
+import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.Vector2D32;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -52,15 +58,20 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.DesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
+import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
+import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.LegCompliancePacket;
+import us.ihmc.humanoidRobotics.communication.packets.LoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.SCSListenerPacket;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
@@ -134,7 +145,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBased
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -216,7 +226,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Point3D32.class);
       registerPacketField(Vector3D.class);
       registerPacketField(Vector2D32.class);
-      registerPacketClass(QuaternionBasedTransform.class);
 
       registerPacketField(Vector3D32.class);
       registerPacketField(boolean[].class);
@@ -224,11 +233,13 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Endeffector load bearing message
       registerPacketClass(FootLoadBearingMessage.class);
       registerPacketClass(HandLoadBearingMessage.class);
-      registerPacketClass(LoadBearingRequest.class);
+      registerPacketField(FootLoadBearingMessage.LoadBearingRequest.class);
+      registerPacketField(LoadBearingMessage.class);
 
       // User control mode
       registerPacketClass(ArmDesiredAccelerationsMessage.class);
       registerPacketClass(NeckDesiredAccelerationsMessage.class);
+      registerPacketField(DesiredAccelerationsMessage.class);
 
       // Trajectory messages
       registerPacketClass(HandTrajectoryMessage.class);
@@ -254,17 +265,26 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(CenterOfMassTrajectoryMessage.class);
 
       // Trajectory message fields
+      registerPacketField(HandTrajectoryMessage.class);
+      registerPacketField(ArmTrajectoryMessage.class);
+      registerPacketField(ChestTrajectoryMessage.class);
+      registerPacketField(PelvisTrajectoryMessage.class);
+      registerPacketField(FootTrajectoryMessage.class);
+      registerPacketField(HeadTrajectoryMessage.class);
+      registerPacketField(SE3TrajectoryMessage.class);
+      registerPacketField(SO3TrajectoryMessage.class);
+      registerPacketField(EuclideanTrajectoryMessage.class);
+      registerPacketField(FrameInformation.class);
+      registerPacketField(QuaternionBasedTransform.class);
       registerPacketField(JointspaceTrajectoryMessage.class);
       registerPacketField(QueueableMessage.class);
-      registerPacketClass(ExecutionMode.class);
-      registerPacketClass(ExecutionTiming.class);
+      registerPacketField(ExecutionMode.class);
+      registerPacketField(ExecutionTiming.class);
       registerPacketClass(OneDoFJointTrajectoryMessage.class);
       registerPacketClass(TrajectoryPoint1DMessage.class);
       registerPacketClass(EuclideanTrajectoryPointMessage.class);
       registerPacketClass(SO3TrajectoryPointMessage.class);
       registerPacketClass(SE3TrajectoryPointMessage.class);
-      registerPacketClass(BodyPart.class);
-      registerPacketClass(FrameInformation.class);
 
       registerPacketField(OneDoFJointTrajectoryMessage.class);
       registerPacketField(OneDoFJointTrajectoryMessage[].class);
@@ -296,7 +316,13 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(ToolboxState.class);
       registerPacketClass(FootstepPlanningToolboxOutputStatus.class);
       registerPacketClass(FootstepPlanningRequestPacket.class);
-      registerPacketClass(FootstepPlanningResult.class);
+      registerPacketField(FootstepPlanningResult.class);
+      registerPacketField(Pose2D.class);
+      registerPacketField(Orientation2D.class);
+      registerPacketField(Vector2D.class);
+      registerPacketField(Point3D.class);
+      registerPacketField(Point3D[].class);
+      registerPacketField(Point3D[][].class);
 
       // Packets for the kinematics toolbox
       registerPacketClass(KinematicsToolboxOutputStatus.class);
@@ -304,6 +330,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(KinematicsToolboxRigidBodyMessage.class);
       registerPacketClass(KinematicsToolboxConfigurationMessage.class);
       registerPacketClass(HumanoidKinematicsToolboxConfigurationMessage.class);
+      registerPacketField(KinematicsToolboxOutputStatus.class);
+      registerPacketField(Pose3D.class);
+      registerPacketField(Pose3D[].class);
 
       // Packets for whole-body trajectory toolbox
       registerPacketClass(WholeBodyTrajectoryToolboxMessage.class);
@@ -328,7 +357,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(FootstepDataMessage.class);
       registerPacketClass(AdjustFootstepMessage.class);
       registerPacketField(ArrayList.class);
+      registerPacketField(List.class);
 
+      registerPacketField(FootstepDataListMessage.class);
       registerPacketClass(FootstepDataListMessage.class);
       registerPacketField(ArrayList.class);
 
@@ -336,7 +367,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(FootstepStatus.class);
       registerPacketClass(PlanOffsetStatus.class);
       registerPacketClass(WalkingStatusMessage.class);
-      registerPacketClass(TrajectoryType.class);
+      registerPacketField(TrajectoryType.class);
 
       registerPacketField(ArrayList.class);
       registerPacketField(FootstepStatus.Status.class);
@@ -349,11 +380,12 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(PlanarRegionsListMessage.class);
       registerPacketClass(PlanarRegionMessage.class);
       registerPacketClass(RequestPlanarRegionsListMessage.class);
-      registerPacketClass(RequestPlanarRegionsListMessage.RequestType.class);
+      registerPacketField(RequestPlanarRegionsListMessage.RequestType.class);
       registerPacketField(Point3D32.class);
       registerPacketField(Vector3D32.class);
       registerPacketField(Point2D32.class);
       registerPacketField(Point2D32[].class);
+      registerPacketField(BoundingBox3D.class);
 
       //SCS
       registerPacketClass(SCSListenerPacket.class);
@@ -374,7 +406,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // high levle state
       registerPacketClass(HighLevelStateMessage.class);
-      registerPacketClass(HighLevelControllerName.class);
+      registerPacketField(HighLevelControllerName.class);
       registerPacketClass(HighLevelStateChangeStatusMessage.class);
 
       // Recording
@@ -411,6 +443,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(WalkToGoalBehaviorPacket.class);
       registerPacketField(WalkToGoalBehaviorPacket.WalkToGoalAction.class);
       registerPacketClass(FootstepPlanRequestPacket.class);
+      registerPacketField(FootstepDataMessage.class);
       registerPacketField(FootstepPlannerType.class);
       registerPacketClass(SimpleCoactiveBehaviorDataPacket.class);
       registerPacketClass(WallPosePacket.class);
@@ -489,6 +522,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(ObjectDetectorResultPacket.class);
       registerPacketClass(RequestStereoPointCloudMessage.class);
       registerPacketClass(StereoVisionPointCloudMessage.class);
+      registerPacketField(HeatMapPacket.class);
+      registerPacketField(BoundingBoxesPacket.class);
 
       registerPacketClass(WholeBodyTrajectoryToolboxRequestPacket.class);
       registerPacketClass(WholeBodyTrajectoryToolboxOutputStatus.class);

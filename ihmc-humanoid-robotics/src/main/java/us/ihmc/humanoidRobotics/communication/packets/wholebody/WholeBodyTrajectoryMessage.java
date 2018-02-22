@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -20,7 +19,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 @RosMessagePacket(documentation = "Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
       + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/whole_body_trajectory")
-public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage> implements MultiplePacketHolder
+public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage>
 {
    @RosExportedField(documentation = "Trajectory for the left hand")
    public HandTrajectoryMessage leftHandTrajectoryMessage;
@@ -454,7 +453,6 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       return errorMessage;
    }
 
-   @Override
    public List<Packet<?>> getPackets()
    {
       ArrayList<Packet<?>> wholeBodyPackets = new ArrayList<>();

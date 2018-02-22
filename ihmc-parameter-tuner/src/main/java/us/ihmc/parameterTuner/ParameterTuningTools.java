@@ -1,15 +1,12 @@
 package us.ihmc.parameterTuner;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import javafx.application.Platform;
@@ -17,6 +14,7 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
+import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 import us.ihmc.yoVariables.parameters.xml.Parameter;
 import us.ihmc.yoVariables.parameters.xml.Parameters;
 import us.ihmc.yoVariables.parameters.xml.Registry;
@@ -33,30 +31,6 @@ public class ParameterTuningTools
          return parameterRoot.getRegistries();
       }
       catch (JAXBException e)
-      {
-         throw new IOException(e);
-      }
-   }
-
-   public static void save(List<Registry> registries, File file) throws IOException
-   {
-      Parameters parameterRoot = new Parameters();
-      parameterRoot.setRegistries(registries);
-
-      try
-      {
-         JAXBContext jaxbContext = JAXBContext.newInstance(Parameters.class);
-         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-         FileOutputStream os = new FileOutputStream(file);
-         jaxbMarshaller.marshal(parameterRoot, os);
-         os.close();
-      }
-      catch (JAXBException e)
-      {
-         throw new IOException(e);
-      }
-      catch (FileNotFoundException e)
       {
          throw new IOException(e);
       }
@@ -91,6 +65,7 @@ public class ParameterTuningTools
             guiParameter.setMin(xmlParameter.getMin());
             guiParameter.setMax(xmlParameter.getMax());
             guiParameter.setDescription(xmlParameter.getDescription());
+            guiParameter.setLoadStatus(ParameterLoadStatus.LOADED);
             guiRegistry.addParameter(guiParameter);
          }
       }

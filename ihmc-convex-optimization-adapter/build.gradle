@@ -23,7 +23,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'IHMCOptimizerWrappers', version: '0.0.26'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
    compile group: 'com.github.vincentfk', name: 'joptimizer', version: '3.3.0'
    compile group: 'org.ejml', name: 'core', version: '0.30'
