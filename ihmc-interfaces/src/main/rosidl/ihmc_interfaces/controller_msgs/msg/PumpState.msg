@@ -1,0 +1,7 @@
+float32 pump_inlet_pressure
+float32 pump_supply_pressure
+float32 air_sump_pressure
+float32 pump_supply_temperature
+float32 pump_rpm
+float32 motor_temperature
+float32 motor_driver_temperature
