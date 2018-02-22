@@ -172,7 +172,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation and angular rate
-      desiredBodyOrientation.setIncludingFrame(supportFrame, postureProvider.getBodyOrientationInput());
+      desiredBodyOrientation.setToZero(supportFrame);
       bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation, taskSpaceEstimates);
 
       // update joint setpoints
