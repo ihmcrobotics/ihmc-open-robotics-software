@@ -54,9 +54,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
    private final FrameQuaternion desiredBodyOrientation = new FrameQuaternion();
 
-   public QuadrupedDcmBasedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
-                                           QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry)
-
+   public QuadrupedDcmBasedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
    {
       // frames
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();

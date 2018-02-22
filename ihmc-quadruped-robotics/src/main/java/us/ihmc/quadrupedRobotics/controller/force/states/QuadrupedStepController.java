@@ -1,4 +1,4 @@
-package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
+package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
