@@ -37,7 +37,22 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.5'
    compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.4.0'
    compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.4.0'
+}
+
+testDependencies {
    compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.4.0'
+}
+
+generatorDependencies {
+   compile group: "us.ihmc", name: "rosidl-typesupport-ihmcpubsub-java", version: "0.3.7"
+}
+
+task show() {
+   doLast {
+      project.gradle.includedBuilds.each { println it }
+      buildscript.configurations.classpath.each { println "Buildscript: " + it }
+      configurations.compile.each { println "Compile: " + it }
+   }
 }
 
 task generateMessages(type: us.ihmc.ros2.rosidl.RosInterfaceGeneratorTask) {
