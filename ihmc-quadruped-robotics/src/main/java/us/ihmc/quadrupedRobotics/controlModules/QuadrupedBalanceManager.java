@@ -3,28 +3,27 @@ package us.ihmc.quadrupedRobotics.controlModules;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
-import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
 
 public class QuadrupedBalanceManager
 {
@@ -63,32 +62,39 @@ public class QuadrupedBalanceManager
    private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
    private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 0.5);
 
+   private final YoFrameVector instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
+   private final YoFrameVector accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
+
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
    private final FramePoint3D dcmPositionWaypoint = new FramePoint3D();
 
-   private final GroundPlaneEstimator groundPlaneEstimator;
-   private final QuadrupedTimedContactSequence timedContactSequence;
+   private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(4, 2 * STEP_SEQUENCE_CAPACITY);
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstanceCopTrajectory;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory;
 
+   private final QuadrupedStepCrossoverProjection crossoverProjection;
+   private final GroundPlaneEstimator groundPlaneEstimator;
+
    private final RecyclingArrayList<YoQuadrupedTimedStep> stepSequence;
+   private final RecyclingArrayList<QuadrupedStep> adjustedActiveSteps;
+
+   private final FramePoint3D tempPoint = new FramePoint3D();
 
    public QuadrupedBalanceManager(QuadrupedForceControllerToolbox toolbox, RecyclingArrayList<YoQuadrupedTimedStep> stepSequence,
-                                  QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry,
-                                  QuadrupedTimedContactSequence timedContactSequence, ThreeDoFMinimumJerkTrajectory dcmTransitionTrajectory)
+                                  QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry)
    {
       this.postureProvider = postureProvider;
       this.stepSequence = stepSequence;
+      this.dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
 
       robotTimestamp = toolbox.getRuntimeEnvironment().getRobotTimestamp();
-      this.gravity = 9.81;
-      this.mass = toolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
+      gravity = 9.81;
+      mass = toolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
 
-      this.timedContactSequence = timedContactSequence;
-      this.dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, postureProvider.getComPositionInput().getZ());
+      dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, postureProvider.getComPositionInput().getZ());
       piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
-      this.dcmTransitionTrajectory = dcmTransitionTrajectory;
+      groundPlaneEstimator = toolbox.getGroundPlaneEstimator();
 
 
       supportFrame = toolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
@@ -99,7 +105,18 @@ public class QuadrupedBalanceManager
       dcmPositionController = toolbox.getDcmPositionController();
       comPositionController = toolbox.getComPositionController();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
-      groundPlaneEstimator = toolbox.getGroundPlaneEstimator();
+
+      crossoverProjection = new QuadrupedStepCrossoverProjection(toolbox.getReferenceFrames().getBodyZUpFrame(), minimumStepClearanceParameter.get(),
+                                                                 maximumStepStrideParameter.get());
+
+      adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
+      {
+         @Override
+         public QuadrupedStep newInstance()
+         {
+            return new QuadrupedStep();
+         }
+      });
 
       parentRegistry.addChild(registry);
    }
@@ -116,6 +133,11 @@ public class QuadrupedBalanceManager
       dcmPositionController.reset();
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
       comPositionController.reset();
+
+      // initialize timed contact sequence
+      timedContactSequence.initialize();
+
+      accumulatedStepAdjustment.setToZero();
    }
 
    public void initializeDcmSetpoints(QuadrupedTaskSpaceEstimates taskSpaceEstimates, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
@@ -210,13 +232,48 @@ public class QuadrupedBalanceManager
       comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
    }
 
-   public FramePoint3D getDCMPositionSetpoint()
+   public void completedStep()
    {
-      return dcmPositionController.getDCMPositionSetpoint();
+      accumulatedStepAdjustment.add(instantaneousStepAdjustment);
+      accumulatedStepAdjustment.setZ(0);
    }
 
-   public FramePoint3D getDCMPositionEstimate()
+   public RecyclingArrayList<QuadrupedStep> computeStepAdjustment(ArrayList<YoQuadrupedTimedStep> activeSteps, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
    {
-      return dcmPositionEstimate;
+      adjustedActiveSteps.clear();
+      if (robotTimestamp.getDoubleValue() > dcmTransitionTrajectory.getEndTime())
+      {
+         // compute step adjustment for ongoing steps (proportional to dcm tracking error)
+         FramePoint3D dcmPositionSetpoint = dcmPositionController.getDCMPositionSetpoint();
+         dcmPositionSetpoint.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
+         dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
+
+         instantaneousStepAdjustment.sub(dcmPositionEstimate, dcmPositionSetpoint);
+         instantaneousStepAdjustment.scale(dcmPositionStepAdjustmentGainParameter.get());
+         instantaneousStepAdjustment.setZ(0);
+
+         // adjust nominal step goal positions in foot state machine
+         for (int i = 0; i < activeSteps.size(); i++)
+         {
+            YoQuadrupedTimedStep activeStep = activeSteps.get(i);
+            QuadrupedStep adjustedStep = adjustedActiveSteps.add();
+            adjustedStep.set(activeStep);
+
+            RobotQuadrant robotQuadrant = activeStep.getRobotQuadrant();
+            activeStep.getGoalPosition(tempPoint);
+            tempPoint.changeFrame(worldFrame);
+            tempPoint.add(instantaneousStepAdjustment);
+            crossoverProjection.project(tempPoint, taskSpaceEstimates.getSolePosition(), robotQuadrant);
+            groundPlaneEstimator.projectZ(tempPoint);
+            adjustedStep.setGoalPosition(tempPoint);
+         }
+      }
+
+      return adjustedActiveSteps;
+   }
+
+   public FrameVector3DReadOnly getAccumulatedStepAdjustment()
+   {
+      return accumulatedStepAdjustment;
    }
 }

@@ -314,13 +314,12 @@ public class QuadrupedDcmBasedStepController implements QuadrupedController, Qua
    {
       for (int i = 0; i < stepSequence.size(); i++)
       {
-         RobotQuadrant robotQuadrant = stepSequence.get(i).getRobotQuadrant();
          double currentTime = robotTimestamp.getDoubleValue();
          double startTime = stepSequence.get(i).getTimeInterval().getStartTime();
          double endTime = stepSequence.get(i).getTimeInterval().getEndTime();
          if (startTime < currentTime && currentTime < endTime)
          {
-            feetManager.triggerStep(robotQuadrant, stepSequence.get(i));
+            feetManager.triggerStep(stepSequence.get(i));
          }
       }
    }
