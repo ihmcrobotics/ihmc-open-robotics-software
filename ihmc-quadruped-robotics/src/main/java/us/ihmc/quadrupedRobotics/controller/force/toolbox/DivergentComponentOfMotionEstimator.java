@@ -24,6 +24,12 @@ public class DivergentComponentOfMotionEstimator
    private final YoFramePoint yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
 
    public DivergentComponentOfMotionEstimator(ReferenceFrame comZUpFrame, LinearInvertedPendulumModel lipModel, YoVariableRegistry parentRegistry,
+                                              YoGraphicsListRegistry graphicsListRegistry)
+   {
+      this(comZUpFrame, lipModel, "", parentRegistry, graphicsListRegistry);
+   }
+
+   public DivergentComponentOfMotionEstimator(ReferenceFrame comZUpFrame, LinearInvertedPendulumModel lipModel, String nameSuffix, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.comZUpFrame = comZUpFrame;
@@ -32,15 +38,15 @@ public class DivergentComponentOfMotionEstimator
       parentRegistry.addChild(registry);
 
       if (graphicsListRegistry != null)
-         createGraphics(graphicsListRegistry);
+         createGraphics(nameSuffix, graphicsListRegistry);
    }
 
-   private void createGraphics(YoGraphicsListRegistry graphicsListRegistry)
+   private void createGraphics(String suffix, YoGraphicsListRegistry graphicsListRegistry)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("icpPositionEstimate", yoIcpPositionEstimate, 0.01, Blue(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("icpPositionEstimate" + suffix , yoIcpPositionEstimate, 0.01, Blue(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
       yoGraphicsList.add(yoIcpPositionEstimateViz);
       artifactList.add(yoIcpPositionEstimateViz.createArtifact());
