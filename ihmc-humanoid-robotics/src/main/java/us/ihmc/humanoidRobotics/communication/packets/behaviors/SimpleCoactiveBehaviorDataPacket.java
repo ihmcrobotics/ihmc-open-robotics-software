@@ -4,7 +4,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehaviorDataPacket>
 {
-   public String key;
+   public StringBuilder key = new StringBuilder();
    public double value;
 
    public SimpleCoactiveBehaviorDataPacket()
@@ -14,7 +14,8 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
    @Override
    public void set(SimpleCoactiveBehaviorDataPacket other)
    {
-      key = other.key;
+      key.setLength(0);
+      key.append(other.key);
       value = other.value;
       setPacketInformation(other);
    }

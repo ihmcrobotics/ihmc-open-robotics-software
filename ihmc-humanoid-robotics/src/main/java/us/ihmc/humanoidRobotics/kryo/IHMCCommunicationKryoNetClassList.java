@@ -196,6 +196,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
    {
       registerPacketClass(Packet.class);
 
+      registerPacketField(StringBuilder.class);
+      registerPacketField(StringBuilder[].class);
+
       registerPacketField(FootstepPlanRequestType.class);
       registerPacketField(String.class);
       registerPacketField(char[].class);

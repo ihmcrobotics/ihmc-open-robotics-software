@@ -67,7 +67,7 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    @Override
    public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)
    {
-      if (data.key.equalsIgnoreCase("validate"))
+      if (data.key.toString().equalsIgnoreCase("validate"))
       {
          if (data.value == 1)
          {

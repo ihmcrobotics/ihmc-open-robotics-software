@@ -33,8 +33,8 @@ public class TextToSpeechNetworkModule implements PacketConsumer<TextToSpeechPac
    @Override
    public void receivedPacket(TextToSpeechPacket packet)
    {
-      PrintTools.debug(this, "Received TextToSpeechPacket: " + packet.getTextToSpeak());
-      String textToSpeak = packet.getTextToSpeak();
+      PrintTools.debug(this, "Received TextToSpeechPacket: " + packet.getTextToSpeakAsString());
+      String textToSpeak = packet.getTextToSpeakAsString();
       textToSpeak = "<prosody pitch=\"60Hz\" rate=\"-10%\" volume=\"x-loud\">" + textToSpeak + "</prosody>";
       ttsClient.playText(textToSpeak);
    }

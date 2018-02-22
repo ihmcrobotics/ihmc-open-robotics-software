@@ -14,7 +14,7 @@ public class TextToSpeechPacket extends SettablePacket<TextToSpeechPacket>
    public boolean speakPacket = false;
    public boolean beep = true;
 
-   public String textToSpeak;
+   public StringBuilder textToSpeak = new StringBuilder();
 
    public TextToSpeechPacket()
    {
@@ -27,12 +27,13 @@ public class TextToSpeechPacket extends SettablePacket<TextToSpeechPacket>
 
    public void setTextToSpeak(String textToSpeak)
    {
-      this.textToSpeak = textToSpeak;
+      this.textToSpeak.setLength(0);
+      this.textToSpeak.append(textToSpeak);
    }
 
-   public String getTextToSpeak()
+   public String getTextToSpeakAsString()
    {
-      return textToSpeak;
+      return textToSpeak.toString();
    }
 
    @Override
@@ -44,7 +45,8 @@ public class TextToSpeechPacket extends SettablePacket<TextToSpeechPacket>
    @Override
    public void set(TextToSpeechPacket other)
    {
-      textToSpeak = other.textToSpeak;
+      textToSpeak.setLength(0);
+      textToSpeak.append(other.textToSpeak);
       setPacketInformation(other);
    }
 }
