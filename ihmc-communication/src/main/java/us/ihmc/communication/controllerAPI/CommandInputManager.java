@@ -9,8 +9,6 @@ import java.util.Map;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.controllerAPI.command.MultipleCommandHolder;
-import us.ihmc.communication.packets.MultiplePacketHolder;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -160,12 +158,6 @@ public class CommandInputManager
          return;
       }
 
-      if (message instanceof MultiplePacketHolder)
-      {
-         submitMessages(((MultiplePacketHolder) message).getPackets());
-         return;
-      }
-
       ConcurrentRingBuffer<? extends Command<?, ?>> buffer = messageClassToBufferMap.get(message.getClass());
       if (buffer == null)
       {
@@ -223,9 +215,6 @@ public class CommandInputManager
    {
       if (!command.isCommandValid())
          return;
-
-      if (command instanceof MultipleCommandHolder)
-         submitControllerCommands(((MultipleCommandHolder<?, ?>) command).getControllerCommands());
 
       ConcurrentRingBuffer<? extends Command<?, ?>> buffer = commandClassToBufferMap.get(command.getClass());
       if (buffer == null)

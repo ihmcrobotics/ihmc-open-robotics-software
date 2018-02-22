@@ -8,12 +8,10 @@
 <?import us.ihmc.parameterTuner.guiElements.tree.ParameterTree?>
 <?import us.ihmc.parameterTuner.guiElements.tuners.Tuner?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity"
-	fx:controller="us.ihmc.parameterTuner.guiElements.main.GuiController"
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" fx:controller="us.ihmc.parameterTuner.guiElements.main.GuiController"
 	xmlns:fx="http://javafx.com/fxml">
 	<children>
-		<HBox spacing="20.0" AnchorPane.leftAnchor="10.0"
-			AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0"
+		<HBox spacing="20.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" AnchorPane.bottomAnchor="10.0"
 			AnchorPane.rightAnchor="10.0">
 			<children>
 				<VBox prefWidth="600.0" spacing="10.0" HBox.hgrow="ALWAYS">
@@ -27,16 +25,22 @@
 								<TextField fx:id="searchFieldNamespaces" HBox.hgrow="ALWAYS" />
 							</children>
 						</HBox>
-						<CheckBox text="Hide Namespaces" fx:id="hideNamespaces"
-							onAction="#handleNamespaceButton" />
+						<HBox spacing="10.0" alignment="CENTER_LEFT">
+							<children>
+								<Button text="Refresh" onAction="#updateTree" />
+								<CheckBox text="Hide Namespaces" fx:id="hideNamespaces" onAction="#updateTree"
+									/>
+								<ChoiceBox fx:id="statusFilter" />
+								<Text text="Status Filter" />
+							</children>
+						</HBox>
 						<ParameterTree VBox.vgrow="ALWAYS" fx:id="tree" />
-						<StackPane fx:id="inputPane" />
+						<StackPane fx:id="inputPane" alignment="CENTER_LEFT" />
 					</children>
 				</VBox>
 				<ScrollPane fx:id="scrollPane">
 					<content>
-						<VBox fx:id="tuningBox" prefWidth="730.0" spacing="10.0"
-							HBox.hgrow="ALWAYS" />
+						<VBox fx:id="tuningBox" prefWidth="730.0" spacing="10.0" HBox.hgrow="ALWAYS" />
 					</content>
 				</ScrollPane>
 			</children>

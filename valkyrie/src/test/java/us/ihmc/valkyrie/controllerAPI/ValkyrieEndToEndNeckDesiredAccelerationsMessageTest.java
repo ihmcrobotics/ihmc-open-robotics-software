@@ -26,7 +26,7 @@ public class ValkyrieEndToEndNeckDesiredAccelerationsMessageTest extends EndToEn
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 14.8)
+   @ContinuousIntegrationTest(estimatedDuration = 20.8)
    @Test(timeout = 30000)
    public void testSimpleCommands() throws Exception
    {

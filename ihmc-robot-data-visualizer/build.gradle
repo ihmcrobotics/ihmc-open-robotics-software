@@ -27,7 +27,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
    compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.3'
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'net.sourceforge.jmatio', name: 'jmatio', version: '1.0'

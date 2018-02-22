@@ -1,8 +1,12 @@
 package us.ihmc.parameterTuner.guiElements;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import gnu.trove.map.TObjectIntMap;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 
 public class GuiParameter extends GuiElement
 {
@@ -13,6 +17,11 @@ public class GuiParameter extends GuiElement
    private final StringProperty min = new SimpleStringProperty();
    private final StringProperty max = new SimpleStringProperty();
    private final StringProperty description = new SimpleStringProperty();
+
+   private GuiParameter resetState;
+   private GuiParameterStatus status;
+
+   private final List<ParameterChangeListener> listeners = new ArrayList<>();
 
    public GuiParameter(String name, String type, GuiRegistry parent)
    {
@@ -26,24 +35,83 @@ public class GuiParameter extends GuiElement
       this.valueOptions = valueOptions;
    }
 
+   /**
+    * This constructor creates a "shallow" copy of the provided parameter. The new parameter
+    * will not have a parent and {@link #getParent()} will return {@code null}. However, the
+    * unique name of the parameter {@link #getUniqueName()} will include the full namespace
+    * of the original parameter.
+    */
+   public GuiParameter(GuiParameter other)
+   {
+      super(other.getName(), null, other.getUniqueName());
+      this.type = other.getType();
+      this.valueOptions = other.getValueOptions();
+      set(other);
+   }
+
+   public void addStatusUpdater()
+   {
+      // Only consider the parameter modified if the value changes for now.
+      value.addListener((observable, oldValue, newValue) -> status = GuiParameterStatus.MODIFIED);
+   }
+
+   public void markAsModified()
+   {
+      if (status != GuiParameterStatus.MODIFIED)
+      {
+         status = GuiParameterStatus.MODIFIED;
+         informListeners();
+      }
+   }
+
    public void setValue(String value)
    {
-      this.value.set(value);
+      if (!this.value.getValueSafe().equals(value))
+      {
+         this.value.set(value);
+         informListeners();
+      }
    }
 
    public void setMin(String min)
    {
-      this.min.set(min);
+      if (!this.min.getValueSafe().equals(min))
+      {
+         this.min.set(min);
+         informListeners();
+      }
    }
 
    public void setMax(String max)
    {
-      this.max.set(max);
+      if (!this.max.getValueSafe().equals(max))
+      {
+         this.max.set(max);
+         informListeners();
+      }
    }
 
    public void setDescription(String description)
    {
-      this.description.set(description);
+      if (!this.description.getValueSafe().equals(description))
+      {
+         this.description.set(description);
+         informListeners();
+      }
+   }
+
+   public void setLoadStatus(ParameterLoadStatus loadStatus)
+   {
+      setStatus(GuiParameterStatus.get(loadStatus));
+   }
+
+   public void setStatus(GuiParameterStatus status)
+   {
+      if (status != this.status)
+      {
+         this.status = status;
+         informListeners();
+      }
    }
 
    public String getType()
@@ -76,26 +144,66 @@ public class GuiParameter extends GuiElement
       return description.get();
    }
 
-   public void addChangedListener(ParameterChangeListener listener)
+   public GuiParameterStatus getStatus()
    {
-      value.addListener((observable, oldValue, newValue) -> listener.changed(this));
-      min.addListener((observable, oldValue, newValue) -> listener.changed(this));
-      max.addListener((observable, oldValue, newValue) -> listener.changed(this));
-      description.addListener((observable, oldValue, newValue) -> listener.changed(this));
+      return status;
    }
 
-   public GuiParameter createCopy()
+   public void addChangedListener(ParameterChangeListener listener)
    {
-      GuiParameter copy = new GuiParameter(getName(), getType(), getValueOptions(), getParent());
+      listeners.add(listener);
+   }
+
+   private void informListeners()
+   {
+      listeners.stream().forEach(listener -> listener.changed(this));
+   }
+
+   public GuiParameter createCopy(GuiRegistry parent)
+   {
+      GuiParameter copy = new GuiParameter(getName(), getType(), getValueOptions(), parent);
       copy.set(this);
       return copy;
    }
 
    public void set(GuiParameter other)
    {
-      setValue(other.getCurrentValue());
-      setMin(other.getCurrentMin());
-      setMax(other.getCurrentMax());
-      setDescription(other.getCurrentDescription());
+      value.set(other.getCurrentValue());
+      min.set(other.getCurrentMin());
+      max.set(other.getCurrentMax());
+      description.set(other.getCurrentDescription());
+      status = other.getStatus();
+      informListeners();
    }
+
+   public void setValueAndStatus(GuiParameter other)
+   {
+      value.set(other.getCurrentValue());
+      status = other.getStatus();
+      informListeners();
+   }
+
+   public void reset()
+   {
+      if (resetState == null || status != GuiParameterStatus.MODIFIED)
+      {
+         throw new RuntimeException("Can not reset if the parameter was not modified.");
+      }
+      set(resetState);
+   }
+
+   public void saveStateForReset()
+   {
+      resetState = createCopy(null);
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = getUniqueName();
+      ret += "\ntype: " + type;
+      ret += "\nvalue: " + value.getValueSafe();
+      return ret;
+   }
+
 }

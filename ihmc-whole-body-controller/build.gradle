@@ -23,7 +23,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
    compile group: 'commons-net', name: 'commons-net', version: '3.3'
    compile group: 'org.yaml', name: 'snakeyaml', version: '1.17' //1.11

@@ -50,7 +50,7 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.7)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 160000)
    public void testMultipleWaypoints() throws Exception
    {
@@ -58,7 +58,7 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 24.6)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
    @Test(timeout = 160000)
    public void testSingleWaypoint() throws Exception
    {
@@ -82,7 +82,7 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
    @Test(timeout = 300000)
    public void testSingleWaypointThenManualChange() throws Exception
    {

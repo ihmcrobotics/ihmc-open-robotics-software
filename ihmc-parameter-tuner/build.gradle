@@ -26,6 +26,6 @@ mainDependencies {
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: 'org.apache.commons', name: 'commons-math3', version: '3.3'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
    compile group: "us.ihmc", name: "ihmc-robot-data-logger", version: "source"
 }

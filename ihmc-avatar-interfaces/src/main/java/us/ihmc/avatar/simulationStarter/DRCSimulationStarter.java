@@ -1,5 +1,8 @@
 package us.ihmc.avatar.simulationStarter;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +23,10 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -59,8 +65,6 @@ import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.*;
-
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
    private static final boolean DEBUG = false;
@@ -83,6 +87,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtForFootstep = false;
+
+   private boolean createYoVariableServer = false;
 
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
@@ -244,6 +250,14 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    public void setGuiInitialSetup(DRCGuiInitialSetup guiInitialSetup)
    {
       this.guiInitialSetup = guiInitialSetup;
+   }
+
+   /**
+    * Allows configuring whether a YoVariableServer will be created.
+    */
+   public void setCreateYoVariableServer(boolean createYoVariableServer)
+   {
+      this.createYoVariableServer = createYoVariableServer;
    }
 
    /**
@@ -436,6 +450,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setSCSInitialSetup(scsInitialSetup);
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
+      avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
       HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();

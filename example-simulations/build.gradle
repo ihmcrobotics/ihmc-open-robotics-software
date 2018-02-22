@@ -23,7 +23,7 @@ testSuites {
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.9'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.7'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
    compile group: 'org.ejml', name: 'dense64', version: '0.30'
    compile group: 'org.ejml', name: 'core', version: '0.30'
    compile "org.apache.commons:commons-lang3:3.7"
