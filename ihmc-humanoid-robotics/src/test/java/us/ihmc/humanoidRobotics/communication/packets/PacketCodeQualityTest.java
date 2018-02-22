@@ -117,7 +117,7 @@ public class PacketCodeQualityTest
                   continue;
                if (isPrimitive(typeToCheck))
                   continue;
-               if (thirdPartySerializableClasses.contains(typeToCheck))
+               if (typeToCheck != String.class && thirdPartySerializableClasses.contains(typeToCheck))
                   continue;
                if (allowedEuclidTypes.contains(typeToCheck))
                   continue;
