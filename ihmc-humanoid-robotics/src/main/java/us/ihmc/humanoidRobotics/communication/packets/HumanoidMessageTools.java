@@ -1604,7 +1604,7 @@ public class HumanoidMessageTools
    public static SimpleCoactiveBehaviorDataPacket createSimpleCoactiveBehaviorDataPacket(String key, double value)
    {
       SimpleCoactiveBehaviorDataPacket message = new SimpleCoactiveBehaviorDataPacket();
-      message.key = key;
+      message.key.append(key);
       message.value = value;
       return message;
    }
@@ -1809,7 +1809,7 @@ public class HumanoidMessageTools
    public static StampedPosePacket createStampedPosePacket(String frameId, TimeStampedTransform3D transform, double confidenceFactor)
    {
       StampedPosePacket message = new StampedPosePacket();
-      message.frameId = frameId;
+      message.frameId.append(frameId);
       message.pose = new Pose3D(transform.getTransform3D());
       message.timeStamp = transform.getTimeStamp();
       message.confidenceFactor = confidenceFactor;
@@ -2015,7 +2015,7 @@ public class HumanoidMessageTools
    {
       LocalizationStatusPacket message = new LocalizationStatusPacket();
       message.overlap = overlap;
-      message.status = status;
+      message.status.append(status);
       return message;
    }
 

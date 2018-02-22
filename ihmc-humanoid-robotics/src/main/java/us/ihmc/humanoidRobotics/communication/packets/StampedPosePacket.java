@@ -8,7 +8,7 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
    public Pose3D pose;
    public long timeStamp;
    public double confidenceFactor;
-   public String frameId;
+   public StringBuilder frameId = new StringBuilder();
 
    public StampedPosePacket()
    {
@@ -21,13 +21,14 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
       pose = new Pose3D(other.pose);
       timeStamp = other.timeStamp;
       confidenceFactor = other.confidenceFactor;
-      frameId = other.frameId;
+      frameId.setLength(0);
+      frameId.append(other.frameId);
       setPacketInformation(other);
    }
-
-   public String getFrameId()
+   
+   public String getFrameIdAsString()
    {
-      return frameId;
+      return frameId.toString();
    }
 
    public Pose3D getPose()
@@ -48,7 +49,7 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
    @Override
    public boolean epsilonEquals(StampedPosePacket other, double epsilon)
    {
-      boolean ret = frameId.equals(other.getFrameId());
+      boolean ret = frameId.equals(other.frameId);
       ret &= pose.epsilonEquals(other.getPose(), epsilon);
       return ret;
    }

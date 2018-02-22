@@ -60,7 +60,7 @@ public class ValveDetectorProcess implements PacketConsumer<VideoPacket>
                                 heatMapPacket.width = rectanglesAndHeatMaps.getRight().w;
                                 heatMapPacket.height = rectanglesAndHeatMaps.getRight().h;
                                 heatMapPacket.data = rectanglesAndHeatMaps.getRight().data;
-                                heatMapPacket.name = "Valve";
+                                heatMapPacket.name.append("Valve");
 
                                 int[] packedBoxes = rectanglesAndHeatMaps.getLeft().stream()
                                                                          .flatMapToInt(rect -> IntStream.of(rect.x, rect.y, rect.width, rect.height)).toArray();

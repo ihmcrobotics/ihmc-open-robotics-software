@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.IntStream;
 
@@ -604,7 +603,7 @@ public final class RandomHumanoidMessages
       next.height = RandomNumbers.nextInt(random, -100, 100);
       next.width = RandomNumbers.nextInt(random, -100, 100);
       next.data = RandomNumbers.nextFloatArray(random, next.height * next.width, 1.0f);
-      next.name = Integer.toHexString(random.nextInt());
+      next.name.append(Integer.toHexString(random.nextInt()));
       return next;
    }
 
@@ -614,11 +613,11 @@ public final class RandomHumanoidMessages
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       int boxesToGenerate = random.nextInt(20);
 
-      next.labels = new String[boxesToGenerate];
-      Arrays.fill(next.labels, Integer.toHexString(random.nextInt()));
+      next.labels = new StringBuilder[boxesToGenerate];
 
       for (int i = 0; i < boxesToGenerate; i++)
       {
+         next.labels[i].append(Integer.toHexString(random.nextInt()));
          next.boundingBoxXCoordinates = new int[boxesToGenerate];
          next.boundingBoxYCoordinates = new int[boxesToGenerate];
          next.boundingBoxWidths = new int[boxesToGenerate];
@@ -737,7 +736,7 @@ public final class RandomHumanoidMessages
       LocalizationStatusPacket next = new LocalizationStatusPacket();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
       next.overlap = random.nextDouble();
-      next.status = Integer.toHexString(random.nextInt());
+      next.status.append(Integer.toHexString(random.nextInt()));
       return next;
    }
 
@@ -1056,7 +1055,7 @@ public final class RandomHumanoidMessages
       next.pose = EuclidGeometryRandomTools.nextPose3D(random);
       next.timeStamp = random.nextLong();
       next.confidenceFactor = random.nextDouble();
-      next.frameId = Integer.toHexString(random.nextInt());
+      next.frameId.append(Integer.toHexString(random.nextInt()));
       return next;
    }
 

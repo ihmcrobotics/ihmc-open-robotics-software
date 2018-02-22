@@ -8,7 +8,7 @@ import java.util.Arrays;
 public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
 {
    public int[] boundingBoxXCoordinates, boundingBoxYCoordinates, boundingBoxWidths, boundingBoxHeights;
-   public String[] labels;
+   public StringBuilder[] labels;
 
    public BoundingBoxesPacket()
    {
