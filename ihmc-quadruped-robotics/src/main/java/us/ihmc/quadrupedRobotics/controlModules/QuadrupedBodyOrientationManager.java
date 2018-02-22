@@ -77,10 +77,11 @@ public class QuadrupedBodyOrientationManager
       setpoints.getBodyOrientation().set(postureProvider.getBodyOrientationInput());
       setpoints.getBodyOrientation().changeFrame(worldFrame);
       double bodyOrientationYaw = setpoints.getBodyOrientation().getYaw();
-      double bodyOrientationPitch = setpoints.getBodyOrientation().getPitch();
+      double bodyOrientationPitch = setpoints.getBodyOrientation().getPitch() + groundPlaneEstimator.getPitch(bodyOrientationYaw);
       double bodyOrientationRoll = setpoints.getBodyOrientation().getRoll();
-      setpoints.getBodyOrientation().setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch + groundPlaneEstimator.getPitch(bodyOrientationYaw), bodyOrientationRoll);
-      setpoints.getBodyAngularVelocity().setToZero();
+      setpoints.getBodyOrientation().setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
+
+      setpoints.getBodyAngularVelocity().set(postureProvider.getBodyAngularRateInput());
       setpoints.getComTorqueFeedforward().setToZero();
 
       controller.compute(angularMomentumRateToPack, setpoints, taskSpaceEstimates);
