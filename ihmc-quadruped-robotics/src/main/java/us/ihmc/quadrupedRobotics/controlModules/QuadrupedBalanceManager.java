@@ -159,7 +159,7 @@ public class QuadrupedBalanceManager
    public void initializeDcmSetpoints(QuadrupedTaskSpaceEstimates taskSpaceEstimates, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
       double currentTime = robotTimestamp.getDoubleValue();
-      if (stepSequence.size() > 0 && stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime)
+      if (!stepSequence.isEmpty() && stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime)
       {
          // compute dcm trajectory
          computeDcmTrajectory(taskSpaceEstimates, taskSpaceControllerSettings);
@@ -174,27 +174,40 @@ public class QuadrupedBalanceManager
 
    private void computeDcmTrajectory(QuadrupedTaskSpaceEstimates taskSpaceEstimates, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
-      // compute piecewise constant center of pressure plan
-      double currentTime = robotTimestamp.getDoubleValue();
-      QuadrantDependentList<FramePoint3D> currentSolePosition = taskSpaceEstimates.getSolePosition();
-      QuadrantDependentList<ContactState> currentContactState = taskSpaceControllerSettings.getContactState();
-      timedContactSequence.update(stepSequence, currentSolePosition, currentContactState, currentTime);
-      piecewiseConstanceCopTrajectory.initializeTrajectory(timedContactSequence);
+      if (!stepSequence.isEmpty())
+      {
+         // compute piecewise constant center of pressure plan
+         double currentTime = robotTimestamp.getDoubleValue();
+         QuadrantDependentList<FramePoint3D> currentSolePosition = taskSpaceEstimates.getSolePosition();
+         QuadrantDependentList<ContactState> currentContactState = taskSpaceControllerSettings.getContactState();
+         timedContactSequence.update(stepSequence, currentSolePosition, currentContactState, currentTime);
+         piecewiseConstanceCopTrajectory.initializeTrajectory(timedContactSequence);
 
-      // compute dcm trajectory with final boundary constraint
-      int numberOfIntervals = piecewiseConstanceCopTrajectory.getNumberOfIntervals();
-      dcmPositionWaypoint.setIncludingFrame(piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(numberOfIntervals - 1));
-      dcmPositionWaypoint.changeFrame(ReferenceFrame.getWorldFrame());
-      dcmPositionWaypoint.add(0, 0, linearInvertedPendulumModel.getComHeight());
-      dcmTrajectory.setComHeight(linearInvertedPendulumModel.getComHeight());
-      dcmTrajectory.initializeTrajectory(numberOfIntervals, piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(),
-                                         piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(),
-                                         piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1), dcmPositionWaypoint);
+         // compute dcm trajectory with final boundary constraint
+         int numberOfIntervals = piecewiseConstanceCopTrajectory.getNumberOfIntervals();
+         dcmPositionWaypoint.setIncludingFrame(piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(numberOfIntervals - 1));
+         dcmPositionWaypoint.changeFrame(ReferenceFrame.getWorldFrame());
+         dcmPositionWaypoint.add(0, 0, linearInvertedPendulumModel.getComHeight());
+         dcmTrajectory.setComHeight(linearInvertedPendulumModel.getComHeight());
+         dcmTrajectory.initializeTrajectory(numberOfIntervals, piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(), piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(),
+                                            piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1), dcmPositionWaypoint);
+      }
    }
 
    private void computeDcmSetpoints()
    {
-      if (robotTimestamp.getDoubleValue() <= dcmTransitionTrajectory.getEndTime())
+      if (stepSequence.isEmpty())
+      {
+         // update desired dcm position
+         FramePoint3D dcmPositionSetpoint = dcmPositionController.getDCMPositionSetpoint();
+         FrameVector3D dcmVelocitySetpoint = dcmPositionController.getDCMVelocitySetpoint();
+         dcmPositionSetpoint.changeFrame(supportFrame);
+         dcmPositionSetpoint.set(postureProvider.getComVelocityInput());
+         dcmPositionSetpoint.scale(1.0 / linearInvertedPendulumModel.getNaturalFrequency());
+         dcmPositionSetpoint.add(postureProvider.getComPositionInput());
+         dcmVelocitySetpoint.setToZero(supportFrame);
+      }
+      else if (robotTimestamp.getDoubleValue() <= dcmTransitionTrajectory.getEndTime())
       {
          dcmTransitionTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
          dcmTransitionTrajectory.getPosition(dcmPositionController.getDCMPositionSetpoint());
