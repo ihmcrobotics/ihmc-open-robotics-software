@@ -1,8 +1,11 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -28,12 +31,6 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory
-         .createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 2500);
-   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory
-         .createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 500);
-   private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
-   private final DoubleParameter bodyOrientationMaxIntegralErrorParameter = parameterFactory.createDouble("bodyOrientationMaxIntegralError", 0);
    private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
    private final DoubleArrayParameter comPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("comPositionDerivativeGains", 0, 0, 750);
    private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
@@ -54,7 +51,6 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
    // frames
    private final ReferenceFrame supportFrame;
-   private final ReferenceFrame worldFrame;
 
    // feedback controllers
    private final LinearInvertedPendulumModel lipModel;
@@ -63,9 +59,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
    private final QuadrupedComPositionController comPositionController;
-   private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
-   private final QuadrupedBodyOrientationController bodyOrientationController;
 
+   private final QuadrupedBodyOrientationManager bodyOrientationManager;
    private final QuadrupedFeetManager feetManager;
 
    // task space controller
@@ -78,6 +73,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    // planning
    private final GroundPlaneEstimator groundPlaneEstimator;
 
+   private final FrameQuaternion desiredBodyOrientation = new FrameQuaternion();
+
    public QuadrupedDcmBasedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                            QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry)
 
@@ -89,7 +86,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       // frames
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-      worldFrame = ReferenceFrame.getWorldFrame();
+      //worldFrame = ReferenceFrame.getWorldFrame();
 
       // feedback controllers
       lipModel = controllerToolbox.getLinearInvertedPendulumModel();
@@ -98,10 +95,9 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       dcmPositionController = controllerToolbox.getDcmPositionController();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
       comPositionController = controllerToolbox.getComPositionController();
-      bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
-      bodyOrientationController = controllerToolbox.getBodyOrientationController();
 
       feetManager = controlManagerFactory.getOrCreateFeetManager();
+      bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
 
       // task space controllers
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
@@ -130,9 +126,6 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
       comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
       comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
-      bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
-      bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
-      bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
       taskSpaceControllerSettings.getContactForceLimits().setCoefficientOfFriction(coefficientOfFrictionParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
@@ -179,15 +172,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       comPositionController.compute(taskSpaceControllerCommands.getComForce(), comPositionControllerSetpoints, taskSpaceEstimates);
 
       // update desired body orientation and angular rate
-      bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(supportFrame);
-      bodyOrientationControllerSetpoints.getBodyOrientation().set(postureProvider.getBodyOrientationInput());
-      bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      double bodyYaw = bodyOrientationControllerSetpoints.getBodyOrientation().getYaw();
-      double bodyPitch = bodyOrientationControllerSetpoints.getBodyOrientation().getPitch() + groundPlaneEstimator.getPitch(bodyYaw);
-      double bodyRoll = bodyOrientationControllerSetpoints.getBodyOrientation().getRoll();
-      bodyOrientationControllerSetpoints.getBodyOrientation().setYawPitchRoll(bodyYaw, bodyPitch, bodyRoll);
-      bodyOrientationControllerSetpoints.getBodyAngularVelocity().set(postureProvider.getBodyAngularRateInput());
-      bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
+      desiredBodyOrientation.setToZero(supportFrame);
+      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation, taskSpaceEstimates);
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
@@ -215,8 +201,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       dcmPositionController.reset();
       comPositionControllerSetpoints.initialize(taskSpaceEstimates);
       comPositionController.reset();
-      bodyOrientationControllerSetpoints.initialize(taskSpaceEstimates);
-      bodyOrientationController.reset();
+
+      bodyOrientationManager.initialize(taskSpaceEstimates);
 
       feetManager.requestFullContact();
 

@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -40,19 +41,12 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int STEP_SEQUENCE_CAPACITY = 100;
-   private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedStepStream stepStream;
    private final YoDouble robotTimestamp;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory
-         .createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
-   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory
-         .createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
-   private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
-   private final DoubleParameter bodyOrientationMaxIntegralErrorParameter = parameterFactory.createDouble("bodyOrientationMaxIntegralError", 0);
    private final DoubleArrayParameter comForceCommandWeightsParameter = parameterFactory.createDoubleArray("comForceCommandWeights", 1, 1, 1);
    private final DoubleArrayParameter comTorqueCommandWeightsParameter = parameterFactory.createDoubleArray("comTorqueCommandWeights", 1, 1, 1);
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentGain", 1.5);
@@ -64,13 +58,10 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final DoubleParameter maximumStepStrideParameter = parameterFactory.createDouble("maximumStepStride", 1.0);
    private final DoubleParameter coefficientOfFrictionParameter = parameterFactory.createDouble("coefficientOfFriction", 0.5);
 
-   // feedback controllers
-   private final QuadrupedBodyOrientationController.Setpoints bodyOrientationControllerSetpoints;
-   private final QuadrupedBodyOrientationController bodyOrientationController;
-
    // managers
    private final QuadrupedFeetManager feetManager;
    private final QuadrupedBalanceManager balanceManager;
+   private final QuadrupedBodyOrientationManager bodyOrientationManager;
 
    // task space controller
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
@@ -91,9 +82,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final YoFrameVector accumulatedStepAdjustment;
    private final QuadrupedStepCrossoverProjection crossoverProjection;
 
-   private final FrameQuaternion bodyOrientationReference;
-   private final OrientationFrame bodyOrientationReferenceFrame;
-
    private final FramePoint3D stepGoalPosition;
    private final RecyclingArrayList<YoQuadrupedTimedStep> stepSequence;
 
@@ -107,7 +95,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
                                   QuadrupedPostureInputProviderInterface postureProvider, QuadrupedStepStream stepStream,
                                   YoVariableRegistry parentRegistry)
    {
-      this.postureProvider = postureProvider;
       this.stepStream = stepStream;
       this.robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
@@ -115,8 +102,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
 
       // feedback controllers
-      bodyOrientationControllerSetpoints = new QuadrupedBodyOrientationController.Setpoints();
-      bodyOrientationController = controllerToolbox.getBodyOrientationController();
       feetManager = controlManagerFactory.getOrCreateFeetManager();
 
       // task space controllers
@@ -139,8 +124,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
             maximumStepStrideParameter.get());
-      bodyOrientationReference = new FrameQuaternion();
-      bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
       stepGoalPosition = new FramePoint3D();
       stepSequence = new RecyclingArrayList<>(MAXIMUM_STEP_QUEUE_SIZE, new GenericTypeBuilder<YoQuadrupedTimedStep>()
       {
@@ -155,16 +138,13 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       });
 
       balanceManager = new QuadrupedBalanceManager(controllerToolbox, stepSequence, postureProvider, registry, timedContactSequence, dcmTransitionTrajectory);
+      bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
 
       parentRegistry.addChild(registry);
    }
 
    private void updateGains()
    {
-      bodyOrientationController.getGains().setProportionalGains(bodyOrientationProportionalGainsParameter.get());
-      bodyOrientationController.getGains().setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
-      bodyOrientationController.getGains().setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
-
       taskSpaceControllerSettings.getContactForceLimits().setCoefficientOfFriction(coefficientOfFrictionParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
@@ -196,20 +176,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       balanceManager.compute(taskSpaceControllerCommands.getComForce(), taskSpaceEstimates, taskSpaceControllerSettings);
 
       // update desired body orientation, angular velocity, and torque
-      stepStream.getBodyOrientation(bodyOrientationReference);
-      bodyOrientationReference.changeFrame(bodyOrientationReferenceFrame.getParent());
-      bodyOrientationReferenceFrame.setOrientationAndUpdate(bodyOrientationReference);
-      bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(bodyOrientationReferenceFrame);
-      bodyOrientationControllerSetpoints.getBodyOrientation().set(postureProvider.getBodyOrientationInput());
-      bodyOrientationControllerSetpoints.getBodyOrientation().changeFrame(worldFrame);
-      double bodyOrientationYaw = bodyOrientationControllerSetpoints.getBodyOrientation().getYaw();
-      double bodyOrientationPitch = bodyOrientationControllerSetpoints.getBodyOrientation().getPitch();
-      double bodyOrientationRoll = bodyOrientationControllerSetpoints.getBodyOrientation().getRoll();
-      bodyOrientationControllerSetpoints.getBodyOrientation()
-            .setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch + groundPlaneEstimator.getPitch(bodyOrientationYaw), bodyOrientationRoll);
-      bodyOrientationControllerSetpoints.getBodyAngularVelocity().setToZero();
-      bodyOrientationControllerSetpoints.getComTorqueFeedforward().setToZero();
-      bodyOrientationController.compute(taskSpaceControllerCommands.getComTorque(), bodyOrientationControllerSetpoints, taskSpaceEstimates);
+      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), stepStream.getBodyOrientation(), taskSpaceEstimates);
 
       // update desired contact state and sole forces
       feetManager.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
@@ -333,8 +300,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       // initialize feedback controllers
       balanceManager.initialize(taskSpaceEstimates);
 
-      bodyOrientationControllerSetpoints.initialize(taskSpaceEstimates);
-      bodyOrientationController.reset();
+      bodyOrientationManager.initialize(taskSpaceEstimates);
 
       feetManager.registerStepTransitionCallback(this);
       feetManager.reset();
