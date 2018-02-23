@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.commons.thread.ThreadTools;
 
-public class GoalOrientedTestConductor implements VariableChangedListener, SimulationDoneListener
+public class GoalOrientedTestConductor implements SimulationDoneListener
 {
    private final SimulationConstructionSet scs;
    private final SimulationTestingParameters simulationTestingParameters;
@@ -43,12 +43,11 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
       this.simulationTestingParameters = simulationTestingParameters;
       
       YoDouble yoTime = (YoDouble) scs.getVariable("t");
-      yoTime.addVariableChangedListener(this);
+      yoTime.addVariableChangedListener(this::notifyOfVariableChange);
       scs.startOnAThread();
       scs.addSimulateDoneListener(this);
    }
    
-   @Override
    public void notifyOfVariableChange(YoVariable<?> v)
    {
       if (yoTimeChangedListenerActive)
