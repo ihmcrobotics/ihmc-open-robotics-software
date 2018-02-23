@@ -28,9 +28,12 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -293,8 +296,17 @@ public class DesiredFootstepTest
       netClassList.registerPacketClass(ExecutionMode.class);
       netClassList.registerPacketClass(ExecutionTiming.class);
 
+      netClassList.registerPacketField(FootstepDataMessage.class);
+      netClassList.registerPacketField(FootstepDataMessage[].class);
+      netClassList.registerPacketField(Class.class);
+      netClassList.registerPacketField(PreallocatedList.class);
+      netClassList.registerPacketField(SE3TrajectoryPointMessage.class);
+      netClassList.registerPacketField(SE3TrajectoryPointMessage[].class);
       netClassList.registerPacketField(QueueableMessage.class);
       netClassList.registerPacketField(ArrayList.class);
+      netClassList.registerPacketField(Vector3D.class);
+      netClassList.registerPacketField(Point2D.class);
+      netClassList.registerPacketField(Point2D[].class);
       netClassList.registerPacketField(Point3D.class);
       netClassList.registerPacketField(Point3D[].class);
       netClassList.registerPacketField(Quaternion.class);
@@ -430,13 +442,15 @@ public class DesiredFootstepTest
          for (int i = 0; i < footstepDataList.size(); i++)
          {
             FootstepDataMessage footstepData = footstepDataList.get(i);
+            FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
+            Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable);
+
             PreallocatedList<Point2D> contactPoints = footstepData.getPredictedContactPoints();
             if (contactPoints != null && contactPoints.size() == 0)
-               contactPoints = null;
-            FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
-
-            Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable);
-            footstep.setPredictedContactPoints(contactPoints.toArray());
+               footstep.setPredictedContactPoints((Point2DReadOnly[]) null);
+            else
+               footstep.setPredictedContactPoints(contactPoints.toArray());
+               
             footstep.setTrajectoryType(TrajectoryType.fromByte(footstepData.getTrajectoryType()));
             footstep.setSwingHeight(footstepData.getSwingHeight());
             reconstructedFootstepPath.add(footstep);
