@@ -16,7 +16,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 {
    @RosExportedField(documentation = "List of trajectory points to go through while executing the trajectory.")
    public PreallocatedList<TrajectoryPoint1DMessage> trajectoryPoints = new PreallocatedList<>(TrajectoryPoint1DMessage.class, TrajectoryPoint1DMessage::new,
-                                                                                               100);
+                                                                                               2000);
    @RosExportedField(documentation = "QP Weight, if Too low, in the event the qp can't achieve all of the objectives it may stop trying to achieve the desireds, if too high, it will favor this joint over other objectives. If set to NaN it will use the default weight for that joint")
    public double weight = Double.NaN;
 

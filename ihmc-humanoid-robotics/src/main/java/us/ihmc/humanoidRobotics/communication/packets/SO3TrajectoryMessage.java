@@ -23,7 +23,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame to define what frame the points are expressed in")
-   public PreallocatedList<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = new PreallocatedList<>(SO3TrajectoryPointMessage.class, SO3TrajectoryPointMessage::new, 100);
+   public PreallocatedList<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = new PreallocatedList<>(SO3TrajectoryPointMessage.class, SO3TrajectoryPointMessage::new, 2000);
 
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
