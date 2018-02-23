@@ -783,4 +783,17 @@ public abstract class WalkingControllerParameters
    {
       return Double.NEGATIVE_INFINITY;
    }
+
+   /**
+    * A robot can implement an ankle IK solver. Optionally, the walking controller will add desired
+    * joint angles and velocities for the ankle to the output of the controller core. Depending on the
+    * implementation of the robots joint control this can be used to better track the foot pose on a
+    * robot. The desired torque and acceleration computed by the whole body controller will still
+    * be available. Note, that the output of this module might be inconsistent with the output of the
+    * whole body controller as it does not consider other objectives such as balancing.
+    */
+   public AnkleIKSolver getAnkleIKSolver()
+   {
+      return null;
+   }
 }
