@@ -36,7 +36,6 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-         conductor.setKeepSCSUp(true);
       }
       catch (IOException e)
       {
