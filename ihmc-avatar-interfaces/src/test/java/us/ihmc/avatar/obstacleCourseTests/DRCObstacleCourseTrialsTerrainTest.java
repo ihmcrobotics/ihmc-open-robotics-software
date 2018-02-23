@@ -229,7 +229,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       for (int i = 0; i < dataList.size(); i++)
       {
          FootstepDataMessage step = dataList.get(i);
-         footstepDataList.getDataList().add(step);
+         footstepDataList.getDataList().add().set(step);
       }
       drcSimulationTestHelper.send(footstepDataList);
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
