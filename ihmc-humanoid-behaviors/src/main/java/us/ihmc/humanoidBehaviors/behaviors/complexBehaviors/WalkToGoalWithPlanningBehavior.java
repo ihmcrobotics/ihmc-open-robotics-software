@@ -334,12 +334,12 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
       {
          if (executeUnknownFirstStep.getBooleanValue() && i == 0)
          {
-            outgoingFootsteps.footstepDataList.add(currentPlan.pathPlan.get(i));
+            outgoingFootsteps.footstepDataList.add().set(currentPlan.pathPlan.get(i));
             executeUnknownFirstStep.set(false);
          }
          else if (currentPlan.footstepUnknown.get(i) == 0)
          {
-            outgoingFootsteps.footstepDataList.add(currentPlan.pathPlan.get(i));
+            outgoingFootsteps.footstepDataList.add().set(currentPlan.pathPlan.get(i));
          }
          else
          {

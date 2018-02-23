@@ -133,10 +133,10 @@ public class CreateFootstepScript
       int idx = 0;
       for (ContactType contactType : contactSequence)
       {
-         footsteps.footstepDataList.add(createFootstep(contactType, idx++));
+         footsteps.footstepDataList.add().set(createFootstep(contactType, idx++));
       }
-      footsteps.footstepDataList.add(createFootstep(ContactType.FULL, idx++));
-      footsteps.footstepDataList.add(createFootstep(ContactType.FULL, idx++));
+      footsteps.footstepDataList.add().set(createFootstep(ContactType.FULL, idx++));
+      footsteps.footstepDataList.add().set(createFootstep(ContactType.FULL, idx++));
    }
 
    private FootstepDataMessage createFootstep(ContactType contactType, int idx)
