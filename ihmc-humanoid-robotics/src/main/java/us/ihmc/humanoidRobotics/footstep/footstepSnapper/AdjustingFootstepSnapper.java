@@ -126,7 +126,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints() != null){
+      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints().size() > 0){
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
       footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints().toArray());
@@ -147,7 +147,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
       if (footstepFound != Footstep.FootstepType.BAD_FOOTSTEP)
       {
-         if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints() != null){
+         if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints().size() > 0){
             throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
          }
          return footstepFound;
