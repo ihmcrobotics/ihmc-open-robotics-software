@@ -75,7 +75,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
          imuSensorData[i].set(other.imuSensorData[i]);
       }
       robotMotionStatus = other.robotMotionStatus;
-      auxiliaryRobotData.setAuxiliaryRobotData(other.auxiliaryRobotData);
+      auxiliaryRobotData.set(other.auxiliaryRobotData);
       lastReceivedPacketTypeID = other.lastReceivedPacketTypeID;
       lastReceivedPacketUniqueId = other.lastReceivedPacketUniqueId;
       lastReceivedPacketRobotTimestamp = other.lastReceivedPacketRobotTimestamp;
@@ -258,7 +258,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
    {
       if (this.auxiliaryRobotData != null && auxiliaryRobotData != null)
       {
-         this.auxiliaryRobotData.setAuxiliaryRobotData(auxiliaryRobotData);
+         this.auxiliaryRobotData.set(auxiliaryRobotData);
       }
    }
 

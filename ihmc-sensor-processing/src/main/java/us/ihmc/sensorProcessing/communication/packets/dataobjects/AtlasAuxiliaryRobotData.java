@@ -1,10 +1,16 @@
 package us.ihmc.sensorProcessing.communication.packets.dataobjects;
 
+import java.util.Arrays;
+
+import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.tools.ArrayTools;
+
 /**
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class AtlasAuxiliaryRobotData
+public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 {
    public float[] electricJointTemperatures;
    public float[] electricJointCurrents;
@@ -59,47 +65,41 @@ public class AtlasAuxiliaryRobotData
       electricJointCurrents[index] = driveCurrent;
    }
 
-   public void setAuxiliaryRobotData(AtlasAuxiliaryRobotData auxiliaryRobotData)
+   @Override
+   public void set(AtlasAuxiliaryRobotData auxiliaryRobotData)
    {
-      if(!(auxiliaryRobotData instanceof AtlasAuxiliaryRobotData))
+      batteryCharging = auxiliaryRobotData.batteryCharging;
+      batteryVoltage = auxiliaryRobotData.batteryVoltage;
+      batteryCurrent = auxiliaryRobotData.batteryCurrent;
+      remainingBatteryTime = auxiliaryRobotData.remainingBatteryTime;
+      remainingAmpHours = auxiliaryRobotData.remainingAmpHours;
+      remainingChargePercentage = auxiliaryRobotData.remainingChargePercentage;
+      batteryCycleCount = auxiliaryRobotData.batteryCycleCount;
+
+      pumpInletPressure = auxiliaryRobotData.pumpInletPressure;
+      pumpSupplyPressure = auxiliaryRobotData.pumpSupplyPressure;
+      airSumpPressure = auxiliaryRobotData.airSumpPressure;
+      pumpSupplyTemperature = auxiliaryRobotData.pumpSupplyTemperature;
+      pumpRPM = auxiliaryRobotData.pumpRPM;
+      motorTemperature = auxiliaryRobotData.motorTemperature;
+      motorDriverTemperature = auxiliaryRobotData.motorDriverTemperature;
+
+      for (int i = 0; i < 6; i++)
       {
-         throw new RuntimeException("Mismatches in Auxiliary Robot Data, cannot proceed");
+         electricJointCurrents[i] = auxiliaryRobotData.electricJointCurrents[i];
+         electricJointTemperatures[i] = auxiliaryRobotData.electricJointTemperatures[i];
+         electricJointEnabledArray[i] = auxiliaryRobotData.electricJointEnabledArray[i];
       }
-      else
+
+      for (int i = 0; i < 15; i++)
       {
-         this.batteryCharging = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).batteryCharging;
-         this.batteryVoltage = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).batteryVoltage;
-         this.batteryCurrent = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).batteryCurrent;
-         this.remainingBatteryTime = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).remainingBatteryTime;
-         this.remainingAmpHours = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).remainingAmpHours;
-         this.remainingChargePercentage = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).remainingChargePercentage;
-         this.batteryCycleCount = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).batteryCycleCount;
+         rawImuTimestamps[i] = auxiliaryRobotData.rawImuTimestamps[i];
+         rawImuPacketCounts[i] = auxiliaryRobotData.rawImuPacketCounts[i];
 
-         this.pumpInletPressure = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).pumpInletPressure;
-         this.pumpSupplyPressure = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).pumpSupplyPressure;
-         this.airSumpPressure = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).airSumpPressure;
-         this.pumpSupplyTemperature = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).pumpSupplyTemperature;
-         this.pumpRPM = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).pumpRPM;
-         this.motorTemperature = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).motorTemperature;
-         this.motorDriverTemperature = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).motorDriverTemperature;
-
-         for(int i = 0; i < 6; i++)
+         for (int j = 0; j < 3; j++)
          {
-            this.electricJointCurrents[i] = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).electricJointCurrents[i];
-            this.electricJointTemperatures[i] = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).electricJointTemperatures[i];
-            this.electricJointEnabledArray[i] = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).electricJointEnabledArray[i];
-         }
-
-         for(int i = 0; i < 15; i++)
-         {
-            this.rawImuTimestamps[i] = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).rawImuTimestamps[i];
-            this.rawImuPacketCounts[i] = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).rawImuPacketCounts[i];
-
-            for(int j = 0; j < 3; j++)
-            {
-               this.rawImuRates[i][j] = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).rawImuRates[i][j];
-               this.rawImuDeltas[i][j] = ((AtlasAuxiliaryRobotData) auxiliaryRobotData).rawImuDeltas[i][j];
-            }
+            rawImuRates[i][j] = auxiliaryRobotData.rawImuRates[i][j];
+            rawImuDeltas[i][j] = auxiliaryRobotData.rawImuDeltas[i][j];
          }
       }
    }
@@ -242,5 +242,58 @@ public class AtlasAuxiliaryRobotData
    public void setMotorDriverTemperature(float motorDriverTemperature)
    {
       this.motorDriverTemperature = motorDriverTemperature;
+   }
+
+   @Override
+   public boolean epsilonEquals(AtlasAuxiliaryRobotData other, double epsilon)
+   {
+      if (!ArrayTools.deltaEquals(electricJointTemperatures, other.electricJointTemperatures, (float) epsilon))
+         return false;
+      if (!ArrayTools.deltaEquals(electricJointCurrents, other.electricJointCurrents, (float) epsilon))
+         return false;
+      if (!Arrays.equals(electricJointEnabledArray, other.electricJointEnabledArray))
+         return false;
+      if (!Arrays.equals(rawImuTimestamps, other.rawImuTimestamps))
+         return false;
+      if (!Arrays.equals(rawImuPacketCounts, other.rawImuPacketCounts))
+         return false;
+
+      for (int i = 0; i < 15; i++)
+      {
+         if (!ArrayTools.deltaEquals(rawImuRates[i], other.rawImuRates[i], (float) epsilon))
+            return false;
+         if (!ArrayTools.deltaEquals(rawImuDeltas[i], other.rawImuDeltas[i], (float) epsilon))
+            return false;
+      }
+
+      if (batteryCharging != other.batteryCharging)
+         return false;
+      if (!MathTools.epsilonEquals(batteryVoltage, other.batteryVoltage, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(batteryCurrent, other.batteryCurrent, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(remainingBatteryTime, other.remainingBatteryTime, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(remainingAmpHours, other.remainingAmpHours, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(remainingChargePercentage, other.remainingChargePercentage, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(batteryCycleCount, other.batteryCycleCount, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(pumpInletPressure, other.pumpInletPressure, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(pumpSupplyPressure, other.pumpSupplyPressure, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(airSumpPressure, other.airSumpPressure, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(pumpSupplyTemperature, other.pumpSupplyTemperature, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(pumpRPM, other.pumpRPM, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(motorTemperature, other.motorTemperature, epsilon))
+         return false;
+      if (!MathTools.epsilonEquals(motorDriverTemperature, other.motorDriverTemperature, epsilon))
+         return false;
+      return true;
    }
 }
