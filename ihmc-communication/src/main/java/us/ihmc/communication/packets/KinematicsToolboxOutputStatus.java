@@ -71,14 +71,14 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (useQDesired)
       {
-         for (int i = 0; i < desiredJointAngles.size(); i++)
+         for (int i = 0; i < newJointData.length; i++)
          {
             desiredJointAngles.add((float) newJointData[i].getqDesired());
          }
       }
       else
       {
-         for (int i = 0; i < desiredJointAngles.size(); i++)
+         for (int i = 0; i < newJointData.length; i++)
          {
             desiredJointAngles.add((float) newJointData[i].getQ());
          }
