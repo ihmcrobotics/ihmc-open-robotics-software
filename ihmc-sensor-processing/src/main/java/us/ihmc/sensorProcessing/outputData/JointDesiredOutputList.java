@@ -55,6 +55,14 @@ public class JointDesiredOutputList implements JointDesiredOutputListReadOnly
       return jointsAndData.first(index).getName();
    }
 
+   public void clear()
+   {
+      for (int jointIdx = 0; jointIdx < jointsAndData.size(); jointIdx++)
+      {
+         jointsAndData.get(jointIdx).getValue().clear();
+      }
+   }
+
 //   public void updateFromModel()
 //   {
 //
