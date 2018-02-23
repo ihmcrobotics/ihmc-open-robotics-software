@@ -189,7 +189,6 @@ import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
@@ -498,7 +497,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketField(RobotMotionStatus.class);
 
-      registerPacketField(AuxiliaryRobotData.class);
+      registerPacketField(AtlasAuxiliaryRobotData.class);
       registerPacketField(AtlasAuxiliaryRobotData.class);
       registerPacketField(long[].class);
       registerPacketField(boolean[].class);

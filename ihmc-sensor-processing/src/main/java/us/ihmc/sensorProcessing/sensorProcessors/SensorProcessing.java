@@ -43,7 +43,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticUpdatable;
 import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
@@ -230,7 +230,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    private final FrameVector3D tempTorque = new FrameVector3D();
    private final Wrench tempWrench = new Wrench();
 
-   private AuxiliaryRobotData auxiliaryRobotData;
+   private AtlasAuxiliaryRobotData auxiliaryRobotData;
    
 
    public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
@@ -1761,12 +1761,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
    }
 
    @Override
-   public AuxiliaryRobotData getAuxiliaryRobotData()
+   public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
    {
       return this.auxiliaryRobotData;
    }
 
-   public void setAuxiliaryRobotData(AuxiliaryRobotData auxiliaryRobotData)
+   public void setAuxiliaryRobotData(AtlasAuxiliaryRobotData auxiliaryRobotData)
    {
       this.auxiliaryRobotData = auxiliaryRobotData;
    }
