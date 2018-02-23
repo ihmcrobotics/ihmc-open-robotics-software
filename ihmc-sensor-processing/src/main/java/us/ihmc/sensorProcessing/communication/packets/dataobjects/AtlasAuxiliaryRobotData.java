@@ -4,7 +4,7 @@ package us.ihmc.sensorProcessing.communication.packets.dataobjects;
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class AtlasAuxiliaryRobotData implements AuxiliaryRobotData
+public class AtlasAuxiliaryRobotData
 {
    public float[] electricJointTemperatures;
    public float[] electricJointCurrents;
@@ -59,7 +59,7 @@ public class AtlasAuxiliaryRobotData implements AuxiliaryRobotData
       electricJointCurrents[index] = driveCurrent;
    }
 
-   @Override public void setAuxiliaryRobotData(AuxiliaryRobotData auxiliaryRobotData)
+   public void setAuxiliaryRobotData(AtlasAuxiliaryRobotData auxiliaryRobotData)
    {
       if(!(auxiliaryRobotData instanceof AtlasAuxiliaryRobotData))
       {

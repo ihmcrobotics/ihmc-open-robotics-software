@@ -10,7 +10,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -152,7 +152,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    }
 
    @Override
-   public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+   public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
    {
       return null;
    }

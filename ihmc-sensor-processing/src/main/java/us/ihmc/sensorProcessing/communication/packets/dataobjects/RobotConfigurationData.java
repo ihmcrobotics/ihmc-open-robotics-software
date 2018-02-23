@@ -39,7 +39,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
    public float[][] momentAndForceDataAllForceSensors;
    public IMUPacket[] imuSensorData;
    public byte robotMotionStatus;
-   public AuxiliaryRobotData auxiliaryRobotData;
+   public AtlasAuxiliaryRobotData auxiliaryRobotData;
 
    public int lastReceivedPacketTypeID;
    public long lastReceivedPacketUniqueId;
@@ -249,12 +249,12 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       pelvisAngularVelocity.set(pelvisAngularVelocityToPack);
    }
 
-   public AuxiliaryRobotData getAuxiliaryRobotData()
+   public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
    {
       return auxiliaryRobotData;
    }
 
-   public void setAuxiliaryRobotData(AuxiliaryRobotData auxiliaryRobotData)
+   public void setAuxiliaryRobotData(AtlasAuxiliaryRobotData auxiliaryRobotData)
    {
       if (this.auxiliaryRobotData != null && auxiliaryRobotData != null)
       {

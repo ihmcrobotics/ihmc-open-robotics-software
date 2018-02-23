@@ -8,7 +8,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 
 public class RobotConfigurationDataFactory
 {
-   public static RobotConfigurationData create(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, AuxiliaryRobotData auxiliaryRobotData,
+   public static RobotConfigurationData create(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, AtlasAuxiliaryRobotData auxiliaryRobotData,
                                                IMUDefinition[] imuDefinitions)
    {
       RobotConfigurationData message = new RobotConfigurationData();
