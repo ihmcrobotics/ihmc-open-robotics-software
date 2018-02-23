@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
@@ -173,6 +174,8 @@ public class QuadrupedFootControlModule
       footStateMachine.process();
 
       // Pack sole force command result.
-      soleForceCommandToPack.set(footStateMachine.getCurrentState().getSoleForceCommand());
+      ReferenceFrame originalFrame = soleForceCommandToPack.getReferenceFrame();
+      soleForceCommandToPack.setIncludingFrame(footStateMachine.getCurrentState().getSoleForceCommand());
+      soleForceCommandToPack.changeFrame(originalFrame);
    }
 }
