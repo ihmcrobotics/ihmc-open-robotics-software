@@ -26,7 +26,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    public static final byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = 1;
 
    @RosExportedField(documentation = "Defines the list of footstep to perform.")
-   public PreallocatedList<FootstepDataMessage> footstepDataList = new PreallocatedList<>(FootstepDataMessage.class, FootstepDataMessage::new, 30);
+   public PreallocatedList<FootstepDataMessage> footstepDataList = new PreallocatedList<>(FootstepDataMessage.class, FootstepDataMessage::new, 100);
 
    @RosExportedField(documentation = "When CONTROL_DURATIONS is chosen:"
          + "\n The controller will try to achieve the swingDuration and the transferDuration specified in the message. If a"
