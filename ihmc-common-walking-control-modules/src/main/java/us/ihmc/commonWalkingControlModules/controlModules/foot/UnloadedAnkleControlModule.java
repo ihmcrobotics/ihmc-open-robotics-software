@@ -23,8 +23,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class UnloadedAnkleControlModule
 {
-   private static final int numberOfAnkleJoints = 2;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final JointDesiredOutputList jointDesiredOutputList;
@@ -54,7 +52,7 @@ public class UnloadedAnkleControlModule
       this.ankleIKSolver = ankleIKSolver;
 
       foot = fullRobotModel.getFoot(robotSide);
-      RigidBody shin = ScrewTools.goUpBodyChain(foot, numberOfAnkleJoints);
+      RigidBody shin = ScrewTools.goUpBodyChain(foot, ankleIKSolver.getNumberOfJoints());
       shinFrame = shin.getParentJoint().getFrameAfterJoint();
       OneDoFJoint[] ankleJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(shin, foot), OneDoFJoint.class);
       jointDesiredOutputList = new JointDesiredOutputList(ankleJoints);

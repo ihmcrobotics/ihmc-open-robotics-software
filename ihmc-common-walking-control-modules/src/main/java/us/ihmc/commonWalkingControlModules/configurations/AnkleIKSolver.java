@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
  * <p>
  * This interface can be used if desired foot orientation and angular velocity should be tracked
  * using the ankle joints of a robot. The implementation of this can be robot specific and specific
- * to the desired foot behavior. It provides two methods:</br>
+ * to the desired foot behavior. It provides two main methods:</br>
  * {@link AnkleIKSolver#computeAngles(QuaternionReadOnly, DenseMatrix64F)}</br>
  * {@link AnkleIKSolver#computeVelocities(Vector3DReadOnly, DenseMatrix64F, DenseMatrix64F)}
  * </p>
@@ -44,6 +44,14 @@ public interface AnkleIKSolver
    public abstract void computeVelocities(Vector3DReadOnly footVelocity, DenseMatrix64F jointAngles, DenseMatrix64F result);
 
    /**
+    * Returns the number of ankle joints. Should be equal to the number of joints between the shin and
+    * the foot.
+    *
+    * @return number of ankle joints.
+    */
+   public abstract int getNumberOfJoints();
+
+   /**
     * An implementation of {@link AnkleIKSolver}. It assumes a two joint ankle that contains one
     * pitch joint and one roll joint starting from the shin. The solver will match the x-y plane
     * of the foot with the desired x-y plane. This should result in the sole being in the intended
@@ -60,7 +68,7 @@ public interface AnkleIKSolver
          double q0 = Math.atan2(rotationMatrix.getM02(), rotationMatrix.getM22());
          double q1 = Math.asin(-rotationMatrix.getM12());
 
-         result.reshape(2, 1);
+         result.reshape(getNumberOfJoints(), 1);
          result.set(0, q0);
          result.set(1, q1);
       }
@@ -72,9 +80,15 @@ public interface AnkleIKSolver
          double q0 = jointAngles.get(0);
          double qd1 = footVelocity.getX() * Math.cos(q0) - footVelocity.getZ() * Math.sin(q0);
 
-         result.reshape(2, 1);
+         result.reshape(getNumberOfJoints(), 1);
          result.set(0, qd0);
          result.set(1, qd1);
+      }
+
+      @Override
+      public int getNumberOfJoints()
+      {
+         return 2;
       }
 
    }
