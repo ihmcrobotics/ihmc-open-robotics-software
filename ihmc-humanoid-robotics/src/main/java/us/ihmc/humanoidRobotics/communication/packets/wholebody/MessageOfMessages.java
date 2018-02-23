@@ -29,17 +29,17 @@ public class MessageOfMessages extends Packet<MessageOfMessages>
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       packets.clear();
-      for(Packet<?> packet : messages)
-      {
-         packets.add(packet);
-      }
+      addPacket(messages);
    }
    
    public void addPacket(Packet<?>... messages)
    {
       for(Packet<?> packet : messages)
       {
-         packets.add(packet);
+         if (packet instanceof MessageOfMessages)
+            packets.addAll(((MessageOfMessages) packet).getPackets());
+         else
+            packets.add(packet);
       }
    }
 
