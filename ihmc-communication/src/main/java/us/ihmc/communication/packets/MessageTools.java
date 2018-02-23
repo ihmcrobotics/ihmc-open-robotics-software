@@ -9,6 +9,7 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
@@ -526,9 +527,17 @@ public class MessageTools
       if (source == null)
          return;
 
-      for (int i = 0; i < source.size(); i++)
+      try
       {
-         destination.add().set(source.get(i));
+         for (int i = 0; i < source.size(); i++)
+         {
+            destination.add().set(source.get(i));
+         }
+      }
+      catch (ArrayIndexOutOfBoundsException e)
+      {
+         PrintTools.error("Caught exception while copying data from list of size: " + source.size());
+         throw e;
       }
    }
 
@@ -546,9 +555,17 @@ public class MessageTools
       if (source == null)
          return;
 
-      for (int i = 0; i < source.length; i++)
+      try
       {
-         destination.add().set(source[i]);
+         for (int i = 0; i < source.length; i++)
+         {
+            destination.add().set(source[i]);
+         }
+      }
+      catch (ArrayIndexOutOfBoundsException e)
+      {
+         PrintTools.error("Caught exception while copying data from array of length: " + source.length);
+         throw e;
       }
    }
 
