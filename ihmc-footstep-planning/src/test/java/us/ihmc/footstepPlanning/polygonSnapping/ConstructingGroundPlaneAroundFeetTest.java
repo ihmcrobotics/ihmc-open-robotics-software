@@ -2,6 +2,9 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 
 import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,11 +22,13 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import static junit.framework.TestCase.assertTrue;
 
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class ConstructingGroundPlaneAroundFeetTest
 {
-   private final boolean visualize = true;
+   private final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
-   @Test
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testConstructingGroundPlaneAroundFeet()
    {
       PlanarRegionsList planarRegionsList = new PlanarRegionsList();
