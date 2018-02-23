@@ -135,7 +135,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       // feedback controllers
       cmpPositionSetpoint = new FramePoint3D();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
-      comPositionController = controllerToolbox.getComPositionController();
+      comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
 
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
       mpcOptimization = new QuadrupedDcmBasedMpcOptimizationWithLaneChange(controllerToolbox.getDcmPositionEstimator(), NUMBER_OF_PREVIEW_STEPS, registry,

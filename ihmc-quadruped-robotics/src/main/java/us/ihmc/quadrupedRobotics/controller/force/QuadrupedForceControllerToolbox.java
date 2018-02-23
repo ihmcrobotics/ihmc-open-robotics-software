@@ -15,8 +15,6 @@ public class QuadrupedForceControllerToolbox
    private final QuadrupedTaskSpaceController taskSpaceController;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
-   private final DivergentComponentOfMotionController dcmPositionController;
-   private final QuadrupedComPositionController comPositionController;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrupedFallDetector fallDetector;
 
@@ -39,8 +37,6 @@ public class QuadrupedForceControllerToolbox
       taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, runtimeEnvironment.getControlDT(), registry, runtimeEnvironment.getGraphicsListRegistry());
       linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassZUpFrame(), mass, gravity, 1.0, registry);
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
-      dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
-      comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
    }
@@ -78,16 +74,6 @@ public class QuadrupedForceControllerToolbox
    public DivergentComponentOfMotionEstimator getDcmPositionEstimator()
    {
       return dcmPositionEstimator;
-   }
-
-   public DivergentComponentOfMotionController getDcmPositionController()
-   {
-      return dcmPositionController;
-   }
-
-   public QuadrupedComPositionController getComPositionController()
-   {
-      return comPositionController;
    }
 
    public GroundPlaneEstimator getGroundPlaneEstimator()

@@ -128,10 +128,10 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       // feedback controllers
       lipModel = controllerToolbox.getLinearInvertedPendulumModel();
       dcmPositionEstimate = new FramePoint3D();
-      dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
-      dcmPositionController = controllerToolbox.getDcmPositionController();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
-      comPositionController = controllerToolbox.getComPositionController();
+      dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), lipModel, registry, runtimeEnvironment.getGraphicsListRegistry());
+      dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), lipModel, registry, runtimeEnvironment.getGraphicsListRegistry());
+      comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
 
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
 

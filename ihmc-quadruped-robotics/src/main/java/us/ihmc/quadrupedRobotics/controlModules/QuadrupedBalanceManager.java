@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
+import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseReverseDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedPiecewiseConstantCopTrajectory;
@@ -88,7 +89,8 @@ public class QuadrupedBalanceManager
       this.postureProvider = postureProvider;
       this.dcmTransitionTrajectory = new ThreeDoFMinimumJerkTrajectory();
 
-      robotTimestamp = toolbox.getRuntimeEnvironment().getRobotTimestamp();
+      QuadrupedRuntimeEnvironment runtimeEnvironment = toolbox.getRuntimeEnvironment();
+      robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       gravity = 9.81;
       mass = toolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
 
@@ -101,9 +103,10 @@ public class QuadrupedBalanceManager
 
       linearInvertedPendulumModel = toolbox.getLinearInvertedPendulumModel();
 
+      ReferenceFrame comZUpFrame = toolbox.getReferenceFrames().getCenterOfMassZUpFrame();
       dcmPositionEstimator = toolbox.getDcmPositionEstimator();
-      dcmPositionController = toolbox.getDcmPositionController();
-      comPositionController = toolbox.getComPositionController();
+      dcmPositionController = new DivergentComponentOfMotionController(comZUpFrame, runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
+      comPositionController = new QuadrupedComPositionController(comZUpFrame, runtimeEnvironment.getControlDT(), registry);
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
 
       crossoverProjection = new QuadrupedStepCrossoverProjection(toolbox.getReferenceFrames().getBodyZUpFrame(), minimumStepClearanceParameter.get(),
