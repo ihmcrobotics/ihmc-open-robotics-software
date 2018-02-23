@@ -2,6 +2,7 @@ package us.ihmc.simulationConstructionSetTools.util.simulationrunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.AssertionFailedError;
 import us.ihmc.commons.PrintTools;
@@ -30,7 +31,10 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
    private List<YoVariableTestGoal> sustainGoalsNotMeeting = new ArrayList<>();
    private List<YoVariableTestGoal> waypointGoalsNotMet = new ArrayList<>();
    private List<YoVariableTestGoal> terminalGoalsNotMeeting = new ArrayList<>();
-   
+
+   private final AtomicBoolean createAssertionFailedException = new AtomicBoolean();
+   private final AtomicBoolean printSuccessMessage = new AtomicBoolean();
+
    private String assertionFailedMessage = null;
    
    public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters)
@@ -79,18 +83,18 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
          
          if (sustainGoalsNotMeeting.size() > 0)
          {
-            createAssertionFailedException();
-            stop();
+            createAssertionFailedException.set(true);
          }
-         else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.size() > 0)
+         else if (terminalGoalsNotMeeting.isEmpty())
          {
-            createAssertionFailedException();
-            stop();
-         }
-         else if (terminalGoalsNotMeeting.isEmpty() && waypointGoalsNotMet.isEmpty())
-         {
-            printSuccessMessage();
-            stop();
+            if(waypointGoalsNotMet.size() > 0)
+            {
+               createAssertionFailedException.set(true);
+            }
+            else
+            {
+               printSuccessMessage.set(true);
+            }
          }
       }
    }
@@ -176,14 +180,28 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
    {
       assertionFailedMessage = null;
       yoTimeChangedListenerActive = true;
+
+      createAssertionFailedException.set(false);
+      printSuccessMessage.set(false);
       
       printSimulatingMessage();
       
       scs.simulate();
-      
-      while (scs.isSimulating())
+
+      while (!createAssertionFailedException.get() && !printSuccessMessage.get())
       {
          Thread.yield();
+      }
+
+      if(createAssertionFailedException.get())
+      {
+         createAssertionFailedException();
+         stop();
+      }
+      else if(printSuccessMessage.get())
+      {
+         printSuccessMessage();
+         stop();
       }
       
       //wait to see if scs threw any exceptions
