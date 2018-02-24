@@ -75,17 +75,17 @@ public class ParameterSavingTools
       registriesA.stream().forEach(registryA -> registryMapA.put(registryA.getUniqueName(), registryA));
       registriesB.stream().forEach(registryB -> registryMapB.put(registryB.getUniqueName(), registryB));
 
-      Map<String, GuiRegistry> mergedRegistries = new HashMap<>();
-      mergedRegistries.putAll(registryMapA);
-      mergedRegistries.putAll(registryMapB);
-      List<GuiRegistry> ret = new ArrayList<>();
-      mergedRegistries.values().forEach(registry -> {
+      Map<String, GuiRegistry> mergedRegistryMap = new HashMap<>();
+      mergedRegistryMap.putAll(registryMapA);
+      mergedRegistryMap.putAll(registryMapB);
+      List<GuiRegistry> mergedRegistries = new ArrayList<>();
+      mergedRegistryMap.values().forEach(registry -> {
          String key = registry.getUniqueName();
          GuiRegistry mergedRegistry = merge(registryMapA.get(key), registryMapB.get(key));
-         ret.add(mergedRegistry);
+         mergedRegistries.add(mergedRegistry);
       });
 
-      return ret;
+      return mergedRegistries;
    }
 
    public static GuiRegistry merge(GuiRegistry registryA, GuiRegistry registryB)
@@ -180,15 +180,15 @@ public class ParameterSavingTools
 
    public static List<GuiRegistry> filterModified(List<GuiRegistry> registries)
    {
-      List<GuiRegistry> ret = new ArrayList<>();
+      List<GuiRegistry> filteredRegistries = new ArrayList<>();
       registries.stream().forEach(registry -> {
          GuiRegistry filtered = filterModified(registry);
          if (!filtered.getAllParameters().isEmpty())
          {
-            ret.add(filtered);
+            filteredRegistries.add(filtered);
          }
       });
-      return ret;
+      return filteredRegistries;
    }
 
    public static GuiRegistry filterModified(GuiRegistry registry)

@@ -32,15 +32,15 @@ public class RemoteInputManager implements ParameterGuiInterface
    }
 
    @Override
-   public List<GuiRegistry> getFullRegistriesCopy()
+   public List<GuiRegistry> getRegistriesCopy()
    {
-      List<GuiRegistry> fullGuiRegistries = updateListener.pollGuiRegistries();
+      List<GuiRegistry> guiRegistries = updateListener.pollGuiRegistries();
 
       // Maintain a local copy for saving that is only modified from the GUI thread.
       parameterMap.clear();
       List<GuiRegistry> localRegistries = new ArrayList<>();
       List<GuiParameter> allParameters = new ArrayList<>();
-      fullGuiRegistries.stream().forEach(fullGuiRegistry -> {
+      guiRegistries.stream().forEach(fullGuiRegistry -> {
          GuiRegistry localRegistry = fullGuiRegistry.createFullCopy();
          allParameters.addAll(localRegistry.getAllParameters());
          localRegistries.add(localRegistry);
@@ -50,7 +50,7 @@ public class RemoteInputManager implements ParameterGuiInterface
       });
       savingNode.setRegistries(localRegistries);
 
-      return fullGuiRegistries;
+      return guiRegistries;
    }
 
    @Override
