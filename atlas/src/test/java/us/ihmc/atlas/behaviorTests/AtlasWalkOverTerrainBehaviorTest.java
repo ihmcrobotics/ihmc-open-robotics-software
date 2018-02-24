@@ -1,5 +1,7 @@
 package us.ihmc.atlas.behaviorTests;
 
+import java.io.IOException;
+
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -10,9 +12,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-
-import java.io.IOException;
 
 public class AtlasWalkOverTerrainBehaviorTest extends AvatarWalkOverTerrainBehaviorTest
 {
@@ -30,7 +29,7 @@ public class AtlasWalkOverTerrainBehaviorTest extends AvatarWalkOverTerrainBehav
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 63.6, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = 320000)
+   @Test(timeout = 400000)
    public void testWalkOverCinderBlocks() throws IOException
    {
       super.testWalkOverCinderBlocks();
