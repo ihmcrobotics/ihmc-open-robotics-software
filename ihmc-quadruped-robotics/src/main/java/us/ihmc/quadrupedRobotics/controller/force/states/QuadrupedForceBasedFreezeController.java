@@ -34,25 +34,24 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final QuadrupedFeetManager feetManager;
 
    // Task space controller
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
-   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
 
    private final FullQuadrupedRobotModel fullRobotModel;
+   private final QuadrupedForceControllerToolbox controllerToolbox;
 
    public QuadrupedForceBasedFreezeController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                               YoVariableRegistry parentRegistry)
    {
+      this.controllerToolbox = controllerToolbox;
+
       // Yo variables
       yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
       // Feedback controller
       feetManager = controlManagerFactory.getOrCreateFeetManager();
 
       // Task space controller
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
-      taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       taskSpaceController = controllerToolbox.getTaskSpaceController();
@@ -64,7 +63,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    @Override
    public void onEntry()
    {
-      taskSpaceEstimator.compute(taskSpaceEstimates);
+      controllerToolbox.update();
 
       // Initialize sole position controller
       feetManager.requestHoldAll();
@@ -95,9 +94,9 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
 
-      taskSpaceEstimator.compute(taskSpaceEstimates);
+      controllerToolbox.update();
 
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
+      feetManager.compute(taskSpaceControllerCommands.getSoleForce(), controllerToolbox.getTaskSpaceEstimates());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
       return null;

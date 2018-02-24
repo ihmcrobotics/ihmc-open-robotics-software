@@ -86,8 +86,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final QuadrupedMpcOptimizationWithLaneChangeSettings mpcSettings;
 
    // task space controller
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
-   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
@@ -108,6 +106,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
    private final FrameQuaternion desiredBodyOrientation = new FrameQuaternion();
 
+   private final QuadrupedForceControllerToolbox controllerToolbox;
+
    // inputs
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
@@ -116,6 +116,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
                                            QuadrupedControlManagerFactory controlManagerFactory, QuadrupedPostureInputProviderInterface postureProvider,
                                            QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider)
    {
+      this.controllerToolbox = controllerToolbox;
       this.postureProvider = postureProvider;
       this.planarVelocityProvider = planarVelocityProvider;
       this.xGaitSettingsProvider = xGaitSettingsProvider;
@@ -150,8 +151,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
                                                              runtimeEnvironment.getGraphicsListRegistry());
 
       // task space controllers
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
-      taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       taskSpaceController = controllerToolbox.getTaskSpaceController();
@@ -215,11 +214,13 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       lipModel.setComHeight(postureProvider.getComPositionInput().getZ());
 
       // update task space estimates
-      taskSpaceEstimator.compute(taskSpaceEstimates);
+      controllerToolbox.update();
    }
 
    private void updateSetpoints()
    {
+      QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
+
       // update desired horizontal com forces
       lipModel.computeComForce(taskSpaceControllerCommands.getComForce(), cmpPositionSetpoint);
       taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
@@ -296,6 +297,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private void computeStepAdjustmentAndCmpPosition()
    {
       double currentTime = robotTimestamp.getDoubleValue();
+      QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // solve for step adjustment and cmp position
       mpcOptimization.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getStepSequence(), taskSpaceEstimates.getSolePosition(),
@@ -322,7 +324,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    public void onLiftOff(RobotQuadrant thisStepQuadrant)
    {
       // update ground plane estimate
-      groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
+      groundPlanePositions.get(thisStepQuadrant).setIncludingFrame(controllerToolbox.getTaskSpaceEstimates().getSolePosition(thisStepQuadrant));
       groundPlanePositions.get(thisStepQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
       groundPlaneEstimator.compute(groundPlanePositions);
 
@@ -337,13 +339,15 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       // update current step goal position
       RobotEnd thisStepEnd = thisStepQuadrant.getEnd();
       if (thisStepQuadrant == xGaitCurrentSteps.get(thisStepEnd).getRobotQuadrant())
-         xGaitCurrentSteps.get(thisStepEnd).setGoalPosition(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
+         xGaitCurrentSteps.get(thisStepEnd).setGoalPosition(controllerToolbox.getTaskSpaceEstimates().getSolePosition(thisStepQuadrant));
    }
 
    @Override
    public void onEntry()
    {
       haltFlag.set(false);
+      
+      QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // initialize estimates
       updateEstimates();

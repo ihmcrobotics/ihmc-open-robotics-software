@@ -6,7 +6,6 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -40,20 +39,18 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
 
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
    private final QuadrupedFeetManager feetManager;
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
-   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
 
    private final FullQuadrupedRobotModel fullRobotModel;
 
    private final YoBoolean isDoneMoving = new YoBoolean("soleWaypointDoneMoving", registry);
+   private final QuadrupedForceControllerToolbox controllerToolbox;
 
    public QuadrupedForceBasedSoleWaypointController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                                     QuadrupedSoleWaypointInputProvider inputProvider, YoVariableRegistry parentRegistry)
    {
+      this.controllerToolbox = controllerToolbox;
       soleWaypointInputProvider = inputProvider;
       feetManager = controlManagerFactory.getOrCreateFeetManager();
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
-      taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
@@ -73,7 +70,7 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    @Override
    public void onEntry()
    {
-      taskSpaceEstimator.compute(taskSpaceEstimates);
+      controllerToolbox.update();
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
@@ -85,7 +82,7 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
       }
       taskSpaceController.reset();
 
-      feetManager.initializeWaypointTrajectory(soleWaypointInputProvider.get(), taskSpaceEstimates, useInitialSoleForces.get());
+      feetManager.initializeWaypointTrajectory(soleWaypointInputProvider.get(), controllerToolbox.getTaskSpaceEstimates(), useInitialSoleForces.get());
 
       yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
       // Initialize force feedback
@@ -104,8 +101,8 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    @Override
    public ControllerEvent process()
    {
-      taskSpaceEstimator.compute(taskSpaceEstimates);
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
+      controllerToolbox.update();
+      feetManager.compute(taskSpaceControllerCommands.getSoleForce(), controllerToolbox.getTaskSpaceEstimates());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
       return isDoneMoving.getBooleanValue() ? ControllerEvent.DONE : null;
    }
