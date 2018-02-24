@@ -43,7 +43,7 @@ public class PacketCodeQualityTest
       {
          try
          {
-            List<Constructor<?>> constructors = Arrays.asList(packetType.getConstructors());
+            List<Constructor<?>> constructors = Arrays.asList(packetType.getDeclaredConstructors());
             assertFalse("The type: " + packetType.getSimpleName() + " has no constructors?!", constructors.isEmpty());
 
             boolean hasEmptyConstructor = constructors.stream()
