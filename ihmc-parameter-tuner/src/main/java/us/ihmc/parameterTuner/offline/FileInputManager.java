@@ -69,11 +69,11 @@ public class FileInputManager extends VBox implements ParameterGuiInterface
    }
 
    @Override
-   public List<GuiRegistry> getFullRegistriesCopy()
+   public List<GuiRegistry> getRegistriesCopy()
    {
-      List<GuiRegistry> ret = new ArrayList<>();
-      localRegistries.stream().forEach(registry -> ret.add(registry.createFullCopy()));
-      return ret;
+      List<GuiRegistry> registriesCopy = new ArrayList<>();
+      localRegistries.stream().forEach(registry -> registriesCopy.add(registry.createFullCopy()));
+      return registriesCopy;
    }
 
    @Override

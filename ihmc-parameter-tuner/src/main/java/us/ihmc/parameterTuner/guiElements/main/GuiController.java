@@ -146,16 +146,16 @@ public class GuiController
       }
    }
 
-   public void setRegistries(List<GuiRegistry> fullRegistry)
+   public void setRegistries(List<GuiRegistry> registries)
    {
-      tree.setRegistries(fullRegistry);
+      tree.setRegistries(registries);
       updateTree();
       tuningBoxManager.clearAllParameters();
 
       changeCollector = new ChangeCollector();
       parameterMap.clear();
       List<GuiParameter> allParameters = new ArrayList<>();
-      fullRegistry.stream().forEach(registry -> allParameters.addAll(registry.getAllParameters()));
+      registries.stream().forEach(registry -> allParameters.addAll(registry.getAllParameters()));
       allParameters.stream().forEach(parameter -> {
          parameter.addChangedListener(changeCollector);
          parameter.addStatusUpdater();

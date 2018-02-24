@@ -89,9 +89,9 @@ public class ParameterTuningTools
 
    public static List<Registry> buildXMLRegistriesFromGui(List<GuiRegistry> guiRegistries)
    {
-      List<Registry> ret = new ArrayList<>();
-      guiRegistries.stream().forEach(guiRegistry -> ret.add(buildXMLRegistryFromGui(guiRegistry)));
-      return ret;
+      List<Registry> xmlRegistries = new ArrayList<>();
+      guiRegistries.stream().forEach(guiRegistry -> xmlRegistries.add(buildXMLRegistryFromGui(guiRegistry)));
+      return xmlRegistries;
    }
 
    public static Registry buildXMLRegistryFromGui(GuiRegistry guiRegistry)
