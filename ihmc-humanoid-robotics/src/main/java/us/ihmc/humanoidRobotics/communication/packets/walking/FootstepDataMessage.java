@@ -78,31 +78,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    {
    }
 
-   FootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
-   {
-      this(robotSide, new Point3D(location), new Quaternion(orientation), null);
-   }
-
-   FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
-   {
-      this(robotSide, location, orientation, null);
-   }
-
-   FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints)
-   {
-      this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
-   }
-
-   FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
-   {
-      this(robotSide, location, orientation, null, trajectoryType, swingHeight);
-   }
-
-   FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
-                              TrajectoryType trajectoryType, double swingHeight)
-   {
-   }
-
    public FootstepDataMessage(FootstepDataMessage footstepData)
    {
       this.robotSide = footstepData.robotSide;
