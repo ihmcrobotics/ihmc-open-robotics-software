@@ -96,7 +96,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
 
       controllerToolbox.update();
 
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce(), controllerToolbox.getTaskSpaceEstimates());
+      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
       return null;

@@ -104,11 +104,11 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
 
       // update desired dcm, com position
-      balanceManager.compute(taskSpaceControllerCommands.getComForce(), taskSpaceEstimates, taskSpaceControllerSettings);
+      balanceManager.compute(taskSpaceControllerCommands.getComForce(), taskSpaceControllerSettings);
 
       // update desired body orientation and angular rate
       desiredBodyOrientation.setToZero(supportFrame);
-      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation, taskSpaceEstimates);
+      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation);
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
