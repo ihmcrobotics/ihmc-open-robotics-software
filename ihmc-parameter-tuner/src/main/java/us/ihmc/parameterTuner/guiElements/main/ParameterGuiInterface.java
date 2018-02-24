@@ -18,7 +18,7 @@ public interface ParameterGuiInterface
     * This will be called by the GUI to load the registry structure if a reload is requested through
     * {@link #pollReloadAll()}. The returned registry will be modified by the GUI.
     */
-   public GuiRegistry getFullRegistryCopy();
+   public List<GuiRegistry> getFullRegistriesCopy();
 
    /**
     * This will be called periodically by the GUI if the user modifies any parameter. The list will

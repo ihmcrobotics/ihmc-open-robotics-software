@@ -37,8 +37,8 @@ public abstract class ParameterTuningApplication extends Application
             // Check if registry structure needs to be reloaded.
             if (guiInterface.pollReloadAll())
             {
-               GuiRegistry fullRegistry = guiInterface.getFullRegistryCopy();
-               controller.setRegistry(fullRegistry);
+               List<GuiRegistry> fullRegistries = guiInterface.getFullRegistriesCopy();
+               controller.setRegistries(fullRegistries);
             }
 
             // If parameters were changed in the GUI forward copies to the interface.

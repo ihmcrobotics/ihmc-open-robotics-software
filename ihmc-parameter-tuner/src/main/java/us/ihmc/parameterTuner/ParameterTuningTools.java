@@ -36,15 +36,20 @@ public class ParameterTuningTools
       }
    }
 
-   public static GuiRegistry buildGuiRegistryFromXML(List<Registry> registries)
+   public static List<GuiRegistry> buildGuiRegistryFromXML(List<Registry> registries)
    {
-      if (registries.size() != 1)
+      List<GuiRegistry> guiRegistries = new ArrayList<>();
+      if (registries != null)
       {
-         throw new RuntimeException("Expecting one root registry for a parameter file.");
+         registries.stream().forEach(registry -> guiRegistries.add(buildGuiRegistryFromXML(registry)));
       }
-      Registry xmlRoot = registries.get(0);
-      GuiRegistry guiRoot = new GuiRegistry(xmlRoot.getName(), null);
-      recursiveAddXmlToGui(guiRoot, xmlRoot);
+      return guiRegistries;
+   }
+
+   public static GuiRegistry buildGuiRegistryFromXML(Registry registry)
+   {
+      GuiRegistry guiRoot = new GuiRegistry(registry.getName(), null);
+      recursiveAddXmlToGui(guiRoot, registry);
       return guiRoot;
    }
 
@@ -82,13 +87,18 @@ public class ParameterTuningTools
       }
    }
 
-   public static List<Registry> buildXMLRegistryFromGui(GuiRegistry guiRoot)
+   public static List<Registry> buildXMLRegistriesFromGui(List<GuiRegistry> guiRegistries)
    {
-      Registry xmlRoot = new Registry(guiRoot.getName());
-      recursiveAddGuiToXml(xmlRoot, guiRoot);
-      List<Registry> xmlRegistries = new ArrayList<>();
-      xmlRegistries.add(xmlRoot);
-      return xmlRegistries;
+      List<Registry> ret = new ArrayList<>();
+      guiRegistries.stream().forEach(guiRegistry -> ret.add(buildXMLRegistryFromGui(guiRegistry)));
+      return ret;
+   }
+
+   public static Registry buildXMLRegistryFromGui(GuiRegistry guiRegistry)
+   {
+      Registry xmlRegistry = new Registry(guiRegistry.getName());
+      recursiveAddGuiToXml(xmlRegistry, guiRegistry);
+      return xmlRegistry;
    }
 
    private static void recursiveAddGuiToXml(Registry xmlRegistry, GuiRegistry guiRegistry)
