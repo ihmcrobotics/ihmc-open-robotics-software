@@ -1,7 +1,5 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -10,7 +8,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class QuadrupedSupportState extends QuadrupedFootState
 {
    private final RobotQuadrant robotQuadrant;
-   private final QuadrupedTaskSpaceEstimates estimates;
    private final YoBoolean stepCommandIsValid;
    private final YoDouble timestamp;
    private final YoQuadrupedTimedStep stepCommand;
@@ -21,14 +18,6 @@ public class QuadrupedSupportState extends QuadrupedFootState
       this.stepCommandIsValid = stepCommandIsValid;
       this.timestamp = timestamp;
       this.stepCommand = stepCommand;
-
-      this.estimates = new QuadrupedTaskSpaceEstimates();
-   }
-
-   @Override
-   public void updateEstimates(QuadrupedTaskSpaceEstimates estimates)
-   {
-      this.estimates.set(estimates);
    }
 
    @Override
