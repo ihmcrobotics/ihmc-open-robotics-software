@@ -6,6 +6,7 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.idl.PreallocatedList;
 
 /**
  * This is an highly inefficient way of enabling the transformation of messages using a
@@ -45,6 +46,12 @@ public final class MessageTransformer
       else if (message instanceof FootstepDataMessage)
       {
          transform((FootstepDataMessage) message, rigidBodyTransformToApply);
+      }
+      else if (message instanceof PreallocatedList)
+      {
+         PreallocatedList list = (PreallocatedList) message;
+         for (int i = 0; i < list.size(); i++)
+            transform(list.get(i), rigidBodyTransformToApply);
       }
       else if (message instanceof Iterable)
       {
