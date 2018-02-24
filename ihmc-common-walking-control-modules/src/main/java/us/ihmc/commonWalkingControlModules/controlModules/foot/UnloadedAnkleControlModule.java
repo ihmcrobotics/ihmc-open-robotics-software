@@ -31,7 +31,7 @@ public class UnloadedAnkleControlModule
    private final RigidBody foot;
    private final MovingReferenceFrame shinFrame;
 
-   private final BooleanParameter useAnkleIKModule = new BooleanParameter("UseAnkleIKModule", registry, false);
+   private final BooleanParameter useAnkleIKModule;
    private final YoBoolean enabled = new YoBoolean("UnloadedAnkleControlModuleEnabled", registry);
 
    private final AnkleIKSolver ankleIKSolver;
@@ -51,6 +51,7 @@ public class UnloadedAnkleControlModule
    {
       this.ankleIKSolver = ankleIKSolver;
 
+      useAnkleIKModule = new BooleanParameter("UseAnkleIKModule" + robotSide.getPascalCaseName(), registry, false);
       foot = fullRobotModel.getFoot(robotSide);
       RigidBody shin = ScrewTools.goUpBodyChain(foot, ankleIKSolver.getNumberOfJoints());
       shinFrame = shin.getParentJoint().getFrameAfterJoint();
