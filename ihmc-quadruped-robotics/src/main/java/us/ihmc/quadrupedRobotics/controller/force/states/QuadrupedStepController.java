@@ -14,7 +14,6 @@ import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStream;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
@@ -49,8 +48,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
 
    // task space controller
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
-   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
@@ -63,9 +60,12 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
    private final YoBoolean onTouchDownTriggered = new YoBoolean("onTouchDownTriggered", registry);
 
+   private final QuadrupedForceControllerToolbox controllerToolbox;
+
    public QuadrupedStepController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                   QuadrupedStepStream stepStream, YoVariableRegistry parentRegistry)
    {
+      this.controllerToolbox = controllerToolbox;
       this.stepStream = stepStream;
       stepMessageHandler = new QuadrupedStepMessageHandler(stepStream, controllerToolbox.getRuntimeEnvironment().getRobotTimestamp(), registry);
 
@@ -75,8 +75,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
 
       // task space controllers
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
-      taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       taskSpaceController = controllerToolbox.getTaskSpaceController();
@@ -107,7 +105,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    public void onLiftOff(RobotQuadrant thisStepQuadrant)
    {
       // update ground plane estimate
-      groundPlanePositions.get(thisStepQuadrant).setAndMatchFrame(taskSpaceEstimates.getSolePosition(thisStepQuadrant));
+      groundPlanePositions.get(thisStepQuadrant).setAndMatchFrame(controllerToolbox.getTaskSpaceEstimates().getSolePosition(thisStepQuadrant));
       onLiftOffTriggered.set(true);
    }
 
@@ -129,7 +127,8 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       onTouchDownTriggered.set(false);
 
       // update task space estimates
-      taskSpaceEstimator.compute(taskSpaceEstimates);
+      controllerToolbox.update();
+      QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // initialize feedback controllers
       balanceManager.initialize(taskSpaceEstimates);
@@ -184,7 +183,8 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       updateGains();
 
       // update task space estimates
-      taskSpaceEstimator.compute(taskSpaceEstimates);
+      controllerToolbox.update();
+      QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // trigger step events
       feetManager.triggerSteps(stepMessageHandler.getActiveSteps());

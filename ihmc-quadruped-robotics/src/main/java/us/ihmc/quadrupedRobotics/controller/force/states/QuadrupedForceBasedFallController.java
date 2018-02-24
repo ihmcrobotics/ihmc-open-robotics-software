@@ -58,22 +58,22 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
 
    private final QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists = new QuadrantDependentList<>();
    private final QuadrupedFeetManager feetManager;
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
-   private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedReferenceFrames referenceFrames;
    private final FramePoint3D solePositionSetpoint;
    private final Vector3D zeroVelocity;
    private final FullQuadrupedRobotModel fullRobotModel;
 
    private final YoBoolean isDoneMoving = new YoBoolean("fallIsDoneMoving", registry);
+   private final QuadrupedForceControllerToolbox controllerToolbox;
 
    public QuadrupedForceBasedFallController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                             YoVariableRegistry parentRegistry)
    {
+      this.controllerToolbox = controllerToolbox;
       this.fallBehaviorType.set(FallBehaviorType.GO_HOME_XYZ);
+
       feetManager = controlManagerFactory.getOrCreateFeetManager();
-      taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
-      taskSpaceEstimator = controllerToolbox.getTaskSpaceEstimator();
+
       referenceFrames = controllerToolbox.getReferenceFrames();
       solePositionSetpoint = new FramePoint3D();
       for (RobotQuadrant quadrant : RobotQuadrant.values)
@@ -104,11 +104,11 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
    @Override
    public void onEntry()
    {
-      taskSpaceEstimator.compute(taskSpaceEstimates);
+      controllerToolbox.update();
       // Create sole waypoint trajectories
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
-         solePositionSetpoint.setIncludingFrame(taskSpaceEstimates.getSolePosition(quadrant));
+         solePositionSetpoint.setIncludingFrame(controllerToolbox.getTaskSpaceEstimates().getSolePosition(quadrant));
          solePositionSetpoint.changeFrame(referenceFrames.getBodyFrame());
          quadrupedSoleWaypointLists.get(quadrant).get(0).set(solePositionSetpoint, zeroVelocity, 0.0);
          switch (fallBehaviorType.getEnumValue())
@@ -127,7 +127,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
          quadrupedSoleWaypointLists.get(quadrant).get(1).set(solePositionSetpoint, zeroVelocity, trajectoryTimeParameter.get());
       }
 
-      feetManager.initializeWaypointTrajectory(quadrupedSoleWaypointLists, taskSpaceEstimates, false);
+      feetManager.initializeWaypointTrajectory(quadrupedSoleWaypointLists, controllerToolbox.getTaskSpaceEstimates(), false);
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
@@ -158,8 +158,8 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
    @Override
    public ControllerEvent process()
    {
-      taskSpaceEstimator.compute(taskSpaceEstimates);
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
+      controllerToolbox.update();
+      feetManager.compute(taskSpaceControllerCommands.getSoleForce(), controllerToolbox.getTaskSpaceEstimates());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
       return isDoneMoving.getBooleanValue() ? ControllerEvent.DONE : null;
    }
