@@ -36,9 +36,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public byte robotSide;
    @RosExportedField(documentation = "Specifies the position of the footstep (sole frame) in world frame.")
-   public Point3D location;
+   public Point3D location = new Point3D();
    @RosExportedField(documentation = "Specifies the orientation of the footstep (sole frame) in world frame.")
-   public Quaternion orientation;
+   public Quaternion orientation = new Quaternion();
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
          + "the world. A value of null or an empty list will default to using the entire foot. Contact points are expressed in sole frame. This ordering does not matter.\n"

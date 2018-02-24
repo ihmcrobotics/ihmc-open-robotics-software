@@ -21,7 +21,7 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
    @RosExportedField(documentation = "Specifies which foot will execute the trajectory.")
    public byte robotSide;
    @RosExportedField(documentation = "The position/orientation trajectory information.")
-   public SE3TrajectoryMessage se3Trajectory;
+   public SE3TrajectoryMessage se3Trajectory = new SE3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization.
