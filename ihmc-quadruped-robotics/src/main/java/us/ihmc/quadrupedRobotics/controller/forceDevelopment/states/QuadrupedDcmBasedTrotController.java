@@ -140,7 +140,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          solePositionControllers.set(robotQuadrant, controlManagerFactory.getOrCreateSolePositionController(robotQuadrant));
 
-      timedStepController = new QuadrupedTimedStepController(solePositionControllers, runtimeEnvironment.getRobotTimestamp(), registry,
+      timedStepController = new QuadrupedTimedStepController(controllerToolbox, solePositionControllers, runtimeEnvironment.getRobotTimestamp(), registry,
             runtimeEnvironment.getGraphicsListRegistry());
 
       // task space controllers

@@ -54,11 +54,10 @@ public class QuadrupedSolePositionController
       solePositionController.resetIntegrator();
    }
 
-   public void compute(FrameVector3D soleForceCommand, QuadrupedSolePositionControllerSetpoints setpoints, QuadrupedTaskSpaceEstimates estimates)
+   public void compute(FrameVector3D soleForceCommand, QuadrupedSolePositionControllerSetpoints setpoints, FrameVector3D soleLinearVelocityEstimate)
    {
       FramePoint3D solePositionSetpoint = setpoints.getSolePosition();
       FrameVector3D soleLinearVelocitySetpoint = setpoints.getSoleLinearVelocity();
-      FrameVector3D soleLinearVelocityEstimate = estimates.getSoleLinearVelocity(robotQuadrant);
       FrameVector3D soleForceFeedforwardSetpoint = setpoints.getSoleForceFeedforward();
 
       ReferenceFrame solePositionSetpointFrame = solePositionSetpoint.getReferenceFrame();

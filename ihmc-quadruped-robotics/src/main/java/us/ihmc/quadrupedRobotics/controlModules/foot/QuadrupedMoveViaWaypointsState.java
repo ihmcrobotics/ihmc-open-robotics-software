@@ -21,7 +21,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    private final YoDouble robotTime;
 
    // SoleWaypoint variables
-   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
    private final MultipleWaypointsPositionTrajectoryGenerator quadrupedWaypointsPositionTrajectoryGenerator;
 
    // Feedback controller
@@ -30,10 +29,13 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    private final FrameVector3D initialSoleForces = new FrameVector3D();
 
    private final ReferenceFrame bodyFrame;
+   private final ReferenceFrame soleFrame;
    private final QuadrupedSoleWaypointList quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
 
    private final QuadrupedFootControlModuleParameters parameters;
    private final RobotQuadrant robotQuadrant;
+
+   private final QuadrupedForceControllerToolbox controllerToolbox;
 
    private double taskStartTime;
 
@@ -41,7 +43,9 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
                                          QuadrupedSolePositionController solePositionController, YoVariableRegistry parentRegistry)
    {
       this.robotQuadrant = robotQuadrant;
+      this.controllerToolbox = toolbox;
       this.bodyFrame = toolbox.getReferenceFrames().getBodyFrame();
+      this.soleFrame = toolbox.getSoleReferenceFrame(robotQuadrant);
       this.parameters = toolbox.getFootControlModuleParameters();
       robotTime = toolbox.getRuntimeEnvironment().getRobotTimestamp();
 
@@ -57,12 +61,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       parentRegistry.addChild(registry);
    }
 
-   @Override
-   public void updateEstimates(QuadrupedTaskSpaceEstimates taskSpaceEstimates)
-   {
-      this.taskSpaceEstimates.set(taskSpaceEstimates);
-   }
-
    public void handleWaypointList(QuadrupedSoleWaypointList quadrupedSoleWaypointList)
    {
       this.quadrupedSoleWaypointList.set(quadrupedSoleWaypointList);
@@ -70,12 +68,12 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
    public void initialize(boolean useInitialSoleForceAsFeedforwardTerm)
    {
-      solePositionControllerSetpoints.initialize(taskSpaceEstimates);
+      solePositionControllerSetpoints.initialize(soleFrame);
       solePositionController.reset();
 
       if (useInitialSoleForceAsFeedforwardTerm)
       {
-         this.initialSoleForces.setIncludingFrame(taskSpaceEstimates.getSoleVirtualForce(robotQuadrant));
+         this.initialSoleForces.setIncludingFrame(controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant));
          this.initialSoleForces.changeFrame(bodyFrame);
       }
       else
@@ -94,7 +92,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       solePositionController.getGains().setProportionalGains(parameters.getSolePositionProportionalGainsParameter());
       solePositionController.getGains().setDerivativeGains(parameters.getSolePositionDerivativeGainsParameter());
       solePositionController.getGains().setIntegralGains(parameters.getSolePositionIntegralGainsParameter(), parameters.getSolePositionMaxIntegralErrorParameter());
-      solePositionControllerSetpoints.initialize(taskSpaceEstimates);
+      solePositionControllerSetpoints.initialize(soleFrame);
    }
 
    @Override
@@ -117,7 +115,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
          quadrupedWaypointsPositionTrajectoryGenerator.getPosition(solePositionControllerSetpoints.getSolePosition());
          solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
          solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
-         solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, taskSpaceEstimates);
+         solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant));
 
          if (waypointCallback != null)
             waypointCallback.isDoneMoving(false);

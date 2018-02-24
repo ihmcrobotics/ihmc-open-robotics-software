@@ -94,4 +94,9 @@ public class QuadrupedForceControllerToolbox
    {
       return taskSpaceEstimates;
    }
+
+   public ReferenceFrame getSoleReferenceFrame(RobotQuadrant robotQuadrant)
+   {
+      return referenceFrames.getFootFrame(robotQuadrant);
+   }
 }
