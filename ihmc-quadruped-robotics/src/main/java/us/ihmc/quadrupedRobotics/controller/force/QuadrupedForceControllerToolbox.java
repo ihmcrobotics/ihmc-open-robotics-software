@@ -1,11 +1,13 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedForceControllerToolbox
@@ -61,11 +63,6 @@ public class QuadrupedForceControllerToolbox
    public QuadrupedReferenceFrames getReferenceFrames()
    {
       return referenceFrames;
-   }
-
-   public QuadrupedTaskSpaceEstimator getTaskSpaceEstimator()
-   {
-      return taskSpaceEstimator;
    }
 
    public QuadrupedTaskSpaceController getTaskSpaceController()

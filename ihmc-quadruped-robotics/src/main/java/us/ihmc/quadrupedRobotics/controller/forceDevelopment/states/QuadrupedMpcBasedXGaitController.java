@@ -239,7 +239,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       bodyYawSetpoint += planarVelocityProvider.get().getZ() * controlDT;
       desiredBodyOrientation.setToZero(worldFrame);
       desiredBodyOrientation.setYawPitchRoll(bodyYawSetpoint, 0.0, 0.0);
-      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation, taskSpaceEstimates);
+      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation);
 
       // update desired contact state and sole forces
       timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerSettings.getContactForceLimits(), taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
@@ -346,7 +346,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    public void onEntry()
    {
       haltFlag.set(false);
-      
+
       QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // initialize estimates

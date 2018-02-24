@@ -165,7 +165,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
 
       // compute step adjustment
-      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps(), taskSpaceEstimates);
+      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
       feetManager.adjustSteps(adjustedSteps);
 
       balanceManager.initializeDcmSetpoints(taskSpaceEstimates, taskSpaceControllerSettings);
@@ -184,7 +184,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
       // update task space estimates
       controllerToolbox.update();
-      QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // trigger step events
       feetManager.triggerSteps(stepMessageHandler.getActiveSteps());
@@ -205,17 +204,17 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
 
       // update step adjustment
-      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps(), taskSpaceEstimates);
+      RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
       feetManager.adjustSteps(adjustedSteps);
 
       // update desired horizontal com forces
-      balanceManager.compute(taskSpaceControllerCommands.getComForce(), taskSpaceEstimates, taskSpaceControllerSettings);
+      balanceManager.compute(taskSpaceControllerCommands.getComForce(), taskSpaceControllerSettings);
 
       // update desired body orientation, angular velocity, and torque
-      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), stepStream.getBodyOrientation(), taskSpaceEstimates);
+      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), stepStream.getBodyOrientation());
 
       // update desired contact state and sole forces
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
+      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setContactState(robotQuadrant, feetManager.getContactState(robotQuadrant));

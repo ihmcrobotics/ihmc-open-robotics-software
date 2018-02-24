@@ -37,9 +37,12 @@ public class QuadrupedBodyOrientationManager
    private final FrameQuaternion bodyOrientationReference;
    private final OrientationFrame bodyOrientationReferenceFrame;
 
+   private final QuadrupedForceControllerToolbox controllerToolbox;
+
    public QuadrupedBodyOrientationManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
                                           YoVariableRegistry parentRegistry)
    {
+      this.controllerToolbox = controllerToolbox;
       this.postureProvider = postureProvider;
 
       controller = new QuadrupedBodyOrientationController(controllerToolbox, registry);
@@ -65,7 +68,7 @@ public class QuadrupedBodyOrientationManager
       controller.reset();
    }
 
-   public void compute(FrameVector3D angularMomentumRateToPack, FrameQuaternionReadOnly bodyOrientationDesired, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
+   public void compute(FrameVector3D angularMomentumRateToPack, FrameQuaternionReadOnly bodyOrientationDesired)
    {
       updateGains();
 
@@ -84,7 +87,7 @@ public class QuadrupedBodyOrientationManager
       setpoints.getBodyAngularVelocity().set(postureProvider.getBodyAngularRateInput());
       setpoints.getComTorqueFeedforward().setToZero();
 
-      controller.compute(angularMomentumRateToPack, setpoints, taskSpaceEstimates);
+      controller.compute(angularMomentumRateToPack, setpoints, controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity());
    }
 
 }

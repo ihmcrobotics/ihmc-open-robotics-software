@@ -213,7 +213,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       }
       desiredBodyOrientation.setToZero(worldFrame);
       desiredBodyOrientation.setYawPitchRoll(bodyYawSetpoint, 0.0, 0.0);
-      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation, controllerToolbox.getTaskSpaceEstimates());
+      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation);
 
       // update desired contact state and sole forces
       timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerSettings.getContactForceLimits(),

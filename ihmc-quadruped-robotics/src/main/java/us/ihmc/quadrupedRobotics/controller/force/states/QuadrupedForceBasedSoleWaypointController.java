@@ -82,7 +82,7 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
       }
       taskSpaceController.reset();
 
-      feetManager.initializeWaypointTrajectory(soleWaypointInputProvider.get(), controllerToolbox.getTaskSpaceEstimates(), useInitialSoleForces.get());
+      feetManager.initializeWaypointTrajectory(soleWaypointInputProvider.get(), useInitialSoleForces.get());
 
       yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
       // Initialize force feedback
@@ -102,7 +102,7 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    public ControllerEvent process()
    {
       controllerToolbox.update();
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce(), controllerToolbox.getTaskSpaceEstimates());
+      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
       return isDoneMoving.getBooleanValue() ? ControllerEvent.DONE : null;
    }

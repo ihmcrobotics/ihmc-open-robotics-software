@@ -82,11 +82,10 @@ public class QuadrupedBodyOrientationController
       bodyOrientationController.resetIntegrator();
    }
 
-   public void compute(FrameVector3D comTorqueCommand, Setpoints setpoints, QuadrupedTaskSpaceEstimates estimates)
+   public void compute(FrameVector3D comTorqueCommand, Setpoints setpoints, FrameVector3D bodyAngularVelocityEstimate)
    {
       FrameQuaternion bodyOrientationSetpoint = setpoints.getBodyOrientation();
       FrameVector3D bodyAngularVelocitySetpoint = setpoints.getBodyAngularVelocity();
-      FrameVector3D bodyAngularVelocityEstimate = estimates.getBodyAngularVelocity();
       FrameVector3D comTorqueFeedforwardSetpoint = setpoints.getComTorqueFeedforward();
 
       ReferenceFrame bodyOrientationSetpointFrame = bodyOrientationSetpoint.getReferenceFrame();
