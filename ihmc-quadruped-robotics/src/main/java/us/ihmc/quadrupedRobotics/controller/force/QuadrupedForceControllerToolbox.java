@@ -21,6 +21,8 @@ public class QuadrupedForceControllerToolbox
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedFootControlModuleParameters footControlModuleParameters;
 
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
+
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, YoVariableRegistry registry)
    {
       double gravity = 9.81;
@@ -39,6 +41,11 @@ public class QuadrupedForceControllerToolbox
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
+   }
+
+   public void update()
+   {
+      taskSpaceEstimator.compute(taskSpaceEstimates);
    }
 
    public QuadrupedRuntimeEnvironment getRuntimeEnvironment()
@@ -84,5 +91,10 @@ public class QuadrupedForceControllerToolbox
    public QuadrupedFallDetector getFallDetector()
    {
       return fallDetector;
+   }
+
+   public QuadrupedTaskSpaceEstimates getTaskSpaceEstimates()
+   {
+      return taskSpaceEstimates;
    }
 }
