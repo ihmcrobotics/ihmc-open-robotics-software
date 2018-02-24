@@ -566,7 +566,7 @@ public final class RandomHumanoidMessages
 
       size = Math.abs(random.nextInt(1000));
       for (int i = 0; i < next.momentAndForceDataAllForceSensors.size(); i++)
-         next.momentAndForceDataAllForceSensors.add().set(createRandomSpatialVectorMessage(random));
+         next.momentAndForceDataAllForceSensors.add().set(nextSpatialVectorMessage(random));
       for (IMUPacket imuPacket : nextIMUPackets(random))
          next.imuSensorData.add().set(imuPacket);
       next.robotMotionStatus = RandomNumbers.nextEnum(random, RobotMotionStatus.class).toByte();
@@ -576,7 +576,7 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static SpatialVectorMessage createRandomSpatialVectorMessage(Random random)
+   public static SpatialVectorMessage nextSpatialVectorMessage(Random random)
    {
       SpatialVectorMessage next = new SpatialVectorMessage();
       next.setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
