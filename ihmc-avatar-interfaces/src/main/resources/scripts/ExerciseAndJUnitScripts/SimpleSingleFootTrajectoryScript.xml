@@ -1,50 +1,70 @@
 <object-stream>
-  <long>1492627391853</long>
+  <long>0</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage>
     <uniqueId>0</uniqueId>
     <destination>0</destination>
     <source>0</source>
+    <robotSide>1</robotSide>
     <se3Trajectory>
       <uniqueId>0</uniqueId>
       <destination>0</destination>
-      <previousMessageId>0</previousMessageId>
+      <source>0</source>
       <taskspaceTrajectoryPoints>
-        <us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
-          <uniqueId>0</uniqueId>
-          <destination>0</destination>
-          <time>2.0</time>
-          <position>
-            <x>0.0</x>
-            <y>0.0</y>
-            <z>0.3</z>
-          </position>
-          <orientation>
-            <x>0.0</x>
-            <y>0.0</y>
-            <z>0.0</z>
-            <s>1.0</s>
-          </orientation>
-          <linearVelocity>
-            <x>0.0</x>
-            <y>0.0</y>
-            <z>0.0</z>
-          </linearVelocity>
-          <angularVelocity>
-            <x>0.0</x>
-            <y>0.0</y>
-            <z>0.0</z>
-          </angularVelocity>
-        </us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
+        <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+        <values class="us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage-array">
+          <us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
+            <uniqueId>0</uniqueId>
+            <destination>0</destination>
+            <source>0</source>
+            <time>2.0</time>
+            <position>
+              <x>0.0</x>
+              <y>0.0</y>
+              <z>0.3</z>
+            </position>
+            <orientation>
+              <x>0.0</x>
+              <y>0.0</y>
+              <z>0.0</z>
+              <s>1.0</s>
+            </orientation>
+            <linearVelocity>
+              <x>0.0</x>
+              <y>0.0</y>
+              <z>0.0</z>
+            </linearVelocity>
+            <angularVelocity>
+              <x>0.0</x>
+              <y>0.0</y>
+              <z>0.0</z>
+            </angularVelocity>
+          </us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
+        </values>
+        <pos>0</pos>
+        <isEnum>false</isEnum>
       </taskspaceTrajectoryPoints>
-      <trajectoryReferenceFrameId>0</trajectoryReferenceFrameId>
-      <dataReferenceFrameId>0</dataReferenceFrameId>
+      <frameInformation>
+        <uniqueId>0</uniqueId>
+        <destination>0</destination>
+        <source>0</source>
+        <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
+        <dataReferenceFrameId>1</dataReferenceFrameId>
+      </frameInformation>
       <useCustomControlFrame>false</useCustomControlFrame>
+      <queueingProperties>
+        <uniqueId>0</uniqueId>
+        <destination>0</destination>
+        <source>0</source>
+        <executionMode>0</executionMode>
+        <previousMessageId>0</previousMessageId>
+        <executionDelayTime>0.0</executionDelayTime>
+      </queueingProperties>
     </se3Trajectory>
-    <robotSide>1</robotSide>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage>
-  <long>1492627391854</long>
+  <long>0</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>
     <destination>0</destination>
+    <source>0</source>
   </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
 </object-stream>
