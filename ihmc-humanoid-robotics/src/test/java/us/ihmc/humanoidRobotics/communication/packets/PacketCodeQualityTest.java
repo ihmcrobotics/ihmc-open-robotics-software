@@ -57,6 +57,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.idl.PreallocatedList;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.HEALTH)
 public class PacketCodeQualityTest
@@ -423,6 +424,7 @@ public class PacketCodeQualityTest
       Set<Field> fieldsToIngore = new HashSet<>();
       fieldsToIngore.add(VideoPacket.class.getField("data"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag"));
+      fieldsToIngore.add(AtlasAuxiliaryRobotData.class.getField("electricJointEnabledArray"));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
@@ -494,6 +496,7 @@ public class PacketCodeQualityTest
       Set<Field> fieldsToIngore = new HashSet<>();
       fieldsToIngore.add(VideoPacket.class.getField("data"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag"));
+      fieldsToIngore.add(AtlasAuxiliaryRobotData.class.getField("electricJointEnabledArray"));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
