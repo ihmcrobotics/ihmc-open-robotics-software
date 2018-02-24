@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,15 +68,52 @@ public class ParameterSavingTools
       return new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
    }
 
+   public static List<GuiRegistry> merge(List<GuiRegistry> registriesA, List<GuiRegistry> registriesB)
+   {
+      Map<String, GuiRegistry> registryMapA = new HashMap<>();
+      Map<String, GuiRegistry> registryMapB = new HashMap<>();
+      registriesA.stream().forEach(registryA -> registryMapA.put(registryA.getUniqueName(), registryA));
+      registriesB.stream().forEach(registryB -> registryMapB.put(registryB.getUniqueName(), registryB));
+
+      Map<String, GuiRegistry> mergedRegistries = new HashMap<>();
+      mergedRegistries.putAll(registryMapA);
+      mergedRegistries.putAll(registryMapB);
+      List<GuiRegistry> ret = new ArrayList<>();
+      mergedRegistries.values().forEach(registry -> {
+         String key = registry.getUniqueName();
+         GuiRegistry mergedRegistry = merge(registryMapA.get(key), registryMapB.get(key));
+         ret.add(mergedRegistry);
+      });
+
+      return ret;
+   }
+
    public static GuiRegistry merge(GuiRegistry registryA, GuiRegistry registryB)
    {
+      if (registryA != null && registryA.getParent() != null)
+      {
+         throw new RuntimeException("Can only merge root registries.");
+      }
+      if (registryB != null && registryB.getParent() != null)
+      {
+         throw new RuntimeException("Can only merge root registries.");
+      }
+
+      if (registryA == null && registryB != null)
+      {
+         GuiRegistry merged = new GuiRegistry(registryB.getName(), null);
+         add(registryB, merged);
+         return merged;
+      }
+      if (registryA != null && registryB == null)
+      {
+         GuiRegistry merged = new GuiRegistry(registryA.getName(), null);
+         add(registryA, merged);
+         return merged;
+      }
       if (!registryA.getUniqueName().equals(registryB.getUniqueName()))
       {
          throw new RuntimeException("Can not merge different regsitries.");
-      }
-      if (registryA.getParent() != null)
-      {
-         throw new RuntimeException("Can only merge root registries.");
       }
 
       GuiRegistry merged = new GuiRegistry(registryA.getName(), null);
@@ -140,9 +178,21 @@ public class ParameterSavingTools
       });
    }
 
+   public static List<GuiRegistry> filterModified(List<GuiRegistry> registries)
+   {
+      List<GuiRegistry> ret = new ArrayList<>();
+      registries.stream().forEach(registry -> {
+         GuiRegistry filtered = filterModified(registry);
+         if (!filtered.getAllParameters().isEmpty())
+         {
+            ret.add(filtered);
+         }
+      });
+      return ret;
+   }
+
    public static GuiRegistry filterModified(GuiRegistry registry)
    {
-      GuiRegistry filtered = registry.createFullCopy(parameter -> parameter.getStatus() == GuiParameterStatus.MODIFIED);
-      return filtered;
+      return registry.createFullCopy(parameter -> parameter.getStatus() == GuiParameterStatus.MODIFIED);
    }
 }

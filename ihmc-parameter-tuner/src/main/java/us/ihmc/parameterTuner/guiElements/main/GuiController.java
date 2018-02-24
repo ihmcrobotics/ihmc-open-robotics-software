@@ -1,5 +1,6 @@
 package us.ihmc.parameterTuner.guiElements.main;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -145,7 +146,7 @@ public class GuiController
       }
    }
 
-   public void setRegistry(GuiRegistry fullRegistry)
+   public void setRegistries(List<GuiRegistry> fullRegistry)
    {
       tree.setRegistries(fullRegistry);
       updateTree();
@@ -153,7 +154,8 @@ public class GuiController
 
       changeCollector = new ChangeCollector();
       parameterMap.clear();
-      List<GuiParameter> allParameters = fullRegistry.getAllParameters();
+      List<GuiParameter> allParameters = new ArrayList<>();
+      fullRegistry.stream().forEach(registry -> allParameters.addAll(registry.getAllParameters()));
       allParameters.stream().forEach(parameter -> {
          parameter.addChangedListener(changeCollector);
          parameter.addStatusUpdater();

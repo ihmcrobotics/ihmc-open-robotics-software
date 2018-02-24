@@ -2,6 +2,7 @@ package us.ihmc.parameterTuner.offline;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class FileInputManager extends VBox implements ParameterGuiInterface
    private final ParameterSavingNode savingNode = new ParameterSavingNode(true, true);
 
    private boolean reloadAll;
-   private GuiRegistry localRegistry;
+   private List<GuiRegistry> localRegistries;
    private HashMap<String, GuiParameter> parameterMap = new HashMap<>();
 
    public FileInputManager()
@@ -68,9 +69,11 @@ public class FileInputManager extends VBox implements ParameterGuiInterface
    }
 
    @Override
-   public GuiRegistry getFullRegistryCopy()
+   public List<GuiRegistry> getFullRegistriesCopy()
    {
-      return localRegistry.createFullCopy();
+      List<GuiRegistry> ret = new ArrayList<>();
+      localRegistries.stream().forEach(registry -> ret.add(registry.createFullCopy()));
+      return ret;
    }
 
    @Override
@@ -126,13 +129,15 @@ public class FileInputManager extends VBox implements ParameterGuiInterface
       if (file != null)
       {
          List<Registry> xmlRegistries = ParameterTuningTools.getParameters(file);
-         localRegistry = ParameterTuningTools.buildGuiRegistryFromXML(xmlRegistries);
+         localRegistries = ParameterTuningTools.buildGuiRegistryFromXML(xmlRegistries);
          parameterMap.clear();
-         localRegistry.getAllParameters().stream().forEach(parameter -> parameterMap.put(parameter.getUniqueName(), parameter));
+         List<GuiParameter> allParameters = new ArrayList<>();
+         localRegistries.stream().forEach(registry -> allParameters.addAll(registry.getAllParameters()));
+         allParameters.stream().forEach(parameter -> parameterMap.put(parameter.getUniqueName(), parameter));
          reloadAll = true;
 
          savingNode.setActiveFile(file);
-         savingNode.setRegistry(localRegistry);
+         savingNode.setRegistries(localRegistries);
       }
    }
 }

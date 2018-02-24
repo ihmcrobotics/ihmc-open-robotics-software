@@ -12,7 +12,7 @@ import us.ihmc.tools.string.RegularExpression;
 
 public class ParameterTree extends TreeView<ParameterTreeValue>
 {
-   private GuiRegistry registry;
+   private List<GuiRegistry> registries;
    private final Map<String, ParameterTreeItem> treeItemMap = new HashMap<>();
 
    public ParameterTree()
@@ -21,11 +21,11 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       setCellFactory(param -> new ParameterTreeCell());
    }
 
-   public void setRegistries(GuiRegistry registry)
+   public void setRegistries(List<GuiRegistry> registries)
    {
-      this.registry = registry;
+      this.registries = registries;
       treeItemMap.clear();
-      createItemsRecursive(registry);
+      registries.stream().forEach(registry -> createItemsRecursive(registry));
    }
 
    private void createItemsRecursive(GuiRegistry registry)
@@ -43,7 +43,7 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
 
    public void filterRegistries(boolean hideNamespaces, GuiParameterStatus status, String regexParameters, String regexNamespaces)
    {
-      if (registry == null)
+      if (registries == null)
       {
          return;
       }
@@ -61,23 +61,25 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       boolean searchingNamespaces = regexNamespaces != null && !regexNamespaces.isEmpty();
       boolean searching = searchingParameters || searchingNamespaces || status != GuiParameterStatus.ANY;
 
-      if (hideNamespaces && searching)
-      {
-         addAllMatching(registry.getAllParameters(), root, regexParameters, status);
-      }
-      else if (hideNamespaces)
-      {
-         addAllMatching(registry.getAllParameters(), root, "", status);
-      }
-      else if (searching)
-      {
-         addMatchingRecursive(registry, root, regexParameters, regexNamespaces, status);
-      }
-      else
-      {
-         addRecursive(registry, root, status);
-         root.expandChildrenForSmallRegistries();
-      }
+      registries.stream().forEach(registry -> {
+         if (hideNamespaces && searching)
+         {
+            addAllMatching(registry.getAllParameters(), root, regexParameters, status);
+         }
+         else if (hideNamespaces)
+         {
+            addAllMatching(registry.getAllParameters(), root, "", status);
+         }
+         else if (searching)
+         {
+            addMatchingRecursive(registry, root, regexParameters, regexNamespaces, status);
+         }
+         else
+         {
+            addRecursive(registry, root, status);
+            root.expandChildrenForSmallRegistries();
+         }
+      });
    }
 
    private void addMatchingRecursive(GuiRegistry registry, ParameterTreeItem item, String regexParameters, String regexNamespaces, GuiParameterStatus status)

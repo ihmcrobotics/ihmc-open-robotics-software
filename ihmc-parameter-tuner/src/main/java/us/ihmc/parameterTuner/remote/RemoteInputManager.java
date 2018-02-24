@@ -1,5 +1,6 @@
 package us.ihmc.parameterTuner.remote;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,19 +32,25 @@ public class RemoteInputManager implements ParameterGuiInterface
    }
 
    @Override
-   public GuiRegistry getFullRegistryCopy()
+   public List<GuiRegistry> getFullRegistriesCopy()
    {
-      GuiRegistry fullGuiRegistry = updateListener.pollGuiRegistry();
+      List<GuiRegistry> fullGuiRegistries = updateListener.pollGuiRegistries();
 
       // Maintain a local copy for saving that is only modified from the GUI thread.
-      GuiRegistry localRegistry = fullGuiRegistry.createFullCopy();
       parameterMap.clear();
-      localRegistry.getAllParameters().stream().forEach(parameter -> {
+      List<GuiRegistry> localRegistries = new ArrayList<>();
+      List<GuiParameter> allParameters = new ArrayList<>();
+      fullGuiRegistries.stream().forEach(fullGuiRegistry -> {
+         GuiRegistry localRegistry = fullGuiRegistry.createFullCopy();
+         allParameters.addAll(localRegistry.getAllParameters());
+         localRegistries.add(localRegistry);
+      });
+      allParameters.stream().forEach(parameter -> {
          parameterMap.put(parameter.getUniqueName(), parameter);
       });
-      savingNode.setRegistry(localRegistry);
+      savingNode.setRegistries(localRegistries);
 
-      return fullGuiRegistry;
+      return fullGuiRegistries;
    }
 
    @Override
