@@ -26,7 +26,7 @@ public class SimulatedQuadrupedInverseKinematicsCalculators extends QuadrupedInv
       for (OneDoFJoint joint : oneDoFJoints)
       {
          OneDegreeOfFreedomJoint simulatedJoint = (OneDegreeOfFreedomJoint) sdfRobot.getJoint(joint.getName());
-         simulatedJoint.setQ(joint.getqDesired());
+         simulatedJoint.setQ(jointDesiredOutputList.getJointDesiredOutput(joint).getDesiredPosition());
       }
    }
 }

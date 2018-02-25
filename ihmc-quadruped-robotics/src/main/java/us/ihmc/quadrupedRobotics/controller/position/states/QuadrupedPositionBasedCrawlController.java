@@ -51,6 +51,7 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
@@ -781,7 +782,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          OneDoFJoint oneDoFJoint = oneDoFJointsActual[i];
          OneDoFJoint oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
 
-         oneDoFJointFeedforward.setQ(oneDoFJoint.getqDesired());
+         oneDoFJointFeedforward.setQ(jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).getDesiredPosition());
       }
 
       feedForwardReferenceFrames.updateFrames();
@@ -842,11 +843,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 	   {
 		   OneDoFJoint oneDoFJoint = oneDoFJointsActual[i];
 		   OneDoFJoint oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
+         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
 
 //		   oneDoFJointFeedforward.setQ(oneDoFJoint.getQ());
-		   double qd = oneDoFJoint.getqDesired() - oneDoFJointFeedforward.getQ();
+		   double qd = jointDesiredOutput.getDesiredVelocity() - oneDoFJointFeedforward.getQ();
 		   oneDoFJointFeedforward.setQd(qd * 1.0 / dt);
-		   oneDoFJointFeedforward.setQ(oneDoFJoint.getqDesired());
+		   oneDoFJointFeedforward.setQ(jointDesiredOutput.getDesiredPosition());
 	   }
 
 	   FloatingInverseDynamicsJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
