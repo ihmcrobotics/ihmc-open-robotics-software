@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
@@ -16,6 +17,7 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -52,6 +54,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
    private final FrameQuaternion desiredBodyOrientation = new FrameQuaternion();
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
+   private final QuadrantDependentList<FramePoint3D> solePositions;
+
    public QuadrupedDcmBasedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
@@ -72,6 +76,8 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
       // planning
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
+
+      solePositions = controllerToolbox.getTaskSpaceEstimates().getSolePositions();
 
       parentRegistry.addChild(registry);
    }
@@ -98,10 +104,9 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       updateGains();
 
       controllerToolbox.update();
-      QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // update ground plane estimate
-      groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
+      groundPlaneEstimator.compute(solePositions);
 
       // update desired dcm, com position
       balanceManager.compute(taskSpaceControllerCommands.getComForce(), taskSpaceControllerSettings);
@@ -124,12 +129,12 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
       QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // update ground plane estimate
-      groundPlaneEstimator.compute(taskSpaceEstimates.getSolePosition());
+      groundPlaneEstimator.compute(solePositions);
 
       // initialize feedback controllers
-      balanceManager.initialize(taskSpaceEstimates);
+      balanceManager.initialize(taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity());
 
-      bodyOrientationManager.initialize(taskSpaceEstimates);
+      bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
 
       feetManager.requestFullContact();
 
