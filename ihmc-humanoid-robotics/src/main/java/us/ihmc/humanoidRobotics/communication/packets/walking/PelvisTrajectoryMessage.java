@@ -19,7 +19,7 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage>
    public boolean enableUserPelvisControl = false;
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The position/orientation trajectory information.")
-   public SE3TrajectoryMessage se3Trajectory;
+   public SE3TrajectoryMessage se3Trajectory = new SE3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization.

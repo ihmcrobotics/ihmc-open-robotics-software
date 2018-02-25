@@ -15,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage>
 {
    @RosExportedField(documentation = "Trajectories for each joint.")
-   public JointspaceTrajectoryMessage jointspaceTrajectory;
+   public JointspaceTrajectoryMessage jointspaceTrajectory = new JointspaceTrajectoryMessage();
 
    /**
     * Empty constructor for serialization.
