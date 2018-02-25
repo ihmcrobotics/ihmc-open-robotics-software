@@ -19,6 +19,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -71,6 +72,73 @@ public class PacketCodeQualityTest
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = Integer.MAX_VALUE)
+   public void testNoFieldsAreNullAfterPacketCreation()
+   { // This test won't fail on Arrays or Lists
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      allPacketTypes.removeAll(reaInternalComms);
+      allPacketTypes.remove(MessageOfMessages.class);
+
+      Set<Class<? extends Packet>> packetTypesWithNullFields = new TreeSet<>((o1, o2) -> o1.getSimpleName().compareTo(o2.getSimpleName()));
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            Packet packetInstance = packetType.newInstance();
+            if (!areAllObjectFieldsNonNull(packetInstance))
+            {
+               packetTypesWithNullFields.add(packetType);
+            }
+         }
+         catch (Exception e)
+         {
+            PrintTools.error("Problem with packet: " + packetType.getSimpleName());
+            e.printStackTrace();
+         }
+      }
+
+      if (verbose)
+      {
+         if (!packetTypesWithNullFields.isEmpty())
+         {
+            System.out.println();
+            System.out.println();
+            PrintTools.error("List of packet with null fields:");
+            packetTypesWithNullFields.forEach(type -> PrintTools.error(type.getSimpleName()));
+         }
+      }
+
+      assertTrue("Found illegal field types in Packet sub-types.", packetTypesWithNullFields.isEmpty());
+   }
+
+   private static boolean areAllObjectFieldsNonNull(Object object) throws IllegalArgumentException, IllegalAccessException
+   {
+      Field[] fields = object.getClass().getDeclaredFields();
+      for (Field field : fields)
+      {
+         if (Modifier.isStatic(field.getModifiers()))
+            continue;
+
+         if (field.getType().isPrimitive())
+            continue;
+         if (field.get(object) == null)
+            return false;
+         if (thirdPartySerializableClasses.contains(field.getType()))
+            continue;
+         if (allowedEuclidTypes.contains(field.getType()))
+            continue;
+         if (!areAllObjectFieldsNonNull(field.get(object)))
+            return false;
+      }
+      return true;
+   }
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testPacketsHaveNoConvenienceMethod()
    { // This test won't fail for setUniqueId(long) or validateMessage()
       boolean verbose = true;
@@ -80,7 +148,8 @@ public class PacketCodeQualityTest
       allPacketTypes.removeAll(reaInternalComms);
       allPacketTypes.remove(MessageOfMessages.class);
 
-      Map<Class<? extends Packet>, List<Method>> packetTypesWithConvenienceMethods = new TreeMap<>((o1, o2) -> o1.getSimpleName().compareTo(o2.getSimpleName()));
+      Map<Class<? extends Packet>, List<Method>> packetTypesWithConvenienceMethods = new TreeMap<>((o1, o2) -> o1.getSimpleName()
+                                                                                                                 .compareTo(o2.getSimpleName()));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
@@ -111,7 +180,8 @@ public class PacketCodeQualityTest
                   continue;
                if (methodName.equals("validateMessage") && method.getParameterCount() == 0 && method.getReturnType() == String.class)
                   continue;
-               if (methodName.equals("setUniqueId") && method.getParameterCount() == 1 && method.getReturnType() == void.class && method.getParameterTypes()[0] == long.class)
+               if (methodName.equals("setUniqueId") && method.getParameterCount() == 1 && method.getReturnType() == void.class
+                     && method.getParameterTypes()[0] == long.class)
                   continue;
                if (methodName.equals("epsilonEquals") && method.getParameterCount() == 2 && method.getReturnType() == boolean.class)
                {
@@ -142,7 +212,7 @@ public class PacketCodeQualityTest
 
                if (setterNames.containsKey(methodName))
                { // Allowing setters with argument being a super-type of the field.
-                  if (method.getParameterCount() == 1 &&  method.getParameterTypes()[0].isAssignableFrom(setterNames.get(methodName)))
+                  if (method.getParameterCount() == 1 && method.getParameterTypes()[0].isAssignableFrom(setterNames.get(methodName)))
                   {
                      if (method.getReturnType() == void.class)
                         continue; // The method is an acceptable setter.
