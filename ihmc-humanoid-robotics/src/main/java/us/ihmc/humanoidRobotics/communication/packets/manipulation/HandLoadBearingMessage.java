@@ -19,12 +19,12 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
     * The jointspace arm trajectory message that will be used for the hybrid control if
     * {@link #useJointspaceCommand} is true.
     */
-   public JointspaceTrajectoryMessage jointspaceTrajectory;
+   public JointspaceTrajectoryMessage jointspaceTrajectory = new JointspaceTrajectoryMessage();
 
    /** the time to delay this command on the controller side before being executed **/
    public double executionDelayTime;
 
-   public LoadBearingMessage loadBearingMessage;
+   public LoadBearingMessage loadBearingMessage = new LoadBearingMessage();
 
    public HandLoadBearingMessage()
    {

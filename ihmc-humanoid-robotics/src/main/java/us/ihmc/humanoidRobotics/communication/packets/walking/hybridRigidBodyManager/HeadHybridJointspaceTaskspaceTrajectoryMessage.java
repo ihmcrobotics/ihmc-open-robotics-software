@@ -13,9 +13,9 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadHybridJointspaceTaskspaceTrajectoryMessage>
 {
    @RosExportedField(documentation = "The taskspace trajectory information.")
-   public SO3TrajectoryMessage taskspaceTrajectoryMessage;
+   public SO3TrajectoryMessage taskspaceTrajectoryMessage = new SO3TrajectoryMessage();
    @RosExportedField(documentation = "The jointspace trajectory information.")
-   public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
+   public JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
 
    /**
     * Empty constructor for serialization.

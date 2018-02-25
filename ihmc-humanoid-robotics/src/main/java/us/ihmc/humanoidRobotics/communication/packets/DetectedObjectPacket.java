@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 
 public class DetectedObjectPacket extends Packet<DetectedObjectPacket>
 {
-   public Pose3D pose;
+   public Pose3D pose = new Pose3D();
    public int id;
 
    public DetectedObjectPacket()
@@ -15,7 +15,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket>
    @Override
    public void set(DetectedObjectPacket other)
    {
-      pose = new Pose3D(other.pose);
+      pose.set(other.pose);
       id = other.id;
       setPacketInformation(other);
    }
