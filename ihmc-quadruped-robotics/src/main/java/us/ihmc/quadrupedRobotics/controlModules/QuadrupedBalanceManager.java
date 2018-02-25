@@ -83,6 +83,7 @@ public class QuadrupedBalanceManager
    private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
    private final RecyclingArrayList<QuadrupedStep> adjustedActiveSteps;
 
+   private final QuadrantDependentList<FramePoint3D> currentSolePositions;
    private final FramePoint3D tempPoint = new FramePoint3D();
 
    public QuadrupedBalanceManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
@@ -101,6 +102,7 @@ public class QuadrupedBalanceManager
       piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
+      currentSolePositions = controllerToolbox.getTaskSpaceEstimates().getSolePositions();
 
       supportFrame = controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
 
@@ -143,17 +145,17 @@ public class QuadrupedBalanceManager
          addStepToSequence(steps.get(i));
    }
 
-   public void initialize(QuadrupedTaskSpaceEstimates taskSpaceEstimates)
+   public void initialize(FramePoint3D comPosition, FrameVector3D comVelocity)
    {
       // update model
       linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
 
       // update dcm estimate
-      dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
+      dcmPositionEstimator.compute(dcmPositionEstimate, comVelocity);
 
       dcmPositionController.initializeSetpoint(dcmPositionEstimate);
       dcmPositionController.reset();
-      comPositionControllerSetpoints.initialize(taskSpaceEstimates);
+      comPositionControllerSetpoints.initialize(comPosition);
       comPositionController.reset();
 
       // initialize timed contact sequence
@@ -162,13 +164,13 @@ public class QuadrupedBalanceManager
       accumulatedStepAdjustment.setToZero();
    }
 
-   public void initializeDcmSetpoints(QuadrupedTaskSpaceEstimates taskSpaceEstimates, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   public void initializeDcmSetpoints(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
       double currentTime = robotTimestamp.getDoubleValue();
       if (!stepSequence.isEmpty() && stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime)
       {
          // compute dcm trajectory
-         computeDcmTrajectory(taskSpaceEstimates, taskSpaceControllerSettings);
+         computeDcmTrajectory(taskSpaceControllerSettings);
          double transitionEndTime = piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(1);
          double transitionStartTime = Math.max(currentTime, transitionEndTime - initialTransitionDurationParameter.get());
          dcmTrajectory.computeTrajectory(transitionEndTime);
@@ -178,15 +180,14 @@ public class QuadrupedBalanceManager
       }
    }
 
-   private void computeDcmTrajectory(QuadrupedTaskSpaceEstimates taskSpaceEstimates, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   private void computeDcmTrajectory(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
       if (!stepSequence.isEmpty())
       {
          // compute piecewise constant center of pressure plan
          double currentTime = robotTimestamp.getDoubleValue();
-         QuadrantDependentList<FramePoint3D> currentSolePosition = taskSpaceEstimates.getSolePosition();
          QuadrantDependentList<ContactState> currentContactState = taskSpaceControllerSettings.getContactState();
-         timedContactSequence.update(stepSequence, currentSolePosition, currentContactState, currentTime);
+         timedContactSequence.update(stepSequence, currentSolePositions, currentContactState, currentTime);
          piecewiseConstanceCopTrajectory.initializeTrajectory(timedContactSequence);
 
          // compute dcm trajectory with final boundary constraint
@@ -239,7 +240,7 @@ public class QuadrupedBalanceManager
       // update dcm estimate
       dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
 
-      computeDcmTrajectory(taskSpaceEstimates, taskSpaceControllerSettings);
+      computeDcmTrajectory(taskSpaceControllerSettings);
 
       // update desired horizontal com forces
       computeDcmSetpoints();
@@ -299,7 +300,7 @@ public class QuadrupedBalanceManager
             activeStep.getGoalPosition(tempPoint);
             tempPoint.changeFrame(worldFrame);
             tempPoint.add(instantaneousStepAdjustment);
-            crossoverProjection.project(tempPoint, controllerToolbox.getTaskSpaceEstimates().getSolePosition(), robotQuadrant);
+            crossoverProjection.project(tempPoint, currentSolePositions, robotQuadrant);
             groundPlaneEstimator.projectZ(tempPoint);
             adjustedStep.setGoalPosition(tempPoint);
          }

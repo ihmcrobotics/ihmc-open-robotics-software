@@ -300,7 +300,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // solve for step adjustment and cmp position
-      mpcOptimization.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getStepSequence(), taskSpaceEstimates.getSolePosition(),
+      mpcOptimization.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getStepSequence(), taskSpaceEstimates.getSolePositions(),
             taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity(), currentTime, mpcSettings);
 
       // adjust goal positions in step controller queue
@@ -313,7 +313,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
          stepGoalPosition.add(stepAdjustmentVector);
          if (step.getTimeInterval().getStartTime() <= currentTime)
          {
-            crossoverProjection.project(stepGoalPosition, taskSpaceEstimates.getSolePosition(), step.getRobotQuadrant());
+            crossoverProjection.project(stepGoalPosition, taskSpaceEstimates.getSolePositions(), step.getRobotQuadrant());
          }
          groundPlaneEstimator.projectZ(stepGoalPosition);
          step.setGoalPosition(stepGoalPosition);
@@ -354,9 +354,9 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       supportCentroid.setToZero(supportFrame);
 
       // initialize feedback controllers
-      comPositionControllerSetpoints.initialize(taskSpaceEstimates);
+      comPositionControllerSetpoints.initialize(taskSpaceEstimates.getComPosition());
       comPositionController.reset();
-      bodyOrientationManager.initialize(taskSpaceEstimates);
+      bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
       timedStepController.reset();
       timedStepController.registerStepTransitionCallback(this);
 

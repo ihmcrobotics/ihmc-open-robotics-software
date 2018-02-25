@@ -6,7 +6,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedBodyOrientationController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -62,9 +61,9 @@ public class QuadrupedBodyOrientationManager
       gains.setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
    }
 
-   public void initialize(QuadrupedTaskSpaceEstimates taskSpaceEstimates)
+   public void initialize(FrameQuaternionReadOnly bodyOrientationEstimate)
    {
-      setpoints.initialize(taskSpaceEstimates);
+      setpoints.initialize(bodyOrientationEstimate);
       controller.reset();
    }
 

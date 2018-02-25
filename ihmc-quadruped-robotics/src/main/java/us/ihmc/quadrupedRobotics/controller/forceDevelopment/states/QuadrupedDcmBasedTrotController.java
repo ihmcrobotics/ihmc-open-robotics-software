@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 
-import com.sun.glass.ui.Robot;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -247,12 +246,12 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
       dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
 
-      comPositionControllerSetpoints.initialize(taskSpaceEstimates);
+      comPositionControllerSetpoints.initialize(taskSpaceEstimates.getComPosition());
       comPositionController.reset();
       comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
       comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
       comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
-      bodyOrientationManager.initialize(taskSpaceEstimates);
+      bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
       timedStepController.reset();
 
       // initialize task space controller

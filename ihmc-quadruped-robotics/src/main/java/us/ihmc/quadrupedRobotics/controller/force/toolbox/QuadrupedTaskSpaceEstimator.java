@@ -22,8 +22,8 @@ import us.ihmc.robotics.screwTheory.Twist;
 
 public class QuadrupedTaskSpaceEstimator
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final QuadrupedReferenceFrames referenceFrames;
-   private final ReferenceFrame worldFrame;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame comFrame;
    private final QuadrantDependentList<ReferenceFrame> soleFrames;
@@ -55,7 +55,6 @@ public class QuadrupedTaskSpaceEstimator
       this.referenceFrames = referenceFrames;
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       bodyFrame = referenceFrames.getBodyFrame();
-      worldFrame = referenceFrames.getWorldFrame();
       soleFrames = referenceFrames.getFootReferenceFrames();
       pelvisRigidBody = fullRobotModel.getPelvis();
       footRigidBody = new QuadrantDependentList<>();
@@ -120,7 +119,7 @@ public class QuadrupedTaskSpaceEstimator
          twistStorage.getAngularPart(estimates.getSoleAngularVelocity().get(robotQuadrant));
          twistStorage.getLinearPart(estimates.getSoleLinearVelocity().get(robotQuadrant));
          estimates.getSoleOrientation().get(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
-         estimates.getSolePosition().get(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
+         estimates.getSolePosition(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
          estimates.getSoleVirtualForce().get(robotQuadrant).setIncludingFrame(soleForceEstimator.getSoleVirtualForce(robotQuadrant));
          estimates.getSoleContactForce().get(robotQuadrant).setIncludingFrame(soleForceEstimator.getSoleContactForce(robotQuadrant));
       }
@@ -149,7 +148,7 @@ public class QuadrupedTaskSpaceEstimator
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          yoSoleOrientationEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleOrientation().get(robotQuadrant));
-         yoSolePositionEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSolePosition().get(robotQuadrant));
+         yoSolePositionEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSolePosition(robotQuadrant));
          yoSoleAngularVelocityEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleAngularVelocity().get(robotQuadrant));
          yoSoleLinearVelocityEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleLinearVelocity().get(robotQuadrant));
       }
