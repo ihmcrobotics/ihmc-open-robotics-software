@@ -480,7 +480,7 @@ public class MessageTools
    {
       destination.clear();
 
-      if (source == null || source.size() == 0)
+      if (source == null || source.isEmpty())
          return;
 
       T firstElement = destination.add();
@@ -655,25 +655,5 @@ public class MessageTools
             return false;
       }
       return true;
-   }
-
-   /**
-    * @deprecated Should use {@code PreallocatedList.remove(int)} as soon as available.
-    */
-   public static <T extends Settable<T>> void removeElement(PreallocatedList<T> listToRemoveElementFrom, int indexOfElementToRemove)
-   {
-      if (listToRemoveElementFrom.size() == 0)
-         return;
-      if (indexOfElementToRemove == listToRemoveElementFrom.size() - 1)
-      {
-         listToRemoveElementFrom.remove();
-         return;
-      }
-
-      while (indexOfElementToRemove < listToRemoveElementFrom.size() - 1)
-      {
-         listToRemoveElementFrom.get(indexOfElementToRemove).set(listToRemoveElementFrom.get(++indexOfElementToRemove));
-      }
-      listToRemoveElementFrom.remove();
    }
 }

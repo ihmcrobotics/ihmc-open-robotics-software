@@ -446,7 +446,7 @@ public class DesiredFootstepTest
             Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable);
 
             PreallocatedList<Point2D> contactPoints = footstepData.getPredictedContactPoints();
-            if (contactPoints != null && contactPoints.size() == 0)
+            if (contactPoints != null && contactPoints.isEmpty())
                footstep.setPredictedContactPoints((Point2DReadOnly[]) null);
             else
                footstep.setPredictedContactPoints(contactPoints.toArray());

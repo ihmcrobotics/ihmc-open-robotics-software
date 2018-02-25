@@ -189,7 +189,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
 
    public final SO3TrajectoryPointMessage getLastTrajectoryPoint()
    {
-      return taskspaceTrajectoryPoints.get(taskspaceTrajectoryPoints.size() - 1);
+      return taskspaceTrajectoryPoints.getLast();
    }
 
    public final double getTrajectoryTime()

@@ -89,7 +89,7 @@ public class FootstepTestHelper
       RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
       FramePose3D solePose = new FramePose3D(worldFrame, footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
       Footstep footstep = new Footstep(robotSide, solePose);
-      if (footstepDataMessage.getPredictedContactPoints() != null && footstepDataMessage.getPredictedContactPoints().size() != 0)
+      if (footstepDataMessage.getPredictedContactPoints() != null && !footstepDataMessage.getPredictedContactPoints().isEmpty())
          footstep.setPredictedContactPoints(footstepDataMessage.getPredictedContactPoints().toArray());
       else
          footstep.setPredictedContactPoints(contactableFeet.get(robotSide).getContactPoints2d());

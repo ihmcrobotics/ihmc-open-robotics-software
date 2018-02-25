@@ -163,7 +163,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
 
    private void visualizePlan(FootstepPathPlanPacket plan)
    {
-      if (plan.pathPlan == null || plan.pathPlan.size() == 0)
+      if (plan.pathPlan == null || plan.pathPlan.isEmpty())
          return;
       int size = plan.pathPlan.size();
       SnapFootstepPacket planVisualizationPacket = new SnapFootstepPacket();
@@ -191,7 +191,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
       }
       while (plan.pathPlan.size() > 0 && !approximatelyEqual(plan.pathPlan.get(0), predictedLocation))
       {
-         MessageTools.removeElement(plan.pathPlan, 0);
+         plan.pathPlan.remove(0);
          plan.footstepUnknown.removeAt(0);
       }
       if (plan.pathPlan.size() < 2)
@@ -263,7 +263,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
    private void takeStep()
    {
       //remove current location from plan, element 1 is next step
-      MessageTools.removeElement(currentPlan.pathPlan, 0);
+      currentPlan.pathPlan.remove(0);
       currentPlan.footstepUnknown.removeAt(0);
       //element 1 is now element 0
       if (currentPlan.footstepUnknown.get(0) == 1 && !executeUnknownFirstStep.getBooleanValue())
@@ -347,7 +347,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
          }
          debugPrintln("Step Added To Send: " + outgoingFootsteps.footstepDataList.get(i));
          if (outgoingFootsteps.footstepDataList.get(i).predictedContactPoints != null
-               && outgoingFootsteps.footstepDataList.get(i).predictedContactPoints.size() == 0)
+               && outgoingFootsteps.footstepDataList.get(i).predictedContactPoints.isEmpty())
          {
             debugPrintln("Support Points are: " + outgoingFootsteps.footstepDataList.get(i).predictedContactPoints.toString());
             throw new RuntimeException("attempting to send footstep with empty list of support points");

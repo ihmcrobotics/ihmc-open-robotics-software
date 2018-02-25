@@ -90,15 +90,15 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
    public boolean isInDoubleSupport()
    {
-      return leftFootSupportPolygon.size() != 0 & rightFootSupportPolygon.size() != 0;
+      return !leftFootSupportPolygon.isEmpty() && !rightFootSupportPolygon.isEmpty();
    }
 
    public boolean isSupportFoot(RobotSide robotside)
    {
       if (robotside == RobotSide.LEFT)
-         return leftFootSupportPolygon.size() != 0;
+         return !leftFootSupportPolygon.isEmpty();
       else
-         return rightFootSupportPolygon.size() != 0;
+         return !rightFootSupportPolygon.isEmpty();
    }
 
    @Override

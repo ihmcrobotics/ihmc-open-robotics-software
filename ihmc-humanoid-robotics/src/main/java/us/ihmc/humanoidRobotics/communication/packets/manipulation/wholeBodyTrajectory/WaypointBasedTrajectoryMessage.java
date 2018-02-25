@@ -278,7 +278,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
          return waypoints.get(0);
 
       else if (time >= waypointTimes.get(waypointTimes.size() - 1))
-         return waypoints.get(waypoints.size() - 1);
+         return waypoints.getLast();
 
       else
       {

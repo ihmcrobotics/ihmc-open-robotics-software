@@ -104,7 +104,7 @@ public class HeightQuadTreeMessageConverter
       heightQuadTree.setSizeX(messageToConvert.sizeX);
       heightQuadTree.setSizeY(messageToConvert.sizeY);
 
-      if (messageToConvert.leaves.size() == 0)
+      if (messageToConvert.leaves.isEmpty())
          return heightQuadTree;
 
       HeightQuadTreeNode root = new HeightQuadTreeNode();
