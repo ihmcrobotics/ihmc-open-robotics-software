@@ -25,6 +25,7 @@ import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverse
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -106,9 +107,12 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final FramePoint3D desiredFootPosition = new FramePoint3D(worldFrame);
    private final FramePoint3D desiredFootPositionInLegAttachmentFrame = new FramePoint3D();
 
+   private final JointDesiredOutputList jointDesiredOutputList;
+
    public QuadrupedPositionBasedCenterOfMassVerificationController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, YoVariableRegistry parentRegistry)
    {
       //Set Initial Values
+      this.jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
       this.swingTime.set(2.0);
       this.footZHeightOnPickUp.set(0.04);
       this.footZHeightOnTouchdown.set(0.0);
@@ -708,7 +712,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
             double alpha = filterStandPrepDesiredsToWalkingDesireds.getDoubleValue();
 
             double alphaFilteredQ = (1.0 - alpha) * intialOneDoFJoint.getqDesired() + alpha * actualOneDoFJoint.getqDesired();
-            actualOneDoFJoint.setqDesired(alphaFilteredQ);
+            jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).setDesiredPosition(alphaFilteredQ);
          }
       }
 
@@ -733,7 +737,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJoints[i];
             OneDoFJoint initialOneDofJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(actualOneDoFJoint.getName());
-            initialOneDofJoint.setqDesired(actualOneDoFJoint.getqDesired());
+            initialOneDofJoint.setqDesired(jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).getDesiredPosition());
          }
       }
 
