@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -10,14 +11,14 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final RobotQuadrant robotQuadrant;
    private final YoBoolean stepCommandIsValid;
    private final YoDouble timestamp;
-   private final YoQuadrupedTimedStep stepCommand;
+   private final YoQuadrupedTimedStep currentStepCommand;
 
    public QuadrupedSupportState(RobotQuadrant robotQuadrant, YoBoolean stepCommandIsValid, YoDouble timestamp, YoQuadrupedTimedStep stepCommand)
    {
       this.robotQuadrant = robotQuadrant;
       this.stepCommandIsValid = stepCommandIsValid;
       this.timestamp = timestamp;
-      this.stepCommand = stepCommand;
+      this.currentStepCommand = stepCommand;
    }
 
    @Override
@@ -28,21 +29,14 @@ public class QuadrupedSupportState extends QuadrupedFootState
    @Override
    public QuadrupedFootControlModule.FootEvent process()
    {
-      if (stepCommandIsValid.getBooleanValue())
+      // trigger swing phase
+      if (stepCommandIsValid.getBooleanValue() && currentStepCommand.getTimeInterval().intervalContains(timestamp.getDoubleValue()))
       {
-         double currentTime = timestamp.getDoubleValue();
-         double liftOffTime = stepCommand.getTimeInterval().getStartTime();
-         double touchDownTime = stepCommand.getTimeInterval().getEndTime();
-
-         // trigger swing phase
-         if (currentTime >= liftOffTime && currentTime < touchDownTime)
+         if (stepTransitionCallback != null)
          {
-            if (stepTransitionCallback != null)
-            {
-               stepTransitionCallback.onLiftOff(robotQuadrant);
-            }
-            return QuadrupedFootControlModule.FootEvent.TIMEOUT;
+            stepTransitionCallback.onLiftOff(robotQuadrant);
          }
+         return QuadrupedFootControlModule.FootEvent.TIMEOUT;
       }
 
       return null;

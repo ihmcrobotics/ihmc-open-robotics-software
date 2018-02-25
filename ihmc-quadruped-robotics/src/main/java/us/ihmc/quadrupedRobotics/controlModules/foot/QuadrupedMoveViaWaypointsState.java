@@ -39,15 +39,15 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
    private double taskStartTime;
 
-   public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox toolbox,
+   public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,
                                          QuadrupedSolePositionController solePositionController, YoVariableRegistry parentRegistry)
    {
       this.robotQuadrant = robotQuadrant;
-      this.controllerToolbox = toolbox;
-      this.bodyFrame = toolbox.getReferenceFrames().getBodyFrame();
-      this.soleFrame = toolbox.getSoleReferenceFrame(robotQuadrant);
-      this.parameters = toolbox.getFootControlModuleParameters();
-      robotTime = toolbox.getRuntimeEnvironment().getRobotTimestamp();
+      this.controllerToolbox = controllerToolbox;
+      this.bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
+      this.soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
+      this.parameters = controllerToolbox.getFootControlModuleParameters();
+      robotTime = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
       // Feedback controller
       this.solePositionController = solePositionController;

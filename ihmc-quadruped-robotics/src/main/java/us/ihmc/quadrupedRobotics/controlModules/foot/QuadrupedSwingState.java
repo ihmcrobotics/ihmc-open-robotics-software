@@ -29,7 +29,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private final YoBoolean stepCommandIsValid;
    private final YoDouble timestamp;
-   private final YoQuadrupedTimedStep stepCommand;
+   private final YoQuadrupedTimedStep currentStepCommand;
 
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
@@ -38,20 +38,20 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private final ReferenceFrame soleFrame;
 
-   public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox toolbox, QuadrupedSolePositionController solePositionController,
-                              YoBoolean stepCommandIsValid, YoQuadrupedTimedStep stepCommand, YoVariableRegistry registry)
+   public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, QuadrupedSolePositionController solePositionController,
+                              YoBoolean stepCommandIsValid, YoQuadrupedTimedStep currentStepCommand, YoVariableRegistry registry)
    {
       this.robotQuadrant = robotQuadrant;
-      this.controllerToolbox = toolbox;
+      this.controllerToolbox = controllerToolbox;
       this.solePositionController = solePositionController;
       this.stepCommandIsValid = stepCommandIsValid;
-      this.timestamp = toolbox.getRuntimeEnvironment().getRobotTimestamp();
-      this.stepCommand = stepCommand;
+      this.timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
+      this.currentStepCommand = currentStepCommand;
 
-      this.parameters = toolbox.getFootControlModuleParameters();
+      this.parameters = controllerToolbox.getFootControlModuleParameters();
       this.solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
-      soleFrame = toolbox.getReferenceFrames().getFootFrame(robotQuadrant);
+      soleFrame = controllerToolbox.getReferenceFrames().getFootFrame(robotQuadrant);
 
       this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
       this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
@@ -62,13 +62,13 @@ public class QuadrupedSwingState extends QuadrupedFootState
    public void onEntry()
    {
       // initialize swing trajectory
-      double groundClearance = stepCommand.getGroundClearance();
-      TimeInterval timeInterval = stepCommand.getTimeInterval();
+      double groundClearance = currentStepCommand.getGroundClearance();
+      TimeInterval timeInterval = currentStepCommand.getTimeInterval();
 
       initialPosition.setToZero(soleFrame);
       initialPosition.changeFrame(worldFrame);
 
-      stepCommand.getGoalPosition(goalPosition);
+      currentStepCommand.getGoalPosition(goalPosition);
       goalPosition.changeFrame(worldFrame);
       goalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
 
@@ -89,10 +89,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
    public QuadrupedFootControlModule.FootEvent process()
    {
       double currentTime = timestamp.getDoubleValue();
-      double touchDownTime = stepCommand.getTimeInterval().getEndTime();
+      double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
 
       // Compute current goal position.
-      stepCommand.getGoalPosition(goalPosition);
+      currentStepCommand.getGoalPosition(goalPosition);
       goalPosition.changeFrame(worldFrame);
       goalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
 
@@ -104,12 +104,12 @@ public class QuadrupedSwingState extends QuadrupedFootState
       swingTrajectory.computeTrajectory(currentTime);
       swingTrajectory.getPosition(solePositionControllerSetpoints.getSolePosition());
 
-      // Detect early touch-down.
+      // Detect early touch-down. // FIXME do something else with this (trigger a loaded transition?)
       FrameVector3D soleForceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
       soleForceEstimate.changeFrame(worldFrame);
       double pressureEstimate = -soleForceEstimate.getZ();
-      double relativeTimeInSwing = currentTime - stepCommand.getTimeInterval().getStartTime();
-      double normalizedTimeInSwing = relativeTimeInSwing / stepCommand.getTimeInterval().getDuration();
+      double relativeTimeInSwing = currentTime - currentStepCommand.getTimeInterval().getStartTime();
+      double normalizedTimeInSwing = relativeTimeInSwing / currentStepCommand.getTimeInterval().getDuration();
       if (normalizedTimeInSwing > 0.5)
       {
          touchdownTrigger.update(pressureEstimate > parameters.getTouchdownPressureLimitParameter());
