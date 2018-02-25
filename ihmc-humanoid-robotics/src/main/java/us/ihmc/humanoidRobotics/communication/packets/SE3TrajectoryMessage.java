@@ -235,7 +235,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
 
    public final SE3TrajectoryPointMessage getLastTrajectoryPoint()
    {
-      return taskspaceTrajectoryPoints.get(taskspaceTrajectoryPoints.size() - 1);
+      return taskspaceTrajectoryPoints.getLast();
    }
 
    public final double getTrajectoryTime()

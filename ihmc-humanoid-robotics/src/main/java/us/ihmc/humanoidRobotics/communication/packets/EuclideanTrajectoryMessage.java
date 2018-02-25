@@ -214,7 +214,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
 
    public final EuclideanTrajectoryPointMessage getLastTrajectoryPoint()
    {
-      return taskspaceTrajectoryPoints.get(taskspaceTrajectoryPoints.size() - 1);
+      return taskspaceTrajectoryPoints.getLast();
    }
 
    public final double getTrajectoryTime()

@@ -81,7 +81,7 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
    public KinematicsToolboxOutputStatus getLastRobotConfiguration()
    {
-      return robotConfigurations.get(robotConfigurations.size() - 1);
+      return robotConfigurations.getLast();
    }
 
    @Override
