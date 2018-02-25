@@ -12,14 +12,8 @@ import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedDcmBasedStandController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedDoNothingController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFallController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedJointInitializationController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedSoleWaypointController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedStepController;
+import us.ihmc.quadrupedRobotics.controller.force.states.*;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedStandController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
@@ -285,7 +279,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       final QuadrupedController doNothingController = new QuadrupedForceBasedDoNothingController(runtimeEnvironment, registry);
       final QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedController freezeController = new QuadrupedForceBasedFreezeController(controllerToolbox, controlManagerFactory, registry);
-      final QuadrupedController standController = new QuadrupedDcmBasedStandController(controllerToolbox, controlManagerFactory, registry);
+      final QuadrupedController standController = new QuadrupedStandController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, stepStreamMultiplexer, registry);
       final QuadrupedController fallController = new QuadrupedForceBasedFallController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(controllerToolbox, controlManagerFactory,

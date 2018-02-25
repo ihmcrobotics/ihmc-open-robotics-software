@@ -21,7 +21,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class QuadrupedDcmBasedStandController implements QuadrupedController
+public class QuadrupedStandController implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -56,7 +56,7 @@ public class QuadrupedDcmBasedStandController implements QuadrupedController
 
    private final QuadrantDependentList<FramePoint3D> solePositions;
 
-   public QuadrupedDcmBasedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
+   public QuadrupedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
 
