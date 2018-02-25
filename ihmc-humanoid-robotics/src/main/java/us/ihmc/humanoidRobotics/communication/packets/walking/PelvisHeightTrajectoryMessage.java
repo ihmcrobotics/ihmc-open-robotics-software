@@ -19,7 +19,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
          + " will keep the height manager in user mode while walking. If this is false the height manager will switch to controller mode when walking.")
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The position trajectory information.")
-   public EuclideanTrajectoryMessage euclideanTrajectory;
+   public EuclideanTrajectoryMessage euclideanTrajectory = new EuclideanTrajectoryMessage();
 
    /**
     * Empty constructor for serialization. Set the id of the message to

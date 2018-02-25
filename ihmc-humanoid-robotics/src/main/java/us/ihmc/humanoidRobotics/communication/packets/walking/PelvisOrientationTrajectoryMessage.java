@@ -16,7 +16,7 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
    @RosExportedField(documentation = "Whether the pelvis orientation is allowed to controlled by the user when the robot is walking.")
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The orientation trajectory information.")
-   public SO3TrajectoryMessage so3Trajectory;
+   public SO3TrajectoryMessage so3Trajectory = new SO3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization. Set the id of the message to

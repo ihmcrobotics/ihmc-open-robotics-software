@@ -22,7 +22,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public byte robotSide;
    @RosExportedField(documentation = "Trajectories for each joint.")
-   public JointspaceTrajectoryMessage jointspaceTrajectory;
+   public JointspaceTrajectoryMessage jointspaceTrajectory = new JointspaceTrajectoryMessage();
 
    /**
     * Empty constructor for serialization.
