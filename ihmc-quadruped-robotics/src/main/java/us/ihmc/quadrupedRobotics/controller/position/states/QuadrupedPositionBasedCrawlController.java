@@ -3,6 +3,11 @@ package us.ihmc.quadrupedRobotics.controller.position.states;
 import java.awt.Color;
 import java.util.Random;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.map.TDoubleCharMap;
+import gnu.trove.map.TDoubleObjectMap;
+import gnu.trove.map.hash.TCharDoubleHashMap;
+import gnu.trove.map.hash.TDoubleCharHashMap;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -47,6 +52,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -737,7 +743,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       if(walkingStateMachine.isCurrentState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS))
       {
-         filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds(oneDoFJointsActual);
+         filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds();
       }
 
       updateFeedForwardModelAndFrames();
@@ -1341,29 +1347,27 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
    private class FilterDesiredsToMatchCrawlControllerState extends State<CrawlGateWalkingState>
    {
-      private final FullRobotModel initialDesiredsUponEnteringFullRobotModel;
-
       private final MinimumJerkTrajectory minimumJerkTrajectory = new MinimumJerkTrajectory();
+      private final TDoubleArrayList initialPositions = new TDoubleArrayList();
 
       public FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState stateEnum, QuadrupedModelFactory robotParameters)
       {
          super(stateEnum);
-
-         initialDesiredsUponEnteringFullRobotModel = robotParameters.createFullRobotModel();
       }
 
-      public void filterDesireds(OneDoFJoint[] oneDoFJointsActual)
+      public void filterDesireds()
       {
          for(int i = 0; i < oneDoFJointsActual.length; i++)
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
             String jointName = actualOneDoFJoint.getName();
 
-            OneDoFJoint intialOneDoFJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(jointName);
+            double initialPosition = initialPositions.get(i);
 
             double alpha = minimumJerkTrajectory.getPosition(); //filterStandPrepDesiredsToWalkingDesireds.getDoubleValue();
 
-            double alphaFilteredQ = (1.0 - alpha) * intialOneDoFJoint.getqDesired() + alpha * actualOneDoFJoint.getqDesired();
+            double alphaFilteredQ = (1.0 - alpha) * initialPosition + alpha * jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).getDesiredPosition();
+
             jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).setDesiredPosition(alphaFilteredQ);
          }
       }
@@ -1385,11 +1389,11 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          minimumJerkTrajectory.setMoveParameters(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, timeToFilterDesiredAtCrawlStart.getDoubleValue());
 
+         initialPositions.clear();
          for(int i = 0; i < oneDoFJointsActual.length; i++)
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
-            OneDoFJoint initialOneDofJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(actualOneDoFJoint.getName());
-            initialOneDofJoint.setqDesired(jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).getDesiredPosition());
+            initialPositions.add(jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).getDesiredPosition());
          }
       }
 
