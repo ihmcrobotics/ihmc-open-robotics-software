@@ -874,22 +874,4 @@ public abstract class PacketValidityChecker
       }
       return null;
    }
-
-   public static boolean testRobotSideConsistency(WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage)
-   {
-      if (RobotSide.fromByte(wholeBodyTrajectoryMessage.leftHandTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
-         return false;
-      if (RobotSide.fromByte(wholeBodyTrajectoryMessage.rightHandTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
-         return false;
-      if (wholeBodyTrajectoryMessage.leftArmTrajectoryMessage.getRobotSide() != RobotSide.LEFT.toByte())
-         return false;
-      if (wholeBodyTrajectoryMessage.rightArmTrajectoryMessage.getRobotSide() != RobotSide.RIGHT.toByte())
-         return false;
-      if (wholeBodyTrajectoryMessage.leftFootTrajectoryMessage.getRobotSide() != RobotSide.LEFT.toByte())
-         return false;
-      if (wholeBodyTrajectoryMessage.rightFootTrajectoryMessage.getRobotSide() != RobotSide.RIGHT.toByte())
-         return false;
-      
-      return true;
-   }
 }
