@@ -53,7 +53,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -1362,7 +1361,6 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          for(int i = 0; i < oneDoFJointsActual.length; i++)
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
-            String jointName = actualOneDoFJoint.getName();
 
             double initialPosition = initialPositions.get(i);
 
