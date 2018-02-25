@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.positionDevelopment.states;
 import java.awt.Color;
 import java.util.HashMap;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -179,7 +180,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
       //Create State Machine and States
       this.stateMachine = new StateMachine<COM_ESTIMATE_STATES>("centerOfMassVerificationStateMachine", "walkingStateTranistionTime", COM_ESTIMATE_STATES.class, runtimeEnvironment.getRobotTimestamp(), registry);
-      this.filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState(modelFactory);
+      this.filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState();
       MoveCenterOfMassAround moveCenterOfMassAroundState = new MoveCenterOfMassAround();
       MoveFeet pickFeetUp = new MoveFeet("pickFeetUp", footZHeightOnPickUp, trotPairToRaise, COM_ESTIMATE_STATES.PICK_UP_FEET);
       MoveFeet putFeetDown = new MoveFeet("putFeetDown", footZHeightOnTouchdown, trotPairInAir, COM_ESTIMATE_STATES.PUT_DOWN_FEET);
@@ -266,7 +267,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
       if (stateMachine.isCurrentState(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS))
       {
-         filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds(oneDoFJoints);
+         filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds();
       }
       return null;
    }
@@ -687,31 +688,26 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private class FilterDesiredsToMatchCrawlControllerState extends State<COM_ESTIMATE_STATES>
    {
       private final AlphaFilteredYoVariable filterStandPrepDesiredsToWalkingDesireds;
-      private final FullRobotModel initialDesiredsUponEnteringFullRobotModel;
+      private final TDoubleArrayList initialPositions = new TDoubleArrayList();
 
-      public FilterDesiredsToMatchCrawlControllerState(QuadrupedModelFactory modelFactory)
+      public FilterDesiredsToMatchCrawlControllerState()
       {
          super(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS);
-
-         initialDesiredsUponEnteringFullRobotModel = modelFactory.createFullRobotModel();
 
          double filterStandPrepDesiredsToWalkingDesiredsAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5, dt);
          filterStandPrepDesiredsToWalkingDesireds = new AlphaFilteredYoVariable("filterStandPrepDesiredsToWalkingDesireds", registry, filterStandPrepDesiredsToWalkingDesiredsAlpha);
       }
 
-      public void filterDesireds(OneDoFJoint[] oneDoFJointsActual)
+      public void filterDesireds()
       {
-         for (int i = 0; i < oneDoFJointsActual.length; i++)
+         for (int i = 0; i < oneDoFJoints.length; i++)
          {
-            OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
+            OneDoFJoint actualOneDoFJoint = oneDoFJoints[i];
             String jointName = actualOneDoFJoint.getName();
-
-            OneDoFJoint intialOneDoFJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(jointName);
-            //            OneDoFJoint desiredOneDofJoint = finalDesiredsFullRobotModel.getOneDoFJointByName(jointName);
 
             double alpha = filterStandPrepDesiredsToWalkingDesireds.getDoubleValue();
 
-            double alphaFilteredQ = (1.0 - alpha) * intialOneDoFJoint.getqDesired() + alpha * actualOneDoFJoint.getqDesired();
+            double alphaFilteredQ = (1.0 - alpha) * initialPositions.get(i) + alpha * actualOneDoFJoint.getqDesired();
             jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).setDesiredPosition(alphaFilteredQ);
          }
       }
@@ -733,11 +729,11 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          filterStandPrepDesiredsToWalkingDesireds.reset();
          filterStandPrepDesiredsToWalkingDesireds.update(0.0);
 
+         initialPositions.clear();
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJoints[i];
-            OneDoFJoint initialOneDofJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(actualOneDoFJoint.getName());
-            initialOneDofJoint.setqDesired(jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).getDesiredPosition());
+            initialPositions.add(jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).getDesiredPosition());
          }
       }
 
