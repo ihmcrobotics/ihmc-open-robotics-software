@@ -55,6 +55,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.idl.PreallocatedList;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
@@ -75,6 +76,7 @@ public class PacketCodeQualityTest
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
+      allPacketTypes.remove(MessageOfMessages.class);
 
       Map<Class<? extends Packet>, List<Class>> packetTypesWithIterableOrArrayField = new HashMap<>();
 
