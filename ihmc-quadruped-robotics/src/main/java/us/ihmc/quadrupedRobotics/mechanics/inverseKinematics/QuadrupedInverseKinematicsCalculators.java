@@ -29,7 +29,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
    private final double[] jointAnglesToPack = new double[3];
 
    private YoGraphicReferenceFrame bodyGraphicReferenceFrame, rootJointGraphicReferenceFrame;
-   private final JointDesiredOutputList jointDesiredOutputList;
+   protected final JointDesiredOutputList jointDesiredOutputList;
 
    public QuadrupedInverseKinematicsCalculators(QuadrupedModelFactory modelFactory, JointDesiredOutputList jointDesiredOutputList, QuadrupedPhysicalProperties physicalProperties,
          FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,

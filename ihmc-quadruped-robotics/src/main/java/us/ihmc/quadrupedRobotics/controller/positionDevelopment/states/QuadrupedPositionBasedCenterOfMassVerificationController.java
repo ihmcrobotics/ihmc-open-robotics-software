@@ -26,6 +26,7 @@ import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverse
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -703,12 +704,12 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJoints[i];
-            String jointName = actualOneDoFJoint.getName();
+            JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint);
 
             double alpha = filterStandPrepDesiredsToWalkingDesireds.getDoubleValue();
 
-            double alphaFilteredQ = (1.0 - alpha) * initialPositions.get(i) + alpha * actualOneDoFJoint.getqDesired();
-            jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).setDesiredPosition(alphaFilteredQ);
+            double alphaFilteredQ = (1.0 - alpha) * initialPositions.get(i) + alpha * jointDesiredOutput.getDesiredPosition();
+            jointDesiredOutput.setDesiredPosition(alphaFilteredQ);
          }
       }
 
