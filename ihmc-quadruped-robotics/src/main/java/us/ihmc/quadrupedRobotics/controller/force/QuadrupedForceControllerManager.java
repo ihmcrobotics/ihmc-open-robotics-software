@@ -72,6 +72,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final QuadrupedControlManagerFactory controlManagerFactory;
    private final OutputProcessor outputProcessor;
 
+
    private final AtomicReference<QuadrupedForceControllerRequestedEvent> requestedEvent = new AtomicReference<>();
 
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties) throws IOException
@@ -104,8 +105,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       controlManagerFactory.getOrCreateBodyOrientationManager();
 
       // Initialize output processor
-      StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment.getControlDT(),
-            runtimeEnvironment.getRobotTimestamp(), registry);
+      StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment, registry);
       FiniteStateMachineStateChangedListener stateChangedListener = stateChangeSmootherComponent.createFiniteStateMachineStateChangedListener();
       controlManagerFactory.getOrCreateFeetManager().attachStateChangedListener(stateChangedListener);
       OutputProcessorBuilder outputProcessorBuilder = new OutputProcessorBuilder(runtimeEnvironment.getFullRobotModel());

@@ -102,6 +102,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
    private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
    private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
+   private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
@@ -262,16 +263,18 @@ public class QuadrupedSimulationFactory
    {
       if (controlMode.get() == QuadrupedControlMode.POSITION || controlMode.get() == QuadrupedControlMode.POSITION_DEV)
       {
-         legInverseKinematicsCalculator = new QuadrupedInverseKinematicsCalculators(modelFactory.get(), physicalProperties.get(), fullRobotModel.get(), referenceFrames.get(),
+         legInverseKinematicsCalculator = new QuadrupedInverseKinematicsCalculators(modelFactory.get(), jointDesiredOutputList.get(), physicalProperties.get(),
+                                                                                    fullRobotModel.get(), referenceFrames.get(),
                                                                                     sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
       }
    }
 
    public void createControllerManager() throws IOException
    {
-
-      QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(), sdfRobot.get().getRobotsYoVariableRegistry(),
-                                                           yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead, globalDataProducer, footSwitches, gravity.get());
+      QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
+                                                                                       jointDesiredOutputList.get(), sdfRobot.get().getRobotsYoVariableRegistry(),
+                                                                                       yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead,
+                                                                                       globalDataProducer, footSwitches, gravity.get());
       switch (controlMode.get())
       {
       case FORCE:
@@ -471,6 +474,11 @@ public class QuadrupedSimulationFactory
    public void setControlDT(double controlDT)
    {
       this.controlDT.set(controlDT);
+   }
+
+   public void setJointDesiredOutputList(JointDesiredOutputList jointDesiredOutputList)
+   {
+      this.jointDesiredOutputList.set(jointDesiredOutputList);
    }
 
    public void setGravity(double gravity)

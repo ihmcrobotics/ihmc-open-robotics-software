@@ -4,6 +4,8 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -15,6 +17,7 @@ public class QuadrupedPositionJointInitializationController implements Quadruped
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedPositionJointInitializationController.class.getSimpleName());
    private final FullRobotModel fullRobotModel;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
    /**
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the {@link FullRobotModel#getOneDoFJoints()}
@@ -25,6 +28,7 @@ public class QuadrupedPositionJointInitializationController implements Quadruped
    public QuadrupedPositionJointInitializationController(QuadrupedRuntimeEnvironment environment)
    {
       this.fullRobotModel = environment.getFullRobotModel();
+      this.jointDesiredOutputList = environment.getJointDesiredOutputList();
 
       this.initialized = new YoBoolean[fullRobotModel.getOneDoFJoints().length];
       for (int i = 0; i < initialized.length; i++)
@@ -40,7 +44,7 @@ public class QuadrupedPositionJointInitializationController implements Quadruped
    {
       for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
-         joint.setUnderPositionControl(true);
+         jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.POSITION);
       }
 
       for (int i = 0; i < initialized.length; i++)
@@ -60,12 +64,12 @@ public class QuadrupedPositionJointInitializationController implements Quadruped
          // Only set a desired if the actuator has just come online or if it is still offline (just in case).
          if (!joint.isEnabled())
          {
-            joint.setqDesired(joint.getQ());
+            jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(joint.getQ());
             initialized[i].set(false);
          }
          else if (!initialized[i].getBooleanValue())
          {
-            joint.setqDesired(joint.getQ());
+            jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(joint.getQ());
             initialized[i].set(true);
          }
       }

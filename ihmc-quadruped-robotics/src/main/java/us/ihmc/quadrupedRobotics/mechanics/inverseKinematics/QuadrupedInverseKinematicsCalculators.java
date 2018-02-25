@@ -12,6 +12,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -28,11 +29,13 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
    private final double[] jointAnglesToPack = new double[3];
 
    private YoGraphicReferenceFrame bodyGraphicReferenceFrame, rootJointGraphicReferenceFrame;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
-   public QuadrupedInverseKinematicsCalculators(QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
+   public QuadrupedInverseKinematicsCalculators(QuadrupedModelFactory modelFactory, JointDesiredOutputList jointDesiredOutputList, QuadrupedPhysicalProperties physicalProperties,
          FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.jointDesiredOutputList = jointDesiredOutputList;
 
       fullRobotModel.updateFrames();
       rootJointFrame = referenceFrames.getRootJointFrame();
@@ -172,7 +175,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
       {
          for (int i = 0; i < jointsToControl.length; i++)
          {
-            jointsToControl[i].setqDesired(jointAnglesToPack[i]);
+            jointDesiredOutputList.getJointDesiredOutput(jointsToControl[i]).setDesiredPosition(jointAnglesToPack[i]);
          }
       }
 
