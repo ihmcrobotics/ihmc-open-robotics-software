@@ -10,6 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation = "Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
@@ -224,30 +225,64 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       String errorMessage = PacketValidityChecker.validatePacket(this, true);
       if (errorMessage != null)
          return errorMessage;
-      if (!PacketValidityChecker.testRobotSideConsistency(this))
-      {
-         errorMessage = "The robotSide of a field is inconsistent with its name.";
-         return errorMessage;
-      }
 
-      if (leftHandTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = leftHandTrajectoryMessage.validateMessage()) != null)
-         return errorMessage;
-      if (rightHandTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = rightHandTrajectoryMessage.validateMessage()) != null)
-         return errorMessage;
-      if (leftArmTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = leftArmTrajectoryMessage.validateMessage()) != null)
-         return errorMessage;
-      if (rightArmTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = rightArmTrajectoryMessage.validateMessage()) != null)
-         return errorMessage;
-      if (chestTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = chestTrajectoryMessage.validateMessage()) != null)
-         return errorMessage;
-      if (pelvisTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = pelvisTrajectoryMessage.validateMessage()) != null)
-         return errorMessage;
-      if (headTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = headTrajectoryMessage.validateMessage()) != null)
-         return errorMessage;
-      if (leftFootTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = leftFootTrajectoryMessage.validateMessage()) != null)
-         return errorMessage;
-      if (rightFootTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && (errorMessage = rightFootTrajectoryMessage.validateMessage()) != null)
-         return errorMessage;
+      if (leftHandTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && !leftHandTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = leftHandTrajectoryMessage.validateMessage()) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(leftHandTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
+            return "The robotSide of leftHandTrajectoryMessage field is inconsistent with its name.";
+      }
+      if (rightHandTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && !leftHandTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = rightHandTrajectoryMessage.validateMessage()) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(rightHandTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
+            return "The robotSide of rightHandTrajectoryMessage field is inconsistent with its name.";
+      }
+      if (leftArmTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && !leftArmTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.isEmpty())
+      {
+         if ((errorMessage = leftArmTrajectoryMessage.validateMessage()) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(leftArmTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
+            return "The robotSide of leftArmTrajectoryMessage field is inconsistent with its name.";
+      }
+      if (rightArmTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && !rightArmTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.isEmpty())
+      {
+         if ((errorMessage = rightArmTrajectoryMessage.validateMessage()) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(rightArmTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
+            return "The robotSide of rightArmTrajectoryMessage field is inconsistent with its name.";
+      }
+      if (chestTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && !chestTrajectoryMessage.so3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = chestTrajectoryMessage.validateMessage()) != null)
+            return errorMessage;
+      }
+      if (pelvisTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && !pelvisTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = pelvisTrajectoryMessage.validateMessage()) != null)
+            return errorMessage;
+      }
+      if (headTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && !headTrajectoryMessage.so3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = headTrajectoryMessage.validateMessage()) != null)
+            return errorMessage;
+      }
+      if (leftFootTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && !leftFootTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = leftFootTrajectoryMessage.validateMessage()) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(leftFootTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
+            return "The robotSide of leftFootTrajectoryMessage field is inconsistent with its name.";
+      }
+      if (rightFootTrajectoryMessage.getUniqueId() != INVALID_MESSAGE_ID && !rightFootTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = rightFootTrajectoryMessage.validateMessage()) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(rightFootTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
+            return "The robotSide of rightFootTrajectoryMessage field is inconsistent with its name.";
+      }
 
       return null;
    }
