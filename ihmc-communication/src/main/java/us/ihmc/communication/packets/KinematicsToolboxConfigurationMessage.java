@@ -24,12 +24,12 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
     * When provided, the solver will attempt to find the solution that is the closest to the
     * privileged configuration.
     */
-   public Point3D32 privilegedRootJointPosition;
+   public Point3D32 privilegedRootJointPosition = new Point3D32();
    /**
     * When provided, the solver will attempt to find the solution that is the closest to the
     * privileged configuration.
     */
-   public Quaternion32 privilegedRootJointOrientation;
+   public Quaternion32 privilegedRootJointOrientation = new Quaternion32();
    /**
     * This array is used identify to which joint each angle in {@link #privilegedJointAngles}
     * belongs to. The name-based hash code can be obtained from
@@ -50,10 +50,8 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    @Override
    public void set(KinematicsToolboxConfigurationMessage other)
    {
-      if (other.privilegedRootJointPosition != null)
-         privilegedRootJointPosition = new Point3D32(other.privilegedRootJointPosition);
-      if (other.privilegedRootJointOrientation != null)
-         privilegedRootJointOrientation = new Quaternion32(other.privilegedRootJointOrientation);
+      privilegedRootJointPosition.set(other.privilegedRootJointPosition);
+      privilegedRootJointOrientation.set(other.privilegedRootJointOrientation);
       MessageTools.copyData(other.privilegedJointNameBasedHashCodes, privilegedJointNameBasedHashCodes);
       MessageTools.copyData(other.privilegedJointAngles, privilegedJointAngles);
       setPacketInformation(other);
@@ -72,10 +70,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
     */
    public void setPrivilegedRootJointPosition(Tuple3DReadOnly rootJointPosition)
    {
-      if (privilegedRootJointPosition == null)
-         privilegedRootJointPosition = new Point3D32(rootJointPosition);
-      else
-         privilegedRootJointPosition.set(rootJointPosition);
+      privilegedRootJointPosition.set(rootJointPosition);
    }
 
    /**
@@ -91,10 +86,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
     */
    public void setPrivilegedRootJointOrientation(QuaternionReadOnly rootJointOrientation)
    {
-      if (privilegedRootJointOrientation == null)
-         privilegedRootJointOrientation = new Quaternion32(rootJointOrientation);
-      else
-         privilegedRootJointOrientation.set(rootJointOrientation);
+      privilegedRootJointOrientation.set(rootJointOrientation);
    }
 
    public Point3D32 getPrivilegedRootJointPosition()
@@ -134,14 +126,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if (!privilegedJointNameBasedHashCodes.equals(other.privilegedJointNameBasedHashCodes))
          return false;
 
-      if (privilegedRootJointPosition == null ^ other.privilegedRootJointPosition == null)
-         return false;
-      else if (privilegedRootJointPosition != null && !privilegedRootJointPosition.epsilonEquals(other.privilegedRootJointPosition, epsilon))
+      if (!privilegedRootJointPosition.epsilonEquals(other.privilegedRootJointPosition, epsilon))
          return false;
 
-      if (privilegedRootJointOrientation == null ^ other.privilegedRootJointOrientation == null)
-         return false;
-      else if (privilegedRootJointOrientation != null && !privilegedRootJointOrientation.epsilonEquals(other.privilegedRootJointOrientation, epsilon))
+      if (!privilegedRootJointOrientation.epsilonEquals(other.privilegedRootJointOrientation, epsilon))
          return false;
 
       if (privilegedJointAngles == other.privilegedJointAngles)

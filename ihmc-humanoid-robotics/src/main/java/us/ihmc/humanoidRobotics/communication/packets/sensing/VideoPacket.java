@@ -25,9 +25,9 @@ public class VideoPacket extends Packet<VideoPacket>
    public byte videoSource;
    public long timeStamp;
    public TByteArrayList data = new TByteArrayList();
-   public Point3D position;
-   public Quaternion orientation;
-   public IntrinsicParametersMessage intrinsicParameters;
+   public Point3D position = new Point3D();
+   public Quaternion orientation = new Quaternion();
+   public IntrinsicParametersMessage intrinsicParameters = new IntrinsicParametersMessage();
 
    public VideoPacket()
    {
@@ -36,12 +36,7 @@ public class VideoPacket extends Packet<VideoPacket>
 
    public VideoPacket(VideoPacket other)
    {
-      videoSource = other.videoSource;
-      timeStamp = other.timeStamp;
-      MessageTools.copyData(other.data, data);
-      position = new Point3D(other.position);
-      orientation = new Quaternion(other.orientation);
-      intrinsicParameters = new IntrinsicParametersMessage(other.intrinsicParameters);
+      set(other);
    }
 
    @Override
@@ -50,9 +45,9 @@ public class VideoPacket extends Packet<VideoPacket>
       videoSource = other.videoSource;
       timeStamp = other.timeStamp;
       MessageTools.copyData(other.data, data);
-      position = new Point3D(other.position);
-      orientation = new Quaternion(other.orientation);
-      intrinsicParameters = other.intrinsicParameters;
+      position.set(other.position);
+      orientation.set(other.orientation);
+      intrinsicParameters.set(other.intrinsicParameters);
       setPacketInformation(other);
    }
 

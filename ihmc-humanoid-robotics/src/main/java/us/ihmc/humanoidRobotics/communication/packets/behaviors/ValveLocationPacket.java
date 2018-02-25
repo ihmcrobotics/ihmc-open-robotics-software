@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 
 public class ValveLocationPacket extends Packet<ValveLocationPacket>
 {
-   public Pose3D valvePoseInWorld;
+   public Pose3D valvePoseInWorld = new Pose3D();
    public double valveRadius;
    
    
@@ -17,7 +17,7 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket>
    @Override
    public void set(ValveLocationPacket other)
    {
-      valvePoseInWorld = new Pose3D(other.valvePoseInWorld);
+      valvePoseInWorld.set(other.valvePoseInWorld);
       valveRadius = other.valveRadius;
       setPacketInformation(other);
    }
