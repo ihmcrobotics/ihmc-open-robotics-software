@@ -249,6 +249,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(Vector2D32.class);
 
       registerPacketField(Vector3D32.class);
+      registerPacketField(Vector3D32[].class);
       registerPacketField(boolean[].class);
 
       // Endeffector load bearing message
