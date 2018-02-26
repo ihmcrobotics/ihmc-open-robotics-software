@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -95,7 +96,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       stanceFootPose.setPosition(0.0, -stepWidth, 0.0);
       swingEndPose.setPosition(0.0, stepWidth, 0.0);
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       double simulationTime = transferTime * steps + 1.0;
       for (int i = 1; i <= steps; i++)
       {
@@ -104,7 +105,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          double footstepX = stepLength * i;
          Point3D location = new Point3D(footstepX, footstepY, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
 
          swingStartPose.set(stanceFootPose);
          stanceFootPose.set(swingEndPose);

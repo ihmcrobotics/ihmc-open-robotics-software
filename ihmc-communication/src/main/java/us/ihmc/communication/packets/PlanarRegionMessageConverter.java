@@ -46,7 +46,11 @@ public class PlanarRegionMessageConverter
          convexPolygonsVertices.add(vertices);
       }
 
-      PlanarRegionMessage planarRegionMessage = new PlanarRegionMessage(regionOrigin, regionNormal, concaveHullVertices, convexPolygonsVertices);
+      PlanarRegionMessage planarRegionMessage = new PlanarRegionMessage();
+      planarRegionMessage.regionOrigin = regionOrigin;
+      planarRegionMessage.regionNormal = regionNormal;
+      planarRegionMessage.concaveHullVertices = concaveHullVertices;
+      planarRegionMessage.convexPolygonsVertices = convexPolygonsVertices;
       planarRegionMessage.setRegionId(regionId);
       return planarRegionMessage;
    }
@@ -88,7 +92,7 @@ public class PlanarRegionMessageConverter
       for (int regionIndex = 0; regionIndex < planarRegionsList.getNumberOfPlanarRegions(); regionIndex++)
          planarRegionMessages.add(convertToPlanarRegionMessage(planarRegionsList.getPlanarRegion(regionIndex)));
 
-      return new PlanarRegionsListMessage(planarRegionMessages);
+      return MessageTools.createPlanarRegionsListMessage(planarRegionMessages);
    }
 
    public static PlanarRegionsList convertToPlanarRegionsList(PlanarRegionsListMessage planarRegionsListMessage)

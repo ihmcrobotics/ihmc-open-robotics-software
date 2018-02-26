@@ -1,5 +1,6 @@
 package us.ihmc.communication.packets;
 
+import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -24,13 +25,14 @@ public class LidarScanMessage extends Packet<LidarScanMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public LidarScanMessage(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scan)
+   @Override
+   public void set(LidarScanMessage other)
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.robotTimestamp = timestamp;
-      this.lidarPosition = lidarPosition;
-      this.lidarOrientation = lidarOrientation;
-      this.scan = scan;
+      robotTimestamp = other.robotTimestamp;
+      lidarPosition = new Point3D32(other.lidarPosition);
+      lidarOrientation = new Quaternion32(other.lidarOrientation);
+      scan = Arrays.copyOf(other.scan, other.scan.length);
+      setPacketInformation(other);
    }
 
    public void setRobotTimestamp(long robotTimestamp)

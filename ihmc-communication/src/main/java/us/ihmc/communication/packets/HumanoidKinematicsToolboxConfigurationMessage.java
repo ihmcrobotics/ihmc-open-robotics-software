@@ -18,6 +18,14 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(HumanoidKinematicsToolboxConfigurationMessage other)
+   {
+      holdCurrentCenterOfMassXYPosition = other.holdCurrentCenterOfMassXYPosition;
+      holdSupportFootPositions = other.holdSupportFootPositions;
+      setPacketInformation(other);
+   }
+
    /**
     * Specifies whether the {@code KinematicsToolboxController} should hold the initial x and y
     * coordinates of the robot's center of mass.

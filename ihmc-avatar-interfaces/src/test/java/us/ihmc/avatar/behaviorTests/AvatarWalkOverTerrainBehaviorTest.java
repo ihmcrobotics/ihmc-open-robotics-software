@@ -1,36 +1,38 @@
 package us.ihmc.avatar.behaviorTests;
 
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_FIELD_PLATFORM_LENGTH;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_HEIGHT;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_HEIGHT_VARIATION;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_SIZE;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_START_X;
+import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.CINDER_BLOCK_START_Y;
+
+import java.io.IOException;
+
 import org.junit.Before;
+
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
-import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkOverTerrainGoalPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-
-import java.io.IOException;
-
-import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest.*;
 
 public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTestInterface
 {
@@ -76,8 +78,8 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
       Point3D goalPosition = new Point3D(courseLength, 0.0, 0.0);
 
       behaviorCommunicator.send(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockField));
-      behaviorCommunicator.send(new WalkOverTerrainGoalPacket(goalPosition, new Quaternion()));
-      behaviorCommunicator.send(new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WAlK_OVER_TERRAIN));
+      behaviorCommunicator.send(HumanoidMessageTools.createWalkOverTerrainGoalPacket(goalPosition, new Quaternion()));
+      behaviorCommunicator.send(HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WAlK_OVER_TERRAIN));
 
       FloatingJoint pelvisJoint = simulationTestHelper.getRobot().getRootJoint();
       Point3D pelvisPosition = new Point3D();

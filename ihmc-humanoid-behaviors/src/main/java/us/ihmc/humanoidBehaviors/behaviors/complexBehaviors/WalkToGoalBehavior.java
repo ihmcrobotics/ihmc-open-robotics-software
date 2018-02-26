@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -10,6 +11,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
@@ -194,12 +196,12 @@ public class WalkToGoalBehavior extends AbstractBehavior
          planningOutputStatusQueue.clear();
          isDone.set(false);
 
-         ToolboxStateMessage wakeUp = new ToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
+         ToolboxStateMessage wakeUp = MessageTools.createToolboxStateMessage(ToolboxStateMessage.ToolboxState.WAKE_UP);
          wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
 
          communicationBridge.sendPacket(wakeUp);
 
-         ToolboxStateMessage reinitialize = new ToolboxStateMessage(ToolboxStateMessage.ToolboxState.REINITIALIZE);
+         ToolboxStateMessage reinitialize = MessageTools.createToolboxStateMessage(ToolboxStateMessage.ToolboxState.REINITIALIZE);
          reinitialize.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
 
          communicationBridge.sendPacket(reinitialize);
@@ -212,7 +214,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
          tempFinalPose.setY(walkToGoalBehaviorPacket.yGoal);
          tempFinalPose.setOrientationYawPitchRoll(walkToGoalBehaviorPacket.thetaGoal, 0.0, 0.0);
          FramePose3D finalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), tempFinalPose);
-         FootstepPlanningRequestPacket tempPlanningRequestPacket = new FootstepPlanningRequestPacket(initialPose, walkToGoalBehaviorPacket.goalSide, finalPose);
+         FootstepPlanningRequestPacket tempPlanningRequestPacket = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialPose, walkToGoalBehaviorPacket.goalSide, finalPose);
          tempPlanningRequestPacket.setTimeout(3.0);
          tempPlanningRequestPacket.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
 

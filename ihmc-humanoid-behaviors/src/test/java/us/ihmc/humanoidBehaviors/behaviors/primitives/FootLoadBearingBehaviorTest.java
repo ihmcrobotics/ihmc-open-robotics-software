@@ -7,6 +7,7 @@ import org.junit.Test;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -20,7 +21,7 @@ public class FootLoadBearingBehaviorTest
       CommunicationBridgeInterface outgoingCommunicationBridge = null;
       FootLoadBearingBehavior footLoadBearingBehavior = new FootLoadBearingBehavior(outgoingCommunicationBridge);
 
-      FootLoadBearingMessage message = new FootLoadBearingMessage(RobotSide.LEFT, LoadBearingRequest.LOAD);
+      FootLoadBearingMessage message = HumanoidMessageTools.createFootLoadBearingMessage(RobotSide.LEFT, LoadBearingRequest.LOAD);
 
       PacketDestination destination = PacketDestination.UI;
       message.setDestination(destination);

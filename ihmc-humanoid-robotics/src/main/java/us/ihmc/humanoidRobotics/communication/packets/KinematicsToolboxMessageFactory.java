@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
 import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -37,7 +38,7 @@ public class KinematicsToolboxMessageFactory
     */
    public static KinematicsToolboxRigidBodyMessage holdRigidBodyCurrentPose(RigidBody rigidBody)
    {
-      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(rigidBody);
+      KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody);
       FramePose3D currentPose = new FramePose3D(rigidBody.getBodyFixedFrame());
       currentPose.changeFrame(worldFrame);
 
@@ -63,7 +64,7 @@ public class KinematicsToolboxMessageFactory
     */
    public static KinematicsToolboxRigidBodyMessage holdRigidBodyCurrentOrientation(RigidBody rigidBody)
    {
-      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage(rigidBody);
+      KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody);
       FrameQuaternion currentOrientation = new FrameQuaternion(rigidBody.getBodyFixedFrame());
       currentOrientation.changeFrame(worldFrame);
 

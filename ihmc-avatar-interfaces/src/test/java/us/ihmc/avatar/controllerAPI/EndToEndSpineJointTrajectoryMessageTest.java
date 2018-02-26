@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
@@ -134,7 +135,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       double totalTime = 10.0;
       int waypoints = 20;
 
-      SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, waypoints);
+      SpineTrajectoryMessage message = HumanoidMessageTools.createSpineTrajectoryMessage(numberOfJoints, waypoints);
       for (int waypoint = 0; waypoint < waypoints; waypoint++)
       {
          double timeAtWaypoint = totalTime * waypoint / waypoints;
@@ -169,7 +170,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       setupTest();
 
       int waypoints = 100;
-      SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, waypoints);
+      SpineTrajectoryMessage message = HumanoidMessageTools.createSpineTrajectoryMessage(numberOfJoints, waypoints);
       for (int waypoint = 0; waypoint < waypoints; waypoint++)
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
             message.getJointspaceTrajectory().setTrajectoryPoint(jointIdx, waypoint, 0.1 * waypoint, 0.0, 0.0);
@@ -202,7 +203,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       SpineTrajectoryMessage[] messages = new SpineTrajectoryMessage[numberOfMessages];
       for (int msgIdx = 0; msgIdx < numberOfMessages; msgIdx++)
       {
-         SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, numberOfPoints);
+         SpineTrajectoryMessage message = HumanoidMessageTools.createSpineTrajectoryMessage(numberOfJoints, numberOfPoints);
          double timeInMessage = timePerWaypoint;
 
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
@@ -273,14 +274,14 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          trajectoryTime[jointIdx] = random.nextDouble() * maxTime;
       }
 
-      SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints);
+      SpineTrajectoryMessage message = HumanoidMessageTools.createSpineTrajectoryMessage(numberOfJoints);
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          int numberOfPoinsForJoint = numberOfPoints[jointIdx];
          double timePerPoint = trajectoryTime[jointIdx] / numberOfPoinsForJoint;
          double time = timePerPoint;
 
-         OneDoFJointTrajectoryMessage jointTrajectoryMessage = new OneDoFJointTrajectoryMessage(numberOfPoinsForJoint);
+         OneDoFJointTrajectoryMessage jointTrajectoryMessage = HumanoidMessageTools.createOneDoFJointTrajectoryMessage(numberOfPoinsForJoint);
          for (int pointIdx = 0; pointIdx < numberOfPoinsForJoint; pointIdx++)
          {
             double position = getRandomJointAngleInRange(random, spineJoints[jointIdx]);
@@ -364,7 +365,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          double desired = getRandomJointAngleInRange(random, joint);
          jointDesireds[jointIdx] = desired;
       }
-      return new SpineTrajectoryMessage(trajectoryTime, jointDesireds);
+      return HumanoidMessageTools.createSpineTrajectoryMessage(trajectoryTime, jointDesireds);
    }
 
    private double getRandomJointAngleInRange(Random random, OneDoFJoint joint)
@@ -386,7 +387,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       FrameQuaternion desiredRandomChestOrientation = new FrameQuaternion(chestClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
-      return new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      return HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
    }
 
    private static void assertControlWasConsistent(ControllerSpy controllerSpy)

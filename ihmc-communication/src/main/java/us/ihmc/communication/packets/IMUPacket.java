@@ -4,7 +4,6 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.commons.MathTools;
 
-
 public class IMUPacket extends Packet<IMUPacket>
 {
    public Vector3D32 linearAcceleration = new Vector3D32();
@@ -15,6 +14,16 @@ public class IMUPacket extends Packet<IMUPacket>
 
    public IMUPacket()
    {
+   }
+
+   @Override
+   public void set(IMUPacket other)
+   {
+      this.linearAcceleration.set(other.linearAcceleration);
+      this.orientation.set(other.orientation);
+      this.angularVelocity.set(other.angularVelocity);
+      this.time = other.time;
+      setPacketInformation(other);
    }
 
    public void set(Vector3D32 linearAcceleration, Quaternion32 orientation, Vector3D32 angularVelocity)

@@ -7,6 +7,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.BoundingBoxesPacket;
 import us.ihmc.communication.packets.HeatMapPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.JPEGDecompressor;
@@ -68,9 +69,9 @@ public class ValveDetectorProcess implements PacketConsumer<VideoPacket>
                                 {
                                    names[i] = "Valve " + i;
                                 }
-                                BoundingBoxesPacket boundingBoxesPacket = new BoundingBoxesPacket(packedBoxes, names);
+                                BoundingBoxesPacket boundingBoxesPacket = MessageTools.createBoundingBoxesPacket(packedBoxes, names);
 
-                                ObjectDetectorResultPacket resultPacket = new ObjectDetectorResultPacket(heatMapPacket, boundingBoxesPacket);
+                                ObjectDetectorResultPacket resultPacket = MessageTools.createObjectDetectorResultPacket(heatMapPacket, boundingBoxesPacket);
                                 resultPacket.setDestination(PacketDestination.BEHAVIOR_MODULE);
 
                                 detectionStatusClient.send(resultPacket);

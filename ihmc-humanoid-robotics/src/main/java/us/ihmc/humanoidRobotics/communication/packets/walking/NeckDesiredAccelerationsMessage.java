@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -26,26 +24,12 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   /**
-    * Random constructor for unit testing this packet
-    * 
-    * @param random seed
-    */
-   public NeckDesiredAccelerationsMessage(Random random)
+   @Override
+   public void set(NeckDesiredAccelerationsMessage other)
    {
-      desiredAccelerations = new DesiredAccelerationsMessage(random);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Constructor that sets the desired accelerations in this message to the provided values
-    * 
-    * @param desiredJointAccelerations
-    */
-   public NeckDesiredAccelerationsMessage(double[] desiredJointAccelerations)
-   {
-      desiredAccelerations = new DesiredAccelerationsMessage(desiredJointAccelerations);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      desiredAccelerations = new DesiredAccelerationsMessage();
+      desiredAccelerations.set(other.desiredAccelerations);
+      setPacketInformation(other);
    }
 
    public void setDesiredAccelerations(DesiredAccelerationsMessage desiredAccelerations)

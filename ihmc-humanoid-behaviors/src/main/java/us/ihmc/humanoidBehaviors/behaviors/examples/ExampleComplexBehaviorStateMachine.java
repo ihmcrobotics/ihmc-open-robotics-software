@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -66,7 +67,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    @Override
    public void onBehaviorEntered()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Starting Example Behavior");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Starting Example Behavior");
       sendPacket(p1);
       super.onBehaviorEntered();
    }
@@ -81,7 +82,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Enabling Lidar");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Enabling Lidar");
             sendPacket(p1);
             // FIXME
 //            atlasPrimitiveActions.enableLidarBehavior.setLidarState(LidarState.ENABLE);
@@ -93,7 +94,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Resetting Robot");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Resetting Robot");
             sendPacket(p1);
             super.setBehaviorInput();
          }
@@ -105,7 +106,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Setting Up Robot Pose");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Setting Up Robot Pose");
             sendPacket(p1);
             super.setBehaviorInput();
          }
@@ -162,7 +163,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
          protected void setBehaviorInput()
          {
 
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Doing Whole Body Behavior");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Doing Whole Body Behavior");
             sendPacket(p1);
             FramePoint3D point = new FramePoint3D(midZupFrame, 0.2, 0.2, 0.3);
             point.changeFrame(ReferenceFrame.getWorldFrame());

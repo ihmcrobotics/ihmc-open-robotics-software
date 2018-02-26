@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.modules;
 import java.io.IOException;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.util.NetworkPorts;
@@ -16,8 +17,8 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnable
 {
@@ -46,7 +47,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
    public void sendMockRobotConfiguration(long totalNsecs)
    {
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), forceSensorDefinitions, null, imuDefinitions);
+      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), forceSensorDefinitions, null, imuDefinitions);
 
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {

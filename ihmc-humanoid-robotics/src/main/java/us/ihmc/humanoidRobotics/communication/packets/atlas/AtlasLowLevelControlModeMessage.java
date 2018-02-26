@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.atlas;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 
 public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControlModeMessage>
@@ -18,9 +15,11 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
    {
    }
 
-   public AtlasLowLevelControlModeMessage(ControlMode request)
+   @Override
+   public void set(AtlasLowLevelControlModeMessage other)
    {
-      requestedControlMode = request;
+      setPacketInformation(other);
+      requestedControlMode = other.requestedControlMode;
    }
 
    public void setRequestedControlMode(ControlMode requestedControlMode)
@@ -47,10 +46,5 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
    public boolean epsilonEquals(AtlasLowLevelControlModeMessage other, double epsilon)
    {
       return requestedControlMode == other.requestedControlMode;
-   }
-
-   public AtlasLowLevelControlModeMessage(Random random)
-   {
-      requestedControlMode = RandomNumbers.nextEnum(random, ControlMode.class);
    }
 }

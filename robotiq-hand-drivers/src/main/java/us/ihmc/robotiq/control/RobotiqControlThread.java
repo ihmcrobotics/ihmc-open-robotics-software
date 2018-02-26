@@ -10,6 +10,7 @@ import com.martiansoftware.jsap.JSAPResult;
 import us.ihmc.avatar.handControl.HandControlThread;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.avatar.handControl.packetsAndConsumers.ManualHandControlProvider;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandControlPacket;
@@ -71,7 +72,7 @@ public class RobotiqControlThread extends HandControlThread
    public void run()
    {
       if(CALIBRATE_ON_CONNECT)
-         handDesiredConfigurationMessageSubscriber.receivedPacket(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
+         handDesiredConfigurationMessageSubscriber.receivedPacket(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.CALIBRATE));
 
       while (packetCommunicator.isConnected())
       {

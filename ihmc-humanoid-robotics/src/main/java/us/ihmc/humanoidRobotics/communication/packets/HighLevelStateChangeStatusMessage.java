@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -23,18 +21,6 @@ public class HighLevelStateChangeStatusMessage extends SettablePacket<HighLevelS
    {
       this.destination = (byte)PacketDestination.ROS_API.ordinal();
    }
-   
-   public HighLevelStateChangeStatusMessage(HighLevelControllerName initialState, HighLevelControllerName endState)
-   {
-      this.destination = (byte)PacketDestination.ROS_API.ordinal();
-      setStateChange(initialState, endState);
-   }
-   
-   public HighLevelStateChangeStatusMessage(Random random)
-   {
-      this.initialState = HighLevelControllerName.values[random.nextInt(HighLevelControllerName.values.length)];
-      this.endState = HighLevelControllerName.values[random.nextInt(HighLevelControllerName.values.length)];
-   }
 
    public void setStateChange(HighLevelControllerName initialState, HighLevelControllerName endState)
    {
@@ -48,6 +34,7 @@ public class HighLevelStateChangeStatusMessage extends SettablePacket<HighLevelS
       destination = other.destination;
       initialState = other.initialState;
       endState = other.endState;
+      setPacketInformation(other);
    }
 
    public HighLevelControllerName getInitialState()

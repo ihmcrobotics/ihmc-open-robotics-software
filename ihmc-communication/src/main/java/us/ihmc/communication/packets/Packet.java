@@ -5,8 +5,9 @@ import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
 
-public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T>
+public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T>, Settable<T>
 {
    @RosExportedField(documentation = "A unique id for the current message. This can be a timestamp or sequence number.\n"
          + "Only the unique id in the top level message is used, the unique id in nested messages is ignored.\n"
@@ -30,6 +31,13 @@ public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T
    @Optional(value = "scripting")
    public String notes;
 
+   public void setPacketInformation(Packet<?> other)
+   {
+      uniqueId = other.uniqueId;
+      destination = other.destination;
+      source = other.source;
+      notes = other.notes;
+   }
 
    public void setDestination(PacketDestination destination)
    {

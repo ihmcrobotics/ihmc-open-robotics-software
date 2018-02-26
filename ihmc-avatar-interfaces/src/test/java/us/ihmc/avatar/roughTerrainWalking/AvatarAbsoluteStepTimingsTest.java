@@ -27,6 +27,7 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -100,7 +101,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          double y = side == RobotSide.LEFT ? stepWidth / 2.0 : -stepWidth / 2.0;
          Point3D location = new Point3D(stepIndex * stepLength, y, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(side, location, orientation);
          footstepData.setSwingHeight(0.04);
          double transferTime = defaultTransferTime + random.nextDouble() * 0.5;
          double swingTime = defaultSwingTime + random.nextDouble() * 0.5 - 0.2;
@@ -266,7 +267,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       scs.setCameraFix(1.5, 0.0, 0.8);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(0.6, 0.3, 0.1);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(0.6, 0.3, 0.1);
       footsteps.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
       double minimumTransferTime = getRobotModel().getWalkingControllerParameters().getMinimumTransferTime();
 
@@ -276,7 +277,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          double y = side == RobotSide.LEFT ? 0.15 : -0.15;
          Point3D location = new Point3D(0.0, y, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(side, location, orientation);
          footstepData.setTransferDuration(minimumTransferTime / 2.0);
          footsteps.add(footstepData);
       }

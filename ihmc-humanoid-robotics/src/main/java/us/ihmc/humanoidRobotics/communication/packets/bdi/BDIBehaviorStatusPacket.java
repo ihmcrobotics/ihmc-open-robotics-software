@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.bdi;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 
 public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
@@ -12,9 +10,11 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
    {
    }
 
-   public BDIBehaviorStatusPacket(BDIRobotBehavior currentBehavior)
+   @Override
+   public void set(BDIBehaviorStatusPacket other)
    {
-      this.currentBehavior = currentBehavior;
+      setPacketInformation(other);
+      currentBehavior = other.currentBehavior;
    }
 
    @Override
@@ -27,10 +27,5 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
    public boolean epsilonEquals(BDIBehaviorStatusPacket other, double epsilon)
    {
       return (other instanceof BDIBehaviorStatusPacket) && (other).currentBehavior == currentBehavior;
-   }
-
-   public BDIBehaviorStatusPacket(Random random)
-   {
-      this(BDIRobotBehavior.values[random.nextInt(BDIRobotBehavior.values.length)]);
    }
 }

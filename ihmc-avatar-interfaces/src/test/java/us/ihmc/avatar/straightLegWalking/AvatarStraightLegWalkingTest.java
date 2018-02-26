@@ -21,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -550,7 +551,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
             Quaternion orientation = new Quaternion();
             cinderBlockPose.get(location, orientation);
             location.setZ(location.getZ() + 0.02);
-            FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
+            FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
             footsteps.add(footstep);
          }
       }
@@ -580,7 +581,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
             Point3D location = new Point3D();
             Quaternion orientation = new Quaternion();
             stepPose.get(location, orientation);
-            FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
+            FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
             footsteps.add(footstep);
 
          robotSide = robotSide.getOppositeSide();
@@ -596,7 +597,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       Point3D location = new Point3D();
       Quaternion orientation = new Quaternion();
       stepPose.get(location, orientation);
-      FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
+      FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
       footsteps.add(footstep);
 
       // ascend the stairs
@@ -613,7 +614,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
             Quaternion stairOrientation = new Quaternion();
             stairPose.get(stairLocation, stairOrientation);
 
-            FootstepDataMessage stepFootstep = new FootstepDataMessage(stepSide, stairLocation, stairOrientation);
+            FootstepDataMessage stepFootstep = HumanoidMessageTools.createFootstepDataMessage(stepSide, stairLocation, stairOrientation);
             footsteps.add(stepFootstep);
          }
       }
@@ -640,7 +641,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
          Point3D stepLocation = new Point3D();
          Quaternion stepOrientation = new Quaternion();
          landingPose.get(stepLocation, stepOrientation);
-         FootstepDataMessage stepMessage = new FootstepDataMessage(robotSide, stepLocation, stepOrientation);
+         FootstepDataMessage stepMessage = HumanoidMessageTools.createFootstepDataMessage(robotSide, stepLocation, stepOrientation);
          footsteps.add(stepMessage);
 
          robotSide = robotSide.getOppositeSide();
@@ -659,7 +660,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       Point3D stepLocation = new Point3D();
       Quaternion stepOrientation = new Quaternion();
       landingPose.get(stepLocation, stepOrientation);
-      FootstepDataMessage landingMessage = new FootstepDataMessage(robotSide, stepLocation, stepOrientation);
+      FootstepDataMessage landingMessage = HumanoidMessageTools.createFootstepDataMessage(robotSide, stepLocation, stepOrientation);
       footsteps.add(landingMessage);
 
       // descend the stairs
@@ -676,7 +677,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
             Quaternion stairOrientation = new Quaternion();
             stairPose.get(stairLocation, stairOrientation);
 
-            FootstepDataMessage stepFootstep = new FootstepDataMessage(stepSide, stairLocation, stairOrientation);
+            FootstepDataMessage stepFootstep = HumanoidMessageTools.createFootstepDataMessage(stepSide, stairLocation, stairOrientation);
             footsteps.add(stepFootstep);
          }
       }
@@ -700,7 +701,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
          Point3D exitLocation = new Point3D();
          Quaternion exitOrientation = new Quaternion();
          exitPose.get(exitLocation, exitOrientation);
-         FootstepDataMessage exitFootstep = new FootstepDataMessage(robotSide, exitLocation, exitOrientation);
+         FootstepDataMessage exitFootstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, exitLocation, exitOrientation);
          footsteps.add(exitFootstep);
 
          robotSide = robotSide.getOppositeSide();
@@ -717,7 +718,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       Point3D exitPosition = new Point3D();
       Quaternion exitOrientation = new Quaternion();
       exitPose.get(exitPosition, exitOrientation);
-      FootstepDataMessage exitFootstep = new FootstepDataMessage(robotSide, exitPosition, exitOrientation);
+      FootstepDataMessage exitFootstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, exitPosition, exitOrientation);
       footsteps.add(exitFootstep);
 
       return footsteps;

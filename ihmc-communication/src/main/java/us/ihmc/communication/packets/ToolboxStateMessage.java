@@ -11,10 +11,11 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
       // TODO Auto-generated constructor stub
    }
 
-   public ToolboxStateMessage(ToolboxState requestedState)
+   @Override
+   public void set(ToolboxStateMessage other)
    {
-      this.requestedState = requestedState;
-      
+      requestedState = other.requestedState;
+      set(other);
    }
 
    public void setRequestedState(ToolboxState requestedState)

@@ -4,6 +4,7 @@ import people_msgs.PositionMeasurement;
 import people_msgs.PositionMeasurementArray;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.DetectedFacesPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -45,7 +46,7 @@ public class RosFaceDetectionSubscriber extends AbstractRosTopicSubscriber<Posit
          positions[i] = new Point3D(framePoint);
       }
 
-      DetectedFacesPacket detectedFaces = new DetectedFacesPacket(ids, positions);
+      DetectedFacesPacket detectedFaces = MessageTools.createDetectedFacesPacket(ids, positions);
       packetCommunicator.send(detectedFaces);
    }
 }

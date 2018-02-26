@@ -1,12 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
-import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -37,7 +38,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    {
       if (timer.totalElapsed() > sendInterval)
       {
-         sendPacketToUI(new TextToSpeechPacket("Sending messages."));
+         sendPacketToUI(MessageTools.createTextToSpeechPacket("Sending messages."));
 
          sendFootsteps();
          sendChestTrajectory();
@@ -50,7 +51,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    private void sendArmTrajectory()
    {
       double[] leftArmHome = new double[] {0.78, -0.1, 3.0, 1.8, -0.3, 0.7, 0.15};
-      ArmTrajectoryMessage armTrajectory = new ArmTrajectoryMessage(RobotSide.LEFT, leftArmHome.length, trajectoryPoints);
+      ArmTrajectoryMessage armTrajectory = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, leftArmHome.length, trajectoryPoints);
       for (int i = 0; i < trajectoryPoints; i++)
       {
          double percent = i / (double) (trajectoryPoints - 1);
@@ -66,7 +67,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    private void sendChestTrajectory()
    {
       ReferenceFrame pelvisZUp = referenceFrames.getPelvisZUpFrame();
-      ChestTrajectoryMessage chestTrajectory = new ChestTrajectoryMessage(trajectoryPoints);
+      ChestTrajectoryMessage chestTrajectory = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryPoints);
       chestTrajectory.getSO3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(pelvisZUp);
       chestTrajectory.getSO3Trajectory().getFrameInformation().setDataReferenceFrame(pelvisZUp);
 
@@ -102,11 +103,11 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
          stepPoseRight.setZ(initialZHeight);
       }
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(1.2, 0.8);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(1.2, 0.8);
       for (int i = 0; i < steps / 2; i++)
       {
-         footsteps.add(new FootstepDataMessage(RobotSide.LEFT, stepPoseLeft.getPosition(), stepPoseLeft.getOrientation()));
-         footsteps.add(new FootstepDataMessage(RobotSide.RIGHT, stepPoseRight.getPosition(), stepPoseRight.getOrientation()));
+         footsteps.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, stepPoseLeft.getPosition(), stepPoseLeft.getOrientation()));
+         footsteps.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, stepPoseRight.getPosition(), stepPoseRight.getOrientation()));
       }
 
       sendPacketToController(footsteps);
@@ -115,7 +116,7 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      sendPacketToUI(new TextToSpeechPacket("Starting GC behavior."));
+      sendPacketToUI(MessageTools.createTextToSpeechPacket("Starting GC behavior."));
       timer.reset();
    }
 

@@ -18,6 +18,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -531,38 +532,38 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 
    private FootstepDataListMessage createFlatBlocksFootstepDataListMessage(double swingTime, double transferTime)
    {
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       Point3D location = new Point3D(0.3, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(0.4, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(0.7, 0.15, 0.08);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(0.7, -0.15, 0.08);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(1.1, 0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(1.1, -0.15, 0.16);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(1.5, 0.15, 0.08);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(1.5, -0.15, 0.16);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(1.9, 0.15, 0.16);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(2.3, -0.15, 0.16);
-      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstep.setSwingHeight(0.22);
       message.add(footstep);
 
@@ -575,69 +576,69 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       */
 
       location = new Point3D(2.7, 0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(2.7, -0.15, 0.08);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(3.1, 0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(3.1, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       return message;
    }
 
    private FootstepDataListMessage createFlatBlocksForwardFootstepDataListMessage(double swingTime, double transferTime)
    {
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       double swingHeight = 0.18;
 
       Point3D location = new Point3D(0.3, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(0.4, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(0.7, 0.15, 0.08);
-      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(1.1, -0.15, 0.08);
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(1.5, 0.15, 0.0);
-      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(1.9, -0.15, 0.16);
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(2.3, 0.15, 0.08);
-      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(2.7, -0.15, 0.16);
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(3.1, 0.15, 0.0);
-      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(3.1, -0.15, 0.0);
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       message.add(footstep);
 
       return message;
@@ -645,170 +646,170 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 
    private FootstepDataListMessage createTiltedBlocksFootstepDataListMessage(double swingTime, double transferTime)
    {
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       Point3D location = new Point3D(3.7, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(3.7, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(4.1, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendPitchRotation(-cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(4.1, -0.15, 0.2);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(4.54, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendPitchRotation(cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(4.54, -0.15, 0.2);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(4.98, 0.15, 0.21);
       orientation = new Quaternion();
       orientation.appendRollRotation(-cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(4.98, -0.15, 0.21);
       orientation = new Quaternion();
       orientation.appendRollRotation(cinderBlockTiltRadians);
-      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstep.setSwingHeight(0.18);
       message.add(footstep);
 
       location = new Point3D(5.39, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendRollRotation(cinderBlockTiltRadians);
-      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(0.18);
       message.add(footstep);
 
       location = new Point3D(5.39, -0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendRollRotation(-cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(5.8, 0.15, 0.3);
       orientation = new Quaternion();
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(5.8, -0.15, 0.3);
       orientation = new Quaternion();
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(6.225, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendPitchRotation(cinderBlockTiltRadians);
-      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(0.18);
       message.add(footstep);
 
       location = new Point3D(6.225, -0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendRollRotation(-cinderBlockTiltRadians);
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       //footstep.setSwingHeight(0.25);
       message.add(footstep);
 
       location = new Point3D(6.665, 0.15, 0.35);
       orientation = new Quaternion();
       orientation.appendRollRotation(cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(6.665, -0.15, 0.35);
       orientation = new Quaternion();
       orientation.appendPitchRotation(cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(7.08, 0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendPitchRotation(-cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(7.08, -0.15, 0.2);
       orientation = new Quaternion();
       orientation.appendRollRotation(cinderBlockTiltRadians);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(7.45, 0.15, 0.0);
       orientation = new Quaternion();
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(7.45, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       return message;
    }
 
    private FootstepDataListMessage createTiltedBlocksForwardFootstepDataListMessage(double swingTime, double transferTime)
    {
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       Point3D location = new Point3D(3.7, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       double swingHeight = 0.2;
 
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(3.7, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(4.1, 0.15, 0.2);
-      FootstepDataMessage footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(4.54, -0.15, 0.2);
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(4.98, 0.15, 0.21);
-      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(5.39, -0.15, 0.2);
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(5.8, 0.15, 0.3);
-      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(6.225, -0.15, 0.3);
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(6.225, 0.15, 0.35);
-      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(6.665, -0.15, 0.35);
-      footstep = new FootstepDataMessage(RobotSide.RIGHT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(7.08, 0.15, 0.35);
-      footstep = new FootstepDataMessage(RobotSide.LEFT, location, orientation);
+      footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation);
       footstep.setSwingHeight(swingHeight);
       message.add(footstep);
 
       location = new Point3D(7.45, -0.15, 0.0);
       orientation = new Quaternion();
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(7.45, 0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       return message;
    }

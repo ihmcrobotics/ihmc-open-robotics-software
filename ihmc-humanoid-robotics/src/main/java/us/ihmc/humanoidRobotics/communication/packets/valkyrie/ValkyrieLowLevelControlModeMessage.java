@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.valkyrie;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -30,6 +27,13 @@ public class ValkyrieLowLevelControlModeMessage extends Packet<ValkyrieLowLevelC
    {
    }
 
+   @Override
+   public void set(ValkyrieLowLevelControlModeMessage other)
+   {
+      requestedControlMode = other.requestedControlMode;
+      setPacketInformation(other);
+   }
+
    public void setRequestedControlMode(ControlMode requestedControlMode)
    {
       this.requestedControlMode = requestedControlMode;
@@ -54,10 +58,5 @@ public class ValkyrieLowLevelControlModeMessage extends Packet<ValkyrieLowLevelC
    public boolean epsilonEquals(ValkyrieLowLevelControlModeMessage other, double epsilon)
    {
       return requestedControlMode == other.requestedControlMode;
-   }
-
-   public ValkyrieLowLevelControlModeMessage(Random random)
-   {
-      requestedControlMode = RandomNumbers.nextEnum(random, ControlMode.class);
    }
 }

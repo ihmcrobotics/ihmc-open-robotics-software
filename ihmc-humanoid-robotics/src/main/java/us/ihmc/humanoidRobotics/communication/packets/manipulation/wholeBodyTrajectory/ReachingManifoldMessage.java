@@ -5,7 +5,6 @@ import java.util.Arrays;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.ArrayTools;
 
 /**
@@ -26,11 +25,16 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public ReachingManifoldMessage(RigidBody rigidBody)
+   @Override
+   public void set(ReachingManifoldMessage other)
    {
-      this.endEffectorNameBasedHashCode = rigidBody.getNameBasedHashCode();
-
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      endEffectorNameBasedHashCode = other.endEffectorNameBasedHashCode;
+      manifoldOriginPosition = new Point3D(other.manifoldOriginPosition);
+      manifoldOriginOrientation = new Quaternion(other.manifoldOriginOrientation);
+      manifoldConfigurationSpaces = Arrays.copyOf(other.manifoldConfigurationSpaces, other.manifoldConfigurationSpaces.length);
+      manifoldLowerLimits = Arrays.copyOf(other.manifoldLowerLimits, other.manifoldLowerLimits.length);
+      manifoldUpperLimits = Arrays.copyOf(other.manifoldUpperLimits, other.manifoldUpperLimits.length);
+      setPacketInformation(other);
    }
 
    public void setOrigin(Point3D position, Quaternion orientation)
@@ -44,10 +48,10 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       ConfigurationSpaceName[] configurations = {};
       double[] lowerLimits = {};
       double[] upperLimits = {};
-      
+
       setManifold(configurations, lowerLimits, upperLimits);
    }
-   
+
    public void setManifold(ConfigurationSpaceName[] configurationSpaces, double[] lowerLimits, double[] upperLimits)
    {
       if (configurationSpaces.length != lowerLimits.length || configurationSpaces.length != upperLimits.length || lowerLimits.length != upperLimits.length)
@@ -64,7 +68,7 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
          this.manifoldUpperLimits[i] = upperLimits[i];
       }
    }
-   
+
    @Override
    public boolean epsilonEquals(ReachingManifoldMessage other, double epsilon)
    {
@@ -82,17 +86,17 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
          return false;
       return true;
    }
-   
+
    public Point3D getOriginPosition()
    {
       return manifoldOriginPosition;
    }
-   
+
    public Quaternion getOriginOrientation()
    {
       return manifoldOriginOrientation;
    }
-   
+
    public long getRigidBodyNameBasedHashCode()
    {
       return endEffectorNameBasedHashCode;
@@ -104,17 +108,17 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
          return 0;
       return manifoldConfigurationSpaces.length;
    }
-   
+
    public ConfigurationSpaceName getDegreeOfManifold(int i)
    {
       return manifoldConfigurationSpaces[i];
    }
-   
+
    public double getUpperLimit(int i)
    {
       return manifoldUpperLimits[i];
    }
-   
+
    public double getLowerLimit(int i)
    {
       return manifoldLowerLimits[i];

@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -56,7 +57,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
          double[] armDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, armJoints.length, 0.1);
-         ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, armDesiredJointAccelerations);
+         ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = HumanoidMessageTools.createArmDesiredAccelerationsMessage(robotSide, armDesiredJointAccelerations);
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs));

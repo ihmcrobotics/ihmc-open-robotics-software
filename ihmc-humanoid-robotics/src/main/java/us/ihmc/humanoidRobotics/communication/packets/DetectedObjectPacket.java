@@ -1,32 +1,25 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class DetectedObjectPacket extends Packet<DetectedObjectPacket>
 {
    public RigidBodyTransform pose;
    public int id;
-   
+
    public DetectedObjectPacket()
    {
    }
-   
-   public DetectedObjectPacket(RigidBodyTransform pose, int id)
+
+   @Override
+   public void set(DetectedObjectPacket other)
    {
-      this.pose = pose;
-      this.id = id;
+      pose = new RigidBodyTransform(other.pose);
+      id = other.id;
+      setPacketInformation(other);
    }
 
-   public DetectedObjectPacket(Random random)
-   {
-      pose = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      id = random.nextInt(255);
-   }
-   
    @Override
    public boolean epsilonEquals(DetectedObjectPacket other, double epsilon)
    {

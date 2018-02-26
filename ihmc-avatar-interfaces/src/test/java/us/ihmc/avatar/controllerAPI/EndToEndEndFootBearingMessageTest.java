@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
@@ -57,14 +58,14 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
          Quaternion desiredOrientation = new Quaternion();
          footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
-         FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
+         FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(footTrajectoryMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
 
          // Now we can do the usual test.
-         FootLoadBearingMessage footLoadBearingMessage = new FootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD);
+         FootLoadBearingMessage footLoadBearingMessage = HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD);
 
          drcSimulationTestHelper.send(footLoadBearingMessage);
 

@@ -1,9 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 
 public class StampedPosePacket extends Packet<StampedPosePacket>
@@ -17,11 +14,14 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
       // Empty constructor for deserialization
    }
 
-   public StampedPosePacket(String frameId, TimeStampedTransform3D transform, double confidenceFactor)
+   @Override
+   public void set(StampedPosePacket other)
    {
-      this.frameId = frameId;
-      this.transform = transform;
-      this.confidenceFactor = confidenceFactor;
+      transform = new TimeStampedTransform3D();
+      transform.set(other.transform);
+      confidenceFactor = other.confidenceFactor;
+      frameId = other.frameId;
+      setPacketInformation(other);
    }
 
    public String getFrameId()
@@ -45,10 +45,5 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
       boolean ret = frameId.equals(other.getFrameId());
       ret &= transform.epsilonEquals(other.getTransform(), epsilon);
       return ret;
-   }
-
-   public StampedPosePacket(Random random)
-   {
-      this("/pelvis", new TimeStampedTransform3D(EuclidCoreRandomTools.nextRigidBodyTransform(random), random.nextLong()), 1.0);
    }
 }
