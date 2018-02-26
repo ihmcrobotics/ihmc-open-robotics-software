@@ -26,6 +26,8 @@ public final class QueueableMessage extends Packet<QueueableMessage>
          + "\n - The trajectory point times are relative to the the last trajectory point time of the previous message."
          + "\n - The controller will queue the joint trajectory messages as a per joint basis." + " The first trajectory point has to be greater than zero.")
    public byte executionMode = ExecutionMode.OVERRIDE.toByte();
+   @RosExportedField(documentation = "Defines a unique ID for this message. Only needed when you want to queue another message to this message.")
+   public long messageId = Packet.VALID_MESSAGE_DEFAULT_ID;
    @RosExportedField(documentation = "Only needed when using QUEUE mode, it refers to the message Id to which this message should be queued to."
          + " It is used by the controller to ensure that no message has been lost on the way."
          + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
@@ -45,8 +47,9 @@ public final class QueueableMessage extends Packet<QueueableMessage>
    @Override
    public void set(QueueableMessage other)
    {
-      setExecutionMode(other.getExecutionMode());
-      setPreviousMessageId(other.getPreviousMessageId());
+      executionMode = other.executionMode;
+      messageId = other.messageId;
+      previousMessageId = other.previousMessageId;
       executionDelayTime = other.executionDelayTime;
       setPacketInformation(other);
    }
@@ -63,6 +66,11 @@ public final class QueueableMessage extends Packet<QueueableMessage>
    public void setExecutionMode(byte executionMode)
    {
       this.executionMode = executionMode;
+   }
+
+   public void setMessageId(long messageId)
+   {
+      this.messageId = messageId;
    }
 
    /**
@@ -93,6 +101,11 @@ public final class QueueableMessage extends Packet<QueueableMessage>
       return executionMode;
    }
 
+   public long getMessageId()
+   {
+      return messageId;
+   }
+
    /**
     * Returns the previous message ID. If the message is queued this is used to verify that no
     * packets were dropped.
@@ -114,6 +127,8 @@ public final class QueueableMessage extends Packet<QueueableMessage>
    public boolean epsilonEquals(QueueableMessage other, double epsilon)
    {
       if (executionMode != other.executionMode)
+         return false;
+      if (messageId != other.messageId)
          return false;
       if (previousMessageId != other.previousMessageId)
          return false;
