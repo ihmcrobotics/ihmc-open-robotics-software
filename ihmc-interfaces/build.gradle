@@ -1,0 +1,82 @@
+buildscript {
+   repositories {
+      mavenCentral()
+      maven { url "http://dl.bintray.com/ihmcrobotics/maven-release" }
+      maven { url "http://dl.bintray.com/ihmcrobotics/maven-vendor" }
+      maven { url "https://plugins.gradle.org/m2/" }
+      mavenLocal()
+      jcenter()
+   }
+   dependencies {
+      classpath "us.ihmc:ihmc-build:0.12.8"
+      classpath "us.ihmc:rosidl-typesupport-ihmcpubsub-java:0.2"
+      classpath "us.ihmc:ihmc-pub-sub-generator:0.3.7"
+      classpath "org.ajoberstar:grgit:2.1.0"
+   }
+}
+
+apply plugin: "us.ihmc.ihmc-build"
+apply plugin: "org.ajoberstar.grgit"
+
+ihmc {
+   loadProductProperties("../product.properties")
+
+   configureDependencyResolution()
+   resourceDirectory("main", "rosidl")
+   javaDirectory("main", "generated-java")
+   configurePublications()
+}
+
+testSuites {
+   def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
+   bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
+}
+
+mainDependencies {
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.7.5'
+   compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.4.0'
+   compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.4.0'
+}
+
+testDependencies {
+   compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.4.0'
+}
+
+generatorDependencies {
+   compile group: "us.ihmc", name: "rosidl-typesupport-ihmcpubsub-java", version: "0.3.7"
+}
+
+task show() {
+   doLast {
+      project.gradle.includedBuilds.each { println it }
+      buildscript.configurations.classpath.each { println "Buildscript: " + it }
+      configurations.compile.each { println "Compile: " + it }
+   }
+}
+
+task generateMessages(type: us.ihmc.ros2.rosidl.RosInterfaceGeneratorTask) {
+   doFirst {
+      delete("build/tmp/generateMessages")
+
+      copy {
+         configurations.compile.findAll { it.name.contains("ros2-common-interfaces") }.each {
+            from zipTree(it)
+         }
+         into file("build/tmp/generateMessages/ros2-common-interfaces")
+      }
+   }
+
+   rosPackages = files("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces",
+                       "build/tmp/generateMessages/ros2-common-interfaces/common_interfaces",
+                       "src/main/rosidl/ihmc_interfaces")
+   outputDirectory = file("build/tmp/generateMessages/java")
+   customIDL = files("build/tmp/generateMessages/ros2-common-interfaces")
+
+   doLast {
+      copy {
+         from "build/tmp/generateMessages/java/controller_msgs"
+         into "src/main/generated-java/controller_msgs"
+      }
+   }
+}

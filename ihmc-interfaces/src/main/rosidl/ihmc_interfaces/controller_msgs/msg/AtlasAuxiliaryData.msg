@@ -1,0 +1,6 @@
+std_msgs/Header header
+
+controller_msgs/ElectricJointData[6] electric_joint_data
+controller_msgs/RawImuData[15] raw_imu_data
+controller_msgs/BatteryState battery_state
+controller_msgs/PumpState pump_state
