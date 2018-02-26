@@ -37,6 +37,8 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
    public abstract double getTransferTime();
 
+   public abstract double getFinalTransferDuration();
+
    public abstract double getStepLength();
 
    public abstract double getStepWidth();
@@ -46,6 +48,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    public abstract double getTimeForResuming();
 
    public abstract int getNumberOfFootsteps();
+
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -122,7 +125,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       sendFootstepCommand(0.0, getNumberOfFootsteps());
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.95));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
       drcSimulationTestHelper.send(pauseWalkingMessage);
@@ -169,6 +172,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       }
       addFootstep(new Point3D((numberOfFootsteps - 1) * stepLength, side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side,
                   footstepMessage);
+      footstepMessage.setFinalTransferDuration(getFinalTransferDuration());
       drcSimulationTestHelper.send(footstepMessage);
    }
 

@@ -4,15 +4,34 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarPauseWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
 {
-   AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+   private final RobotTarget target = RobotTarget.SCS;
+
+   private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, target, false)
+   {
+      @Override
+      public WalkingControllerParameters getWalkingControllerParameters()
+      {
+         return new AtlasWalkingControllerParameters(target, getJointMap(), getContactPointParameters())
+         {
+            @Override
+            public double getDefaultFinalTransferTime()
+            {
+               return getFinalTransferDuration();
+            }
+         };
+      }
+   };
+
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -29,13 +48,19 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Override
    public double getSwingTime()
    {
-      return 0.6;
+      return 1.2;
    }
 
    @Override
    public double getTransferTime()
    {
-      return 0.2;
+      return 0.8;
+   }
+
+   @Override
+   public double getFinalTransferDuration()
+   {
+      return getTransferTime();
    }
 
    @Override
