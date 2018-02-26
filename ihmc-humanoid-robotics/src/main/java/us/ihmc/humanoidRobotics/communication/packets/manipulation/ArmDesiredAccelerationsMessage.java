@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -26,20 +23,6 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public ArmDesiredAccelerationsMessage(Random random)
-   {
-      desiredAccelerations = new DesiredAccelerationsMessage(random);
-      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public ArmDesiredAccelerationsMessage(RobotSide robotSide, double[] armDesiredJointAccelerations)
-   {
-      desiredAccelerations = new DesiredAccelerationsMessage(armDesiredJointAccelerations);
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -53,6 +36,15 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
    public DesiredAccelerationsMessage getDesiredAccelerations()
    {
       return desiredAccelerations;
+   }
+
+   @Override
+   public void set(ArmDesiredAccelerationsMessage other)
+   {
+      desiredAccelerations = new DesiredAccelerationsMessage();
+      desiredAccelerations.set(other.desiredAccelerations);
+      robotSide = other.robotSide;
+      setPacketInformation(other);
    }
 
    @Override

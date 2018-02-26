@@ -1,11 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.LoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.LoadBearingMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
@@ -33,19 +30,16 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public HandLoadBearingMessage(RobotSide robotSide)
+   @Override
+   public void set(HandLoadBearingMessage other)
    {
-      loadBearingMessage = new LoadBearingMessage();
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public HandLoadBearingMessage(Random random)
-   {
-      loadBearingMessage = new LoadBearingMessage(random);
-      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      robotSide = other.robotSide;
+      useJointspaceCommand = other.useJointspaceCommand;
+      jointspaceTrajectory = new JointspaceTrajectoryMessage();
+      jointspaceTrajectory.set(other.jointspaceTrajectory);
+      executionDelayTime = other.executionDelayTime;
+      loadBearingMessage = other.loadBearingMessage;
+      setPacketInformation(other);
    }
 
    public void setJointspaceTrajectory(JointspaceTrajectoryMessage armTrajectoryMessage)

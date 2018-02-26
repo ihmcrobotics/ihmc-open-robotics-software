@@ -2,7 +2,6 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -49,8 +48,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    public double executionDelayTime;
 
    /**
-    * Empty constructor for serialization.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * Empty constructor for serialization. Set the id of the message to
+    * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
    public WholeBodyTrajectoryMessage()
    {
@@ -81,30 +80,28 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
          headTrajectoryMessage = new HeadTrajectoryMessage(other.headTrajectoryMessage);
    }
 
-   public WholeBodyTrajectoryMessage(Random random)
+   @Override
+   public void set(WholeBodyTrajectoryMessage other)
    {
-      leftHandTrajectoryMessage = new HandTrajectoryMessage(random);
-      leftHandTrajectoryMessage.robotSide = RobotSide.LEFT;
-
-      rightHandTrajectoryMessage = new HandTrajectoryMessage(random);
-      rightHandTrajectoryMessage.robotSide = RobotSide.RIGHT;
-
-      leftArmTrajectoryMessage = new ArmTrajectoryMessage(random);
-      leftArmTrajectoryMessage.robotSide = RobotSide.LEFT;
-
-      rightArmTrajectoryMessage = new ArmTrajectoryMessage(random);
-      rightArmTrajectoryMessage.robotSide = RobotSide.RIGHT;
-
-      leftFootTrajectoryMessage = new FootTrajectoryMessage(random);
-      leftFootTrajectoryMessage.robotSide = RobotSide.LEFT;
-
-      rightFootTrajectoryMessage = new FootTrajectoryMessage(random);
-      rightFootTrajectoryMessage.robotSide = RobotSide.RIGHT;
-
-      chestTrajectoryMessage = new ChestTrajectoryMessage(random);
-      pelvisTrajectoryMessage = new PelvisTrajectoryMessage(random);
-
-      headTrajectoryMessage = new HeadTrajectoryMessage(random);
+      if (other.leftHandTrajectoryMessage != null)
+         leftHandTrajectoryMessage = new HandTrajectoryMessage(other.leftHandTrajectoryMessage);
+      if (other.rightHandTrajectoryMessage != null)
+         rightHandTrajectoryMessage = new HandTrajectoryMessage(other.rightHandTrajectoryMessage);
+      if (other.leftArmTrajectoryMessage != null)
+         leftArmTrajectoryMessage = new ArmTrajectoryMessage(other.leftArmTrajectoryMessage);
+      if (other.rightArmTrajectoryMessage != null)
+         rightArmTrajectoryMessage = new ArmTrajectoryMessage(other.rightArmTrajectoryMessage);
+      if (other.chestTrajectoryMessage != null)
+         chestTrajectoryMessage = new ChestTrajectoryMessage(other.chestTrajectoryMessage);
+      if (other.pelvisTrajectoryMessage != null)
+         pelvisTrajectoryMessage = new PelvisTrajectoryMessage(other.pelvisTrajectoryMessage);
+      if (other.leftFootTrajectoryMessage != null)
+         leftFootTrajectoryMessage = new FootTrajectoryMessage(other.leftFootTrajectoryMessage);
+      if (other.rightFootTrajectoryMessage != null)
+         rightFootTrajectoryMessage = new FootTrajectoryMessage(other.rightFootTrajectoryMessage);
+      if (other.headTrajectoryMessage != null)
+         headTrajectoryMessage = new HeadTrajectoryMessage(other.headTrajectoryMessage);
+      setPacketInformation(other);
    }
 
    public HandTrajectoryMessage getHandTrajectoryMessage(RobotSide robotSide)
@@ -348,6 +345,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
    /**
     * returns the amount of time this command is delayed on the controller side before executing
+    * 
     * @return the time to delay this command in seconds
     */
    public double getExecutionDelayTime()
@@ -357,6 +355,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
    /**
     * sets the amount of time this command is delayed on the controller side before executing
+    * 
     * @param delayTime the time in seconds to delay after receiving the command before executing
     */
    public void setExecutionDelayTime(double delayTime)

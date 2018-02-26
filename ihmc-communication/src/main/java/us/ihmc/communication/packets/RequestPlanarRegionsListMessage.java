@@ -13,34 +13,13 @@ public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlana
    {
    }
 
-   public RequestPlanarRegionsListMessage(RequestType requestType)
-   {
-      this(requestType, null, null);
-   }
-
-   public RequestPlanarRegionsListMessage(RequestType requestType, BoundingBox3D boundingBoxInWorldForRequest)
-   {
-      this(requestType, boundingBoxInWorldForRequest, null);
-   }
-
-   public RequestPlanarRegionsListMessage(RequestType requestType, PacketDestination destination)
-   {
-      this(requestType, null, destination);
-   }
-
-   public RequestPlanarRegionsListMessage(RequestType requestType, BoundingBox3D boundingBoxInWorldForRequest, PacketDestination destination)
-   {
-      this.requestType = requestType;
-      this.boundingBoxInWorldForRequest = boundingBoxInWorldForRequest;
-      if (destination != null)
-         setDestination(destination);
-   }
-
+   @Override
    public void set(RequestPlanarRegionsListMessage other)
    {
-      this.requestType = other.requestType;
-      this.boundingBoxInWorldForRequest = other.boundingBoxInWorldForRequest;
+      requestType = other.requestType;
+      boundingBoxInWorldForRequest = other.boundingBoxInWorldForRequest;
       setDestination(other.getDestination());
+      setPacketInformation(other);
    }
 
    public RequestType getRequestType()

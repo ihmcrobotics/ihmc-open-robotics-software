@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
@@ -169,6 +170,6 @@ public class AtlasFlatGroundSideSteppingTest extends AvatarFlatGroundSideSteppin
    @Override
    protected FootstepDataListMessage getFootstepDataListMessage()
    {
-      return new FootstepDataListMessage(swingTime, transferTime, finalTransferTime);
+      return HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime, finalTransferTime);
    }
 }

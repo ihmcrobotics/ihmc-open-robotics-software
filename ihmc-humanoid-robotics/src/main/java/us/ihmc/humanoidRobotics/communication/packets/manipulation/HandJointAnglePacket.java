@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Arrays;
-import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
@@ -19,11 +18,6 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
       // Empty constructor for deserialization
    }
 
-   public HandJointAnglePacket(RobotSide robotSide, boolean connected, boolean calibrated, double[] jointAngles)
-   {
-      setAll(robotSide, connected, calibrated, jointAngles);
-   }
-
    public void setAll(RobotSide robotSide, boolean connected, boolean calibrated, double[] jointAngles)
    {
       this.robotSide = robotSide;
@@ -36,9 +30,11 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
       this.calibrated = calibrated;
    }
 
+   @Override
    public void set(HandJointAnglePacket other)
    {
       setAll(other.robotSide, other.connected, other.calibrated, other.jointAngles);
+      setPacketInformation(other);
    }
 
    public double getJointAngle(HandJointName jointName)
@@ -100,24 +96,5 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
       ret &= calibrated == other.calibrated;
 
       return ret;
-   }
-
-   public HandJointAnglePacket(Random random)
-   {
-      double limit = Math.PI;
-
-      double[] joints = new double[8];
-
-      for (int i = 0; i < joints.length; i++)
-      {
-         joints[i] = -limit + random.nextDouble() * limit * 2;
-      }
-
-      RobotSide side = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-
-      robotSide = side;
-      jointAngles = joints;
-      connected = random.nextBoolean();
-      calibrated = random.nextBoolean();
    }
 }

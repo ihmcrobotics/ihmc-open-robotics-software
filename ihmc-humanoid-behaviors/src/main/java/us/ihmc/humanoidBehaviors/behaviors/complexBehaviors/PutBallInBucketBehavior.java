@@ -6,6 +6,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -39,28 +40,28 @@ public class PutBallInBucketBehavior extends AbstractBehavior
       double[] leftHandBucketLocation1 = new double[] {-0.5609186812662719, -0.39273790125704305, 1.89931104400202, 1.8345084796174007, -1.9173410679363112,
             -0.7657081703756509, -0.7098631227127279};
 
-      ArmTrajectoryMessage leftHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation1);
+      ArmTrajectoryMessage leftHandBucketLocation1Message = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation1);
 
       ArmTrajectoryTask leftHandBucketLocation1Task = new ArmTrajectoryTask(leftHandBucketLocation1Message, atlasPrimitiveActions.leftArmTrajectoryBehavior);
 
       double[] rightHandBucketLocation1 = new double[] {0.5489321822438367, 0.2899665391571677, 2.096340823983413, -1.2225333451166707, 0.1256161514011733,
             -1.3433026185064938, -1.1994258903111514};
 
-      ArmTrajectoryMessage rightHandBucketLocation1Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation1);
+      ArmTrajectoryMessage rightHandBucketLocation1Message = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation1);
 
       ArmTrajectoryTask rightHandBucketLocation1Task = new ArmTrajectoryTask(rightHandBucketLocation1Message, atlasPrimitiveActions.rightArmTrajectoryBehavior);
 
       double[] leftHandBucketLocation2 = new double[] {-0.6312858675745908, -0.6560594198655715, 2.026449179186367, 2.0325182474649997, -1.4129369066719957,
             -0.33189990885720594, -1.1435699210219243};
 
-      ArmTrajectoryMessage leftHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation2);
+      ArmTrajectoryMessage leftHandBucketLocation2Message = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 2, leftHandBucketLocation2);
 
       ArmTrajectoryTask leftHandBucketLocation2Task = new ArmTrajectoryTask(leftHandBucketLocation2Message, atlasPrimitiveActions.leftArmTrajectoryBehavior);
 
       double[] rightHandBucketLocation2 = new double[] {0.4765048070153984, 0.305694742754363, 2.173812006625049, -1.4970540590789951, 0.10321456673940527,
             -1.2120648871681976, -1.1591439074587626};
 
-      ArmTrajectoryMessage rightHandBucketLocation2Message = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation2);
+      ArmTrajectoryMessage rightHandBucketLocation2Message = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandBucketLocation2);
 
       ArmTrajectoryTask rightHandBucketLocation2Task = new ArmTrajectoryTask(rightHandBucketLocation2Message, atlasPrimitiveActions.rightArmTrajectoryBehavior);
 

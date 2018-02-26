@@ -12,6 +12,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
 import us.ihmc.commons.thread.ThreadTools;
@@ -44,12 +45,14 @@ public class GlobalDataProducer
 
    public void notifyInvalidPacketReceived(Class<? extends Packet<?>> packetClass, String error)
    {
-      queueDataToSend(new InvalidPacketNotificationPacket(packetClass, error));
+      InvalidPacketNotificationPacket packet = new InvalidPacketNotificationPacket();
+      packet.set(packetClass, error);
+      queueDataToSend(packet);
    }
 
    public void notifyControllerCrash(CrashLocation location, String stackTrace)
    {
-      queueDataToSend(new ControllerCrashNotificationPacket(location, stackTrace));
+      queueDataToSend(MessageTools.createControllerCrashNotificationPacket(location, stackTrace));
    }
 
    public void stop()

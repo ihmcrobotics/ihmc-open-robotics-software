@@ -23,6 +23,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
@@ -187,7 +188,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
+      FootstepDataMessage originalFootstep = HumanoidMessageTools.createFootstepDataMessage(footstep);
 
       //set to the sole pose
       FramePoint3D position = new FramePoint3D();
@@ -241,7 +242,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
+      FootstepDataMessage originalFootstep = HumanoidMessageTools.createFootstepDataMessage(footstep);
 
       //set to the sole pose
       FramePoint3D position = new FramePoint3D();
@@ -428,8 +429,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
          face.getPlane(facePlane);
          Quaternion newOrientation = new Quaternion();
          RotationTools.computeQuaternionFromYawAndZNormal(yaw, facePlane.getNormalCopy(), newOrientation);
-         FootstepDataMessage currentFaceFootstep = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(x, y, facePlane.getZOnPlane(x, y)),
-               newOrientation);
+         FootstepDataMessage currentFaceFootstep = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), new Point3D(x, y, facePlane.getZOnPlane(x, y)), newOrientation);
          currentPredictedContactPoints = getPredictedContactPointsForFootstep(currentFaceFootstep, points, distanceTolerance);
 
          if ((currentPredictedContactPoints == null) || (currentPredictedContactPoints.size() < 3))

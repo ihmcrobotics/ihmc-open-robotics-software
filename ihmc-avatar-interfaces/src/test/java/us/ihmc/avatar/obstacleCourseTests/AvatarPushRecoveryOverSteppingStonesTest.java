@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -184,7 +185,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
 
    private FootstepDataListMessage createFootstepsForWalkingOverEasySteppingStones(double swingTime, double transferTime)
    {
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       List<Point3D> locations = new ArrayList<>();
       locations.add(new Point3D(-7.75, -0.55, 0.3));
       locations.add(new Point3D(-8.25, -0.95, 0.3));
@@ -248,7 +249,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
             planarRegionsAsMessages.add(PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegion));
       }
 
-      PlanarRegionsListMessage messageList = new PlanarRegionsListMessage(planarRegionsAsMessages);
+      PlanarRegionsListMessage messageList = MessageTools.createPlanarRegionsListMessage(planarRegionsAsMessages);
       messageList.uniqueId = 5L;
 
       return messageList;

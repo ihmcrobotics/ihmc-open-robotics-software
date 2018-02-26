@@ -19,6 +19,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -130,8 +131,8 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       double stepWidth = getStepWidth();
       double dTheta = stepLength / radius;
       double theta = 0;
-      ArmTrajectoryMessage leftHandMessage = new ArmTrajectoryMessage(RobotSide.LEFT, getArmDoF());
-      ArmTrajectoryMessage rightHandMessage = new ArmTrajectoryMessage(RobotSide.RIGHT, getArmDoF());
+      ArmTrajectoryMessage leftHandMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, getArmDoF());
+      ArmTrajectoryMessage rightHandMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, getArmDoF());
       ArmJointName[] armJoint = getArmJointNames();
       if (armJoint == null)
       {
@@ -148,8 +149,8 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
 
       for (int armJointIndex = 0; armJointIndex < getArmDoF(); armJointIndex++)
       {
-         OneDoFJointTrajectoryMessage leftJointTrajectory = new OneDoFJointTrajectoryMessage(getArmTrajectoryPoints());
-         OneDoFJointTrajectoryMessage rightJointTrajectory = new OneDoFJointTrajectoryMessage(getArmTrajectoryPoints());
+         OneDoFJointTrajectoryMessage leftJointTrajectory = HumanoidMessageTools.createOneDoFJointTrajectoryMessage(getArmTrajectoryPoints());
+         OneDoFJointTrajectoryMessage rightJointTrajectory = HumanoidMessageTools.createOneDoFJointTrajectoryMessage(getArmTrajectoryPoints());
          for (int trajectoryPointIndex = 0; trajectoryPointIndex < getArmTrajectoryPoints(); trajectoryPointIndex++)
          {
 

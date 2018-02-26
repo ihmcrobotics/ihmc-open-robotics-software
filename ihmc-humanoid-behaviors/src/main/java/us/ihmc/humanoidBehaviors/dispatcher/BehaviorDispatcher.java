@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -17,19 +18,18 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.BehaviorStateMachine;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket.CurrentBehaviorStatus;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
+import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
-import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
-import us.ihmc.commons.thread.ThreadTools;
 
 /**
  * The BehaviorDispatcher is used to select the behavior to run and to execute operator's commands as pause, resume, stop, etc.
@@ -177,7 +177,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
       if (stateMachine.getCurrentStateEnum().equals(stopBehavior) && currentBehavior!=null && !currentBehavior.equals(stopBehavior))
       {
-         communicationBridge.sendPacketToUI(new BehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
+         communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
       }
       currentBehavior = stateMachine.getCurrentStateEnum();
 
@@ -225,20 +225,20 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
          {
          case STOP:
             stateMachine.stop();
-            communicationBridge.sendPacketToUI(new BehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
-            communicationBridge.sendPacket(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
+            communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
+            communicationBridge.sendPacket(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.STOP));
             break;
          case PAUSE:
             stateMachine.pause();
-            communicationBridge.sendPacketToUI(new BehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_PAUSED));
+            communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_PAUSED));
 
-            communicationBridge.sendPacket(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
+            communicationBridge.sendPacket(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.PAUSE));
             break;
          case RESUME:
             stateMachine.resume();
-            communicationBridge.sendPacketToUI(new BehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING));
+            communicationBridge.sendPacketToUI(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING));
 
-            communicationBridge.sendPacket(new BehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
+            communicationBridge.sendPacket(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
             break;
          default:
             throw new IllegalArgumentException("BehaviorCommunicationBridge, unhandled control!");

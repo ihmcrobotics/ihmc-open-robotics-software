@@ -1,5 +1,7 @@
 package us.ihmc.communication.packets;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.euclid.tuple2D.Point2D32;
@@ -19,12 +21,20 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    {
    }
 
-   public PlanarRegionMessage(Point3D32 regionOrigin, Vector3D32 regionNormal, Point2D32[] concaveHullVertices, List<Point2D32[]> convexPolygonsVertices)
+   @Override
+   public void set(PlanarRegionMessage other)
    {
-      this.regionOrigin = regionOrigin;
-      this.regionNormal = regionNormal;
-      this.concaveHullVertices = concaveHullVertices;
-      this.convexPolygonsVertices = convexPolygonsVertices;
+      regionId = other.regionId;
+      regionOrigin = new Point3D32(other.regionOrigin);
+      regionNormal = new Vector3D32(other.regionNormal);
+      concaveHullVertices = Arrays.stream(other.concaveHullVertices).map(Point2D32::new).toArray(Point2D32[]::new);
+      convexPolygonsVertices = new ArrayList<>(other.convexPolygonsVertices.size());
+      for (int i = 0; i < other.convexPolygonsVertices.size(); i++)
+      {
+         Point2D32[] vertices = Arrays.stream(other.convexPolygonsVertices.get(i)).map(Point2D32::new).toArray(Point2D32[]::new);
+         convexPolygonsVertices.add(vertices);
+      }
+      setPacketInformation(other);
    }
 
    public void setRegionId(int regionId)

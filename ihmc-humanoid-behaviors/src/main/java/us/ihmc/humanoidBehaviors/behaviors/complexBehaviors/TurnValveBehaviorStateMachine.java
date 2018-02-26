@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,6 +14,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -21,12 +23,12 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValveBehaviorState> implements CoactiveDataListenerInterface
 {
@@ -97,9 +99,9 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          protected void setBehaviorInput()
          {
 
-            GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
+            GoHomeMessage goHomeRightArmMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
             atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(goHomeRightArmMessage);
-            HandDesiredConfigurationMessage handMessage = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
+            HandDesiredConfigurationMessage handMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
             atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(handMessage);
          }
       };
@@ -114,7 +116,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
             super.doTransitionOutOfAction();
             //found the valve location, inform the UI of its location
 
-            ValveLocationPacket valveLocationPacket = new ValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius());
+            ValveLocationPacket valveLocationPacket = HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius());
             communicationBridge.sendPacketToUI(valveLocationPacket);
 
          }
@@ -129,7 +131,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
             super.doTransitionOutOfAction();
             //found the valve location, inform the UI of its location
 
-            ValveLocationPacket valveLocationPacket = new ValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius());
+            ValveLocationPacket valveLocationPacket = HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius());
             communicationBridge.sendPacketToUI(valveLocationPacket);
 
          }
@@ -166,7 +168,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Finished Turning Valve");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Finished Turning Valve");
             sendPacket(p1);
          }
       };
@@ -177,7 +179,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Did I Turn It Far Enough?");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Did I Turn It Far Enough?");
             sendPacket(p1);
             super.setBehaviorInput();
          }

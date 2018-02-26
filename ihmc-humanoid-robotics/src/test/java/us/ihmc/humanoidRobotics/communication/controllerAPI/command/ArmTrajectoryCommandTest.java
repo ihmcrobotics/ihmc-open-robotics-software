@@ -10,6 +10,7 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
@@ -80,7 +81,7 @@ public class ArmTrajectoryCommandTest
    {
       Random random = new Random();
       ArmTrajectoryCommand armTrajectoryCommand = new ArmTrajectoryCommand();
-      ArmTrajectoryMessage message = new ArmTrajectoryMessage(random);
+      ArmTrajectoryMessage message = RandomHumanoidMessages.nextArmTrajectoryMessage(random);
       armTrajectoryCommand.set(message);
 
       assertEquals(message.getQueueingProperties().getExecutionDelayTime(), armTrajectoryCommand.getExecutionDelayTime(), 1e-9);

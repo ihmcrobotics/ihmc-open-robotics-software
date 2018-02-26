@@ -1,5 +1,6 @@
 package us.ihmc.communication.packets;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage>
@@ -10,9 +11,13 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage>
    {
    }
 
-   public PlanarRegionsListMessage(List<PlanarRegionMessage> planarRegions)
+   @Override
+   public void set(PlanarRegionsListMessage other)
    {
-      this.planarRegions = planarRegions;
+      planarRegions = new ArrayList<>();
+      for (PlanarRegionMessage region : other.planarRegions)
+         planarRegions.add(region);
+      setPacketInformation(other);
    }
 
    public List<PlanarRegionMessage> getPlanarRegions()

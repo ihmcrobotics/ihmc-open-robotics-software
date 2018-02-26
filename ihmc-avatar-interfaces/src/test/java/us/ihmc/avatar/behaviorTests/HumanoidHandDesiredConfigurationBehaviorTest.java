@@ -15,6 +15,7 @@ import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -87,7 +88,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       double trajectoryTime = 2.0;
 
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
-      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
+      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(behavior);
       assertTrue(success);
       double fingerJointQFinal = getTotalFingerJointQ(robotSide);
@@ -117,7 +118,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       double stopTime = trajectoryTime / 2.0;
 
       PrintTools.debug(this, "Initializing Behavior");
-      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
+      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
 
       PrintTools.debug(this, "Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);
@@ -157,7 +158,7 @@ public abstract class HumanoidHandDesiredConfigurationBehaviorTest implements Mu
       double stopTime = trajectoryTime / 2.0;
 
       PrintTools.debug(this, "Initializing Behavior");
-      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(new HandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
+      HandDesiredConfigurationBehavior behavior = testHandDesiredConfigurationBehavior(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.CLOSE), trajectoryTime);
 
       PrintTools.debug(this, "Starting Behavior");
       double fingerJointQInitial = getTotalFingerJointQ(robotSide);

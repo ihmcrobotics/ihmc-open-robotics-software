@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
@@ -371,7 +372,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
@@ -437,7 +438,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
@@ -503,7 +504,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
@@ -571,7 +572,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
@@ -638,7 +639,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);
@@ -707,7 +708,7 @@ public class PelvisPoseHistoryCorrectionUsingSimpleRobotTest
          
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
-         StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
+         StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket("/pelvis", timeStampedTransform, 1.0);
          
          success &= simulateAndBlockAndCatchExceptions(Conversions.nanosecondsToSeconds(1000000) * 3);
          externalPelvisPoseCreator.setNewestPose(posePacket);

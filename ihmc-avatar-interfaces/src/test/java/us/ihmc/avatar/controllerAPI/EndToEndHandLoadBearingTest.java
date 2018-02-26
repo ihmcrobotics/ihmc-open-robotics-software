@@ -10,6 +10,7 @@ import org.junit.Before;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -34,7 +36,6 @@ import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInterface
 {
@@ -73,7 +74,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       // Position hand above table
       Quaternion chestOrientation = new Quaternion();
       chestOrientation.appendPitchRotation(Math.PI / 4.0);
-      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(1.0, chestOrientation, worldFrame, pelvisZUpFrame);
+      ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, chestOrientation, worldFrame, pelvisZUpFrame);
       drcSimulationTestHelper.send(chestTrajectoryMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       assertTrue(success);
@@ -82,7 +83,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       handOrientation.appendYawRotation(-Math.PI / 2.0);
       handOrientation.appendPitchRotation(Math.PI / 2.0);
 
-      HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
+      HandTrajectoryMessage handTrajectoryMessage1 = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.LEFT, 1);
       handTrajectoryMessage1.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
       handTrajectoryMessage1.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
       handTrajectoryMessage1.getSe3Trajectory().setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
@@ -90,7 +91,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
-      HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
+      HandTrajectoryMessage handTrajectoryMessage2 = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.LEFT, 1);
       handTrajectoryMessage2.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
       handTrajectoryMessage2.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
       handTrajectoryMessage2.getSe3Trajectory().setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
@@ -103,7 +104,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       transformToContactFrame.setTranslation(0.0, 0.09, 0.0);
       transformToContactFrame.appendRollRotation(Math.PI);
 
-      HandLoadBearingMessage loadBearingMessage = new HandLoadBearingMessage(RobotSide.LEFT);
+      HandLoadBearingMessage loadBearingMessage = HumanoidMessageTools.createHandLoadBearingMessage(RobotSide.LEFT);
       loadBearingMessage.getLoadBearingMessage().setLoad(true);
       loadBearingMessage.getLoadBearingMessage().setCoefficientOfFriction(0.8);
       loadBearingMessage.getLoadBearingMessage().setContactNormalInWorldFrame(new Vector3D(0.0, 0.0, 1.0));

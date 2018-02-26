@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -51,7 +52,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    {
       //reset necessary values so this behavior can run again properly
       scanNumber = 0;
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Getting Lidar");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Getting Lidar");
       sendPacket(p1);
       //let the UI know this specific behavior has started
       coactiveBehaviorsNetworkManager.sendToUI("GetLidarScanExampleBehavior", 1);

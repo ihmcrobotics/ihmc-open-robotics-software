@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.RobotController;
@@ -137,7 +138,7 @@ public class ValkyrieHandStateCommunicator implements RobotController
       public HandJointAnglePacket newInstance()
       {
          double[] handJoints = new double[ValkyrieHandJointName.values.length];
-         return new HandJointAnglePacket(null, false, false, handJoints);
+         return HumanoidMessageTools.createHandJointAnglePacket(null, false, false, handJoints);
       }
    }
 }

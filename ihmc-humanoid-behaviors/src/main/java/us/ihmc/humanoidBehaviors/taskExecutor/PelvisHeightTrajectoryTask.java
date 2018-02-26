@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.taskExecutor;
 
 import us.ihmc.humanoidBehaviors.behaviors.primitives.PelvisHeightTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 
 public class PelvisHeightTrajectoryTask<E extends Enum<E>> extends BehaviorAction<E>
@@ -18,7 +19,7 @@ public class PelvisHeightTrajectoryTask<E extends Enum<E>> extends BehaviorActio
    {
       super(stateEnum, pelvisHeightTrajectoryBehavior);
       this.pelvisHeightTrajectoryBehavior = pelvisHeightTrajectoryBehavior;
-      pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(trajectoryTime, heightInWorld);
+      pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime, heightInWorld);
    }
 
    @Override

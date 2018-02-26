@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -13,15 +13,16 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
 import us.ihmc.humanoidBehaviors.taskExecutor.HandDesiredConfigurationTask;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class GraspAndTurnValveBehavior extends AbstractBehavior
 {
@@ -84,7 +85,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       double[] approachPointLocation = new double[] {0.42441454428847003, -0.5829781169010966, 1.8387098771297432, -2.35619, 0.11468460263836734,
             1.0402909950400858, 0.9434293109027067};
 
-      ArmTrajectoryMessage rightHandValveApproachMessage = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, approachPointLocation);
+      ArmTrajectoryMessage rightHandValveApproachMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, approachPointLocation);
 
       ArmTrajectoryTask moveHandToApproachPoint = new ArmTrajectoryTask(rightHandValveApproachMessage, atlasPrimitiveActions.rightArmTrajectoryBehavior)
       {
@@ -92,7 +93,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             super.setBehaviorInput();
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Moving Hand To Approach Location");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Moving Hand To Approach Location");
             sendPacket(p1);
          }
       };
@@ -172,15 +173,15 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("rotate Valve");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("rotate Valve");
             sendPacket(p1);
             FramePose3D point = offsetPointFromValveInWorldFrame(0.0, valveRadius + valveRadiusfinalOffset, distanceFromValve, 1.5708, 1.5708, -3.14159);
 
             GeometryTools.rotatePoseAboutAxis(valvePose, Axis.Z, degrees, point);
 
-            sendPacketToUI(new UIPositionCheckerPacket(point.getPosition()));
+            sendPacketToUI(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
 
-            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
+            HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
                   point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
             handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
@@ -192,7 +193,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
    private void moveHand(final double x, final double y, final double z, final double yaw, final double pitch, final double roll, final String description)
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket(description);
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket(description);
       sendPacket(p1);
 
       //      Vector3d orient = new Vector3d();
@@ -202,9 +203,9 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       FramePose3D point = offsetPointFromValveInWorldFrame(x, y, z, yaw, pitch, roll);
       //      System.out.println("-orient.x,orient.y, orient.z " + (-orient.x) + "," + orient.y + "," + orient.z);
 
-      sendPacketToUI(new UIPositionCheckerPacket(point.getPosition()));
+      sendPacketToUI(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
 
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
+      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.RIGHT, 2, point.getPosition(),
             point.getOrientation(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 

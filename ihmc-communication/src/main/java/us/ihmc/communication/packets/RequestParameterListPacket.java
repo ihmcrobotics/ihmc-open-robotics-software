@@ -7,6 +7,12 @@ public class RequestParameterListPacket extends Packet<RequestParameterListPacke
    }
 
    @Override
+   public void set(RequestParameterListPacket other)
+   {
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(RequestParameterListPacket other, double epsilon)
    {
       return true;

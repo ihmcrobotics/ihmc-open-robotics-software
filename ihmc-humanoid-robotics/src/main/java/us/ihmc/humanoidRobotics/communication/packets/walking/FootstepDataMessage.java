@@ -2,17 +2,13 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
-import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -22,9 +18,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -70,10 +63,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration.")
    public double transferDuration = -1.0;
-   
-//   this needs to be tested on the real robot before it's exposed in ROS. -shrews
-//   @RosExportedField(documentation = "The touchdown duration is the time spent trying to do a soft touchdown."
-//         + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration. If the default is set to zero, the touchdown state will be disabled")
+
+   @RosExportedField(documentation = "(Experimental) The touchdown duration is the time spent trying to do a soft touchdown."
+         + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration. If the default is set to zero, the touchdown state will be disabled")
    public double touchdownDuration = -1.0;
 
    /** the time to delay this command on the controller side before being executed **/
@@ -84,40 +76,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
     */
    public FootstepDataMessage()
    {
-   }
-
-   public FootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
-   {
-      this(robotSide, new Point3D(location), new Quaternion(orientation), null);
-   }
-
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
-   {
-      this(robotSide, location, orientation, null);
-   }
-
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints)
-   {
-      this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
-   }
-
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
-   {
-      this(robotSide, location, orientation, null, trajectoryType, swingHeight);
-   }
-
-   public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
-                              TrajectoryType trajectoryType, double swingHeight)
-   {
-      this.robotSide = robotSide;
-      this.location = location;
-      this.orientation = orientation;
-      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         this.predictedContactPoints = null;
-      else
-         this.predictedContactPoints = predictedContactPoints;
-      this.trajectoryType = trajectoryType;
-      this.swingHeight = swingHeight;
    }
 
    public FootstepDataMessage(FootstepDataMessage footstepData)
@@ -156,52 +114,36 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       this.executionDelayTime = footstepData.executionDelayTime;
    }
 
-   public FootstepDataMessage(Footstep footstep)
+   @Override
+   public void set(FootstepDataMessage other)
    {
-      robotSide = footstep.getRobotSide();
-
-      FramePoint3D location = new FramePoint3D();
-      FrameQuaternion orientation = new FrameQuaternion();
-      footstep.getPose(location, orientation);
-      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      this.location = new Point3D(location);
-      this.orientation = new Quaternion(orientation);
-
-      List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
-      if (footstepContactPoints != null)
+      robotSide = other.robotSide;
+      location = new Point3D(other.location);
+      orientation = new Quaternion(other.orientation);
+      if (other.predictedContactPoints != null)
       {
-         if (predictedContactPoints == null)
+         predictedContactPoints = new ArrayList<>();
+         other.predictedContactPoints.stream().map(Point2D::new).forEach(predictedContactPoints::add);
+      }
+
+      trajectoryType = other.trajectoryType;
+      swingHeight = other.swingHeight;
+      if (other.positionWaypoints != null)
+      {
+         positionWaypoints = Arrays.stream(other.positionWaypoints).map(Point3D::new).toArray(Point3D[]::new);
+      }
+
+      if (other.swingTrajectory != null)
+      {
+         swingTrajectory = new SE3TrajectoryPointMessage[other.swingTrajectory.length];
+         for (int i = 0; i < swingTrajectory.length; i++)
          {
-            predictedContactPoints = new ArrayList<>();
-         }
-         else
-         {
-            predictedContactPoints.clear();
-         }
-         for (int i = 0; i < footstepContactPoints.size(); i++)
-         {
-            Point2D point = new Point2D(footstepContactPoints.get(i));
-            predictedContactPoints.add(point);
+            swingTrajectory[i] = new SE3TrajectoryPointMessage();
+            swingTrajectory[i].set(other.swingTrajectory[i]);
          }
       }
-      else
-      {
-         predictedContactPoints = null;
-      }
-      trajectoryType = footstep.getTrajectoryType();
-      swingHeight = footstep.getSwingHeight();
-      swingTrajectoryBlendDuration = footstep.getSwingTrajectoryBlendDuration();
 
-      if (footstep.getCustomPositionWaypoints().size() != 0)
-      {
-         positionWaypoints = new Point3D[footstep.getCustomPositionWaypoints().size()];
-         for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
-         {
-            FramePoint3D framePoint = footstep.getCustomPositionWaypoints().get(i);
-            framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            positionWaypoints[i] = new Point3D(framePoint);
-         }
-      }
+      setPacketInformation(other);
    }
 
    public ArrayList<Point2D> getPredictedContactPoints()
@@ -330,7 +272,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    {
       this.touchdownDuration = touchdownDuration;
    }
-   
+
    public void setTransferDuration(double transferDuration)
    {
       this.transferDuration = transferDuration;
@@ -340,7 +282,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    {
       return swingDuration;
    }
-   
+
    public double getTouchdownDuration()
    {
       return touchdownDuration;
@@ -353,6 +295,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
 
    /**
     * returns the amount of time this command is delayed on the controller side before executing
+    * 
     * @return the time to delay this command in seconds
     */
    public double getExecutionDelayTime()
@@ -362,6 +305,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
 
    /**
     * sets the amount of time this command is delayed on the controller side before executing
+    * 
     * @param delayTime the time in seconds to delay after receiving the command before executing
     */
    public void setExecutionDelayTime(double delayTime)
@@ -465,46 +409,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
          }
       }
 
-      boolean sameTimings = MathTools.epsilonEquals(swingDuration, footstepData.swingDuration, epsilon);
-      sameTimings = sameTimings && MathTools.epsilonEquals(transferDuration, footstepData.transferDuration, epsilon);
-      sameTimings = sameTimings && MathTools.epsilonEquals(touchdownDuration, footstepData.touchdownDuration, epsilon);
+      boolean sameTimings = MathTools.epsilonCompare(swingDuration, footstepData.swingDuration, epsilon);
+      sameTimings = sameTimings && MathTools.epsilonCompare(transferDuration, footstepData.transferDuration, epsilon);
+      sameTimings = sameTimings && MathTools.epsilonCompare(touchdownDuration, footstepData.touchdownDuration, epsilon);
 
-      boolean swingTrajectoryBlendDurationEquals = MathTools.epsilonEquals(swingTrajectoryBlendDuration, footstepData.swingTrajectoryBlendDuration, epsilon);
+      boolean swingTrajectoryBlendDurationEquals = MathTools.epsilonCompare(swingTrajectoryBlendDuration, footstepData.swingTrajectoryBlendDuration, epsilon);
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings
             && swingTrajectoryBlendDurationEquals;
-   }
-
-   public FootstepDataMessage(Random random)
-   {
-      TrajectoryType[] trajectoryTypes = TrajectoryType.values();
-      int randomOrdinal = random.nextInt(trajectoryTypes.length);
-
-      this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
-      this.orientation = RandomGeometry.nextQuaternion(random);
-      int numberOfPredictedContactPoints = random.nextInt(10);
-      this.predictedContactPoints = new ArrayList<>();
-
-      for (int i = 0; i < numberOfPredictedContactPoints; i++)
-      {
-         predictedContactPoints.add(new Point2D(random.nextDouble(), random.nextDouble()));
-      }
-
-      this.trajectoryType = trajectoryTypes[randomOrdinal];
-      this.swingHeight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.05);
-
-      this.swingDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
-      this.transferDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
-      //TODO: when the footstep data list ros message gets regenerated uncomment this! -shrews
-//      this.touchdownDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
-
-      if (trajectoryType == TrajectoryType.CUSTOM)
-      {
-         positionWaypoints = new Point3D[2];
-         positionWaypoints[0] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-         positionWaypoints[1] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-      }
    }
 
    /** {@inheritDoc} */

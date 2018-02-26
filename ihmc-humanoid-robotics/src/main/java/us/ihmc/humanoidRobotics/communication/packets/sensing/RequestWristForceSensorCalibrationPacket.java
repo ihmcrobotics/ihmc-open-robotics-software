@@ -13,6 +13,12 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
    }
 
    @Override
+   public void set(RequestWristForceSensorCalibrationPacket other)
+   {
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(RequestWristForceSensorCalibrationPacket other, double epsilon)
    {
       return true;

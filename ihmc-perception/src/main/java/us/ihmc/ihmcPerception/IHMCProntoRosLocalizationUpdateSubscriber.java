@@ -4,6 +4,7 @@ import org.ros.node.NodeConfiguration;
 
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -31,7 +32,7 @@ public class IHMCProntoRosLocalizationUpdateSubscriber
 			   timestamp = ppsTimeOffsetProvider.adjustTimeStampToRobotClock(timestamp);
 			   timeStampedTransform.setTimeStamp(timestamp);
 			   
-			   StampedPosePacket posePacket = new StampedPosePacket(frameID, timeStampedTransform, overlap);
+			   StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket(frameID, timeStampedTransform, overlap);
 			   posePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
 			   if (DEBUG) System.out.println("Pose update received. \ntimestamp: " + timeStampedTransform.getTimeStamp());
 			   

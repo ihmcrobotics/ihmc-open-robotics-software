@@ -1,20 +1,24 @@
 package us.ihmc.communication.packets;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.robotics.dataStructures.parameter.Parameter;
 
 public class ParameterListPacket extends Packet<ParameterListPacket>
 {
-   private List<Parameter> parameters;
+   public List<Parameter> parameters;
 
    public ParameterListPacket() // no-arg for serialization
    {
    }
 
-   public ParameterListPacket(List<Parameter> parameters)
+   @Override
+   public void set(ParameterListPacket other)
    {
-      this.parameters = parameters;
+      parameters = new ArrayList<>();
+      parameters.addAll(other.parameters);
+      setPacketInformation(other);
    }
 
    public List<Parameter> getParameters()
