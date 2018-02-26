@@ -5,9 +5,11 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 
+import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -43,13 +45,14 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
    public abstract double getTimeForResuming();
 
-   public abstract int getNumberOfFoosteps();
+   public abstract int getNumberOfFootsteps();
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
@@ -72,12 +75,14 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
    {
       setupTest();
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-      sendFootstepCommand(getNumberOfFoosteps());
+      sendFootstepCommand(getNumberOfFootsteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForPausing()));
       PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
       drcSimulationTestHelper.send(pauseWalkingMessage);
@@ -86,7 +91,29 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       pauseWalkingMessage = new PauseWalkingMessage(false);
       drcSimulationTestHelper.send(pauseWalkingMessage);
       walkPaused.set(false);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFoosteps() * (getSwingTime() + getTransferTime())));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      sendFootstepCommand(getNumberOfFootsteps());
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.95));
+
+      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+
+      pauseWalkingMessage = new PauseWalkingMessage(false);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
    private void sendFootstepCommand(int numberOfFootsteps)
@@ -145,42 +172,4 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-//   private class ControllerSpy extends SimpleRobotController
-//   {
-//      private final DRCRobotModel robotModel;
-//      private final FullHumanoidRobotModel fullHumanoidRobotModel;
-//      private final BipedSupportPolygons bipedSupportPolygons;
-//      private final HighLevelHumanoidControllerToolbox humanoidControllerToolbox;
-//      private final YoDouble copPositionX, copPositionY;
-//      private final DRCSimulationTestHelper drcSimulationTestHelper;
-//      private final FramePoint2D copPosition = new FramePoint2D();
-//      private boolean condition = true;
-//
-//      public ControllerSpy(DRCSimulationTestHelper drcSimulationTestHelper, DRCRobotModel robotModel)
-//      {
-//         this.robotModel = robotModel;
-//         this.fullHumanoidRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-//         this.bipedSupportPolygons = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory().getHighLevelHumanoidControllerToolbox()
-//                                                            .getBipedSupportPolygons();
-//         this.humanoidControllerToolbox = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory()
-//                                                                 .getHighLevelHumanoidControllerToolbox();
-//         this.copPositionX = (YoDouble) drcSimulationTestHelper.getYoVariable("icpPlannerDesiredCoPPositionX");
-//         this.copPositionY = (YoDouble) drcSimulationTestHelper.getYoVariable("icpPlannerDesiredCoPPositionY");
-//         this.drcSimulationTestHelper = drcSimulationTestHelper;
-//         drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
-//      }
-//
-//      @Override
-//      public void doControl()
-//      {
-//         copPosition.set(copPositionX.getDoubleValue(), copPositionY.getDoubleValue());
-//         if(condition && drcSimulationTestHelper.getSimulationConstructionSet().getTime() > getTimeForPausing() && drcSimulationTestHelper.getSimulationConstructionSet().getTime() < getTimeForResuming())
-//            condition &= (bipedSupportPolygons.getSupportPolygonInWorld().signedDistance(copPosition) < 0);
-//      }
-//
-//      public boolean didCoPRemainInsideTheSupportPolygon()
-//      {
-//         return condition;
-//      }
-//   }
 }

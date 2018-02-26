@@ -63,7 +63,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    }
 
    @Override
-   public int getNumberOfFoosteps()
+   public int getNumberOfFootsteps()
    {
       return 5;
    }
@@ -74,5 +74,13 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
    {
       super.testPauseWalking();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   @Override
+   public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
+   {
+      super.testPauseWalkingInitialTransfer();
    }
 }
