@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 
 @RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
@@ -32,7 +31,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public RecyclingArrayListPubSub<Point2D> predictedContactPoints = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 4);
+   public RecyclingArrayListPubSub<Point2D> predictedContactPoints = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 10);
 
    @RosExportedField(documentation = "The time to delay this command on the controller side before being executed.")
    public double executionDelayTime;
@@ -183,12 +182,5 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       }
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateFootstepDataMessage(this);
    }
 }

@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 
 @RosMessagePacket(documentation =
@@ -89,12 +88,5 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
          ret = "Foot SE3 trajectory: no SE3 trajectory points";
 
       return ret + ", robotSide = " + robotSide + ".";
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateFootTrajectoryMessage(this);
    }
 }

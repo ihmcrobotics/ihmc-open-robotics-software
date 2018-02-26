@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
 @RosMessagePacket(documentation = "This message commands the controller to move in taskspace the pelvis to the desired orientation while going through the specified trajectory points."
@@ -33,7 +32,7 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
     */
    public PelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)
    {
-      so3Trajectory = new SO3TrajectoryMessage(pelvisOrientationTrajectoryMessage.so3Trajectory);
+      so3Trajectory.set(pelvisOrientationTrajectoryMessage.so3Trajectory);
       setDestination(pelvisOrientationTrajectoryMessage.getDestination());
    }
 
@@ -50,7 +49,7 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
    @Override
    public void set(PelvisOrientationTrajectoryMessage other)
    {
-      so3Trajectory = new SO3TrajectoryMessage(other.so3Trajectory);
+      so3Trajectory.set(other.so3Trajectory);
       enableUserPelvisControlDuringWalking = other.enableUserPelvisControlDuringWalking;
       setPacketInformation(other);
    }
@@ -77,12 +76,5 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
          return "Pelvis SO3 trajectory: number of SO3 trajectory points = " + so3Trajectory.taskspaceTrajectoryPoints.size();
       else
          return "Pelvis SO3 trajectory: no SO3 trajectory points";
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validatePelvisOrientationTrajectoryMessage(this);
    }
 }

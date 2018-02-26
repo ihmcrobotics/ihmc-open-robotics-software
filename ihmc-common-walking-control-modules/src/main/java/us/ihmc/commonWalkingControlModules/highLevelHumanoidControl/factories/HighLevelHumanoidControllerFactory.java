@@ -520,6 +520,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, scheduler,
                                                                                                 packetCommunicator);
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
+      controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);
    }
 
