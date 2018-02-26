@@ -88,11 +88,11 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       sendFootstepCommand(0.0, getNumberOfFootsteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForPausing()));
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
+      PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
       drcSimulationTestHelper.send(pauseWalkingMessage);
       walkPaused.set(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForResuming()));
-      pauseWalkingMessage = new PauseWalkingMessage(false);
+      pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       drcSimulationTestHelper.send(pauseWalkingMessage);
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
@@ -128,12 +128,13 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       sendFootstepCommand(0.0, getNumberOfFootsteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
+      PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
+
       drcSimulationTestHelper.send(pauseWalkingMessage);
       walkPaused.set(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
-      pauseWalkingMessage = new PauseWalkingMessage(false);
+      pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       drcSimulationTestHelper.send(pauseWalkingMessage);
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
@@ -150,12 +151,12 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       sendFootstepCommand(getStepLength(), getNumberOfFootsteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
+      PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
       drcSimulationTestHelper.send(pauseWalkingMessage);
       walkPaused.set(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
-      pauseWalkingMessage = new PauseWalkingMessage(false);
+      pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       drcSimulationTestHelper.send(pauseWalkingMessage);
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
