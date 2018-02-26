@@ -309,23 +309,21 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (handMessages.get(robotSide) != null)
+            KinematicsToolboxRigidBodyMessage handMessage = handMessages.get(robotSide);
+            if (handMessage != null)
             {
                SelectionMatrix6D selectionMatrix6D = handSelectionMatrices.get(robotSide);
-               KinematicsToolboxRigidBodyMessage r = handMessages.get(robotSide);
-               r.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getAngularPart()));
-               SelectionMatrix3D linearPart = selectionMatrix6D.getLinearPart();
-               r.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(linearPart));
-               handMessages.get(robotSide).setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-               sendPacket(handMessages.get(robotSide));
+               handMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getAngularPart()));
+               handMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getLinearPart()));
+               handMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+               sendPacket(handMessage);
             }
          }
 
          if (chestMessage != null)
          {
             chestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(chestSelectionMatrix.getAngularPart()));
-            SelectionMatrix3D linearPart = chestSelectionMatrix.getLinearPart();
-            chestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(linearPart));
+            chestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(chestSelectionMatrix.getLinearPart()));
             chestMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(chestMessage);
          }
@@ -333,8 +331,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          if (pelvisMessage != null)
          {
             pelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(pelvisSelectionMatrix.getAngularPart()));
-            SelectionMatrix3D linearPart = pelvisSelectionMatrix.getLinearPart();
-            pelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(linearPart));
+            pelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(pelvisSelectionMatrix.getLinearPart()));
             pelvisMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(pelvisMessage);
          }
