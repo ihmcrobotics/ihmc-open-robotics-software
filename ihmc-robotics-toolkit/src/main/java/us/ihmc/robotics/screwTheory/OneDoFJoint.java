@@ -44,7 +44,9 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    @Deprecated
    private boolean resetIntegrator = false;
 
+   @Deprecated
    private double qDesired;
+   @Deprecated
    private double qdDesired;
    @Deprecated
    private double kp;
@@ -426,13 +428,15 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       resetIntegrator = true;
    }
 
-   
+
+   @Deprecated
    public double getqDesired()
    {
       return qDesired;
    }
 
-   
+
+   @Deprecated
    public double getQdDesired()
    {
       return qdDesired;
@@ -450,17 +454,20 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return kd;
    }
 
+   @Deprecated
    public abstract boolean isPassiveJoint();
 
    /*
     * VRC HACKS
     */
 
+   @Deprecated
    public void setqDesired(double qDesired)
    {
       this.qDesired = qDesired;
    }
 
+   @Deprecated
    public void setQdDesired(double qdDesired)
    {
       this.qdDesired = qdDesired;
