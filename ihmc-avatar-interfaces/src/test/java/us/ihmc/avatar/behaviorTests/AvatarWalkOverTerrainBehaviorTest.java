@@ -4,11 +4,13 @@ import org.junit.Before;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
+import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
@@ -16,11 +18,15 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehavior
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkOverTerrainGoalPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
 import java.io.IOException;
 
@@ -28,7 +34,7 @@ import static us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEnd
 
 public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTestInterface
 {
-   private DRCSimulationStarter simulationStarter;
+   private DRCSimulationTestHelper simulationTestHelper;
    private PlanarRegionsList cinderBlockField;
 
    @Before
@@ -38,8 +44,8 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
                                                                             CINDER_BLOCK_COURSE_WIDTH_X_IN_NUMBER_OF_BLOCKS,
                                                                             CINDER_BLOCK_COURSE_LENGTH_Y_IN_NUMBER_OF_BLOCKS, CINDER_BLOCK_HEIGHT_VARIATION, - 0.03);
 
-
-      simulationStarter = new DRCSimulationStarter(getRobotModel(), createCommonAvatarInterface(cinderBlockField));
+      SimulationTestingParameters parameters = SimulationTestingParameters.createFromSystemProperties();
+      simulationTestHelper = new DRCSimulationTestHelper(parameters, getRobotModel(), createCommonAvatarInterface(cinderBlockField));
    }
 
    private static CommonAvatarEnvironmentInterface createCommonAvatarInterface(PlanarRegionsList planarRegionsList)
@@ -50,13 +56,15 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
                                                      allowablePenetrationThickness, generateGroundPlane);
    }
 
-   public void testWalkOverCinderBlocks() throws IOException
+   public void testWalkOverCinderBlocks() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException, ControllerFailureException
    {
       DRCNetworkModuleParameters networkModuleParameters = new DRCNetworkModuleParameters();
       networkModuleParameters.enableLocalControllerCommunicator(true);
       networkModuleParameters.enableBehaviorModule(true);
       networkModuleParameters.enableFootstepPlanningToolbox(true);
-      simulationStarter.startSimulation(networkModuleParameters, true);
+      simulationTestHelper.setNetworkProcessorParameters(networkModuleParameters);
+
+      simulationTestHelper.createSimulation(getClass().getSimpleName(), !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(), true);
 
       PacketCommunicator behaviorCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
       behaviorCommunicator.connect();
@@ -68,14 +76,14 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
       Point3D goalPosition = new Point3D(courseLength, 0.0, 0.0);
 
       behaviorCommunicator.send(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockField));
-      behaviorCommunicator.send(new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WAlK_OVER_TERRAIN));
       behaviorCommunicator.send(new WalkOverTerrainGoalPacket(goalPosition, new Quaternion()));
+      behaviorCommunicator.send(new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WAlK_OVER_TERRAIN));
 
-      FloatingJoint pelvisJoint = simulationStarter.getSDFRobot().getRootJoint();
+      FloatingJoint pelvisJoint = simulationTestHelper.getRobot().getRootJoint();
       Point3D pelvisPosition = new Point3D();
       while(pelvisPosition.distanceXY(goalPosition) > 0.1)
       {
-         ThreadTools.sleep(2000);
+         simulationTestHelper.simulateAndBlock(2.0);
          pelvisJoint.getPosition(pelvisPosition);
       }
    }
