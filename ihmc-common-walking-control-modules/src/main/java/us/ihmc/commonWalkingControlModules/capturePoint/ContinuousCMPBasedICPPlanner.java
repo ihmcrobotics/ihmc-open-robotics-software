@@ -314,7 +314,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
       this.initialTime.set(initialTime);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
-      updateTransferPlan();
+      updateTransferPlan(false);
    }
 
    /** {@inheritDoc} */
@@ -331,7 +331,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
          transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       }
 
-      updateTransferPlan();
+      updateTransferPlan(false);
    }
 
 
@@ -375,13 +375,13 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
       yoSingleSupportInitialCoM.set(desiredCoMPosition);
       singleSupportInitialCoM.set(desiredCoMPosition);
-      updateSingleSupportPlan();
+      updateSingleSupportPlan(false);
    }
 
 
    /** {@inheritDoc} */
    @Override
-   protected void updateTransferPlan()
+   protected void updateTransferPlan(boolean maintainContinuity)
    {
       RobotSide transferToSide = this.transferToSide.getEnumValue();
       if (transferToSide == null)
@@ -402,7 +402,7 @@ public class ContinuousCMPBasedICPPlanner extends AbstractICPPlanner
 
    /** {@inheritDoc} */
    @Override
-   protected void updateSingleSupportPlan()
+   protected void updateSingleSupportPlan(boolean maintainContinuity)
    {
       RobotSide supportSide = this.supportSide.getEnumValue();
 
