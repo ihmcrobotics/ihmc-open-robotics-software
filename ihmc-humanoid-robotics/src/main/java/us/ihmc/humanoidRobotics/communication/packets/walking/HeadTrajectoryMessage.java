@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
 @RosMessagePacket(documentation =
@@ -24,7 +23,6 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
     */
    public HeadTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -33,14 +31,13 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
     */
    public HeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
    {
-      so3Trajectory = new SO3TrajectoryMessage(headTrajectoryMessage.so3Trajectory);
+      so3Trajectory.set(headTrajectoryMessage.so3Trajectory);
       setDestination(headTrajectoryMessage.getDestination());
    }
 
    @Override
    public void set(HeadTrajectoryMessage other)
    {
-      so3Trajectory = new SO3TrajectoryMessage();
       so3Trajectory.set(other.so3Trajectory);
       setPacketInformation(other);
    }
@@ -61,11 +58,5 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
       if (!so3Trajectory.epsilonEquals(other.so3Trajectory, epsilon))
          return false;
       return true;
-   }
-
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateHeadTrajectoryMessage(this);
    }
 }

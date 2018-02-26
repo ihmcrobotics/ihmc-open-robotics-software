@@ -5,7 +5,6 @@ import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation = "This mesage commands the controller to move the pelvis to a new height in the trajectory frame while going through the specified trajectory points."
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
@@ -27,7 +26,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     */
    public PelvisHeightTrajectoryMessage()
    {
-      euclideanTrajectory = new EuclideanTrajectoryMessage();
       euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
       euclideanTrajectory.selectionMatrix.xSelected = false;
       euclideanTrajectory.selectionMatrix.ySelected = false;
@@ -53,7 +51,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    {
       enableUserPelvisControl = other.enableUserPelvisControl;
       enableUserPelvisControlDuringWalking = other.enableUserPelvisControlDuringWalking;
-      euclideanTrajectory = new EuclideanTrajectoryMessage();
       euclideanTrajectory.set(other.euclideanTrajectory);
    }
 
@@ -106,18 +103,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    public EuclideanTrajectoryMessage getEuclideanTrajectory()
    {
       return euclideanTrajectory;
-   }
-
-   /**
-    * Returns whether this message is valid
-    * 
-    * @return returns null if the message is valid, returns a string describing why the message is
-    *         invalid if it is invalid
-    */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validatePelvisHeightTrajectoryMessage(this);
    }
 
    /**

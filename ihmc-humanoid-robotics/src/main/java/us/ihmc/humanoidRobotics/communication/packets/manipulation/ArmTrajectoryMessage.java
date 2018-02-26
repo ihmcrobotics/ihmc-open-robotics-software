@@ -4,7 +4,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move an arm in jointspace to the desired joint angles while going through the specified trajectory points."
@@ -87,12 +86,5 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
          return "Arm 1D trajectories: number of joints = " + jointspaceTrajectory.jointTrajectoryMessages.size() + ", robotSide = " + robotSide;
       else
          return "Arm 1D trajectories: no joint trajectory, robotSide = " + robotSide;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateArmTrajectoryMessage(this);
    }
 }

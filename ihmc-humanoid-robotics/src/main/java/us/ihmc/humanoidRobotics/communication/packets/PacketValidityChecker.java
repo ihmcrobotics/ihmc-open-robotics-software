@@ -30,6 +30,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationT
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -221,7 +222,7 @@ public abstract class PacketValidityChecker
     * @param message
     * @return null if the packet is valid, or the error message.
     */
-   public static String validateFootstepDataMessage(AdjustFootstepMessage message)
+   public static String validateAdjustFootstepMessage(AdjustFootstepMessage message)
    {
       ObjectErrorType packetFieldErrorType;
 
@@ -684,6 +685,73 @@ public abstract class PacketValidityChecker
          errorMessage = validateDesiredAccelerationsMessage(message.getDesiredAccelerations());
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
+
+      return null;
+   }
+
+   public static String validateWholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage message)
+   {
+      String errorMessage = validatePacket(message);
+      if (errorMessage != null)
+         return errorMessage;
+
+      if (!message.leftHandTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = validateHandTrajectoryMessage(message.leftHandTrajectoryMessage)) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(message.leftHandTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
+            return "The robotSide of leftHandTrajectoryMessage field is inconsistent with its name.";
+      }
+      if (!message.leftHandTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = validateHandTrajectoryMessage(message.rightHandTrajectoryMessage)) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(message.rightHandTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
+            return "The robotSide of rightHandTrajectoryMessage field is inconsistent with its name.";
+      }
+      if (!message.leftArmTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.isEmpty())
+      {
+         if ((errorMessage = validateArmTrajectoryMessage(message.leftArmTrajectoryMessage)) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(message.leftArmTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
+            return "The robotSide of leftArmTrajectoryMessage field is inconsistent with its name.";
+      }
+      if (!message.rightArmTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.isEmpty())
+      {
+         if ((errorMessage = validateArmTrajectoryMessage(message.rightArmTrajectoryMessage)) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(message.rightArmTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
+            return "The robotSide of rightArmTrajectoryMessage field is inconsistent with its name.";
+      }
+      if (!message.chestTrajectoryMessage.so3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = validateChestTrajectoryMessage(message.chestTrajectoryMessage)) != null)
+            return errorMessage;
+      }
+      if (!message.pelvisTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = validatePelvisTrajectoryMessage(message.pelvisTrajectoryMessage)) != null)
+            return errorMessage;
+      }
+      if (!message.headTrajectoryMessage.so3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = validateHeadTrajectoryMessage(message.headTrajectoryMessage)) != null)
+            return errorMessage;
+      }
+      if (!message.leftFootTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = validateFootTrajectoryMessage(message.leftFootTrajectoryMessage)) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(message.leftFootTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
+            return "The robotSide of leftFootTrajectoryMessage field is inconsistent with its name.";
+      }
+      if (!message.rightFootTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      {
+         if ((errorMessage = validateFootTrajectoryMessage(message.rightFootTrajectoryMessage)) != null)
+            return errorMessage;
+         else if (RobotSide.fromByte(message.rightFootTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
+            return "The robotSide of rightFootTrajectoryMessage field is inconsistent with its name.";
+      }
 
       return null;
    }

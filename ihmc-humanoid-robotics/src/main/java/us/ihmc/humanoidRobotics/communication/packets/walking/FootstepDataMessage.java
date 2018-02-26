@@ -14,7 +14,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -308,12 +307,5 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings
             && swingTrajectoryBlendDurationEquals && swingTrajectoriesEqual;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateFootstepDataMessage(this);
    }
 }
