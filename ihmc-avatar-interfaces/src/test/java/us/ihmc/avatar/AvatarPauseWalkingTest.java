@@ -82,7 +82,26 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       setupTest();
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-      sendFootstepCommand(getNumberOfFootsteps());
+      sendFootstepCommand(0.0, getNumberOfFootsteps());
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForPausing()));
+      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForResuming()));
+      pauseWalkingMessage = new PauseWalkingMessage(false);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      sendFootstepCommand(getStepLength(), getNumberOfFootsteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForPausing()));
       PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
       drcSimulationTestHelper.send(pauseWalkingMessage);
@@ -102,7 +121,7 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
-      sendFootstepCommand(getNumberOfFootsteps());
+      sendFootstepCommand(0.0, getNumberOfFootsteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.95));
 
       PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
@@ -116,17 +135,39 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
-   private void sendFootstepCommand(int numberOfFootsteps)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      sendFootstepCommand(getStepLength(), getNumberOfFootsteps());
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.95));
+
+      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage(true);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+
+      pauseWalkingMessage = new PauseWalkingMessage(false);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+   }
+
+   private void sendFootstepCommand(double stepLength, int numberOfFootsteps)
    {
       FootstepDataListMessage footstepMessage = new FootstepDataListMessage(getSwingTime(), getTransferTime());
       RobotSide side = RobotSide.LEFT;
       Quaternion orientation = new Quaternion();
       for (int i = 1; i < numberOfFootsteps; i++)
       {
-         addFootstep(new Point3D(i * getStepLength(), side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side, footstepMessage);
+         addFootstep(new Point3D(i * stepLength, side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side, footstepMessage);
          side = side.getOppositeSide();
       }
-      addFootstep(new Point3D((numberOfFootsteps - 1) * getStepLength(), side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side,
+      addFootstep(new Point3D((numberOfFootsteps - 1) * stepLength, side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side,
                   footstepMessage);
       drcSimulationTestHelper.send(footstepMessage);
    }
