@@ -41,7 +41,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Override
    public double getStepLength()
    {
-      return 0.0;
+      return 0.3;
    }
 
    @Override
@@ -53,13 +53,13 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Override
    public double getTimeForPausing()
    {
-      return 3.3;
+      return 2.55;
    }
 
    @Override
    public double getTimeForResuming()
    {
-      return 0.1;
+      return 2.0;
    }
 
    @Override
@@ -79,8 +79,24 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 100000)
    @Override
+   public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
+   {
+      super.testPauseWalkingForward();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   @Override
    public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
    {
       super.testPauseWalkingInitialTransfer();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   @Override
+   public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
+   {
+      super.testPauseWalkingForwardInitialTransfer();
    }
 }
