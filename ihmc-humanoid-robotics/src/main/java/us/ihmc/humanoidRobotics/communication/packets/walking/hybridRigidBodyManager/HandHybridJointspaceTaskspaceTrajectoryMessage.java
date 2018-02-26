@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -33,19 +31,6 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    }
 
    /**
-    * Random constructor for unit testing this packet
-    * @param random seed
-    */
-   public HandHybridJointspaceTaskspaceTrajectoryMessage(Random random)
-   {
-      robotSide = RobotSide.generateRandomRobotSide(random);
-      this.taskspaceTrajectoryMessage = new SE3TrajectoryMessage(random);
-      this.jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(random);
-      jointspaceTrajectoryMessage.queueingProperties.set(taskspaceTrajectoryMessage.getQueueingProperties());
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
     * Clone constructor.
     * @param message to clone.
     */
@@ -57,21 +42,15 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
       setUniqueId(hybridJointspaceTaskspaceMessage.getUniqueId());
    }
 
-   /**
-    * Typical constructor to use, pack the two taskspace and joint space commands.
-    * If these messages conflict, the qp weights and gains will dictate the desireds
-    * @param taskspaceTrajectoryMessage
-    * @param jointspaceTrajectoryMessage
-    */
-   public HandHybridJointspaceTaskspaceTrajectoryMessage(RobotSide robotSide, SE3TrajectoryMessage taskspaceTrajectoryMessage, JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
+   @Override
+   public void set(HandHybridJointspaceTaskspaceTrajectoryMessage other)
    {
-      if (!taskspaceTrajectoryMessage.getQueueingProperties().epsilonEquals(jointspaceTrajectoryMessage.getQueueingProperties(), 0.0))
-         throw new IllegalArgumentException("The trajectory messages should have the same queueing properties.");
-
-      this.robotSide = robotSide;
-      this.taskspaceTrajectoryMessage = new SE3TrajectoryMessage(taskspaceTrajectoryMessage);
-      this.jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      robotSide = other.robotSide;
+      taskspaceTrajectoryMessage = new SE3TrajectoryMessage();
+      taskspaceTrajectoryMessage.set(other.taskspaceTrajectoryMessage);
+      jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
+      jointspaceTrajectoryMessage.set(other.jointspaceTrajectoryMessage);
+      setPacketInformation(other);
    }
 
    public SE3TrajectoryMessage getTaskspaceTrajectoryMessage()

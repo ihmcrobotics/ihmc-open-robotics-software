@@ -4,19 +4,20 @@ import com.google.common.math.DoubleMath;
 
 public class SetDoubleParameterPacket extends Packet<SetDoubleParameterPacket>
 {
-   private final String parameterName;
-   private final double parameterValue;
+   public String parameterName;
+   public double parameterValue;
 
    // Empty constructor for serialization
    public SetDoubleParameterPacket()
    {
-      this(null, Double.NaN);
    }
 
-   public SetDoubleParameterPacket(String parameterName, double parameterValue)
+   @Override
+   public void set(SetDoubleParameterPacket other)
    {
-      this.parameterName = parameterName;
-      this.parameterValue = parameterValue;
+      parameterName = other.parameterName;
+      parameterValue = other.parameterValue;
+      setPacketInformation(other);
    }
 
    public String getParameterName()

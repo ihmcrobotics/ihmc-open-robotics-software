@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -64,7 +65,7 @@ public class WholeBodyTrajectoryToolboxMessageTools
          waypoints[i] = trajectoryToDiscretize.compute(waypointTime);
       }
 
-      return new WaypointBasedTrajectoryMessage(endEffector, waypointTimes, waypoints, selectionMatrix);
+      return HumanoidMessageTools.createWaypointBasedTrajectoryMessage(endEffector, waypointTimes, waypoints, selectionMatrix);
    }
 
    public static double[] createDefaultExplorationAmplitudeArray(ConfigurationSpaceName... configurationSpaceNames)

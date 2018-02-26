@@ -10,6 +10,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -201,13 +202,13 @@ public class CommunicationBridge implements CommunicationBridgeInterface
 
    public void sendToUI(String key, double value)
    {
-      SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, value);
+      SimpleCoactiveBehaviorDataPacket newPacket = HumanoidMessageTools.createSimpleCoactiveBehaviorDataPacket(key, value);
       sendPacketToUI(newPacket);
    }
 
    public void sendToBehavior(String key, double value)
    {
-      SimpleCoactiveBehaviorDataPacket newPacket = new SimpleCoactiveBehaviorDataPacket(key, value);
+      SimpleCoactiveBehaviorDataPacket newPacket = HumanoidMessageTools.createSimpleCoactiveBehaviorDataPacket(key, value);
       sendPacketToBehavior(newPacket);
    }
 }

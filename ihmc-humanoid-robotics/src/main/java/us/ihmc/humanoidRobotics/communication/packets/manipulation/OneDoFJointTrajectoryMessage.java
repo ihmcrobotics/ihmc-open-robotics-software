@@ -1,13 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
 @RosMessagePacket(documentation =
@@ -29,70 +27,17 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
       super();
    }
 
-   public OneDoFJointTrajectoryMessage(Random random)
+   public OneDoFJointTrajectoryMessage(OneDoFJointTrajectoryMessage other)
    {
-      this(random.nextInt(16) + 1);
-
+      trajectoryPoints = new TrajectoryPoint1DMessage[other.getNumberOfTrajectoryPoints()];
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
       {
-         trajectoryPoints[i] = new TrajectoryPoint1DMessage(random);
+         trajectoryPoints[i] = new TrajectoryPoint1DMessage(other.getTrajectoryPoint(i));
       }
+      weight = other.getWeight();
    }
 
-   public OneDoFJointTrajectoryMessage(OneDoFJointTrajectoryMessage trajectory1dMessage)
-   {
-      trajectoryPoints = new TrajectoryPoint1DMessage[trajectory1dMessage.getNumberOfTrajectoryPoints()];
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-      {
-         trajectoryPoints[i] = new TrajectoryPoint1DMessage(trajectory1dMessage.getTrajectoryPoint(i));
-      }
-      this.weight = trajectory1dMessage.getWeight();
-   }
-
-   public OneDoFJointTrajectoryMessage(SimpleTrajectoryPoint1DList trajectoryData)
-   {
-      int numberOfPoints = trajectoryData.getNumberOfTrajectoryPoints();
-      trajectoryPoints = new TrajectoryPoint1DMessage[numberOfPoints];
-
-      for (int i=0; i<numberOfPoints; i++)
-      {
-         SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(i);
-         trajectoryPoints[i] = new TrajectoryPoint1DMessage(trajectoryPoint);
-      }
-   }
-
-   /**
-    * Use this constructor to go straight to the given end point.
-    * @param trajectoryTime how long it takes to reach the desired position.
-    * @param desiredPosition desired end point position.
-    */
-   public OneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition)
-   {
-      trajectoryPoints = new TrajectoryPoint1DMessage[] {new TrajectoryPoint1DMessage(trajectoryTime, desiredPosition, 0.0)};
-   }
-   
-   /**
-    * Use this constructor to go straight to the given end point.
-    * @param trajectoryTime how long it takes to reach the desired position.
-    * @param desiredPosition desired end point position.
-    * @param weight the weight for the qp
-    */
-   public OneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition, double weight)
-   {
-      this(trajectoryTime, desiredPosition);
-      this.weight = weight;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory points.
-    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, double, double)} for each trajectory point afterwards.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
-    */
-   public OneDoFJointTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      trajectoryPoints = new TrajectoryPoint1DMessage[numberOfTrajectoryPoints];
-   }
-
+   @Override
    public void set(OneDoFJointTrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
@@ -101,6 +46,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          trajectoryPoints[i].set(other.trajectoryPoints[i]);
       weight = other.weight;
+      setPacketInformation(other);
    }
 
    /**
@@ -113,7 +59,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, double position, double velocity)
    {
       rangeCheck(trajectoryPointIndex);
-      trajectoryPoints[trajectoryPointIndex] = new TrajectoryPoint1DMessage(time, position, velocity);
+      trajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createTrajectoryPoint1DMessage(time, position, velocity);
    }
 
    public void getTrajectoryPoints(SimpleTrajectoryPoint1DList trajectoryPointListToPack)

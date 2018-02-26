@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Random;
-
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
@@ -13,13 +12,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.QuaternionBasedTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
@@ -53,22 +50,6 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public EuclideanTrajectoryMessage(Random random)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
-      int randomNumberOfPoints = random.nextInt(16) + 1;
-      taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[randomNumberOfPoints];
-      for (int i = 0; i < randomNumberOfPoints; i++)
-      {
-         taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(random);
-      }
-
-      useCustomControlFrame = random.nextBoolean();
-      controlFramePose.set(RandomGeometry.nextQuaternion(random), RandomGeometry.nextVector3D(random));
-      queueingProperties = new QueueableMessage(random);
-   }
-
    public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage other)
    {
       int numberOfPoints = other.getNumberOfTrajectoryPoints();
@@ -92,49 +73,11 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    }
 
    /**
-    * set a single point
-    * 
-    * @param trajectoryTime the duration of the trajectory
-    * @param desiredPosition the desired end position
-    * @param trajectoryReferenceFrameId the frame id the trajectory will be executed in
-    */
-   public EuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, long trajectoryReferenceFrameId)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      Vector3D zeroLinearVelocity = new Vector3D();
-      taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[] {
-            new EuclideanTrajectoryPointMessage(trajectoryTime, desiredPosition, zeroLinearVelocity)};
-      frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
-   }
-
-   /**
-    * set a single point
-    * 
-    * @param trajectoryTime the duration of the trajectory
-    * @param desiredPosition the desired end position
-    * @param trajectoryReferenceFrame the frame the trajectory will be executed in
-    */
-   public EuclideanTrajectoryMessage(double trajectoryTime, Point3DReadOnly desiredPosition, ReferenceFrame trajectoryReferenceFrame)
-   {
-      this(trajectoryTime, desiredPosition, trajectoryReferenceFrame.getNameBasedHashCode());
-   }
-
-   /**
-    * creates a new empty message with a trajectory point list the size of numberOfTrajectoryPoints
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points in this message
-    */
-   public EuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfTrajectoryPoints];
-   }
-
-   /**
     * set this message to the have the same contents of the other message
     * 
     * @param other the other message
     */
+   @Override
    public void set(EuclideanTrajectoryMessage other)
    {
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
@@ -146,14 +89,14 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
          taskspaceTrajectoryPoints[i] = new EuclideanTrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       }
 
-      setUniqueId(other.getUniqueId());
-      setDestination(other.getDestination());
       selectionMatrix.set(other.selectionMatrix);
       frameInformation.set(other.getFrameInformation());
       weightMatrix.set(other.weightMatrix);
       useCustomControlFrame = other.useCustomControlFrame;
       controlFramePose.set(other.controlFramePose);
       queueingProperties.set(other.queueingProperties);
+
+      setPacketInformation(other);
    }
 
    /**
@@ -191,7 +134,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = new EuclideanTrajectoryPointMessage(time, position, linearVelocity);
+      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createEuclideanTrajectoryPointMessage(time, position, linearVelocity);
    }
 
    /**
@@ -210,7 +153,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = new EuclideanTrajectoryPointMessage(time, position, linearVelocity);
+      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createEuclideanTrajectoryPointMessage(time, position, linearVelocity);
    }
 
    /**
@@ -255,7 +198,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix3D)
    {
       if (selectionMatrix == null)
-         selectionMatrix = new SelectionMatrix3DMessage(selectionMatrix3D);
+         selectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix3D);
       else
          selectionMatrix.set(selectionMatrix3D);
    }
@@ -278,7 +221,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    public void setWeightMatrix(WeightMatrix3D weightMatrix3D)
    {
       if (weightMatrix == null)
-         weightMatrix = new WeightMatrix3DMessage(weightMatrix3D);
+         weightMatrix = MessageTools.createWeightMatrix3DMessage(weightMatrix3D);
       else
          weightMatrix.set(weightMatrix3D);
    }

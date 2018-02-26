@@ -74,7 +74,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
    private void computHandTrajectoryMessage(WholeBodyTrajectoryToolboxOutputStatus solution, RobotSide robotSide)
    {
       int numberOfTrajectoryPoints = solution.getRobotConfigurations().length;
-      HandTrajectoryMessage trajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
+      HandTrajectoryMessage trajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
 
       trajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
       trajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
@@ -133,7 +133,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
    private void computeChestTrajectoryMessage(WholeBodyTrajectoryToolboxOutputStatus solution)
    {
       int numberOfTrajectoryPoints = solution.getRobotConfigurations().length;
-      ChestTrajectoryMessage trajectoryMessage = new ChestTrajectoryMessage(numberOfTrajectoryPoints);
+      ChestTrajectoryMessage trajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(numberOfTrajectoryPoints);
 
       trajectoryMessage.getSO3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
       trajectoryMessage.getSO3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
@@ -182,7 +182,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
    private void computePelvisTrajectoryMessage(WholeBodyTrajectoryToolboxOutputStatus solution)
    {
       int numberOfTrajectoryPoints = solution.getRobotConfigurations().length;
-      PelvisTrajectoryMessage trajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
+      PelvisTrajectoryMessage trajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(numberOfTrajectoryPoints);
 
       trajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(worldFrame);
       trajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);

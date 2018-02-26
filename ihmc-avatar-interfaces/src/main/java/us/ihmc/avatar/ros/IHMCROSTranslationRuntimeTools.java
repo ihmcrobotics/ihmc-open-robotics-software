@@ -18,10 +18,12 @@ import ihmc_msgs.HandTrajectoryRosMessage;
 import ihmc_msgs.HeadTrajectoryRosMessage;
 import ihmc_msgs.PelvisTrajectoryRosMessage;
 import ihmc_msgs.Point2dRosMessage;
+import ihmc_msgs.QueueableRosMessage;
 import ihmc_msgs.WholeBodyTrajectoryRosMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -114,9 +116,18 @@ public class IHMCROSTranslationRuntimeTools
       footsteps.defaultSwingDuration = message.getDefaultSwingDuration();
       footsteps.defaultTransferDuration = message.getDefaultTransferDuration();
       footsteps.setUniqueId(message.getUniqueId());
-      footsteps.getQueueingProperties().executionMode = ExecutionMode.values[message.getQueueingProperties().getExecutionMode()];
+      try
+      {
+         footsteps.queueingProperties.set((QueueableMessage) convertToIHMCMessage(message.getQueueingProperties()));
+      }
+      catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchFieldException | InstantiationException
+            | RosEnumConversionException e1)
+      {
+         e1.printStackTrace();
+      }
       footsteps.finalTransferDuration = message.getFinalTransferDuration();
       footsteps.executionTiming = ExecutionTiming.values[message.getExecutionTiming()];
+      footsteps.offsetFootstepsWithExecutionError = message.getOffsetFootstepsWithExecutionError();
 
       ArrayList<FootstepDataMessage> stepData = new ArrayList<>();
       for (FootstepDataRosMessage footstepDataRosMessage : message.getFootstepDataList())
@@ -149,6 +160,8 @@ public class IHMCROSTranslationRuntimeTools
       ihmcMessage.setUniqueId(message.getUniqueId());
       ihmcMessage.setSwingDuration(message.getSwingDuration());
       ihmcMessage.setTransferDuration(message.getTransferDuration());
+      ihmcMessage.setTouchdownDuration(message.getTouchdownDuration());
+      ihmcMessage.setSwingTrajectoryBlendDuration(message.getSwingTrajectoryBlendDuration());
 
       ArrayList<Point2D> predictedContactPoints = new ArrayList<>();
       for (Point2dRosMessage point2dRosMessage : message.getPredictedContactPoints())
@@ -304,6 +317,8 @@ public class IHMCROSTranslationRuntimeTools
       message.setTrajectoryType((byte) footstep.getTrajectoryType().ordinal());
       message.setSwingDuration(footstep.swingDuration);
       message.setTransferDuration(footstep.transferDuration);
+      message.setTouchdownDuration(footstep.touchdownDuration);
+      message.setSwingTrajectoryBlendDuration(footstep.swingTrajectoryBlendDuration);
 
       List<Point2dRosMessage> predictedContatcPointsRos = new ArrayList<>();
       if (footstep.predictedContactPoints != null)
@@ -340,9 +355,17 @@ public class IHMCROSTranslationRuntimeTools
       message.setDefaultSwingDuration(footstepList.defaultSwingDuration);
       message.setDefaultTransferDuration(footstepList.defaultTransferDuration);
       message.setUniqueId(footstepList.getUniqueId());
-      message.getQueueingProperties().setExecutionMode((byte) footstepList.getQueueingProperties().executionMode.ordinal());
       message.setFinalTransferDuration(footstepList.finalTransferDuration);
+      message.setOffsetFootstepsWithExecutionError(footstepList.offsetFootstepsWithExecutionError);
       message.setExecutionTiming((byte) footstepList.getExecutionTiming().ordinal());
+      try
+      {
+         message.setQueueingProperties((QueueableRosMessage) convertToRosMessage(footstepList.queueingProperties));
+      }
+      catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e1)
+      {
+         e1.printStackTrace();
+      }
 
       List<FootstepDataRosMessage> convertedFootsteps = new ArrayList<>();
       for (FootstepDataMessage footstepDataMessage : footstepList.footstepDataList)

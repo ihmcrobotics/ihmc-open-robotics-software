@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -69,7 +70,7 @@ public class FootstepListBehavior extends AbstractBehavior
 
    public void set(ArrayList<Footstep> footsteps, double swingTime, double transferTime)
    {
-      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime,transferTime);
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       for (int i = 0; i < footsteps.size(); i++)
       {
@@ -79,7 +80,7 @@ public class FootstepListBehavior extends AbstractBehavior
          footstep.getPose(position, orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstepSide, position, orientation);
          footstepDataList.add(footstepData);
       }
       set(footstepDataList);
@@ -203,7 +204,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorAborted()
    {
-      sendPacketToController(new PauseWalkingMessage(true));
+      sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(true));
       isPaused.set(true);
       isStopped.set(true);
    }
@@ -211,7 +212,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorPaused()
    {
-      sendPacketToController(new PauseWalkingMessage(true));
+      sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(true));
       isPaused.set(true);
       if (DEBUG)
          PrintTools.debug(this, "Pausing Behavior");
@@ -220,7 +221,7 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorResumed()
    {
-      sendPacketToController(new PauseWalkingMessage(false));
+      sendPacketToController(HumanoidMessageTools.createPauseWalkingMessage(false));
       isPaused.set(false);
       isStopped.set(false);
       isRobotDoneWalking.set(false);

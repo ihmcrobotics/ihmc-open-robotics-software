@@ -16,6 +16,15 @@ public class LocalVideoPacket extends Packet<LocalVideoPacket>
 
    }
 
+   @Override
+   public void set(LocalVideoPacket other)
+   {
+      timeStamp = other.timeStamp;
+      image = other.image;
+      intrinsicParameters =  other.intrinsicParameters;
+      setPacketInformation(other);
+   }
+
    public long getTimeStamp()
    {
       return timeStamp;
@@ -33,13 +42,6 @@ public class LocalVideoPacket extends Packet<LocalVideoPacket>
 
    public void setIntrinsicParameters(IntrinsicParameters intrinsicParameters)
    {
-      this.intrinsicParameters = intrinsicParameters;
-   }
-
-   public LocalVideoPacket(long timeStamp, BufferedImage image, IntrinsicParameters intrinsicParameters)
-   {
-      this.timeStamp = timeStamp;
-      this.image = image;
       this.intrinsicParameters = intrinsicParameters;
    }
 

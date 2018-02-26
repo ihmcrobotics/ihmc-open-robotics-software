@@ -18,14 +18,15 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
    
    public ControllerCrashNotificationPacket()
    {
-      
-   }
-   
-   public ControllerCrashNotificationPacket(CrashLocation location, String stackTrace)
-   {
       setDestination(PacketDestination.BROADCAST);
-      this.location = location;
-      this.stacktrace = stackTrace;
+   }
+
+   @Override
+   public void set(ControllerCrashNotificationPacket other)
+   {
+      location = other.location;
+      stacktrace = other.stacktrace;
+      setPacketInformation(other);
    }
 
    @Override

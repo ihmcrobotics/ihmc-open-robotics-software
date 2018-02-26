@@ -1,9 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
-
 
 public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacket>
 {
@@ -14,9 +11,11 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
    {
    }
 
-   public HumanoidBehaviorTypePacket(HumanoidBehaviorType behaviorType)
+   @Override
+   public void set(HumanoidBehaviorTypePacket other)
    {
-      this.behaviorType = behaviorType;
+      behaviorType = other.behaviorType;
+      setPacketInformation(other);
    }
 
    public HumanoidBehaviorType getBehaviorType()
@@ -28,10 +27,5 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
    public boolean epsilonEquals(HumanoidBehaviorTypePacket other, double epsilon)
    {
       return this.getBehaviorType().equals(other.getBehaviorType());
-   }
-
-   public HumanoidBehaviorTypePacket(Random random)
-   {
-      this(HumanoidBehaviorType.values()[random.nextInt(HumanoidBehaviorType.values().length)]);
    }
 }

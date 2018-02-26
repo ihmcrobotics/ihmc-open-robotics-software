@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
@@ -237,7 +238,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       hasSentMessageToController.set(false);
       hasSolverFailed.set(false);
       solutionSentToController = null;
-      ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.WAKE_UP);
+      ToolboxStateMessage message = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacket(message);
 
@@ -256,8 +257,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             Quaternion desiredHandOrientation = new Quaternion(yoDesiredHandOrientation);
             RigidBody hand = fullRobotModel.getHand(robotSide);
             ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-            KinematicsToolboxRigidBodyMessage handMessage = new KinematicsToolboxRigidBodyMessage(hand, handControlFrame, desiredHandPosition,
-                                                                                                  desiredHandOrientation);
+            KinematicsToolboxRigidBodyMessage handMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, handControlFrame, desiredHandPosition, desiredHandOrientation);
             handMessage.setWeight(20.0);
             handMessages.put(robotSide, handMessage);
          }
@@ -271,7 +271,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       {
          Quaternion desiredChestOrientation = new Quaternion(yoDesiredChestOrientation);
          RigidBody chest = fullRobotModel.getChest();
-         chestMessage = new KinematicsToolboxRigidBodyMessage(chest, desiredChestOrientation);
+         chestMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(chest, desiredChestOrientation);
          chestMessage.setWeight(0.02);
       }
 
@@ -280,7 +280,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       if (yoDesiredPelvisOrientation.containsNaN() && yoDesiredPelvisPosition.containsNaN())
          pelvisMessage = null;
       else
-         pelvisMessage = new KinematicsToolboxRigidBodyMessage(pelvis);
+         pelvisMessage = MessageTools.createKinematicsToolboxRigidBodyMessage(pelvis);
 
       if (!yoDesiredPelvisOrientation.containsNaN())
       {
@@ -410,7 +410,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    private void deactivateKinematicsToolboxModule()
    {
-      ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.SLEEP);
+      ToolboxStateMessage message = MessageTools.createToolboxStateMessage(ToolboxState.SLEEP);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       sendPacket(message);
    }

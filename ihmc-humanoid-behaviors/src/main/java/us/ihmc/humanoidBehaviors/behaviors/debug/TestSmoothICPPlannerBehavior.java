@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -14,6 +15,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
@@ -112,8 +114,8 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
          @Override
          protected void setBehaviorInput()
          {
-            HandDesiredConfigurationMessage leftHandMessage = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
-            HandDesiredConfigurationMessage rightHandMessage = new HandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CLOSE);
+            HandDesiredConfigurationMessage leftHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
+            HandDesiredConfigurationMessage rightHandMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CLOSE);
 
             atlasPrimitiveActions.rightHandDesiredConfigurationBehavior.setInput(rightHandMessage);
 
@@ -124,9 +126,9 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
             double[] leftArmPose = new double[] {-1.5383305366909918, -0.9340404711083553, 1.9634792241521146, 0.9236260708644913, -0.8710518130931819,
                   -0.8771109242461594, -1.336089159719967};
 
-            ArmTrajectoryMessage rightPoseMessage = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightArmPose);
+            ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, rightArmPose);
 
-            ArmTrajectoryMessage leftPoseMessage = new ArmTrajectoryMessage(RobotSide.LEFT, 2, leftArmPose);
+            ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 2, leftArmPose);
 
             atlasPrimitiveActions.leftArmTrajectoryBehavior.setInput(leftPoseMessage);
             atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(rightPoseMessage);
@@ -160,7 +162,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Finished Walking Forward");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Finished Walking Forward");
             sendPacket(p1);
          }
       };
@@ -176,7 +178,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
 
    public FootstepDataListMessage setUpFootSteps()
    {
-      FootstepDataListMessage footstepMessage = new FootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue(), finalTransferTime.getDoubleValue());
+      FootstepDataListMessage footstepMessage = HumanoidMessageTools.createFootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue(), finalTransferTime.getDoubleValue());
 
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       
@@ -199,7 +201,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
    {
       FramePose3D stepPose = new FramePose3D();
       getRelativeFootstepInWorldFrame(stepReferenceFrame, stepLocation, stepOrientation, stepPose);
-      FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, stepPose.getPosition(), stepPose.getOrientation());
+      FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, stepPose.getPosition(), stepPose.getOrientation());
 
       footstepMessage.add(footstepData);
    }

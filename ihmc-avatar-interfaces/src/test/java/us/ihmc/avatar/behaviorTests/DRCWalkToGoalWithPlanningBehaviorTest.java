@@ -30,6 +30,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalWithPlanningBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket.WalkToGoalAction;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
@@ -181,14 +182,13 @@ public abstract class DRCWalkToGoalWithPlanningBehaviorTest implements MultiRobo
       final WalkToGoalWithPlanningBehavior walkToGoalWithPlanningBehavior = new WalkToGoalWithPlanningBehavior(communicationBridge, fullRobotModel, yoTime);
       walkToGoalWithPlanningBehavior.initialize();
 
-      WalkToGoalBehaviorPacket requestedGoal = new WalkToGoalBehaviorPacket(desiredMidFeetPose.getX(), desiredMidFeetPose.getY(), desiredMidFeetPose.getYaw(),
-            RobotSide.RIGHT);
+      WalkToGoalBehaviorPacket requestedGoal = HumanoidMessageTools.createWalkToGoalBehaviorPacket(desiredMidFeetPose.getX(), desiredMidFeetPose.getY(), desiredMidFeetPose.getYaw(), RobotSide.RIGHT);
       walkToGoalWithPlanningBehavior.getCommunicationBridge().consumeObjectFromNetwork(requestedGoal);
 
-      WalkToGoalBehaviorPacket walkToGoalFindPathPacket = new WalkToGoalBehaviorPacket(WalkToGoalAction.FIND_PATH);
+      WalkToGoalBehaviorPacket walkToGoalFindPathPacket = HumanoidMessageTools.createWalkToGoalBehaviorPacket(WalkToGoalAction.FIND_PATH);
       walkToGoalWithPlanningBehavior.getCommunicationBridge().consumeObjectFromNetwork(walkToGoalFindPathPacket);
 
-      WalkToGoalBehaviorPacket walkToGoalExecutePacket = new WalkToGoalBehaviorPacket(WalkToGoalAction.EXECUTE);
+      WalkToGoalBehaviorPacket walkToGoalExecutePacket = HumanoidMessageTools.createWalkToGoalBehaviorPacket(WalkToGoalAction.EXECUTE);
       walkToGoalWithPlanningBehavior.getCommunicationBridge().consumeObjectFromNetwork(walkToGoalExecutePacket);
       walkToGoalWithPlanningBehavior.doControl();
       assertTrue( walkToGoalWithPlanningBehavior.hasInputBeenSet() );

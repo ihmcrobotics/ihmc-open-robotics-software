@@ -30,8 +30,14 @@ float64 default_transfer_duration
 # list is finished. If the value is negative the defaultTransferDuration will be used.
 float64 final_transfer_duration
 
+# If false the controller adjust each footstep height to be at the support sole height.
+bool trust_height_of_footsteps
+
 # Contains information on whether the robot can automatically adjust its footsteps to retain balance.
 bool are_footsteps_adjustable
+
+# If true the controller will adjust upcoming footsteps with the location error of previous steps.
+bool offset_footsteps_with_execution_error
 
 # Properties for queueing footstep lists.
 ihmc_msgs/QueueableRosMessage queueing_properties

@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class PlanarVelocityPacket extends Packet<PlanarVelocityPacket>
 {
-   private final Vector3D velocity;
+   public Vector3D velocity;
 
    public PlanarVelocityPacket()
    {
@@ -21,6 +21,13 @@ public class PlanarVelocityPacket extends Packet<PlanarVelocityPacket>
    public PlanarVelocityPacket(double vx, double vy, double wz)
    {
       this.velocity = new Vector3D(vx, vy, wz);
+   }
+
+   @Override
+   public void set(PlanarVelocityPacket other)
+   {
+      velocity = new Vector3D(other.velocity);
+      setPacketInformation(other);
    }
 
    public void get(Vector3D velocity)

@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -22,10 +20,11 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       // Empty constructor for deserialization
    }
 
-   public AtlasWristSensorCalibrationRequestPacket(RobotSide robotSide)
+   @Override
+   public void set(AtlasWristSensorCalibrationRequestPacket other)
    {
-      setDestination(PacketDestination.CONTROLLER.ordinal());
-      this.robotSide = robotSide;
+      setPacketInformation(other);
+      robotSide = other.robotSide;
    }
 
    public RobotSide getRobotSide()
@@ -33,21 +32,17 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       return robotSide;
    }
 
+   @Override
    public boolean equals(Object obj)
    {
-      return ((obj instanceof AtlasWristSensorCalibrationRequestPacket) && this.epsilonEquals((AtlasWristSensorCalibrationRequestPacket) obj, 0));
+      return obj instanceof AtlasWristSensorCalibrationRequestPacket && epsilonEquals((AtlasWristSensorCalibrationRequestPacket) obj, 0);
    }
 
    @Override
    public boolean epsilonEquals(AtlasWristSensorCalibrationRequestPacket other, double epsilon)
    {
-      boolean ret = this.getRobotSide().equals(other.getRobotSide());
+      boolean ret = getRobotSide().equals(other.getRobotSide());
 
       return ret;
-   }
-
-   public AtlasWristSensorCalibrationRequestPacket(Random random)
-   {
-      this(random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT);
    }
 }

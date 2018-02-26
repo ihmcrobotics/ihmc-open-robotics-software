@@ -2,9 +2,8 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Random;
 
-import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -16,8 +15,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.random.RandomGeometry;
 
 @RosMessagePacket(documentation =
       "This class is used to build trajectory messages in taskspace. It holds the only the rotational information for one trajectory point (orientation & angular velocity). "
@@ -40,13 +37,6 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    {
    }
 
-   public SO3TrajectoryPointMessage(Random random)
-   {
-      time = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
-      orientation = RandomGeometry.nextQuaternion(random);
-      angularVelocity = RandomGeometry.nextVector3D(random);
-   }
-
    public SO3TrajectoryPointMessage(SO3TrajectoryPointMessage trajectoryPoint)
    {
       time = trajectoryPoint.time;
@@ -54,13 +44,6 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
          orientation = new Quaternion(trajectoryPoint.orientation);
       if (trajectoryPoint.angularVelocity != null)
          angularVelocity = new Vector3D(trajectoryPoint.angularVelocity);
-   }
-
-   public SO3TrajectoryPointMessage(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
-   {
-      this.time = time;
-      this.orientation = new Quaternion(orientation);
-      this.angularVelocity = new Vector3D(angularVelocity);
    }
 
    public void set(SO3TrajectoryPointMessage other)

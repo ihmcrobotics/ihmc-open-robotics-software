@@ -3,25 +3,19 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.trajectories.TrajectoryType;
 
-@RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).",
-                  rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
+@RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 {
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
@@ -37,8 +31,8 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public List<Point2D> predictedContactPoints;
-   
-   /** the time to delay this command on the controller side before being executed **/
+
+   @RosExportedField(documentation = "The time to delay this command on the controller side before being executed.")
    public double executionDelayTime;
 
    /**
@@ -49,94 +43,32 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
    }
 
-   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
+   public AdjustFootstepMessage(AdjustFootstepMessage other)
    {
-      this(robotSide, location, orientation, null);
-   }
-
-   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints)
-   {
-      this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
-   }
-
-   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
-   {
-      this(robotSide, location, orientation, null, trajectoryType, swingHeight);
-   }
-
-   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
-         TrajectoryType trajectoryType, double swingHeight)
-   {
-      uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      this.robotSide = robotSide;
-      this.location = location;
-      this.orientation = orientation;
-      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         this.predictedContactPoints = null;
-      else
-         this.predictedContactPoints = predictedContactPoints;
-   }
-
-   public AdjustFootstepMessage(AdjustFootstepMessage footstepData)
-   {
-      uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      this.robotSide = footstepData.robotSide;
-      this.location = new Point3D(footstepData.location);
-      this.orientation = new Quaternion(footstepData.orientation);
-      this.executionDelayTime = footstepData.executionDelayTime;
-      orientation.checkIfUnitary();
-      if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
-      {
-         this.predictedContactPoints = null;
-      }
-      else
-      {
-         this.predictedContactPoints = new ArrayList<>();
-         for (Point2D contactPoint : footstepData.predictedContactPoints)
-         {
-            this.predictedContactPoints.add(new Point2D(contactPoint));
-         }
-      }
+      set(other);
    }
 
    @Override
-   public AdjustFootstepMessage clone()
+   public void set(AdjustFootstepMessage other)
    {
-      return new AdjustFootstepMessage(this);
-   }
-
-   public AdjustFootstepMessage(Footstep footstep)
-   {
-      uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      robotSide = footstep.getRobotSide();
-
-      FramePoint3D location = new FramePoint3D();
-      FrameQuaternion orientation = new FrameQuaternion();
-      footstep.getPose(location, orientation);
-      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      this.location = new Point3D(location);
-      this.orientation = new Quaternion(orientation);
-
-      List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
-      if (footstepContactPoints != null)
+      robotSide = other.robotSide;
+      location = new Point3D(other.location);
+      orientation = new Quaternion(other.orientation);
+      executionDelayTime = other.executionDelayTime;
+      orientation.checkIfUnitary();
+      if (other.predictedContactPoints == null || other.predictedContactPoints.isEmpty())
       {
-         if (predictedContactPoints == null)
-         {
-            predictedContactPoints = new ArrayList<>();
-         }
-         else
-         {
-            predictedContactPoints.clear();
-         }
-         for (Point2D contactPoint : footstepContactPoints)
+         predictedContactPoints = null;
+      }
+      else
+      {
+         predictedContactPoints = new ArrayList<>();
+         for (Point2D contactPoint : other.predictedContactPoints)
          {
             predictedContactPoints.add(new Point2D(contactPoint));
          }
       }
-      else
-      {
-         predictedContactPoints = null;
-      }
+      setPacketInformation(other);
    }
 
    public List<Point2D> getPredictedContactPoints()
@@ -161,7 +93,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 
    public void getOrientation(Quaternion orientationToPack)
    {
-      orientationToPack.set(this.orientation);
+      orientationToPack.set(orientation);
    }
 
    public RobotSide getRobotSide()
@@ -176,13 +108,15 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 
    public void setLocation(Point3D location)
    {
-      if (this.location == null) this.location = new Point3D();
+      if (this.location == null)
+         this.location = new Point3D();
       this.location.set(location);
    }
 
    public void setOrientation(Quaternion orientation)
    {
-      if (this.orientation == null) this.orientation = new Quaternion();
+      if (this.orientation == null)
+         this.orientation = new Quaternion();
       this.orientation.set(orientation);
    }
 
@@ -190,23 +124,25 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
    {
       this.predictedContactPoints = predictedContactPoints;
    }
-   
+
    /**
     * returns the amount of time this command is delayed on the controller side before executing
+    * 
     * @return the time to delay this command in seconds
     */
    public double getExecutionDelayTime()
    {
       return executionDelayTime;
    }
-   
+
    /**
     * sets the amount of time this command is delayed on the controller side before executing
+    * 
     * @param delayTime the time in seconds to delay after receiving the command before executing
     */
    public void setExecutionDelayTime(double delayTime)
    {
-      this.executionDelayTime = delayTime;
+      executionDelayTime = delayTime;
    }
 
    @Override
@@ -214,7 +150,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
    {
       String ret = "";
 
-      FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), this.orientation);
+      FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), orientation);
       double[] ypr = new double[3];
       frameOrientation.getYawPitchRoll(ypr);
       ret = location.toString();
@@ -248,11 +184,11 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
 
       boolean contactPointsEqual = true;
 
-      if ((this.predictedContactPoints == null) && (footstepData.predictedContactPoints != null))
+      if (predictedContactPoints == null && footstepData.predictedContactPoints != null)
          contactPointsEqual = false;
-      else if ((this.predictedContactPoints != null) && (footstepData.predictedContactPoints == null))
+      else if (predictedContactPoints != null && footstepData.predictedContactPoints == null)
          contactPointsEqual = false;
-      else if (this.predictedContactPoints != null)
+      else if (predictedContactPoints != null)
       {
          int size = predictedContactPoints.size();
          if (size != footstepData.predictedContactPoints.size())
@@ -271,21 +207,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       }
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual;
-   }
-
-   public AdjustFootstepMessage(Random random)
-   {
-      uniqueId = VALID_MESSAGE_DEFAULT_ID;
-      this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
-      this.orientation = RandomGeometry.nextQuaternion(random);
-      int numberOfPredictedContactPoints = random.nextInt(10);
-      this.predictedContactPoints = new ArrayList<>();
-
-      for (int i = 0; i < numberOfPredictedContactPoints; i++)
-      {
-         predictedContactPoints.add(new Point2D(random.nextDouble(), random.nextDouble()));
-      }
    }
 
    /** {@inheritDoc} */

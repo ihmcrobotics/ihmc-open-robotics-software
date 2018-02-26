@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.communication.packets.dataobjects;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.zip.CRC32;
 
 import us.ihmc.communication.packets.IMUPacket;
@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -44,67 +43,41 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
    public long lastReceivedPacketUniqueId;
    public long lastReceivedPacketRobotTimestamp;
 
-   public RobotConfigurationData(Random random)
-   {
-      timestamp = random.nextLong();
-      sensorHeadPPSTimestamp = random.nextLong();
-      jointNameHash = random.nextInt(10000);
-
-      int size = Math.abs(random.nextInt(1000));
-
-      jointAngles = new float[size];
-      for (int i = 0; i < jointAngles.length; i++)
-      {
-         jointAngles[i] = random.nextFloat();
-      }
-
-      jointVelocities = new float[size];
-      for (int i = 0; i < jointVelocities.length; i++)
-      {
-         jointVelocities[i] = random.nextFloat();
-      }
-
-      jointTorques = new float[size];
-      for (int i = 0; i < jointTorques.length; i++)
-      {
-         jointTorques[i] = random.nextFloat();
-      }
-
-      rootTranslation = RandomGeometry.nextVector3D32(random);
-      rootOrientation = RandomGeometry.nextQuaternion32(random);
-
-      size = Math.abs(random.nextInt(1000));
-      momentAndForceDataAllForceSensors = new float[size][Wrench.SIZE];
-      for (int i = 0; i < momentAndForceDataAllForceSensors.length; i++)
-      {
-         for (int j = 0; j < Wrench.SIZE; j++)
-         {
-            momentAndForceDataAllForceSensors[i][j] = random.nextFloat();
-         }
-      }
-   }
-
    public RobotConfigurationData()
    {
       // empty constructor for serialization
    }
 
-   public RobotConfigurationData(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, AuxiliaryRobotData auxiliaryRobotData,
-         IMUDefinition[] imuDefinitions)
+   @Override
+   public void set(RobotConfigurationData other)
    {
-      jointAngles = new float[joints.length];
-      jointVelocities = new float[joints.length];
-      jointTorques = new float[joints.length];
-      momentAndForceDataAllForceSensors = new float[forceSensorDefinitions.length][Wrench.SIZE];
+      timestamp = other.timestamp;
+      sensorHeadPPSTimestamp = other.sensorHeadPPSTimestamp;
+      jointNameHash = other.jointNameHash;
+      jointAngles = Arrays.copyOf(other.jointAngles, other.jointAngles.length);
+      jointVelocities = Arrays.copyOf(other.jointVelocities, other.jointVelocities.length);
+      jointTorques = Arrays.copyOf(other.jointTorques, other.jointTorques.length);
 
-      imuSensorData = new IMUPacket[imuDefinitions.length];
-      for (int sensorNumber = 0; sensorNumber < imuSensorData.length; sensorNumber++)
+      rootTranslation.set(other.rootTranslation);
+      rootOrientation.set(other.rootOrientation);
+      pelvisLinearVelocity.set(other.pelvisLinearVelocity);
+      pelvisAngularVelocity.set(other.pelvisAngularVelocity);
+      pelvisLinearAcceleration.set(other.pelvisLinearAcceleration);
+      momentAndForceDataAllForceSensors = new float[other.momentAndForceDataAllForceSensors.length][Wrench.SIZE];
+      for (int i = 0; i < momentAndForceDataAllForceSensors.length; i++)
+         momentAndForceDataAllForceSensors[i] = Arrays.copyOf(other.momentAndForceDataAllForceSensors[i], Wrench.SIZE);
+      imuSensorData = new IMUPacket[other.imuSensorData.length];
+      for (int i = 0; i < imuSensorData.length; i++)
       {
-         imuSensorData[sensorNumber] = new IMUPacket();
+         imuSensorData[i] = new IMUPacket();
+         imuSensorData[i].set(other.imuSensorData[i]);
       }
-
-      jointNameHash = calculateJointNameHash(joints, forceSensorDefinitions, imuDefinitions);
-      this.auxiliaryRobotData = auxiliaryRobotData;
+      robotMotionStatus = other.robotMotionStatus;
+      auxiliaryRobotData.setAuxiliaryRobotData(other.auxiliaryRobotData);
+      lastReceivedPacketTypeID = other.lastReceivedPacketTypeID;
+      lastReceivedPacketUniqueId = other.lastReceivedPacketUniqueId;
+      lastReceivedPacketRobotTimestamp = other.lastReceivedPacketRobotTimestamp;
+      setPacketInformation(other);
    }
 
    public void setJointState(OneDoFJoint[] newJointData)

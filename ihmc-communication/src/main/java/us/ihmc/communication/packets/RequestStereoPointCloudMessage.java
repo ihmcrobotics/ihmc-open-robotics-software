@@ -5,7 +5,12 @@ public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointClo
 
    public RequestStereoPointCloudMessage()
    {
-      // TODO Auto-generated constructor stub
+   }
+
+   @Override
+   public void set(RequestStereoPointCloudMessage other)
+   {
+      setPacketInformation(other);
    }
 
    @Override

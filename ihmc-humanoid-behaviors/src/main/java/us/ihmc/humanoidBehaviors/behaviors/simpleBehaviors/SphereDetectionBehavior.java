@@ -21,6 +21,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -107,7 +108,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
          id++;
          RigidBodyTransform t = new RigidBodyTransform();
          t.setTranslation(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
-         sendPacket(new DetectedObjectPacket(t, 4));
+         sendPacket(HumanoidMessageTools.createDetectedObjectPacket(t, 4));
       }
 
       if (balls.size() > 0)

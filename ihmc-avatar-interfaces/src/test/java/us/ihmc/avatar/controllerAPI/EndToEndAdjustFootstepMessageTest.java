@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -101,7 +102,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
                      orientation.set(nextFootstepPose.getOrientation());
                      adjustedLocation.setX(adjustedLocation.getX() + 0.1);
                      adjustedLocation.setY(adjustedLocation.getY() - 0.15);
-                     AdjustFootstepMessage adjustFootstepMessage = new AdjustFootstepMessage(swingSideForAdjusting, adjustedLocation, orientation);
+                     AdjustFootstepMessage adjustFootstepMessage = HumanoidMessageTools.createAdjustFootstepMessage(swingSideForAdjusting, adjustedLocation, orientation);
                      drcSimulationTestHelper.send(adjustFootstepMessage);
                      adjustedFootstep = true;
                   }
@@ -163,7 +164,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          framePosition.add(stepLength, side.negateIfRightSide(stepWidth), 0.0);
          Point3D position = new Point3D(framePosition);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         footstepDataListMessage.add(new FootstepDataMessage(side, position, orientation));
+         footstepDataListMessage.add(HumanoidMessageTools.createFootstepDataMessage(side, position, orientation));
          side = side.getOppositeSide();
       }
 

@@ -1,15 +1,12 @@
 package us.ihmc.communication.packets;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * A QueueableMessage is a {@link Packet} that can be queued for execution inside the controller. It implements command
- * IDs that are used to ensure no commands were dropped in the network.
+ * A QueueableMessage is a {@link Packet} that can be queued for execution inside the controller. It
+ * implements command IDs that are used to ensure no commands were dropped in the network.
  *
  * @author Georg
  *
@@ -31,7 +28,7 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
          + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
          + " If previousMessageId == 0, the controller will not check for the ID of the last received message.")
    public long previousMessageId = Packet.INVALID_MESSAGE_ID;
-   
+
    /** the time to delay this message on the controller side before being executed **/
    public double executionDelayTime;
 
@@ -42,28 +39,25 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
    {
    }
 
-   /**
-    * Random constructor for message tests.
-    * @param random
-    */
-   public QueueableMessage(Random random)
-   {
-      executionMode = RandomNumbers.nextEnum(random, ExecutionMode.class);
-   }
-
+   @Override
    public void set(QueueableMessage other)
    {
       executionMode = other.executionMode;
       previousMessageId = other.previousMessageId;
       executionDelayTime = other.executionDelayTime;
+      setPacketInformation(other);
    }
 
    /**
     * Set how the controller should consume this message:
-    * <li> {@link ExecutionMode#OVERRIDE}: this message will override any previous message, including canceling any active execution of a message.
-    * <li> {@link ExecutionMode#QUEUE}: this message is queued and will be executed once all the previous messages are done.
+    * <li>{@link ExecutionMode#OVERRIDE}: this message will override any previous message, including
+    * canceling any active execution of a message.
+    * <li>{@link ExecutionMode#QUEUE}: this message is queued and will be executed once all the
+    * previous messages are done.
+    * 
     * @param executionMode
-    * @param previousMessageId when queuing, one needs to provide the ID of the message this message should be queued to.
+    * @param previousMessageId when queuing, one needs to provide the ID of the message this message
+    *           should be queued to.
     */
    public void setExecutionMode(ExecutionMode executionMode, long previousMessageId)
    {
@@ -72,26 +66,30 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
    }
 
    /**
-    * Returns the execution mode of the packet. This will tell the controller whether the message should be queued or executed immediately.
+    * Returns the execution mode of the packet. This will tell the controller whether the message
+    * should be queued or executed immediately.
+    * 
     * @return {@link #executionMode}
     */
    public ExecutionMode getExecutionMode()
    {
       return executionMode;
    }
-   
+
    public void setExecutionDelayTime(double delayTime)
    {
-      this.executionDelayTime = (float) delayTime;
+      executionDelayTime = (float) delayTime;
    }
-   
+
    public double getExecutionDelayTime()
    {
       return executionDelayTime;
    }
 
    /**
-    * Returns the previous message ID. If the message is queued this is used to verify that no packets were dropped.
+    * Returns the previous message ID. If the message is queued this is used to verify that no
+    * packets were dropped.
+    * 
     * @return {@link #previousMessageId}
     */
    public long getPreviousMessageId()
@@ -105,8 +103,14 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
    {
       if (executionMode != other.getExecutionMode())
          return false;
-      if (executionMode == ExecutionMode.OVERRIDE && previousMessageId != other.getPreviousMessageId())
+      if (executionMode == ExecutionMode.QUEUE && previousMessageId != other.getPreviousMessageId())
          return false;
       return true;
+   }
+
+   @Override
+   public String toString()
+   {
+      return "Mode: " + executionMode + ", delay: " + executionDelayTime + ", previous ID: " + previousMessageId;
    }
 }

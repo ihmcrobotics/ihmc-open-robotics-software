@@ -46,6 +46,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -133,7 +134,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          System.out.println(desiredOrientation);
       }
 
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
 
       drcSimulationTestHelper.send(pelvisTrajectoryMessage);
 
@@ -222,7 +223,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          System.out.println(desiredOrientation);
       }
 
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(1);
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(1);
       pelvisTrajectoryMessage.setTrajectoryPoint(0, 1.0, desiredPosition, desiredOrientation, new Vector3D(), new Vector3D());
 
       drcSimulationTestHelper.send(pelvisTrajectoryMessage);
@@ -307,7 +308,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    {
       componentBasedDesiredFootstepCalculator.initializeDesiredFootstep(supportLeg, stepTime);
       FootstepDataMessage footStep = componentBasedDesiredFootstepCalculator.updateAndGetDesiredFootstep(supportLeg);
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(Double.NaN, Double.NaN);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(Double.NaN, Double.NaN);
 
       RobotSide robotSide = supportLeg;
       FootstepDataMessage previousFootStep = footStep;
@@ -346,7 +347,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(numberOfTrajectoryPoints);
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
       selectionMatrix6D.clearAngularSelection();
       selectionMatrix6D.clearLinearSelection();
@@ -491,7 +492,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(numberOfTrajectoryPoints);
       pelvisTrajectoryMessage.setEnableUserPelvisControlDuringWalking(true);
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
       selectionMatrix6D.clearAngularSelection();
@@ -614,7 +615,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       MovingReferenceFrame midFootZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       pelvisPosition.changeFrame(midFootZUpGroundFrame);
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(numberOfTrajectoryPoints);
       pelvisTrajectoryMessage.setEnableUserPelvisControlDuringWalking(false);
       SelectionMatrix6D selectionMatrix6D = new SelectionMatrix6D();
       selectionMatrix6D.clearAngularSelection();
@@ -714,7 +715,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       double radius = 0.05;
       double trajectoryDuration = 10.0;
       int numberOfWaypoints = 100;
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfWaypoints);
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(numberOfWaypoints);
       pelvisTrajectoryMessage.setEnableUserPelvisControlDuringWalking(true);
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -915,7 +916,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       FramePoint3D pelvisPosition = new FramePoint3D(pelvis.getParentJoint().getFrameAfterJoint());
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(numberOfTrajectoryPoints);
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(numberOfTrajectoryPoints);
 
       double rotationAmp = Math.toRadians(20.0);
       double pitchFreq = 0.5;
@@ -1073,7 +1074,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       String managerName = PelvisOrientationManager.class.getSimpleName();
       YoEnum<PelvisOrientationControlMode> orientationControlMode = (YoEnum<PelvisOrientationControlMode>) scs.getVariable(managerName, managerName + "State");
 
-      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
 
       drcSimulationTestHelper.send(pelvisTrajectoryMessage);
 
@@ -1150,7 +1151,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          desiredPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
          desiredPelvisPose.setZ(desiredHeight);
          desiredPelvisPose.get(desiredPosition, desiredOrientation);
-         PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(0.5, desiredPosition, desiredOrientation);
+         PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(0.5, desiredPosition, desiredOrientation);
          drcSimulationTestHelper.send(pelvisTrajectoryMessage);
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));
          pelvisPosition.setToZero(pelvisFrame);

@@ -119,7 +119,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
@@ -524,7 +523,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HeatMapPacket.class);
       registerPacketField(BoundingBoxesPacket.class);
 
-      registerPacketClass(WholeBodyTrajectoryToolboxRequestPacket.class);
       registerPacketClass(WholeBodyTrajectoryToolboxOutputStatus.class);
       registerPacketClass(SetBooleanParameterPacket.class);
       registerPacketField(KinematicsToolboxOutputStatus[].class);

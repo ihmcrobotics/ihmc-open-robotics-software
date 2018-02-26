@@ -12,6 +12,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
@@ -237,7 +238,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
 
    private void sendMessageToUI(String message)
    {
-      TextToSpeechPacket packet = new TextToSpeechPacket(message);
+      TextToSpeechPacket packet = MessageTools.createTextToSpeechPacket(message);
       packet.setDestination(PacketDestination.UI);
       packetCommunicator.send(packet);
    }
