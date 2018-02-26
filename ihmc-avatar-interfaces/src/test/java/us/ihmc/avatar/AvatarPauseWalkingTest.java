@@ -5,9 +5,11 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 
+import org.junit.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -36,6 +38,8 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
    public abstract double getTransferTime();
 
+   public abstract double getFinalTransferDuration();
+
    public abstract double getStepLength();
 
    public abstract double getStepWidth();
@@ -44,13 +48,15 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
 
    public abstract double getTimeForResuming();
 
-   public abstract int getNumberOfFoosteps();
+   public abstract int getNumberOfFootsteps();
+
 
    @Before
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
@@ -73,12 +79,14 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
    {
       setupTest();
       walkPaused.set(false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-      sendFootstepCommand(getNumberOfFoosteps());
+      sendFootstepCommand(0.0, getNumberOfFootsteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForPausing()));
       PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
       drcSimulationTestHelper.send(pauseWalkingMessage);
@@ -87,21 +95,86 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
       drcSimulationTestHelper.send(pauseWalkingMessage);
       walkPaused.set(false);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFoosteps() * (getSwingTime() + getTransferTime())));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
    }
 
-   private void sendFootstepCommand(int numberOfFootsteps)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      sendFootstepCommand(getStepLength(), getNumberOfFootsteps());
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForPausing()));
+      PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getTimeForResuming()));
+      pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      sendFootstepCommand(0.0, getNumberOfFootsteps());
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
+
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+
+      pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+   }
+
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000)
+   public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      sendFootstepCommand(getStepLength(), getNumberOfFootsteps());
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      PauseWalkingMessage pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(true);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+
+      pauseWalkingMessage = HumanoidMessageTools.createPauseWalkingMessage(false);
+      drcSimulationTestHelper.send(pauseWalkingMessage);
+      walkPaused.set(false);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getNumberOfFootsteps() * (getSwingTime() + getTransferTime())));
+   }
+
+   private void sendFootstepCommand(double stepLength, int numberOfFootsteps)
    {
       FootstepDataListMessage footstepMessage = HumanoidMessageTools.createFootstepDataListMessage(getSwingTime(), getTransferTime());
       RobotSide side = RobotSide.LEFT;
       Quaternion orientation = new Quaternion();
       for (int i = 1; i < numberOfFootsteps; i++)
       {
-         addFootstep(new Point3D(i * getStepLength(), side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side, footstepMessage);
+         addFootstep(new Point3D(i * stepLength, side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side, footstepMessage);
          side = side.getOppositeSide();
       }
-      addFootstep(new Point3D((numberOfFootsteps - 1) * getStepLength(), side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side,
+      addFootstep(new Point3D((numberOfFootsteps - 1) * stepLength, side.negateIfRightSide(getStepWidth() / 2.0), 0.0), orientation, side,
                   footstepMessage);
+      footstepMessage.setFinalTransferDuration(getFinalTransferDuration());
       drcSimulationTestHelper.send(footstepMessage);
    }
 
@@ -146,42 +219,4 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
 
-//   private class ControllerSpy extends SimpleRobotController
-//   {
-//      private final DRCRobotModel robotModel;
-//      private final FullHumanoidRobotModel fullHumanoidRobotModel;
-//      private final BipedSupportPolygons bipedSupportPolygons;
-//      private final HighLevelHumanoidControllerToolbox humanoidControllerToolbox;
-//      private final YoDouble copPositionX, copPositionY;
-//      private final DRCSimulationTestHelper drcSimulationTestHelper;
-//      private final FramePoint2D copPosition = new FramePoint2D();
-//      private boolean condition = true;
-//
-//      public ControllerSpy(DRCSimulationTestHelper drcSimulationTestHelper, DRCRobotModel robotModel)
-//      {
-//         this.robotModel = robotModel;
-//         this.fullHumanoidRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-//         this.bipedSupportPolygons = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory().getHighLevelHumanoidControllerToolbox()
-//                                                            .getBipedSupportPolygons();
-//         this.humanoidControllerToolbox = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory()
-//                                                                 .getHighLevelHumanoidControllerToolbox();
-//         this.copPositionX = (YoDouble) drcSimulationTestHelper.getYoVariable("icpPlannerDesiredCoPPositionX");
-//         this.copPositionY = (YoDouble) drcSimulationTestHelper.getYoVariable("icpPlannerDesiredCoPPositionY");
-//         this.drcSimulationTestHelper = drcSimulationTestHelper;
-//         drcSimulationTestHelper.addRobotControllerOnControllerThread(this);
-//      }
-//
-//      @Override
-//      public void doControl()
-//      {
-//         copPosition.set(copPositionX.getDoubleValue(), copPositionY.getDoubleValue());
-//         if(condition && drcSimulationTestHelper.getSimulationConstructionSet().getTime() > getTimeForPausing() && drcSimulationTestHelper.getSimulationConstructionSet().getTime() < getTimeForResuming())
-//            condition &= (bipedSupportPolygons.getSupportPolygonInWorld().signedDistance(copPosition) < 0);
-//      }
-//
-//      public boolean didCoPRemainInsideTheSupportPolygon()
-//      {
-//         return condition;
-//      }
-//   }
 }
