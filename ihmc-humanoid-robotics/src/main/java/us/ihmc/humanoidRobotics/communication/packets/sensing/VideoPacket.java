@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
 import java.util.Arrays;
-import java.util.Random;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.packets.HighBandwidthPacket;
@@ -13,7 +12,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomGeometry;
 
 @HighBandwidthPacket
 public class VideoPacket extends Packet<VideoPacket>
@@ -24,10 +22,10 @@ public class VideoPacket extends Packet<VideoPacket>
    public Point3D position;
    public Quaternion orientation;
    public IntrinsicParameters intrinsicParameters;
-   
+
    public VideoPacket()
    {
-      
+
    }
 
    public VideoPacket(VideoPacket other)
@@ -40,22 +38,16 @@ public class VideoPacket extends Packet<VideoPacket>
       intrinsicParameters = new IntrinsicParameters(other.intrinsicParameters);
    }
 
-   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
+   @Override
+   public void set(VideoPacket other)
    {
-      this(videoSource, timeStamp, data, position, orientation, intrinsicParameters, null);
-   }
-
-   public VideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position, QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters,
-         PacketDestination packetDestination)
-   {
-      if(packetDestination != null)
-         setDestination(packetDestination);
-      this.videoSource = videoSource;
-      this.timeStamp = timeStamp;
-      this.data = data;
-      this.position = new Point3D(position);
-      this.orientation = new Quaternion(orientation);
-      this.intrinsicParameters = intrinsicParameters;
+      videoSource = other.videoSource;
+      timeStamp = other.timeStamp;
+      data = Arrays.copyOf(other.data, other.data.length);
+      position = new Point3D(other.position);
+      orientation = new Quaternion(other.orientation);
+      intrinsicParameters = other.intrinsicParameters;
+      setPacketInformation(other);
    }
 
    public VideoSource getVideoSource()
@@ -107,7 +99,6 @@ public class VideoPacket extends Packet<VideoPacket>
          return false;
       }
 
-
       if (this.getData().length != other.getData().length)
       {
          System.out.println("Data length");
@@ -131,19 +122,7 @@ public class VideoPacket extends Packet<VideoPacket>
    @Override
    public String toString()
    {
-      return "VideoPacket [source=" + videoSource + ", timeStamp=" + timeStamp + ", data=" + data.length + " byte, position=" + position + ", orientation=" + orientation;
-   }
-
-   public VideoPacket(Random random)
-   {
-      byte[] data = new byte[random.nextInt((int) (Math.pow(2, 20) - 19))];
-      random.nextBytes(data);
-
-      this.timeStamp = 0;
-      this.videoSource = VideoSource.MULTISENSE_LEFT_EYE;
-      this.data = data;
-      this.position = RandomGeometry.nextPoint3D(random, 2.0, 2.0, 1.0);
-      this.orientation = RandomGeometry.nextQuaternion(random);
-      this.intrinsicParameters = new IntrinsicParameters();
+      return "VideoPacket [source=" + videoSource + ", timeStamp=" + timeStamp + ", data=" + data.length + " byte, position=" + position + ", orientation="
+            + orientation;
    }
 }

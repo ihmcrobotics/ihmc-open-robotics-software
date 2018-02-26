@@ -1,12 +1,11 @@
 package us.ihmc.quadrupedRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
-
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class BodyAngularRatePacket extends Packet<BodyAngularRatePacket>
 {
-   private final Vector3D velocity;
+   public Vector3D velocity;
 
    public BodyAngularRatePacket()
    {
@@ -21,6 +20,13 @@ public class BodyAngularRatePacket extends Packet<BodyAngularRatePacket>
    public BodyAngularRatePacket(double wx, double wy, double wz)
    {
       this.velocity = new Vector3D(wx, wy, wz);
+   }
+
+   @Override
+   public void set(BodyAngularRatePacket other)
+   {
+      setPacketInformation(other);
+      velocity = new Vector3D(other.velocity);
    }
 
    public void get(Vector3D velocity)
@@ -43,7 +49,8 @@ public class BodyAngularRatePacket extends Packet<BodyAngularRatePacket>
       return velocity.getZ();
    }
 
-   @Override public boolean epsilonEquals(BodyAngularRatePacket other, double epsilon)
+   @Override
+   public boolean epsilonEquals(BodyAngularRatePacket other, double epsilon)
    {
       return this.velocity.epsilonEquals(other.velocity, epsilon);
    }

@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
@@ -83,12 +84,12 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
       drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       // take care of steps down
       for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
@@ -159,12 +160,12 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
       drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       RobotSide robotSide = RobotSide.LEFT;
       // take care of steps down
@@ -229,12 +230,12 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
       drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       RobotSide robotSide = RobotSide.LEFT;
       // take care of steps down
@@ -300,12 +301,12 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
       drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       RobotSide robotSide = RobotSide.LEFT;
       // take care of steps down
@@ -401,13 +402,13 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      PelvisHeightTrajectoryMessage pelvisHeight = new PelvisHeightTrajectoryMessage(0.5, 0.8);
+      PelvisHeightTrajectoryMessage pelvisHeight = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, 0.8);
       drcSimulationTestHelper.send(pelvisHeight);
 
       double executionDuration = 0.0;
       double distanceTraveled = 0.5 * starterLength;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       RobotSide robotSide = RobotSide.LEFT;
       // take care of random steps
       for (int stepNumber = 0; stepNumber < numberOfSteps; stepNumber++)
@@ -506,7 +507,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double executionDuration = 0.0;
       double distanceTraveled = 0.5 * starterLength;
 
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       RobotSide robotSide = RobotSide.LEFT;
 
       int numberOfSteps = stepLengths.size();

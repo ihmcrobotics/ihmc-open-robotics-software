@@ -1,22 +1,26 @@
 package us.ihmc.communication.packets;
 
+import java.util.Arrays;
+
 import com.google.common.math.DoubleMath;
 
 public class SetDoubleArrayParameterPacket extends Packet<SetDoubleArrayParameterPacket>
 {
-   private final String parameterName;
-   private final double[] parameterValue;
+
+   public String parameterName;
+   public double[] parameterValue;
 
    // Empty constructor for serialization
    public SetDoubleArrayParameterPacket()
    {
-      this(null, new double[] { });
    }
 
-   public SetDoubleArrayParameterPacket(String parameterName, double[] parameterValue)
+   @Override
+   public void set(SetDoubleArrayParameterPacket other)
    {
-      this.parameterName = parameterName;
-      this.parameterValue = parameterValue;
+      parameterName = other.parameterName;
+      parameterValue = Arrays.copyOf(other.parameterValue, other.parameterValue.length);
+      setPacketInformation(other);
    }
 
    public String getParameterName()

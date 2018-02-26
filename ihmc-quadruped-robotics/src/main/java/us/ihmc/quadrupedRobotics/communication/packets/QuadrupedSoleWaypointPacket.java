@@ -7,7 +7,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedSoleWaypointPacket extends Packet<QuadrupedSoleWaypointPacket>
 {
-   private final QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists = new QuadrantDependentList<>();
+   public QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists = new QuadrantDependentList<>();
 
    public QuadrupedSoleWaypointPacket()
    {
@@ -19,6 +19,17 @@ public class QuadrupedSoleWaypointPacket extends Packet<QuadrupedSoleWaypointPac
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          this.quadrupedSoleWaypointLists.set(robotQuadrant, new QuadrupedSoleWaypointList(quadrupedSoleWaypointLists.get(robotQuadrant)));
+   }
+
+   @Override
+   public void set(QuadrupedSoleWaypointPacket other)
+   {
+      quadrupedSoleWaypointLists = new QuadrantDependentList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         this.quadrupedSoleWaypointLists.set(robotQuadrant, new QuadrupedSoleWaypointList(other.quadrupedSoleWaypointLists.get(robotQuadrant)));
+      }
+      setPacketInformation(other);
    }
 
    @Override

@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -49,7 +50,7 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
    {
       //reset necessary values so this behavior can run again properly
       frameNumber = 0;
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Getting Video Packets");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Getting Video Packets");
       sendPacket(p1);
       //let the UI know this specific behavior has started
       coactiveBehaviorsNetworkManager.sendToUI("GetVideoPacketExampleBehavior", 1);

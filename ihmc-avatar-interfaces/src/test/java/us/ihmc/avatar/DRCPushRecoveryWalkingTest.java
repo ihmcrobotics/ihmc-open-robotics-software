@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -264,7 +265,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       ReferenceFrame pelvisFrame = drcSimulationTestHelper.getSDFFullRobotModel().getPelvis().getBodyFixedFrame();
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       for (int i = 1; i <= steps; i++)
       {
          RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
@@ -274,7 +275,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          location.changeFrame(ReferenceFrame.getWorldFrame());
          location.setZ(0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
          footsteps.add(footstepData);
       }
 

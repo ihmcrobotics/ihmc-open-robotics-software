@@ -1,16 +1,8 @@
 package us.ihmc.avatar.ros;
 
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.ros.internal.message.Message;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.continuousIntegration.IntegrationCategory;
+import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Random;
@@ -18,7 +10,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.ros.internal.message.Message;
+
+import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 
 /**
  * Tests the proper ROS<->Java translation of the IHMC messages.
@@ -58,11 +60,10 @@ public class IHMCROSTranslationRuntimeToolsTest
          int packetsFailed = 0;
          for (Class<?> concreteType : concreteTypes)
          {
-            Constructor<?> randomConstructor = null;
             try
             {
-               randomConstructor = concreteType.getConstructor(Random.class);
-               ihmcMessage = (Packet<?>) randomConstructor.newInstance(random);
+               Method randomGenerator = RandomHumanoidMessages.class.getMethod("next" + concreteType.getSimpleName(), Random.class);
+               ihmcMessage = (Packet<?>) randomGenerator.invoke(null, random);
                rosMessage = IHMCROSTranslationRuntimeTools.convertToRosMessage(ihmcMessage);
                Packet packet = IHMCROSTranslationRuntimeTools.convertToIHMCMessage(rosMessage);
                assertTrue("Problem with packet " + concreteType + ". \n" + ihmcMessage + ", \n" + packet, packet.epsilonEquals(ihmcMessage, 0.1));

@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
@@ -9,6 +10,7 @@ import us.ihmc.humanoidBehaviors.coactiveDesignFramework.CoactiveElement;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
@@ -98,7 +100,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To The Ball");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking To The Ball");
             sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.WALKING_TO_BALL);
             coactiveElement.searchingForBall.set(false);
@@ -117,7 +119,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Looking For The Ball Again");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Looking For The Ball Again");
             sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.SEARCHING_FOR_BALL_NEAR);
             coactiveElement.searchingForBall.set(true);
@@ -134,7 +136,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Picking Up The Ball");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Picking Up The Ball");
             sendPacket(p1);
             coactiveElement.currentState.set(PickUpBallBehaviorState.PICKING_UP_BALL);
             coactiveElement.searchingForBall.set(false);
@@ -155,10 +157,10 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          @Override
          protected void setBehaviorInput()
          {
-            GoHomeMessage goHomeRightArmMessage = new GoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
+            GoHomeMessage goHomeRightArmMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.ARM, RobotSide.RIGHT, 2);
             atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(goHomeRightArmMessage);
 
-            HandDesiredConfigurationMessage handMessage = new HandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
+            HandDesiredConfigurationMessage handMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
             atlasPrimitiveActions.leftHandDesiredConfigurationBehavior.setInput(handMessage);
          }
       };
@@ -177,7 +179,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    @Override
    public void onBehaviorExited()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("YAY IM ALL DONE");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("YAY IM ALL DONE");
       sendPacket(p1);
 
       coactiveElement.currentState.set(PickUpBallBehaviorState.STOPPED);

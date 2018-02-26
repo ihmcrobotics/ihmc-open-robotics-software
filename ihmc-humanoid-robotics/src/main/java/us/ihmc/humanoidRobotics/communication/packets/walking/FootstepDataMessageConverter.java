@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 
@@ -33,7 +34,7 @@ public class FootstepDataMessageConverter
          Point3D location = new Point3D(footstepPose.getPosition());
          Quaternion orientation = new Quaternion(footstepPose.getOrientation());
 
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), location, orientation);
 
          if (footstep.hasFoothold())
          {
@@ -67,7 +68,7 @@ public class FootstepDataMessageConverter
          Point3D location = new Point3D(footstepPose.getPosition());
          Quaternion orientation = new Quaternion(footstepPose.getOrientation());
 
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstep.getRobotSide(), location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), location, orientation);
 
          if (footstep.hasFoothold())
          {

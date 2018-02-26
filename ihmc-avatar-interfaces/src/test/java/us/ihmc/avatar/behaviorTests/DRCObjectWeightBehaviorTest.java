@@ -9,6 +9,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ObjectWeightBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -58,7 +59,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
    public void testConstructorAndSetInput()
    {
       ObjectWeightBehavior behavior = new ObjectWeightBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
-      behavior.setInput(new ObjectWeightPacket(RobotSide.LEFT, 0.0));
+      behavior.setInput(HumanoidMessageTools.createObjectWeightPacket(RobotSide.LEFT, 0.0));
       assertTrue(behavior.hasInputBeenSet());
    }
 
@@ -73,7 +74,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
 
       double weightLeft = 1.5;
       objectWeightBehavior.initialize();
-      objectWeightBehavior.setInput(new ObjectWeightPacket(RobotSide.LEFT, weightLeft));
+      objectWeightBehavior.setInput(HumanoidMessageTools.createObjectWeightPacket(RobotSide.LEFT, weightLeft));
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(objectWeightBehavior);
       assertTrue(success);
       assertTrue(MathTools.epsilonEquals(leftMass.getDoubleValue(), weightLeft, epsilon));
@@ -81,7 +82,7 @@ public abstract class DRCObjectWeightBehaviorTest implements MultiRobotTestInter
 
       double weightRight = 0.8;
       objectWeightBehavior.initialize();
-      objectWeightBehavior.setInput(new ObjectWeightPacket(RobotSide.RIGHT, weightRight));
+      objectWeightBehavior.setInput(HumanoidMessageTools.createObjectWeightPacket(RobotSide.RIGHT, weightRight));
       success = drcBehaviorTestHelper.executeBehaviorUntilDone(objectWeightBehavior);
       assertTrue(success);
       assertTrue(MathTools.epsilonEquals(leftMass.getDoubleValue(), weightLeft, epsilon));

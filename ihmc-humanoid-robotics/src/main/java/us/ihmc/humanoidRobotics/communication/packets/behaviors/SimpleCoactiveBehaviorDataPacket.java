@@ -11,10 +11,12 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
    {
    }
 
-   public SimpleCoactiveBehaviorDataPacket(String key, double value)
+   @Override
+   public void set(SimpleCoactiveBehaviorDataPacket other)
    {
-      this.key = key;
-      this.value = value;
+      key = other.key;
+      value = other.value;
+      setPacketInformation(other);
    }
 
    @Override
@@ -22,5 +24,4 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
    {
       return key.equals(other.key) && value == other.value;
    }
-
 }

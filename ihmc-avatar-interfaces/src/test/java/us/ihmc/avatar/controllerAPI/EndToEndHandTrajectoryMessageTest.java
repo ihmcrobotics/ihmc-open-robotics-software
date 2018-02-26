@@ -45,6 +45,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
@@ -147,7 +148,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, chestFrame);
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, chestFrame);
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
          drcSimulationTestHelper.send(handTrajectoryMessage);
@@ -195,7 +196,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       position.scale(scale);
 
       {
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 1);
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, 1);
          handTrajectoryMessage.getSe3Trajectory().setControlFramePosition(new Point3D(0.0, 0.0, 0.0));
          handTrajectoryMessage.getSe3Trajectory().setUseCustomControlFrame(true);
          handTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(0, trajectoryTime, position, orientation, new Vector3D(), new Vector3D(), worldFrame);
@@ -215,7 +216,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       // This should not change the hand pose since the control frame change is compensated by a desireds change.
       {
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 1);
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, 1);
 
          handTrajectoryMessage.getSe3Trajectory().setUseCustomControlFrame(true);
          Point3D framePosition = EuclidCoreRandomTools.nextPoint3D(random, -0.1, 0.1);
@@ -288,7 +289,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator = createTaskspaceToJointspaceCalculator(fullRobotModel, robotSide);
          FrameQuaternion tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, circleCenter, taskspaceToJointspaceCalculator, 500);
 
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
@@ -324,7 +325,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             handTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, worldFrame);
 
-            SE3TrajectoryPointMessage point = new SE3TrajectoryPointMessage(time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+            SE3TrajectoryPointMessage point = HumanoidMessageTools.createSE3TrajectoryPointMessage(time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
             handTrajectoryPoints.get(robotSide).addLast(point);
          }
 
@@ -410,7 +411,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       {
          int numberOfPoints = RigidBodyTaskspaceControlState.maxPoints;
-         HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
+         HandTrajectoryMessage message = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, numberOfPoints);
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
          message.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
@@ -432,7 +433,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       {
          int numberOfPoints = RigidBodyTaskspaceControlState.maxPoints - 1;
-         HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
+         HandTrajectoryMessage message = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, numberOfPoints);
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          message.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
          message.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
@@ -521,7 +522,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
       {
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(CommonReferenceFrameIds.CHEST_FRAME.getHashId());
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
@@ -547,7 +548,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             handTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, worldFrame);
 
-            SE3TrajectoryPointMessage point = new SE3TrajectoryPointMessage(time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+            SE3TrajectoryPointMessage point = HumanoidMessageTools.createSE3TrajectoryPointMessage(time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
             FrameSE3TrajectoryPoint framePoint = new FrameSE3TrajectoryPoint(worldFrame);
             framePoint.set(time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
             framePoint.changeFrame(chestBodyFixedFrame);
@@ -706,7 +707,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
          {
-            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
+            HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
             handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
             handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
             handTrajectoryMessage.setUniqueId(id);
@@ -825,7 +826,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
          {
-            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
+            HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
             handTrajectoryMessage.setUniqueId(id);
 
             if (messageIndex > 0)
@@ -875,7 +876,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
          desiredHandPose.get(desiredPosition, desiredOrientation);
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation, chestFrame);
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation, chestFrame);
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
          drcSimulationTestHelper.send(handTrajectoryMessage);
@@ -984,7 +985,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          Quaternion desiredOrientation = new Quaternion();
          desiredRandomHandPose.get(desiredPosition, desiredOrientation);
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, chestFrame);
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, chestFrame);
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
 
          drcSimulationTestHelper.send(handTrajectoryMessage);

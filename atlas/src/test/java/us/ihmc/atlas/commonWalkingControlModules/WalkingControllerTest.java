@@ -49,6 +49,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -205,7 +206,7 @@ public class WalkingControllerTest
 
    private void sendFootsteps()
    {
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(0.3, 0.2);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(0.3, 0.2);
       MovingReferenceFrame stanceFrame = referenceFrames.getSoleZUpFrame(RobotSide.LEFT);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -220,7 +221,7 @@ public class WalkingControllerTest
 
          location.changeFrame(ReferenceFrame.getWorldFrame());
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
-         FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
+         FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
          footsteps.add(footstep);
       }
       commandInputManager.submitMessage(footsteps);
@@ -228,7 +229,7 @@ public class WalkingControllerTest
 
    private void sendChestTrajectory()
    {
-      ChestTrajectoryMessage message = new ChestTrajectoryMessage(2);
+      ChestTrajectoryMessage message = HumanoidMessageTools.createChestTrajectoryMessage(2);
       Quaternion orientation = new Quaternion();
       orientation.appendYawRotation(Math.toRadians(-10.0));
       orientation.appendRollRotation(Math.toRadians(10.0));
@@ -245,7 +246,7 @@ public class WalkingControllerTest
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(chest, hand);
-         ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, joints.length, 2);
+         ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, joints.length, 2);
          for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
          {
             OneDoFJoint joint = joints[jointIdx];

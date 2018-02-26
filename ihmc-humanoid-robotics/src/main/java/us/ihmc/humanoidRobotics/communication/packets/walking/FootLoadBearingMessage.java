@@ -1,8 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -44,22 +41,12 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public FootLoadBearingMessage(Random random)
+   @Override
+   public void set(FootLoadBearingMessage other)
    {
-      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      request = RandomNumbers.nextEnum(random, LoadBearingRequest.class);
-   }
-
-   /**
-    * Create a message to request one end-effector to switch to load bearing.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param robotSide refers to the side of the end-effector if necessary.
-    */
-   public FootLoadBearingMessage(RobotSide robotSide, LoadBearingRequest request)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.robotSide = robotSide;
-      this.request = request;
+      robotSide = other.robotSide;
+      request = other.request;
+      setPacketInformation(other);
    }
 
    public RobotSide getRobotSide()

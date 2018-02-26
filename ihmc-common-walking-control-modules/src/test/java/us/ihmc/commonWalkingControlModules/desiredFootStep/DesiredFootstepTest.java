@@ -31,6 +31,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -83,7 +84,7 @@ public class DesiredFootstepTest
       ArrayList<Footstep> sentFootsteps = createRandomFootsteps(50);
       for (Footstep footstep : sentFootsteps)
       {
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstep);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstep);
          tcpServer.send(footstepData);
          //         queueBasedStreamingDataProducer.queueDataToSend(footstepData);
       }
@@ -152,7 +153,7 @@ public class DesiredFootstepTest
       {
          boolean isPaused = random.nextBoolean();
          commands.add(isPaused);
-         tcpServer.send(new PauseWalkingMessage(isPaused));
+         tcpServer.send(HumanoidMessageTools.createPauseWalkingMessage(isPaused));
       }
 
       ThreadTools.sleep(SLEEP_TIME);
@@ -211,7 +212,7 @@ public class DesiredFootstepTest
       {
          boolean isPaused = random.nextBoolean();
          commands.add(isPaused);
-         streamingDataTCPServer.send(new PauseWalkingMessage(isPaused));
+         streamingDataTCPServer.send(HumanoidMessageTools.createPauseWalkingMessage(isPaused));
       }
 
       ThreadTools.sleep(SLEEP_TIME);
@@ -266,7 +267,7 @@ public class DesiredFootstepTest
             status = FootstepStatus.Status.COMPLETED;
          }
 
-         FootstepStatus footstepStatus = new FootstepStatus(status, i);
+         FootstepStatus footstepStatus = HumanoidMessageTools.createFootstepStatus(status, i);
          sentFootstepStatus.add(footstepStatus);
          tcpServer.send(footstepStatus);
       }
@@ -386,11 +387,11 @@ public class DesiredFootstepTest
 
    private static FootstepDataListMessage convertFootstepsToFootstepData(ArrayList<Footstep> footsteps, double swingTime, double transferTime)
    {
-      FootstepDataListMessage footstepsData = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footstepsData = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       for (Footstep footstep : footsteps)
       {
-         footstepsData.add(new FootstepDataMessage(footstep));
+         footstepsData.add(HumanoidMessageTools.createFootstepDataMessage(footstep));
       }
 
       return footstepsData;

@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,7 +38,7 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(1.5, 0.0, 0.8);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(0.6, 0.3, 0.1);
+      FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(0.6, 0.3, 0.1);
 
       for (int stepIndex = 0; stepIndex < 10; stepIndex++)
       {
@@ -45,7 +46,7 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
          double y = side == RobotSide.LEFT ? 0.15 : -0.15;
          Point3D location = new Point3D(0.3 * (stepIndex + 1), y, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(side, location, orientation);
 
          double swingTime, transferTime;
 

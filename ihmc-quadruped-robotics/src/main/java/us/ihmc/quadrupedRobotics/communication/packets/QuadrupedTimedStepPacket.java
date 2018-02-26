@@ -10,8 +10,8 @@ import java.util.List;
 
 public class QuadrupedTimedStepPacket extends Packet<QuadrupedTimedStepPacket>
 {
-   private final ArrayList<QuadrupedTimedStep> steps;
-   private final boolean isExpressedInAbsoluteTime;
+   public ArrayList<QuadrupedTimedStep> steps;
+   public boolean isExpressedInAbsoluteTime;
 
    public QuadrupedTimedStepPacket()
    {
@@ -33,6 +33,16 @@ public class QuadrupedTimedStepPacket extends Packet<QuadrupedTimedStepPacket>
       this.steps = new ArrayList<>(steps);
       this.isExpressedInAbsoluteTime = isExpressedInAbsoluteTime;
       setDestination(PacketDestination.CONTROLLER);
+   }
+
+   @Override
+   public void set(QuadrupedTimedStepPacket other)
+   {
+      steps = new ArrayList<>();
+      for (QuadrupedTimedStep step : other.steps)
+         steps.add(new QuadrupedTimedStep(step));
+      isExpressedInAbsoluteTime = other.isExpressedInAbsoluteTime;
+      setPacketInformation(other);
    }
 
    public int size()
@@ -65,7 +75,7 @@ public class QuadrupedTimedStepPacket extends Packet<QuadrupedTimedStepPacket>
    @Override
    public boolean epsilonEquals(QuadrupedTimedStepPacket other, double epsilon)
    {
-      if(other == null)
+      if (other == null)
          return false;
 
       if (isExpressedInAbsoluteTime() != other.isExpressedInAbsoluteTime)

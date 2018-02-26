@@ -6,6 +6,7 @@ import java.util.Map;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,7 +35,7 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
 
    public void sendDeviceSettingToUI(Map<String, Object> params)
    {
-      BlackFlyParameterPacket packet = new BlackFlyParameterPacket(false, (Double) params.get("gain"), (Double) params.get("exposure"),
+      BlackFlyParameterPacket packet = HumanoidMessageTools.createBlackFlyParameterPacket(false, (Double) params.get("gain"), (Double) params.get("exposure"),
             (Double) params.get("frame_rate"), (Double) params.get("shutter_speed"), (Boolean) params.get("auto_exposure"), (Boolean) params.get("auto_gain"),
             (Boolean) params.get("auto_shutter"), side);
       packetCommunicator.send(packet);

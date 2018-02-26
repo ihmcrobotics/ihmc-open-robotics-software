@@ -2,13 +2,13 @@ package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -32,6 +32,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -233,7 +234,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private void sendTextToSpeechPacket(String message)
    {
-      TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket(message);
+      TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket(message);
       textToSpeechPacket.setbeep(false);
       sendPacketToUI(textToSpeechPacket);
    }
@@ -261,7 +262,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private void sendHeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
       ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
-      HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
 
       headTrajectoryMessage.setDestination(PacketDestination.UI);
       sendPacket(headTrajectoryMessage);
@@ -318,7 +319,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private void requestPlanarRegionsList()
    {
-      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = new RequestPlanarRegionsListMessage(RequestType.SINGLE_UPDATE);
+      RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(RequestType.SINGLE_UPDATE);
       requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
       sendPacket(requestPlanarRegionsListMessage);
    }
@@ -411,7 +412,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 //      footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.CLOSE_TO_XY_POSITION);
 
-    sendPacketToUI(new UIPositionCheckerPacket(new Point3D(xyGoal.getX(), xyGoal.getY(), leftFootPose.getZ()), new Quaternion()));
+    sendPacketToUI(MessageTools.createUIPositionCheckerPacket(new Point3D(xyGoal.getX(), xyGoal.getY(), leftFootPose.getZ()), new Quaternion()));
 
       footstepPlanner.setGoal(footstepPlannerGoal);
 
@@ -446,8 +447,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
          //         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 
-         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(tempFootstepPosePosition),
-               new Quaternion(tempFirstFootstepPoseOrientation));
+         FootstepDataMessage firstFootstepMessage = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), new Point3D(tempFootstepPosePosition), new Quaternion(tempFirstFootstepPoseOrientation));
 
          footstepDataListMessage.add(firstFootstepMessage);
       }

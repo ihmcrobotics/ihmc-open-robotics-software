@@ -42,6 +42,7 @@ import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
@@ -240,7 +241,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       behaviorDispatcher.start();
 
-      HumanoidBehaviorTypePacket requestPelvisPoseBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.TEST);
+      HumanoidBehaviorTypePacket requestPelvisPoseBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.TEST);
       behaviorCommunicatorClient.send(requestPelvisPoseBehaviorPacket);
       PrintTools.debug(this, "Requesting PelvisPoseBehavior");
 
@@ -285,7 +286,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       behaviorDispatcher.start();
 
 
-      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
+      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -352,7 +353,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       behaviorDispatcher.start();
 
-      HumanoidBehaviorTypePacket requestDiagnosticBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.DIAGNOSTIC);
+      HumanoidBehaviorTypePacket requestDiagnosticBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.DIAGNOSTIC);
       behaviorCommunicatorClient.send(requestDiagnosticBehaviorPacket);
       PrintTools.debug(this, "Requesting DiagnosticBehavior");
 
@@ -395,7 +396,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       behaviorDispatcher.start();
 
 
-      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
+      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -413,7 +414,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(success);
       FramePose2D poseBeforeStop = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
-      BehaviorControlModePacket stopModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.STOP);
+      BehaviorControlModePacket stopModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.STOP);
       behaviorCommunicatorClient.send(stopModePacket);
       PrintTools.debug(this, "Sending Stop Request");
 
@@ -444,7 +445,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       behaviorDispatcher.start();
 
 
-      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = new HumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
+      HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       behaviorCommunicatorClient.send(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -462,7 +463,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(success);
       FramePose2D poseBeforePause = getCurrentMidFeetPose2dTheHardWayBecauseReferenceFramesDontUpdateProperly(robot);
 
-      BehaviorControlModePacket pauseModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
+      BehaviorControlModePacket pauseModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
       behaviorCommunicatorClient.send(pauseModePacket);
       PrintTools.debug(this, "Sending Pause Request");
 
@@ -474,7 +475,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       assertTrue(distanceWalkedAfterStopRequest < walkingControllerParameters.getSteppingParameters().getMaxStepLength());
       assertTrue(!walkToLocationBehavior.isDone());
 
-      BehaviorControlModePacket resumeModePacket = new BehaviorControlModePacket(BehaviorControlModeEnum.RESUME);
+      BehaviorControlModePacket resumeModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.RESUME);
       behaviorCommunicatorClient.send(resumeModePacket);
       PrintTools.debug(this, "Sending Resume Request");
 
@@ -539,7 +540,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       Quaternion desiredPelvisQuat = new Quaternion();
       desiredPelvisQuat.set(desiredPelvisAxisAngle);
 
-      PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(3.0, desiredPelvisQuat);
+      PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage = HumanoidMessageTools.createPelvisOrientationTrajectoryMessage(3.0, desiredPelvisQuat);
       return pelvisOrientationTrajectoryMessage;
    }
 

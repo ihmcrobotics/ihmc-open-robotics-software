@@ -1,10 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
@@ -50,12 +48,12 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
          + "\nfootstep list is finished. If the value is negative the defaultTransferDuration will be used.")
    public double finalTransferDuration = -1.0;
 
-   /** If{@code false} the controller adjust each footstep height to be at the support sole height. */
+   @RosExportedField(documentation = "If false the controller adjust each footstep height to be at the support sole height.")
    public boolean trustHeightOfFootsteps = true;
    @RosExportedField(documentation = "Contains information on whether the robot can automatically adjust its footsteps to retain balance.")
    public boolean areFootstepsAdjustable = true;
 
-   /** If {@code true} the controller will adjust upcoming footsteps with the location error of previous steps. */
+   @RosExportedField(documentation = "If true the controller will adjust upcoming footsteps with the location error of previous steps.")
    public boolean offsetFootstepsWithExecutionError = false;
 
    @RosExportedField(documentation = "Properties for queueing footstep lists.")
@@ -85,72 +83,28 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
          queueingProperties.set(other.queueingProperties);
    }
 
-   public FootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double finalTransferDuration)
+   @Override
+   public void set(FootstepDataListMessage other)
    {
-      this(footstepDataList, 0.0, 0.0, finalTransferDuration, ExecutionMode.OVERRIDE);
-   }
-
-   /**
-    *
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param footstepDataList
-    * @param defaultSwingDuration
-    * @param defaultTransferDuration
-    * @param executionMode
-    */
-   public FootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double defaultSwingDuration, double defaultTransferDuration, ExecutionMode executionMode)
-   {
-      this(footstepDataList, defaultSwingDuration, defaultTransferDuration, defaultTransferDuration, executionMode);
-   }
-
-   /**
-    *
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param footstepDataList
-    * @param defaultSwingDuration
-    * @param defaultTransferDuration
-    * @param finalTransferDuration
-    * @param executionMode
-    */
-   public FootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double defaultSwingDuration, double defaultTransferDuration, double finalTransferDuration,
-         ExecutionMode executionMode)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      if(footstepDataList != null)
+      footstepDataList = new ArrayList<>();
+      for (FootstepDataMessage otherFootstep : other.footstepDataList)
       {
-         this.footstepDataList = footstepDataList;
+         FootstepDataMessage footstep = new FootstepDataMessage();
+         footstep.set(otherFootstep);
+         footstepDataList.add(footstep);
       }
-      this.defaultSwingDuration = defaultSwingDuration;
-      this.defaultTransferDuration = defaultTransferDuration;
-      this.finalTransferDuration = finalTransferDuration;
-      queueingProperties.setExecutionMode(executionMode, Packet.VALID_MESSAGE_DEFAULT_ID);
-   }
 
-   /**
-    *
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}. Set execution mode to OVERRIDE
-    * @param defaultSwingDuration
-    * @param defaultTransferDuration
-    */
-   public FootstepDataListMessage(double defaultSwingDuration, double defaultTransferDuration)
-   {
-      this(defaultSwingDuration, defaultTransferDuration, defaultTransferDuration);
-   }
-
-   /**
-    *
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}. Set execution mode to OVERRIDE
-    * @param defaultSwingDuration
-    * @param defaultTransferDuration
-    * @param finalTransferDuration
-    */
-   public FootstepDataListMessage(double defaultSwingDuration, double defaultTransferDuration, double finalTransferDuration)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.defaultSwingDuration = defaultSwingDuration;
-      this.defaultTransferDuration = defaultTransferDuration;
-      this.finalTransferDuration = finalTransferDuration;
-      queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE, Packet.VALID_MESSAGE_DEFAULT_ID);
+      executionTiming = other.executionTiming;
+      defaultSwingDuration = other.defaultSwingDuration;
+      defaultTransferDuration = other.defaultTransferDuration;
+      finalTransferDuration = other.finalTransferDuration;
+      trustHeightOfFootsteps = other.trustHeightOfFootsteps;
+      areFootstepsAdjustable = other.areFootstepsAdjustable;
+      offsetFootstepsWithExecutionError = other.offsetFootstepsWithExecutionError;
+      if (other.queueingProperties != null)
+         queueingProperties.set(other.queueingProperties);
+      
+      setPacketInformation(other);      
    }
 
    public ArrayList<FootstepDataMessage> getDataList()
@@ -326,22 +280,6 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    public QueueableMessage getQueueingProperties()
    {
       return queueingProperties;
-   }
-
-   public FootstepDataListMessage(Random random)
-   {
-      setUniqueId(1L);
-      int footstepListSize = random.nextInt(20);
-      for (int i = 0; i < footstepListSize; i++)
-      {
-         footstepDataList.add(new FootstepDataMessage(random));
-      }
-
-      this.defaultSwingDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
-      this.defaultTransferDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
-      this.finalTransferDuration = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
-      this.executionTiming = RandomNumbers.nextEnum(random, ExecutionTiming.class);
-      queueingProperties = new QueueableMessage(random);
    }
 
    /** {@inheritDoc} */

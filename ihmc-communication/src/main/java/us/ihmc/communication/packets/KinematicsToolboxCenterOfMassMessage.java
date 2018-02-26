@@ -2,6 +2,8 @@ package us.ihmc.communication.packets;
 
 import static us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage.nullEqualsAndEpsilonEquals;
 
+import java.util.Arrays;
+
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.MathTools;
@@ -49,21 +51,18 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
-   /**
-    * Creates a new center of mass message.
-    * <p>
-    * The new message is ready to be sent, but it can be further adjusted to provide more details.
-    * For example, the priority of the task can be changed by changing the weight of this message, a
-    * custom control frame can be specified.
-    * </p>
-    * 
-    * @param desiredPosition the position that center of mass should reach. The data is assumed to
-    *           be expressed in world frame. Not modified.
-    */
-   public KinematicsToolboxCenterOfMassMessage(Point3DReadOnly desiredPosition)
+   @Override
+   public void set(KinematicsToolboxCenterOfMassMessage other)
    {
-      setDesiredPosition(desiredPosition);
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
+      desiredPositionInWorld = new Point3D32(other.desiredPositionInWorld);
+      if (other.selectionMatrix != null)
+      {
+         selectionMatrix = new SelectionMatrix3DMessage();
+         selectionMatrix.set(other.selectionMatrix);
+      }
+      if (other.weights != null)
+         weights = Arrays.copyOf(other.weights, other.weights.length);
+      setPacketInformation(other);
    }
 
    /**
@@ -146,7 +145,7 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       if (this.selectionMatrix == null)
-         this.selectionMatrix = new SelectionMatrix3DMessage(selectionMatrix);
+         this.selectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix);
       else
          this.selectionMatrix.set(selectionMatrix);
    }

@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 
@@ -15,18 +13,14 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
 
    public AtlasElectricMotorAutoEnableFlagPacket()
    {
-
-   }
-
-   public AtlasElectricMotorAutoEnableFlagPacket(boolean shouldAutoEnable)
-   {
       setDestination(PacketDestination.CONTROLLER.ordinal());
-      this.shouldAutoEnable = shouldAutoEnable;
    }
 
-   public AtlasElectricMotorAutoEnableFlagPacket(Random random)
+   @Override
+   public void set(AtlasElectricMotorAutoEnableFlagPacket other)
    {
-      this(random.nextBoolean());
+      setPacketInformation(other);
+      shouldAutoEnable = other.shouldAutoEnable;
    }
 
    public boolean shouldAutoEnable()
@@ -34,7 +28,8 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
       return shouldAutoEnable;
    }
 
-   @Override public boolean epsilonEquals(AtlasElectricMotorAutoEnableFlagPacket other, double epsilon)
+   @Override
+   public boolean epsilonEquals(AtlasElectricMotorAutoEnableFlagPacket other, double epsilon)
    {
       return other.shouldAutoEnable == shouldAutoEnable;
    }

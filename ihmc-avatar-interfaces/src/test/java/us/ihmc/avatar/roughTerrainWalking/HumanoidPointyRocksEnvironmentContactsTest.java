@@ -17,6 +17,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
@@ -96,7 +97,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             doFootExplorationInTransferToStanding.set(false);
          }
 
-         FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+         FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          Point3D position = new Point3D(stepLocations.get(i));
@@ -158,7 +159,7 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
             doFootExplorationInTransferToStanding.set(false);
          }
 
-         FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+         FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          Point3D position = new Point3D(stepLocations.get(i));
