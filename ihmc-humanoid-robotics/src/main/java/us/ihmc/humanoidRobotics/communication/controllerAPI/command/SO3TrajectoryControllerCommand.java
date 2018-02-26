@@ -121,7 +121,7 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
          trajectoryPointList.addTrajectoryPoint(so3TrajectoryPointMessage.time, so3TrajectoryPointMessage.orientation,
                                                 so3TrajectoryPointMessage.angularVelocity);
       }
-      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
+      setQueueableCommandVariables(message.getQueueingProperties());
       selectionMatrix.resetSelection();
       selectionMatrix.setAxisSelection(message.selectionMatrix.xSelected, message.selectionMatrix.ySelected, message.selectionMatrix.zSelected);
       weightMatrix.clear();
