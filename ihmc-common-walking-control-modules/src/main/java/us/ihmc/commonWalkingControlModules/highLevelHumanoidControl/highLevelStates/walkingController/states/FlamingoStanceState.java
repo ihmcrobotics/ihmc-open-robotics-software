@@ -135,6 +135,7 @@ public class FlamingoStanceState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(swingTime, initialTransferTime);
 
+      balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(swingTime, initialTransferTime, finalTransferTime);
@@ -185,6 +186,7 @@ public class FlamingoStanceState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(swingTime, transferTime);
 
+      balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setUpcomingFootstep(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
       balanceManager.setICPPlanSupportSide(supportSide);

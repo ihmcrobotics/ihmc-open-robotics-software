@@ -154,6 +154,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             double transferDuration = footstepTiming.getTransferTime();
 
             balanceManager.clearICPPlan();
+            balanceManager.setFinalTransferTime(finalTransferTime);
             balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
             balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.initializeICPPlanForSingleSupport(swingDuration, transferDuration, finalTransferTime);
@@ -222,6 +223,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getBooleanValue());
       balanceManager.setNextFootstep(nextFootstep);
+      balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
