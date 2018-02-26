@@ -2,7 +2,9 @@ package us.ihmc.quadrupedRobotics;
 
 import junit.framework.AssertionFailedError;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerState;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -36,9 +38,9 @@ public class QuadrupedTestBehaviors
 
    public static void enterXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
       conductor.addTimeLimit(variables.getYoTime(), 2.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.XGAIT));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.XGAIT));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
    }
@@ -48,11 +50,12 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
       conductor.simulate();
 
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
+      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING);
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 2.0);
       //      conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getComPositionEstimateZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.05)); // doesn't work well when not flat ground - BS
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerState.STAND));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerEnum.STEPPING));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
    }
@@ -67,12 +70,12 @@ public class QuadrupedTestBehaviors
       
       variables.getXGaitEndDoubleSupportDurationInput().set(0.1);
       variables.getXGaitEndPhaseShiftInput().set(180.0);
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.5));
       conductor.simulate();
 
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_STAND);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
       

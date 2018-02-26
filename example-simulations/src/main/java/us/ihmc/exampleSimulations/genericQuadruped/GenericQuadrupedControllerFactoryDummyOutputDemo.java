@@ -13,7 +13,7 @@ import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.JointsOnlyStateEstimator;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootContactableBodiesFactory;
@@ -176,7 +176,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
 
       YoDouble robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       double robotTimeBeforeWarmUp = robotTimestamp.getDoubleValue();
-      for (QuadrupedForceControllerState state : QuadrupedForceControllerState.values)
+      for (QuadrupedForceControllerEnum state : QuadrupedForceControllerEnum.values)
       {
          FiniteStateMachineState<ControllerEvent> stateImpl = controllerManager.getState(state);
 

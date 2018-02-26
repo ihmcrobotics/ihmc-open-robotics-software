@@ -59,7 +59,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(1.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
@@ -81,7 +81,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(0.5);
       variables.getYoPlanarVelocityInputZ().set(0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));

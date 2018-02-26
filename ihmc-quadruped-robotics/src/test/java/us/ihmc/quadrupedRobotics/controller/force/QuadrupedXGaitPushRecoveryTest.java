@@ -68,7 +68,7 @@ public abstract class QuadrupedXGaitPushRecoveryTest implements QuadrupedMultiRo
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
       
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
       variables.getYoPlanarVelocityInputX().set(0.8);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
