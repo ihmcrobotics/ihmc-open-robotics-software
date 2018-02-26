@@ -23,7 +23,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
@@ -287,6 +286,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
       {
          ArmTrajectoryMessage trajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
+         trajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
          trajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
          {
@@ -412,6 +412,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
+            armTrajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
             armTrajectoryMessage.setUniqueId(id);
             if (messageIndex > 0)
             {
@@ -522,6 +523,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
+            armTrajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
             armTrajectoryMessage.setUniqueId(id);
             if (messageIndex > 0)
             {

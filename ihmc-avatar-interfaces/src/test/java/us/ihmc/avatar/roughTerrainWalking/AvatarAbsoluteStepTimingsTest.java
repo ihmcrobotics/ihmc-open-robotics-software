@@ -82,8 +82,6 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
       FootstepDataListMessage footstepMessage1 = new FootstepDataListMessage();
       footstepMessage1.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
-      footstepMessage1.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      footstepMessage1.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
       footstepMessage1.setUniqueId(1);
 
       FootstepDataListMessage footstepMessage2 = new FootstepDataListMessage();
