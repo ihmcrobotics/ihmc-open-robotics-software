@@ -488,6 +488,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage();
          footTrajectoryMessage.setRobotSide(robotSide.toByte());
          footTrajectoryMessage.setUniqueId(id);
+         footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setMessageId(id);
          if (messageIndex > 0)
          {
             footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
@@ -575,6 +576,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage();
          footTrajectoryMessage.setRobotSide(robotSide.toByte());
+         footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setMessageId(100);
          footTrajectoryMessage.setUniqueId(100);
          footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
          footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setPreviousMessageId((long) 500); //not the right ID

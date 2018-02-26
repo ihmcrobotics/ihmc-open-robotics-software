@@ -54,8 +54,6 @@ public class FootstepDataMessageConverter
          footstepDataListMessage.footstepDataList.add().set(footstepData);
       }
 
-      footstepDataListMessage.queueingProperties.setExecutionMode(executionMode.toByte());
-      footstepDataListMessage.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
       return footstepDataListMessage;
    }
    

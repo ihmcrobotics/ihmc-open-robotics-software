@@ -1221,8 +1221,6 @@ public class HumanoidMessageTools
       message.defaultSwingDuration = defaultSwingDuration;
       message.defaultTransferDuration = defaultTransferDuration;
       message.finalTransferDuration = finalTransferDuration;
-      message.queueingProperties.setExecutionMode(executionMode.toByte());
-      message.queueingProperties.setPreviousMessageId(Packet.VALID_MESSAGE_DEFAULT_ID);
       return message;
    }
 
@@ -1255,8 +1253,6 @@ public class HumanoidMessageTools
       message.defaultSwingDuration = defaultSwingDuration;
       message.defaultTransferDuration = defaultTransferDuration;
       message.finalTransferDuration = finalTransferDuration;
-      message.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      message.queueingProperties.setPreviousMessageId(Packet.VALID_MESSAGE_DEFAULT_ID);
       return message;
    }
 
