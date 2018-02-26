@@ -16,6 +16,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
@@ -83,7 +84,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
       variables.getTimedStepGoalPositionX().set(variables.getSolePositionXs().get(RobotQuadrant.FRONT_LEFT).getDoubleValue());
       variables.getTimedStepGoalPositionY().set(variables.getSolePositionYs().get(RobotQuadrant.FRONT_LEFT).getDoubleValue() + 0.2);
       variables.getTimedStepGoalPositionZ().set(0.2);
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_STEP);
 
       lowerHeightUntilFailure(originalHeight);
       raiseHeightUntilFailure(originalHeight);

@@ -75,7 +75,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
 
       Random random = new Random(1447L);
       double runningDuration = variables.getYoTime().getDoubleValue();
@@ -95,7 +95,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
 
       Random random = new Random(1547L);
       double runningDuration = variables.getYoTime().getDoubleValue();
@@ -122,7 +122,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
 
       Random random = new Random(2456L);
       double runningDuration = variables.getYoTime().getDoubleValue();
@@ -150,7 +150,7 @@ public abstract class QuadrupedXGaitRandomWalkingTest implements QuadrupedMultiR
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
 
       Random random = new Random(1557L);
       double runningDuration = variables.getYoTime().getDoubleValue();

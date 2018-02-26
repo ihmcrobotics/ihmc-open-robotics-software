@@ -1,7 +1,9 @@
 package us.ihmc.quadrupedRobotics;
 
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -10,8 +12,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
 {
    private final YoEnum<QuadrupedForceControllerRequestedEvent> userTrigger;
-   private final YoEnum<QuadrupedForceControllerState> forceControllerState;
-   
+   private final YoEnum<QuadrupedSteppingRequestedEvent> stepTrigger;
+   private final YoEnum<QuadrupedForceControllerEnum> forceControllerState;
+   private final YoEnum<QuadrupedSteppingStateEnum> steppingState;
+
    private final YoDouble stanceHeight;
    private final YoDouble groundPlanePointZ;
    
@@ -41,8 +45,10 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       super(scs);
       
       userTrigger = (YoEnum<QuadrupedForceControllerRequestedEvent>) scs.getVariable("userTrigger");
-      forceControllerState = (YoEnum<QuadrupedForceControllerState>) scs.getVariable("forceControllerState");
-      
+      stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.getVariable("stepTrigger");
+      forceControllerState = (YoEnum<QuadrupedForceControllerEnum>) scs.getVariable("forceControllerState");
+      steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingState");
+
       stanceHeight = (YoDouble) scs.getVariable("param__stanceHeight");
       groundPlanePointZ = (YoDouble) scs.getVariable("groundPlanePointZ");
       
@@ -70,9 +76,19 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return userTrigger;
    }
 
-   public YoEnum<QuadrupedForceControllerState> getForceControllerState()
+   public YoEnum<QuadrupedSteppingRequestedEvent> getStepTrigger()
+   {
+      return stepTrigger;
+   }
+
+   public YoEnum<QuadrupedForceControllerEnum> getForceControllerState()
    {
       return forceControllerState;
+   }
+
+   public YoEnum<QuadrupedSteppingStateEnum> getSteppingState()
+   {
+      return steppingState;
    }
 
    public YoDouble getStanceHeight()

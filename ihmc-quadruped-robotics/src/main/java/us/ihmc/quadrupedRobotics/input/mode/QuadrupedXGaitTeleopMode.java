@@ -4,12 +4,9 @@ import java.util.Map;
 
 import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedXGaitSettingsPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -137,7 +134,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       case A:
          if (event.getValue() > 0.5)
          {
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STAND);
+            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING);
             packetCommunicator.send(eventPacket);
             mode = XGaitInputMode.POSITION;
          }
@@ -148,7 +145,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             xGaitSettings.setEndPhaseShift(180);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+            QuadrupedSteppingEventPacket eventPacket = new QuadrupedSteppingEventPacket(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
             packetCommunicator.send(eventPacket);
             mode = XGaitInputMode.VELOCITY;
          }
@@ -159,7 +156,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             xGaitSettings.setEndPhaseShift(90);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+            QuadrupedSteppingEventPacket eventPacket = new QuadrupedSteppingEventPacket(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
             packetCommunicator.send(eventPacket);
             mode = XGaitInputMode.VELOCITY;
          }
@@ -170,7 +167,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
             xGaitSettings.setEndPhaseShift(0);
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
-            QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+            QuadrupedSteppingEventPacket eventPacket = new QuadrupedSteppingEventPacket(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
             packetCommunicator.send(eventPacket);
             mode = XGaitInputMode.VELOCITY;
          }

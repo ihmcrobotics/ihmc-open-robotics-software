@@ -61,7 +61,7 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getXGaitStanceWidthInput().set(0.35);
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
@@ -89,7 +89,7 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
       QuadrupedTestBehaviors.readyXGait(conductor, variables);
 
       variables.getXGaitStanceWidthInput().set(0.35);
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_XGAIT);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
