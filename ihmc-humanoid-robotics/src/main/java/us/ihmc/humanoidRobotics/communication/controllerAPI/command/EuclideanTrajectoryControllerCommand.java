@@ -117,7 +117,7 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
          trajectoryPointList.addTrajectoryPoint(euclideanTrajectoryPointMessage.time, euclideanTrajectoryPointMessage.position,
                                                 euclideanTrajectoryPointMessage.linearVelocity);
       }
-      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
+      setQueueableCommandVariables(message.getQueueingProperties());
       selectionMatrix.resetSelection();
       selectionMatrix.setAxisSelection(message.selectionMatrix.xSelected, message.selectionMatrix.ySelected, message.selectionMatrix.zSelected);
       weightMatrix.clear();

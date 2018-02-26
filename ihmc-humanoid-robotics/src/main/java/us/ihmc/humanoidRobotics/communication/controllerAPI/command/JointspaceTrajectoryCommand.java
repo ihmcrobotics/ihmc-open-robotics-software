@@ -46,7 +46,7 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
    @Override
    public void set(JointspaceTrajectoryMessage message)
    {
-      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
+      setQueueableCommandVariables(message.getQueueingProperties());
       set(message.getJointTrajectoryMessages());
    }
 
