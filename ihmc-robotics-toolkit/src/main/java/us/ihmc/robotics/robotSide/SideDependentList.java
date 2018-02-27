@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class SideDependentList<V> extends EnumMap<RobotSide, V> implements Iterable<V>
+public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> implements Iterable<V>
 {
    private static final long serialVersionUID = -6514328471068877058L;
 
@@ -35,21 +35,6 @@ public class SideDependentList<V> extends EnumMap<RobotSide, V> implements Itera
          this.set(robotSide, other.get(robotSide));
       }
    }
-   
-   public V get(RobotSide side)
-   {
-      return super.get(side);
-   }
-
-   public String toString()
-   {
-      return new String("type: " + this.getClass() + "\n" + "left: " + get(RobotSide.LEFT) + "\n" + "right: " + get(RobotSide.RIGHT));
-   }
-
-   public V set(RobotSide robotSide, V element)
-   {
-      return this.put(robotSide, element);
-   }
 
    public void set(SideDependentList<V> sideDependentList)
    {
@@ -57,6 +42,11 @@ public class SideDependentList<V> extends EnumMap<RobotSide, V> implements Itera
       {
          this.set(robotSide, sideDependentList.get(robotSide));
       }
+   }
+
+   public String toString()
+   {
+      return new String("type: " + this.getClass() + "\n" + "left: " + get(RobotSide.LEFT) + "\n" + "right: " + get(RobotSide.RIGHT));
    }
 
    public static <K extends Enum<K>, V> SideDependentList<EnumMap<K, V>> createListOfEnumMaps(Class<K> keyType)
