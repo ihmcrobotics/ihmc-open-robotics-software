@@ -117,7 +117,7 @@ public class PacketCodeQualityTest
                   continue;
                if (isPrimitive(typeToCheck))
                   continue;
-               if (typeToCheck != String.class && thirdPartySerializableClasses.contains(typeToCheck))
+               if (thirdPartySerializableClasses.contains(typeToCheck))
                   continue;
                if (allowedEuclidTypes.contains(typeToCheck))
                   continue;
@@ -593,7 +593,6 @@ public class PacketCodeQualityTest
    private static final Set<Class<?>> thirdPartySerializableClasses = new HashSet<>();
    static
    {
-      thirdPartySerializableClasses.add(String.class);
       thirdPartySerializableClasses.add(List.class);
       thirdPartySerializableClasses.add(ArrayList.class);
       thirdPartySerializableClasses.add(StringBuilder.class);
