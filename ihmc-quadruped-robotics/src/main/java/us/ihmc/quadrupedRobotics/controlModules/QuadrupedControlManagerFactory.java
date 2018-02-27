@@ -16,6 +16,7 @@ public class QuadrupedControlManagerFactory
 
    private QuadrupedFeetManager feetManager;
    private QuadrupedBodyOrientationManager bodyOrientationManager;
+   private QuadrupedBalanceManager balanceManager;
 
    public QuadrupedControlManagerFactory(QuadrupedForceControllerToolbox toolbox, QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry)
    {
@@ -41,6 +42,15 @@ public class QuadrupedControlManagerFactory
 
       bodyOrientationManager = new QuadrupedBodyOrientationManager(toolbox, postureProvider, registry);
       return bodyOrientationManager;
+   }
+
+   public QuadrupedBalanceManager getOrCreateBalanceManager()
+   {
+      if (balanceManager != null)
+         return balanceManager;
+
+      balanceManager = new QuadrupedBalanceManager(toolbox, postureProvider, registry);
+      return balanceManager;
    }
 
    public QuadrupedSolePositionController getOrCreateSolePositionController(RobotQuadrant robotQuadrant)
