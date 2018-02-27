@@ -56,12 +56,12 @@ public abstract class AvatarPauseWalkingTest implements MultiRobotTestInterface
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @After
    public void destroySimulationAndRecycleMemory()
    {
+      System.out.println("blah? " + simulationTestingParameters.getKeepSCSUp());
       if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
