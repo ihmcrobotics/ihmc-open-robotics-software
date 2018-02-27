@@ -72,12 +72,12 @@ public enum QuadrupedSupportConfiguration
    
    public boolean isSupportQuadrant(RobotQuadrant robotQuadrant)
    {
-      return supportQuadrants.containsQuadrant(robotQuadrant);
+      return supportQuadrants.containsKey(robotQuadrant);
    }
    
    public boolean isSwingQuadrant(RobotQuadrant robotQuadrant)
    {
-      return swingQuadrants.containsQuadrant(robotQuadrant);
+      return swingQuadrants.containsKey(robotQuadrant);
    }
    
    public RobotQuadrant[] swingQuadrants()

@@ -25,5 +25,5 @@ public class SegmentDependentList<E extends Enum<E> & RobotSegment<E>, V> extend
    {
       return this.containsKey(robotSegment);
    }
-   
+
 }
