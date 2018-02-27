@@ -200,9 +200,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(StringBuilder[].class);
 
       registerPacketField(FootstepPlanRequestType.class);
-      registerPacketField(String.class);
       registerPacketField(char[].class);
-      registerPacketField(String[].class);
       registerPacketClass(HandCollisionDetectedPacket.class);
 
       // Video data
