@@ -20,9 +20,9 @@ public class QuadrupedSolePositionControllerSetpoints
       this.soleForceFeedforward = new FrameVector3D();
    }
 
-   public void initialize(QuadrupedTaskSpaceEstimates estimates)
+   public void initialize(ReferenceFrame soleReferenceFrame)
    {
-      this.solePosition.setIncludingFrame(estimates.getSolePosition(robotQuadrant));
+      this.solePosition.setToZero(soleReferenceFrame);
       this.solePosition.changeFrame(ReferenceFrame.getWorldFrame());
       this.soleLinearVelocity.setToZero();
       this.soleForceFeedforward.setToZero();

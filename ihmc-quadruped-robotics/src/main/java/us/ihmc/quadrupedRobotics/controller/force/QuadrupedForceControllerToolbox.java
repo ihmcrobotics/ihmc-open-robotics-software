@@ -1,11 +1,13 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedForceControllerToolbox
@@ -15,13 +17,13 @@ public class QuadrupedForceControllerToolbox
    private final QuadrupedTaskSpaceController taskSpaceController;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
-   private final DivergentComponentOfMotionController dcmPositionController;
-   private final QuadrupedComPositionController comPositionController;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrupedFallDetector fallDetector;
 
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedFootControlModuleParameters footControlModuleParameters;
+
+   private final QuadrupedTaskSpaceEstimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
 
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, YoVariableRegistry registry)
    {
@@ -39,10 +41,13 @@ public class QuadrupedForceControllerToolbox
       taskSpaceController = new QuadrupedTaskSpaceController(runtimeEnvironment.getFullRobotModel(), referenceFrames, runtimeEnvironment.getControlDT(), registry, runtimeEnvironment.getGraphicsListRegistry());
       linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassZUpFrame(), mass, gravity, 1.0, registry);
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
-      dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry, runtimeEnvironment.getGraphicsListRegistry());
-      comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
+   }
+
+   public void update()
+   {
+      taskSpaceEstimator.compute(taskSpaceEstimates);
    }
 
    public QuadrupedRuntimeEnvironment getRuntimeEnvironment()
@@ -60,11 +65,6 @@ public class QuadrupedForceControllerToolbox
       return referenceFrames;
    }
 
-   public QuadrupedTaskSpaceEstimator getTaskSpaceEstimator()
-   {
-      return taskSpaceEstimator;
-   }
-
    public QuadrupedTaskSpaceController getTaskSpaceController()
    {
       return taskSpaceController;
@@ -80,16 +80,6 @@ public class QuadrupedForceControllerToolbox
       return dcmPositionEstimator;
    }
 
-   public DivergentComponentOfMotionController getDcmPositionController()
-   {
-      return dcmPositionController;
-   }
-
-   public QuadrupedComPositionController getComPositionController()
-   {
-      return comPositionController;
-   }
-
    public GroundPlaneEstimator getGroundPlaneEstimator()
    {
       return groundPlaneEstimator;
@@ -98,5 +88,15 @@ public class QuadrupedForceControllerToolbox
    public QuadrupedFallDetector getFallDetector()
    {
       return fallDetector;
+   }
+
+   public QuadrupedTaskSpaceEstimates getTaskSpaceEstimates()
+   {
+      return taskSpaceEstimates;
+   }
+
+   public ReferenceFrame getSoleReferenceFrame(RobotQuadrant robotQuadrant)
+   {
+      return referenceFrames.getFootFrame(robotQuadrant);
    }
 }

@@ -1,8 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -22,11 +19,11 @@ import us.ihmc.robotics.screwTheory.Twist;
 
 public class QuadrupedTaskSpaceEstimator
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final QuadrupedReferenceFrames referenceFrames;
-   private final ReferenceFrame worldFrame;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame comFrame;
-   private final QuadrantDependentList<ReferenceFrame> soleFrame;
+   private final QuadrantDependentList<ReferenceFrame> soleFrames;
    private final QuadrantDependentList<RigidBody> footRigidBody;
    private final RigidBody pelvisRigidBody;
 
@@ -55,8 +52,7 @@ public class QuadrupedTaskSpaceEstimator
       this.referenceFrames = referenceFrames;
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       bodyFrame = referenceFrames.getBodyFrame();
-      worldFrame = referenceFrames.getWorldFrame();
-      soleFrame = referenceFrames.getFootReferenceFrames();
+      soleFrames = referenceFrames.getFootReferenceFrames();
       pelvisRigidBody = fullRobotModel.getPelvis();
       footRigidBody = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -116,11 +112,11 @@ public class QuadrupedTaskSpaceEstimator
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          footRigidBody.get(robotQuadrant).getBodyFixedFrame().getTwistOfFrame(twistStorage);
-         twistStorage.changeFrame(soleFrame.get(robotQuadrant));
+         twistStorage.changeFrame(soleFrames.get(robotQuadrant));
          twistStorage.getAngularPart(estimates.getSoleAngularVelocity().get(robotQuadrant));
          twistStorage.getLinearPart(estimates.getSoleLinearVelocity().get(robotQuadrant));
-         estimates.getSoleOrientation().get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
-         estimates.getSolePosition().get(robotQuadrant).setToZero(soleFrame.get(robotQuadrant));
+         estimates.getSoleOrientation().get(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
+         estimates.getSolePosition(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
          estimates.getSoleVirtualForce().get(robotQuadrant).setIncludingFrame(soleForceEstimator.getSoleVirtualForce(robotQuadrant));
          estimates.getSoleContactForce().get(robotQuadrant).setIncludingFrame(soleForceEstimator.getSoleContactForce(robotQuadrant));
       }
@@ -149,7 +145,7 @@ public class QuadrupedTaskSpaceEstimator
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          yoSoleOrientationEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleOrientation().get(robotQuadrant));
-         yoSolePositionEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSolePosition().get(robotQuadrant));
+         yoSolePositionEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSolePosition(robotQuadrant));
          yoSoleAngularVelocityEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleAngularVelocity().get(robotQuadrant));
          yoSoleLinearVelocityEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleLinearVelocity().get(robotQuadrant));
       }
