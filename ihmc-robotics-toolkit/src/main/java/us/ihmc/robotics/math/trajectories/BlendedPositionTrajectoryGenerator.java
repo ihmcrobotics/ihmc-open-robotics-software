@@ -12,8 +12,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private final PositionTrajectoryGenerator trajectory;
    private final ReferenceFrame trajectoryFrame;
    private final YoPolynomial[] initialConstraintPolynomial = new YoPolynomial[3];
@@ -47,23 +45,22 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    {
       this.trajectory = trajectory;
       this.trajectoryFrame = trajectoryFrame;
-      this.initialConstraintPolynomial[0] = new YoPolynomial(prefix + "InitialConstraintPolynomialX", 6, registry);
-      this.initialConstraintPolynomial[1] = new YoPolynomial(prefix + "InitialConstraintPolynomialY", 6, registry);
-      this.initialConstraintPolynomial[2] = new YoPolynomial(prefix + "InitialConstraintPolynomialZ", 6, registry);
-      this.finalConstraintPolynomial[0] = new YoPolynomial(prefix + "FinalConstraintPolynomialX", 6, registry);
-      this.finalConstraintPolynomial[1] = new YoPolynomial(prefix + "FinalConstraintPolynomialY", 6, registry);
-      this.finalConstraintPolynomial[2] = new YoPolynomial(prefix + "FinalConstraintPolynomialZ", 6, registry);
-      this.initialBlendStartTime = new YoDouble(prefix + "InitialBlendStartTime", registry);
-      this.initialBlendEndTime = new YoDouble(prefix + "InitialBlendEndTime", registry);
-      this.finalBlendStartTime = new YoDouble(prefix + "FinalBlendStartTime", registry);
-      this.finalBlendEndTime = new YoDouble(prefix + "FinalBlendEndTime", registry);
+      this.initialConstraintPolynomial[0] = new YoPolynomial(prefix + "InitialConstraintPolynomialX", 6, parentRegistry);
+      this.initialConstraintPolynomial[1] = new YoPolynomial(prefix + "InitialConstraintPolynomialY", 6, parentRegistry);
+      this.initialConstraintPolynomial[2] = new YoPolynomial(prefix + "InitialConstraintPolynomialZ", 6, parentRegistry);
+      this.finalConstraintPolynomial[0] = new YoPolynomial(prefix + "FinalConstraintPolynomialX", 6, parentRegistry);
+      this.finalConstraintPolynomial[1] = new YoPolynomial(prefix + "FinalConstraintPolynomialY", 6, parentRegistry);
+      this.finalConstraintPolynomial[2] = new YoPolynomial(prefix + "FinalConstraintPolynomialZ", 6, parentRegistry);
+      this.initialBlendStartTime = new YoDouble(prefix + "InitialBlendStartTime", parentRegistry);
+      this.initialBlendEndTime = new YoDouble(prefix + "InitialBlendEndTime", parentRegistry);
+      this.finalBlendStartTime = new YoDouble(prefix + "FinalBlendStartTime", parentRegistry);
+      this.finalBlendEndTime = new YoDouble(prefix + "FinalBlendEndTime", parentRegistry);
       this.position.changeFrame(trajectoryFrame);
       this.velocity.changeFrame(trajectoryFrame);
       this.acceleration.changeFrame(trajectoryFrame);
       this.tempPosition.changeFrame(trajectoryFrame);
       this.tempVelocity.changeFrame(trajectoryFrame);
       this.tempAcceleration.changeFrame(trajectoryFrame);
-      parentRegistry.addChild(registry);
       clear();
    }
 
