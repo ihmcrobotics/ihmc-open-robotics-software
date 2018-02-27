@@ -15,7 +15,7 @@ import java.util.Random;
  * @author not attributable
  * @version 1.0
  */
-public enum RobotSide
+public enum RobotSide implements RobotSegment<RobotSide>
 {
    LEFT, RIGHT;
 
@@ -220,5 +220,17 @@ public enum RobotSide
       if (enumAsByte == -1)
          return null;
       return values[enumAsByte];
+   }
+
+   @Override
+   public RobotSide[] getValues()
+   {
+      return values;
+   }
+
+   @Override
+   public EnumSet<RobotSide> getEnumSet()
+   {
+      return set;
    }
 }
