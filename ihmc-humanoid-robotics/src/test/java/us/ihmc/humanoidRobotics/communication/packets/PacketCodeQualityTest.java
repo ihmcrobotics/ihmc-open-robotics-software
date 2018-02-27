@@ -247,7 +247,8 @@ public class PacketCodeQualityTest
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
-      allPacketTypes.remove(LocalVideoPacket.class); // That guy is a packet but does not make it to the network. It will stay on Kryo. 
+      allPacketTypes.remove(LocalVideoPacket.class); // That guy is a packet but does not make it to the network. It will stay on Kryo.
+      allPacketTypes.remove(MessageOfMessages.class); // This guy has its own ticket to get converted. 
 
       Map<Class<? extends Packet>, List<Class>> packetTypesWithIllegalFieldTypes = new HashMap<>();
 
@@ -725,6 +726,9 @@ public class PacketCodeQualityTest
 
    private void checkIfAllFieldsArePublic(Class<?> clazz)
    {
+      if (List.class.isAssignableFrom(clazz))
+         return;
+
       if (thirdPartySerializableClasses.contains(clazz) || allowedEuclidTypes.contains(clazz))
          return;
 
@@ -755,8 +759,6 @@ public class PacketCodeQualityTest
    private static final Set<Class<?>> thirdPartySerializableClasses = new HashSet<>();
    static
    {
-      thirdPartySerializableClasses.add(List.class);
-      thirdPartySerializableClasses.add(ArrayList.class);
       thirdPartySerializableClasses.add(PreallocatedList.class);
       thirdPartySerializableClasses.add(TByteArrayList.class);
       thirdPartySerializableClasses.add(TFloatArrayList.class);
