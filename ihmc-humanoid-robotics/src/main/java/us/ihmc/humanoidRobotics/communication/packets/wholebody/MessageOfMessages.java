@@ -14,7 +14,6 @@ public class MessageOfMessages extends Packet<MessageOfMessages>
 
    public MessageOfMessages()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override

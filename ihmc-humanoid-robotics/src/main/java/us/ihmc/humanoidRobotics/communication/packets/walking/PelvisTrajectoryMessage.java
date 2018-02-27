@@ -80,14 +80,6 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage>
    }
 
    @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (se3Trajectory != null)
-         se3Trajectory.setUniqueId(uniqueId);
-   }
-
-   @Override
    public boolean epsilonEquals(PelvisTrajectoryMessage other, double epsilon)
    {
       return se3Trajectory.epsilonEquals(other.se3Trajectory, epsilon);

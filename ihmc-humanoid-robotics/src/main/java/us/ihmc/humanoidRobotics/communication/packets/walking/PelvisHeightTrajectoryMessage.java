@@ -28,7 +28,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    public PelvisHeightTrajectoryMessage()
    {
       euclideanTrajectory = new EuclideanTrajectoryMessage();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
       euclideanTrajectory.selectionMatrix.xSelected = false;
       euclideanTrajectory.selectionMatrix.ySelected = false;
@@ -43,7 +42,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage other)
    {
       euclideanTrajectory = new EuclideanTrajectoryMessage(other.euclideanTrajectory);
-      setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
 
       enableUserPelvisControl = other.enableUserPelvisControl;
@@ -103,14 +101,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    public void setEnableUserPelvisControlDuringWalking(boolean enableUserPelvisControlDuringWalking)
    {
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (euclideanTrajectory != null)
-         euclideanTrajectory.setUniqueId(uniqueId);
    }
 
    public EuclideanTrajectoryMessage getEuclideanTrajectory()

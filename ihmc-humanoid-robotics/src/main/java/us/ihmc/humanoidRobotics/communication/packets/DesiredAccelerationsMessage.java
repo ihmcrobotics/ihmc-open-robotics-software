@@ -20,7 +20,6 @@ public final class DesiredAccelerationsMessage extends Packet<DesiredAcceleratio
 
    public DesiredAccelerationsMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override

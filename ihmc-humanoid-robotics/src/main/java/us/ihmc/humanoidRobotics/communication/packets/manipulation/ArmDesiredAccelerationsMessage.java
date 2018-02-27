@@ -50,14 +50,6 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
    }
 
    @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (desiredAccelerations != null)
-         desiredAccelerations.setUniqueId(uniqueId);
-   }
-
-   @Override
    public boolean epsilonEquals(ArmDesiredAccelerationsMessage other, double epsilon)
    {
       if (robotSide != other.robotSide)

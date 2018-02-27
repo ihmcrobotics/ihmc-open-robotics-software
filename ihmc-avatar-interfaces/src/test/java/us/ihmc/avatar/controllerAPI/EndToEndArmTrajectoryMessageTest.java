@@ -23,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
@@ -287,7 +288,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       {
          ArmTrajectoryMessage trajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
          trajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
-         trajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
          {
             trajectoryMessage.jointspaceTrajectory.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
@@ -413,7 +413,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
             armTrajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
-            armTrajectoryMessage.setUniqueId(id);
             if (messageIndex > 0)
             {
                long previousMessageId = id - 1;
@@ -524,7 +523,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
             armTrajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
-            armTrajectoryMessage.setUniqueId(id);
             if (messageIndex > 0)
             {
                armTrajectoryMessage.jointspaceTrajectory.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());

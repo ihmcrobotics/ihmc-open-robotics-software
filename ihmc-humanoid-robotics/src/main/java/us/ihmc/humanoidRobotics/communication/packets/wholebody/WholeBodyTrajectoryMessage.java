@@ -55,8 +55,6 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
    public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage other)
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-
       leftHandTrajectoryMessage = new HandTrajectoryMessage(other.leftHandTrajectoryMessage);
       rightHandTrajectoryMessage = new HandTrajectoryMessage(other.rightHandTrajectoryMessage);
       leftArmTrajectoryMessage = new ArmTrajectoryMessage(other.leftArmTrajectoryMessage);

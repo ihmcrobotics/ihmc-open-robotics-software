@@ -21,7 +21,6 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
    public NeckDesiredAccelerationsMessage()
    {
       desiredAccelerations = new DesiredAccelerationsMessage();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override
@@ -40,14 +39,6 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
    public DesiredAccelerationsMessage getDesiredAccelerations()
    {
       return desiredAccelerations;
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (desiredAccelerations != null)
-         desiredAccelerations.setUniqueId(uniqueId);
    }
 
    @Override

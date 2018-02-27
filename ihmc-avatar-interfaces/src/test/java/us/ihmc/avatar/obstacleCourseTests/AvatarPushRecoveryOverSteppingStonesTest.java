@@ -255,7 +255,6 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       }
 
       PlanarRegionsListMessage messageList = MessageTools.createPlanarRegionsListMessage(planarRegionsAsMessages);
-      messageList.uniqueId = 5L;
 
       return messageList;
    }

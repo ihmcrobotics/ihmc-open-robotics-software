@@ -128,7 +128,6 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-      planarRegionsListMessage.setUniqueId(5L);
 
       drcSimulationTestHelper.getControllerCommunicator().attachListener(RequestPlanarRegionsListMessage.class, new PacketConsumer<RequestPlanarRegionsListMessage>()
       {

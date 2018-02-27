@@ -21,7 +21,6 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
     */
    public ChestTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -32,7 +31,6 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
    public ChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
    {
       so3Trajectory = new SO3TrajectoryMessage(chestTrajectoryMessage.so3Trajectory);
-      setUniqueId(chestTrajectoryMessage.getUniqueId());
       setDestination(chestTrajectoryMessage.getDestination());
    }
 
@@ -41,14 +39,6 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
    {
       so3Trajectory.set(other.so3Trajectory);
       setPacketInformation(other);
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (so3Trajectory != null)
-         so3Trajectory.setUniqueId(uniqueId);
    }
 
    public SO3TrajectoryMessage getSo3Trajectory()

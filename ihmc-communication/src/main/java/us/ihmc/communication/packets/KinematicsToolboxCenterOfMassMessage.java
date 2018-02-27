@@ -47,7 +47,6 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
 
    public KinematicsToolboxCenterOfMassMessage()
    {
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override

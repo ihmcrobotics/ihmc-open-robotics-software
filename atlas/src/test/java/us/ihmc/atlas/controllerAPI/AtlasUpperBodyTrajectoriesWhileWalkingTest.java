@@ -165,7 +165,6 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
          for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
-            armTrajectoryMessage.setUniqueId(id);
             armTrajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
 
             if (messageIndex > 0)

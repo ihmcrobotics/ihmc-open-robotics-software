@@ -211,7 +211,6 @@ public class HumanoidMessageTools
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
       message.jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
       message.robotSide = robotSide.toByte();
-      message.setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
       return message;
    }
 
@@ -1529,7 +1528,6 @@ public class HumanoidMessageTools
    {
       SpineTrajectoryMessage message = new SpineTrajectoryMessage();
       message.jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
-      message.setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
       return message;
    }
 
