@@ -250,7 +250,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
 
    private void computeFinalConstraintPolynomial(double finalTime, double blendDuration)
    {
-      initialBlendTimeOffset.set(finalTime);
+      finalBlendTimeOffset.set(finalTime);
       finalBlendStartTime.set(-blendDuration);
       finalBlendEndTime.set(0.0);
 
