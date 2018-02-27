@@ -1,7 +1,10 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
+import static junit.framework.TestCase.assertTrue;
+
 import org.junit.After;
 import org.junit.Before;
+
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -19,7 +22,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -31,8 +33,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import static junit.framework.TestCase.assertTrue;
 
 public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInterface
 {
@@ -69,7 +69,6 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-      planarRegionsListMessage.setUniqueId(5L);
 
       drcSimulationTestHelper.getControllerCommunicator().attachListener(RequestPlanarRegionsListMessage.class, new PacketConsumer<RequestPlanarRegionsListMessage>()
       {

@@ -9,7 +9,6 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
 
    public HeightQuadTreeToolboxRequestMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override

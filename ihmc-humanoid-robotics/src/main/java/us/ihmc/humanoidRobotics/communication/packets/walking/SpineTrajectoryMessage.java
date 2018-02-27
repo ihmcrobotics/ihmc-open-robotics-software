@@ -27,7 +27,6 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
    public SpineTrajectoryMessage(SpineTrajectoryMessage spineTrajectoryMessage)
    {
       jointspaceTrajectory = new JointspaceTrajectoryMessage(spineTrajectoryMessage.jointspaceTrajectory);
-      setUniqueId(spineTrajectoryMessage.getUniqueId());
    }
 
    @Override
@@ -36,14 +35,6 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
       jointspaceTrajectory = new JointspaceTrajectoryMessage();
       jointspaceTrajectory.set(other.jointspaceTrajectory);
       setPacketInformation(other);
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (jointspaceTrajectory != null)
-         jointspaceTrajectory.setUniqueId(uniqueId);
    }
 
    public void setJointspaceTrajectory(JointspaceTrajectoryMessage jointspaceTrajectory)

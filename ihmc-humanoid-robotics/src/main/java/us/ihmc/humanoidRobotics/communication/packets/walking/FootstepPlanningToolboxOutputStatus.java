@@ -71,7 +71,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       footstepDataList.set(other.footstepDataList);
       footstepDataList.defaultSwingDuration = other.footstepDataList.defaultSwingDuration;
       footstepDataList.defaultTransferDuration = other.footstepDataList.defaultTransferDuration;
-      footstepDataList.uniqueId = other.footstepDataList.uniqueId;
       planarRegionsList = other.planarRegionsList;
       bodyPath = other.bodyPath;
       lowLevelPlannerGoal = other.lowLevelPlannerGoal;

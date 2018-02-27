@@ -18,7 +18,6 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage>
     */
    public PauseWalkingMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override

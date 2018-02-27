@@ -21,7 +21,6 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
    public SpineDesiredAccelerationsMessage()
    {
       desiredAccelerations = new DesiredAccelerationsMessage();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override
@@ -40,14 +39,6 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
    public DesiredAccelerationsMessage getDesiredAccelerations()
    {
       return desiredAccelerations;
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (desiredAccelerations != null)
-         desiredAccelerations.setUniqueId(uniqueId);
    }
 
    @Override

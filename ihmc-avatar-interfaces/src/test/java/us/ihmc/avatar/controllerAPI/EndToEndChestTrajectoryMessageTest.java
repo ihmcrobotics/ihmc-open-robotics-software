@@ -781,7 +781,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
 
          so3Trajectory.getQueueingProperties().setMessageId(id);
-         chestTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
          {
             so3Trajectory.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
@@ -907,7 +906,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(pelvisZUpFrame));
          so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
          so3Trajectory.getQueueingProperties().setMessageId(id);
-         chestTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
          {
             long previousMessageId = id - 1;
@@ -1157,7 +1155,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
 
          so3Trajectory.getQueueingProperties().setMessageId(id);
-         chestTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
          {
             so3Trajectory.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());

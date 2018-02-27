@@ -40,7 +40,6 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
    {
       se3Trajectory = new SE3TrajectoryMessage(handTrajectoryMessage.se3Trajectory);
       robotSide = handTrajectoryMessage.robotSide;
-      setUniqueId(handTrajectoryMessage.getUniqueId());
       setDestination(handTrajectoryMessage.getDestination());
    }
 
@@ -70,14 +69,6 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
    public SE3TrajectoryMessage getSe3Trajectory()
    {
       return se3Trajectory;
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (se3Trajectory != null)
-         se3Trajectory.setUniqueId(uniqueId);
    }
 
    @Override

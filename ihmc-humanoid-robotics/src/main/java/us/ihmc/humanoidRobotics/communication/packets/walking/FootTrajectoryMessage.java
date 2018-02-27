@@ -29,7 +29,6 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
     */
    public FootTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -40,7 +39,6 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
    {
       se3Trajectory = new SE3TrajectoryMessage(footTrajectoryMessage.se3Trajectory);
       robotSide = footTrajectoryMessage.robotSide;
-      setUniqueId(footTrajectoryMessage.getUniqueId());
       setDestination(footTrajectoryMessage.getDestination());
    }
 
@@ -70,14 +68,6 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
    public SE3TrajectoryMessage getSe3Trajectory()
    {
       return se3Trajectory;
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (se3Trajectory != null)
-         se3Trajectory.setUniqueId(uniqueId);
    }
 
    @Override
