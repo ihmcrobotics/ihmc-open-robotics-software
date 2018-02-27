@@ -33,8 +33,6 @@ public class IHMCCommunicationKryoNetClassListTest
       ArrayList<Class<?>> packetClassList = netClassList.getPacketClassList();
       Set<Class<?>> packetFieldSet = new HashSet<>(netClassList.getPacketFieldList());
 
-      assertTrue("String is not registered.", packetFieldSet.contains(String.class));
-
       for (Class<?> packetClass : packetClassList)
       {
          for (Field field : packetClass.getDeclaredFields())
