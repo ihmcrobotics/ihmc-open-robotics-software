@@ -18,6 +18,7 @@ public class QuadrupedSteppingEventPacket extends Packet<QuadrupedSteppingEventP
       this.event = event;
    }
 
+   public void set(QuadrupedSteppingEventPacket other) { this.event = other.event; }
    public QuadrupedSteppingRequestedEvent get()
    {
       return event;
