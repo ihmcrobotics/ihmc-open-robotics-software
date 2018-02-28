@@ -51,7 +51,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       this.parameters = controllerToolbox.getFootControlModuleParameters();
       this.solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
-      soleFrame = controllerToolbox.getReferenceFrames().getFootFrame(robotQuadrant);
+      soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
 
       this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
       this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,

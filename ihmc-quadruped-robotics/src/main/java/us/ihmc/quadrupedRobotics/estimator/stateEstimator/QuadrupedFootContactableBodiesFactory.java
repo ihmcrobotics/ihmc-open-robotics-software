@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.estimator.stateEstimator;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
+import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -26,7 +26,7 @@ public class QuadrupedFootContactableBodiesFactory
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          RigidBody foot = fullRobotModel.get().getFoot(robotQuadrant);
-         ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, referenceFrames.get().getFootFrame(robotQuadrant),
+         ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, referenceFrames.get().getSoleFrame(robotQuadrant),
                                                                                                      physicalProperties.get()
                                                                                                                        .getFootGroundContactPoints(robotQuadrant));
          footContactableBodies.set(robotQuadrant, footContactableBody);

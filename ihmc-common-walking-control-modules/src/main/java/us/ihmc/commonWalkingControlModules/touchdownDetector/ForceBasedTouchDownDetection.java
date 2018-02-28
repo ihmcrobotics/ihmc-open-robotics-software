@@ -50,7 +50,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       RigidBody foot = robotModel.getFoot(robotQuadrant);
       footJacobian = new GeometricJacobian(body, foot, soleFrame);
       
-      legOneDoFJoints = robotModel.getLegOneDoFJoints(robotQuadrant);
+      legOneDoFJoints = robotModel.getLegJointsList(robotQuadrant);
       
       //remove angular part
       MatrixTools.removeRow(selectionMatrix, 0);

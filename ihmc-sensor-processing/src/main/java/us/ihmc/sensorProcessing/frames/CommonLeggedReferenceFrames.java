@@ -10,19 +10,11 @@ import java.util.EnumMap;
 
 public interface CommonLeggedReferenceFrames<E extends Enum<E> & RobotSegment<E>> extends ReferenceFrames
 {
-   MovingReferenceFrame getABodyAttachedZUpFrame();
-
-   MovingReferenceFrame getMidFeetZUpFrame();
-
-   MovingReferenceFrame getMidFeetUnderPelvisFrame();
-
    SegmentDependentList<E, MovingReferenceFrame> getAnkleZUpReferenceFrames();
 
    SegmentDependentList<E, MovingReferenceFrame> getFootReferenceFrames();
 
    SegmentDependentList<E, MovingReferenceFrame> getSoleFrames();
-
-   MovingReferenceFrame getPelvisFrame();
 
    MovingReferenceFrame getAnkleZUpFrame(E robotSegment);
 
@@ -34,15 +26,10 @@ public interface CommonLeggedReferenceFrames<E extends Enum<E> & RobotSegment<E>
 
    ReferenceFrame getIMUFrame();
 
-   MovingReferenceFrame getPelvisZUpFrame();
-
    MovingReferenceFrame getSoleFrame(E robotSegment);
 
    MovingReferenceFrame getSoleZUpFrame(E robotSegment);
 
    SegmentDependentList<E, MovingReferenceFrame> getSoleZUpFrames();
 
-   MovingReferenceFrame getChestFrame();
-
-   MovingReferenceFrame getMidFootZUpGroundFrame();
 }

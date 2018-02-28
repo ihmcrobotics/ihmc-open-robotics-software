@@ -97,6 +97,6 @@ public class QuadrupedForceControllerToolbox
 
    public ReferenceFrame getSoleReferenceFrame(RobotQuadrant robotQuadrant)
    {
-      return referenceFrames.getFootFrame(robotQuadrant);
+      return referenceFrames.getSoleFrame(robotQuadrant);
    }
 }
