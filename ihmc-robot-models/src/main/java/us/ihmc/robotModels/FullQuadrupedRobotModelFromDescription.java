@@ -137,10 +137,4 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    {
       return jointLimits.get(jointName);
    }
-
-   @Override
-   public RobotQuadrant[] getRobotSegments()
-   {
-      return RobotQuadrant.values;
-   }
 }
