@@ -3,6 +3,7 @@ package us.ihmc.avatar.ros;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -75,9 +76,9 @@ public class RosCapturabilityBasedStatusPublisher implements PacketConsumer<Capt
 
          if (rosMainNode.isStarted())
          {
-            capturePointPublisher.publish(capturabilityBasedStatus.capturePoint);
-            desiredCapturePointPublisher.publish(capturabilityBasedStatus.desiredCapturePoint);
-            centerOfMassPublisher.publish(capturabilityBasedStatus.centerOfMass);
+            capturePointPublisher.publish(new Point2D(capturabilityBasedStatus.capturePoint2D));
+            desiredCapturePointPublisher.publish(new Point2D(capturabilityBasedStatus.desiredCapturePoint2D));
+            centerOfMassPublisher.publish(capturabilityBasedStatus.centerOfMass3D);
             isInDoubleSupportPublisher.publish(HumanoidMessageTools.unpackIsInDoubleSupport(capturabilityBasedStatus));
 
 //            for (RobotSide value : RobotSide.values)

@@ -2,7 +2,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 
@@ -10,13 +9,13 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 {
    public static final int MAXIMUM_NUMBER_OF_VERTICES = 8;
 
-   public Point2D capturePoint = new Point2D();
-   public Point2D desiredCapturePoint = new Point2D();
+   public Point3D capturePoint2D = new Point3D();
+   public Point3D desiredCapturePoint2D = new Point3D();
 
-   public Point3D centerOfMass = new Point3D();
+   public Point3D centerOfMass3D = new Point3D();
 
-   public RecyclingArrayListPubSub<Point2D> leftFootSupportPolygon = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, MAXIMUM_NUMBER_OF_VERTICES);
-   public RecyclingArrayListPubSub<Point2D> rightFootSupportPolygon = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, MAXIMUM_NUMBER_OF_VERTICES);
+   public RecyclingArrayListPubSub<Point3D> leftFootSupportPolygon2D = new RecyclingArrayListPubSub<>(Point3D.class, Point3D::new, MAXIMUM_NUMBER_OF_VERTICES);
+   public RecyclingArrayListPubSub<Point3D> rightFootSupportPolygon2D = new RecyclingArrayListPubSub<>(Point3D.class, Point3D::new, MAXIMUM_NUMBER_OF_VERTICES);
 
    public CapturabilityBasedStatus()
    {
@@ -26,10 +25,10 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
    @Override
    public void set(CapturabilityBasedStatus other)
    {
-      capturePoint.set(other.capturePoint);
-      desiredCapturePoint.set(other.desiredCapturePoint);
-      MessageTools.copyData(other.leftFootSupportPolygon, leftFootSupportPolygon);
-      MessageTools.copyData(other.rightFootSupportPolygon, rightFootSupportPolygon);
+      capturePoint2D.set(other.capturePoint2D);
+      desiredCapturePoint2D.set(other.desiredCapturePoint2D);
+      MessageTools.copyData(other.leftFootSupportPolygon2D, leftFootSupportPolygon2D);
+      MessageTools.copyData(other.rightFootSupportPolygon2D, rightFootSupportPolygon2D);
       setPacketInformation(other);
    }
 
@@ -37,14 +36,14 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
    public boolean epsilonEquals(CapturabilityBasedStatus other, double epsilon)
    {
 
-      boolean ret = this.capturePoint.epsilonEquals(other.capturePoint, epsilon);
-      ret &= this.desiredCapturePoint.epsilonEquals(other.desiredCapturePoint, epsilon);
+      boolean ret = this.capturePoint2D.epsilonEquals(other.capturePoint2D, epsilon);
+      ret &= this.desiredCapturePoint2D.epsilonEquals(other.desiredCapturePoint2D, epsilon);
 
-      ret &= this.centerOfMass.epsilonEquals(other.centerOfMass, epsilon);
+      ret &= this.centerOfMass3D.epsilonEquals(other.centerOfMass3D, epsilon);
 
-      if (!MessageTools.epsilonEquals(leftFootSupportPolygon, other.leftFootSupportPolygon, epsilon))
+      if (!MessageTools.epsilonEquals(leftFootSupportPolygon2D, other.leftFootSupportPolygon2D, epsilon))
          return false;
-      if (!MessageTools.epsilonEquals(rightFootSupportPolygon, other.rightFootSupportPolygon, epsilon))
+      if (!MessageTools.epsilonEquals(rightFootSupportPolygon2D, other.rightFootSupportPolygon2D, epsilon))
          return false;
 
       return ret;

@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeLeafMessage;
@@ -44,7 +45,8 @@ public class HeightQuadTreeMessageConverter
       {
          HeightQuadTreeLeafMessage leaf = new HeightQuadTreeLeafMessage();
          Box bounds = original.getBounds();
-         leaf.center.set(bounds.centreX, bounds.centreY);
+         leaf.centerX = (float) bounds.centreX;
+         leaf.centerY = (float) bounds.centreY;
          leaf.height = (float) original.getLeaf().getAveragePoint().getZ();
          copyToPack.add(leaf);
          return;
@@ -123,7 +125,8 @@ public class HeightQuadTreeMessageConverter
 
    private static void insertLeafRecursive(HeightQuadTreeNode node, HeightQuadTreeLeafMessage leaf)
    {
-      if (leaf.center.epsilonEquals(node.getCenter(), 1.0e-3))
+      double epsilon = 1.0e-3;
+      if (MathTools.epsilonEquals(node.getCenterX(), leaf.centerX, epsilon) && MathTools.epsilonEquals(node.getCenterY(), leaf.centerY, epsilon))
       {
          node.setHeight(leaf.height);
          return;
@@ -134,9 +137,9 @@ public class HeightQuadTreeMessageConverter
 
       // Computing the morton code to make sure that the indexing is correct.
       int mortonCode = 0;
-      if (leaf.center.getX32() > node.getCenterX())
+      if (leaf.centerX > node.getCenterX())
          mortonCode |= 1;
-      if (leaf.center.getY32() > node.getCenterY())
+      if (leaf.centerY > node.getCenterY())
          mortonCode |= 2;
 
       HeightQuadTreeNode child = node.getChild(mortonCode);

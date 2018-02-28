@@ -122,8 +122,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
       if (statusQueue.isNewPacketAvailable())
       {
          CapturabilityBasedStatus latestPacket = statusQueue.getLatestPacket();
-         FramePoint2D desiredCapturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.desiredCapturePoint);
-         FramePoint2D capturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.capturePoint);
+         FramePoint2D desiredCapturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.desiredCapturePoint2D);
+         FramePoint2D capturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.capturePoint2D);
 
          boolean doubleSupport = true;
          for (RobotSide robotSide : RobotSide.values)

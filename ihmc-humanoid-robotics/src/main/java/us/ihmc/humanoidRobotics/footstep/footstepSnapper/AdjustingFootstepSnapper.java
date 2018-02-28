@@ -126,10 +126,10 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints().size() > 0){
+      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoint2Ds().size() > 0){
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
-      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(originalFootstep));
       footstep.setFootstepType(type);
       FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
@@ -147,7 +147,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
       if (footstepFound != Footstep.FootstepType.BAD_FOOTSTEP)
       {
-         if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints().size() > 0){
+         if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoint2Ds().size() > 0){
             throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
          }
          return footstepFound;
@@ -207,7 +207,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
             if (footstepFound!= Footstep.FootstepType.BAD_FOOTSTEP)
             {
-               if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints() != null){
+               if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoint2Ds() != null){
                   throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
                }
                return footstepFound;

@@ -201,11 +201,11 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints().size() > 0 )
+      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoint2Ds().size() > 0 )
       {
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
-      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(originalFootstep));
       footstep.setFootstepType(type);
       FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
@@ -256,7 +256,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, pointList, defaultHeight);
       footstep.setFootstepType(type);
-      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
+      footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(originalFootstep));
       FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
 
@@ -339,7 +339,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       if (!badPlane)
       {
          adjustFootstepWithoutHeightmap(footstep, height, surfaceNormal);
-         footstep.predictedContactPoints.clear();
+         footstep.predictedContactPoint2Ds.clear();
          return Footstep.FootstepType.FULL_FOOTSTEP;
       }
 
@@ -448,7 +448,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
             continue;
          }
 
-         MessageTools.copyData(currentPredictedContactPoints, currentFaceFootstep.predictedContactPoints);
+         HumanoidMessageTools.packPredictedContactPoints(currentPredictedContactPoints, currentFaceFootstep);
          valueOfCurrent = footstepValueFunction.getFootstepValue(currentFaceFootstep);
 
          if (valueOfCurrent > maxValue)
@@ -469,7 +469,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       // determine the footstep with the highest value, then
       footstep.setLocation(maxValueFootstep.getLocation());
       footstep.setOrientation(maxValueFootstep.getOrientation());
-      MessageTools.copyData(maxValueFootstep.getPredictedContactPoints(), footstep.predictedContactPoints);
+      MessageTools.copyData(maxValueFootstep.getPredictedContactPoint2Ds(), footstep.predictedContactPoint2Ds);
       return true;
    }
 
