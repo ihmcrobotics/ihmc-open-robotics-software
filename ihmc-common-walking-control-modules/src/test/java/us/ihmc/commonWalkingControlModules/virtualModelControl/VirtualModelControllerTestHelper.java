@@ -1914,7 +1914,7 @@ public class VirtualModelControllerTestHelper
       private final SideDependentList<Point2D> controllerToeContactPoints = new SideDependentList<>();
       private final SideDependentList<LineSegment2D> controllerToeContactLines = new SideDependentList<>();
 
-      private final ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>(RobotSide.values);
+      private final ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       private final SideDependentList<ContactableFoot> footContactableBodies = new SideDependentList<>();
 
       public RobotLegs(String name)

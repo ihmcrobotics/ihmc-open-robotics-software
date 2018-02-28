@@ -1,8 +1,10 @@
 package us.ihmc.robotics.partNames;
 
+import us.ihmc.robotics.robotSide.RobotSegment;
+
 import java.util.Set;
 
-public interface JointNameMap extends RobotSpecificJointNames
+public interface JointNameMap<E extends Enum<E> & RobotSegment<E>> extends RobotSpecificJointNames
 {
 
    String getModelName();
@@ -60,8 +62,8 @@ public interface JointNameMap extends RobotSpecificJointNames
 
    String[] getJointNamesBeforeFeet();
 
-   Enum<?>[] getRobotSegments();
+   E[] getRobotSegments();
 
-   Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector);
+   E getEndEffectorsRobotSegment(String jointNameBeforeEndEffector);
 
 }

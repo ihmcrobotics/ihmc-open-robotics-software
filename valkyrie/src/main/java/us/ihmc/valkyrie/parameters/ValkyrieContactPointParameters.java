@@ -29,7 +29,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters<
 
    public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, FootContactPoints<RobotSide> footContactPoints)
    {
-      super(RobotSide.values, jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
+      super(jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
       this.jointMap = jointMap;
 
       if (footContactPoints == null)

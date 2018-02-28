@@ -5,6 +5,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSegment;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -83,9 +84,9 @@ public interface FullLeggedRobotModel<E extends Enum<E> & RobotSegment<E>> exten
     */
    public abstract MovingReferenceFrame getSoleFrame(E segment);
 
-   public abstract SideDependentList<MovingReferenceFrame> getSoleFrames();
+   public abstract SegmentDependentList<E, MovingReferenceFrame> getSoleFrames();
 
    public abstract void setJointAngles(E side, LimbName limb, double[] q);
 
-
+   E[] getRobotSegments();
 }

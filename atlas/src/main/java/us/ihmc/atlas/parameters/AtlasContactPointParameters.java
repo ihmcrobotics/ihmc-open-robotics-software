@@ -39,7 +39,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters<Rob
    public AtlasContactPointParameters(AtlasJointMap jointMap, AtlasRobotVersion atlasVersion, boolean createFootContactPoints,
          FootContactPoints<RobotSide> footContactPoints, boolean createAdditionalContactPoints)
    {
-      super(RobotSide.values, jointMap, jointMap.getPhysicalProperties().getToeWidthForControl(), jointMap.getPhysicalProperties().getFootWidthForControl(),
+      super(jointMap, jointMap.getPhysicalProperties().getToeWidthForControl(), jointMap.getPhysicalProperties().getFootWidthForControl(),
             jointMap.getPhysicalProperties().getFootLengthForControl(), jointMap.getPhysicalProperties().getSoleToAnkleFrameTransforms());
 
       this.jointMap = jointMap;

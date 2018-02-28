@@ -4,7 +4,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSegment;
 
-public interface LeggedJointNameMap<E extends Enum<E> & RobotSegment<E>> extends JointNameMap
+public interface LeggedJointNameMap<E extends Enum<E> & RobotSegment<E>> extends JointNameMap<E>
 {
    ImmutablePair<E, LegJointName> getLegJointName(String jointName);
 

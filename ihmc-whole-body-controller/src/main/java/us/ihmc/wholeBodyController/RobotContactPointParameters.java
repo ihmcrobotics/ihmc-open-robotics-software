@@ -22,7 +22,7 @@ import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
 public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegment<E>> implements ContactPointDefinitionHolder
 {
-   protected final ContactableBodiesFactory<E> contactableBodiesFactory;
+   protected final ContactableBodiesFactory<E> contactableBodiesFactory = new ContactableBodiesFactory<>();
 
    private final LeggedJointNameMap<E> jointMap;
    private final double footWidth, toeWidth, footLength;
@@ -38,13 +38,13 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
 
    private boolean useSoftGroundContactParameters;
 
-   public RobotContactPointParameters(E[] robotSegments, LeggedJointNameMap<E> jointMap, double footWidth, double footLength,
+   public RobotContactPointParameters(LeggedJointNameMap<E> jointMap, double footWidth, double footLength,
                                       SegmentDependentList<E, RigidBodyTransform> soleToAnkleFrameTransforms)
    {
-      this(robotSegments, jointMap, footWidth, footWidth, footLength, soleToAnkleFrameTransforms);
+      this(jointMap, footWidth, footWidth, footLength, soleToAnkleFrameTransforms);
    }
 
-   public RobotContactPointParameters(E[] robotSegments, LeggedJointNameMap<E> jointMap, double toeWidth, double footWidth, double footLength,
+   public RobotContactPointParameters(LeggedJointNameMap<E> jointMap, double toeWidth, double footWidth, double footLength,
                                       SegmentDependentList<E, RigidBodyTransform> soleToAnkleFrameTransforms)
    {
       this.jointMap = jointMap;
@@ -52,9 +52,8 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       this.footWidth = footWidth;
       this.footLength = footLength;
       this.soleToAnkleFrameTransforms = soleToAnkleFrameTransforms;
-      this.robotSegments = robotSegments;
+      this.robotSegments = jointMap.getRobotSegments();
 
-      contactableBodiesFactory = new ContactableBodiesFactory<>(robotSegments);
       controllerFootGroundContactPoints = new SegmentDependentList<>(robotSegments[0].getClassType());
       controllerToeContactPoints = new SegmentDependentList<>(robotSegments[0].getClassType());
       controllerToeContactLines = new SegmentDependentList<>(robotSegments[0].getClassType());
