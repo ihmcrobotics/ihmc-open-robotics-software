@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -74,7 +75,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final StateMachine<COM_ESTIMATE_STATES> stateMachine;
    private final FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerOnTransitionIn;
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
-   private final FullRobotModel fullRobotModel;
+   private final FullQuadrupedRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final OneDoFJoint[] oneDoFJoints;
 
@@ -509,7 +510,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          intialCenterOfMassReferenceFrame.updateTranslation(intialCenterOfMass);
 
          totalMass = fullRobotModel.getTotalMass();
-         bodyMass = fullRobotModel.getPelvis().getInertia().getMass();
+         bodyMass = fullRobotModel.getBodyLink().getInertia().getMass();
 
          for (TrotPair trotPair : TrotPair.values())
          {

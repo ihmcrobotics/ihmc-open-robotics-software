@@ -10,6 +10,18 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public interface FullHumanoidRobotModel extends FullLeggedRobotModel<RobotSide>
 {
    /**
+    * Returns the {@link RigidBody} describing the chest (or trunk) of this robot.
+    * The chest is considered to be located right after the spine joints, and right before the arms and head.
+    */
+   RigidBody getChest();
+
+   /**
+    * Returns the {@link RigidBody} describing the pelvis of this robot.
+    * In the current framework (on the day: 11/18/2014), the pelvis is the the first successor of the root joint.
+    */
+   RigidBody getPelvis();
+
+   /**
     * Return the {@link OneDoFJoint} describing the the corresponding arm joint.
     * @param robotSide Refers to which arm the joint belongs to (assuming there is only one left arm and one right arm).
     * @param armJointName Refers to the joint's name.

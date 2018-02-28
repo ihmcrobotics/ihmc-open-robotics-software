@@ -125,7 +125,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final NextSwingLegChooser nextSwingLegChooser;
    private final SwingTargetGenerator swingTargetGenerator;
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
-   private final FullRobotModel actualFullRobotModel;
+   private final FullQuadrupedRobotModel actualFullRobotModel;
    private final FloatingInverseDynamicsJoint actualRobotRootJoint;
 
    private final QuadrupedReferenceFrames referenceFrames;
@@ -932,7 +932,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
     */
    private void updateEstimates()
    {
-      actualFullRobotModel.getPelvis().getBodyFixedFrame().getTwistOfFrame(bodyTwist);
+      actualFullRobotModel.getBodyLink().getBodyFixedFrame().getTwistOfFrame(bodyTwist);
 
       actualRobotRootJoint.getRotation(yawPitchRollArray);
       actualYaw.set(yawPitchRollArray[0]);

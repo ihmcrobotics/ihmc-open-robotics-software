@@ -7,6 +7,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -37,7 +38,7 @@ public class LockPelvisController implements RobotController
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ArrayList<YoGraphicPosition> efp_positionViz = new ArrayList<>();
 
-   public LockPelvisController(FloatingRootJointRobot robot, SimulationConstructionSet scs, FullRobotModel fullRobotModel, double desiredHeight)
+   public LockPelvisController(FloatingRootJointRobot robot, SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel, double desiredHeight)
    {
       this.robot = robot;
       robotMass = robot.computeCenterOfMass(new Point3D());

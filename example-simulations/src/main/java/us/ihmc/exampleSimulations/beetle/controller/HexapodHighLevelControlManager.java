@@ -45,8 +45,8 @@ public class HexapodHighLevelControlManager
       controllerCoreMode.set(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       controllerCoreCommandList = new ControllerCoreCommand(controllerCoreMode.getEnumValue());
 
-      RigidBody pelvis = fullRobotModel.getPelvis();
-      String bodyName = pelvis.getName();
+      RigidBody body = fullRobotModel.getRootLink();
+      String bodyName = body.getName();
 
       bodySpatialManager = new HexapodBodySpatialManager(bodyName, fullRobotModel, referenceFrames, controllerDt, yoGraphicsListRegistry, registry);
       stepController = new HexapodStepController("HexapodStepController", fullRobotModel, contactStateUpdaters, yoGraphicsListRegistry, controllerDt, registry, referenceFrames);

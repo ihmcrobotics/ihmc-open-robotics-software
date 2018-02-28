@@ -280,7 +280,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    {
       RigidBody elevator = fullRobotModel.getElevator();
       FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
-      RigidBody estimationLink = fullRobotModel.getPelvis();
+      RigidBody estimationLink = fullRobotModel.getRootLink();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 

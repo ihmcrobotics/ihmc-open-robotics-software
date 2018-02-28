@@ -22,6 +22,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterPar
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -41,8 +42,8 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
    private final ReferenceFrame chestCoMFrame;
 
    public SearchNearForSphereBehavior(YoDouble yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
-         HumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
-         AtlasPrimitiveActions atlasPrimitiveActions)
+                                      HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
+                                      AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("SearchForSpehereNear", SearchNearState.class, yoTime, outgoingCommunicationBridge);
       this.atlasPrimitiveActions = atlasPrimitiveActions;

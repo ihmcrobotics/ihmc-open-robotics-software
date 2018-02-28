@@ -17,6 +17,10 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
       return getSoleToAnkleFrameTransform(robotSide);
    }
 
+   String getPelvisName();
+
+   String getChestName();
+
    @Deprecated
    RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide);
 

@@ -142,6 +142,12 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    @Override
+   public RigidBody getBodyLink()
+   {
+      return getRootLink();
+   }
+
+   @Override
    public MovingReferenceFrame getEndEffectorFrame(RobotQuadrant robotQuadrant, LimbName limbName)
    {
       return getEndEffector(robotQuadrant, limbName).getParentJoint().getFrameAfterJoint();

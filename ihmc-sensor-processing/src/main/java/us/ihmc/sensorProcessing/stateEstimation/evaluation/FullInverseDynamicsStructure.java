@@ -58,7 +58,7 @@ public class FullInverseDynamicsStructure
    {
       RigidBody elevator = fullRobotModel.getElevator();
       FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
-      RigidBody estimationLink = fullRobotModel.getPelvis();
+      RigidBody estimationLink = fullRobotModel.getRootLink();
 
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 
