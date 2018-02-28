@@ -41,6 +41,11 @@ public class CommunicationBridge implements CommunicationBridgeInterface
    {
       notifyNetworkListeners(object);
    }
+   
+   public void freezeCommunications(boolean freeze)
+   {
+     packetCommunicator.freezeCommunication(freeze);
+   }
 
    private void notifyNetworkListeners(Object object)
    {
