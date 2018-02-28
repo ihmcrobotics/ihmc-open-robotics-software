@@ -29,11 +29,11 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
 
    private final SegmentDependentList<E, RigidBodyTransform> soleToAnkleFrameTransforms;
 
-   protected final SegmentDependentList<E, ArrayList<Point2D>> controllerFootGroundContactPoints;;
-   protected final SegmentDependentList<E, Point2D> controllerToeContactPoints;
-   protected final SegmentDependentList<E, LineSegment2D> controllerToeContactLines;
+   private final SegmentDependentList<E, ArrayList<Point2D>> controllerFootGroundContactPoints;;
+   private final SegmentDependentList<E, Point2D> controllerToeContactPoints;
+   private final SegmentDependentList<E, LineSegment2D> controllerToeContactLines;
 
-   private final List<ImmutablePair<String, Vector3D>> simulationGroundContactPoints = new ArrayList<ImmutablePair<String, Vector3D>>();
+   private final List<ImmutablePair<String, Vector3D>> simulationGroundContactPoints = new ArrayList<>();
    private final E[] robotSegments;
 
    private boolean useSoftGroundContactParameters;
@@ -54,9 +54,10 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       this.soleToAnkleFrameTransforms = soleToAnkleFrameTransforms;
       this.robotSegments = jointMap.getRobotSegments();
 
-      controllerFootGroundContactPoints = new SegmentDependentList<>(robotSegments[0].getClassType());
-      controllerToeContactPoints = new SegmentDependentList<>(robotSegments[0].getClassType());
-      controllerToeContactLines = new SegmentDependentList<>(robotSegments[0].getClassType());
+      Class<E> clazz = robotSegments[0].getClassType();
+      controllerFootGroundContactPoints = new SegmentDependentList<>(clazz);
+      controllerToeContactPoints = new SegmentDependentList<>(clazz);
+      controllerToeContactLines = new SegmentDependentList<>(clazz);
    }
 
    protected void createFootContactPoints(FootContactPoints<E> footContactPoints)
@@ -83,8 +84,8 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       SegmentDependentList<E, LineSegment2D> toeOffContactLines = footContactPoints.getToeOffContactLines(footLength, footWidth, toeWidth);
       for (E segment : robotSegments)
       {
-         controllerToeContactPoints.put(segment, new Point2D(toeOffContactPoints.get(segment)));
-         controllerToeContactLines.put(segment, new LineSegment2D(toeOffContactLines.get(segment)));
+         if (toeOffContactPoints != null) controllerToeContactPoints.put(segment, new Point2D(toeOffContactPoints.get(segment)));
+         if (toeOffContactLines != null) controllerToeContactLines.put(segment, new LineSegment2D(toeOffContactLines.get(segment)));
       }
 
 
