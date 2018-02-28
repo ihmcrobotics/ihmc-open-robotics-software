@@ -11,10 +11,12 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.robotics.partNames.LeggedJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class WobblySimulationContactPoints implements FootContactPoints
+public class WobblySimulationContactPoints implements FootContactPoints<RobotSide>
 {
    private final double zWobble;
 
@@ -24,8 +26,8 @@ public class WobblySimulationContactPoints implements FootContactPoints
    }
 
    @Override
-   public Map<String, List<Tuple3DBasics>> getSimulationContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,
-         SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms)
+   public Map<String, List<Tuple3DBasics>> getSimulationContactPoints(double footLength, double footWidth, double toeWidth, LeggedJointNameMap<RobotSide> jointMap,
+         SegmentDependentList<RobotSide, RigidBodyTransform> soleToAnkleFrameTransforms)
    {
       HashMap<String, List<Tuple3DBasics>> ret = new HashMap<>();
 

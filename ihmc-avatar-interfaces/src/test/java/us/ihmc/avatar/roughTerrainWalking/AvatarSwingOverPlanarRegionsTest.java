@@ -62,7 +62,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
 
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
       AvatarSwingOverPlanarRegionsVisualizer swingOverPlanarRegionsVisualizer = null;

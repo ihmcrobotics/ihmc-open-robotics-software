@@ -21,15 +21,15 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public class ValkyrieContactPointParameters extends RobotContactPointParameters
+public class ValkyrieContactPointParameters extends RobotContactPointParameters<RobotSide>
 {
    private final SideDependentList<ArrayList<Point2D>> footGroundContactPoints = new SideDependentList<>();
 
    private final DRCRobotJointMap jointMap;
 
-   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, FootContactPoints footContactPoints)
+   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, FootContactPoints<RobotSide> footContactPoints)
    {
-      super(jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
+      super(RobotSide.values, jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
       this.jointMap = jointMap;
 
       if (footContactPoints == null)
