@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.model;
 
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -28,7 +29,8 @@ public class QuadrupedRuntimeEnvironment
    public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel,
                                       JointDesiredOutputList jointDesiredOutputList, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
                                       YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
-                                      QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity)
+                                      QuadrantDependentList<ContactablePlaneBody> contactableFeet, QuadrantDependentList<FootSwitchInterface> footSwitches,
+                                      double gravity)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
