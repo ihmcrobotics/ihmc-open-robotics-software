@@ -63,7 +63,5 @@ public interface FullLeggedRobotModel<E extends Enum<E> & RobotSegment<E>> exten
 
    SegmentDependentList<E, MovingReferenceFrame> getSoleFrames();
 
-   void setJointAngles(E side, LimbName limb, double[] q);
-
    E[] getRobotSegments();
 }

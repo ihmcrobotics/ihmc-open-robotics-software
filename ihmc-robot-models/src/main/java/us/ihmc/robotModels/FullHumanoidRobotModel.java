@@ -44,5 +44,10 @@ public interface FullHumanoidRobotModel extends FullLeggedRobotModel<RobotSide>
     */
    MovingReferenceFrame getHandControlFrame(RobotSide robotSide);
 
+   default RobotSide[] getRobotSegments()
+   {
+      return RobotSide.values;
+   }
+
    void setJointAngles(RobotSide side, LimbName limb, double[] q);
 }
