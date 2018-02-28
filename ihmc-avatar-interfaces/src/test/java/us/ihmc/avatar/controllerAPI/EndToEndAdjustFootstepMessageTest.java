@@ -62,7 +62,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
-      SideDependentList<MovingReferenceFrame> soleFrames = fullRobotModel.getSoleFrames();
+      SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>(fullRobotModel.getSoleFrames());
       drcSimulationTestHelper.send(createFootsteps(soleFrames));
 
       final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
