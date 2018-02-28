@@ -5,6 +5,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSegment;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -41,7 +42,7 @@ public interface FullLeggedRobotModel<E extends Enum<E> & RobotSegment<E>> exten
    /**
     * This method is equivalent to:
     * <p>{@link FullLeggedRobotModel#getFoot(E)} when {@code limbName == LimbName.LEG},</p>
-    * <p>{@link FullLeggedRobotModel#getHand(E)} when {@code limbName == LimbName.ARM}.</p>
+    * <p>{@link FullHumanoidRobotModel#getHand(RobotSide)} when {@code limbName == LimbName.ARM}.</p>
     * @param robotSegment refers to the end-effector side.
     * @param limbName refers to the limb the end-effector is attached to (either a leg or an arm).
     */

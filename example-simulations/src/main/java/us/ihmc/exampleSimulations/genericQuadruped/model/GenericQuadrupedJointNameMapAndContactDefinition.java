@@ -198,6 +198,18 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    }
 
    @Override
+   public ImmutablePair<RobotQuadrant, LegJointName> getLegJointName(String jointName)
+   {
+      return legJointNamesMap.get(jointName);
+   }
+
+   @Override
+   public ImmutablePair<RobotQuadrant, LimbName> getLimbName(String limbName)
+   {
+      return limbNames.get(limbName);
+   }
+
+   @Override
    public String getJointBeforeFootName(RobotQuadrant robotQuadrant)
    {
       HashMap<LegJointName, String> legJointMap = mapFromLegJointNameToJointId.get(robotQuadrant);
