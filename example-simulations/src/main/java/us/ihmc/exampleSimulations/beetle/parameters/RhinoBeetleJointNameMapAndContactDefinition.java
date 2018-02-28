@@ -79,12 +79,6 @@ public class RhinoBeetleJointNameMapAndContactDefinition implements JointNameMap
    }
 
    @Override
-   public String getPelvisName()
-   {
-      return rootJoint;
-   }
-
-   @Override
    public String getUnsanitizedRootJointInSdf()
    {
       return rootJoint;
@@ -163,13 +157,6 @@ public class RhinoBeetleJointNameMapAndContactDefinition implements JointNameMap
       return null;
    }
    
-   @Override
-   @Deprecated
-   public String getChestName()
-   {
-      return null;
-   }
-
    @Override
    @Deprecated
    public String getHeadName()

@@ -117,7 +117,7 @@ public class HexapodStepController
          currentPositions.set(robotSextant, currentPosition);
 
          SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
-         spatialFeedbackControlCommand.set(fullRobotModel.getPelvis(), shinRigidBody);
+         spatialFeedbackControlCommand.set(fullRobotModel.getRootLink(), shinRigidBody);
          spatialFeedbackControlCommand.setWeightsForSolver(new Vector3D(0.0, 0.0, 0.0), new Vector3D(100.0, 100.0, 100.0));
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(footInShinFrame);
          spatialFeedbackControlCommands.set(robotSextant, spatialFeedbackControlCommand);

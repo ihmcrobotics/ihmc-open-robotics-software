@@ -150,7 +150,7 @@ public class HexapodSimulationController implements RobotController
          controlledBodies[i] = endEffector;
          i++;
       }
-      controlledBodies[i] = fullRobotModel.getPelvis();
+      controlledBodies[i] = fullRobotModel.getRootLink();
 
       //Joints to Control
       InverseDynamicsJoint[] controlledJoints = ScrewTools.computeSubtreeJoints(fullRobotModel.getElevator());
@@ -165,7 +165,7 @@ public class HexapodSimulationController implements RobotController
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       toolbox.setupForInverseDynamicsSolver(footContactableBodies);
       toolbox.setupForInverseKinematicsSolver();
-      toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, footContactableBodies);
+      toolbox.setupForVirtualModelControlSolver(fullRobotModel.getRootLink(), controlledBodies, footContactableBodies);
 
       return toolbox;
    }

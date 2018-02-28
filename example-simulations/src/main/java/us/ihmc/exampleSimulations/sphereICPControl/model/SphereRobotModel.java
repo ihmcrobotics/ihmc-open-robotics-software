@@ -168,12 +168,7 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
-   public RigidBody getPelvis()
-   {
-      return null;
-   }
-
-   public RigidBody getChest()
+   public RigidBody getRootLink()
    {
       return null;
    }

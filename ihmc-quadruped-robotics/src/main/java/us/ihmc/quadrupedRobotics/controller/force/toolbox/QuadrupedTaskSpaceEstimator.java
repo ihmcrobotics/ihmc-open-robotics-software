@@ -50,7 +50,7 @@ public class QuadrupedTaskSpaceEstimator
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       soleFrames = referenceFrames.getFootReferenceFrames();
-      pelvisRigidBody = fullRobotModel.getPelvis();
+      pelvisRigidBody = fullRobotModel.getRootLink();
       footRigidBody = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {

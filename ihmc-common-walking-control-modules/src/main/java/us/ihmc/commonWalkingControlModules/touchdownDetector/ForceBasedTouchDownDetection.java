@@ -46,7 +46,7 @@ public class ForceBasedTouchDownDetection implements TouchdownDetector
       
       zForceThreshold.set(80.0);
       
-      RigidBody body = robotModel.getPelvis();
+      RigidBody body = robotModel.getRootLink();
       RigidBody foot = robotModel.getFoot(robotQuadrant);
       footJacobian = new GeometricJacobian(body, foot, soleFrame);
       
