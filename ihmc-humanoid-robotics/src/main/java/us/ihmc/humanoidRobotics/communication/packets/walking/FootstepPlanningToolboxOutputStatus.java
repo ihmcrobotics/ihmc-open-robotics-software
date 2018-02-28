@@ -9,13 +9,19 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlanningToolboxOutputStatus extends SettablePacket<FootstepPlanningToolboxOutputStatus>
 {
+   public static final byte FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION = 0;
+   public static final byte FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION = 1;
+   public static final byte FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION = 2;
+   public static final byte FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS = 3;
+   public static final byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = 4;
+   public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = 5;
+
    public FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
-   public FootstepPlanningResult planningResult;
+   public byte footstepPlanningResult;
    public int planId = FootstepPlanningRequestPacket.NO_PLAN_ID;
 
    public PlanarRegionsListMessage planarRegionsListMessage = null;
@@ -58,7 +64,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    @Override
    public boolean epsilonEquals(FootstepPlanningToolboxOutputStatus other, double epsilon)
    {
-      if (!planningResult.equals(other.planningResult))
+      if (footstepPlanningResult != other.footstepPlanningResult)
          return false;
       if (planId != other.planId)
          return false;
@@ -120,7 +126,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    @Override
    public void set(FootstepPlanningToolboxOutputStatus other)
    {
-      planningResult = other.planningResult;
+      footstepPlanningResult = other.footstepPlanningResult;
       footstepDataList.destination = other.footstepDataList.destination;
       footstepDataList.getQueueingProperties().set(other.footstepDataList.getQueueingProperties());
       footstepDataList.footstepDataList = new ArrayList<>();

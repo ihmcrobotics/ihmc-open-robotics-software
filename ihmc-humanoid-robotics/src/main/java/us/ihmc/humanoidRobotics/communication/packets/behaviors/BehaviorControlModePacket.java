@@ -4,14 +4,11 @@ import us.ihmc.communication.packets.Packet;
 
 public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
 {
-   public static enum BehaviorControlModeEnum
-   {
-      STOP, PAUSE, RESUME;
+   public static final byte STOP = 0;
+   public static final byte PAUSE = 1;
+   public static final byte RESUME = 2;
 
-      public static final BehaviorControlModeEnum[] values = values();
-   }
-
-   public BehaviorControlModeEnum requestedControl;
+   public byte behaviorControlModeEnumRequest;
 
    // empty constructor for deserialization
    public BehaviorControlModePacket()
@@ -21,16 +18,16 @@ public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
    @Override
    public void set(BehaviorControlModePacket other)
    {
-      requestedControl = other.requestedControl;
+      behaviorControlModeEnumRequest = other.behaviorControlModeEnumRequest;
    }
 
-   public BehaviorControlModeEnum getRequestedControl()
+   public byte getRequestedControl()
    {
-      return requestedControl;
+      return behaviorControlModeEnumRequest;
    }
 
    public boolean epsilonEquals(BehaviorControlModePacket other, double epsilon)
    {
-      return this.requestedControl.equals(other.requestedControl);
+      return this.behaviorControlModeEnumRequest == other.behaviorControlModeEnumRequest;
    }
 }

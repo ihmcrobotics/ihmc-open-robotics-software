@@ -4,7 +4,18 @@ import us.ihmc.communication.packets.Packet;
 
 public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
 {
-   public BDIRobotBehavior atlasRobotBehavior;
+   public static final byte NONE = 0;
+   public static final byte FREEZE = 1;
+   public static final byte STAND_PREP = 2;
+   public static final byte STAND = 3;
+   public static final byte WALK = 4;
+   public static final byte STEP = 5;
+   public static final byte MANIPULATE = 6;
+   public static final byte USER = 7;
+   public static final byte CALIBRATE = 8;
+   public static final byte SOFT_STOP = 9;
+
+   public byte atlasBDIRobotBehavior;
    public boolean stop = false;
 
    public BDIBehaviorCommandPacket()
@@ -15,7 +26,7 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
    public void set(BDIBehaviorCommandPacket other)
    {
       setPacketInformation(other);
-      atlasRobotBehavior = other.atlasRobotBehavior;
+      atlasBDIRobotBehavior = other.atlasBDIRobotBehavior;
       stop = other.stop;
    }
 
@@ -28,6 +39,6 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
    @Override
    public boolean epsilonEquals(BDIBehaviorCommandPacket other, double epsilon)
    {
-      return (other.atlasRobotBehavior == atlasRobotBehavior) && (other.stop == stop);
+      return (other.atlasBDIRobotBehavior == atlasBDIRobotBehavior) && (other.stop == stop);
    }
 }

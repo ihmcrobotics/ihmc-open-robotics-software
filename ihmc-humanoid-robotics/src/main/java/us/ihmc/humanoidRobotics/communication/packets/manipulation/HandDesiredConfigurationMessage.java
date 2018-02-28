@@ -10,10 +10,45 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/hand_desired_configuration")
 public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigurationMessage>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
+   public static final byte HAND_CONFIGURATION_STOP = 0;
+   public static final byte HAND_CONFIGURATION_OPEN = 1;
+   public static final byte HAND_CONFIGURATION_CLOSE = 2;
+   public static final byte HAND_CONFIGURATION_CRUSH = 3;
+   public static final byte HAND_CONFIGURATION_HOOK = 4;
+   public static final byte HAND_CONFIGURATION_BASIC_GRIP = 5;
+   public static final byte HAND_CONFIGURATION_PINCH_GRIP = 6;
+   public static final byte HAND_CONFIGURATION_WIDE_GRIP = 7;
+   public static final byte HAND_CONFIGURATION_SCISSOR_GRIP = 8;
+   public static final byte HAND_CONFIGURATION_RESET = 9;
+   public static final byte HAND_CONFIGURATION_OPEN_FINGERS = 10;
+   public static final byte HAND_CONFIGURATION_OPEN_THUMB = 11;
+   public static final byte HAND_CONFIGURATION_CLOSE_FINGERS = 12;
+   public static final byte HAND_CONFIGURATION_CLOSE_THUMB = 13;
+   public static final byte HAND_CONFIGURATION_OPEN_INDEX = 14;
+   public static final byte HAND_CONFIGURATION_OPEN_MIDDLE = 15;
+   public static final byte HAND_CONFIGURATION_HALF_CLOSE = 16;
+   public static final byte HAND_CONFIGURATION_CONNECT = 17;
+   public static final byte HAND_CONFIGURATION_CRUSH_INDEX = 18;
+   public static final byte HAND_CONFIGURATION_CRUSH_MIDDLE = 19;
+   public static final byte HAND_CONFIGURATION_CRUSH_THUMB = 20;
+   public static final byte HAND_CONFIGURATION_INVERT_POWER = 21;
+   public static final byte HAND_CONFIGURATION_T_SPREAD = 22;
+   public static final byte HAND_CONFIGURATION_BEND_BACKWARD = 23;
+   public static final byte HAND_CONFIGURATION_CALIBRATE = 24;
+   public static final byte HAND_CONFIGURATION_FINGER_MANIPULATION = 25;
+   public static final byte HAND_CONFIGURATION_PRE_CREEPY_GRASP = 26;
+   public static final byte HAND_CONFIGURATION_PARTIAL_CREEPY_GRASP = 27;
+   public static final byte HAND_CONFIGURATION_CREEPY_GRASPING = 28;
+   public static final byte HAND_CONFIGURATION_CREEPY_GRASPING_HARD = 29;
+   public static final byte HAND_CONFIGURATION_SLOW_CLOSE = 30;
+
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory")
-   public RobotSide robotSide;
+   public byte robotSide;
    @RosExportedField(documentation = "Specifies the grasp to perform")
-   public HandConfiguration handDesiredConfiguration;
+   public byte desiredHandConfiguration;
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -28,16 +63,16 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    public void set(HandDesiredConfigurationMessage other)
    {
       robotSide = other.robotSide;
-      handDesiredConfiguration = other.handDesiredConfiguration;
+      desiredHandConfiguration = other.desiredHandConfiguration;
       setPacketInformation(other);
    }
 
-   public HandConfiguration getHandDesiredConfiguration()
+   public byte getHandDesiredConfiguration()
    {
-      return handDesiredConfiguration;
+      return desiredHandConfiguration;
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
@@ -51,14 +86,14 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    @Override
    public String toString()
    {
-      return robotSide.toString() + " State= " + handDesiredConfiguration.toString();
+      return RobotSide.fromByte(robotSide).toString() + " State= " + HandConfiguration.fromByte(desiredHandConfiguration).toString();
    }
 
    @Override
    public boolean epsilonEquals(HandDesiredConfigurationMessage other, double epsilon)
    {
       boolean ret = (this.getRobotSide() == other.getRobotSide());
-      ret &= (this.getHandDesiredConfiguration().equals(other.getHandDesiredConfiguration()));
+      ret &= (this.getHandDesiredConfiguration() == other.getHandDesiredConfiguration());
 
       return ret;
    }

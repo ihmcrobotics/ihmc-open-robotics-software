@@ -81,7 +81,7 @@ public class FootstepTestHelper
 
    public Footstep convertToFootstep(FootstepDataMessage footstepDataMessage)
    {
-      RobotSide robotSide = footstepDataMessage.getRobotSide();
+      RobotSide robotSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
       RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
       FramePose3D solePose = new FramePose3D(worldFrame, footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
       Footstep footstep = new Footstep(robotSide, solePose);

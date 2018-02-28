@@ -20,7 +20,7 @@ public class HandDesiredConfigurationMessageSubscriber implements PacketConsumer
    {
       if (this.robotSide == null)
          messageQueue.add(ihmcMessage);
-      else if (ihmcMessage.getRobotSide() == this.robotSide)
+      else if (ihmcMessage.getRobotSide() == this.robotSide.toByte())
          messageQueue.add(ihmcMessage);
    }
 

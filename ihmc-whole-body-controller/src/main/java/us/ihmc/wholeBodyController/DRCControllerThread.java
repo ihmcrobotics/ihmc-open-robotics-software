@@ -6,7 +6,7 @@ import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -342,7 +342,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          if(globalDataProducer != null)
          {
-            globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_READ, e.getMessage());
+            globalDataProducer.notifyControllerCrash(ControllerCrashLocation.CONTROLLER_READ, e.getMessage());
          }
 
          throw new RuntimeException(e);
@@ -373,7 +373,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       catch (Exception e)
       {
          if(globalDataProducer != null)
-            globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_RUN, e.getMessage());
+            globalDataProducer.notifyControllerCrash(ControllerCrashLocation.CONTROLLER_RUN, e.getMessage());
          throw new RuntimeException(e);
       }
    }
@@ -406,7 +406,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          if(globalDataProducer != null)
          {
-            globalDataProducer.notifyControllerCrash(CrashLocation.CONTROLLER_WRITE, e.getMessage());
+            globalDataProducer.notifyControllerCrash(ControllerCrashLocation.CONTROLLER_WRITE, e.getMessage());
          }
          throw new RuntimeException(e);
 

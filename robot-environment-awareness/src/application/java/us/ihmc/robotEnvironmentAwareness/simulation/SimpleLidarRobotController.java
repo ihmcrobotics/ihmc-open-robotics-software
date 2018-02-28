@@ -10,7 +10,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -155,7 +155,7 @@ public class SimpleLidarRobotController implements RobotController
          executorService.execute(() -> packetCommunicator.send(lidarScanMessage));
       }
 
-      packetCommunicator.send(MessageTools.createRequestPlanarRegionsListMessage(RequestType.CONTINUOUS_UPDATE));
+      packetCommunicator.send(MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.CONTINUOUS_UPDATE));
       yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
    }
 

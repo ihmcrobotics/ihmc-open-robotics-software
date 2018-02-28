@@ -80,7 +80,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(simpleFootstep.getRobotSide(), new Point3D(swingEndPose.getPosition()), new Quaternion(swingEndPose.getOrientation()));
 
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
-         footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
+         footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
@@ -142,7 +142,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPosition()), new Quaternion(swingEndPose.getOrientation()));
 
          swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
-         footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
+         footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));

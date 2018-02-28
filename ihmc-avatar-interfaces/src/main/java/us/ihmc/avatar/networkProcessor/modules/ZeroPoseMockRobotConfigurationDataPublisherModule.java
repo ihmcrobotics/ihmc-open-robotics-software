@@ -58,7 +58,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
          imuPacket.set(linearAcceleration, orientation, angularVelocity);
       }
       
-      robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING);
+      robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING.toByte());
       robotConfigurationData.setTimestamp(totalNsecs);
       Vector3D translation = new Vector3D();
       Quaternion orientation = new Quaternion();

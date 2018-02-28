@@ -22,4 +22,14 @@ public enum FootstepPlanningResult
          return false;
       }
    }
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static FootstepPlanningResult fromByte(byte enumAsByte)
+   {
+      return values[enumAsByte];
+   }
 }

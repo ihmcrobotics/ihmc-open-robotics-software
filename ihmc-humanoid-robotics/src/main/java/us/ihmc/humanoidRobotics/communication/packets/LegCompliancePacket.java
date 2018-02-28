@@ -16,6 +16,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class LegCompliancePacket extends Packet<LegCompliancePacket>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    /**
     * maximum allowed force (ratio) from velocity control in the range of [0.0, 1.0]. 1.0 is the
     * maximum stiffness (default) value tuned for fast walking, 0.0 refers to zero velocity control
@@ -25,7 +28,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
     */
    public float[] maxVelocityDeltas; //values in the order of AtlasJointId.getLegJoints()
 
-   public RobotSide robotSide;
+   public byte robotSide;
 
    public LegCompliancePacket()
    {
@@ -54,7 +57,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
    public String toString()
    {
       StringBuilder s = new StringBuilder();
-      s.append("LegCompliancePacket: side " + robotSide.name());
+      s.append("LegCompliancePacket: side " + RobotSide.fromByte(robotSide).name());
 
       s.append(" maxVelocityDeltas ");
       for (int i = 0; i < maxVelocityDeltas.length; i++)

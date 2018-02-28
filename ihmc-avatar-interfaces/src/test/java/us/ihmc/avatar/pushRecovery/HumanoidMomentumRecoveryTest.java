@@ -173,7 +173,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       FootstepDataMessage footstepData = new FootstepDataMessage();
       footstepData.setLocation(stepLocation);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
-      footstepData.setRobotSide(robotSide);
+      footstepData.setRobotSide(robotSide.toByte());
       message.add(footstepData);
    }
 
@@ -199,7 +199,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
 
       footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
-      footstepData.setRobotSide(stepSide);
+      footstepData.setRobotSide(stepSide.toByte());
       message.add(footstepData);
 
       drcSimulationTestHelper.send(message);

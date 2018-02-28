@@ -29,24 +29,24 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlModeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlModeMessage.ControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorCommandPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIRobotBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket.CurrentBehaviorStatus;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DoorLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkOverTerrainGoalPacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalAction;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket.WalkToGoalAction;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -82,26 +82,26 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulationAbortMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPathPlanPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestPacket.RequestType;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus.Status;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
@@ -148,7 +148,7 @@ public class HumanoidMessageTools
       message.autoExposure = autoExposure;
       message.autoGain = autoGain;
       message.autoShutter = autoShutter;
-      message.side = side;
+      message.robotSide = side.toByte();
       return message;
    }
 
@@ -189,7 +189,7 @@ public class HumanoidMessageTools
                                                                                                                      JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
       HandHybridJointspaceTaskspaceTrajectoryMessage message = new HandHybridJointspaceTaskspaceTrajectoryMessage();
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       message.taskspaceTrajectoryMessage = new SE3TrajectoryMessage(taskspaceTrajectoryMessage);
       message.jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
       return message;
@@ -199,7 +199,7 @@ public class HumanoidMessageTools
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
       message.jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       message.setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
       return message;
    }
@@ -217,7 +217,7 @@ public class HumanoidMessageTools
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
       message.jointspaceTrajectory = createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -236,7 +236,7 @@ public class HumanoidMessageTools
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
       message.jointspaceTrajectory = createJointspaceTrajectoryMessage(trajectoryTime, desiredJointPositions, weights);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -251,7 +251,7 @@ public class HumanoidMessageTools
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
       message.jointspaceTrajectory = createJointspaceTrajectoryMessage(jointTrajectory1DListMessages);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -268,7 +268,7 @@ public class HumanoidMessageTools
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
       message.jointspaceTrajectory = createJointspaceTrajectoryMessage(numberOfJoints);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -287,7 +287,7 @@ public class HumanoidMessageTools
    {
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
       message.jointspaceTrajectory = createJointspaceTrajectoryMessage(numberOfJoints, numberOfTrajectoryPoints);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -295,7 +295,7 @@ public class HumanoidMessageTools
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.se3Trajectory = new SE3TrajectoryMessage(trajectoryMessage);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -314,7 +314,7 @@ public class HumanoidMessageTools
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.se3Trajectory = createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrameId);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -333,7 +333,7 @@ public class HumanoidMessageTools
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.se3Trajectory = createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation, trajectoryReferenceFrame);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -354,14 +354,14 @@ public class HumanoidMessageTools
    {
       HandTrajectoryMessage message = new HandTrajectoryMessage();
       message.se3Trajectory = createSE3TrajectoryMessage(numberOfTrajectoryPoints);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
    public static BehaviorStatusPacket createBehaviorStatusPacket(CurrentBehaviorStatus requestedControl)
    {
       BehaviorStatusPacket message = new BehaviorStatusPacket();
-      message.currentStatus = requestedControl;
+      message.currentBehaviorStatus = requestedControl.toByte();
       return message;
    }
 
@@ -369,7 +369,7 @@ public class HumanoidMessageTools
    {
       LegCompliancePacket message = new LegCompliancePacket();
       message.maxVelocityDeltas = maxVelocityDeltas;
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -385,7 +385,7 @@ public class HumanoidMessageTools
    public static BehaviorControlModePacket createBehaviorControlModePacket(BehaviorControlModeEnum requestedControl)
    {
       BehaviorControlModePacket message = new BehaviorControlModePacket();
-      message.requestedControl = requestedControl;
+      message.behaviorControlModeEnumRequest = requestedControl.toByte();
       return message;
    }
 
@@ -398,8 +398,8 @@ public class HumanoidMessageTools
    public static FootLoadBearingMessage createFootLoadBearingMessage(RobotSide robotSide, LoadBearingRequest request)
    {
       FootLoadBearingMessage message = new FootLoadBearingMessage();
-      message.robotSide = robotSide;
-      message.request = request;
+      message.robotSide = robotSide.toByte();
+      message.loadBearingRequest = request.toByte();
       return message;
    }
 
@@ -408,7 +408,7 @@ public class HumanoidMessageTools
                                                                        int controlType)
    {
       ManualHandControlPacket message = new ManualHandControlPacket();
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       message.index = index;
       message.middle = middle;
       message.thumb = thumb;
@@ -460,7 +460,7 @@ public class HumanoidMessageTools
                                                                                            HighLevelControllerName endState)
    {
       HighLevelStateChangeStatusMessage message = new HighLevelStateChangeStatusMessage();
-      message.setStateChange(initialState, endState);
+      message.setStateChange(initialState == null ? -1 : initialState.toByte(), endState == null ? -1 : endState.toByte());
       return message;
    }
 
@@ -475,7 +475,7 @@ public class HumanoidMessageTools
       ConfigurationSpaceName[] configurations = {ConfigurationSpaceName.X, ConfigurationSpaceName.Y, ConfigurationSpaceName.Z, ConfigurationSpaceName.YAW,
             ConfigurationSpaceName.PITCH, ConfigurationSpaceName.ROLL};
       double[] regionAmplitude = new double[] {0, 0, 0, 0, 0, 0};
-      message.setExplorationConfigurationSpaces(configurations, regionAmplitude);
+      message.setExplorationConfigurationSpaces(ConfigurationSpaceName.toBytes(configurations), regionAmplitude);
 
       return message;
    }
@@ -499,7 +499,7 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
 
       message.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
-      message.setExplorationConfigurationSpaces(degreesOfFreedomToExplore, explorationRangeAmplitudes);
+      message.setExplorationConfigurationSpaces(ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore), explorationRangeAmplitudes);
 
       return message;
    }
@@ -514,7 +514,7 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
 
       message.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
-      message.setExplorationConfigurationSpaces(degreesOfFreedomToExplore, explorationRangeUpperLimits, explorationRangeLowerLimits);
+      message.setExplorationConfigurationSpaces(ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore), explorationRangeUpperLimits, explorationRangeLowerLimits);
 
       return message;
    }
@@ -545,7 +545,7 @@ public class HumanoidMessageTools
    public static ObjectWeightPacket createObjectWeightPacket(RobotSide robotSide, double weight)
    {
       ObjectWeightPacket message = new ObjectWeightPacket();
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       message.weight = weight;
       return message;
    }
@@ -553,7 +553,7 @@ public class HumanoidMessageTools
    public static HandPowerCyclePacket createHandPowerCyclePacket(RobotSide robotSide)
    {
       HandPowerCyclePacket message = new HandPowerCyclePacket();
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -622,7 +622,7 @@ public class HumanoidMessageTools
                                                                    ArrayList<Point2D> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
    {
       AdjustFootstepMessage message = new AdjustFootstepMessage();
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       message.location = location;
       message.orientation = orientation;
       if (predictedContactPoints != null && predictedContactPoints.size() == 0)
@@ -652,7 +652,7 @@ public class HumanoidMessageTools
    public static AdjustFootstepMessage createAdjustFootstepMessage(Footstep footstep)
    {
       AdjustFootstepMessage message = new AdjustFootstepMessage();
-      message.robotSide = footstep.getRobotSide();
+      message.robotSide = footstep.getRobotSide().toByte();
 
       FramePoint3D location = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
@@ -772,7 +772,7 @@ public class HumanoidMessageTools
                                                                                    FramePose3D goalPose)
    {
       FootstepPlanningRequestPacket message = new FootstepPlanningRequestPacket();
-      message.set(initialStanceFootPose, initialStanceSide, goalPose, FootstepPlannerType.PLANAR_REGION_BIPEDAL);
+      message.set(initialStanceFootPose, initialStanceSide.toByte(), goalPose, FootstepPlannerType.PLANAR_REGION_BIPEDAL.toByte());
       return message;
    }
 
@@ -780,7 +780,7 @@ public class HumanoidMessageTools
                                                                                    FramePose3D goalPose, FootstepPlannerType requestedPlannerType)
    {
       FootstepPlanningRequestPacket message = new FootstepPlanningRequestPacket();
-      message.set(initialStanceFootPose, initialStanceSide, goalPose, requestedPlannerType);
+      message.set(initialStanceFootPose, initialStanceSide.toByte(), goalPose, requestedPlannerType.toByte());
       return message;
    }
 
@@ -839,14 +839,14 @@ public class HumanoidMessageTools
    public static BDIBehaviorCommandPacket createBDIBehaviorCommandPacket(BDIRobotBehavior atlasRobotBehavior)
    {
       BDIBehaviorCommandPacket message = new BDIBehaviorCommandPacket();
-      message.atlasRobotBehavior = atlasRobotBehavior;
+      message.atlasBDIRobotBehavior = atlasRobotBehavior.toByte();
       return message;
    }
 
    public static AtlasElectricMotorEnablePacket createAtlasElectricMotorEnablePacket(AtlasElectricMotorPacketEnum motorEnableEnum, boolean enable)
    {
       AtlasElectricMotorEnablePacket message = new AtlasElectricMotorEnablePacket();
-      message.motorEnableEnum = motorEnableEnum;
+      message.atlasElectricMotorPacketEnumEnable = motorEnableEnum.toByte();
       message.enable = enable;
       return message;
    }
@@ -1096,60 +1096,60 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootstepStatus createFootstepStatus(Status status, int footstepIndex)
+   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex)
    {
-      FootstepStatus message = new FootstepStatus();
-      message.status = status;
+      FootstepStatusMessage message = new FootstepStatusMessage();
+      message.footstepStatus = status.toByte();
       message.footstepIndex = footstepIndex;
       message.desiredFootPositionInWorld = null;
       message.desiredFootOrientationInWorld = null;
       message.actualFootPositionInWorld = null;
       message.actualFootOrientationInWorld = null;
-      message.robotSide = null;
+      message.robotSide = -1;
       return message;
    }
 
-   public static FootstepStatus createFootstepStatus(Status status, int footstepIndex, Point3D actualFootPositionInWorld,
+   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, Point3D actualFootPositionInWorld,
                                                      Quaternion actualFootOrientationInWorld)
    {
-      FootstepStatus message = new FootstepStatus();
-      message.status = status;
+      FootstepStatusMessage message = new FootstepStatusMessage();
+      message.footstepStatus = status.toByte();
       message.footstepIndex = footstepIndex;
       message.desiredFootPositionInWorld = null;
       message.desiredFootOrientationInWorld = null;
       message.actualFootPositionInWorld = actualFootPositionInWorld;
       message.actualFootOrientationInWorld = actualFootOrientationInWorld;
 
-      message.robotSide = null;
+      message.robotSide = -1;
       return message;
    }
 
-   public static FootstepStatus createFootstepStatus(Status status, int footstepIndex, Point3D actualFootPositionInWorld,
+   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, Point3D actualFootPositionInWorld,
                                                      Quaternion actualFootOrientationInWorld, RobotSide robotSide)
    {
-      FootstepStatus message = new FootstepStatus();
-      message.status = status;
+      FootstepStatusMessage message = new FootstepStatusMessage();
+      message.footstepStatus = status.toByte();
       message.footstepIndex = footstepIndex;
       message.desiredFootPositionInWorld = null;
       message.desiredFootOrientationInWorld = null;
       message.actualFootPositionInWorld = actualFootPositionInWorld;
       message.actualFootOrientationInWorld = actualFootOrientationInWorld;
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
-   public static FootstepStatus createFootstepStatus(Status status, int footstepIndex, Point3D desiredFootPositionInWorld,
+   public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, Point3D desiredFootPositionInWorld,
                                                      Quaternion desiredFootOrientationInWorld, Point3D actualFootPositionInWorld,
                                                      Quaternion actualFootOrientationInWorld, RobotSide robotSide)
    {
-      FootstepStatus message = new FootstepStatus();
-      message.status = status;
+      FootstepStatusMessage message = new FootstepStatusMessage();
+      message.footstepStatus = status.toByte();
       message.footstepIndex = footstepIndex;
       message.desiredFootPositionInWorld = desiredFootPositionInWorld;
       message.desiredFootOrientationInWorld = desiredFootOrientationInWorld;
       message.actualFootPositionInWorld = actualFootPositionInWorld;
       message.actualFootOrientationInWorld = actualFootOrientationInWorld;
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -1178,7 +1178,7 @@ public class HumanoidMessageTools
    public static HighLevelStateMessage createHighLevelStateMessage(HighLevelControllerName highLevelControllerName)
    {
       HighLevelStateMessage message = new HighLevelStateMessage();
-      message.highLevelState = highLevelControllerName;
+      message.highLevelControllerName = highLevelControllerName.toByte();
       return message;
    }
 
@@ -1209,22 +1209,22 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(RequestType requestType, FootstepDataMessage startFootstep, double thetaStart,
+   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep, double thetaStart,
                                                                            ArrayList<FootstepDataMessage> goals)
    {
       FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
-      message.requestType = requestType;
+      message.footstepPlanRequestType = requestType.toByte();
       message.startFootstep = startFootstep;
       message.thetaStart = thetaStart;
       message.goals = goals;
       return message;
    }
 
-   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(RequestType requestType, FootstepDataMessage startFootstep, double thetaStart,
+   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep, double thetaStart,
                                                                            ArrayList<FootstepDataMessage> goals, double maxSuboptimality)
    {
       FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
-      message.requestType = requestType;
+      message.footstepPlanRequestType = requestType.toByte();
       message.startFootstep = startFootstep;
       message.thetaStart = thetaStart;
       message.goals = goals;
@@ -1235,7 +1235,7 @@ public class HumanoidMessageTools
    public static HandJointAnglePacket createHandJointAnglePacket(RobotSide robotSide, boolean connected, boolean calibrated, double[] jointAngles)
    {
       HandJointAnglePacket message = new HandJointAnglePacket();
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       if (message.jointAngles == null)
       {
          message.jointAngles = new double[jointAngles.length];
@@ -1249,29 +1249,29 @@ public class HumanoidMessageTools
    public static HandCollisionDetectedPacket createHandCollisionDetectedPacket(RobotSide robotSide, int collisionSeverityLevelZeroToThree)
    {
       HandCollisionDetectedPacket message = new HandCollisionDetectedPacket();
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       message.collisionSeverityLevelOneToThree = MathTools.clamp(collisionSeverityLevelZeroToThree, 1, 3);
       return message;
    }
 
-   public static AtlasLowLevelControlModeMessage createAtlasLowLevelControlModeMessage(ControlMode request)
+   public static AtlasLowLevelControlModeMessage createAtlasLowLevelControlModeMessage(AtlasLowLevelControlMode request)
    {
       AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
-      message.requestedControlMode = request;
+      message.requestedAtlasLowLevelControlMode = request.toByte();
       return message;
    }
 
    public static HandLoadBearingMessage createHandLoadBearingMessage(RobotSide robotSide)
    {
       HandLoadBearingMessage message = new HandLoadBearingMessage();
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
    public static BehaviorControlModeResponsePacket createBehaviorControlModeResponsePacket(BehaviorControlModeEnum requestedControl)
    {
       BehaviorControlModeResponsePacket message = new BehaviorControlModeResponsePacket();
-      message.requestedControl = requestedControl;
+      message.behaviorControlModeEnumRequest = requestedControl.toByte();
       return message;
    }
 
@@ -1296,14 +1296,14 @@ public class HumanoidMessageTools
    public static StateEstimatorModePacket createStateEstimatorModePacket(StateEstimatorMode requestedOperatingMode)
    {
       StateEstimatorModePacket message = new StateEstimatorModePacket();
-      message.requestedOperatingMode = requestedOperatingMode;
+      message.requestedStateEstimatorMode = requestedOperatingMode.toByte();
       return message;
    }
 
    public static HumanoidBehaviorTypePacket createHumanoidBehaviorTypePacket(HumanoidBehaviorType behaviorType)
    {
       HumanoidBehaviorTypePacket message = new HumanoidBehaviorTypePacket();
-      message.behaviorType = behaviorType;
+      message.humanoidBehaviorType = behaviorType.toByte();
       return message;
    }
 
@@ -1349,7 +1349,8 @@ public class HumanoidMessageTools
       message.defaultSwingDuration = defaultSwingDuration;
       message.defaultTransferDuration = defaultTransferDuration;
       message.finalTransferDuration = finalTransferDuration;
-      message.queueingProperties.setExecutionMode(executionMode, Packet.VALID_MESSAGE_DEFAULT_ID);
+      message.queueingProperties.setExecutionMode(executionMode.toByte());
+      message.queueingProperties.setPreviousMessageId(Packet.VALID_MESSAGE_DEFAULT_ID);
       return message;
    }
 
@@ -1382,7 +1383,8 @@ public class HumanoidMessageTools
       message.defaultSwingDuration = defaultSwingDuration;
       message.defaultTransferDuration = defaultTransferDuration;
       message.finalTransferDuration = finalTransferDuration;
-      message.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE, Packet.VALID_MESSAGE_DEFAULT_ID);
+      message.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      message.queueingProperties.setPreviousMessageId(Packet.VALID_MESSAGE_DEFAULT_ID);
       return message;
    }
 
@@ -1396,8 +1398,8 @@ public class HumanoidMessageTools
    public static HandDesiredConfigurationMessage createHandDesiredConfigurationMessage(RobotSide robotSide, HandConfiguration handDesiredConfiguration)
    {
       HandDesiredConfigurationMessage message = new HandDesiredConfigurationMessage();
-      message.robotSide = robotSide;
-      message.handDesiredConfiguration = handDesiredConfiguration;
+      message.robotSide = robotSide.toByte();
+      message.desiredHandConfiguration = handDesiredConfiguration.toByte();
       return message;
    }
 
@@ -1405,7 +1407,7 @@ public class HumanoidMessageTools
                                                    QuaternionReadOnly orientation, IntrinsicParameters intrinsicParameters)
    {
       FisheyePacket message = new FisheyePacket();
-      message.videoSource = videoSource;
+      message.videoSource = videoSource.toByte();
       message.timeStamp = timeStamp;
       message.data = data;
       message.position = new Point3D(position);
@@ -1426,7 +1428,7 @@ public class HumanoidMessageTools
       VideoPacket message = new VideoPacket();
       if (packetDestination != null)
          message.setDestination(packetDestination);
-      message.videoSource = videoSource;
+      message.videoSource = videoSource.toByte();
       message.timeStamp = timeStamp;
       message.data = data;
       message.position = new Point3D(position);
@@ -1491,7 +1493,7 @@ public class HumanoidMessageTools
    {
       ArmDesiredAccelerationsMessage message = new ArmDesiredAccelerationsMessage();
       message.desiredAccelerations = HumanoidMessageTools.createDesiredAccelerationsMessage(armDesiredJointAccelerations);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -1690,25 +1692,25 @@ public class HumanoidMessageTools
    public static WalkToGoalBehaviorPacket createWalkToGoalBehaviorPacket(WalkToGoalAction action)
    {
       WalkToGoalBehaviorPacket message = new WalkToGoalBehaviorPacket();
-      message.action = action;
+      message.walkToGoalAction = action.toByte();
       return message;
    }
 
    public static WalkToGoalBehaviorPacket createWalkToGoalBehaviorPacket(double xGoal, double yGoal, double thetaGoal, RobotSide goalSide)
    {
       WalkToGoalBehaviorPacket message = new WalkToGoalBehaviorPacket();
-      message.action = WalkToGoalAction.FIND_PATH;
+      message.walkToGoalAction = WalkToGoalAction.FIND_PATH.toByte();
       message.xGoal = xGoal;
       message.yGoal = yGoal;
       message.thetaGoal = thetaGoal;
-      message.goalSide = goalSide;
+      message.goalRobotSide = goalSide.toByte();
       return message;
    }
 
    public static BDIBehaviorStatusPacket createBDIBehaviorStatusPacket(BDIRobotBehavior currentBehavior)
    {
       BDIBehaviorStatusPacket message = new BDIBehaviorStatusPacket();
-      message.currentBehavior = currentBehavior;
+      message.currentBDIRobotBehavior = currentBehavior.toByte();
       return message;
    }
 
@@ -1857,26 +1859,26 @@ public class HumanoidMessageTools
    public static AtlasWristSensorCalibrationRequestPacket createAtlasWristSensorCalibrationRequestPacket(RobotSide robotSide)
    {
       AtlasWristSensorCalibrationRequestPacket message = new AtlasWristSensorCalibrationRequestPacket();
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
-   public static GoHomeMessage createGoHomeMessage(BodyPart bodyPart, double trajectoryTime)
+   public static GoHomeMessage createGoHomeMessage(HumanoidBodyPart bodyPart, double trajectoryTime)
    {
       GoHomeMessage message = new GoHomeMessage();
-      GoHomeMessage.checkRobotSide(bodyPart);
-      message.bodyPart = bodyPart;
+      HumanoidMessageTools.checkRobotSide(bodyPart);
+      message.humanoidBodyPart = bodyPart.toByte();
       message.trajectoryTime = trajectoryTime;
       return message;
    }
 
-   public static GoHomeMessage createGoHomeMessage(BodyPart bodyPart, RobotSide robotSide, double trajectoryTime)
+   public static GoHomeMessage createGoHomeMessage(HumanoidBodyPart bodyPart, RobotSide robotSide, double trajectoryTime)
    {
       GoHomeMessage message = new GoHomeMessage();
       if (robotSide == null)
-         GoHomeMessage.checkRobotSide(bodyPart);
-      message.bodyPart = bodyPart;
-      message.robotSide = robotSide;
+         HumanoidMessageTools.checkRobotSide(bodyPart);
+      message.humanoidBodyPart = bodyPart.toByte();
+      message.robotSide = robotSide.toByte();
       message.trajectoryTime = trajectoryTime;
       return message;
    }
@@ -1919,14 +1921,14 @@ public class HumanoidMessageTools
                                                                ArrayList<Point2D> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
    {
       FootstepDataMessage message = new FootstepDataMessage();
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       message.location = location;
       message.orientation = orientation;
       if (predictedContactPoints != null && predictedContactPoints.size() == 0)
          message.predictedContactPoints = null;
       else
          message.predictedContactPoints = predictedContactPoints;
-      message.trajectoryType = trajectoryType;
+      message.trajectoryType = trajectoryType.toByte();
       message.swingHeight = swingHeight;
       return message;
    }
@@ -1935,7 +1937,7 @@ public class HumanoidMessageTools
    {
       FootstepDataMessage message = new FootstepDataMessage();
 
-      message.robotSide = footstep.getRobotSide();
+      message.robotSide = footstep.getRobotSide().toByte();
 
       FramePoint3D location = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
@@ -1965,7 +1967,7 @@ public class HumanoidMessageTools
       {
          message.predictedContactPoints = null;
       }
-      message.trajectoryType = footstep.getTrajectoryType();
+      message.trajectoryType = footstep.getTrajectoryType().toByte();
       message.swingHeight = footstep.getSwingHeight();
       message.swingTrajectoryBlendDuration = footstep.getSwingTrajectoryBlendDuration();
 
@@ -2022,7 +2024,7 @@ public class HumanoidMessageTools
    {
       FootTrajectoryMessage message = new FootTrajectoryMessage();
       message.se3Trajectory = new SE3TrajectoryMessage(trajectoryMessage);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -2042,7 +2044,7 @@ public class HumanoidMessageTools
       FootTrajectoryMessage message = new FootTrajectoryMessage();
       message.se3Trajectory = HumanoidMessageTools.createSE3TrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation,
                                                                               ReferenceFrame.getWorldFrame());
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -2061,7 +2063,7 @@ public class HumanoidMessageTools
    {
       FootTrajectoryMessage message = new FootTrajectoryMessage();
       message.se3Trajectory = HumanoidMessageTools.createSE3TrajectoryMessage(numberOfTrajectoryPoints);
-      message.robotSide = robotSide;
+      message.robotSide = robotSide.toByte();
       return message;
    }
 
@@ -2084,5 +2086,11 @@ public class HumanoidMessageTools
       message.position = position;
       message.orientation = orientation;
       return message;
+   }
+
+   public static void checkRobotSide(HumanoidBodyPart bodyPart)
+   {
+      if (bodyPart.isRobotSideNeeded())
+         throw new RuntimeException("Need to provide robotSide for the bodyPart: " + bodyPart);
    }
 }

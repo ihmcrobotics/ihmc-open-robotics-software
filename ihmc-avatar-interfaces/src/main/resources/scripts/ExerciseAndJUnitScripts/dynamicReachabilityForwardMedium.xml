@@ -8,7 +8,7 @@
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <origin>AT_ANKLE_FRAME</origin>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>0.40</x>
           <y>-0.20</y>
@@ -20,14 +20,14 @@
           <z>-0.0010246821224833887</z>
           <s>0.9999917421986881</s>
         </orientation>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <origin>AT_ANKLE_FRAME</origin>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>0.8</x>
           <y>0.10</y>
@@ -39,14 +39,14 @@
           <z>-0.0010246821224833887</z>
           <s>0.9999917421986881</s>
         </orientation>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <origin>AT_ANKLE_FRAME</origin>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>1.2</x>
           <y>-0.20</y>
@@ -58,14 +58,14 @@
           <z>-0.0010246821224833887</z>
           <s>0.9999917421986881</s>
         </orientation>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <origin>AT_ANKLE_FRAME</origin>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>1.6</x>
           <y>0.10</y>
@@ -77,14 +77,14 @@
           <z>-0.0010246821224833887</z>
           <s>0.9999917421986881</s>
         </orientation>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <origin>AT_ANKLE_FRAME</origin>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>2.0</x>
           <y>-0.20</y>
@@ -96,14 +96,14 @@
           <z>-0.0010246821224833887</z>
           <s>0.9999917421986881</s>
         </orientation>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <origin>AT_ANKLE_FRAME</origin>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>2.4</x>
           <y>0.10</y>
@@ -115,12 +115,12 @@
           <z>-0.0010246821224833887</z>
           <s>0.9999917421986881</s>
         </orientation>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
     <executionMode>OVERRIDE</executionMode>
-    <executionTiming>CONTROL_DURATIONS</executionTiming>
+    <executionTiming>0</executionTiming>
     <defaultSwingDuration>2.5</defaultSwingDuration>
     <defaultTransferDuration>2.5</defaultTransferDuration>
     <finalTransferDuration>0.0</finalTransferDuration>

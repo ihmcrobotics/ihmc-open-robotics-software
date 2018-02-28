@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.SettablePacket;
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 
@@ -10,20 +9,12 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
       topic = "/output/walking_status")
 public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
 {
-   public enum Status
-   {
-      @RosEnumValueDocumentation(documentation = "The robot has begun its initial transfer/sway at the start of a walking plan")
-      STARTED,
-      @RosEnumValueDocumentation(documentation = "The robot has finished its final transfer/sway at the end of a walking plan")
-      COMPLETED,
-      @RosEnumValueDocumentation(documentation = "A walking abort has been requested")
-      ABORT_REQUESTED;
-
-      public static final Status[] values = values();
-   }
+   public static final byte STARTED = 0;
+   public static final byte COMPLETED = 1;
+   public static final byte ABORT_REQUESTED = 2;
 
    @RosExportedField(documentation = "Status of walking. Either STARTED, COMPLETED, or ABORT_REQUESTED.")
-   public Status status;
+   public byte walkingStatus;
 
    public WalkingStatusMessage()
    {
@@ -32,23 +23,23 @@ public class WalkingStatusMessage extends SettablePacket<WalkingStatusMessage>
    @Override
    public void set(WalkingStatusMessage other)
    {
-      status = other.status;
+      walkingStatus = other.walkingStatus;
       setPacketInformation(other);
    }
 
-   public void setWalkingStatus(Status status)
+   public void setWalkingStatus(byte status)
    {
-      this.status = status;
+      this.walkingStatus = status;
    }
 
-   public Status getWalkingStatus()
+   public byte getWalkingStatus()
    {
-      return status;
+      return walkingStatus;
    }
 
    @Override
    public boolean epsilonEquals(WalkingStatusMessage other, double epsilon)
    {
-      return status == other.status;
+      return walkingStatus == other.walkingStatus;
    }
 }

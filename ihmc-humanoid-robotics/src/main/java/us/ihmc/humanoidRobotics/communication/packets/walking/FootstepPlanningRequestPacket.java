@@ -8,20 +8,27 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningRequestPacket>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
+   public static final byte FOOTSTEP_PLANNER_TYPE_PLANAR_REGION_BIPEDAL = 0;
+   public static final byte FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP = 1;
+   public static final byte FOOTSTEP_PLANNER_TYPE_A_STAR = 2;
+   public static final byte FOOTSTEP_PLANNER_TYPE_SIMPLE_BODY_PATH = 3;
+   public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = 4;
+
    public static final int NO_PLAN_ID = -1;
 
-   public RobotSide initialStanceSide;
+   public byte initialStanceRobotSide;
    public Point3D32 stanceFootPositionInWorld;
    public Quaternion32 stanceFootOrientationInWorld;
    public Point3D32 goalPositionInWorld;
    public Quaternion32 goalOrientationInWorld;
-   public FootstepPlannerType requestedPlannerType;
+   public byte requestedFootstepPlannerType;
    public double timeout;
    public PlanarRegionsListMessage planarRegionsListMessage;
 
@@ -35,12 +42,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    @Override
    public void set(FootstepPlanningRequestPacket other)
    {
-      initialStanceSide = other.initialStanceSide;
+      initialStanceRobotSide = other.initialStanceRobotSide;
       stanceFootPositionInWorld = new Point3D32(other.stanceFootPositionInWorld);
       stanceFootOrientationInWorld = new Quaternion32(other.stanceFootOrientationInWorld);
       goalPositionInWorld = new Point3D32(other.goalPositionInWorld);
       goalOrientationInWorld = new Quaternion32(other.goalOrientationInWorld);
-      requestedPlannerType = other.requestedPlannerType;
+      requestedFootstepPlannerType = other.requestedFootstepPlannerType;
       timeout = other.timeout;
       planarRegionsListMessage = new PlanarRegionsListMessage();
       planarRegionsListMessage.set(other.planarRegionsListMessage);
@@ -49,9 +56,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       setPacketInformation(other);
    }
 
-   public void set(FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose, FootstepPlannerType requestedPlannerType)
+   public void set(FramePose3D initialStanceFootPose, byte initialStanceSide, FramePose3D goalPose, byte requestedPlannerType)
    {
-      this.initialStanceSide = initialStanceSide;
+      this.initialStanceRobotSide = initialStanceSide;
 
       FramePoint3D initialFramePoint = new FramePoint3D(initialStanceFootPose.getPosition());
       initialFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
@@ -69,7 +76,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       goalFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       goalOrientationInWorld = new Quaternion32(goalFrameOrientation);
 
-      this.requestedPlannerType = requestedPlannerType;
+      this.requestedFootstepPlannerType = requestedPlannerType;
    }
 
    public void setTimeout(double timeout)
@@ -95,7 +102,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    @Override
    public boolean epsilonEquals(FootstepPlanningRequestPacket other, double epsilon)
    {
-      if (!initialStanceSide.equals(other.initialStanceSide))
+      if (initialStanceRobotSide != other.initialStanceRobotSide)
          return false;
       if (!stanceFootPositionInWorld.epsilonEquals(other.stanceFootPositionInWorld, (float) epsilon))
          return false;
@@ -105,7 +112,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
          return false;
       if (!RotationTools.quaternionEpsilonEquals(goalOrientationInWorld, other.goalOrientationInWorld, (float) epsilon))
          return false;
-      if (this.requestedPlannerType != other.requestedPlannerType)
+      if (this.requestedFootstepPlannerType != other.requestedFootstepPlannerType)
          return false;
       if (planId != other.planId)
          return false;

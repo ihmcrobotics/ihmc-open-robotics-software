@@ -4,12 +4,10 @@ import us.ihmc.communication.packets.Packet;
 
 public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
 {
-   public enum StateEstimatorMode
-   {
-      NORMAL, FROZEN
-   }
+   public static final byte NORMAL = 0;
+   public static final byte FROZEN = 1;
 
-   public StateEstimatorMode requestedOperatingMode;
+   public byte requestedStateEstimatorMode;
 
    public StateEstimatorModePacket()
    {
@@ -18,24 +16,24 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
    @Override
    public void set(StateEstimatorModePacket other)
    {
-      requestedOperatingMode = other.requestedOperatingMode;
+      requestedStateEstimatorMode = other.requestedStateEstimatorMode;
       setPacketInformation(other);
    }
 
-   public StateEstimatorMode getRequestedOperatingMode()
+   public byte getRequestedOperatingMode()
    {
-      return requestedOperatingMode;
+      return requestedStateEstimatorMode;
    }
 
-   public void setRequestedOperatingMode(StateEstimatorMode requestedOperatingMode)
+   public void setRequestedOperatingMode(byte requestedOperatingMode)
    {
-      this.requestedOperatingMode = requestedOperatingMode;
+      this.requestedStateEstimatorMode = requestedOperatingMode;
    }
 
    @Override
    public boolean epsilonEquals(StateEstimatorModePacket other, double epsilon)
    {
-      boolean ret = requestedOperatingMode == other.requestedOperatingMode;
+      boolean ret = requestedStateEstimatorMode == other.requestedStateEstimatorMode;
 
       return ret;
    }

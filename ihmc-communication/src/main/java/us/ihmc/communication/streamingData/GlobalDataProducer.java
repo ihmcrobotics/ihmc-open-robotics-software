@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
-import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
+import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
@@ -50,7 +50,7 @@ public class GlobalDataProducer
       queueDataToSend(packet);
    }
 
-   public void notifyControllerCrash(CrashLocation location, String stackTrace)
+   public void notifyControllerCrash(ControllerCrashLocation location, String stackTrace)
    {
       queueDataToSend(MessageTools.createControllerCrashNotificationPacket(location, stackTrace));
    }

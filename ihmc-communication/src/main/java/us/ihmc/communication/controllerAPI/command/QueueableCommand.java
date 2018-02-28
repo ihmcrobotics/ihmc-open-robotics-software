@@ -59,7 +59,7 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
       if (messageQueueingProperties == null)
          return;
       setExecutionDelayTime(messageQueueingProperties.getExecutionDelayTime());
-      executionMode = messageQueueingProperties.getExecutionMode();
+      executionMode = ExecutionMode.fromByte(messageQueueingProperties.getExecutionMode());
       previousCommandId = messageQueueingProperties.getPreviousMessageId();
    }
 

@@ -4,15 +4,17 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation = "Request taring of the wrist force/torque sensors.",
       rosPackage = "ihmc_atlas_ros",
       topic = "/control/request_wrist_sensor_calibration")
 public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristSensorCalibrationRequestPacket>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    @RosExportedField(documentation = "The robot side (left or right) for the wrist sensor you would like to request calibration for.")
-   public RobotSide robotSide;
+   public byte robotSide;
 
    public AtlasWristSensorCalibrationRequestPacket()
    {
@@ -27,7 +29,7 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       robotSide = other.robotSide;
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
@@ -41,8 +43,6 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
    @Override
    public boolean epsilonEquals(AtlasWristSensorCalibrationRequestPacket other, double epsilon)
    {
-      boolean ret = getRobotSide().equals(other.getRobotSide());
-
-      return ret;
+      return robotSide == other.robotSide;
    }
 }

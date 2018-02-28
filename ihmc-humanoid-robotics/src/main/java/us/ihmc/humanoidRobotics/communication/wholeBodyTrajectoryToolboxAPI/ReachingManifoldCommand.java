@@ -90,7 +90,7 @@ public class ReachingManifoldCommand
 
       for (int i = 0; i < message.getDimensionOfManifold(); i++)
       {
-         manifoldConfigurationSpaces.add(message.getDegreeOfManifold(i));
+         manifoldConfigurationSpaces.add(ConfigurationSpaceName.fromByte(message.getDegreeOfManifold(i)));
          manifoldLowerLimits.add(message.getLowerLimit(i));
          manifoldUpperLimits.add(message.getUpperLimit(i));
       }

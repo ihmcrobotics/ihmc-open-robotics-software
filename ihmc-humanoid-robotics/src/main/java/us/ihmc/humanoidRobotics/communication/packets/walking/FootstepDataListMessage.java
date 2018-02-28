@@ -22,6 +22,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
                   topic = "/control/footstep_list")
 public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 {
+   public static final byte EXECUTION_TIMING_CONTROL_DURATIONS = 0;
+   public static final byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = 1;
+
    @RosExportedField(documentation = "Defines the list of footstep to perform.")
    public ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
 
@@ -33,7 +36,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
          + "\n The controller will compute the expected times for swing start and touchdown and attempt to start a footstep"
          + "\n at that time. If a footstep touches down early, the following transfer will be extended to make up for this"
          + "\n time difference and the footstep plan will finish at the expected time.")
-   public ExecutionTiming executionTiming = ExecutionTiming.CONTROL_DURATIONS;
+   public byte executionTiming = ExecutionTiming.CONTROL_DURATIONS.toByte();
 
    @RosExportedField(documentation = "The swingDuration is the time a foot is not in ground contact during a step."
          + "\nEach step in a list of footsteps might have a different swing duration. The value specified here is a default"
@@ -191,7 +194,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 
       if (this.size() == 1)
       {
-         RobotSide footSide = footstepDataList.get(0).getRobotSide();
+         RobotSide footSide = RobotSide.fromByte(footstepDataList.get(0).getRobotSide());
          String side = "Right Step";
          if (footSide.getSideNameFirstLetter().equals("L"))
             side = "Left Step";
@@ -201,7 +204,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       else
       {
          return ("Starting Footstep: " + startingFootstep + "\n"
-               + "\tExecution Mode: " + queueingProperties.getExecutionMode().toString() + "\n"
+               + "\tExecution Mode: " + ExecutionMode.fromByte(queueingProperties.getExecutionMode()).toString() + "\n"
                + "\tExecution Timing: " + this.executionTiming + "\n"
                + "\tTransfer Duration: " + this.defaultTransferDuration + "\n"
                + "\tSwing Duration: " + this.defaultSwingDuration + "\n"
@@ -226,15 +229,16 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 
    public void setExecutionMode(ExecutionMode executionMode)
    {
-      queueingProperties.setExecutionMode(executionMode, VALID_MESSAGE_DEFAULT_ID);
+      queueingProperties.setExecutionMode(executionMode.toByte());
+      queueingProperties.setPreviousMessageId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public void setExecutionTiming(ExecutionTiming executionTiming)
+   public void setExecutionTiming(byte executionTiming)
    {
       this.executionTiming = executionTiming;
    }
 
-   public ExecutionTiming getExecutionTiming()
+   public byte getExecutionTiming()
    {
       return executionTiming;
    }

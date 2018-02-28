@@ -5,8 +5,8 @@ import java.util.EnumMap;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -21,8 +21,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
 {
-   private final SideDependentList<EnumMap<BodyPart, MutableBoolean>> sideDependentBodyPartRequestMap = SideDependentList.createListOfEnumMaps(BodyPart.class);
-   private final EnumMap<BodyPart, MutableBoolean> otherBodyPartRequestMap = new EnumMap<>(BodyPart.class);
+   private final SideDependentList<EnumMap<HumanoidBodyPart, MutableBoolean>> sideDependentBodyPartRequestMap = SideDependentList.createListOfEnumMaps(HumanoidBodyPart.class);
+   private final EnumMap<HumanoidBodyPart, MutableBoolean> otherBodyPartRequestMap = new EnumMap<>(HumanoidBodyPart.class);
    private double trajectoryTime = 1.0;
    
    /** the time to delay this command on the controller side before being executed **/
@@ -35,7 +35,7 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
     */
    public GoHomeCommand()
    {
-      for (BodyPart bodyPart : BodyPart.values)
+      for (HumanoidBodyPart bodyPart : HumanoidBodyPart.values)
       {
          if (bodyPart.isRobotSideNeeded())
          {
@@ -55,7 +55,7 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
    @Override
    public void clear()
    {
-      for (BodyPart bodyPart : BodyPart.values)
+      for (HumanoidBodyPart bodyPart : HumanoidBodyPart.values)
       {
          if (bodyPart.isRobotSideNeeded())
          {
@@ -79,10 +79,10 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
       executionDelayTime = message.executionDelayTime;
       trajectoryTime = message.getTrajectoryTime();
 
-      BodyPart bodyPart = message.getBodyPart();
+      HumanoidBodyPart bodyPart = HumanoidBodyPart.fromByte(message.getBodyPart());
       if (bodyPart.isRobotSideNeeded())
       {
-         RobotSide robotSide = message.getRobotSide();
+         RobotSide robotSide = RobotSide.fromByte(message.getRobotSide());
          sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).setValue(true);
       }
       else
@@ -99,7 +99,7 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
       trajectoryTime = other.trajectoryTime;
       executionDelayTime = other.getExecutionDelayTime();
 
-      for (BodyPart bodyPart : BodyPart.values)
+      for (HumanoidBodyPart bodyPart : HumanoidBodyPart.values)
       {
          if (bodyPart.isRobotSideNeeded())
          {
@@ -133,7 +133,7 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
     * @return true if the go home is requested, false otherwise.
     * @throws RuntimeException if the robot side is need for the given body part.
     */
-   public boolean getRequest(BodyPart bodyPart)
+   public boolean getRequest(HumanoidBodyPart bodyPart)
    {
       if (bodyPart.isRobotSideNeeded())
          throw new RuntimeException("Need to provide robotSide for the bodyPart: " + bodyPart);
@@ -148,7 +148,7 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
     * @param bodyPart body part to check the request for.
     * @return true if the go home is requested, false otherwise.
     */
-   public boolean getRequest(RobotSide robotSide, BodyPart bodyPart)
+   public boolean getRequest(RobotSide robotSide, HumanoidBodyPart bodyPart)
    {
       if (bodyPart.isRobotSideNeeded())
          return sideDependentBodyPartRequestMap.get(robotSide).get(bodyPart).booleanValue();

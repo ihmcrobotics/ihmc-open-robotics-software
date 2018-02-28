@@ -33,4 +33,14 @@ public enum HumanoidBehaviorType
    REPEATEDLY_WALK_FOOTSTEP_LIST;
 
    public static final HumanoidBehaviorType[] values = values();
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static HumanoidBehaviorType fromByte(byte enumAsByte)
+   {
+      return values[enumAsByte];
+   }
 }
