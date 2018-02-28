@@ -48,7 +48,7 @@ public class FootstepDataMessageConverter
             ArrayList<Point2D> contactPoints = new ArrayList<>();
             for (int contactPointIdx = 0; contactPointIdx < 4; contactPointIdx++)
                contactPoints.add(new Point2D(foothold.getVertex(contactPointIdx)));
-            MessageTools.copyData(contactPoints, footstepData.predictedContactPoints);
+            HumanoidMessageTools.packPredictedContactPoints(contactPoints, footstepData);
          }
 
          footstepDataListMessage.footstepDataList.add().set(footstepData);
@@ -81,7 +81,7 @@ public class FootstepDataMessageConverter
             ArrayList<Point2D> contactPoints = new ArrayList<>();
             for (int contactPointIdx = 0; contactPointIdx < 4; contactPointIdx++)
                contactPoints.add(new Point2D(foothold.getVertex(contactPointIdx)));
-            MessageTools.copyData(contactPoints, footstepData.predictedContactPoints);
+            HumanoidMessageTools.packPredictedContactPoints(contactPoints, footstepData);
          }
 
          footstepDataListMessage.footstepDataList.add().set(footstepData);

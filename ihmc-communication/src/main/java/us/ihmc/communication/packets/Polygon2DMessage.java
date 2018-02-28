@@ -1,11 +1,11 @@
 package us.ihmc.communication.packets;
 
-import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class Polygon2DMessage extends Packet<Polygon2DMessage>
 {
-   public RecyclingArrayListPubSub<Point2D32> vertices = new RecyclingArrayListPubSub<>(Point2D32.class, Point2D32::new, 10);
+   public RecyclingArrayListPubSub<Point3D> vertices = new RecyclingArrayListPubSub<>(Point3D.class, Point3D::new, 100);
 
    public Polygon2DMessage()
    {
@@ -17,7 +17,7 @@ public class Polygon2DMessage extends Packet<Polygon2DMessage>
       MessageTools.copyData(other.vertices, vertices);
    }
 
-   public RecyclingArrayListPubSub<Point2D32> getVertices()
+   public RecyclingArrayListPubSub<Point3D> getVertices()
    {
       return vertices;
    }

@@ -58,8 +58,8 @@ public class CapturabilityBasedStatusSubscriber implements PacketConsumer<Captur
       if (object == null)
          return;
 
-      capturePointReference.set(new FramePoint2D(ReferenceFrame.getWorldFrame(), object.capturePoint));
-      desiredCapturePointReference.set(new FramePoint2D(ReferenceFrame.getWorldFrame(), object.desiredCapturePoint));
+      capturePointReference.set(new FramePoint2D(ReferenceFrame.getWorldFrame(), object.capturePoint2D));
+      desiredCapturePointReference.set(new FramePoint2D(ReferenceFrame.getWorldFrame(), object.desiredCapturePoint2D));
       for (RobotSide robotSide : RobotSide.values)
          footSupportPolygonReferences.get(robotSide).set(HumanoidMessageTools.unpackFootSupportPolygon(object, robotSide));
       doubleSupportReference.set(HumanoidMessageTools.unpackIsInDoubleSupport(object));
