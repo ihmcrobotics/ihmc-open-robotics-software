@@ -11,4 +11,10 @@ public interface QuadrupedJointNameMap extends JointNameMap
    QuadrupedJointName getJointNameForSDFName(String name);
 
    String getSDFNameForJointName(QuadrupedJointName name);
+
+   @Override
+   default RobotQuadrant[] getRobotSegments()
+   {
+      return RobotQuadrant.values;
+   }
 }

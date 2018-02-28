@@ -29,13 +29,6 @@ public class ContactableBodiesFactory<E extends Enum<E> & RobotSegment<E>>
    private final ArrayList<String> contactNames = new ArrayList<>();
    private final ArrayList<RigidBodyTransform> contactPointFrameTransforms = new ArrayList<>();
 
-   private final E[] robotSegments;
-
-   public ContactableBodiesFactory(E[] robotSegments)
-   {
-      this.robotSegments = robotSegments;
-   }
-
    public void addFootContactParameters(SegmentDependentList<E, ? extends List<Point2D>> footContactPoints, SegmentDependentList<E, ? extends Point2D> toeContactPoints,
          SegmentDependentList<E, ? extends LineSegment2D> toeContactLines)
    {
@@ -49,6 +42,8 @@ public class ContactableBodiesFactory<E extends Enum<E> & RobotSegment<E>>
    {
       if (footContactPoints == null)
          return null;
+
+      E[] robotSegments = fullRobotModel.getRobotSegments();
 
       SegmentDependentList<E, ContactableFoot> footContactableBodies = new SegmentDependentList<>(robotSegments[0].getClassType());
 
