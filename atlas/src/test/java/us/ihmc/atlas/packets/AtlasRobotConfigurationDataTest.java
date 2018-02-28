@@ -1,6 +1,6 @@
 package us.ihmc.atlas.packets;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 
@@ -23,7 +23,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
@@ -66,9 +65,7 @@ public class AtlasRobotConfigurationDataTest
          forceSensorDefinitions[i] = new ForceSensorDefinition("wim", body2, new RigidBodyTransform());
       }
 
-      AtlasAuxiliaryRobotData auxiliaryRobotData = new AtlasAuxiliaryRobotData();
-
-      RobotConfigurationData data = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, auxiliaryRobotData, imuSensorDefinitions);
+      RobotConfigurationData data = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuSensorDefinitions);
       kryo.writeClassAndObject(output, data);
       output.flush();
 

@@ -397,7 +397,7 @@ public class KinematicsToolboxControllerTest
    private RobotConfigurationData extractRobotConfigurationData(Pair<FloatingInverseDynamicsJoint, OneDoFJoint[]> initialFullRobotModel)
    {
       OneDoFJoint[] joints = initialFullRobotModel.getRight();
-      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], null, new IMUDefinition[0]);
+      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], new IMUDefinition[0]);
       robotConfigurationData.setJointState(Arrays.stream(joints).collect(Collectors.toList()));
 
       FloatingInverseDynamicsJoint rootJoint = initialFullRobotModel.getLeft();

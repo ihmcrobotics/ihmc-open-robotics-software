@@ -8,8 +8,7 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 
 public class RobotConfigurationDataFactory
 {
-   public static RobotConfigurationData create(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, AtlasAuxiliaryRobotData auxiliaryRobotData,
-                                               IMUDefinition[] imuDefinitions)
+   public static RobotConfigurationData create(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
    {
       RobotConfigurationData message = new RobotConfigurationData();
       message.jointAngles = new float[joints.length];
@@ -24,7 +23,6 @@ public class RobotConfigurationDataFactory
       }
 
       message.jointNameHash = RobotConfigurationData.calculateJointNameHash(joints, forceSensorDefinitions, imuDefinitions);
-      message.auxiliaryRobotData = auxiliaryRobotData;
       return message;
    }
 }
