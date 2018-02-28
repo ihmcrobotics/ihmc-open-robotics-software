@@ -11,12 +11,18 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 
 public class NetClassList
 {
+   public static interface PacketTrimmer<T>
+   {
+      T trim(T messageToTrim);
+   }
+
    private final ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
    private final ArrayList<Class<?>> typeList = new ArrayList<Class<?>>();
 
    public int uniquePacketID = 0;
    public final TObjectIntMap<Class<?>> registrationIDs = new TObjectIntHashMap<>();
    public final TIntObjectMap<Class<?>> registrationClasses = new TIntObjectHashMap<>();
+   public final TIntObjectMap<PacketTrimmer<?>> classIDsToTrimmerMap = new TIntObjectHashMap<>();
    
    public NetClassList()
    {
@@ -29,11 +35,17 @@ public class NetClassList
 
    public void registerPacketClass(Class<?> clazz)
    {
-      classList.add(clazz);
+      registerPacketClass(clazz, null);
+   }
 
+   public void registerPacketClass(Class<?> clazz, PacketTrimmer<?> packetTrimmer)
+   {
+      classList.add(clazz);
+      
       int id = ++uniquePacketID;
       registrationIDs.put(clazz, id);
       registrationClasses.put(id, clazz);
+      classIDsToTrimmerMap.put(id, packetTrimmer);
    }
 
    public void registerPacketClasses(Class<?>... classes)
@@ -94,6 +106,17 @@ public class NetClassList
    {
       return registrationClasses.get(id);
    }
-   
-   
+
+   public PacketTrimmer<?> getPacketTrimmer(Class<?> clazz)
+   {
+      if (registrationIDs.containsKey(clazz))
+      {
+         int id = registrationIDs.get(clazz);
+         return classIDsToTrimmerMap.get(id);
+      }
+      else
+      {
+         return null;
+      }
+   }
 }
