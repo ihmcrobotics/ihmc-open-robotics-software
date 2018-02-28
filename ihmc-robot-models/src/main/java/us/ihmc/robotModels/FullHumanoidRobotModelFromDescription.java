@@ -345,6 +345,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       initializeLists();
 
       LinkDescription childLink = joint.getLink();
+      HumanoidJointNameMap humanoidJointNameMap = (HumanoidJointNameMap) sdfJointNameMap;
 
       if (rigidBody.getName().equals(humanoidJointNameMap.getChestName()))
       {
