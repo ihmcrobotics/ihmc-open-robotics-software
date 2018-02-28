@@ -19,6 +19,7 @@ import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 /**
  * Created by agrabertilton on 1/28/15.
@@ -134,7 +135,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
-      footstep.setTrajectoryType(originalFootstep.getTrajectoryType());
+      footstep.setTrajectoryType(TrajectoryType.fromByte(originalFootstep.getTrajectoryType()));
 
       return type;
    }

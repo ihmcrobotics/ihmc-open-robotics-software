@@ -6,11 +6,9 @@ import us.ihmc.communication.packets.Packet;
 
 public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 {
-
-   public enum RequestType
-   {
-      START_SEARCH, STOP_SEARCH, UPDATE_START
-   };
+   public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_START_SEARCH = 0;
+   public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_STOP_SEARCH = 1;
+   public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_UPDATE_START = 2;
 
    public FootstepDataMessage startFootstep;
    public double thetaStart;
@@ -18,7 +16,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 
    public ArrayList<FootstepDataMessage> goals = new ArrayList<FootstepDataMessage>();
 
-   public RequestType requestType;
+   public byte footstepPlanRequestType;
 
    public FootstepPlanRequestPacket()
    {
@@ -41,7 +39,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
          goals.add(footstep);
       }
 
-      requestType = other.requestType;
+      footstepPlanRequestType = other.footstepPlanRequestType;
 
       setPacketInformation(other);
    }
@@ -49,7 +47,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    @Override
    public boolean epsilonEquals(FootstepPlanRequestPacket other, double epsilon)
    {
-      if (this.requestType != other.requestType)
+      if (this.footstepPlanRequestType != other.footstepPlanRequestType)
          return false;
       if (Math.abs(this.thetaStart - other.thetaStart) > epsilon)
          return false;

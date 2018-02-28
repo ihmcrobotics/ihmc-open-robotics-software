@@ -5,6 +5,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    public static final int VELOCITY = 0;
    public static final int POSITION = 1;
 
@@ -13,7 +16,7 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       IROBOT, ROBOTIQ
    }
 
-   public RobotSide robotSide;
+   public byte robotSide;
    public double index;
    public double middle;
    public double thumb;
@@ -37,7 +40,7 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       setPacketInformation(other);
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
@@ -45,13 +48,13 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
    @Override
    public String toString()
    {
-      return robotSide.getSideNameFirstLetter() + " finger jodoubles";
+      return RobotSide.fromByte(robotSide).getSideNameFirstLetter() + " finger jodoubles";
    }
 
    @Override
    public boolean epsilonEquals(ManualHandControlPacket other, double epsilon)
    {
-      boolean ret = getRobotSide().equals(other.getRobotSide());
+      boolean ret = robotSide == other.robotSide;
 
       ret &= Math.abs(getIndex() - other.getIndex()) < epsilon;
       ret &= Math.abs(getMiddle() - other.getMiddle()) < epsilon;
@@ -97,7 +100,7 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       return controlType;
    }
 
-   public RobotSide getSide()
+   public byte getSide()
    {
       return robotSide;
    }

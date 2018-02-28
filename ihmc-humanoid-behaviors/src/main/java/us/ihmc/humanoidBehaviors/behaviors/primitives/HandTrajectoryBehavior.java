@@ -58,7 +58,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    {
       outgoingMessage = armTrajectoryMessage;
 
-      robotSide = armTrajectoryMessage.getRobotSide();
+      robotSide = RobotSide.fromByte(armTrajectoryMessage.getRobotSide());
       startTime.set(yoTime.getDoubleValue());
       trajectoryTime.set(armTrajectoryMessage.getSe3Trajectory().getTrajectoryTime());
 

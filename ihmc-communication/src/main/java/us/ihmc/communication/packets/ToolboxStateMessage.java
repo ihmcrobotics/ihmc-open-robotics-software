@@ -2,9 +2,11 @@ package us.ihmc.communication.packets;
 
 public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
 {
-   public ToolboxState requestedState;
+   public static final byte WAKE_UP = 0;
+   public static final byte REINITIALIZE = 1;
+   public static final byte SLEEP = 2;
 
-   public enum ToolboxState {WAKE_UP, REINITIALIZE, SLEEP};
+   public byte requestedToolboxState;
 
    public ToolboxStateMessage()
    {
@@ -14,23 +16,23 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage>
    @Override
    public void set(ToolboxStateMessage other)
    {
-      requestedState = other.requestedState;
+      requestedToolboxState = other.requestedToolboxState;
       set(other);
    }
 
-   public void setRequestedState(ToolboxState requestedState)
+   public void setRequestedState(byte requestedState)
    {
-      this.requestedState = requestedState;
+      this.requestedToolboxState = requestedState;
    }
 
-   public ToolboxState getRequestedState()
+   public byte getRequestedState()
    {
-      return requestedState;
+      return requestedToolboxState;
    }
 
    @Override
    public boolean epsilonEquals(ToolboxStateMessage other, double epsilon)
    {
-      return requestedState == other.requestedState;
+      return requestedToolboxState == other.requestedToolboxState;
    }
 }

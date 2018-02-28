@@ -85,7 +85,7 @@ public class ArmTrajectoryCommandTest
       armTrajectoryCommand.set(message);
 
       assertEquals(message.getQueueingProperties().getExecutionDelayTime(), armTrajectoryCommand.getExecutionDelayTime(), 1e-9);
-      assertEquals(message.getQueueingProperties().getExecutionMode(), armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
+      assertEquals(ExecutionMode.fromByte(message.getQueueingProperties().getExecutionMode()), armTrajectoryCommand.getJointspaceTrajectory().getExecutionMode());
       assertEquals(message.getJointspaceTrajectory().getNumberOfJoints(), armTrajectoryCommand.getJointspaceTrajectory().getNumberOfJoints());
 
       for (int i = 0; i < message.getJointspaceTrajectory().getNumberOfJoints(); i++)

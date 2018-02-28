@@ -43,7 +43,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
    @Override
    public void set(AdjustFootstepMessage message)
    {
-      robotSide = message.getRobotSide();
+      robotSide = RobotSide.fromByte(message.getRobotSide());
       adjustedPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLocation());
       adjustedOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getOrientation());
       List<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();

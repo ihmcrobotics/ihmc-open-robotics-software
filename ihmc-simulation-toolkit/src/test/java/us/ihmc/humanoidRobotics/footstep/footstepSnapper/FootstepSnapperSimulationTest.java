@@ -85,7 +85,7 @@ public class FootstepSnapperSimulationTest
          desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().getX(), footstepData.getLocation().getY(),
                                            footstepData.getOrientation().getYaw());
          Footstep footstep = footstepSnapper.generateFootstepUsingHeightMap(desiredPose, spoof.getRigidBody(), spoof.getSoleFrame(),
-                                footstepData.getRobotSide(), listOfPoints, 0.0);
+                                RobotSide.fromByte(footstepData.getRobotSide()), listOfPoints, 0.0);
 
          assertTrue(footstep.getFootstepType() != Footstep.FootstepType.BAD_FOOTSTEP);
       }
@@ -542,9 +542,9 @@ public class FootstepSnapperSimulationTest
 
                   String footside = tokenizer.nextToken();
                   if (footside == "l_foot")
-                     footstepData.robotSide = RobotSide.LEFT;
+                     footstepData.robotSide = RobotSide.LEFT.toByte();
                   if (footside == "r_foot")
-                     footstepData.robotSide = RobotSide.RIGHT;
+                     footstepData.robotSide = RobotSide.RIGHT.toByte();
 
                   for (int i = 5; i < 8; i++)
                   {

@@ -5,8 +5,6 @@ import java.util.Arrays;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.packets.HighBandwidthPacket;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -16,7 +14,15 @@ import us.ihmc.robotics.geometry.RotationTools;
 @HighBandwidthPacket
 public class VideoPacket extends Packet<VideoPacket>
 {
-   public VideoSource videoSource;
+   public static final byte VIDEO_SOURCE_MULTISENSE_LEFT_EYE = 0;
+   public static final byte VIDEO_SOURCE_MULTISENSE_RIGHT_EYE = 1;
+   public static final byte VIDEO_SOURCE_FISHEYE_LEFT = 2;
+   public static final byte VIDEO_SOURCE_FISHEYE_RIGHT = 3;
+   public static final byte VIDEO_SOURCE_CV_THRESHOLD = 4;
+   public static final byte VIDEO_SOURCE_IMAGE_PROCESSING_BEHAVIOR = 5;
+   public static final byte VIDEO_SOURCE_AWARE_FACE_TRACKER = 6;
+
+   public byte videoSource;
    public long timeStamp;
    public byte[] data;
    public Point3D position;
@@ -50,7 +56,7 @@ public class VideoPacket extends Packet<VideoPacket>
       setPacketInformation(other);
    }
 
-   public VideoSource getVideoSource()
+   public byte getVideoSource()
    {
       return videoSource;
    }

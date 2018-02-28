@@ -31,13 +31,13 @@ public class HumanoidBehaviorTypeSubscriber implements PacketConsumer<HumanoidBe
    @Override
    public HumanoidBehaviorType getRequestedBehavior()
    {
-      return packetReference.getAndSet(null).getBehaviorType();
+      return HumanoidBehaviorType.fromByte(packetReference.getAndSet(null).getBehaviorType());
    }
 
    @Override
    public void receivedPacket(HumanoidBehaviorTypePacket object)
    {
       packetReference.set(object);
-      PrintTools.info("Received behavior packet of type: " + object.behaviorType);
+      PrintTools.info("Received behavior packet of type: " + object.humanoidBehaviorType);
    }
 }

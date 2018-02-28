@@ -4,12 +4,10 @@ import us.ihmc.communication.packets.Packet;
 
 public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControlModeMessage>
 {
-   public enum ControlMode
-   {
-      STAND_PREP, FREEZE;
-   }
+   public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_STAND_PREP = 0;
+   public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_FREEZE = 1;
 
-   public ControlMode requestedControlMode;
+   public byte requestedAtlasLowLevelControlMode;
 
    public AtlasLowLevelControlModeMessage()
    {
@@ -19,32 +17,22 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
    public void set(AtlasLowLevelControlModeMessage other)
    {
       setPacketInformation(other);
-      requestedControlMode = other.requestedControlMode;
+      requestedAtlasLowLevelControlMode = other.requestedAtlasLowLevelControlMode;
    }
 
-   public void setRequestedControlMode(ControlMode requestedControlMode)
+   public void setRequestedControlMode(byte requestedControlMode)
    {
-      this.requestedControlMode = requestedControlMode;
+      this.requestedAtlasLowLevelControlMode = requestedControlMode;
    }
 
-   public ControlMode getRequestedControlMode()
+   public byte getRequestedControlMode()
    {
-      return requestedControlMode;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      String errorMessage = null;
-      if (requestedControlMode == null)
-         errorMessage = "The field requestedControlMode is null.";
-      return errorMessage;
+      return requestedAtlasLowLevelControlMode;
    }
 
    @Override
    public boolean epsilonEquals(AtlasLowLevelControlModeMessage other, double epsilon)
    {
-      return requestedControlMode == other.requestedControlMode;
+      return requestedAtlasLowLevelControlMode == other.requestedAtlasLowLevelControlMode;
    }
 }

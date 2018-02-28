@@ -16,8 +16,8 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -30,7 +30,7 @@ public class FootstepListBehavior extends AbstractBehavior
    private static final boolean DEBUG = false;
 
    private FootstepDataListMessage outgoingFootstepDataList;
-   private final ConcurrentListeningQueue<FootstepStatus> footstepStatusQueue;
+   private final ConcurrentListeningQueue<FootstepStatusMessage> footstepStatusQueue;
    private final ConcurrentListeningQueue<WalkingStatusMessage> walkingStatusQueue;
 
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
@@ -49,8 +49,8 @@ public class FootstepListBehavior extends AbstractBehavior
    public FootstepListBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, WalkingControllerParameters walkingControllerParameters)
    {
       super(outgoingCommunicationBridge);
-      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatus>(40);
-      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
+      footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatusMessage>(40);
+      attachNetworkListeningQueue(footstepStatusQueue, FootstepStatusMessage.class);
       walkingStatusQueue = new ConcurrentListeningQueue<>(40);
       attachNetworkListeningQueue(walkingStatusQueue, WalkingStatusMessage.class);
       numberOfFootsteps.set(-1);
@@ -120,7 +120,7 @@ public class FootstepListBehavior extends AbstractBehavior
    {
       if (footstepStatusQueue.isNewPacketAvailable())
       {
-         FootstepStatus newestFootstepStatus = footstepStatusQueue.poll();
+         FootstepStatusMessage newestFootstepStatus = footstepStatusQueue.poll();
          if (newestFootstepStatus != null)
          {
             int currentStepIndex = newestFootstepStatus.getFootstepIndex();
@@ -153,7 +153,7 @@ public class FootstepListBehavior extends AbstractBehavior
          WalkingStatusMessage newestPacket = walkingStatusQueue.poll();
          if (newestPacket != null)
          {
-            switch (newestPacket.getWalkingStatus())
+            switch (WalkingStatus.fromByte(newestPacket.getWalkingStatus()))
             {
             case COMPLETED:
                isRobotDoneWalking.set(true);
@@ -271,7 +271,7 @@ public class FootstepListBehavior extends AbstractBehavior
 
       FootstepDataMessage firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
 
-      RigidBodyTransform firstSingleSupportFootTransformToWorld = fullRobotModel.getFoot(firstStepData.getRobotSide().getOppositeSide()).getBodyFixedFrame()
+      RigidBodyTransform firstSingleSupportFootTransformToWorld = fullRobotModel.getFoot(RobotSide.fromByte(firstStepData.getRobotSide()).getOppositeSide()).getBodyFixedFrame()
             .getTransformToWorldFrame();
       firstSingleSupportFootTransformToWorld.getTranslation(firstSingleSupportFootTranslationFromWorld);
 

@@ -35,7 +35,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBased
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
@@ -54,7 +54,7 @@ public class PacketsForwardedToTheUi
    public static final long UI_MULTISENSE_IMU_CHECK_MILLIS=5000l;
 
    public static Class<?>[] PACKETS_ALLOWED_TO_BE_SENT_TO_THE_USER_INTERFACE = {
-      FootstepStatus.class,
+      FootstepStatusMessage.class,
       PelvisPoseErrorPacket.class,
       BehaviorControlModeResponsePacket.class,
       BDIBehaviorStatusPacket.class,

@@ -3,13 +3,19 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 import java.util.Arrays;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.ArrayTools;
 
 public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyExplorationConfigurationMessage>
 {
+   public static final byte CONFIGURATION_SPACE_NAME_X = 0;
+   public static final byte CONFIGURATION_SPACE_NAME_Y = 1;
+   public static final byte CONFIGURATION_SPACE_NAME_Z = 2;
+   public static final byte CONFIGURATION_SPACE_NAME_ROLL = 3;
+   public static final byte CONFIGURATION_SPACE_NAME_PITCH = 4;
+   public static final byte CONFIGURATION_SPACE_NAME_YAW = 5;
+
    public long rigidBodyNameBasedHashCode;
-   public ConfigurationSpaceName[] degreesOfFreedomToExplore;
+   public byte[] configurationSpaceNamesToExplore;
 
    public double[] explorationRangeUpperLimits;
    public double[] explorationRangeLowerLimits;
@@ -26,16 +32,16 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    public void set(RigidBodyExplorationConfigurationMessage other)
    {
       rigidBodyNameBasedHashCode = other.rigidBodyNameBasedHashCode;
-      degreesOfFreedomToExplore = Arrays.copyOf(other.degreesOfFreedomToExplore, other.degreesOfFreedomToExplore.length);
+      configurationSpaceNamesToExplore = Arrays.copyOf(other.configurationSpaceNamesToExplore, other.configurationSpaceNamesToExplore.length);
    }
 
-   public void setExplorationConfigurationSpaces(ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeAmplitudes)
+   public void setExplorationConfigurationSpaces(byte[] degreesOfFreedomToExplore, double[] explorationRangeAmplitudes)
    {
       if (degreesOfFreedomToExplore.length != explorationRangeAmplitudes.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length
                + ", explorationRangeLowerLimits.length = ");
 
-      this.degreesOfFreedomToExplore = degreesOfFreedomToExplore;
+      this.configurationSpaceNamesToExplore = degreesOfFreedomToExplore;
       this.explorationRangeUpperLimits = new double[degreesOfFreedomToExplore.length];
       this.explorationRangeLowerLimits = new double[degreesOfFreedomToExplore.length];
       for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
@@ -45,14 +51,14 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       }
    }
 
-   public void setExplorationConfigurationSpaces(ConfigurationSpaceName[] degreesOfFreedomToExplore, double[] explorationRangeUpperLimits,
+   public void setExplorationConfigurationSpaces(byte[] degreesOfFreedomToExplore, double[] explorationRangeUpperLimits,
                                                  double[] explorationRangeLowerLimits)
    {
       if (degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length)
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length
                + ", explorationRangeLowerLimits.length = ");
 
-      this.degreesOfFreedomToExplore = degreesOfFreedomToExplore;
+      this.configurationSpaceNamesToExplore = degreesOfFreedomToExplore;
       this.explorationRangeUpperLimits = explorationRangeUpperLimits;
       this.explorationRangeLowerLimits = explorationRangeLowerLimits;
    }
@@ -64,14 +70,14 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
    public int getNumberOfDegreesOfFreedomToExplore()
    {
-      if (degreesOfFreedomToExplore == null)
+      if (configurationSpaceNamesToExplore == null)
          return 0;
-      return degreesOfFreedomToExplore.length;
+      return configurationSpaceNamesToExplore.length;
    }
 
-   public ConfigurationSpaceName getDegreeOfFreedomToExplore(int i)
+   public byte getDegreeOfFreedomToExplore(int i)
    {
-      return degreesOfFreedomToExplore[i];
+      return configurationSpaceNamesToExplore[i];
    }
 
    public double getExplorationRangeUpperLimits(int i)
@@ -89,7 +95,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    {
       if (rigidBodyNameBasedHashCode != other.rigidBodyNameBasedHashCode)
          return false;
-      if (!Arrays.equals(degreesOfFreedomToExplore, other.degreesOfFreedomToExplore))
+      if (!Arrays.equals(configurationSpaceNamesToExplore, other.configurationSpaceNamesToExplore))
          return false;
       if (!ArrayTools.deltaEquals(explorationRangeUpperLimits, other.explorationRangeUpperLimits, epsilon))
          return false;

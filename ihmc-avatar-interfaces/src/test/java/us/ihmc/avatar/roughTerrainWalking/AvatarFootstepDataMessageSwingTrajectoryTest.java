@@ -83,7 +83,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       double transferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double initialTransferTime = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
       FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
-      footstepDataList.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
+      footstepDataList.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
 
       // step in place but do some fancy foot motion
       RobotSide robotSide = RobotSide.LEFT;
@@ -92,8 +92,8 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       FrameQuaternion footOrientation = new FrameQuaternion(soleFrame);
 
       FootstepDataMessage footstep = new FootstepDataMessage();
-      footstep.setRobotSide(robotSide);
-      footstep.setTrajectoryType(TrajectoryType.WAYPOINTS);
+      footstep.setRobotSide(robotSide.toByte());
+      footstep.setTrajectoryType(TrajectoryType.WAYPOINTS.toByte());
       footstep.setTimings(swingTime, initialTransferTime);
 
       double radius = robotScale * 0.10;

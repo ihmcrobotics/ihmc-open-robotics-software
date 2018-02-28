@@ -55,11 +55,11 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
@@ -1942,7 +1942,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitChestHomeCommand(boolean parallelize)
    {
-      GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.CHEST, trajectoryTime.getDoubleValue());
+      GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, trajectoryTime.getDoubleValue());
       GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, chestGoHomeBehavior);
       if (parallelize)
       {
@@ -2001,7 +2001,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
    private void submitPelvisHomeCommand(boolean parallelize)
    {
-      GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.PELVIS, trajectoryTime.getDoubleValue());
+      GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, trajectoryTime.getDoubleValue());
       GoHomeTask goHomeTask = new GoHomeTask(goHomeMessage, pelvisGoHomeBehavior);
 
       if (parallelize)
@@ -2080,7 +2080,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(BodyPart.ARM, robotSide, trajectoryTime.getDoubleValue());
+         GoHomeMessage goHomeMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, robotSide, trajectoryTime.getDoubleValue());
          GoHomeBehavior armGoHomeBehavior = armGoHomeBehaviors.get(robotSide);
          if (parallelize)
             pipeLine.submitTaskForPallelPipesStage(armGoHomeBehavior, new GoHomeTask(goHomeMessage, armGoHomeBehavior));

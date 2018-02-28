@@ -1,5 +1,6 @@
 package us.ihmc.communication.packets;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
@@ -15,6 +16,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 @RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/queueable_properties")
 public final class QueueableMessage extends Packet<QueueableMessage> implements EpsilonComparable<QueueableMessage>
 {
+   public static final byte EXECUTION_MODE_OVERRIDE = 0;
+   public static final byte EXECUTION_MODE_QUEUE = 1;
+
    @RosExportedField(documentation = "When OVERRIDE is chosen:"
          + "\n - The time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point."
          + " Otherwise the controller will prepend a first trajectory point at the current desired position." + "\n When QUEUE is chosen:"
@@ -22,14 +26,14 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
          + "\n - The very first message of a list of queued messages has to be an OVERRIDE message."
          + "\n - The trajectory point times are relative to the the last trajectory point time of the previous message."
          + "\n - The controller will queue the joint trajectory messages as a per joint basis." + " The first trajectory point has to be greater than zero.")
-   public ExecutionMode executionMode = ExecutionMode.OVERRIDE;
+   public byte executionMode = ExecutionMode.OVERRIDE.toByte();
    @RosExportedField(documentation = "Only needed when using QUEUE mode, it refers to the message Id to which this message should be queued to."
          + " It is used by the controller to ensure that no message has been lost on the way."
          + " If a message appears to be missing (previousMessageId different from the last message ID received by the controller), the motion is aborted."
          + " If previousMessageId == 0, the controller will not check for the ID of the last received message.")
    public long previousMessageId = Packet.INVALID_MESSAGE_ID;
 
-   /** the time to delay this message on the controller side before being executed **/
+   @RosExportedField(documentation = "The time to delay this message on the controller side before being executed.")
    public double executionDelayTime;
 
    /**
@@ -42,8 +46,8 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
    @Override
    public void set(QueueableMessage other)
    {
-      executionMode = other.executionMode;
-      previousMessageId = other.previousMessageId;
+      setExecutionMode(other.getExecutionMode());
+      setPreviousMessageId(other.getPreviousMessageId());
       executionDelayTime = other.executionDelayTime;
       setPacketInformation(other);
    }
@@ -56,13 +60,27 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
     * previous messages are done.
     * 
     * @param executionMode
+    */
+   public void setExecutionMode(byte executionMode)
+   {
+      this.executionMode = executionMode;
+   }
+
+   /**
+    * When the message is to be queued, the ID of the message this should be queued to has to be
+    * provided.
+    * 
     * @param previousMessageId when queuing, one needs to provide the ID of the message this message
     *           should be queued to.
     */
-   public void setExecutionMode(ExecutionMode executionMode, long previousMessageId)
+   public void setPreviousMessageId(long previousMessageId)
    {
-      this.executionMode = executionMode;
       this.previousMessageId = previousMessageId;
+   }
+
+   public void setExecutionDelayTime(double delayTime)
+   {
+      executionDelayTime = (float) delayTime;
    }
 
    /**
@@ -71,19 +89,9 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
     * 
     * @return {@link #executionMode}
     */
-   public ExecutionMode getExecutionMode()
+   public byte getExecutionMode()
    {
       return executionMode;
-   }
-
-   public void setExecutionDelayTime(double delayTime)
-   {
-      executionDelayTime = (float) delayTime;
-   }
-
-   public double getExecutionDelayTime()
-   {
-      return executionDelayTime;
    }
 
    /**
@@ -97,13 +105,20 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
       return previousMessageId;
    }
 
+   public double getExecutionDelayTime()
+   {
+      return executionDelayTime;
+   }
+
    /** {@inheritDoc} */
    @Override
    public boolean epsilonEquals(QueueableMessage other, double epsilon)
    {
-      if (executionMode != other.getExecutionMode())
+      if (executionMode != other.executionMode)
          return false;
-      if (executionMode == ExecutionMode.QUEUE && previousMessageId != other.getPreviousMessageId())
+      if (previousMessageId != other.previousMessageId)
+         return false;
+      if (!MathTools.epsilonCompare(executionDelayTime, other.executionDelayTime, epsilon))
          return false;
       return true;
    }
@@ -111,6 +126,6 @@ public final class QueueableMessage extends Packet<QueueableMessage> implements 
    @Override
    public String toString()
    {
-      return "Mode: " + executionMode + ", delay: " + executionDelayTime + ", previous ID: " + previousMessageId;
+      return "Mode: " + getExecutionMode() + ", delay: " + executionDelayTime + ", previous ID: " + getPreviousMessageId();
    }
 }

@@ -6,7 +6,6 @@ import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move an arm in jointspace to the desired joint angles while going through the specified trajectory points."
@@ -18,8 +17,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
       topic = "/control/arm_trajectory")
 public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
-   public RobotSide robotSide;
+   public byte robotSide;
    @RosExportedField(documentation = "Trajectories for each joint.")
    public JointspaceTrajectoryMessage jointspaceTrajectory;
 
@@ -58,12 +60,12 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
       setPacketInformation(other);
    }
 
-   public void setRobotSide(RobotSide robotSide)
+   public void setRobotSide(byte robotSide)
    {
       this.robotSide = robotSide;
    }
 
-   public RobotSide getRobotSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
@@ -86,7 +88,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
    @Override
    public boolean epsilonEquals(ArmTrajectoryMessage other, double epsilon)
    {
-      if (!robotSide.equals(other.robotSide))
+      if (robotSide != other.robotSide)
          return false;
       if (!jointspaceTrajectory.epsilonEquals(other.jointspaceTrajectory, epsilon))
          return false;

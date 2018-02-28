@@ -34,8 +34,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -253,21 +254,21 @@ public class DesiredFootstepTest
       PacketCommunicator tcpServer = createAndStartStreamingDataTCPServer(port);
 
       FootstepStatusConsumer footstepStatusConsumer = new FootstepStatusConsumer();
-      PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepStatus.class, footstepStatusConsumer, port);
+      PacketCommunicator tcpClient = createStreamingDataConsumer(FootstepStatusMessage.class, footstepStatusConsumer, port);
       ThreadTools.sleep(SLEEP_TIME);
 
       // create test footsteps
-      ArrayList<FootstepStatus> sentFootstepStatus = new ArrayList<FootstepStatus>();
+      ArrayList<FootstepStatusMessage> sentFootstepStatus = new ArrayList<FootstepStatusMessage>();
       for (int i = 0; i < 50; i++)
       {
-         FootstepStatus.Status status = FootstepStatus.Status.STARTED;
+         FootstepStatus status = FootstepStatus.STARTED;
          boolean isComplete = random.nextBoolean();
          if (isComplete)
          {
-            status = FootstepStatus.Status.COMPLETED;
+            status = FootstepStatus.COMPLETED;
          }
 
-         FootstepStatus footstepStatus = HumanoidMessageTools.createFootstepStatus(status, i);
+         FootstepStatusMessage footstepStatus = HumanoidMessageTools.createFootstepStatus(status, i);
          sentFootstepStatus.add(footstepStatus);
          tcpServer.send(footstepStatus);
       }
@@ -278,7 +279,7 @@ public class DesiredFootstepTest
       tcpClient.disconnect();
 
       // verify received correctly
-      ArrayList<FootstepStatus> receivedFootsteps = footstepStatusConsumer.getReconstructedFootsteps();
+      ArrayList<FootstepStatusMessage> receivedFootsteps = footstepStatusConsumer.getReconstructedFootsteps();
       compareStatusSentWithReceived(sentFootstepStatus, receivedFootsteps);
    }
 
@@ -288,7 +289,7 @@ public class DesiredFootstepTest
       netClassList.registerPacketClass(FootstepDataMessage.class);
       netClassList.registerPacketClass(FootstepDataListMessage.class);
       netClassList.registerPacketClass(PauseWalkingMessage.class);
-      netClassList.registerPacketClass(FootstepStatus.class);
+      netClassList.registerPacketClass(FootstepStatusMessage.class);
       netClassList.registerPacketClass(ExecutionMode.class);
       netClassList.registerPacketClass(ExecutionTiming.class);
 
@@ -298,7 +299,7 @@ public class DesiredFootstepTest
       netClassList.registerPacketField(Point3D[].class);
       netClassList.registerPacketField(Quaternion.class);
       netClassList.registerPacketField(PacketDestination.class);
-      netClassList.registerPacketField(FootstepStatus.Status.class);
+      netClassList.registerPacketField(FootstepStatus.class);
       netClassList.registerPacketField(TrajectoryType.class);
       netClassList.registerPacketField(RobotSide.class);
 
@@ -375,12 +376,12 @@ public class DesiredFootstepTest
       return arePosesEqual && sameRobotSide && isTrustHeightTheSame && isAdjustableTheSame && sameWaypoints && sameBlendDuration;
    }
 
-   private void compareStatusSentWithReceived(ArrayList<FootstepStatus> sentFootstepStatus, ArrayList<FootstepStatus> receivedFootsteps)
+   private void compareStatusSentWithReceived(ArrayList<FootstepStatusMessage> sentFootstepStatus, ArrayList<FootstepStatusMessage> receivedFootsteps)
    {
       for (int i = 0; i < sentFootstepStatus.size(); i++)
       {
-         FootstepStatus footstepStatus = sentFootstepStatus.get(i);
-         FootstepStatus reconstructedFootstepStatus = receivedFootsteps.get(i);
+         FootstepStatusMessage footstepStatus = sentFootstepStatus.get(i);
+         FootstepStatusMessage reconstructedFootstepStatus = receivedFootsteps.get(i);
          assertTrue(footstepStatus.getStatus() == reconstructedFootstepStatus.getStatus());
       }
    }
@@ -407,7 +408,7 @@ public class DesiredFootstepTest
          FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(packet.getRobotSide(), pose, trustHeight);
+         Footstep footstep = new Footstep(RobotSide.fromByte(packet.getRobotSide()), pose, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -433,7 +434,7 @@ public class DesiredFootstepTest
             FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
 
             Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable, contactPoints);
-            footstep.setTrajectoryType(footstepData.getTrajectoryType());
+            footstep.setTrajectoryType(TrajectoryType.fromByte(footstepData.getTrajectoryType()));
             footstep.setSwingHeight(footstepData.getSwingHeight());
             reconstructedFootstepPath.add(footstep);
          }
@@ -461,17 +462,17 @@ public class DesiredFootstepTest
       }
    }
 
-   private class FootstepStatusConsumer implements PacketConsumer<FootstepStatus>
+   private class FootstepStatusConsumer implements PacketConsumer<FootstepStatusMessage>
    {
-      private final ArrayList<FootstepStatus> reconstructedFootstepStatuses = new ArrayList<FootstepStatus>();
+      private final ArrayList<FootstepStatusMessage> reconstructedFootstepStatuses = new ArrayList<FootstepStatusMessage>();
 
       @Override
-      public void receivedPacket(FootstepStatus footstepStatus)
+      public void receivedPacket(FootstepStatusMessage footstepStatus)
       {
          reconstructedFootstepStatuses.add(footstepStatus);
       }
 
-      public ArrayList<FootstepStatus> getReconstructedFootsteps()
+      public ArrayList<FootstepStatusMessage> getReconstructedFootsteps()
       {
          return reconstructedFootstepStatuses;
       }

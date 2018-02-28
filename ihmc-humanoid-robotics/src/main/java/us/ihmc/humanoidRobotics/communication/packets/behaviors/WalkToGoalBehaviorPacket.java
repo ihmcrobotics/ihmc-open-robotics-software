@@ -5,17 +5,20 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
 {
-   public static enum WalkToGoalAction
-   {
-      FIND_PATH, EXECUTE, EXECUTE_UNKNOWN, STOP
-   };
+   public static final byte WALK_TO_GOAL_ACTION_FIND_PATH = 0;
+   public static final byte WALK_TO_GOAL_ACTION_EXECUTE = 1;
+   public static final byte WALK_TO_GOAL_ACTION_EXECUTE_UNKNOWN = 2;
+   public static final byte WALK_TO_GOAL_ACTION_STOP = 3;
 
-   public WalkToGoalAction action;
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
+   public byte walkToGoalAction;
    public double xGoal;
    public double yGoal;
    public double thetaGoal;
 
-   public RobotSide goalSide;
+   public byte goalRobotSide;
 
    public WalkToGoalBehaviorPacket()
    {
@@ -25,11 +28,11 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
    @Override
    public void set(WalkToGoalBehaviorPacket other)
    {
-      action = other.action;
+      walkToGoalAction = other.walkToGoalAction;
       xGoal = other.xGoal;
       yGoal = other.yGoal;
       thetaGoal = other.thetaGoal;
-      goalSide = other.goalSide;
+      goalRobotSide = other.goalRobotSide;
       setPacketInformation(other);
    }
 
@@ -38,9 +41,9 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
       return new double[] {xGoal, yGoal, thetaGoal};
    }
 
-   public RobotSide getGoalSide()
+   public byte getGoalSide()
    {
-      return goalSide;
+      return goalRobotSide;
    }
 
    @Override
@@ -53,7 +56,7 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
       {
          ret = Math.abs(thisData[i] - otherData[i]) < epsilon;
       }
-      ret &= this.goalSide == other.goalSide;
+      ret &= this.goalRobotSide == other.goalRobotSide;
       return ret;
    }
 
@@ -65,7 +68,7 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
       ret += "x: " + xGoal + "\n";
       ret += "y: " + yGoal + "\n";
       ret += "theta: " + thetaGoal + "\n";
-      ret += "side: " + goalSide.toString() + "\n";
+      ret += "side: " + RobotSide.fromByte(goalRobotSide).toString() + "\n";
 
       return ret;
    }
