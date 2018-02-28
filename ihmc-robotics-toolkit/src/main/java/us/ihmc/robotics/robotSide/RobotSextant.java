@@ -32,4 +32,10 @@ public enum RobotSextant implements RobotSegment<RobotSextant>
    {
       return values;
    }
+
+   @Override
+   public Class<RobotSextant> getClassType()
+   {
+      return RobotSextant.class;
+   }
 }
