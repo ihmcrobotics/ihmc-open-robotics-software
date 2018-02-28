@@ -427,15 +427,14 @@ public class WalkingControllerTest
       double omega0 = walkingControllerParameters.getOmega0();
 
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
-      SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames));
-      SideDependentList<String> footNames = new SideDependentList<>();
-      List<ContactablePlaneBody> addidionalContacts = contactableBodiesFactory.createAdditionalContactPoints(fullRobotModel);
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(referenceFrames);
+      SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
+      List<ContactablePlaneBody> additionalContacts = contactableBodiesFactory.createAdditionalContactPoints();
       for (RobotSide robotSide : RobotSide.values)
-      {
          contactableBodies.add(feet.get(robotSide));
-         footNames.put(robotSide, feet.get(robotSide).getName());
-      }
-      contactableBodies.addAll(addidionalContacts);
+      contactableBodies.addAll(additionalContacts);
+      contactableBodiesFactory.disposeFactory();
 
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityZ;
       updatableFootSwitches = TestFootSwitch.createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());

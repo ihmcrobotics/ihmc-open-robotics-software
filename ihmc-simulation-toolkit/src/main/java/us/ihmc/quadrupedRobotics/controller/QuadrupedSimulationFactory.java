@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller;
 import java.io.IOException;
 import java.net.BindException;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -40,6 +41,7 @@ import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -177,13 +179,14 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   private void createContactibleFeet()
+   private void createContactableFeet()
    {
-      QuadrupedFootContactableBodiesFactory footContactableBodiesFactory = new QuadrupedFootContactableBodiesFactory();
+      ContactableBodiesFactory<RobotQuadrant> footContactableBodiesFactory = new ContactableBodiesFactory<>();
       footContactableBodiesFactory.setFullRobotModel(fullRobotModel.get());
-      footContactableBodiesFactory.setPhysicalProperties(physicalProperties.get());
+      footContactableBodiesFactory.setFootContactPoints(physicalProperties.get().getFeetGroundContactPoints());
       footContactableBodiesFactory.setReferenceFrames(referenceFrames.get());
-      contactableFeet = footContactableBodiesFactory.createFootContactableBodies();
+      contactableFeet = new QuadrantDependentList<>(footContactableBodiesFactory.createFootContactablePlaneBodies());
+      footContactableBodiesFactory.disposeFactory();
    }
 
    private void createFootSwitches()
@@ -274,7 +277,7 @@ public class QuadrupedSimulationFactory
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        jointDesiredOutputList.get(), sdfRobot.get().getRobotsYoVariableRegistry(),
                                                                                        yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead,
-                                                                                       globalDataProducer, footSwitches, gravity.get());
+                                                                                       globalDataProducer, contactableFeet, footSwitches, gravity.get());
       switch (controlMode.get())
       {
       case FORCE:
@@ -414,7 +417,7 @@ public class QuadrupedSimulationFactory
       setupYoRegistries();
       createPushRobotController();
       createSensorReader();
-      createContactibleFeet();
+      createContactableFeet();
       createFootSwitches();
       createStateEstimator();
       createPacketCommunicator();

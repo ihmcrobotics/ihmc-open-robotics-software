@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -249,14 +250,16 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
                                                                  FullHumanoidRobotModel fullRobotModel)
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = DRCControllerThread.createInverseDynamicsStructure(fullRobotModel);
-      RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       DRCRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
       HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
-      SegmentDependentList<RobotSide, ? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel,
-                                                                                                                            estimatorReferenceFrames);
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(estimatorReferenceFrames);
+      SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
+      contactableBodiesFactory.disposeFactory();
 
       double gravityMagnitude = Math.abs(gravity);
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravityMagnitude;

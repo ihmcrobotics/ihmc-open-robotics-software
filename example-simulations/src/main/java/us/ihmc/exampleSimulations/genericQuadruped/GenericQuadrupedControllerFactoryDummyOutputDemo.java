@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
@@ -26,6 +27,7 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -97,11 +99,12 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
 
       QuadrupedPhysicalProperties quadrupedPhysicalProperties = new GenericQuadrupedPhysicalProperties();
 
-      QuadrupedFootContactableBodiesFactory footContactableBodiesFactory = new QuadrupedFootContactableBodiesFactory();
+      ContactableBodiesFactory<RobotQuadrant> footContactableBodiesFactory = new ContactableBodiesFactory<>();
       footContactableBodiesFactory.setFullRobotModel(fullRobotModel);
-      footContactableBodiesFactory.setPhysicalProperties(quadrupedPhysicalProperties);
+      footContactableBodiesFactory.setFootContactPoints(quadrupedPhysicalProperties.getFeetGroundContactPoints());
       footContactableBodiesFactory.setReferenceFrames(referenceFrames);
-      QuadrantDependentList<ContactablePlaneBody> contactableFeet = footContactableBodiesFactory.createFootContactableBodies();
+      QuadrantDependentList<ContactablePlaneBody> contactableFeet = new QuadrantDependentList<>(footContactableBodiesFactory.createFootContactablePlaneBodies());
+      footContactableBodiesFactory.disposeFactory();
 
       QuadrupedFootSwitchFactory footSwitchFactory = new QuadrupedFootSwitchFactory();
       footSwitchFactory.setFootContactableBodies(contactableFeet);
@@ -141,7 +144,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       YoGraphicsListRegistry ignoredYoGraphicsListRegistry  = new YoGraphicsListRegistry();
 
       runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, jointDesiredOutputList, registry, yoGraphicsListRegistry,
-                                                           ignoredYoGraphicsListRegistry, dataProducer, footSwitches, GRAVITY);
+                                                           ignoredYoGraphicsListRegistry, dataProducer, contactableFeet, footSwitches, GRAVITY);
 
       controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
 

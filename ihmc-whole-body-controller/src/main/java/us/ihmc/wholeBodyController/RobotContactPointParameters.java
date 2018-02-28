@@ -84,12 +84,17 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       SegmentDependentList<E, LineSegment2D> toeOffContactLines = footContactPoints.getToeOffContactLines(footLength, footWidth, toeWidth);
       for (E segment : robotSegments)
       {
-         if (toeOffContactPoints != null) controllerToeContactPoints.put(segment, new Point2D(toeOffContactPoints.get(segment)));
-         if (toeOffContactLines != null) controllerToeContactLines.put(segment, new LineSegment2D(toeOffContactLines.get(segment)));
+         if (toeOffContactPoints != null && toeOffContactLines != null)
+         {
+            controllerToeContactPoints.put(segment, new Point2D(toeOffContactPoints.get(segment)));
+            controllerToeContactLines.put(segment, new LineSegment2D(toeOffContactLines.get(segment)));
+         }
       }
 
 
-      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
+      contactableBodiesFactory.setFootContactPoints(controllerFootGroundContactPoints);
+      if (toeOffContactPoints != null && toeOffContactLines != null)
+         contactableBodiesFactory.setToeContactParameters(controllerToeContactPoints, controllerToeContactLines);
 
       useSoftGroundContactParameters = footContactPoints.useSoftContactPointParameters();
    }
@@ -119,7 +124,7 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
    {
       controllerFootGroundContactPoints.get(segment).add(contactPoint);
       // Update the factory with the new set of contact points.
-      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
+      contactableBodiesFactory.setFootContactPoints(controllerFootGroundContactPoints);
    }
 
    protected final void setControllerFootContactPoint(E segment, List<Point2D> contactPoints)
@@ -127,21 +132,21 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       controllerFootGroundContactPoints.get(segment).clear();
       controllerFootGroundContactPoints.get(segment).addAll(contactPoints);
       // Update the factory with the new set of contact points.
-      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
+      contactableBodiesFactory.setFootContactPoints(controllerFootGroundContactPoints);
    }
 
    protected final void setControllerToeContactPoint(E segment, Point2D toeContactPoint)
    {
       controllerToeContactPoints.get(segment).set(toeContactPoint);
       // Update the factory with the new set of contact points.
-      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
+      contactableBodiesFactory.setToeContactParameters(controllerToeContactPoints, controllerToeContactLines);
    }
 
-   protected final void setControllerToeContacLine(E segment, LineSegment2D toeContactLine)
+   protected final void setControllerToeContactLine(E segment, LineSegment2D toeContactLine)
    {
       controllerToeContactLines.get(segment).set(toeContactLine);
       // Update the factory with the new set of contact points.
-      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
+      contactableBodiesFactory.setToeContactParameters(controllerToeContactPoints, controllerToeContactLines);
    }
 
    public final List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()

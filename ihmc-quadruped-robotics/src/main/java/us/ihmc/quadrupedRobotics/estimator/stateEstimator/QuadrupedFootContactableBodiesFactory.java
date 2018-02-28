@@ -27,8 +27,7 @@ public class QuadrupedFootContactableBodiesFactory
       {
          RigidBody foot = fullRobotModel.get().getFoot(robotQuadrant);
          ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, referenceFrames.get().getSoleFrame(robotQuadrant),
-                                                                                                     physicalProperties.get()
-                                                                                                                       .getFootGroundContactPoints(robotQuadrant));
+                                                                                                     physicalProperties.get().getFootGroundContactPoints(robotQuadrant));
          footContactableBodies.set(robotQuadrant, footContactableBody);
       }
       
