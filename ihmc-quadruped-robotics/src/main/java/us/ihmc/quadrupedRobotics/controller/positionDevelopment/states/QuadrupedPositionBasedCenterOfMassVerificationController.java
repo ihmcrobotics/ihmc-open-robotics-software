@@ -168,7 +168,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          RobotQuadrant hindSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide);
          RobotQuadrant frontSoleQuadrantOppositeSide = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide.getOppositeSide());
 
-         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, referenceFrames.getFootFrame(hindSoleQuadrant), referenceFrames.getFootFrame(frontSoleQuadrantOppositeSide));
+         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, referenceFrames.getSoleFrame(hindSoleQuadrant), referenceFrames.getSoleFrame(frontSoleQuadrantOppositeSide));
          sideDependentMidTrotLineZUpFrames.put(robotSide, midTrotLineZUpFrame);
       }
 

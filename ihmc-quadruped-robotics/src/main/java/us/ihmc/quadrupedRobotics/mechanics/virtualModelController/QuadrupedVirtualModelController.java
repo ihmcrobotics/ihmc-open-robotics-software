@@ -15,6 +15,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.kinematics.JointLimit;
@@ -22,11 +24,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.PointJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class QuadrupedVirtualModelController
 {
@@ -35,7 +32,7 @@ public class QuadrupedVirtualModelController
    private final FullQuadrupedRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
-   private final QuadrantDependentList<ReferenceFrame> soleFrame;
+   private final QuadrantDependentList<MovingReferenceFrame> soleFrame;
 
    private final QuadrantDependentList<FrameVector3D> soleVirtualForce;
    private final QuadrantDependentList<FrameVector3D> soleContactForce;
@@ -119,9 +116,8 @@ public class QuadrupedVirtualModelController
       legEffortVector = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
+         RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
          RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
-         RigidBody foot = jointBeforeFoot.getSuccessor();
          legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());

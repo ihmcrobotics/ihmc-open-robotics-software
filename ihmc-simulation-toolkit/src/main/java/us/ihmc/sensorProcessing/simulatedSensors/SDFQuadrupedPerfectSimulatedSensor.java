@@ -2,7 +2,8 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 
-import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -37,7 +38,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          String prefix = quadrant.getCamelCaseNameForStartOfExpression();
-         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(quadrant);
+         InverseDynamicsJoint jointBeforeFoot = fullRobotModel.getFoot(quadrant).getParentJoint();
 
          for(GroundContactPoint groundContactPoint : groundContactPoints)
          {

@@ -63,7 +63,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBodyTransform soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
+         RigidBodyTransform soleToAnkleTransform = sdfJointNameMap.getSoleToParentFrameTransform(robotSide);
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          MovingReferenceFrame soleFrame = MovingReferenceFrame.constructFrameFixedInParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
          soleFrames.put(robotSide, soleFrame);

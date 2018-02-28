@@ -13,4 +13,18 @@ public interface CommonHumanoidReferenceFrames extends CommonLeggedReferenceFram
    SideDependentList<MovingReferenceFrame> getSoleFrames();
 
    SideDependentList<MovingReferenceFrame> getSoleZUpFrames();
+
+   MovingReferenceFrame getPelvisFrame();
+
+   MovingReferenceFrame getPelvisZUpFrame();
+
+   MovingReferenceFrame getChestFrame();
+
+   MovingReferenceFrame getMidFeetZUpFrame();
+
+   MovingReferenceFrame getMidFeetUnderPelvisFrame();
+
+   MovingReferenceFrame getABodyAttachedZUpFrame();
+
+   MovingReferenceFrame getMidFootZUpGroundFrame();
 }
