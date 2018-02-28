@@ -351,6 +351,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);
+      registerPacketClass(AtlasAuxiliaryRobotData.class);
       registerPacketFields(double[].class, Vector3D.class);
       registerPacketFields(DenseMatrix64F.class);
       registerPacketFields(DenseMatrix64F[].class);
@@ -497,8 +498,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketField(RobotMotionStatus.class);
 
-      registerPacketField(AtlasAuxiliaryRobotData.class);
-      registerPacketField(AtlasAuxiliaryRobotData.class);
       registerPacketField(long[].class);
       registerPacketField(boolean[].class);
       registerPacketField(float[].class);
