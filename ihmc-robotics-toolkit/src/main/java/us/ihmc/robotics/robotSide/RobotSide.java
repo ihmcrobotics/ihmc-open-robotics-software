@@ -233,4 +233,10 @@ public enum RobotSide implements RobotSegment<RobotSide>
    {
       return set;
    }
+
+   @Override
+   public Class<RobotSide> getClassType()
+   {
+      return RobotSide.class;
+   }
 }

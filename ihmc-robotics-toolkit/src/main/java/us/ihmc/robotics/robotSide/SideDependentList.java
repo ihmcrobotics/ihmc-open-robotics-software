@@ -26,7 +26,7 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
     * Copy constructor. Just copies the references to the objects; not a deep copy.
     * @param other the SideDependentList to be copied
     */
-   public SideDependentList(SideDependentList<? extends V> other)
+   public SideDependentList(SegmentDependentList<RobotSide, ? extends V> other)
    {
       super(RobotSide.class);
 
