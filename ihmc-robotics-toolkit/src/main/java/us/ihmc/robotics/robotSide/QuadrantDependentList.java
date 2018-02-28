@@ -30,6 +30,20 @@ public class QuadrantDependentList<V> extends SegmentDependentList<RobotQuadrant
       set(RobotQuadrant.HIND_LEFT, hindLeftObject);
    }
 
+   /**
+    * Copy constructor. Just copies the references to the objects; not a deep copy.
+    * @param other the QuadrantDependentList to be copied
+    */
+   public QuadrantDependentList(SegmentDependentList<RobotQuadrant, ? extends V> other)
+   {
+      super(RobotQuadrant.class);
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         this.set(robotQuadrant, other.get(robotQuadrant));
+      }
+   }
+
    public RobotQuadrant[] quadrants()
    {
       fillQuadrantArray();
