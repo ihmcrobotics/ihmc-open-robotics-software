@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.scene.Node;
 import javafx.scene.control.TreeView;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
+import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 import us.ihmc.tools.string.RegularExpression;
 
 public class ParameterTree extends TreeView<ParameterTreeValue>
@@ -21,22 +23,23 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
       setCellFactory(param -> new ParameterTreeCell());
    }
 
-   public void setRegistries(List<GuiRegistry> registries)
+   public void setRegistries(List<GuiRegistry> registries, Map<String, Tuner> tuningNodes)
    {
       this.registries = registries;
       treeItemMap.clear();
-      registries.stream().forEach(registry -> createItemsRecursive(registry));
+      registries.stream().forEach(registry -> createItemsRecursive(registry, tuningNodes));
    }
 
-   private void createItemsRecursive(GuiRegistry registry)
+   private void createItemsRecursive(GuiRegistry registry, Map<String, Tuner> tuningNodes)
    {
       ParameterTreeItem registryItem = new ParameterTreeItem(new ParameterTreeRegistry(registry));
       treeItemMap.put(registry.getUniqueName(), registryItem);
       registry.getRegistries().stream().forEach(child -> {
-         createItemsRecursive(child);
+         createItemsRecursive(child, tuningNodes);
       });
       registry.getParameters().stream().forEach(parameter -> {
-         ParameterTreeItem parameterItem = new ParameterTreeItem(new ParameterTreeParameter(parameter));
+         Node inputNode = tuningNodes.get(parameter.getUniqueName()).getSimpleInputNode();
+         ParameterTreeItem parameterItem = new ParameterTreeItem(new ParameterTreeParameter(parameter, inputNode));
          treeItemMap.put(parameter.getUniqueName(), parameterItem);
       });
    }

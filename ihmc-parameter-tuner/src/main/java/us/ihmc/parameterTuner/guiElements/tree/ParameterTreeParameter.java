@@ -4,7 +4,6 @@ import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tooltip;
@@ -18,11 +17,14 @@ import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 public class ParameterTreeParameter implements ParameterTreeValue
 {
    private final GuiParameter parameter;
+   private final Node treeTuner;
+
    private ParameterNode node;
 
-   public ParameterTreeParameter(GuiParameter parameter)
+   public ParameterTreeParameter(GuiParameter parameter, Node treeTuner)
    {
       this.parameter = parameter;
+      this.treeTuner = treeTuner;
    }
 
    @Override
@@ -47,7 +49,7 @@ public class ParameterTreeParameter implements ParameterTreeValue
    {
       if (node == null)
       {
-         node = new ParameterNode(parameter);
+         node = new ParameterNode(parameter, treeTuner);
       }
       return node;
    }
@@ -55,7 +57,6 @@ public class ParameterTreeParameter implements ParameterTreeValue
    private class ParameterNode extends HBox
    {
       private final Text name = new Text();
-      private final Label value = new Label();
 
       private final ContextMenu contextMenu = new ContextMenu();
       private final MenuItem discard = new MenuItem("Discard");
@@ -64,15 +65,13 @@ public class ParameterTreeParameter implements ParameterTreeValue
       private final Clipboard clipboard = Clipboard.getSystemClipboard();
       private final ClipboardContent content = new ClipboardContent();
 
-      public ParameterNode(GuiParameter parameter)
+      public ParameterNode(GuiParameter parameter, Node treeTuner)
       {
          // Creating this using fxml causes crazy slow down since it is done a lot.
-         value.setPrefWidth(80.0);
          setSpacing(10.0);
          setAlignment(Pos.CENTER_LEFT);
-         getChildren().add(value);
+         getChildren().add(treeTuner);
          getChildren().add(name);
-         value.setId("parameter-value-in-tree-view");
 
          // Setup context menu for copying name to system clipboard.
          content.putString(parameter.getName());
@@ -83,7 +82,7 @@ public class ParameterTreeParameter implements ParameterTreeValue
          // Setup context menu for discarding changes.
          discard.setDisable(true);
          contextMenu.getItems().add(discard);
-         setOnContextMenuRequested((event) -> contextMenu.show(value, event.getScreenX(), event.getScreenY()));
+         setOnContextMenuRequested((event) -> contextMenu.show(name, event.getScreenX(), event.getScreenY()));
          discard.setOnAction(event -> parameter.reset());
 
          // Setup context menu for marking a parameter as modified.
@@ -95,11 +94,9 @@ public class ParameterTreeParameter implements ParameterTreeValue
 
          parameter.addChangedListener(p -> Platform.runLater(() -> {
             updateStyle(parameter);
-            value.setText(parameter.getCurrentValue());
          }));
 
          name.setText(parameter.getName());
-         value.setText(parameter.getCurrentValue());
 
          Tooltip tooltip = new Tooltip();
          tooltip.setText(parameter.getCurrentDescription());
