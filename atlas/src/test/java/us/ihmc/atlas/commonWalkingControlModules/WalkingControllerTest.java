@@ -426,7 +426,8 @@ public class WalkingControllerTest
 
       double omega0 = walkingControllerParameters.getOmega0();
 
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setRobotContactPointParameters(robotModel.getContactPointParameters());
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
       SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());

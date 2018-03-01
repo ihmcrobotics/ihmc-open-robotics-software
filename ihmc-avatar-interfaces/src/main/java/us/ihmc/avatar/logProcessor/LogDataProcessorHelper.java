@@ -74,7 +74,8 @@ public class LogDataProcessorHelper
       controllerDT = model.getControllerDT();
       this.walkingControllerParameters = model.getWalkingControllerParameters();
 
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setRobotContactPointParameters(model.getContactPointParameters());
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
       contactableFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());

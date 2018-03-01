@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Wa
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -55,13 +56,14 @@ public class DRCFlatGroundWalkingTrack
 
       HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
-      RobotContactPointParameters contactPointParameters = model.getContactPointParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
-      ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
       DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setRobotContactPointParameters(model.getContactPointParameters());
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames,
                                                                                                     wristForceSensorNames, highLevelControllerParameters,

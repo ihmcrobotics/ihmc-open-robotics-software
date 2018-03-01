@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -22,8 +21,6 @@ import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
 public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegment<E>> implements ContactPointDefinitionHolder
 {
-   protected final ContactableBodiesFactory<E> contactableBodiesFactory = new ContactableBodiesFactory<>();
-
    private final LeggedJointNameMap<E> jointMap;
    private final double footWidth, toeWidth, footLength;
 
@@ -35,6 +32,11 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
 
    private final List<ImmutablePair<String, Vector3D>> simulationGroundContactPoints = new ArrayList<>();
    private final E[] robotSegments;
+
+   protected final ArrayList<String> additionalContactRigidBodyNames = new ArrayList<>();
+   protected final ArrayList<String> additionalContactNames = new ArrayList<>();
+   protected final ArrayList<RigidBodyTransform> additionalContactTransforms = new ArrayList<>();
+
 
    private boolean useSoftGroundContactParameters;
 
@@ -91,11 +93,6 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
          }
       }
 
-
-      contactableBodiesFactory.setFootContactPoints(controllerFootGroundContactPoints);
-      if (toeOffContactPoints != null && toeOffContactLines != null)
-         contactableBodiesFactory.setToeContactParameters(controllerToeContactPoints, controllerToeContactLines);
-
       useSoftGroundContactParameters = footContactPoints.useSoftContactPointParameters();
    }
 
@@ -123,30 +120,22 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
    protected final void addControllerFootContactPoint(E segment, Point2D contactPoint)
    {
       controllerFootGroundContactPoints.get(segment).add(contactPoint);
-      // Update the factory with the new set of contact points.
-      contactableBodiesFactory.setFootContactPoints(controllerFootGroundContactPoints);
    }
 
    protected final void setControllerFootContactPoint(E segment, List<Point2D> contactPoints)
    {
       controllerFootGroundContactPoints.get(segment).clear();
       controllerFootGroundContactPoints.get(segment).addAll(contactPoints);
-      // Update the factory with the new set of contact points.
-      contactableBodiesFactory.setFootContactPoints(controllerFootGroundContactPoints);
    }
 
    protected final void setControllerToeContactPoint(E segment, Point2D toeContactPoint)
    {
       controllerToeContactPoints.get(segment).set(toeContactPoint);
-      // Update the factory with the new set of contact points.
-      contactableBodiesFactory.setToeContactParameters(controllerToeContactPoints, controllerToeContactLines);
    }
 
    protected final void setControllerToeContactLine(E segment, LineSegment2D toeContactLine)
    {
       controllerToeContactLines.get(segment).set(toeContactLine);
-      // Update the factory with the new set of contact points.
-      contactableBodiesFactory.setToeContactParameters(controllerToeContactPoints, controllerToeContactLines);
    }
 
    public final List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
@@ -159,9 +148,34 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       return controllerFootGroundContactPoints;
    }
 
-   public final ContactableBodiesFactory<E> getContactableBodiesFactory()
+   public SegmentDependentList<E, ArrayList<Point2D>> getControllerFootGroundContactPoints()
    {
-      return contactableBodiesFactory;
+      return controllerFootGroundContactPoints;
+   }
+
+   public SegmentDependentList<E, LineSegment2D> getControllerToeContactLines()
+   {
+      return controllerToeContactLines;
+   }
+
+   public SegmentDependentList<E, Point2D> getControllerToeContactPoints()
+   {
+      return controllerToeContactPoints;
+   }
+
+   public ArrayList<String> getAdditionalContactRigidBodyNames()
+   {
+      return additionalContactRigidBodyNames;
+   }
+
+   public ArrayList<RigidBodyTransform> getAdditionalContactTransforms()
+   {
+      return additionalContactTransforms;
+   }
+
+   public ArrayList<String> getAdditionalContactNames()
+   {
+      return additionalContactNames;
    }
 
    public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
