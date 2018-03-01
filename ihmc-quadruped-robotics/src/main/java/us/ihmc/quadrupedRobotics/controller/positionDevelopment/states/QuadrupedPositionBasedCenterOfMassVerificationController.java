@@ -510,7 +510,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          intialCenterOfMassReferenceFrame.updateTranslation(intialCenterOfMass);
 
          totalMass = fullRobotModel.getTotalMass();
-         bodyMass = fullRobotModel.getBodyLink().getInertia().getMass();
+         bodyMass = fullRobotModel.getBody().getInertia().getMass();
 
          for (TrotPair trotPair : TrotPair.values())
          {

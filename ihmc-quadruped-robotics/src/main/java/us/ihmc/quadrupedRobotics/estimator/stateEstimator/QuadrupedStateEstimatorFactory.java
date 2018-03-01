@@ -43,7 +43,7 @@ public class QuadrupedStateEstimatorFactory
 
       RigidBody elevator = fullRobotModel.get().getElevator();
       FloatingInverseDynamicsJoint rootInverseDynamicsJoint = fullRobotModel.get().getRootJoint();
-      RigidBody estimationLink = fullRobotModel.get().getRootLink();
+      RigidBody estimationLink = fullRobotModel.get().getRootBody();
       FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
 
       RobotMotionStatusHolder robotMotionStatusFromController = new RobotMotionStatusHolder();

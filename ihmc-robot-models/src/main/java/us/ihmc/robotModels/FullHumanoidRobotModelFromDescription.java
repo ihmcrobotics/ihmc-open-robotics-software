@@ -203,7 +203,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    @Override
    public RigidBody getPelvis()
    {
-      return getRootLink();
+      return getRootBody();
    }
 
    /** {@inheritDoc} */

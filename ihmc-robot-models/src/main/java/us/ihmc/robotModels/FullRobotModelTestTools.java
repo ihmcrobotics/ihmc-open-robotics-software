@@ -354,7 +354,7 @@ public class FullRobotModelTestTools
          return pelvis;
       }
 
-      @Override public RigidBody getRootLink()
+      @Override public RigidBody getRootBody()
       {
          return pelvis;
       }

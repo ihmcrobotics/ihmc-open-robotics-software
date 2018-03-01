@@ -75,7 +75,7 @@ public interface FullRobotModel
     * Returns the {@link RigidBody} describing the root link of this robot.
     * In the current framework (on the day: 2/28/2018), the root link is the the first successor of the root joint.
     */
-   RigidBody getRootLink();
+   RigidBody getRootBody();
 
    /**
     * Returns the {@link RigidBody} describing the head of this robot.

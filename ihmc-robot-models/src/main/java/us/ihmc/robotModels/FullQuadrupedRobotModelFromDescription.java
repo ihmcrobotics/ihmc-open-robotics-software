@@ -142,9 +142,9 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    @Override
-   public RigidBody getBodyLink()
+   public RigidBody getBody()
    {
-      return getRootLink();
+      return getRootBody();
    }
 
    @Override

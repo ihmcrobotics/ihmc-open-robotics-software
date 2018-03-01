@@ -751,7 +751,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getRootLink()
+      public RigidBody getRootBody()
       {
          return null;
       }
@@ -1044,7 +1044,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getRootLink()
+      public RigidBody getRootBody()
       {
          return null;
       }
@@ -1395,7 +1395,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getRootLink()
+      public RigidBody getRootBody()
       {
          return null;
       }
@@ -1735,7 +1735,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getRootLink()
+      public RigidBody getRootBody()
       {
          return null;
       }
@@ -2011,7 +2011,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getRootLink()
+      public RigidBody getRootBody()
       {
          return pelvis;
       }
