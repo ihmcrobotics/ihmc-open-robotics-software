@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ public class PiecewiseReverseDcmTrajectory
    private final FrameVector3D dcmVelocity;
    private final List<MutableDouble> temporaryDouble;
    private final List<FramePoint3D> temporaryFramePoints;
-   private final FramePoint3D tempPoint = new FramePoint3D();
 
    public PiecewiseReverseDcmTrajectory(int maxSteps, double gravity, double comHeight)
    {
@@ -137,16 +137,14 @@ public class PiecewiseReverseDcmTrajectory
       return timeAtSoS[0];
    }
 
-   public void getPosition(FixedFramePoint3DBasics dcmPosition)
+   public void getPosition(FramePoint3D dcmPositionToPack)
    {
-      tempPoint.setIncludingFrame(this.dcmPosition);
-      tempPoint.changeFrame(dcmPosition.getReferenceFrame());
-      dcmPosition.set(tempPoint);
+      dcmPositionToPack.setIncludingFrame(dcmPosition);
    }
 
-   public void getVelocity(FrameVector3D dcmVelocity)
+   public void getVelocity(FrameVector3D dcmVelocityToPack)
    {
-      dcmVelocity.setIncludingFrame(this.dcmVelocity);
+      dcmVelocityToPack.setIncludingFrame(dcmVelocity);
    }
 
    public static void main(String args[])

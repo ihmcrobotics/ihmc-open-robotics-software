@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -45,7 +46,6 @@ public class DCMPlanner
    private final FramePoint3D finalDesiredDCM = new FramePoint3D();
 
    private final FramePoint3D tempPoint = new FramePoint3D();
-
 
    public DCMPlanner(double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
                      QuadrantDependentList<FramePoint3D> currentSolePositions, YoVariableRegistry parentRegistry)
@@ -102,7 +102,7 @@ public class DCMPlanner
       }
    }
 
-   public void computeDcmTrajectory(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   private void computeDcmTrajectory(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
       if (!stepSequence.isEmpty())
       {
@@ -124,28 +124,38 @@ public class DCMPlanner
       }
    }
 
-   public void computeDcmSetpoints(FramePoint3D desiredDCMPositionToPack, FrameVector3D desiredDCMVelocityToPack)
+   private final FramePoint3D desiredDCMPosition = new FramePoint3D();
+   private final FrameVector3D desiredDCMVelocity = new FrameVector3D();
+
+   public void computeDcmSetpoints(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings, FixedFramePoint3DBasics desiredDCMPositionToPack,
+                                   FixedFrameVector3DBasics desiredDCMVelocityToPack)
    {
-      //computeDcmTrajectory(taskSpaceControllerSettings);
+      computeDcmTrajectory(taskSpaceControllerSettings);
 
       if (stepSequence.isEmpty())
       {
          // update desired dcm position
-         desiredDCMPositionToPack.setToZero(supportFrame);
-         desiredDCMVelocityToPack.setToZero(supportFrame);
+         desiredDCMPosition.setToZero(supportFrame);
+         desiredDCMVelocity.setToZero(supportFrame);
       }
       else if (robotTimestamp.getDoubleValue() <= dcmTransitionTrajectory.getFinalTime())
       {
          dcmTransitionTrajectory.compute(robotTimestamp.getDoubleValue());
-         dcmTransitionTrajectory.getFramePosition(desiredDCMPositionToPack);
-         dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocityToPack);
+         dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
+         dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
       }
       else
       {
          dcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
-         dcmTrajectory.getPosition(desiredDCMPositionToPack);
-         dcmTrajectory.getVelocity(desiredDCMVelocityToPack);
+         dcmTrajectory.getPosition(desiredDCMPosition);
+         dcmTrajectory.getVelocity(desiredDCMVelocity);
       }
+
+      desiredDCMPosition.changeFrame(desiredDCMPositionToPack.getReferenceFrame());
+      desiredDCMVelocity.changeFrame(desiredDCMVelocityToPack.getReferenceFrame());
+
+      desiredDCMPositionToPack.set(desiredDCMPosition);
+      desiredDCMVelocityToPack.set(desiredDCMVelocity);
    }
 
    public void getFinalDesiredDCM(FixedFramePoint3DBasics finalDesiredDCMToPack)
