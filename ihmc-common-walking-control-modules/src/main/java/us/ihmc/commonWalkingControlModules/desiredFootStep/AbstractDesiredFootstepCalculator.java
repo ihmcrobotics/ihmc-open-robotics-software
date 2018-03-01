@@ -54,7 +54,7 @@ public abstract class AbstractDesiredFootstepCalculator implements DesiredFootst
       frameOrientation.changeFrame(worldFrame);
 
       FootstepDataMessage footstep = new FootstepDataMessage();
-      footstep.setRobotSide(swingLegSide);
+      footstep.setRobotSide(swingLegSide.toByte());
       footstep.setLocation(framePosition);
       footstep.setOrientation(frameOrientation);
 

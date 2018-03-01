@@ -13,12 +13,13 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidBehaviors.taskExecutor.ArmTrajectoryTask;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehavior<WalkState>
 {
@@ -58,7 +59,7 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
       double[] rightHandWiderHomeJointAngles = new double[] {-0.785398, 0.5143374964757462, 2.2503094898479272, -2.132492022530739, -0.22447272781774874,
             -0.4780687104960028, -0.24919417978503655};
 
-      ArmTrajectoryMessage widerHome = new ArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandWiderHomeJointAngles);
+      ArmTrajectoryMessage widerHome = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 2, rightHandWiderHomeJointAngles);
 
       ArmTrajectoryTask<WalkState> rightArmHomeTask = new ArmTrajectoryTask<WalkState>(WalkState.GET_READY_TO_WALK, widerHome,
             atlasPrimitiveActions.rightArmTrajectoryBehavior);

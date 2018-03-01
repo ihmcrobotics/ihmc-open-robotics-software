@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
@@ -23,6 +24,7 @@ import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 /**
  * Created by agrabertilton on 1/14/15.
@@ -72,7 +74,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
+      FootstepDataMessage originalFootstep = HumanoidMessageTools.createFootstepDataMessage(footstep);
 
       //set to the sole pose
       FramePoint3D position = new FramePoint3D();
@@ -89,7 +91,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
-      footstep.setTrajectoryType(originalFootstep.getTrajectoryType());
+      footstep.setTrajectoryType(TrajectoryType.fromByte(originalFootstep.getTrajectoryType()));
 
       return type;
    }

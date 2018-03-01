@@ -14,6 +14,16 @@ public class NormalOcTreeMessage extends Packet<NormalOcTreeMessage>
    }
 
    @Override
+   public void set(NormalOcTreeMessage other)
+   {
+      treeDepth = other.treeDepth;
+      resolution = other.resolution;
+      root = new NormalOcTreeNodeMessage();
+      root.set(other.root);
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(NormalOcTreeMessage other, double epsilon)
    {
       if (treeDepth != other.treeDepth)

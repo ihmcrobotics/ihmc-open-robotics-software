@@ -78,4 +78,9 @@ public class TimeInterval
    {
       return MathTools.epsilonEquals(getStartTime(), other.getStartTime(), epsilon) && MathTools.epsilonEquals(getEndTime(), other.getEndTime(), epsilon);
    }
+
+   public boolean intervalContains(double time)
+   {
+      return MathTools.intervalContains(time, getStartTime(), getEndTime());
+   }
 }

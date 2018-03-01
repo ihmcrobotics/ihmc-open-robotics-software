@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -135,6 +135,7 @@ public class FlamingoStanceState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(swingTime, initialTransferTime);
 
+      balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(swingTime, initialTransferTime, finalTransferTime);
@@ -185,6 +186,7 @@ public class FlamingoStanceState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(swingTime, transferTime);
 
+      balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setUpcomingFootstep(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
       balanceManager.setICPPlanSupportSide(supportSide);

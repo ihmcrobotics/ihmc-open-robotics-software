@@ -232,7 +232,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       FootstepDataMessage footstepData = new FootstepDataMessage();
       footstepData.setLocation(stepLocation);
       footstepData.setOrientation(orient);
-      footstepData.setRobotSide(robotSide);
+      footstepData.setRobotSide(robotSide.toByte());
       message.add(footstepData);
    }
 

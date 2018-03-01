@@ -6,10 +6,11 @@ import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.LidarScanMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
+import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -146,11 +147,15 @@ public class SimpleLidarRobotController implements RobotController
             }
          }
 
-         LidarScanMessage lidarScanMessage = new LidarScanMessage(-1L, lidarPosition, lidarOrientation, newScan.toArray());
+         LidarScanMessage lidarScanMessage = new LidarScanMessage();
+         lidarScanMessage.robotTimestamp = -1L;
+         lidarScanMessage.lidarPosition = lidarPosition;
+         lidarScanMessage.lidarOrientation = lidarOrientation;
+         lidarScanMessage.scan = newScan.toArray();
          executorService.execute(() -> packetCommunicator.send(lidarScanMessage));
       }
 
-      packetCommunicator.send(new RequestPlanarRegionsListMessage(RequestType.CONTINUOUS_UPDATE));
+      packetCommunicator.send(MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.CONTINUOUS_UPDATE));
       yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
    }
 

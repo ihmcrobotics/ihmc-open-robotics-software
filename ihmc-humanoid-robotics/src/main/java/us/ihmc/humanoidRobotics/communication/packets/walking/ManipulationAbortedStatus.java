@@ -11,6 +11,7 @@ public class ManipulationAbortedStatus extends SettablePacket<ManipulationAborte
    @Override
    public void set(ManipulationAbortedStatus other)
    {
+      setPacketInformation(other);
    }
 
    @Override

@@ -3,7 +3,7 @@
 # world frame.
 
 # Specifies which foot will swing to reach the foostep.
-uint8 robot_side
+int8 robot_side
 
 # Specifies the position of the footstep (sole frame) in world frame.
 geometry_msgs/Point location
@@ -21,7 +21,7 @@ ihmc_msgs/Point2dRosMessage[] predicted_contact_points
 
 # This contains information on what the swing trajectory should be for each step. Recomended is
 # DEFAULT.
-uint8 trajectory_type
+int8 trajectory_type
 
 # Contains information on how high the robot should swing its foot. This affects trajectory types
 # DEFAULT and OBSTACLE_CLEARANCE.If a value smaller then the minumal swing height is chosen (e.g. 0.0)
@@ -58,22 +58,15 @@ float64 swing_duration
 # of this field is invalid (not positive) it will be replaced by a default transferDuration.
 float64 transfer_duration
 
+# (Experimental) The touchdown duration is the time spent trying to do a soft touchdown. If the value
+# of this field is invalid (not positive) it will be replaced by a default transferDuration. If the
+# default is set to zero, the touchdown state will be disabled
+float64 touchdown_duration
+
 # A unique id for the current message. This can be a timestamp or sequence number. Only the unique id
 # in the top level message is used, the unique id in nested messages is ignored. Use
 # /output/last_received_message for feedback about when the last message was received. A message with
 # a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.
 int64 unique_id
 
-
-# This message utilizes "enums". Enum value information for this message follows.
-
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
-
-# "trajectory_type" enum values:
-uint8 DEFAULT=0 # The controller will execute a default trajectory.
-uint8 OBSTACLE_CLEARANCE=1 # The controller will attempt to step on/off an obstacle.
-uint8 CUSTOM=2 # In this mode two trajectory position waypoints can be specified.
-uint8 WAYPOINTS=3 # The swing trajectory is fully defined by the given waypoints.
 

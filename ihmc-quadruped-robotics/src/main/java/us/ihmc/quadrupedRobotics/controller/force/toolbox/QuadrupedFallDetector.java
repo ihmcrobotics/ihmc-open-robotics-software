@@ -50,7 +50,7 @@ public class QuadrupedFallDetector
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       dcmPositionEstimate = new FramePoint3D();
       this.dcmPositionEstimator = dcmPositionEstimator;
-      supportPolygon = new QuadrupedSupportPolygon(taskSpaceEstimates.getSolePosition());
+      supportPolygon = new QuadrupedSupportPolygon(taskSpaceEstimates.getSolePositions());
       parentRegistry.addChild(registry);
    }
 

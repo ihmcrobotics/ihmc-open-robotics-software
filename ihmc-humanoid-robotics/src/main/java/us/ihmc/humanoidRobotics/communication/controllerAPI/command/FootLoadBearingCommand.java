@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -30,8 +30,8 @@ public class FootLoadBearingCommand implements Command<FootLoadBearingCommand, F
    public void set(FootLoadBearingMessage message)
    {
       clear();
-      LoadBearingRequest request = message.getRequest();
-      RobotSide robotSide = message.getRobotSide();
+      LoadBearingRequest request = LoadBearingRequest.fromByte(message.getRequest());
+      RobotSide robotSide = RobotSide.fromByte(message.getRobotSide());
       footRequests.put(robotSide, request);
       executionDelayTime = message.executionDelayTime;
    }

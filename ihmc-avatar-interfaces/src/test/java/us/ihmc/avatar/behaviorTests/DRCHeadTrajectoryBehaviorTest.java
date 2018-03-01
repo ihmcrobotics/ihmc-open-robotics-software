@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
@@ -133,7 +134,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       ReferenceFrame chestCoMFrame = controllerFullRobotModel.getChest().getBodyFixedFrame();
       double trajectoryTime = 4.0;
       Quaternion desiredHeadQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), MAX_ANGLE_TO_TEST_RAD));
-      HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, chestCoMFrame);
+      HeadTrajectoryMessage message = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, chestCoMFrame);
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       testHeadOrientationBehavior(message, trajectoryTime + EXTRA_SIM_TIME_FOR_SETTLING);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -149,7 +150,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       FullHumanoidRobotModel controllerFullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       ReferenceFrame chestCoMFrame = controllerFullRobotModel.getChest().getBodyFixedFrame();
 
-      HeadTrajectoryMessage message = new HeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, chestCoMFrame);
+      HeadTrajectoryMessage message = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredHeadQuat, chestCoMFrame);
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
       return message;
    }

@@ -20,6 +20,7 @@ import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.LidarScanMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
@@ -307,7 +308,7 @@ public class LidarScanPublisher
 
                float[] scanPointBuffer = scanData.getScanBuffer(indicesToRemove);
 
-               LidarScanMessage message = new LidarScanMessage(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer);
+               LidarScanMessage message = MessageTools.createLidarScanMessage(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer);
 
                PacketDestination destination = PacketDestination.fromOrdinal(requestLidarScanMessage.getSource());
                message.setDestination(destination);

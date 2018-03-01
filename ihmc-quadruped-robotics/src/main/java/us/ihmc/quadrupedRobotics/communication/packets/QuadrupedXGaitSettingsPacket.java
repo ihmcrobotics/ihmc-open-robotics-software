@@ -3,8 +3,6 @@ package us.ihmc.quadrupedRobotics.communication.packets;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
-
 public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsPacket>
 {
    private final QuadrupedXGaitSettings xGaitSettings;
@@ -20,6 +18,13 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
       this.xGaitSettings.set(xGaitSettings);
    }
 
+   @Override
+   public void set(QuadrupedXGaitSettingsPacket other)
+   {
+      xGaitSettings.set(other.xGaitSettings);
+      setPacketInformation(other);
+   }
+
    public QuadrupedXGaitSettings get()
    {
       return xGaitSettings;
@@ -30,7 +35,8 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
       xGaitSettings.set(this.xGaitSettings);
    }
 
-   @Override public boolean epsilonEquals(QuadrupedXGaitSettingsPacket other, double epsilon)
+   @Override
+   public boolean epsilonEquals(QuadrupedXGaitSettingsPacket other, double epsilon)
    {
       return this.xGaitSettings.epsilonEquals(other.xGaitSettings, epsilon);
    }

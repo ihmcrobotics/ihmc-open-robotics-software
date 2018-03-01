@@ -29,7 +29,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
 {
    private YoVariableClientInterface yoVariableClientInterface;
 
-   private final AtomicReference<GuiRegistry> guiRegistryCopy = new AtomicReference<>(null);
+   private final AtomicReference<List<GuiRegistry>> guiRegistriesCopy = new AtomicReference<>(null);
 
    private final Map<String, GuiParameter> guiParametersByYoName = new HashMap<>();
    private final Map<String, YoVariable<?>> yoVariablesByGuiName = new HashMap<>();
@@ -76,9 +76,9 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    public void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
       this.yoVariableClientInterface = yoVariableClientInterface;
-      YoVariableRegistry yoRegistry = handshakeParser.getRootRegistry();
+      YoVariableRegistry yoRootRegistry = handshakeParser.getRootRegistry();
 
-      yoRegistry.getAllParameters().stream().forEach(parameter -> {
+      yoRootRegistry.getAllParameters().stream().forEach(parameter -> {
          parameter.addParameterChangedListener(new ParameterChangedListener()
          {
             @Override
@@ -95,9 +95,14 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
       guiParametersByYoName.clear();
       yoVariablesByGuiName.clear();
 
-      GuiRegistry guiRegistry = new GuiRegistry(yoRegistry.getName(), null);
-      createGuiRegistryRecursive(guiRegistry, yoRegistry);
-      this.guiRegistryCopy.set(guiRegistry.createFullCopy());
+      List<GuiRegistry> registriesCopy = new ArrayList<>();
+      ArrayList<YoVariableRegistry> yoRegistries = yoRootRegistry.getChildren();
+      yoRegistries.stream().forEach(yoRegistry -> {
+         GuiRegistry guiRegistry = new GuiRegistry(yoRegistry.getName(), null);
+         createGuiRegistryRecursive(guiRegistry, yoRegistry);
+         registriesCopy.add(guiRegistry.createFullCopy());
+      });
+      this.guiRegistriesCopy.set(registriesCopy);
    }
 
    @Override
@@ -155,12 +160,12 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
 
    public boolean hasNewGuiRegistry()
    {
-      return guiRegistryCopy.get() != null;
+      return guiRegistriesCopy.get() != null;
    }
 
-   public GuiRegistry pollGuiRegistry()
+   public List<GuiRegistry> pollGuiRegistries()
    {
-      return guiRegistryCopy.getAndSet(null);
+      return guiRegistriesCopy.getAndSet(null);
    }
 
    public List<GuiParameter> getChangedParametersAndClear()

@@ -3,65 +3,73 @@ package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket> {
-   public static enum WalkToGoalAction{
-      FIND_PATH, EXECUTE, EXECUTE_UNKNOWN, STOP
-   };
+public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
+{
+   public static final byte WALK_TO_GOAL_ACTION_FIND_PATH = 0;
+   public static final byte WALK_TO_GOAL_ACTION_EXECUTE = 1;
+   public static final byte WALK_TO_GOAL_ACTION_EXECUTE_UNKNOWN = 2;
+   public static final byte WALK_TO_GOAL_ACTION_STOP = 3;
 
-	public WalkToGoalAction action;
-	public double xGoal;
-	public double yGoal;
-	public double thetaGoal;
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
 
-	public RobotSide goalSide;
-	
-	
-	public WalkToGoalBehaviorPacket(){
-		// for serialization
-	}
-	
-	public WalkToGoalBehaviorPacket(WalkToGoalAction action){
-		this.action = action;
-	}
-	
-	public WalkToGoalBehaviorPacket(double xGoal, double yGoal, double thetaGoal, RobotSide goalSide){
-		this.action = WalkToGoalAction.FIND_PATH;
-		this.xGoal = xGoal;
-		this.yGoal = yGoal;
-		this.thetaGoal = thetaGoal;
-		this.goalSide = goalSide;
-	}
-	
-	public double[] getGoalPosition(){
-		return new double[]{xGoal, yGoal, thetaGoal};
-	}
-	
-	public RobotSide getGoalSide() {
-		return goalSide;
-	}
-	
-	@Override
-	public boolean epsilonEquals(WalkToGoalBehaviorPacket other, double epsilon) {
-		boolean ret = true;
-		double[] thisData = this.getGoalPosition();
-		double[] otherData = other.getGoalPosition();
-		for (int i = 0; (i < thisData.length && ret); i++){
-			ret = Math.abs(thisData[i] - otherData[i]) < epsilon;
-		}
-		ret &= this.goalSide == other.goalSide;
-		return ret;
-	}
+   public byte walkToGoalAction;
+   public double xGoal;
+   public double yGoal;
+   public double thetaGoal;
 
-	@Override
-	public String toString()
-	{
-		String ret = getClass().getSimpleName() + "\n";
+   public byte goalRobotSide;
 
-		ret += "x: " + xGoal + "\n";
-		ret += "y: " + yGoal + "\n";
-		ret += "theta: " + thetaGoal + "\n";
-		ret += "side: " + goalSide.toString() + "\n";
+   public WalkToGoalBehaviorPacket()
+   {
+      // for serialization
+   }
 
-		return ret;
-	}
+   @Override
+   public void set(WalkToGoalBehaviorPacket other)
+   {
+      walkToGoalAction = other.walkToGoalAction;
+      xGoal = other.xGoal;
+      yGoal = other.yGoal;
+      thetaGoal = other.thetaGoal;
+      goalRobotSide = other.goalRobotSide;
+      setPacketInformation(other);
+   }
+
+   public double[] getGoalPosition()
+   {
+      return new double[] {xGoal, yGoal, thetaGoal};
+   }
+
+   public byte getGoalSide()
+   {
+      return goalRobotSide;
+   }
+
+   @Override
+   public boolean epsilonEquals(WalkToGoalBehaviorPacket other, double epsilon)
+   {
+      boolean ret = true;
+      double[] thisData = this.getGoalPosition();
+      double[] otherData = other.getGoalPosition();
+      for (int i = 0; (i < thisData.length && ret); i++)
+      {
+         ret = Math.abs(thisData[i] - otherData[i]) < epsilon;
+      }
+      ret &= this.goalRobotSide == other.goalRobotSide;
+      return ret;
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + "\n";
+
+      ret += "x: " + xGoal + "\n";
+      ret += "y: " + yGoal + "\n";
+      ret += "theta: " + thetaGoal + "\n";
+      ret += "side: " + RobotSide.fromByte(goalRobotSide).toString() + "\n";
+
+      return ret;
+   }
 }

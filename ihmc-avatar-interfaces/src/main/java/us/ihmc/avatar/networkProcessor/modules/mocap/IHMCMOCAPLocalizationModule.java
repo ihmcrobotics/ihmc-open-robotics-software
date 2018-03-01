@@ -21,8 +21,10 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -104,7 +106,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       mocapDataClient.registerRigidBodiesListener(this);
 
       packetCommunicator.attachListener(RobotConfigurationData.class, this);
-      packetCommunicator.attachListener(FootstepStatus.class, walkingStatusManager);
+      packetCommunicator.attachListener(FootstepStatusMessage.class, walkingStatusManager);
 
       PeriodicThreadSchedulerFactory scheduler = new PeriodicNonRealtimeThreadSchedulerFactory();
       LogModelProvider logModelProvider = drcRobotModel.getLogModelProvider();
@@ -301,7 +303,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       overallListOfSteps.addAll(listOfStepsForward);
       overallListOfSteps.addAll(listOfStepsBackward);
 
-      FootstepDataListMessage footstepsListMessage = new FootstepDataListMessage(overallListOfSteps, 1.2, 0.8, ExecutionMode.QUEUE);
+      FootstepDataListMessage footstepsListMessage = HumanoidMessageTools.createFootstepDataListMessage(overallListOfSteps, 1.2, 0.8, ExecutionMode.QUEUE);
       footstepsListMessage.setDestination(PacketDestination.CONTROLLER);
       walkingStatusManager.sendFootstepList(footstepsListMessage);
    }
@@ -326,22 +328,22 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
             position.setX(startingPoint -i * 0.2 - 0.2);
          }
 
-         FootstepDataMessage footStep = new FootstepDataMessage(robotSide, position, new Quaternion(0.0, 0.0, 0.0, 1.0));
+         FootstepDataMessage footStep = HumanoidMessageTools.createFootstepDataMessage(robotSide, position, new Quaternion(0.0, 0.0, 0.0, 1.0));
          listOfSteps.set(i, footStep);
          robotSide = robotSide.getOppositeSide();
       }
       return listOfSteps;
    }
       
-   private class WalkingStatusManager implements PacketConsumer<FootstepStatus>
+   private class WalkingStatusManager implements PacketConsumer<FootstepStatusMessage>
    {
       private final YoInteger footstepsCompleted = new YoInteger("footstepsCompleted", registry);
       private final YoInteger numberOfFootstepsToTake = new YoInteger("numberOfFootstepsToTake", registry);
       
       @Override
-      public void receivedPacket(FootstepStatus packet)
+      public void receivedPacket(FootstepStatusMessage packet)
       {
-         if(packet.getStatus().equals(FootstepStatus.Status.COMPLETED))
+         if(packet.getStatus() == FootstepStatus.COMPLETED.toByte())
             footstepsCompleted.increment();
       }
       

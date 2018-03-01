@@ -1,7 +1,5 @@
 package us.ihmc.communication.packets;
 
-import java.util.Random;
-
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
@@ -15,16 +13,14 @@ public class ObjectDetectorResultPacket extends Packet<ObjectDetectorResultPacke
 
    }
 
-   public ObjectDetectorResultPacket(HeatMapPacket heatMap, BoundingBoxesPacket boundingBoxes)
+   @Override
+   public void set(ObjectDetectorResultPacket other)
    {
-      this.heatMap = heatMap;
-      this.boundingBoxes = boundingBoxes;
-   }
-
-   public ObjectDetectorResultPacket(Random random)
-   {
-      this.heatMap = new HeatMapPacket(random);
-      this.boundingBoxes = new BoundingBoxesPacket(random);
+      heatMap = new HeatMapPacket();
+      heatMap.set(other.heatMap);
+      boundingBoxes = new BoundingBoxesPacket();
+      boundingBoxes.set(boundingBoxes);
+      setPacketInformation(other);
    }
 
    @Override

@@ -313,7 +313,7 @@ public class TouchDownState extends AbstractFootControlState
    }
 
    @Override
-   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   public SpatialFeedbackControlCommand getFeedbackControlCommand()
    {
       return feedbackControlCommand;
    }

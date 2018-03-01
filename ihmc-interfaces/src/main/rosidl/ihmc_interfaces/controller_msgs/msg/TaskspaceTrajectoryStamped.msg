@@ -1,0 +1,3 @@
+std_msgs/Header header
+geometry_msgs/PoseStamped[] trajectory_points_stamped
+builtin_interfaces/Duration time_from_start

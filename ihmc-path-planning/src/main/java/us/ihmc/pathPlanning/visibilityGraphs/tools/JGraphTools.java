@@ -13,10 +13,16 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
+import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphPathPlanner;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 
 public class JGraphTools
 {
+   public static VisibilityGraphPathPlanner getJGraphPlanner()
+   {
+      return JGraphTools::calculatePathOnVisibilityGraph;
+   }
+
    public static List<Point3DReadOnly> calculatePathOnVisibilityGraph(ConnectionPoint3D start, ConnectionPoint3D goal,
                                                                       Collection<VisibilityMapHolder> allVisibilityMapHolders)
    {

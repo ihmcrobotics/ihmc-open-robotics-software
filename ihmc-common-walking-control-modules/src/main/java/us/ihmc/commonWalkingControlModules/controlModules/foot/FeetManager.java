@@ -34,6 +34,7 @@ import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FeetManager
@@ -489,6 +490,11 @@ public class FeetManager
    public FeedbackControlCommand<?> getFeedbackControlCommand(RobotSide robotSide)
    {
       return footControlModules.get(robotSide).getFeedbackControlCommand();
+   }
+
+   public JointDesiredOutputListReadOnly getJointDesiredData(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getJointDesiredData();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()

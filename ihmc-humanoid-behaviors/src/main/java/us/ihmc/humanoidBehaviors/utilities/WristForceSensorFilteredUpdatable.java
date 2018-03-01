@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollisionDetectedPacket;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.FirstOrderBandPassFilteredYoVariable;
@@ -226,7 +227,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
             yoImpactDetected.set(true);
             yoImpactTime.set(time);
 
-            controllerCommunicator.send(new HandCollisionDetectedPacket(robotSide, yoCollisionSeverityLevelOneToThree.getIntegerValue()));
+            controllerCommunicator.send(HumanoidMessageTools.createHandCollisionDetectedPacket(robotSide, yoCollisionSeverityLevelOneToThree.getIntegerValue()));
             if (DEBUG)
                PrintTools.debug(this, "Sending Collision Detected Packet.  FilteredForce = " + yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue());
 

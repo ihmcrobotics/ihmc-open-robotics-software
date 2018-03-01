@@ -2,19 +2,20 @@ package us.ihmc.communication.packets;
 
 public class SetStringParameterPacket extends Packet<SetStringParameterPacket>
 {
-   private final String parameterName;
-   private final String parameterValue;
+   public String parameterName;
+   public String parameterValue;
 
    // Empty constructor for serialization
    public SetStringParameterPacket()
    {
-      this(null, "");
    }
 
-   public SetStringParameterPacket(String parameterName, String parameterValue)
+   @Override
+   public void set(SetStringParameterPacket other)
    {
-      this.parameterName = parameterName;
-      this.parameterValue = parameterValue;
+      parameterName = other.parameterName;
+      parameterValue = other.parameterValue;
+      setPacketInformation(other);
    }
 
    public String getParameterName()

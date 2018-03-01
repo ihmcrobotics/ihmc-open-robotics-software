@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 
 public class LocalizationPacket extends Packet<LocalizationPacket>
@@ -14,10 +12,12 @@ public class LocalizationPacket extends Packet<LocalizationPacket>
       // Empty constructor for deserialization
    }
 
-   public LocalizationPacket(boolean reset, boolean toggle)
+   @Override
+   public void set(LocalizationPacket other)
    {
-      this.reset = reset;
-      this.toggle = toggle;
+      reset = other.reset;
+      toggle = other.toggle;
+      setPacketInformation(other);
    }
 
    public boolean getReset()
@@ -48,11 +48,5 @@ public class LocalizationPacket extends Packet<LocalizationPacket>
    public boolean epsilonEquals(LocalizationPacket other, double epsilon)
    {
       return (this.reset == other.reset) && (this.toggle == other.toggle);
-   }
-
-   public LocalizationPacket(Random random)
-   {
-      this(random.nextBoolean(), random.nextBoolean());
-
    }
 }

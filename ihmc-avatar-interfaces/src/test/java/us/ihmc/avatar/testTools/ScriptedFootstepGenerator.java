@@ -8,6 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -48,15 +49,14 @@ public class ScriptedFootstepGenerator
 
    public FootstepDataListMessage generateFootstepsFromLocationsAndOrientations(RobotSide[] robotSides, double[][][] footstepLocationsAndOrientations, double swingTime, double transferTime)
    {
-      FootstepDataListMessage footstepDataList = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage footstepDataList = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
       for (int i = 0; i < robotSides.length; i++)
       {
          RobotSide robotSide = robotSides[i];
          double[][] footstepLocationAndOrientation = footstepLocationsAndOrientations[i];
          Footstep footstep = generateFootstepFromLocationAndOrientation(robotSide, footstepLocationAndOrientation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, footstep.getFootstepPose().getPosition(),
-                                                                    footstep.getFootstepPose().getOrientation());
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, footstep.getFootstepPose().getPosition(), footstep.getFootstepPose().getOrientation());
          footstepDataList.add(footstepData);
       }
 

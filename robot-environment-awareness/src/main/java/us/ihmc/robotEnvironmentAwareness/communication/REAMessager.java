@@ -16,7 +16,10 @@ public interface REAMessager
 
    default <T> void submitMessage(Topic<T> topic, T messageContent)
    {
-      submitMessage(new REAMessage<T>(topic, messageContent));
+      REAMessage<T> reaMessage = new REAMessage<>();
+      reaMessage.topicId = topic.getUniqueId();
+      reaMessage.messageContent = messageContent;
+      submitMessage(reaMessage);
    }
 
    <T> void submitMessage(REAMessage<T> message);

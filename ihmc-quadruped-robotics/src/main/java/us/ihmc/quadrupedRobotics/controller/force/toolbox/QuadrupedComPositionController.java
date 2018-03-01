@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.force.toolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -19,10 +20,10 @@ public class QuadrupedComPositionController
       private final FrameVector3D comVelocity = new FrameVector3D();
       private final FrameVector3D comForceFeedforward = new FrameVector3D();
 
-      public void initialize(QuadrupedTaskSpaceEstimates estimates)
+      public void initialize(FramePoint3DReadOnly comPosition)
       {
-         comPosition.setIncludingFrame(estimates.getComPosition());
-         comPosition.changeFrame(ReferenceFrame.getWorldFrame());
+         this.comPosition.setIncludingFrame(comPosition);
+         this.comPosition.changeFrame(ReferenceFrame.getWorldFrame());
          comVelocity.setToZero();
          comForceFeedforward.setToZero();
       }

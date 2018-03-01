@@ -52,5 +52,17 @@ public enum HandConfiguration
    PARTIAL_CREEPY_GRASP,
    CREEPY_GRASPING,
    CREEPY_GRASPING_HARD,
-   SLOW_CLOSE
+   SLOW_CLOSE;
+
+   public final static HandConfiguration[] values = values();
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static HandConfiguration fromByte(byte enumAsByte)
+   {
+      return values[enumAsByte];
+   }
 }

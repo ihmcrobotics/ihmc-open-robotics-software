@@ -20,4 +20,16 @@ public enum RobotMotionStatus
    {
       return behaviorId;
    }
+   
+   public static RobotMotionStatus[] values = values();
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static RobotMotionStatus fromByte(byte enumAsByte)
+   {
+      return values[enumAsByte];
+   }
 }

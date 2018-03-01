@@ -14,4 +14,14 @@ public enum BDIRobotBehavior
    SOFT_STOP;
    
    public static BDIRobotBehavior[] values = values();
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static BDIRobotBehavior fromByte(byte enumAsByte)
+   {
+      return values[enumAsByte];
+   }
 }

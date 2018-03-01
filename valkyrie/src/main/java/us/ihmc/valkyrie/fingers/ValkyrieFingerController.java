@@ -93,7 +93,7 @@ public class ValkyrieFingerController implements RobotController
       {
          if (subscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
-            HandConfiguration handDesiredConfiguration = subscribers.get(robotSide).pollMessage().getHandDesiredConfiguration();
+            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(subscribers.get(robotSide).pollMessage().getHandDesiredConfiguration());
 
             switch (handDesiredConfiguration)
             {

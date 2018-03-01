@@ -24,7 +24,7 @@ public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAcceler
    @Override
    public void set(ArmDesiredAccelerationsMessage message)
    {
-      robotSide = message.getRobotSide();
+      robotSide = RobotSide.fromByte(message.getRobotSide());
       desiredAccelerations.set(message.desiredAccelerations);
    }
 

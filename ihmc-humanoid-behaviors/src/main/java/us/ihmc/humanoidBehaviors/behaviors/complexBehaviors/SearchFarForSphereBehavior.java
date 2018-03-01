@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
@@ -86,7 +87,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("LOOKING FOR BALL");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("LOOKING FOR BALL");
             sendPacket(p1);
             coactiveElement.searchingForBall.set(true);
             coactiveElement.foundBall.set(false);

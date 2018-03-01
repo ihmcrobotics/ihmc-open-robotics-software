@@ -78,6 +78,7 @@ public class AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> doSmoothJointTorquesAtControllerStateChanges = new OptionalFactoryField<>("doSmoothJointTorquesAtControllerStateChanges");
    private final OptionalFactoryField<Boolean> addActualCMPVisualization = new OptionalFactoryField<>("addActualCMPVisualization");
    private final OptionalFactoryField<Boolean> createCollisionMeshes = new OptionalFactoryField<>("createCollisionMeshes");
+   private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
 
    // TO CONSTRUCT
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
@@ -101,14 +102,10 @@ public class AvatarSimulationFactory
 
    private void setupYoVariableServer()
    {
-      if (robotModel.get().getLogSettings().isLog())
+      if (createYoVariableServer.get())
       {
-         yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(),
-                                                 robotModel.get().getLogModelProvider(), robotModel.get().getLogSettings(), robotModel.get().getEstimatorDT());
-      }
-      else
-      {
-         yoVariableServer = null;
+         yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), robotModel.get().getLogModelProvider(),
+                                                 robotModel.get().getLogSettings(), robotModel.get().getEstimatorDT());
       }
    }
 
@@ -399,6 +396,7 @@ public class AvatarSimulationFactory
       doSmoothJointTorquesAtControllerStateChanges.setDefaultValue(false);
       addActualCMPVisualization.setDefaultValue(true);
       createCollisionMeshes.setDefaultValue(false);
+      createYoVariableServer.setDefaultValue(false);
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -494,6 +492,11 @@ public class AvatarSimulationFactory
    public void setCreateCollisionMeshes(boolean createCollisionMeshes)
    {
       this.createCollisionMeshes.set(createCollisionMeshes);
+   }
+
+   public void setCreateYoVariableServer(boolean createYoVariableServer)
+   {
+      this.createYoVariableServer.set(createYoVariableServer);
    }
 
    public void setGravity(double gravity)

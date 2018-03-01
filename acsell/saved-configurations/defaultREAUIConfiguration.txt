@@ -1,3 +1,0 @@
-#
-#Tue Oct 10 11:32:49 CDT 2017
-REA/UserInterface/OcTree/BoundingBox/Show=false
