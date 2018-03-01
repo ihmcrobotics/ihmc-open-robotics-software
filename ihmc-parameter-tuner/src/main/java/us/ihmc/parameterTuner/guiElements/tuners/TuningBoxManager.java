@@ -12,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
+import us.ihmc.parameterTuner.guiElements.GuiRegistry;
 
 public class TuningBoxManager
 {
@@ -40,26 +41,31 @@ public class TuningBoxManager
       }
 
       Tuner tuner = tunerMap.get(parameter.getUniqueName());
-      if (tuner == null)
-      {
-         tuner = new Tuner(parameter);
-         tunerMap.put(parameter.getUniqueName(), tuner);
-      }
-      Tuner finalTuner = tuner;
-
       parametersBeingTuned.add(parameterName);
       EventHandler<ActionEvent> closeHandler = event -> {
-         tuningBox.getChildren().remove(finalTuner);
+         tuningBox.getChildren().remove(tuner);
          parametersBeingTuned.remove(parameterName);
       };
       tuner.setCloseHandler(closeHandler);
       tuningBox.getChildren().add(tuner);
    }
 
-   public void clearAllParameters()
+   public void setRegistries(List<GuiRegistry> registries)
    {
       tuningBox.getChildren().clear();
       parametersBeingTuned.clear();
       tunerMap.clear();
+
+      List<GuiParameter> allParameters = new ArrayList<>();
+      registries.stream().forEach(registry -> allParameters.addAll(registry.getAllParameters()));
+      allParameters.stream().forEach(parameter -> {
+         Tuner tuner = new Tuner(parameter);
+         tunerMap.put(parameter.getUniqueName(), tuner);
+      });
+   }
+
+   public Map<String, Tuner> getTunerMap()
+   {
+      return tunerMap;
    }
 }
