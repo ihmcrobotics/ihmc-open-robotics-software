@@ -17,6 +17,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -174,18 +175,18 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
 
    private FootstepDataListMessage createFootstepDataListMessage(double swingTime, double transferTime)
    {
-      FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
+      FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       Point3D location = new Point3D(0.3, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(0.75, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(1.05, 0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
       location = new Point3D(1.05, -0.15, 0.0);
-      message.add(new FootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       return message;
    }

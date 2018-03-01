@@ -31,6 +31,14 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
       return requestMessage;
    }
 
+   @Override
+   public void set(HeightQuadTreeToolboxRequestMessage other)
+   {
+      requestClearQuadTree = other.requestClearQuadTree;
+      requestQuadTreeUpdate = other.requestQuadTreeUpdate;
+      setPacketInformation(other);
+   }
+
    public boolean isClearQuadTreeRequested()
    {
       return requestClearQuadTree;

@@ -41,7 +41,7 @@
       <dataReferenceFrameId>0</dataReferenceFrameId>
       <useCustomControlFrame>false</useCustomControlFrame>
     </se3Trajectory>
-    <robotSide>LEFT</robotSide>
+    <robotSide>0</robotSide>
   </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage>
   <long>1492627391790</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>

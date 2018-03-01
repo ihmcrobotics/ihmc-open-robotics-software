@@ -10,4 +10,14 @@ public enum ExecutionMode
    QUEUE;
 
    public static final ExecutionMode[] values = values();
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static ExecutionMode fromByte(byte enumAsByte)
+   {
+      return values[enumAsByte];
+   }
 }

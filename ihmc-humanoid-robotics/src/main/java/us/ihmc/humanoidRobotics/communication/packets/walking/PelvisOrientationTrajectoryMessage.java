@@ -1,14 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
@@ -19,6 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/pelvis_orientation_trajectory")
 public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientationTrajectoryMessage>
 {
+   @RosExportedField(documentation = "Whether the pelvis orientation is allowed to controlled by the user when the robot is walking.")
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The orientation trajectory information.")
    public SO3TrajectoryMessage so3Trajectory;
@@ -29,12 +24,6 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
     */
    public PelvisOrientationTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public PelvisOrientationTrajectoryMessage(Random random)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -50,41 +39,6 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
       setDestination(pelvisOrientationTrajectoryMessage.getDestination());
    }
 
-   /**
-    * Use this constructor to execute a simple interpolation towards the given endpoint. Set the id
-    * of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * 
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredOrientation desired pelvis orientation expressed in world frame.
-    */
-   public PelvisOrientationTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame());
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point. Set the id of the
-    * message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}. This constructor only allocates memory for
-    * the trajectory points, you need to call
-    * {@link #setTrajectoryPoint(int, double, Quaternion, Vector3D)} for each trajectory point
-    * afterwards.
-    * 
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the
-    *           controller.
-    */
-   public PelvisOrientationTrajectoryMessage(int numberOfTrajectoryPoints)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public PelvisOrientationTrajectoryMessage(double trajectoryTime, QuaternionReadOnly desiredOrientation, ReferenceFrame trajectoryFrame)
-   {
-      so3Trajectory = new SO3TrajectoryMessage(trajectoryTime, desiredOrientation, trajectoryFrame);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
    public boolean isEnableUserPelvisControlDuringWalking()
    {
       return enableUserPelvisControlDuringWalking;
@@ -95,11 +49,12 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
    }
 
+   @Override
    public void set(PelvisOrientationTrajectoryMessage other)
    {
       so3Trajectory = new SO3TrajectoryMessage(other.so3Trajectory);
-      setUniqueId(other.getUniqueId());
-      setDestination(other.getDestination());
+      enableUserPelvisControlDuringWalking = other.enableUserPelvisControlDuringWalking;
+      setPacketInformation(other);
    }
 
    @Override

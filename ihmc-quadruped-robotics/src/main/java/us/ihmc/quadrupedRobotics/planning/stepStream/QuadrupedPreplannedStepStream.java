@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
@@ -91,6 +92,12 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    public void getBodyOrientation(FrameQuaternion bodyOrientation)
    {
       bodyOrientation.setIncludingFrame(this.bodyOrientation.getFrameOrientation());
+   }
+
+   @Override
+   public FrameQuaternionReadOnly getBodyOrientation()
+   {
+      return bodyOrientation.getFrameOrientation();
    }
 
    @Override

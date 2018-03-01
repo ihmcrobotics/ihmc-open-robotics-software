@@ -19,7 +19,7 @@ public class ManualHandControlProvider implements PacketConsumer<ManualHandContr
    
    public void receivedPacket(ManualHandControlPacket packet)
    {
-      if(packet.getRobotSide() == this.robotSide)
+      if(packet.getRobotSide() == this.robotSide.toByte())
     	  packetQueue.add(packet);
    }
 

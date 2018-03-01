@@ -118,7 +118,7 @@ public class QuadrupedTaskSpaceEstimates
       return soleOrientation;
    }
 
-   public QuadrantDependentList<FramePoint3D> getSolePosition()
+   public QuadrantDependentList<FramePoint3D> getSolePositions()
    {
       return solePosition;
    }

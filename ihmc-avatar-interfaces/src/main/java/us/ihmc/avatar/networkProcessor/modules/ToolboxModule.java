@@ -21,6 +21,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SettablePacket;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -224,7 +225,7 @@ public abstract class ToolboxModule
                return;
             }
 
-            switch (message.getRequestedState())
+            switch (ToolboxState.fromByte(message.getRequestedState()))
             {
             case WAKE_UP:
                wakeUp(message.getSource());

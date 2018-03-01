@@ -13,8 +13,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BlendedOrientationTrajectoryGenerator implements OrientationTrajectoryGenerator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private final OrientationTrajectoryGenerator trajectory;
    private final HermiteCurveBasedOrientationTrajectoryGenerator initialConstraintTrajectory;
    private final HermiteCurveBasedOrientationTrajectoryGenerator finalConstraintTrajectory;
@@ -48,12 +46,12 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
    {
       this.trajectory = trajectory;
       this.trajectoryFrame = trajectoryFrame;
-      this.initialConstraintTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(prefix + "InitialConstraintTrajectory", trajectoryFrame, registry);
-      this.finalConstraintTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(prefix + "FinalConstraintTrajectory", trajectoryFrame, registry);
-      this.initialBlendStartTime = new YoDouble(prefix + "InitialBlendStartTime", registry);
-      this.initialBlendEndTime = new YoDouble(prefix + "InitialBlendEndTime", registry);
-      this.finalBlendStartTime = new YoDouble(prefix + "FinalBlendStartTime", registry);
-      this.finalBlendEndTime = new YoDouble(prefix + "FinalBlendEndTime", registry);
+      this.initialConstraintTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(prefix + "InitialConstraintTrajectory", trajectoryFrame, parentRegistry);
+      this.finalConstraintTrajectory = new HermiteCurveBasedOrientationTrajectoryGenerator(prefix + "FinalConstraintTrajectory", trajectoryFrame, parentRegistry);
+      this.initialBlendStartTime = new YoDouble(prefix + "InitialBlendStartTime", parentRegistry);
+      this.initialBlendEndTime = new YoDouble(prefix + "InitialBlendEndTime", parentRegistry);
+      this.finalBlendStartTime = new YoDouble(prefix + "FinalBlendStartTime", parentRegistry);
+      this.finalBlendEndTime = new YoDouble(prefix + "FinalBlendEndTime", parentRegistry);
       this.initialConstraintOrientationOffset.changeFrame(trajectoryFrame);
       this.initialConstraintAngularVelocityOffset.changeFrame(trajectoryFrame);
       this.initialConstraintAngularAccelerationOffset.changeFrame(trajectoryFrame);
@@ -65,7 +63,6 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       this.angularAcceleration.changeFrame(trajectoryFrame);
       this.tempOrientation.changeFrame(trajectoryFrame);
       this.tempAngularVelocity.changeFrame(trajectoryFrame);
-      parentRegistry.addChild(registry);
       clear();
    }
 

@@ -68,14 +68,14 @@ public class HandTrajectoryCommand
    public void set(HandTrajectoryMessage message)
    {
       se3Trajectory.set(message.se3Trajectory);
-      robotSide = message.getRobotSide();
+      robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandTrajectoryMessage message)
    {
       se3Trajectory.set(resolver, message.se3Trajectory);
-      robotSide = message.getRobotSide();
+      robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 
    public void setRobotSide(RobotSide robotSide)

@@ -412,7 +412,17 @@ public class ClusterTools
          break;
       case POLYGON:
          boolean extrudeToTheLeft = cluster.getExtrusionSide() != ExtrusionSide.INSIDE;
-         cluster.addNonNavigableExtrusionsInLocal2D(extrudePolygon(extrudeToTheLeft, cluster, nonNavigableCalculator));
+
+         try
+         {
+            cluster.addNonNavigableExtrusionsInLocal2D(extrudePolygon(extrudeToTheLeft, cluster, nonNavigableCalculator));
+         }
+         catch(Exception e)
+         {
+            e.printStackTrace();
+            return;
+         }
+
          cluster.addNavigableExtrusionsInLocal2D(extrudePolygon(extrudeToTheLeft, cluster, navigableCalculator));
          break;
 

@@ -2,14 +2,10 @@ package us.ihmc.footstepPlanning.ui;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
-import javafx.scene.Camera;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
@@ -30,16 +26,21 @@ public class FootstepPlannerUI
 
    private final PlanarRegionViewer planarRegionViewer;
    private final StartGoalPositionEditor startGoalEditor;
+   private final FootPositionEditor footPositionEditor;
    private final StartGoalPositionViewer startGoalPositionViewer;
    private final StartGoalOrientationViewer startGoalOrientationViewer;
    private final FootstepPathRenderer pathRenderer;
    private final StartGoalOrientationEditor orientationEditor;
+   private final NodeCheckerRenderer nodeCheckerRenderer;
 
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
 
    @FXML
    private StartGoalTabController startGoalTabController;
+
+   @FXML
+   private FootstepNodeCheckingUIController footstepNodeCheckingUIController;
 
    @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
@@ -58,11 +59,13 @@ public class FootstepPlannerUI
       footstepPlannerMenuUIController.attachMessager(messager);
       startGoalTabController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
+      footstepNodeCheckingUIController.attachMessager(messager);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
       startGoalTabController.bindControls();
       footstepPlannerParametersUIController.bindControls();
+      footstepNodeCheckingUIController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
       view3dFactory.addCameraController(true);
@@ -74,13 +77,16 @@ public class FootstepPlannerUI
       this.startGoalOrientationViewer = new StartGoalOrientationViewer(messager);
       this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, StartPositionEditModeEnabledTopic, GoalPositionEditModeEnabledTopic, StartPositionTopic,
                                                     GoalPositionTopic);
+      this.footPositionEditor = new FootPositionEditor(messager, subScene);
       this.orientationEditor = new StartGoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathRenderer = new FootstepPathRenderer(messager);
+      this.nodeCheckerRenderer = new NodeCheckerRenderer(messager);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalPositionViewer.getRoot());
       view3dFactory.addNodeToView(startGoalOrientationViewer.getRoot());
       view3dFactory.addNodeToView(pathRenderer.getRoot());
+      view3dFactory.addNodeToView(nodeCheckerRenderer.getRoot());
 
       planarRegionViewer.start();
       startGoalPositionViewer.start();
@@ -88,6 +94,8 @@ public class FootstepPlannerUI
       startGoalEditor.start();
       orientationEditor.start();
       pathRenderer.start();
+      nodeCheckerRenderer.start();
+      footPositionEditor.start();
 
       mainPane.setCenter(subScene);
       primaryStage.setTitle(getClass().getSimpleName());

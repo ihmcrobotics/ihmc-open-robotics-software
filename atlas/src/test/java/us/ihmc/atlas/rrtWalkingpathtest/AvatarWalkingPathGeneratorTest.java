@@ -392,7 +392,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
          Graphics3DObject singleStep = new Graphics3DObject();
 
          singleStep.translate(footsteps.get(i).location);
-         if(footsteps.get(i).robotSide == RobotSide.RIGHT)
+         if(footsteps.get(i).robotSide == RobotSide.RIGHT.toByte())
          {
             singleStep.addSphere(0.05, YoAppearance.Blue());
          }

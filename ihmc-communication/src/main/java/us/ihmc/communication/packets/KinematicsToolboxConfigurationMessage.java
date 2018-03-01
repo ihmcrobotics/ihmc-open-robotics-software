@@ -48,6 +48,20 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   @Override
+   public void set(KinematicsToolboxConfigurationMessage other)
+   {
+      if (other.privilegedRootJointPosition != null)
+         privilegedRootJointPosition = new Point3D32(other.privilegedRootJointPosition);
+      if (other.privilegedRootJointOrientation != null)
+         privilegedRootJointOrientation = new Quaternion32(other.privilegedRootJointOrientation);
+      if (other.privilegedJointNameBasedHashCodes != null)
+         privilegedJointNameBasedHashCodes = Arrays.copyOf(other.privilegedJointNameBasedHashCodes, other.privilegedJointNameBasedHashCodes.length);
+      if (other.privilegedJointAngles != null)
+         privilegedJointAngles = Arrays.copyOf(other.privilegedJointAngles, other.privilegedJointAngles.length);
+      setPacketInformation(other);
+   }
+
    /**
     * When provided, the {@code KinematicsToolboxController} will attempt to find the closest
     * solution to the privileged configuration.

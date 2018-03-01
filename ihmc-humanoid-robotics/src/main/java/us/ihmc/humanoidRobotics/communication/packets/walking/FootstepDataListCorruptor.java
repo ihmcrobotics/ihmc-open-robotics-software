@@ -7,6 +7,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class FootstepDataListCorruptor
@@ -25,7 +26,7 @@ public class FootstepDataListCorruptor
    
    public FootstepDataListMessage corruptDataList(FootstepDataListMessage footstepDataList)
    {
-      FootstepDataListMessage ret = new FootstepDataListMessage(footstepDataList.defaultSwingDuration, footstepDataList.defaultTransferDuration);
+      FootstepDataListMessage ret = HumanoidMessageTools.createFootstepDataListMessage(footstepDataList.defaultSwingDuration, footstepDataList.defaultTransferDuration);
       
       for (FootstepDataMessage footstepData : footstepDataList.footstepDataList)
       {

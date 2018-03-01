@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,9 +15,9 @@ import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLocationStates>
 {
@@ -82,7 +83,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
                System.err.println("WalkToLocationPlannedBehavior: goal pose NULL");
 
             planPathToLocationBehavior.setInputs(goalPose, stanceFootPose, initialStanceSide);
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Planning Path");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Planning Path");
             sendPacket(p1);
          }
       };
@@ -93,7 +94,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          protected void setBehaviorInput()
          {
             footstepListBehavior.set(planPathToLocationBehavior.getFootStepList());
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking Path");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking Path");
             sendPacket(p1);
          }
       };
@@ -103,7 +104,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Finished Walking");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Finished Walking");
             sendPacket(p1);
          }
       };
@@ -114,7 +115,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          protected void setBehaviorInput()
          {
             walkSucceded = false;
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Plan Failed");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Plan Failed");
             sendPacket(p1);
          }
       };

@@ -2,30 +2,27 @@ package us.ihmc.communication.packets;
 
 public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNotificationPacket>
 {
-   public enum CrashLocation
-   {
-      CONTROLLER_READ,
-      CONTROLLER_WRITE,
-      CONTROLLER_RUN, 
-      ESTIMATOR_READ,
-      ESTIMATOR_WRITE,
-      ESTIMATOR_RUN
-   }
-   
-   
-   public CrashLocation location;
+   public static final byte CONTROLLER_READ = 0;
+   public static final byte CONTROLLER_WRITE = 1;
+   public static final byte CONTROLLER_RUN = 2;
+   public static final byte ESTIMATOR_READ = 3;
+   public static final byte ESTIMATOR_WRITE = 4;
+   public static final byte ESTIMATOR_RUN = 5;
+
+   public byte controllerCrashLocation;
    public String stacktrace;
    
    public ControllerCrashNotificationPacket()
    {
-      
-   }
-   
-   public ControllerCrashNotificationPacket(CrashLocation location, String stackTrace)
-   {
       setDestination(PacketDestination.BROADCAST);
-      this.location = location;
-      this.stacktrace = stackTrace;
+   }
+
+   @Override
+   public void set(ControllerCrashNotificationPacket other)
+   {
+      controllerCrashLocation = other.controllerCrashLocation;
+      stacktrace = other.stacktrace;
+      setPacketInformation(other);
    }
 
    @Override

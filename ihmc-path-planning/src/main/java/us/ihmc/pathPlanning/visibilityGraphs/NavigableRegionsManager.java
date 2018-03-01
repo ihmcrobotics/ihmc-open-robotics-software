@@ -18,7 +18,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.SingleSourceVisibilit
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityGraphsParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.JGraphTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.OcclusionTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -26,6 +25,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class NavigableRegionsManager
 {
    final static boolean debug = false;
+   final static boolean useCustomDijkstraSearch = true;
 
    final static int START_GOAL_ID = 0;
 
@@ -99,7 +99,9 @@ public class NavigableRegionsManager
                                                                         interRegionVisibilityMap.getVisibilityMapInLocal());
 
       if (goalMap == null)
-         return null;
+      {
+         goalMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(goal, START_GOAL_ID), 1, navigableRegions, START_GOAL_ID);
+      }
 
       if (startMap != null)
       {
@@ -114,6 +116,9 @@ public class NavigableRegionsManager
       else
       {
          startMap = VisibilityGraphsFactory.connectToFallbackMap(start, START_GOAL_ID, 1.0e-3, interRegionVisibilityMap.getVisibilityMapInLocal());
+
+         if(startMap == null)
+            startMap = VisibilityGraphsFactory.connectToClosestPoints(new ConnectionPoint3D(start, START_GOAL_ID), 1, navigableRegions, START_GOAL_ID);
       }
 
       if (startMap == null)
@@ -127,7 +132,8 @@ public class NavigableRegionsManager
 
       ConnectionPoint3D startConnection = new ConnectionPoint3D(start, START_GOAL_ID);
       ConnectionPoint3D goalConnection = new ConnectionPoint3D(goal, START_GOAL_ID);
-      List<Point3DReadOnly> path = JGraphTools.calculatePathOnVisibilityGraph(startConnection, goalConnection, visibilityMapHolders);
+
+      List<Point3DReadOnly> path = parameters.getPathPlanner().calculatePath(startConnection, goalConnection, visibilityMapHolders);
 
       if (debug)
       {

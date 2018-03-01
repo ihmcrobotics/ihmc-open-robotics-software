@@ -12,14 +12,14 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGenerator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private final PositionTrajectoryGenerator trajectory;
    private final ReferenceFrame trajectoryFrame;
    private final YoPolynomial[] initialConstraintPolynomial = new YoPolynomial[3];
    private final YoPolynomial[] finalConstraintPolynomial = new YoPolynomial[3];
+   private final YoDouble initialBlendTimeOffset;
    private final YoDouble initialBlendStartTime;
    private final YoDouble initialBlendEndTime;
+   private final YoDouble finalBlendTimeOffset;
    private final YoDouble finalBlendStartTime;
    private final YoDouble finalBlendEndTime;
 
@@ -47,23 +47,24 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    {
       this.trajectory = trajectory;
       this.trajectoryFrame = trajectoryFrame;
-      this.initialConstraintPolynomial[0] = new YoPolynomial(prefix + "InitialConstraintPolynomialX", 6, registry);
-      this.initialConstraintPolynomial[1] = new YoPolynomial(prefix + "InitialConstraintPolynomialY", 6, registry);
-      this.initialConstraintPolynomial[2] = new YoPolynomial(prefix + "InitialConstraintPolynomialZ", 6, registry);
-      this.finalConstraintPolynomial[0] = new YoPolynomial(prefix + "FinalConstraintPolynomialX", 6, registry);
-      this.finalConstraintPolynomial[1] = new YoPolynomial(prefix + "FinalConstraintPolynomialY", 6, registry);
-      this.finalConstraintPolynomial[2] = new YoPolynomial(prefix + "FinalConstraintPolynomialZ", 6, registry);
-      this.initialBlendStartTime = new YoDouble(prefix + "InitialBlendStartTime", registry);
-      this.initialBlendEndTime = new YoDouble(prefix + "InitialBlendEndTime", registry);
-      this.finalBlendStartTime = new YoDouble(prefix + "FinalBlendStartTime", registry);
-      this.finalBlendEndTime = new YoDouble(prefix + "FinalBlendEndTime", registry);
+      this.initialConstraintPolynomial[0] = new YoPolynomial(prefix + "InitialConstraintPolynomialX", 6, parentRegistry);
+      this.initialConstraintPolynomial[1] = new YoPolynomial(prefix + "InitialConstraintPolynomialY", 6, parentRegistry);
+      this.initialConstraintPolynomial[2] = new YoPolynomial(prefix + "InitialConstraintPolynomialZ", 6, parentRegistry);
+      this.finalConstraintPolynomial[0] = new YoPolynomial(prefix + "FinalConstraintPolynomialX", 6, parentRegistry);
+      this.finalConstraintPolynomial[1] = new YoPolynomial(prefix + "FinalConstraintPolynomialY", 6, parentRegistry);
+      this.finalConstraintPolynomial[2] = new YoPolynomial(prefix + "FinalConstraintPolynomialZ", 6, parentRegistry);
+      this.initialBlendTimeOffset = new YoDouble(prefix + "InitialBlendTimeOffset", parentRegistry);
+      this.initialBlendStartTime = new YoDouble(prefix + "InitialBlendStartTime", parentRegistry);
+      this.initialBlendEndTime = new YoDouble(prefix + "InitialBlendEndTime", parentRegistry);
+      this.finalBlendTimeOffset = new YoDouble(prefix + "FinalBlendTimeOffset", parentRegistry);
+      this.finalBlendStartTime = new YoDouble(prefix + "FinalBlendStartTime", parentRegistry);
+      this.finalBlendEndTime = new YoDouble(prefix + "FinalBlendEndTime", parentRegistry);
       this.position.changeFrame(trajectoryFrame);
       this.velocity.changeFrame(trajectoryFrame);
       this.acceleration.changeFrame(trajectoryFrame);
       this.tempPosition.changeFrame(trajectoryFrame);
       this.tempVelocity.changeFrame(trajectoryFrame);
       this.tempAcceleration.changeFrame(trajectoryFrame);
-      parentRegistry.addChild(registry);
       clear();
    }
 
@@ -232,8 +233,9 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
 
    private void computeInitialConstraintPolynomial(double initialTime, double blendDuration)
    {
-      initialBlendStartTime.set(initialTime);
-      initialBlendEndTime.set(initialTime + blendDuration);
+      initialBlendTimeOffset.set(initialTime);
+      initialBlendStartTime.set(0.0);
+      initialBlendEndTime.set(blendDuration);
 
       for (int i = 0; i < 3; i++)
       {
@@ -248,8 +250,9 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
 
    private void computeFinalConstraintPolynomial(double finalTime, double blendDuration)
    {
-      finalBlendStartTime.set(finalTime - blendDuration);
-      finalBlendEndTime.set(finalTime);
+      finalBlendTimeOffset.set(finalTime);
+      finalBlendStartTime.set(-blendDuration);
+      finalBlendEndTime.set(0.0);
 
       for (int i = 0; i < 3; i++)
       {
@@ -266,7 +269,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    {
       double startTime = initialBlendStartTime.getDoubleValue();
       double endTime = initialBlendEndTime.getDoubleValue();
-      time = MathTools.clamp(time, startTime, endTime);
+      time = MathTools.clamp(time - initialBlendTimeOffset.getValue(), startTime, endTime);
 
       for (int i = 0; i < 3; i++)
       {
@@ -281,7 +284,7 @@ public class BlendedPositionTrajectoryGenerator implements PositionTrajectoryGen
    {
       double startTime = finalBlendStartTime.getDoubleValue();
       double endTime = finalBlendEndTime.getDoubleValue();
-      time = MathTools.clamp(time, startTime, endTime);
+      time = MathTools.clamp(time - finalBlendTimeOffset.getValue(), startTime, endTime);
 
       for (int i = 0; i < 3; i++)
       {

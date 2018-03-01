@@ -48,6 +48,12 @@ public class DivergentComponentOfMotionController
    private final FrameVector3D dcmVelocitySetpoint = new FrameVector3D();
 
    public DivergentComponentOfMotionController(ReferenceFrame comZUpFrame, double controlDT, LinearInvertedPendulumModel lipModel,
+                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   {
+      this(comZUpFrame, controlDT, lipModel, "", parentRegistry, graphicsListRegistry);
+   }
+
+   public DivergentComponentOfMotionController(ReferenceFrame comZUpFrame, double controlDT, LinearInvertedPendulumModel lipModel, String nameSuffix,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.comZUpFrame = comZUpFrame;
@@ -70,16 +76,16 @@ public class DivergentComponentOfMotionController
       parentRegistry.addChild(registry);
 
       if (graphicsListRegistry != null)
-         createGraphics(graphicsListRegistry);
+         createGraphics(nameSuffix, graphicsListRegistry);
    }
 
-   private void createGraphics(YoGraphicsListRegistry graphicsListRegistry)
+   private void createGraphics(String suffix, YoGraphicsListRegistry graphicsListRegistry)
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition("icpPositionSetpoint", yoIcpPositionSetpoint, 0.01, YoAppearance.Yellow(), BALL_WITH_ROTATED_CROSS);
-      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("cmpPositionSetpoint", yoCmpPositionSetpoint, 0.01, YoAppearance.Purple(), BALL_WITH_CROSS);
+      YoGraphicPosition yoIcpPositionSetpointViz = new YoGraphicPosition("icpPositionSetpoint" + suffix, yoIcpPositionSetpoint, 0.01, YoAppearance.Yellow(), BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("cmpPositionSetpoint" + suffix, yoCmpPositionSetpoint, 0.01, YoAppearance.Purple(), BALL_WITH_CROSS);
 
       yoGraphicsList.add(yoIcpPositionSetpointViz);
       yoGraphicsList.add(yoCmpPositionSetpointViz);

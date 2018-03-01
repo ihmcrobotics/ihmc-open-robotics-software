@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -76,11 +77,10 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
 
          simpleFootstep.getSoleFramePose(swingEndPose);
 
-         FootstepDataMessage footstepDataMessage = new FootstepDataMessage(simpleFootstep.getRobotSide(), new Point3D(swingEndPose.getPosition()),
-                                                                           new Quaternion(swingEndPose.getOrientation()));
+         FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(simpleFootstep.getRobotSide(), new Point3D(swingEndPose.getPosition()), new Quaternion(swingEndPose.getOrientation()));
 
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
-         footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
+         footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
@@ -139,11 +139,10 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          Footstep footstep = footstepList.get(i);
          footstep.getPose(swingEndPose);
 
-         FootstepDataMessage footstepDataMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPosition()),
-                                                                           new Quaternion(swingEndPose.getOrientation()));
+         FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPosition()), new Quaternion(swingEndPose.getOrientation()));
 
          swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
-         footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM);
+         footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));

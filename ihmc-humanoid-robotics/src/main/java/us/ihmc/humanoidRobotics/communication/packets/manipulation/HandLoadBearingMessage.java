@@ -1,17 +1,16 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.LoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.humanoidRobotics.communication.packets.LoadBearingMessage;
 
 public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
 {
+   public static final byte ROBOT_SIDE_LEFT = 0;
+   public static final byte ROBOT_SIDE_RIGHT = 1;
+
    /** The robot side of that hand that will be load bearing. */
-   public RobotSide robotSide;
+   public byte robotSide;
 
    /** A boolean that determines whether hybrid load-bearing & jointspace control will be used. */
    public boolean useJointspaceCommand = false;
@@ -33,19 +32,16 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public HandLoadBearingMessage(RobotSide robotSide)
+   @Override
+   public void set(HandLoadBearingMessage other)
    {
-      loadBearingMessage = new LoadBearingMessage();
-      this.robotSide = robotSide;
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   public HandLoadBearingMessage(Random random)
-   {
-      loadBearingMessage = new LoadBearingMessage(random);
-      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      jointspaceTrajectory = new JointspaceTrajectoryMessage(random);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      robotSide = other.robotSide;
+      useJointspaceCommand = other.useJointspaceCommand;
+      jointspaceTrajectory = new JointspaceTrajectoryMessage();
+      jointspaceTrajectory.set(other.jointspaceTrajectory);
+      executionDelayTime = other.executionDelayTime;
+      loadBearingMessage = other.loadBearingMessage;
+      setPacketInformation(other);
    }
 
    public void setJointspaceTrajectory(JointspaceTrajectoryMessage armTrajectoryMessage)

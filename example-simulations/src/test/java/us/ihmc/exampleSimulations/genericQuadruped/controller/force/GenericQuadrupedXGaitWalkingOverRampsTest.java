@@ -20,7 +20,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 600000)
    public void testWalkingDownSlope() throws IOException
    {
@@ -28,7 +28,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 140.0)
    @Test(timeout = 500000)
    public void testWalkingOverShallowRamps() throws IOException
    {
@@ -36,7 +36,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 300000)
    public void testWalkingUpSlope() throws IOException
    {
@@ -44,7 +44,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 300000)
    public void testWalkingOverAggressiveRamps() throws IOException
    {

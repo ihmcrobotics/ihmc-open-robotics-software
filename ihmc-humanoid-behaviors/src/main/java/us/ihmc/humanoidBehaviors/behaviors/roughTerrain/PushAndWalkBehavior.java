@@ -16,11 +16,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage.Status;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -113,8 +114,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
       if (walkingStatusQueue.isNewPacketAvailable())
       {
          WalkingStatusMessage latestPacket = walkingStatusQueue.getLatestPacket();
-         Status walkingStatus = latestPacket.getWalkingStatus();
-         walking.set(walkingStatus != Status.COMPLETED);
+         WalkingStatus walkingStatus = WalkingStatus.fromByte(latestPacket.getWalkingStatus());
+         walking.set(walkingStatus != WalkingStatus.COMPLETED);
          walkingStatusQueue.clear();
       }
 
@@ -209,7 +210,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       orientation.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
-      FootstepDataMessage footstep = new FootstepDataMessage(swingSide, location, orientation);
+      FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(swingSide, location, orientation);
       footsteps.add(footstep);
       sendPacketToController(footsteps);
    }

@@ -1,23 +1,27 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlanningToolboxOutputStatus extends SettablePacket<FootstepPlanningToolboxOutputStatus>
 {
+   public static final byte FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION = 0;
+   public static final byte FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION = 1;
+   public static final byte FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION = 2;
+   public static final byte FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS = 3;
+   public static final byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = 4;
+   public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = 5;
+
    public FootstepDataListMessage footstepDataList = new FootstepDataListMessage();
-   public FootstepPlanningResult planningResult;
+   public byte footstepPlanningResult;
    public int planId = FootstepPlanningRequestPacket.NO_PLAN_ID;
 
    public PlanarRegionsListMessage planarRegionsListMessage = null;
@@ -30,34 +34,6 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    public FootstepPlanningToolboxOutputStatus()
    {
       // empty constructor for serialization
-   }
-
-   public FootstepPlanningToolboxOutputStatus(Random random)
-   {
-      footstepDataList = new FootstepDataListMessage(random);
-      int result = random.nextInt(FootstepPlanningResult.values.length);
-      planningResult = FootstepPlanningResult.values[result];
-      planId = random.nextInt();
-
-      bodyPath = new Point2D[random.nextInt(10)];
-      for (int i = 0; i < bodyPath.length; i++)
-      {
-         bodyPath[i] = EuclidCoreRandomTools.nextPoint2D(random);
-      }
-
-      lowLevelPlannerGoal = new Pose2D(random.nextDouble(), random.nextDouble(), random.nextDouble());
-
-      navigableExtrusions = new Point3D[random.nextInt(40) + 1][];
-      for (int i = 0; i < navigableExtrusions.length; i++)
-      {
-         int numberOfPoints = random.nextInt(5) + 1;
-         navigableExtrusions[i] = new Point3D[numberOfPoints];
-
-         for (int j = 0; j < numberOfPoints; j++)
-         {
-            navigableExtrusions[i][j] = EuclidCoreRandomTools.nextPoint3D(random);
-         }
-      }
    }
 
    public void setPlanId(int planId)
@@ -88,42 +64,42 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    @Override
    public boolean epsilonEquals(FootstepPlanningToolboxOutputStatus other, double epsilon)
    {
-      if (!planningResult.equals(other.planningResult))
+      if (footstepPlanningResult != other.footstepPlanningResult)
          return false;
-      if(planId != other.planId)
-         return false;
-
-      if(!nullAndEpilsonCompare(planarRegionsListMessage, other.planarRegionsListMessage, epsilon))
-         return false;
-      if(!nullAndEpilsonCompare(lowLevelPlannerGoal, other.lowLevelPlannerGoal, epsilon))
-         return false;
-      if(!bothOrNeitherAreNull(bodyPath, other.bodyPath))
-         return false;
-      if(!bothOrNeitherAreNull(navigableExtrusions, other.navigableExtrusions))
+      if (planId != other.planId)
          return false;
 
-      if(bodyPath != null)
+      if (!nullAndEpilsonCompare(planarRegionsListMessage, other.planarRegionsListMessage, epsilon))
+         return false;
+      if (!nullAndEpilsonCompare(lowLevelPlannerGoal, other.lowLevelPlannerGoal, epsilon))
+         return false;
+      if (!bothOrNeitherAreNull(bodyPath, other.bodyPath))
+         return false;
+      if (!bothOrNeitherAreNull(navigableExtrusions, other.navigableExtrusions))
+         return false;
+
+      if (bodyPath != null)
       {
          for (int i = 0; i < bodyPath.length; i++)
          {
-            if(!bodyPath[i].epsilonEquals(other.bodyPath[i], epsilon))
+            if (!bodyPath[i].epsilonEquals(other.bodyPath[i], epsilon))
                return false;
          }
       }
 
-      if(navigableExtrusions != null)
+      if (navigableExtrusions != null)
       {
          for (int i = 0; i < navigableExtrusions.length; i++)
          {
             for (int j = 0; j < navigableExtrusions[i].length; j++)
             {
-               if(!navigableExtrusions[i][j].epsilonEquals(other.navigableExtrusions[i][j], epsilon))
+               if (!navigableExtrusions[i][j].epsilonEquals(other.navigableExtrusions[i][j], epsilon))
                   return false;
             }
          }
       }
 
-      if(!footstepDataList.epsilonEquals(other.footstepDataList, epsilon))
+      if (!footstepDataList.epsilonEquals(other.footstepDataList, epsilon))
          return false;
 
       return true;
@@ -131,18 +107,18 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
 
    private static <T extends EpsilonComparable<T>> boolean nullAndEpilsonCompare(T object1, T object2, double epsilon)
    {
-      if(!bothOrNeitherAreNull(object1, object2))
+      if (!bothOrNeitherAreNull(object1, object2))
          return false;
-      else if(object1 != null && !object1.epsilonEquals(object2, epsilon))
+      else if (object1 != null && !object1.epsilonEquals(object2, epsilon))
          return false;
       return true;
    }
 
    private static boolean bothOrNeitherAreNull(Object object1, Object object2)
    {
-      if(object1 == null && object2 != null)
+      if (object1 == null && object2 != null)
          return false;
-      else if(object1 != null && object2 == null)
+      else if (object1 != null && object2 == null)
          return false;
       return true;
    }
@@ -150,7 +126,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
    @Override
    public void set(FootstepPlanningToolboxOutputStatus other)
    {
-      planningResult = other.planningResult;
+      footstepPlanningResult = other.footstepPlanningResult;
       footstepDataList.destination = other.footstepDataList.destination;
       footstepDataList.getQueueingProperties().set(other.footstepDataList.getQueueingProperties());
       footstepDataList.footstepDataList = new ArrayList<>();
@@ -166,6 +142,7 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
       bodyPath = other.bodyPath;
       lowLevelPlannerGoal = other.lowLevelPlannerGoal;
       planId = other.planId;
+      setPacketInformation(other);
    }
 
 }

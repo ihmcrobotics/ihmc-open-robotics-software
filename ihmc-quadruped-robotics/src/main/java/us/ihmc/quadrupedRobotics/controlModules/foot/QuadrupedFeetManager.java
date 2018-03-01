@@ -1,19 +1,20 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.util.List;
 
 public class QuadrupedFeetManager
 {
@@ -41,8 +42,7 @@ public class QuadrupedFeetManager
          footControlModules.get(quadrant).attachStateChangedListener(stateChangedListener);
    }
 
-   public void initializeWaypointTrajectory(QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists,
-                                            QuadrupedTaskSpaceEstimates taskSpaceEstimates, boolean useInitialSoleForceAsFeedforwardTerm)
+   public void initializeWaypointTrajectory(QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists, boolean useInitialSoleForceAsFeedforwardTerm)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -51,7 +51,7 @@ public class QuadrupedFeetManager
          if (waypointList.size() > 0)
          {
             footControlModule.requestMoveViaWaypoints();
-            footControlModule.initializeWaypointTrajectory(waypointList, taskSpaceEstimates, useInitialSoleForceAsFeedforwardTerm);
+            footControlModule.initializeWaypointTrajectory(waypointList, useInitialSoleForceAsFeedforwardTerm);
          }
          else
          {
@@ -60,9 +60,32 @@ public class QuadrupedFeetManager
       }
    }
 
-   public void triggerStep(RobotQuadrant robotQuadrant, QuadrupedTimedStep stepSequence)
+   public void triggerStep(QuadrupedTimedStep step)
    {
-      footControlModules.get(robotQuadrant).triggerStep(stepSequence);
+      footControlModules.get(step.getRobotQuadrant()).triggerStep(step);
+   }
+
+   public void triggerSteps(List<YoQuadrupedTimedStep> steps)
+   {
+      for (int i = 0; i < steps.size(); i++)
+      {
+         QuadrupedTimedStep step = steps.get(i);
+         footControlModules.get(step.getRobotQuadrant()).triggerStep(step);
+      }
+   }
+
+   public void adjustSteps(List<QuadrupedStep> activeSteps)
+   {
+      for (int i = 0; i < activeSteps.size(); i++)
+         adjustStep(activeSteps.get(i));
+   }
+
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   public void adjustStep(QuadrupedStep step)
+   {
+      step.getGoalPosition(tempPoint);
+      tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      footControlModules.get(step.getRobotQuadrant()).adjustStep(tempPoint);
    }
 
    public void adjustStep(RobotQuadrant robotQuadrant, FramePoint3DReadOnly adjustedStep)
@@ -88,15 +111,15 @@ public class QuadrupedFeetManager
          footControlModules.get(robotQuadrant).registerWaypointCallback(waypointCallback);
    }
 
-   public void compute(QuadrantDependentList<FrameVector3D> soleForcesToPack, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
+   public void compute(QuadrantDependentList<FrameVector3D> soleForcesToPack)
    {
       for (RobotQuadrant quadrant : RobotQuadrant.values)
-         compute(soleForcesToPack.get(quadrant), taskSpaceEstimates, quadrant);
+         compute(soleForcesToPack.get(quadrant), quadrant);
    }
 
-   public void compute(FrameVector3D soleForceToPack, QuadrupedTaskSpaceEstimates taskSpaceEstimates, RobotQuadrant robotQuadrant)
+   public void compute(FrameVector3D soleForceToPack, RobotQuadrant robotQuadrant)
    {
-      footControlModules.get(robotQuadrant).compute(soleForceToPack, taskSpaceEstimates);
+      footControlModules.get(robotQuadrant).compute(soleForceToPack);
    }
 
    public ContactState getContactState(RobotQuadrant robotQuadrant)

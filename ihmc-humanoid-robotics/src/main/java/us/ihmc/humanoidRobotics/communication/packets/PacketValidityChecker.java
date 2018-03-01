@@ -16,8 +16,11 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
+import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
@@ -26,6 +29,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public abstract class PacketValidityChecker
@@ -40,7 +44,7 @@ public abstract class PacketValidityChecker
    {
       ObjectErrorType packetFieldErrorType;
 
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(message.getRobotSide());
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.getRobotSide()));
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -79,7 +83,7 @@ public abstract class PacketValidityChecker
          }
       }
 
-      TrajectoryType trajectoryType = message.getTrajectoryType();
+      TrajectoryType trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
       packetFieldErrorType = ObjectValidityChecker.validateEnum(trajectoryType);
       if (packetFieldErrorType != null)
       {
@@ -214,7 +218,7 @@ public abstract class PacketValidityChecker
    {
       ObjectErrorType packetFieldErrorType;
 
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(message.getRobotSide());
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.getRobotSide()));
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -257,12 +261,12 @@ public abstract class PacketValidityChecker
    }
 
    /**
-    * Checks the validity of a {@link FootstepStatus}.
+    * Checks the validity of a {@link FootstepStatusMessage}.
     *
     * @param message
     * @return null if the packet is valid, or the error message.
     */
-   public static String validateFootstepStatus(FootstepStatus message)
+   public static String validateFootstepStatus(FootstepStatusMessage message)
    {
       ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getActualFootPositionInWorld());
       if (packetFieldErrorType != null)
@@ -280,7 +284,7 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(message.getStatus());
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(FootstepStatus.fromByte(message.getStatus()));
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -307,7 +311,7 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateEnum(message.getRobotSide());
+      errorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.getRobotSide()));
       if (errorType != null)
       {
          errorMessage = "robotSide field " + errorType.getMessage();
@@ -325,7 +329,7 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(message.robotSide);
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.robotSide));
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -545,7 +549,7 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateEnum(message.getRobotSide());
+      errorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.getRobotSide()));
       if (errorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -564,7 +568,7 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateEnum(message.getRequest());
+      errorType = ObjectValidityChecker.validateEnum(LoadBearingRequest.fromByte(message.getRequest()));
       if (errorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -583,7 +587,7 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateEnum(message.getBodyPart());
+      errorType = ObjectValidityChecker.validateEnum(HumanoidBodyPart.fromByte(message.getBodyPart()));
       if (errorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -591,10 +595,10 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if (message.getBodyPart().isRobotSideNeeded())
+      if (HumanoidBodyPart.fromByte(message.getBodyPart()).isRobotSideNeeded())
       {
-         errorType = ObjectValidityChecker.validateEnum(message.getRobotSide());
-         if (message.getRobotSide() == null)
+         errorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.getRobotSide()));
+         if (RobotSide.fromByte(message.getRobotSide()) == null)
          {
             String messageClassName = message.getClass().getSimpleName();
             errorMessage = messageClassName + "'s robotSide field is null. It is required for the bodyPart " + message.getBodyPart();
@@ -644,7 +648,7 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(message.robotSide);
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.robotSide));
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();

@@ -140,7 +140,8 @@ public class FootstepPathRenderer
          if(VERBOSE)
          {
             PrintTools.info(this, "Planner result: " + planningResult);
-            PrintTools.info(this, "Planner result: " + planner.getPlan().getNumberOfSteps());
+            if(planningResult.validForExecution())
+               PrintTools.info(this, "Planner result: " + planner.getPlan().getNumberOfSteps());
          }
 
          footstepPathMeshViewer.processFootstepPath(planner.getPlan());

@@ -1,0 +1,5 @@
+uint64 unique_id
+controller_msgs/Footstep[] footsteps
+uint8 executing_timing
+float64 default_swing_duration
+float64 final_transfer_duration

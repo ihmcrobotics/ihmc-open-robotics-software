@@ -9,7 +9,7 @@
 # message.
 
 # Specifies which foot will execute the trajectory.
-uint8 robot_side
+int8 robot_side
 
 # The position/orientation trajectory information.
 ihmc_msgs/SE3TrajectoryRosMessage se3_trajectory
@@ -20,10 +20,4 @@ ihmc_msgs/SE3TrajectoryRosMessage se3_trajectory
 # a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.
 int64 unique_id
 
-
-# This message utilizes "enums". Enum value information for this message follows.
-
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
 

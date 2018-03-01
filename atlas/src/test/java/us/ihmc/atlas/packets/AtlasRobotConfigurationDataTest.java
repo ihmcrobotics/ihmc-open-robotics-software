@@ -25,6 +25,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AtlasRobotConfigurationDataTest
@@ -67,7 +68,7 @@ public class AtlasRobotConfigurationDataTest
 
       AtlasAuxiliaryRobotData auxiliaryRobotData = new AtlasAuxiliaryRobotData();
 
-      RobotConfigurationData data = new RobotConfigurationData(joints, forceSensorDefinitions, auxiliaryRobotData, imuSensorDefinitions);
+      RobotConfigurationData data = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, auxiliaryRobotData, imuSensorDefinitions);
       kryo.writeClassAndObject(output, data);
       output.flush();
 

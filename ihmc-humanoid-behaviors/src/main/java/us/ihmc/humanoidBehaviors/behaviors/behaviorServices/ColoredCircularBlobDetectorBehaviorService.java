@@ -14,6 +14,7 @@ import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
@@ -79,8 +80,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
          BufferedImage thresholdBufferedImage = OpenCVTools.convertToCompressableBufferedImage(thresholdBufferedImageOpenCVEncoded);
 
          byte[] jpegThresholdImage = jpegCompressor.convertBufferedImageToJPEGData(thresholdBufferedImage);
-         VideoPacket circleBlobThresholdImagePacket = new VideoPacket(VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage,
-                                                                      videoPacket.getPosition(), videoPacket.getOrientation(), videoPacket.getIntrinsicParameters());
+         VideoPacket circleBlobThresholdImagePacket = HumanoidMessageTools.createVideoPacket(VideoSource.CV_THRESHOLD, videoTimestamp, jpegThresholdImage, videoPacket.getPosition(), videoPacket.getOrientation(), videoPacket.getIntrinsicParameters());
          getCommunicationBridge().sendPacket(circleBlobThresholdImagePacket);
 
          if (circles.size() > 0)

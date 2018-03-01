@@ -18,10 +18,10 @@ import ihmc_msgs.HandTrajectoryRosMessage;
 import ihmc_msgs.HeadTrajectoryRosMessage;
 import ihmc_msgs.PelvisTrajectoryRosMessage;
 import ihmc_msgs.Point2dRosMessage;
+import ihmc_msgs.QueueableRosMessage;
 import ihmc_msgs.WholeBodyTrajectoryRosMessage;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -36,7 +36,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.utilities.ros.msgToPacket.converter.CustomFieldConversions;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.utilities.ros.msgToPacket.converter.RosEnumConversionException;
@@ -114,9 +113,18 @@ public class IHMCROSTranslationRuntimeTools
       footsteps.defaultSwingDuration = message.getDefaultSwingDuration();
       footsteps.defaultTransferDuration = message.getDefaultTransferDuration();
       footsteps.setUniqueId(message.getUniqueId());
-      footsteps.getQueueingProperties().executionMode = ExecutionMode.values[message.getQueueingProperties().getExecutionMode()];
+      try
+      {
+         footsteps.queueingProperties.set((QueueableMessage) convertToIHMCMessage(message.getQueueingProperties()));
+      }
+      catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | NoSuchFieldException | InstantiationException
+            | RosEnumConversionException e1)
+      {
+         e1.printStackTrace();
+      }
       footsteps.finalTransferDuration = message.getFinalTransferDuration();
-      footsteps.executionTiming = ExecutionTiming.values[message.getExecutionTiming()];
+      footsteps.executionTiming = message.getExecutionTiming();
+      footsteps.offsetFootstepsWithExecutionError = message.getOffsetFootstepsWithExecutionError();
 
       ArrayList<FootstepDataMessage> stepData = new ArrayList<>();
       for (FootstepDataRosMessage footstepDataRosMessage : message.getFootstepDataList())
@@ -141,14 +149,16 @@ public class IHMCROSTranslationRuntimeTools
    {
       FootstepDataMessage ihmcMessage = new FootstepDataMessage();
 
-      ihmcMessage.setRobotSide(RobotSide.values[message.getRobotSide()]);
+      ihmcMessage.setRobotSide(message.getRobotSide());
       ihmcMessage.setLocation(new Point3D(GenericROSTranslationTools.convertPoint(message.getLocation())));
       ihmcMessage.setOrientation(new us.ihmc.euclid.tuple4D.Quaternion(GenericROSTranslationTools.convertQuaternion(message.getOrientation())));
       ihmcMessage.setSwingHeight(message.getSwingHeight());
-      ihmcMessage.setTrajectoryType(TrajectoryType.values()[message.getTrajectoryType()]);
+      ihmcMessage.setTrajectoryType(message.getTrajectoryType());
       ihmcMessage.setUniqueId(message.getUniqueId());
       ihmcMessage.setSwingDuration(message.getSwingDuration());
       ihmcMessage.setTransferDuration(message.getTransferDuration());
+      ihmcMessage.setTouchdownDuration(message.getTouchdownDuration());
+      ihmcMessage.setSwingTrajectoryBlendDuration(message.getSwingTrajectoryBlendDuration());
 
       ArrayList<Point2D> predictedContactPoints = new ArrayList<>();
       for (Point2dRosMessage point2dRosMessage : message.getPredictedContactPoints())
@@ -235,14 +245,14 @@ public class IHMCROSTranslationRuntimeTools
       if (wholeBodyTrajectoryMessage.getArmTrajectoryMessage(RobotSide.LEFT) == null)
       {
          ArmTrajectoryMessage component = new ArmTrajectoryMessage();
-         component.robotSide = RobotSide.LEFT;
+         component.robotSide = RobotSide.LEFT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setArmTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getArmTrajectoryMessage(RobotSide.RIGHT) == null)
       {
          ArmTrajectoryMessage component = new ArmTrajectoryMessage();
-         component.robotSide = RobotSide.RIGHT;
+         component.robotSide = RobotSide.RIGHT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setArmTrajectoryMessage(component);
       }
@@ -255,28 +265,28 @@ public class IHMCROSTranslationRuntimeTools
       if (wholeBodyTrajectoryMessage.getFootTrajectoryMessage(RobotSide.LEFT) == null)
       {
          FootTrajectoryMessage component = new FootTrajectoryMessage();
-         component.robotSide = RobotSide.LEFT;
+         component.robotSide = RobotSide.LEFT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setFootTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getFootTrajectoryMessage(RobotSide.RIGHT) == null)
       {
          FootTrajectoryMessage component = new FootTrajectoryMessage();
-         component.robotSide = RobotSide.RIGHT;
+         component.robotSide = RobotSide.RIGHT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setFootTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)
       {
          HandTrajectoryMessage component = new HandTrajectoryMessage();
-         component.robotSide = RobotSide.LEFT;
+         component.robotSide = RobotSide.LEFT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setHandTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT) == null)
       {
          HandTrajectoryMessage component = new HandTrajectoryMessage();
-         component.robotSide = RobotSide.RIGHT;
+         component.robotSide = RobotSide.RIGHT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setHandTrajectoryMessage(component);
       }
@@ -299,11 +309,13 @@ public class IHMCROSTranslationRuntimeTools
       message.setUniqueId(footstep.getUniqueId());
       message.setLocation(GenericROSTranslationTools.convertPoint3D(footstep.getLocation()));
       message.setOrientation(GenericROSTranslationTools.convertTuple4d(footstep.getOrientation()));
-      message.setRobotSide((byte) footstep.getRobotSide().ordinal());
+      message.setRobotSide(footstep.getRobotSide());
       message.setSwingHeight(footstep.getSwingHeight());
-      message.setTrajectoryType((byte) footstep.getTrajectoryType().ordinal());
+      message.setTrajectoryType(footstep.getTrajectoryType());
       message.setSwingDuration(footstep.swingDuration);
       message.setTransferDuration(footstep.transferDuration);
+      message.setTouchdownDuration(footstep.touchdownDuration);
+      message.setSwingTrajectoryBlendDuration(footstep.swingTrajectoryBlendDuration);
 
       List<Point2dRosMessage> predictedContatcPointsRos = new ArrayList<>();
       if (footstep.predictedContactPoints != null)
@@ -340,9 +352,17 @@ public class IHMCROSTranslationRuntimeTools
       message.setDefaultSwingDuration(footstepList.defaultSwingDuration);
       message.setDefaultTransferDuration(footstepList.defaultTransferDuration);
       message.setUniqueId(footstepList.getUniqueId());
-      message.getQueueingProperties().setExecutionMode((byte) footstepList.getQueueingProperties().executionMode.ordinal());
       message.setFinalTransferDuration(footstepList.finalTransferDuration);
-      message.setExecutionTiming((byte) footstepList.getExecutionTiming().ordinal());
+      message.setOffsetFootstepsWithExecutionError(footstepList.offsetFootstepsWithExecutionError);
+      message.setExecutionTiming(footstepList.getExecutionTiming());
+      try
+      {
+         message.setQueueingProperties((QueueableRosMessage) convertToRosMessage(footstepList.queueingProperties));
+      }
+      catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e1)
+      {
+         e1.printStackTrace();
+      }
 
       List<FootstepDataRosMessage> convertedFootsteps = new ArrayList<>();
       for (FootstepDataMessage footstepDataMessage : footstepList.footstepDataList)

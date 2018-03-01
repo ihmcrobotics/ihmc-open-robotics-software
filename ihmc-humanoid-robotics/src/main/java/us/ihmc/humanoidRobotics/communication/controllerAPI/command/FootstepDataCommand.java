@@ -70,8 +70,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    @Override
    public void set(FootstepDataMessage message)
    {
-      robotSide = message.getRobotSide();
-      trajectoryType = message.getTrajectoryType();
+      robotSide = RobotSide.fromByte(message.getRobotSide());
+      trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
       swingHeight = message.getSwingHeight();
       swingTrajectoryBlendDuration = message.getSwingTrajectoryBlendDuration();
       position.setIncludingFrame(worldFrame, message.getLocation());
