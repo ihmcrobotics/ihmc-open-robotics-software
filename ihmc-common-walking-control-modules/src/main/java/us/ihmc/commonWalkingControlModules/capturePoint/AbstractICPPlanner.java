@@ -247,11 +247,11 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
       {
          if (isHoldingPosition.getBooleanValue())
             requestedHoldPosition.set(true);
-         updateTransferPlan();
+         updateTransferPlan(false);
       }
       else
       {
-         updateSingleSupportPlan();
+         updateSingleSupportPlan(false);
       }
    }
 
@@ -326,8 +326,8 @@ public abstract class AbstractICPPlanner implements ICPPlannerInterface
    @Override
    public abstract int getNumberOfFootstepsRegistered();
 
-   protected abstract void updateTransferPlan();
-   protected abstract void updateSingleSupportPlan();
+   protected abstract void updateTransferPlan(boolean maintainContinuity);
+   protected abstract void updateSingleSupportPlan(boolean maintainContinuity);
 
    private final FramePoint2D desiredICP2d = new FramePoint2D();
    private final FramePoint2D finalICP2d = new FramePoint2D();

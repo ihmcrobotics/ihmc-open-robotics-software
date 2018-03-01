@@ -20,7 +20,7 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
    @Override
    public double getMaximumStepReach()
    {
-      return 0.45;
+      return 0.4;
    }
 
    @Override
@@ -47,4 +47,45 @@ public class AtlasFootstepPlannerParameters implements FootstepPlannerParameters
       return 0.4;
    }
 
+   @Override
+   public double getCliffHeightToAvoid()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMinimumDistanceFromCliffBottoms()
+   {
+      return 0.1;
+   }
+
+   @Override
+   public double getWiggleInsideDelta()
+   {
+      return 0.03;
+   }
+
+   @Override
+   public boolean getWiggleIntoConvexHullOfPlanarRegions()
+   {
+      return true;
+   }
+
+   @Override
+   public boolean getRejectIfCannotFullyWiggleInside()
+   {
+      return false;
+   }
+
+   @Override
+   public double getMaximumXYWiggleDistance()
+   {
+      return 0.05;
+   }
+
+   @Override
+   public double getMaximumYawWiggle()
+   {
+      return Math.toRadians(7.5);
+   }
 }

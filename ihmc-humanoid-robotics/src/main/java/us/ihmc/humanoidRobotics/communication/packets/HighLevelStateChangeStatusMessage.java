@@ -1,69 +1,62 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
 @RosMessagePacket(documentation = "This message notifies the user of a change in the high level state. This message's primary\n"
-                                  + "use is to signal a requested state change is completed.",
-      rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
-      topic = "/output/high_level_state_change")
+      + "use is to signal a requested state change is completed.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/output/high_level_state_change")
 public class HighLevelStateChangeStatusMessage extends SettablePacket<HighLevelStateChangeStatusMessage>
 {
+   public static final byte DO_NOTHING_BEHAVIOR = 0;
+   public static final byte STAND_PREP_STATE = 1;
+   public static final byte STAND_READY = 2;
+   public static final byte FREEZE_STATE = 3;
+   public static final byte STAND_TRANSITION_STATE = 4;
+   public static final byte WALKING = 5;
+   public static final byte DIAGNOSTICS = 6;
+   public static final byte CALIBRATION = 7;
+
    @RosExportedField(documentation = "initialState gives the controller's state prior to transition")
-   public HighLevelControllerName initialState;
+   public byte initialHighLevelControllerName;
    @RosExportedField(documentation = "endState gives the state the controller has transitioned into")
-   public HighLevelControllerName endState;
-   
+   public byte endHighLevelControllerName;
+
    public HighLevelStateChangeStatusMessage()
    {
-      this.destination = (byte)PacketDestination.ROS_API.ordinal();
-   }
-   
-   public HighLevelStateChangeStatusMessage(HighLevelControllerName initialState, HighLevelControllerName endState)
-   {
-      this.destination = (byte)PacketDestination.ROS_API.ordinal();
-      setStateChange(initialState, endState);
-   }
-   
-   public HighLevelStateChangeStatusMessage(Random random)
-   {
-      this.initialState = HighLevelControllerName.values[random.nextInt(HighLevelControllerName.values.length)];
-      this.endState = HighLevelControllerName.values[random.nextInt(HighLevelControllerName.values.length)];
+      this.destination = (byte) PacketDestination.ROS_API.ordinal();
    }
 
-   public void setStateChange(HighLevelControllerName initialState, HighLevelControllerName endState)
+   public void setStateChange(byte initialState, byte endState)
    {
-      this.initialState = initialState;
-      this.endState = endState;
+      this.initialHighLevelControllerName = initialState;
+      this.endHighLevelControllerName = endState;
    }
 
    @Override
    public void set(HighLevelStateChangeStatusMessage other)
    {
       destination = other.destination;
-      initialState = other.initialState;
-      endState = other.endState;
+      initialHighLevelControllerName = other.initialHighLevelControllerName;
+      endHighLevelControllerName = other.endHighLevelControllerName;
+      setPacketInformation(other);
    }
 
-   public HighLevelControllerName getInitialState()
+   public byte getInitialState()
    {
-      return initialState;
+      return initialHighLevelControllerName;
    }
-   
-   public HighLevelControllerName getEndState()
+
+   public byte getEndState()
    {
-      return endState;
+      return endHighLevelControllerName;
    }
-   
+
    @Override
    public boolean epsilonEquals(HighLevelStateChangeStatusMessage other, double epsilon)
    {
-      return this.getInitialState().equals(other.getInitialState()) && this.getEndState().equals(other.getEndState());
+      return initialHighLevelControllerName == other.initialHighLevelControllerName && endHighLevelControllerName == other.endHighLevelControllerName;
    }
 
 }

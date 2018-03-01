@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynami
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -56,7 +57,7 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
       RigidBody chest = fullRobotModel.getChest();
       OneDoFJoint[] spineJoints = ScrewTools.createOneDoFJointPath(pelvis, chest);
       double[] chestDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, spineJoints.length, 0.1);
-      SpineDesiredAccelerationsMessage desiredAccelerationsMessage = new SpineDesiredAccelerationsMessage(chestDesiredJointAccelerations);
+      SpineDesiredAccelerationsMessage desiredAccelerationsMessage = HumanoidMessageTools.createSpineDesiredAccelerationsMessage(chestDesiredJointAccelerations);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       RigidBodyControlMode defaultControlState = getRobotModel().getWalkingControllerParameters().getDefaultControlModesForRigidBodies().get(chest.getName());

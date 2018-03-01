@@ -14,6 +14,13 @@ public class DrillDetectionPacket extends Packet<DrillDetectionPacket>
    }
 
    @Override
+   public void set(DrillDetectionPacket other)
+   {
+      isDrillOn = other.isDrillOn;
+      setPacketInformation(other);
+   }
+
+   @Override
    public boolean epsilonEquals(DrillDetectionPacket other, double epsilon)
    {
       return this.isDrillOn == other.isDrillOn;

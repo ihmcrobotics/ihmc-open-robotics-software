@@ -3,8 +3,8 @@ package us.ihmc.humanoidBehaviors.dispatcher;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 
 public class BehaviorControlModeSubscriber implements PacketConsumer<BehaviorControlModePacket>
 {
@@ -22,7 +22,7 @@ public class BehaviorControlModeSubscriber implements PacketConsumer<BehaviorCon
 
    public BehaviorControlModeEnum getRequestedBehaviorControl()
    {
-      return packetReference.getAndSet(null).getRequestedControl();
+      return BehaviorControlModeEnum.fromByte(packetReference.getAndSet(null).getRequestedControl());
    }
 
    @Override

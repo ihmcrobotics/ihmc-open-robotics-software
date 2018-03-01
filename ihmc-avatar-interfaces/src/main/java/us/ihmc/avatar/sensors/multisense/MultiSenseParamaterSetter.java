@@ -21,6 +21,7 @@ import dynamic_reconfigure.StrParameter;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.tools.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -195,7 +196,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       }
 
       packetCommunicator.send(
-            new MultisenseParameterPacket(false, params.getDouble("/multisense/gain"), params.getDouble("/multisense/motor_speed"), params
+            HumanoidMessageTools.createMultisenseParameterPacket(false, params.getDouble("/multisense/gain"), params.getDouble("/multisense/motor_speed"), params
                   .getDouble("/multisense/led_duty_cycle"), params.getBoolean("/multisense/lighting"), params
                   .getBoolean("/multisense/flash"), params.getBoolean("multisense/auto_exposure"), params.getBoolean("multisense/auto_white_balance")));
    }

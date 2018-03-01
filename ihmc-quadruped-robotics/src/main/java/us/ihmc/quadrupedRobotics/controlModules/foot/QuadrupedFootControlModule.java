@@ -1,11 +1,11 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
@@ -22,7 +22,7 @@ public class QuadrupedFootControlModule
 {
    // control variables
    private final YoVariableRegistry registry;
-   private final YoQuadrupedTimedStep stepCommand;
+   private final YoQuadrupedTimedStep currentStepCommand;
    private final YoBoolean stepCommandIsValid;
 
    // foot state machine
@@ -34,22 +34,22 @@ public class QuadrupedFootControlModule
    private final QuadrupedMoveViaWaypointsState moveViaWaypointsState;
    private final FiniteStateMachine<QuadrupedFootStates, FootEvent, QuadrupedFootState> footStateMachine;
 
-   public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox toolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedFootControlModule(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       // control variables
       String prefix = robotQuadrant.getCamelCaseName();
       this.registry = new YoVariableRegistry(robotQuadrant.getPascalCaseName() + getClass().getSimpleName());
-      this.stepCommand = new YoQuadrupedTimedStep(prefix + "StepCommand", registry);
+      this.currentStepCommand = new YoQuadrupedTimedStep(prefix + "CurrentStepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
 
       // position controller
-      solePositionController = new QuadrupedSolePositionController(robotQuadrant, toolbox, registry);
+      solePositionController = new QuadrupedSolePositionController(robotQuadrant, controllerToolbox, registry);
 
       // state machine
-      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, stepCommandIsValid, toolbox.getRuntimeEnvironment().getRobotTimestamp(), stepCommand);
-      QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, toolbox, solePositionController, stepCommandIsValid, stepCommand, registry);
-      moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, toolbox, solePositionController, registry);
-      QuadrupedHoldPositionState holdState = new QuadrupedHoldPositionState(robotQuadrant, toolbox, solePositionController, registry);
+      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, stepCommandIsValid, controllerToolbox.getRuntimeEnvironment().getRobotTimestamp(), currentStepCommand);
+      QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, solePositionController, stepCommandIsValid, currentStepCommand, registry);
+      moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, controllerToolbox, solePositionController, registry);
+      QuadrupedHoldPositionState holdState = new QuadrupedHoldPositionState(robotQuadrant, controllerToolbox, solePositionController, registry);
 
       FiniteStateMachineBuilder<QuadrupedFootStates, FootEvent, QuadrupedFootState> stateMachineBuilder = new FiniteStateMachineBuilder<>(QuadrupedFootStates.class, FootEvent.class,
                                                                                                                                           prefix + "QuadrupedFootStates", registry);
@@ -108,11 +108,9 @@ public class QuadrupedFootControlModule
       footStateMachine.attachStateChangedListener(stateChangedListener);
    }
 
-   public void initializeWaypointTrajectory(QuadrupedSoleWaypointList quadrupedSoleWaypointList, QuadrupedTaskSpaceEstimates taskSpaceEstimates,
-                                            boolean useInitialSoleForceAsFeedforwardTerm)
+   public void initializeWaypointTrajectory(QuadrupedSoleWaypointList quadrupedSoleWaypointList, boolean useInitialSoleForceAsFeedforwardTerm)
    {
       moveViaWaypointsState.handleWaypointList(quadrupedSoleWaypointList);
-      moveViaWaypointsState.updateEstimates(taskSpaceEstimates);
       moveViaWaypointsState.initialize(useInitialSoleForceAsFeedforwardTerm);
    }
 
@@ -146,14 +144,14 @@ public class QuadrupedFootControlModule
    {
       if (footStateMachine.getCurrentStateEnum() == QuadrupedFootStates.SUPPORT)
       {
-         this.stepCommand.set(stepCommand);
+         this.currentStepCommand.set(stepCommand);
          this.stepCommandIsValid.set(true);
       }
    }
 
    public void adjustStep(FramePoint3DReadOnly newGoalPosition)
    {
-      this.stepCommand.setGoalPosition(newGoalPosition);
+      this.currentStepCommand.setGoalPosition(newGoalPosition);
    }
 
    public ContactState getContactState()
@@ -164,15 +162,14 @@ public class QuadrupedFootControlModule
          return ContactState.NO_CONTACT;
    }
 
-   public void compute(FrameVector3D soleForceCommandToPack, QuadrupedTaskSpaceEstimates taskSpaceEstimates)
+   public void compute(FrameVector3D soleForceCommandToPack)
    {
-      // Update estimates.
-      footStateMachine.getCurrentState().updateEstimates(taskSpaceEstimates);
-
       // Update foot state machine.
       footStateMachine.process();
 
       // Pack sole force command result.
-      soleForceCommandToPack.set(footStateMachine.getCurrentState().getSoleForceCommand());
+      ReferenceFrame originalFrame = soleForceCommandToPack.getReferenceFrame();
+      soleForceCommandToPack.setIncludingFrame(footStateMachine.getCurrentState().getSoleForceCommand());
+      soleForceCommandToPack.changeFrame(originalFrame);
    }
 }

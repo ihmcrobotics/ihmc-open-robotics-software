@@ -39,7 +39,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
       Quaternion orientation = new Quaternion();
       orientation.setToYawQuaternion(theta);
       footstepData.setOrientation(orientation);
-      footstepData.robotSide = side;
+      footstepData.robotSide = side.toByte();
       this.theta = theta;
    }
 
@@ -96,7 +96,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
 
    public RobotSide getRobotSide()
    {
-      return footstepData.robotSide;
+      return RobotSide.fromByte(footstepData.robotSide);
    }
 
    @Override
@@ -119,9 +119,9 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
          return -1;
       if (this.theta > s.theta)
          return 1;
-      if (this.footstepData.robotSide.ordinal() < s.footstepData.robotSide.ordinal())
+      if (this.footstepData.robotSide < s.footstepData.robotSide)
          return -1;
-      if (this.footstepData.robotSide.ordinal() > s.footstepData.robotSide.ordinal())
+      if (this.footstepData.robotSide > s.footstepData.robotSide)
          return 1;
       return 0;
    }
@@ -129,7 +129,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    @Override
    public int hashCode()
    {
-      return (int) (discretize(footstepData.location.getX(), distanceResolution) + 3424.0 * discretize(footstepData.location.getY(), distanceResolution) + 16353.0 * discretize(theta, thetaResolution) + 72432.0 * footstepData.robotSide.ordinal());
+      return (int) (discretize(footstepData.location.getX(), distanceResolution) + 3424.0 * discretize(footstepData.location.getY(), distanceResolution) + 16353.0 * discretize(theta, thetaResolution) + 72432.0 * RobotSide.fromByte(footstepData.robotSide).ordinal());
    }
 
    private double discretize(double value, double interval)
@@ -140,7 +140,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    public String getID()
    {
       String id = "";
-      id = footstepData.robotSide.getSideNameFirstLetter() + "_" + discretize(footstepData.location.getX(), distanceResolution) + "_" + discretize(footstepData.location.getY(), distanceResolution) + "_" + discretize(theta, thetaResolution);
+      id = RobotSide.fromByte(footstepData.robotSide).getSideNameFirstLetter() + "_" + discretize(footstepData.location.getX(), distanceResolution) + "_" + discretize(footstepData.location.getY(), distanceResolution) + "_" + discretize(theta, thetaResolution);
       return id;
    }
 }

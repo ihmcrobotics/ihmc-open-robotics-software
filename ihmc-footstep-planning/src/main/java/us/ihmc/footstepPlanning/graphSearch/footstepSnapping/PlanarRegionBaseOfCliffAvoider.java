@@ -22,14 +22,16 @@ public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
 {
    private final FootstepPlannerParameters parameters;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
+   private final FootstepNodeSnapperReadOnly snapper;
 
    private PlanarRegionsList planarRegionsList;
    private FootstepNode startNode;
 
-   public PlanarRegionBaseOfCliffAvoider(FootstepPlannerParameters parameters, SideDependentList<ConvexPolygon2D> footPolygons)
+   public PlanarRegionBaseOfCliffAvoider(FootstepPlannerParameters parameters, FootstepNodeSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
       this.footPolygons = footPolygons;
+      this.snapper = snapper;
    }
 
    @Override
@@ -62,7 +64,7 @@ public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
          return true;
 
       RigidBodyTransform soleTransform = new RigidBodyTransform();
-      FootstepNodeTools.getNodeTransform(node, soleTransform);
+      FootstepNodeTools.getSnappedNodeTransform(node, snapper.getSnapData(node).getSnapTransform(), soleTransform);
 
       RigidBodyTransform inverseSoleTransform = new RigidBodyTransform(soleTransform);
       inverseSoleTransform.invert();
@@ -84,6 +86,7 @@ public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
       LineSegment2D highestLineSegmentInSoleFrame = new LineSegment2D();
 
       double maximumCliffZInSoleFrame = findHighestPointInOriginalSoleFrame(planarRegionsList, soleTransform, inverseSoleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame);
+
       return maximumCliffZInSoleFrame < cliffHeightToAvoid;
    }
    

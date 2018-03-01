@@ -15,7 +15,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedSolePositionController
 {
-   private final RobotQuadrant robotQuadrant;
    private final ReferenceFrame soleFrame;
    private final EuclideanPositionController solePositionController;
    private final YoPID3DGains solePositionControllerGains;
@@ -29,7 +28,6 @@ public class QuadrupedSolePositionController
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       double controlDT = toolbox.getRuntimeEnvironment().getControlDT();
-      this.robotQuadrant = robotQuadrant;
       this.soleFrame = toolbox.getReferenceFrames().getFootReferenceFrames().get(robotQuadrant);
       this.solePositionController = new EuclideanPositionController(prefix + "SolePosition", soleFrame, controlDT, registry);
       this.solePositionControllerGains = new DefaultYoPID3DGains(prefix + "SolePosition", GainCoupling.NONE, true, registry);
@@ -54,11 +52,10 @@ public class QuadrupedSolePositionController
       solePositionController.resetIntegrator();
    }
 
-   public void compute(FrameVector3D soleForceCommand, QuadrupedSolePositionControllerSetpoints setpoints, QuadrupedTaskSpaceEstimates estimates)
+   public void compute(FrameVector3D soleForceCommand, QuadrupedSolePositionControllerSetpoints setpoints, FrameVector3D soleLinearVelocityEstimate)
    {
       FramePoint3D solePositionSetpoint = setpoints.getSolePosition();
       FrameVector3D soleLinearVelocitySetpoint = setpoints.getSoleLinearVelocity();
-      FrameVector3D soleLinearVelocityEstimate = estimates.getSoleLinearVelocity(robotQuadrant);
       FrameVector3D soleForceFeedforwardSetpoint = setpoints.getSoleForceFeedforward();
 
       ReferenceFrame solePositionSetpointFrame = solePositionSetpoint.getReferenceFrame();
@@ -73,8 +70,7 @@ public class QuadrupedSolePositionController
       soleLinearVelocityEstimate.changeFrame(soleFrame);
       soleForceFeedforwardSetpoint.changeFrame(soleFrame);
       solePositionController.setGains(solePositionControllerGains);
-      solePositionController
-            .compute(soleForceCommand, solePositionSetpoint, soleLinearVelocitySetpoint, soleLinearVelocityEstimate, soleForceFeedforwardSetpoint);
+      solePositionController.compute(soleForceCommand, solePositionSetpoint, soleLinearVelocitySetpoint, soleLinearVelocityEstimate, soleForceFeedforwardSetpoint);
 
       // update log variables
       yoSolePositionSetpoint.setAndMatchFrame(solePositionSetpoint);

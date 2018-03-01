@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -139,7 +140,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       for (int i = 0; i < corruptedFootstepDataList.getDataList().size(); i++)
       {
          FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
-         RobotSide robotSide = footstepData.getRobotSide();
+         RobotSide robotSide = RobotSide.fromByte(footstepData.getRobotSide());
          FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame());
          pose.set(footstepData.getLocation(), footstepData.getOrientation());
          corruptedFootstepList.add(new Footstep(robotSide, pose));
@@ -191,7 +192,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          FramePoint3D position = new FramePoint3D();
          FrameQuaternion orientation = new FrameQuaternion();
          footstep.getPose(position, orientation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, position, orientation);
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, position, orientation);
          snappedFootstepDataList.add(footstepData);
       }
 

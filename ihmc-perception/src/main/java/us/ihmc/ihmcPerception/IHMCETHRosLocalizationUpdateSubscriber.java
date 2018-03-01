@@ -8,6 +8,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
@@ -45,7 +46,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
 			   timestamp = ppsTimeOffsetProvider.adjustTimeStampToRobotClock(timestamp);
 			   timeStampedTransform.setTimeStamp(timestamp);
 			   
-			   StampedPosePacket posePacket = new StampedPosePacket(frameID, timeStampedTransform, overlap);
+			   StampedPosePacket posePacket = HumanoidMessageTools.createStampedPosePacket(frameID, timeStampedTransform, overlap);
 			   posePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
 			   if (DEBUG) System.out.println("Pose update received. \ntimestamp: " + timeStampedTransform.getTimeStamp());
 			   
@@ -59,7 +60,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
          @Override
          public void onNewMessage(std_msgs.Float64 message) {
             overlap = message.getData();
-            LocalizationStatusPacket localizationOverlapPacket = new LocalizationStatusPacket(overlap,null);
+            LocalizationStatusPacket localizationOverlapPacket = HumanoidMessageTools.createLocalizationStatusPacket(overlap, null);
             rosModulePacketCommunicator.send(localizationOverlapPacket);
          }
       };
@@ -70,7 +71,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
          @Override
          public void onNewMessage(std_msgs.String message) {
             String status = message.getData();
-            LocalizationStatusPacket localizationOverlapPacket = new LocalizationStatusPacket(overlap,status);
+            LocalizationStatusPacket localizationOverlapPacket = HumanoidMessageTools.createLocalizationStatusPacket(overlap, status);
             rosModulePacketCommunicator.send(localizationOverlapPacket);
          }
 

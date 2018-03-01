@@ -5,7 +5,7 @@ import us.ihmc.communication.packets.Packet;
 
 public class QuadrupedForceControllerEventPacket extends Packet<QuadrupedForceControllerEventPacket>
 {
-   private QuadrupedForceControllerRequestedEvent event;
+   public QuadrupedForceControllerRequestedEvent event;
 
    public QuadrupedForceControllerEventPacket()
    {
@@ -17,12 +17,20 @@ public class QuadrupedForceControllerEventPacket extends Packet<QuadrupedForceCo
       this.event = event;
    }
 
+   @Override
+   public void set(QuadrupedForceControllerEventPacket other)
+   {
+      event = other.event;
+      setPacketInformation(other);
+   }
+
    public QuadrupedForceControllerRequestedEvent get()
    {
       return event;
    }
 
-   @Override public boolean epsilonEquals(QuadrupedForceControllerEventPacket other, double epsilon)
+   @Override
+   public boolean epsilonEquals(QuadrupedForceControllerEventPacket other, double epsilon)
    {
       return (this.event == other.event);
    }

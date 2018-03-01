@@ -36,9 +36,9 @@ public class PeriodicRosHighLevelStatePublisher implements PacketConsumer<HighLe
    @Override
    public void receivedPacket(HighLevelStateChangeStatusMessage packet)
    {
-      if (packet.getEndState() != currentState)
+      if (packet.getEndState() != currentState.toByte())
       {
-         currentState = packet.getEndState();
+         currentState = HighLevelControllerName.fromByte(packet.getEndState());
       }
    }
 

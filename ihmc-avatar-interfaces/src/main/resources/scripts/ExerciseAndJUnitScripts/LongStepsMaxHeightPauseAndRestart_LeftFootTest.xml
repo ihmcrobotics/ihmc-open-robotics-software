@@ -7,7 +7,7 @@
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>0.4587796761983862</x>
           <y>0.035775123781215404</y>
@@ -20,7 +20,7 @@
           <s>0.9999741788565889</s>
         </orientation>
         <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
         <positionWaypoints/>
         <swingDuration>0.0</swingDuration>
@@ -29,7 +29,7 @@
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>1.034584897695115</x>
           <y>-0.11697898558017215</y>
@@ -42,7 +42,7 @@
           <s>0.9999741788561664</s>
         </orientation>
         <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
         <positionWaypoints/>
         <swingDuration>0.0</swingDuration>
@@ -50,7 +50,7 @@
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
     <executionMode>OVERRIDE</executionMode>
-    <executionTiming>CONTROL_DURATIONS</executionTiming>
+    <executionTiming>0</executionTiming>
     <defaultSwingDuration>0.0</defaultSwingDuration>
     <defaultTransferDuration>0.0</defaultTransferDuration>
     <finalTransferDuration>0.0</finalTransferDuration>
@@ -94,7 +94,7 @@
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>1.5773135634335025</x>
           <y>0.020352014569407495</y>
@@ -107,7 +107,7 @@
           <s>0.9999741788561664</s>
         </orientation>
         <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
         <positionWaypoints/>
         <swingDuration>0.0</swingDuration>
@@ -116,7 +116,7 @@
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>1.8932137385535026</x>
           <y>-0.24085070347943513</y>
@@ -129,7 +129,7 @@
           <s>0.9999741788565889</s>
         </orientation>
         <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
         <positionWaypoints/>
         <swingDuration>0.0</swingDuration>
@@ -138,7 +138,7 @@
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <robotSide>LEFT</robotSide>
+        <robotSide>0</robotSide>
         <location>
           <x>2.3761560835479787</x>
           <y>0.0022643634899831883</y>
@@ -151,7 +151,7 @@
           <s>0.9999741492244566</s>
         </orientation>
         <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
         <positionWaypoints/>
         <swingDuration>0.0</swingDuration>
@@ -160,7 +160,7 @@
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <robotSide>RIGHT</robotSide>
+        <robotSide>1</robotSide>
         <location>
           <x>2.3725795842070396</x>
           <y>-0.24770997514554816</y>
@@ -173,7 +173,7 @@
           <s>0.999974218870433</s>
         </orientation>
         <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
-        <trajectoryType>DEFAULT</trajectoryType>
+        <trajectoryType>0</trajectoryType>
         <swingHeight>0.0</swingHeight>
         <positionWaypoints/>
         <swingDuration>0.0</swingDuration>
@@ -181,7 +181,7 @@
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
     <executionMode>OVERRIDE</executionMode>
-    <executionTiming>CONTROL_DURATIONS</executionTiming>
+    <executionTiming>0</executionTiming>
     <defaultSwingDuration>0.0</defaultSwingDuration>
     <defaultTransferDuration>0.0</defaultTransferDuration>
     <finalTransferDuration>0.0</finalTransferDuration>

@@ -19,6 +19,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
@@ -103,7 +104,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
             @Override
             public void actionPerformed(ActionEvent e)
             {
-               handModuleCommunicator.send(new HandDesiredConfigurationMessage(robotSide, (HandConfiguration) (stateToSend.getSelectedItem())));
+               handModuleCommunicator.send(HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, (HandConfiguration) (stateToSend.getSelectedItem())));
             }
          });
          
@@ -153,7 +154,7 @@ public class RobotiqHandCommandManager extends HandCommandManager
             @Override
             public void actionPerformed(ActionEvent e)
             {
-               handModuleCommunicator.send(new ManualHandControlPacket(robotSide, indexSlider.getValue(), middleSlider.getValue(), thumbSlider.getValue(), spreadSlider.getValue(), 1));
+               handModuleCommunicator.send(HumanoidMessageTools.createManualHandControlPacket(robotSide, indexSlider.getValue(), middleSlider.getValue(), thumbSlider.getValue(), spreadSlider.getValue(), 1));
             }
          });
          panel.add(sendSliderPositions, gc);

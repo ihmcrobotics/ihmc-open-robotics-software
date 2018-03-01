@@ -55,7 +55,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
       else
          pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       walkingMessageHandler.requestPlanarRegions();
+      balanceManager.setFinalTransferTime(finalTransferTime);
 
       int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       if (stepsToAdd < 1)
@@ -79,7 +81,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       balanceManager.setICPPlanTransferToSide(transferToSide);
-      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       FootstepTiming firstTiming = footstepTimings[0];
       currentTransferDuration.set(firstTiming.getTransferTime());
       balanceManager.initializeICPPlanForTransfer(firstTiming.getSwingTime(), firstTiming.getTransferTime(), finalTransferTime);

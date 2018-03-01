@@ -58,7 +58,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
    private static final double defaultHeuristicWeight = 15.0;
    private static final double planningHorizon = 1.0;
    private static final double defaultTimeout = 5.0;
@@ -191,10 +191,6 @@ public class VisibilityGraphWithAStarPlanner implements FootstepPlanner
             PrintTools.info("Starting to plan using )" + getClass().getSimpleName());
             PrintTools.info("Body start pose: " + startPos);
             PrintTools.info("Body goal pose:  " + goalPos);
-
-            String homePath = System.getProperty("user.home");
-            Path path = Paths.get(homePath, "footstepPlannerData", PlanarRegionFileTools.getDate() + "_PlannerData");
-            PlanarRegionFileTools.exportPlanarRegionData(path, planarRegionsList);
          }
 
          try

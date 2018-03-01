@@ -15,6 +15,7 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.RequestStereoPointCloudMessage;
 import us.ihmc.communication.packets.StereoVisionPointCloudMessage;
@@ -146,7 +147,7 @@ public class StereoVisionPointCloudPublisher
                float[] scanPointBuffer = pointCloudData.getPointCloudBuffer();
 
                int[] colors = pointCloudData.getColors();
-               StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage(robotTimestamp, scanPointBuffer, colors);
+               StereoVisionPointCloudMessage message = MessageTools.createStereoVisionPointCloudMessage(robotTimestamp, scanPointBuffer, colors);
 
                message.setDestination(destination);
                packetCommunicator.send(message);

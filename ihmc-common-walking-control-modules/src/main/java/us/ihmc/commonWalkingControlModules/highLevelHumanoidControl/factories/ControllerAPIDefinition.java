@@ -41,7 +41,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PlanOffsetStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
@@ -91,7 +91,7 @@ public abstract class ControllerAPIDefinition
 
       List<Class<? extends SettablePacket<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(CapturabilityBasedStatus.class);
-      statusMessages.add(FootstepStatus.class);
+      statusMessages.add(FootstepStatusMessage.class);
       statusMessages.add(PlanOffsetStatus.class);
       statusMessages.add(WalkingStatusMessage.class);
       statusMessages.add(WalkingControllerFailureStatusMessage.class);

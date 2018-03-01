@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import com.jme3.math.Quaternion;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -17,8 +18,8 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavi
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkToObjectState>
 {
@@ -67,7 +68,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
       {
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Getting Ready To Walk");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Getting Ready To Walk");
             sendPacket(p1);
          }
       };
@@ -79,7 +80,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To Point One");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking To Point One");
             sendPacket(p1);
             walkToPoint1.changeFrame(ReferenceFrame.getWorldFrame());
             FramePoint3D walkPosition2d = new FramePoint3D(ReferenceFrame.getWorldFrame(), walkToPoint1.getX(), walkToPoint1.getY(), 0);
@@ -106,7 +107,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walking To Point Two");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walking To Point Two");
             sendPacket(p1);
 
             walkToPoint2.changeFrame(ReferenceFrame.getWorldFrame());
@@ -132,7 +133,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          protected void setBehaviorInput()
          {
             succeded = false;
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walk Failed");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walk Failed");
             sendPacket(p1);
          }
       };
@@ -142,7 +143,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
       {
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = new TextToSpeechPacket("Walk Complete");
+            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Walk Complete");
             sendPacket(p1);
          }
       };

@@ -20,6 +20,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
@@ -218,7 +219,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
          state.setAuxiliaryRobotData(sensorRawOutputMapReadOnly.getAuxiliaryRobotData());
       }
 
-      state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus());
+      state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus().toByte());
 
       LastPacket lastPacket = dataProducer.getLastPacket();
       if (lastPacket != null)
@@ -258,11 +259,11 @@ public class DRCPoseCommunicator implements RawOutputWriter
       {
          if (auxiliaryRobotDataProvider != null)
          {
-            return new RobotConfigurationData(joints, forceSensorDefinitions, auxiliaryRobotDataProvider.newAuxiliaryRobotDataInstance(), imuDefinitions);
+            return RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, auxiliaryRobotDataProvider.newAuxiliaryRobotDataInstance(), imuDefinitions);
          }
          else
          {
-            return new RobotConfigurationData(joints, forceSensorDefinitions, null, imuDefinitions);
+            return RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, null, imuDefinitions);
          }
       }
 

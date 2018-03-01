@@ -5,6 +5,15 @@
 # message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the
 # controller. This rule does not apply to the fields of this message.
 
+# Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg
+# kinematics.
+bool enable_user_pelvis_control
+
+# If enableUserPelvisControl is true then enableUserPelvisControlDuringWalking will keep the height
+# manager in user mode while walking. If this is false the height manager will switch to controller
+# mode when walking.
+bool enable_user_pelvis_control_during_walking
+
 # The position trajectory information.
 ihmc_msgs/EuclideanTrajectoryRosMessage euclidean_trajectory
 

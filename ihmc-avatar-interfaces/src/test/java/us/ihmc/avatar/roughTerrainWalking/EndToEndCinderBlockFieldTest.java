@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
@@ -80,7 +81,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
       pelvisPosition.add(0.0, 0.0, getPelvisOffsetHeight());
       double desiredHeight = pelvisPosition.getZ();
-      simulationTestHelper.send(new PelvisHeightTrajectoryMessage(0.5, desiredHeight));
+      simulationTestHelper.send(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
 
       simulationTestHelper.send(footsteps);
 
@@ -114,7 +115,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
             Quaternion orientation = new Quaternion();
             cinderBlockPose.get(location, orientation);
             location.setZ(location.getZ() + zOffset);
-            FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);
+            FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
             footsteps.add(footstep);
          }
       }

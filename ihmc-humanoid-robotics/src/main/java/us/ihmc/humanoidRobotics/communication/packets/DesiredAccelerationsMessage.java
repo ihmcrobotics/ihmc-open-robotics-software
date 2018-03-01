@@ -2,9 +2,8 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Random;
+import java.util.Arrays;
 
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -24,21 +23,12 @@ public final class DesiredAccelerationsMessage extends Packet<DesiredAcceleratio
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public DesiredAccelerationsMessage(Random random)
+   @Override
+   public void set(DesiredAccelerationsMessage other)
    {
-      int randomNumberOfAccels = random.nextInt(16) + 1;
-      desiredJointAccelerations = new double[randomNumberOfAccels];
-
-      for(int i = 0; i < randomNumberOfAccels; i++)
-      {
-         desiredJointAccelerations[i] = RandomNumbers.nextDoubleWithEdgeCases(random, 0.01);
-      }
-   }
-
-   public DesiredAccelerationsMessage(double[] desiredJointAccelerations)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.desiredJointAccelerations = desiredJointAccelerations;
+      desiredJointAccelerations = Arrays.copyOf(other.desiredJointAccelerations, other.desiredJointAccelerations.length);
+      queueingProperties.set(other.queueingProperties);
+      setPacketInformation(other);
    }
 
    public int getNumberOfJoints()
