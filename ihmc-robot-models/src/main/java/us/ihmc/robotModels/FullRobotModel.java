@@ -19,7 +19,6 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 
 public interface FullRobotModel
 {
-
    /** Returns the specific the joint names of this robot. See {@link RobotSpecificJointNames}. */
    public abstract RobotSpecificJointNames getRobotSpecificJointNames();
 

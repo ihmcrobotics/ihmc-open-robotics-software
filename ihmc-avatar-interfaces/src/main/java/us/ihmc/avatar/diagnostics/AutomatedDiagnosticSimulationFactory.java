@@ -159,9 +159,9 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       double totalRobotWeight = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator()) * gravitationalAcceleration;
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
-      ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
-      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, humanoidReferenceFrames);
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
+      SideDependentList<? extends ContactablePlaneBody> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableBodies(fullRobotModel, humanoidReferenceFrames));
 
       Map<RigidBody, FootSwitchInterface> footSwitchMap = new LinkedHashMap<RigidBody, FootSwitchInterface>();
       Map<RigidBody, ContactablePlaneBody> bipedFeetMap = new LinkedHashMap<RigidBody, ContactablePlaneBody>();

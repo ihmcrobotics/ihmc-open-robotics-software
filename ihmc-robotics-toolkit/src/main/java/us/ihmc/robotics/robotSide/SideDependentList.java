@@ -6,8 +6,15 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class SideDependentList<V> extends EnumMap<RobotSide, V> implements Iterable<V>
+public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> implements Iterable<V>
 {
+   private final RobotSide[][] sideArrays = new RobotSide[2][];
+   {
+      sideArrays[0] = new RobotSide[0];
+      sideArrays[1] = new RobotSide[1];
+      sideArrays[2] = RobotSide.values;
+   }
+
    private static final long serialVersionUID = -6514328471068877058L;
 
    public SideDependentList()
@@ -26,7 +33,7 @@ public class SideDependentList<V> extends EnumMap<RobotSide, V> implements Itera
     * Copy constructor. Just copies the references to the objects; not a deep copy.
     * @param other the SideDependentList to be copied
     */
-   public SideDependentList(SideDependentList<? extends V> other)
+   public SideDependentList(SegmentDependentList<RobotSide, ? extends V> other)
    {
       super(RobotSide.class);
 
@@ -35,21 +42,6 @@ public class SideDependentList<V> extends EnumMap<RobotSide, V> implements Itera
          this.set(robotSide, other.get(robotSide));
       }
    }
-   
-   public V get(RobotSide side)
-   {
-      return super.get(side);
-   }
-
-   public String toString()
-   {
-      return new String("type: " + this.getClass() + "\n" + "left: " + get(RobotSide.LEFT) + "\n" + "right: " + get(RobotSide.RIGHT));
-   }
-
-   public V set(RobotSide robotSide, V element)
-   {
-      return this.put(robotSide, element);
-   }
 
    public void set(SideDependentList<V> sideDependentList)
    {
@@ -57,6 +49,31 @@ public class SideDependentList<V> extends EnumMap<RobotSide, V> implements Itera
       {
          this.set(robotSide, sideDependentList.get(robotSide));
       }
+   }
+
+   public RobotSide[] sides()
+   {
+      fillSideArray();
+      return sideArrays[size()];
+   }
+
+   private void fillSideArray()
+   {
+      if (size() == 2)
+         return;
+
+      for (int i = 0, j = 0; i < RobotSide.values.length; i++)
+      {
+         if (containsKey(RobotSide.values[i]))
+         {
+            sideArrays[size()][j++] = RobotSide.values[i];
+         }
+      }
+   }
+
+   public String toString()
+   {
+      return new String("type: " + this.getClass() + "\n" + "left: " + get(RobotSide.LEFT) + "\n" + "right: " + get(RobotSide.RIGHT));
    }
 
    public static <K extends Enum<K>, V> SideDependentList<EnumMap<K, V>> createListOfEnumMaps(Class<K> keyType)

@@ -39,6 +39,7 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -76,7 +77,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                                   HighLevelControllerName.class, true);
    private HighLevelControllerName initialControllerState;
 
-   private final ContactableBodiesFactory contactableBodiesFactory;
+   private final ContactableBodiesFactory<RobotSide> contactableBodiesFactory;
 
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final CommandInputManager commandInputManager;
@@ -106,7 +107,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    private HumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
 
-   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
+   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
                                              SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters, ICPWithTimeFreezingPlannerParameters icpPlannerParameters)
@@ -322,7 +323,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    {
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
-      SideDependentList<ContactableFoot> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
+      SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames));
       List<ContactablePlaneBody> additionalContacts = contactableBodiesFactory.createAdditionalContactPoints(fullRobotModel);
       List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)

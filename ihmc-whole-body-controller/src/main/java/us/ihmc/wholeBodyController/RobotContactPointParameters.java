@@ -14,42 +14,53 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.partNames.LeggedJointNameMap;
+import us.ihmc.robotics.robotSide.RobotSegment;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.simulationconstructionset.util.BidirectionGroundContactModel;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
-public abstract class RobotContactPointParameters implements ContactPointDefinitionHolder
+public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegment<E>> implements ContactPointDefinitionHolder
 {
-   protected final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
+   protected final ContactableBodiesFactory<E> contactableBodiesFactory = new ContactableBodiesFactory<>();
 
-   private final DRCRobotJointMap jointMap;
+   private final LeggedJointNameMap<E> jointMap;
    private final double footWidth, toeWidth, footLength;
-   private final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms;
 
-   protected final SideDependentList<ArrayList<Point2D>> controllerFootGroundContactPoints = new SideDependentList<>();
-   protected final SideDependentList<Point2D> controllerToeContactPoints = new SideDependentList<>();
-   protected final SideDependentList<LineSegment2D> controllerToeContactLines = new SideDependentList<>();
+   private final SegmentDependentList<E, RigidBodyTransform> soleToAnkleFrameTransforms;
 
-   private final List<ImmutablePair<String, Vector3D>> simulationGroundContactPoints = new ArrayList<ImmutablePair<String, Vector3D>>();
+   private final SegmentDependentList<E, ArrayList<Point2D>> controllerFootGroundContactPoints;;
+   private final SegmentDependentList<E, Point2D> controllerToeContactPoints;
+   private final SegmentDependentList<E, LineSegment2D> controllerToeContactLines;
+
+   private final List<ImmutablePair<String, Vector3D>> simulationGroundContactPoints = new ArrayList<>();
+   private final E[] robotSegments;
 
    private boolean useSoftGroundContactParameters;
 
-   public RobotContactPointParameters(DRCRobotJointMap jointMap, double footWidth, double footLength, SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms)
+   public RobotContactPointParameters(LeggedJointNameMap<E> jointMap, double footWidth, double footLength,
+                                      SegmentDependentList<E, RigidBodyTransform> soleToAnkleFrameTransforms)
    {
       this(jointMap, footWidth, footWidth, footLength, soleToAnkleFrameTransforms);
    }
 
-   public RobotContactPointParameters(DRCRobotJointMap jointMap, double toeWidth, double footWidth, double footLength, SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms)
+   public RobotContactPointParameters(LeggedJointNameMap<E> jointMap, double toeWidth, double footWidth, double footLength,
+                                      SegmentDependentList<E, RigidBodyTransform> soleToAnkleFrameTransforms)
    {
       this.jointMap = jointMap;
       this.toeWidth = toeWidth;
       this.footWidth = footWidth;
       this.footLength = footLength;
       this.soleToAnkleFrameTransforms = soleToAnkleFrameTransforms;
+      this.robotSegments = jointMap.getRobotSegments();
+
+      Class<E> clazz = robotSegments[0].getClassType();
+      controllerFootGroundContactPoints = new SegmentDependentList<>(clazz);
+      controllerToeContactPoints = new SegmentDependentList<>(clazz);
+      controllerToeContactLines = new SegmentDependentList<>(clazz);
    }
 
-   protected void createFootContactPoints(FootContactPoints footContactPoints)
+   protected void createFootContactPoints(FootContactPoints<E> footContactPoints)
    {
       Map<String, List<Tuple3DBasics>> simulationContactPoints = footContactPoints.getSimulationContactPoints(footLength, footWidth, toeWidth, jointMap, soleToAnkleFrameTransforms);
       for (String parentJointName : simulationContactPoints.keySet())
@@ -60,21 +71,21 @@ public abstract class RobotContactPointParameters implements ContactPointDefinit
       }
 
 
-      SideDependentList<List<Tuple2DBasics>> controllerContactPoints = footContactPoints.getControllerContactPoints(footLength, footWidth, toeWidth);
-      for (RobotSide robotSide : RobotSide.values)
+      SegmentDependentList<E, List<Tuple2DBasics>> controllerContactPoints = footContactPoints.getControllerContactPoints(footLength, footWidth, toeWidth);
+      for (E segment : robotSegments)
       {
-         List<Tuple2DBasics> points = controllerContactPoints.get(robotSide);
-         controllerFootGroundContactPoints.put(robotSide, new ArrayList<Point2D>());
+         List<Tuple2DBasics> points = controllerContactPoints.get(segment);
+         controllerFootGroundContactPoints.put(segment, new ArrayList<>());
          for (Tuple2DBasics point : points)
-            controllerFootGroundContactPoints.get(robotSide).add(new Point2D(point));
+            controllerFootGroundContactPoints.get(segment).add(new Point2D(point));
       }
 
-      SideDependentList<Tuple2DBasics> toeOffContactPoints = footContactPoints.getToeOffContactPoints(footLength, footWidth, toeWidth);
-      SideDependentList<LineSegment2D> toeOffContactLines = footContactPoints.getToeOffContactLines(footLength, footWidth, toeWidth);
-      for (RobotSide robotSide : RobotSide.values)
+      SegmentDependentList<E,Tuple2DBasics> toeOffContactPoints = footContactPoints.getToeOffContactPoints(footLength, footWidth, toeWidth);
+      SegmentDependentList<E, LineSegment2D> toeOffContactLines = footContactPoints.getToeOffContactLines(footLength, footWidth, toeWidth);
+      for (E segment : robotSegments)
       {
-         controllerToeContactPoints.put(robotSide, new Point2D(toeOffContactPoints.get(robotSide)));
-         controllerToeContactLines.put(robotSide, new LineSegment2D(toeOffContactLines.get(robotSide)));
+         if (toeOffContactPoints != null) controllerToeContactPoints.put(segment, new Point2D(toeOffContactPoints.get(segment)));
+         if (toeOffContactLines != null) controllerToeContactLines.put(segment, new LineSegment2D(toeOffContactLines.get(segment)));
       }
 
 
@@ -85,7 +96,7 @@ public abstract class RobotContactPointParameters implements ContactPointDefinit
 
    protected void createDefaultFootContactPoints()
    {
-      createFootContactPoints(new DefaultFootContactPoints());
+      createFootContactPoints(new DefaultFootContactPoints<>(robotSegments));
    }
 
    protected final void clearSimulationContactPoints()
@@ -95,8 +106,8 @@ public abstract class RobotContactPointParameters implements ContactPointDefinit
 
    protected final void clearControllerFootContactPoints()
    {
-      for (RobotSide robotSide : RobotSide.values)
-         controllerFootGroundContactPoints.get(robotSide).clear();
+      for (E segment : robotSegments)
+         controllerFootGroundContactPoints.get(segment).clear();
    }
 
    protected final void addSimulationContactPoint(String parentJointName, Tuple3DBasics contactPointPositionInParentJointFrame)
@@ -104,31 +115,31 @@ public abstract class RobotContactPointParameters implements ContactPointDefinit
       simulationGroundContactPoints.add(new ImmutablePair<String, Vector3D>(parentJointName, new Vector3D(contactPointPositionInParentJointFrame)));
    }
 
-   protected final void addControllerFootContactPoint(RobotSide robotSide, Point2D contactPoint)
+   protected final void addControllerFootContactPoint(E segment, Point2D contactPoint)
    {
-      controllerFootGroundContactPoints.get(robotSide).add(contactPoint);
+      controllerFootGroundContactPoints.get(segment).add(contactPoint);
       // Update the factory with the new set of contact points.
       contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
    }
 
-   protected final void setControllerFootContactPoint(RobotSide robotSide, List<Point2D> contactPoints)
+   protected final void setControllerFootContactPoint(E segment, List<Point2D> contactPoints)
    {
-      controllerFootGroundContactPoints.get(robotSide).clear();
-      controllerFootGroundContactPoints.get(robotSide).addAll(contactPoints);
+      controllerFootGroundContactPoints.get(segment).clear();
+      controllerFootGroundContactPoints.get(segment).addAll(contactPoints);
       // Update the factory with the new set of contact points.
       contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
    }
 
-   protected final void setControllerToeContactPoint(RobotSide robotSide, Point2D toeContactPoint)
+   protected final void setControllerToeContactPoint(E segment, Point2D toeContactPoint)
    {
-      controllerToeContactPoints.get(robotSide).set(toeContactPoint);
+      controllerToeContactPoints.get(segment).set(toeContactPoint);
       // Update the factory with the new set of contact points.
       contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
    }
 
-   protected final void setControllerToeContacLine(RobotSide robotSide, LineSegment2D toeContactLine)
+   protected final void setControllerToeContacLine(E segment, LineSegment2D toeContactLine)
    {
-      controllerToeContactLines.get(robotSide).set(toeContactLine);
+      controllerToeContactLines.get(segment).set(toeContactLine);
       // Update the factory with the new set of contact points.
       contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
    }
@@ -138,12 +149,12 @@ public abstract class RobotContactPointParameters implements ContactPointDefinit
       return simulationGroundContactPoints;
    }
 
-   public SideDependentList<ArrayList<Point2D>> getFootContactPoints()
+   public SegmentDependentList<E, ArrayList<Point2D>> getFootContactPoints()
    {
       return controllerFootGroundContactPoints;
    }
 
-   public final ContactableBodiesFactory getContactableBodiesFactory()
+   public final ContactableBodiesFactory<E> getContactableBodiesFactory()
    {
       return contactableBodiesFactory;
    }
