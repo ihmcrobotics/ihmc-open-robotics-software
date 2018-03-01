@@ -132,7 +132,7 @@ public class QuadrupedStandController implements QuadrupedController
       groundPlaneEstimator.compute(solePositions);
 
       // initialize feedback controllers
-      balanceManager.initialize(taskSpaceEstimates.getComPosition());
+      balanceManager.initialize(taskSpaceControllerSettings);
 
       bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
 

@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controlModules;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -116,7 +117,6 @@ public class QuadrupedBalanceManager
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       ReferenceFrame comZUpFrame = controllerToolbox.getReferenceFrames().getCenterOfMassZUpFrame();
-      //dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
       dcmPositionController = new DivergentComponentOfMotionController(comZUpFrame, runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry);
       comPositionController = new QuadrupedComPositionController(comZUpFrame, runtimeEnvironment.getControlDT(), registry);
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
@@ -177,7 +177,7 @@ public class QuadrupedBalanceManager
       dcmPlanner.addStepsToSequence(steps);
    }
 
-   public void initialize(FramePoint3D comPosition)
+   public void initialize(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
       // update model
       linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
@@ -187,15 +187,12 @@ public class QuadrupedBalanceManager
 
       dcmPositionController.initializeSetpoint(dcmPositionEstimate);
       dcmPositionController.reset();
-      comPositionControllerSetpoints.initialize(comPosition);
+      comPositionControllerSetpoints.initialize(controllerToolbox.getTaskSpaceEstimates().getComPosition());
       comPositionController.reset();
 
       // initialize timed contact sequence
       accumulatedStepAdjustment.setToZero();
-   }
 
-   public void initializeDcmSetpoints(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
-   {
       dcmPlanner.initializeDcmSetpoints(taskSpaceControllerSettings, dcmPositionEstimate);
    }
 

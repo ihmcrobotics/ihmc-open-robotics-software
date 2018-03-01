@@ -131,7 +131,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // initialize feedback controllers
-      balanceManager.initialize(taskSpaceEstimates.getComPosition());
+      //balanceManager.initialize(taskSpaceEstimates.getComPosition());
 
       bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
 
@@ -168,7 +168,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
       feetManager.adjustSteps(adjustedSteps);
 
-      balanceManager.initializeDcmSetpoints(taskSpaceControllerSettings);
+      balanceManager.initialize(taskSpaceControllerSettings);
    }
 
    @Override
