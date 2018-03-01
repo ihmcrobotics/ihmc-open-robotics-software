@@ -133,8 +133,7 @@ public class JumpHighLevelHumanoidController
    private void submitControllerCommands()
    {
       planeContactStateCommandPool.clear();
-      //controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getMomentumRateCommand());
-      controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getCoMAccelerationCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getMomentumRateCommand());
       controllerCoreCommand.addInverseDynamicsCommand(gravityCompensationManager.getRootJointAccelerationCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
@@ -181,7 +180,6 @@ public class JumpHighLevelHumanoidController
          for (int i = 0; i < legJointNames.length; i++)
             privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, legJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
       }
-
    }
 
    public ControllerCoreCommand getControllerCoreCommand()

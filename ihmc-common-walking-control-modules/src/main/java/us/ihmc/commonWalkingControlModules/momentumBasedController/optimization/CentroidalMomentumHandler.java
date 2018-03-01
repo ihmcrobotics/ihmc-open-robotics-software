@@ -4,12 +4,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.factory.LinearSolverFactory;
+import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -37,21 +38,34 @@ public class CentroidalMomentumHandler
    private final InverseDynamicsJoint[] jointsInOrder;
    private final DenseMatrix64F v;
    private final Map<InverseDynamicsJoint, int[]> columnsForJoints = new LinkedHashMap<InverseDynamicsJoint, int[]>();
-   private final DenseMatrix64F momentum = new DenseMatrix64F(Momentum.SIZE, 1);
+   private final DenseMatrix64F spatialMomentum = new DenseMatrix64F(Momentum.SIZE, 1);
    private final DenseMatrix64F momentumRate = new DenseMatrix64F(Momentum.SIZE, 1);
    private final DenseMatrix64F centroidalMomentumEquationRightHandSide = new DenseMatrix64F(Momentum.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
    private final ReferenceFrame centerOfMassFrame;
    private final CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator;
    private final double robotMass;
-   private final RigidBodyInertia tempRigidBodyInertia = new RigidBodyInertia(ReferenceFrame.getWorldFrame(), 0.01, 0.01, 0.01, 0.01);  // Dummy value to create a valid inertia tensor
-   private final DenseMatrix64F tempMatrixForStoringRigidBodyInertia = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+   /**
+    * Using nomenclature from "Centroidal dynamics of a humanoid robot", by David E. Orin, Ambarish Goswami, Sung-Hee Lee
+    */
+   private final DenseMatrix64F centroidalCompositeRigidBodyInertia = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
+   private final FrameVector3D centroidalLinearMomentum;
+   private final FrameVector3D centroidalAngularMomentum;
+   private final FrameVector3D centroidalLinearVelocity;
+   private final FrameVector3D centroidalAngularVelocity;
+   private final int angularPartSize = SpatialForceVector.SIZE / 2;
+   private final DenseMatrix64F centroidalAngularInertia = new DenseMatrix64F(angularPartSize, angularPartSize);
+   private final RigidBodyInertia tempRigidBodyInertia = new RigidBodyInertia(ReferenceFrame.getWorldFrame(), 0.01, 0.01, 0.01, 0.01); // Dummy value to create a valid inertia tensor
+   private final DenseMatrix64F tempMatrixForRigidBodyInertia = new DenseMatrix64F(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+   private final LinearSolver<DenseMatrix64F> linear3DMatrixSolver = LinearSolverFactory.symmPosDef(angularPartSize);
+   private final DenseMatrix64F A = new DenseMatrix64F(angularPartSize, angularPartSize), b = new DenseMatrix64F(angularPartSize, 1),
+         x = new DenseMatrix64F(angularPartSize, 1);
 
    public CentroidalMomentumHandler(RigidBody rootBody, ReferenceFrame centerOfMassFrame)
    {
       this.rootBody = rootBody;
       this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
-      if(rootBody.getChildrenJoints().size() != 1)
+      if (rootBody.getChildrenJoints().size() != 1)
          throw new RuntimeException("More than one root joint");
       this.rigidBodyList = ScrewTools.computeRigidBodiesAfterThisJoint(rootBody.getChildrenJoints().get(0));
 
@@ -71,10 +85,15 @@ public class CentroidalMomentumHandler
 
       robotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
       this.centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(rootBody, centerOfMassFrame, v, robotMass);
+      this.centroidalLinearMomentum = new FrameVector3D(centerOfMassFrame);
+      this.centroidalAngularMomentum = new FrameVector3D(centerOfMassFrame);
+      this.centroidalLinearVelocity = new FrameVector3D(centerOfMassFrame);
+      this.centroidalAngularVelocity = new FrameVector3D(centerOfMassFrame);
    }
 
    public void initialize()
    {
+
    }
 
    public void compute()
@@ -83,28 +102,101 @@ public class CentroidalMomentumHandler
 
       centroidalMomentumRateTermCalculator.compute();
       adotV.set(centroidalMomentumRateTermCalculator.getADotVTerm());
+      computeSpatialMomentum();
+      computeCentroidalCompositeRigidBodyInertia();
+      computeCentroidalSpatialVelocity();
+   }
+
+   private void computeSpatialMomentum()
+   {
+      DenseMatrix64F centroidalMomentumMatrix = centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix();
+      CommonOps.mult(centroidalMomentumMatrix, v, spatialMomentum);
+      setLinearAndAngularMomentumfromSpatialMomentum();
+   }
+
+   private void setLinearAndAngularMomentumfromSpatialMomentum()
+   {
+      centroidalAngularMomentum.setIncludingFrame(centerOfMassFrame, 0, spatialMomentum);
+      centroidalLinearMomentum.setIncludingFrame(centerOfMassFrame, 3, spatialMomentum);
+   }
+
+   private void computeCentroidalCompositeRigidBodyInertia()
+   {
+      tempMatrixForRigidBodyInertia.reshape(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
+
+      centroidalCompositeRigidBodyInertia.reshape(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
+      centroidalCompositeRigidBodyInertia.zero();
+
+      for (int i = 0; i < rigidBodyList.length; i++)
+      {
+         RigidBodyInertia rigidBodyInertia = rigidBodyList[i].getInertia();
+         tempRigidBodyInertia.set(rigidBodyInertia);
+         tempRigidBodyInertia.changeFrame(centerOfMassFrame);
+         tempRigidBodyInertia.getMatrix(tempMatrixForRigidBodyInertia);
+         CommonOps.addEquals(centroidalCompositeRigidBodyInertia, tempMatrixForRigidBodyInertia);
+      }
+      setLinearAndAngularInertia();
+   }
+
+   private void setLinearAndAngularInertia()
+   {
+      //No need to set linear inertia. Its just the robot mass
+      CommonOps.extract(centroidalCompositeRigidBodyInertia, 0, 3, 0, 3, centroidalAngularInertia, 0, 0);
+   }
+
+   private void computeCentroidalSpatialVelocity()
+   {
+      // Storing as linear and angular components since its more efficient that way
+      centroidalLinearVelocity.setIncludingFrame(centroidalLinearMomentum);
+      centroidalLinearVelocity.scale(1.0 / robotMass);
+
+      A.set(centroidalAngularInertia);
+      centroidalAngularMomentum.get(b);
+      x.reshape(angularPartSize, 1);
+      linear3DMatrixSolver.setA(A);
+      linear3DMatrixSolver.solve(b, x);
+      centroidalAngularVelocity.setIncludingFrame(centerOfMassFrame, x);
+   }
+
+   public void getSpatialMomemntum(SpatialForceVector spatialMomentum)
+   {
+      spatialMomentum.setToZero(centerOfMassFrame);
+      spatialMomentum.setAngularPart(centroidalAngularMomentum);
+      spatialMomentum.setLinearPart(centroidalLinearMomentum);
+   }
+
+   public void getSpatialVelocity(SpatialMotionVector spatialVelocity)
+   {
+      spatialVelocity.setToZero(centerOfMassFrame, ReferenceFrame.getWorldFrame(), centerOfMassFrame);
+      spatialVelocity.setAngularPart(centroidalAngularVelocity);
+      spatialVelocity.setLinearPart(centroidalLinearVelocity);
    }
 
    public void getAngularMomentum(FrameVector3D angularMomentumToPack)
    {
-      DenseMatrix64F centroidalMomentumMatrix = centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix();
-      CommonOps.mult(centroidalMomentumMatrix, v, momentum);
-      angularMomentumToPack.setIncludingFrame(centerOfMassFrame, 0, momentum);
+      angularMomentumToPack.setIncludingFrame(centroidalAngularMomentum);
    }
 
    public void getLinearMomentum(FrameVector3D linearMomentumToPack)
    {
-      DenseMatrix64F centroidalMomentumMatrix = centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix();
-      CommonOps.mult(centroidalMomentumMatrix, v, momentum);
-      linearMomentumToPack.setIncludingFrame(centerOfMassFrame, 3, momentum);
+      linearMomentumToPack.setIncludingFrame(centroidalLinearMomentum);
    }
 
-   public void getCenterOfMassLinearVelocity(FrameVector3D centerOfMassVelocityToPack)
+   public void getCentroidalAngularInertia(DenseMatrix64F angularInertiaToPack)
    {
-      getLinearMomentum(centerOfMassVelocityToPack);
-      centerOfMassVelocityToPack.scale(1.0 / robotMass);
+      angularInertiaToPack.set(centroidalAngularInertia);
    }
-   
+
+   public void getCenterOfMassLinearVelocity(FrameVector3D centerOfMassLinearVelocityToPack)
+   {
+      centerOfMassLinearVelocityToPack.setIncludingFrame(centroidalLinearVelocity);
+   }
+
+   public void getCenterOfMassAngularVelocity(FrameVector3D centerOfMassAngularVelocityToPack)
+   {
+      centerOfMassAngularVelocityToPack.setIncludingFrame(centroidalAngularVelocity);
+   }
+
    public DenseMatrix64F getCentroidalMomentumMatrixPart(InverseDynamicsJoint[] joints)
    {
       int partDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(joints);
@@ -151,15 +243,6 @@ public class CentroidalMomentumHandler
 
    public void computeSpatialInertiaMatrix(DenseMatrix64F spatialCentroidalInertiaToPack)
    {
-      spatialCentroidalInertiaToPack.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-      spatialCentroidalInertiaToPack.zero();
-      for (int i = 0; i < rigidBodyList.length; i++)
-      {
-         RigidBodyInertia rigidBodyInertia = rigidBodyList[i].getInertia();
-         tempRigidBodyInertia.set(rigidBodyInertia);
-         tempRigidBodyInertia.changeFrame(centerOfMassFrame);
-         tempRigidBodyInertia.getMatrix(tempMatrixForStoringRigidBodyInertia);
-         CommonOps.addEquals(spatialCentroidalInertiaToPack, tempMatrixForStoringRigidBodyInertia);
-      }
+      spatialCentroidalInertiaToPack.set(centroidalCompositeRigidBodyInertia);
    }
 }

@@ -7,7 +7,6 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CoMAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
@@ -297,9 +296,6 @@ public class WholeBodyInverseDynamicsSolver
             break;
          case ROOT_JOINT_ACCELERATION_COMMAND:
             spatialAccelerationCalculator.setRootAcceleration(((RootJointAccelerationCommand) command).getRootJointSpatialAcceleration());
-            break;
-         case COM_ACCELERATION_COMMAND:
-            optimizationControlModule.submitCoMAccelerationCommand((CoMAccelerationCommand) command);
             break;
          case COMMAND_LIST:
             submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);

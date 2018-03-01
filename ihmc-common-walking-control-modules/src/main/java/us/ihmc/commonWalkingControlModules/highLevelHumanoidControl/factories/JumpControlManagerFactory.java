@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.configurations.AbstractHighLevelContr
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.WholeBodyCentoidalAngularVelocityRegulator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.GravityCompensationManager;
@@ -43,7 +42,6 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
    private FeetJumpManager feetManager;
    private CentroidalMomentumManager momentumManager;
    private GravityCompensationManager gravityCompensationManager;
-   private WholeBodyCentoidalAngularVelocityRegulator angularVelocityRegulator;
    //private PlaneContactControlManager planeContactManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
@@ -87,21 +85,20 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
 
       return momentumManager;
    }
-   
+
    public GravityCompensationManager getOrCreateGravityCompensationManager()
    {
       if (gravityCompensationManager != null)
          return gravityCompensationManager;
-      if(!hasHighLevelHumanoidControllerToolbox(GravityCompensationManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(GravityCompensationManager.class))
          return null;
-      if(!hasJumpControllerParameters(GravityCompensationManager.class))
+      if (!hasJumpControllerParameters(GravityCompensationManager.class))
          return null;
-      
+
       this.gravityCompensationManager = new GravityCompensationManager(controllerToolbox, jumpControllerParameters, registry);
 
       return gravityCompensationManager;
    }
-   
 
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody baseBody, ReferenceFrame controlFrame,
                                                               ReferenceFrame baseFrame, Collection<ReferenceFrame> trajectoryFrames)
@@ -149,15 +146,6 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
       return manager;
-   }
-   
-   public WholeBodyCentoidalAngularVelocityRegulator getOrCreateAngularVelocityRegulator()
-   {
-      if(angularVelocityRegulator != null)
-         return angularVelocityRegulator;
-      
-      angularVelocityRegulator = null; //new WholeBodyCentoidalAngularVelocityRegulator(controllerToolbox, registry);
-      return angularVelocityRegulator;
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
