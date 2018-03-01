@@ -3,21 +3,20 @@ package us.ihmc.parameterTuner.guiElements.tuners;
 import java.io.IOException;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
-public class BooleanTuner extends HBox
+public class BooleanTuner extends HBox implements InputNode
 {
    private static final String FXML_PATH = "boolean_tuner.fxml";
 
    @FXML
    private CheckBox value;
-
-   private final GuiParameter parameter;
 
    public BooleanTuner(GuiParameter parameter)
    {
@@ -33,18 +32,25 @@ public class BooleanTuner extends HBox
          e.printStackTrace();
       }
 
-      this.parameter = parameter;
       value.setSelected(Boolean.parseBoolean(parameter.getCurrentValue()));
 
       parameter.addChangedListener(p -> {
          // This listener will be triggered by an external change and is called from the animation timer.
          value.setSelected(Boolean.parseBoolean(parameter.getCurrentValue()));
       });
+
+      value.selectedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+         Platform.runLater(() -> parameter.setValue(Boolean.toString(value.isSelected())));
+      });
    }
 
-   @FXML
-   protected void handleButton(ActionEvent event)
+   @Override
+   public Node getSimpleInputNode()
    {
-      Platform.runLater(() -> parameter.setValue(Boolean.toString(value.isSelected())));
+      CheckBox duplicate = new CheckBox(value.getText());
+      duplicate.setSelected(value.isSelected());
+      duplicate.selectedProperty().addListener((observable, oldValue, newValue) -> value.setSelected(newValue));
+      value.selectedProperty().addListener((observable, oldValue, newValue) -> duplicate.setSelected(newValue));
+      return duplicate;
    }
 }

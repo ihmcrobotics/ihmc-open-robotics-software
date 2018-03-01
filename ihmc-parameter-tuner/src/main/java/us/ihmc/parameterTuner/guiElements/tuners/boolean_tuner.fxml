@@ -12,6 +12,6 @@
 	<padding><Insets top="0" right="5" bottom="5" left="5"/></padding>
 	<children>
 		<Text text="Value" />
-		<CheckBox fx:id="value" onAction="#handleButton"/>
+		<CheckBox fx:id="value" />
 	</children>
 </fx:root>

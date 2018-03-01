@@ -5,11 +5,12 @@ import java.io.IOException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
-public abstract class NumericTuner<T extends Number> extends HBox
+public abstract class NumericTuner<T extends Number> extends HBox implements InputNode
 {
    private static final String FXML_PATH = "numeric_tuner.fxml";
 
@@ -93,4 +94,10 @@ public abstract class NumericTuner<T extends Number> extends HBox
    public abstract NumericSpinner<T> createSpinner();
 
    public abstract NumericSlider<T> createSlider();
+
+   @Override
+   public Node getSimpleInputNode()
+   {
+      return value.createLinkedDuplicate();
+   }
 }

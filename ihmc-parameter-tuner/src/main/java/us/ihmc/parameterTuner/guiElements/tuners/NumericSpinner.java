@@ -128,4 +128,28 @@ public abstract class NumericSpinner<T extends Number> extends Spinner<T>
    public abstract String convertNumberToString(T number);
 
    public abstract List<ImmutablePair<String, String>> getSpecialStringOptions();
+
+   public NumericSpinner<T> createLinkedDuplicate()
+   {
+      return new NumericSpinner<T>(getValueFactory())
+      {
+         @Override
+         public List<ImmutablePair<String, String>> getSpecialStringOptions()
+         {
+            return NumericSpinner.this.getSpecialStringOptions();
+         }
+
+         @Override
+         public T convertStringToNumber(String numberString)
+         {
+            return NumericSpinner.this.convertStringToNumber(numberString);
+         }
+
+         @Override
+         public String convertNumberToString(T number)
+         {
+            return NumericSpinner.this.convertNumberToString(number);
+         }
+      };
+   }
 }

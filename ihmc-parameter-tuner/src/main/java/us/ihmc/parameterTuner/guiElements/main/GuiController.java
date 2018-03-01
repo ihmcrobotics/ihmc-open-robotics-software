@@ -148,9 +148,9 @@ public class GuiController
 
    public void setRegistries(List<GuiRegistry> registries)
    {
-      tree.setRegistries(registries);
+      tuningBoxManager.setRegistries(registries);
+      tree.setRegistries(registries, tuningBoxManager.getTunerMap());
       updateTree();
-      tuningBoxManager.clearAllParameters();
 
       changeCollector = new ChangeCollector();
       parameterMap.clear();

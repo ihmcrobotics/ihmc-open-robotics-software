@@ -11,12 +11,6 @@
     -fx-font-size: 20.0;
 }
 
-#parameter-value-in-tree-view {
-	-fx-text-fill: -fx-text-inner-color;
-	-fx-text-inner-color: gray;
-	-fx-font-weight: bold;
-}
-
 #parameter-name-in-tree-view {
 	-fx-fill: black;
 }
