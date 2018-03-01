@@ -153,6 +153,9 @@ public class ContactableBodiesFactory<E extends Enum<E> & RobotSegment<E>>
    public List<ContactablePlaneBody> createAdditionalContactPoints()
    {
       ArrayList<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
+      if (!additionalContactNames.hasValue())
+         return contactablePlaneBodies;
+
       FullLeggedRobotModel<E> fullRobotModel = this.fullRobotModel.get();
       RigidBody[] bodies = ScrewTools.computeSubtreeSuccessors(fullRobotModel.getElevator());
 
