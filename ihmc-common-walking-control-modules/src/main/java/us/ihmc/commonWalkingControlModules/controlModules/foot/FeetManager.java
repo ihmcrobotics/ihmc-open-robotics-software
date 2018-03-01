@@ -54,7 +54,7 @@ public class FeetManager
    private final SideDependentList<ContactableFoot> feet;
 
    private final ReferenceFrame pelvisZUpFrame;
-   private final SegmentDependentList<RobotSide, MovingReferenceFrame> soleZUpFrames;
+   private final SideDependentList<MovingReferenceFrame> soleZUpFrames;
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
