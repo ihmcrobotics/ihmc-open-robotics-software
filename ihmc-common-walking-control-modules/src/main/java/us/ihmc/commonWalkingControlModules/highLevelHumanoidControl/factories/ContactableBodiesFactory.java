@@ -18,7 +18,6 @@ import us.ihmc.sensorProcessing.frames.CommonLeggedReferenceFrames;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,21 +54,6 @@ public class ContactableBodiesFactory<E extends Enum<E> & RobotSegment<E>>
    {
       this.toeContactPoints.set(toeContactPoints);
       this.toeContactLines.set(toeContactLines);
-   }
-
-   public void setRobotContactPointParameters(RobotContactPointParameters<E> robotContactPointParameters)
-   {
-      setFootContactPoints(robotContactPointParameters.getFootContactPoints());
-      setToeContactParameters(robotContactPointParameters.getControllerToeContactPoints(), robotContactPointParameters.getControllerToeContactLines());
-
-      ArrayList<String> additionalContactRigidBodyNames = robotContactPointParameters.getAdditionalContactRigidBodyNames();
-      ArrayList<String> additionaContactNames = robotContactPointParameters.getAdditionalContactNames();
-      ArrayList<RigidBodyTransform> additionalContactTransforms = robotContactPointParameters.getAdditionalContactTransforms();
-
-      for (int i = 0; i < robotContactPointParameters.getAdditionalContactNames().size(); i++)
-      {
-         addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionaContactNames.get(i), additionalContactTransforms.get(i));
-      }
    }
 
    public void addAdditionalContactPoint(String bodyName, String contactName, RigidBodyTransform transformFromParentLinkToPoint)
