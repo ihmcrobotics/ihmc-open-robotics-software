@@ -8,6 +8,13 @@ import java.util.Map;
 
 public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> implements Iterable<V>
 {
+   private final RobotSide[][] sideArrays = new RobotSide[2][];
+   {
+      sideArrays[0] = new RobotSide[0];
+      sideArrays[1] = new RobotSide[1];
+      sideArrays[2] = RobotSide.values;
+   }
+
    private static final long serialVersionUID = -6514328471068877058L;
 
    public SideDependentList()
@@ -41,6 +48,26 @@ public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> imp
       for (RobotSide robotSide : RobotSide.values)
       {
          this.set(robotSide, sideDependentList.get(robotSide));
+      }
+   }
+
+   public RobotSide[] sides()
+   {
+      fillSideArray();
+      return sideArrays[size()];
+   }
+
+   private void fillSideArray()
+   {
+      if (size() == 2)
+         return;
+
+      for (int i = 0, j = 0; i < RobotSide.values.length; i++)
+      {
+         if (containsKey(RobotSide.values[i]))
+         {
+            sideArrays[size()][j++] = RobotSide.values[i];
+         }
       }
    }
 

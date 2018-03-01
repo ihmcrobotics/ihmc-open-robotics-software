@@ -56,7 +56,7 @@ public class PushRecoveryControlModule
    private final SideDependentList<? extends ContactablePlaneBody> feet;
 
    private final ReferenceFrame midFeetZUp;
-   private final SegmentDependentList<RobotSide, MovingReferenceFrame> soleFrames;
+   private final SideDependentList<MovingReferenceFrame> soleFrames;
 
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
 
