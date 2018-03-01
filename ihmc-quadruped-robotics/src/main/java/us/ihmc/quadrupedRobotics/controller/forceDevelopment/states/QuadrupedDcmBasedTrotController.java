@@ -70,6 +70,8 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 
    // feedback controllers
    private final LinearInvertedPendulumModel lipModel;
+   private final FramePoint3D vrpPositionSetpoint = new FramePoint3D();
+   private final FramePoint3D cmpPositionSetpoint = new FramePoint3D();
    private final FramePoint3D dcmPositionEstimate;
    private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final DivergentComponentOfMotionController dcmPositionController;
@@ -130,7 +132,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       dcmPositionEstimate = new FramePoint3D();
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), lipModel, registry, runtimeEnvironment.getGraphicsListRegistry());
-      dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), lipModel, registry, runtimeEnvironment.getGraphicsListRegistry());
+      dcmPositionController = new DivergentComponentOfMotionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), lipModel, registry);
       comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
 
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
@@ -191,8 +193,13 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
    {
       // update desired horizontal com forces
       trotStateMachine.process();
-      dcmPositionController.compute(taskSpaceControllerCommands.getComForce(), dcmPositionEstimate, dcmPositionController.getDCMPositionSetpoint(),
+      dcmPositionController.compute(vrpPositionSetpoint, dcmPositionEstimate, dcmPositionController.getDCMPositionSetpoint(),
                                     dcmPositionController.getDCMVelocitySetpoint());
+
+      cmpPositionSetpoint.set(vrpPositionSetpoint);
+      cmpPositionSetpoint.subZ(lipModel.getComHeight());
+      lipModel.computeComForce(taskSpaceControllerCommands.getComForce(), cmpPositionSetpoint);
+
       taskSpaceControllerCommands.getComForce().changeFrame(supportFrame);
 
       // update desired com position, velocity, and vertical force
