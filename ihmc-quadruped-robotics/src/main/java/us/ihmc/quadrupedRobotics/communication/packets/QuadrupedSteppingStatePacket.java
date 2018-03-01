@@ -23,9 +23,15 @@ public class QuadrupedSteppingStatePacket extends Packet<QuadrupedSteppingStateP
       return state;
    }
 
-   public void set(QuadrupedSteppingStatePacket other) { this.state = other.state; }
+   public void set(QuadrupedSteppingStateEnum state)
+   {
+      this.state = state;
+   }
 
-   public void set(QuadrupedSteppingStateEnum state){ this.state = state;}
+   public void set(QuadrupedSteppingStatePacket other)
+   {
+      this.state = other.state;
+   }
 
    @Override
    public boolean epsilonEquals(QuadrupedSteppingStatePacket other, double epsilon)
