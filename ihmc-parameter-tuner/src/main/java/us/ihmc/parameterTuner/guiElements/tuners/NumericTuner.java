@@ -1,53 +1,23 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
-import java.io.IOException;
-
 import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
 public abstract class NumericTuner<T extends Number> extends HBox implements InputNode
 {
-   private static final String FXML_PATH = "numeric_tuner.fxml";
-
-   @FXML
-   private StackPane valuePane;
    private final NumericSpinner<T> value = createSpinner();
-
-   @FXML
-   private StackPane minPane;
    private final NumericSpinner<T> min = createSpinner();
-
-   @FXML
-   private StackPane maxPane;
    private final NumericSpinner<T> max = createSpinner();
-
-   @FXML
-   private StackPane sliderPane;
-   private NumericSlider<T> slider = createSlider();
+   private final NumericSlider<T> slider = createSlider();
 
    public NumericTuner(GuiParameter parameter)
    {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
-      loader.setRoot(this);
-      loader.setController(this);
-      try
-      {
-         loader.load();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
-      valuePane.getChildren().add(value);
-      minPane.getChildren().add(min);
-      maxPane.getChildren().add(max);
-      sliderPane.getChildren().add(slider);
+      setupNode();
 
       value.addListener((observable, oldValue, newValue) -> {
          Platform.runLater(() -> parameter.setValue(value.getValueAsText()));
@@ -75,6 +45,24 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
          setFromParameter(parameter);
       });
       setFromParameter(parameter);
+   }
+
+   private void setupNode()
+   {
+      setSpacing(10.0);
+      setAlignment(Pos.CENTER_LEFT);
+      setMaxHeight(Double.NEGATIVE_INFINITY);
+      setMaxWidth(Double.NEGATIVE_INFINITY);
+      setPrefWidth(800.0);
+      setPadding(new Insets(0.0, 5.0, 5.0, 5.0));
+
+      getChildren().add(new Text("Value"));
+      getChildren().add(value);
+      getChildren().add(new Text("Min"));
+      getChildren().add(min);
+      getChildren().add(slider);
+      getChildren().add(new Text("Max"));
+      getChildren().add(max);
    }
 
    private void setFromParameter(GuiParameter parameter)

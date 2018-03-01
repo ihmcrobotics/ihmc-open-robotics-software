@@ -1,36 +1,22 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
-import java.io.IOException;
-
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
 public class BooleanTuner extends HBox implements InputNode
 {
-   private static final String FXML_PATH = "boolean_tuner.fxml";
-
-   @FXML
-   private CheckBox value;
+   private final CheckBox value = new CheckBox();
 
    public BooleanTuner(GuiParameter parameter)
    {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
-      loader.setRoot(this);
-      loader.setController(this);
-      try
-      {
-         loader.load();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      setupNode();
 
       value.setSelected(Boolean.parseBoolean(parameter.getCurrentValue()));
 
@@ -43,6 +29,19 @@ public class BooleanTuner extends HBox implements InputNode
          Platform.runLater(() -> parameter.setValue(Boolean.toString(value.isSelected())));
       });
    }
+
+   private void setupNode()
+   {
+      setSpacing(10.0);
+      setAlignment(Pos.CENTER_LEFT);
+      setMaxHeight(Double.NEGATIVE_INFINITY);
+      setMaxWidth(Double.NEGATIVE_INFINITY);
+      setPrefWidth(800.0);
+      setPadding(new Insets(0.0, 5.0, 5.0, 5.0));
+      getChildren().add(new Text("Value"));
+      getChildren().add(value);
+   }
+
 
    @Override
    public Node getSimpleInputNode()
