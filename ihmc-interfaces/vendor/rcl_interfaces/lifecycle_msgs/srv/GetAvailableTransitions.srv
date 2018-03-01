@@ -1,0 +1,3 @@
+string node_name
+---
+TransitionDescription[] available_transitions

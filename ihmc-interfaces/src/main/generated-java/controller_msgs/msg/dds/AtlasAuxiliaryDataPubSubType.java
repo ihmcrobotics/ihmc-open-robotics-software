@@ -51,16 +51,16 @@ public class AtlasAuxiliaryDataPubSubType implements us.ihmc.pubsub.TopicDataTyp
       int initial_alignment = current_alignment;
 
       current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
-      for (int a = 0; a < data.getElectric_joint_data().length; ++a)
+      for (int a = 0; a < data.getElectricJointData().length; ++a)
       {
-         current_alignment += controller_msgs.msg.dds.ElectricJointDataPubSubType.getCdrSerializedSize(data.getElectric_joint_data()[a], current_alignment);
+         current_alignment += controller_msgs.msg.dds.ElectricJointDataPubSubType.getCdrSerializedSize(data.getElectricJointData()[a], current_alignment);
       }
-      for (int a = 0; a < data.getRaw_imu_data().length; ++a)
+      for (int a = 0; a < data.getRawImuData().length; ++a)
       {
-         current_alignment += controller_msgs.msg.dds.RawImuDataPubSubType.getCdrSerializedSize(data.getRaw_imu_data()[a], current_alignment);
+         current_alignment += controller_msgs.msg.dds.RawImuDataPubSubType.getCdrSerializedSize(data.getRawImuData()[a], current_alignment);
       }
-      current_alignment += controller_msgs.msg.dds.BatteryStatePubSubType.getCdrSerializedSize(data.getBattery_state(), current_alignment);
-      current_alignment += controller_msgs.msg.dds.PumpStatePubSubType.getCdrSerializedSize(data.getPump_state(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.BatteryStatePubSubType.getCdrSerializedSize(data.getBatteryState(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.PumpStatePubSubType.getCdrSerializedSize(data.getPumpState(), current_alignment);
 
       return current_alignment - initial_alignment;
    }
@@ -70,19 +70,19 @@ public class AtlasAuxiliaryDataPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
 
-      for (int a = 0; a < data.getElectric_joint_data().length; ++a)
+      for (int a = 0; a < data.getElectricJointData().length; ++a)
       {
-         controller_msgs.msg.dds.ElectricJointDataPubSubType.write(data.getElectric_joint_data()[a], cdr);
+         controller_msgs.msg.dds.ElectricJointDataPubSubType.write(data.getElectricJointData()[a], cdr);
       }
 
-      for (int a = 0; a < data.getRaw_imu_data().length; ++a)
+      for (int a = 0; a < data.getRawImuData().length; ++a)
       {
-         controller_msgs.msg.dds.RawImuDataPubSubType.write(data.getRaw_imu_data()[a], cdr);
+         controller_msgs.msg.dds.RawImuDataPubSubType.write(data.getRawImuData()[a], cdr);
       }
 
-      controller_msgs.msg.dds.BatteryStatePubSubType.write(data.getBattery_state(), cdr);
+      controller_msgs.msg.dds.BatteryStatePubSubType.write(data.getBatteryState(), cdr);
 
-      controller_msgs.msg.dds.PumpStatePubSubType.write(data.getPump_state(), cdr);
+      controller_msgs.msg.dds.PumpStatePubSubType.write(data.getPumpState(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.AtlasAuxiliaryData data, us.ihmc.idl.CDR cdr)
@@ -90,19 +90,19 @@ public class AtlasAuxiliaryDataPubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
 
-      for (int a = 0; a < data.getElectric_joint_data().length; ++a)
+      for (int a = 0; a < data.getElectricJointData().length; ++a)
       {
-         controller_msgs.msg.dds.ElectricJointDataPubSubType.read(data.getElectric_joint_data()[a], cdr);
+         controller_msgs.msg.dds.ElectricJointDataPubSubType.read(data.getElectricJointData()[a], cdr);
       }
 
-      for (int a = 0; a < data.getRaw_imu_data().length; ++a)
+      for (int a = 0; a < data.getRawImuData().length; ++a)
       {
-         controller_msgs.msg.dds.RawImuDataPubSubType.read(data.getRaw_imu_data()[a], cdr);
+         controller_msgs.msg.dds.RawImuDataPubSubType.read(data.getRawImuData()[a], cdr);
       }
 
-      controller_msgs.msg.dds.BatteryStatePubSubType.read(data.getBattery_state(), cdr);
+      controller_msgs.msg.dds.BatteryStatePubSubType.read(data.getBatteryState(), cdr);
 
-      controller_msgs.msg.dds.PumpStatePubSubType.read(data.getPump_state(), cdr);
+      controller_msgs.msg.dds.PumpStatePubSubType.read(data.getPumpState(), cdr);
    }
 
    public static void staticCopy(controller_msgs.msg.dds.AtlasAuxiliaryData src, controller_msgs.msg.dds.AtlasAuxiliaryData dest)
@@ -132,11 +132,11 @@ public class AtlasAuxiliaryDataPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
-      ser.write_type_f("electric_joint_data", new controller_msgs.msg.dds.ElectricJointDataPubSubType(), data.getElectric_joint_data());
-      ser.write_type_f("raw_imu_data", new controller_msgs.msg.dds.RawImuDataPubSubType(), data.getRaw_imu_data());
-      ser.write_type_a("battery_state", new controller_msgs.msg.dds.BatteryStatePubSubType(), data.getBattery_state());
+      ser.write_type_f("electric_joint_data", new controller_msgs.msg.dds.ElectricJointDataPubSubType(), data.getElectricJointData());
+      ser.write_type_f("raw_imu_data", new controller_msgs.msg.dds.RawImuDataPubSubType(), data.getRawImuData());
+      ser.write_type_a("battery_state", new controller_msgs.msg.dds.BatteryStatePubSubType(), data.getBatteryState());
 
-      ser.write_type_a("pump_state", new controller_msgs.msg.dds.PumpStatePubSubType(), data.getPump_state());
+      ser.write_type_a("pump_state", new controller_msgs.msg.dds.PumpStatePubSubType(), data.getPumpState());
    }
 
    @Override
@@ -144,13 +144,13 @@ public class AtlasAuxiliaryDataPubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
-      ser.read_type_f("electric_joint_data", new controller_msgs.msg.dds.ElectricJointDataPubSubType(), data.getElectric_joint_data());
+      ser.read_type_f("electric_joint_data", new controller_msgs.msg.dds.ElectricJointDataPubSubType(), data.getElectricJointData());
 
-      ser.read_type_f("raw_imu_data", new controller_msgs.msg.dds.RawImuDataPubSubType(), data.getRaw_imu_data());
+      ser.read_type_f("raw_imu_data", new controller_msgs.msg.dds.RawImuDataPubSubType(), data.getRawImuData());
 
-      ser.read_type_a("battery_state", new controller_msgs.msg.dds.BatteryStatePubSubType(), data.getBattery_state());
+      ser.read_type_a("battery_state", new controller_msgs.msg.dds.BatteryStatePubSubType(), data.getBatteryState());
 
-      ser.read_type_a("pump_state", new controller_msgs.msg.dds.PumpStatePubSubType(), data.getPump_state());
+      ser.read_type_a("pump_state", new controller_msgs.msg.dds.PumpStatePubSubType(), data.getPumpState());
    }
 
    @Override

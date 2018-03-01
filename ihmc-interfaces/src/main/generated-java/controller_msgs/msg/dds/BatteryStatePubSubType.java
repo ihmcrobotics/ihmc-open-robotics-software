@@ -72,37 +72,37 @@ public class BatteryStatePubSubType implements us.ihmc.pubsub.TopicDataType<cont
    public static void write(controller_msgs.msg.dds.BatteryState data, us.ihmc.idl.CDR cdr)
    {
 
-      cdr.write_type_7(data.getBattery_charging());
+      cdr.write_type_7(data.getBatteryCharging());
 
-      cdr.write_type_5(data.getBattery_voltage());
+      cdr.write_type_5(data.getBatteryVoltage());
 
-      cdr.write_type_5(data.getBattery_current());
+      cdr.write_type_5(data.getBatteryCurrent());
 
-      cdr.write_type_5(data.getRemaining_battery_time());
+      cdr.write_type_5(data.getRemainingBatteryTime());
 
-      cdr.write_type_5(data.getRemaining_amp_hours());
+      cdr.write_type_5(data.getRemainingAmpHours());
 
-      cdr.write_type_5(data.getRemaining_charge_percentage());
+      cdr.write_type_5(data.getRemainingChargePercentage());
 
-      cdr.write_type_11(data.getBattery_cycle_count());
+      cdr.write_type_11(data.getBatteryCycleCount());
    }
 
    public static void read(controller_msgs.msg.dds.BatteryState data, us.ihmc.idl.CDR cdr)
    {
 
-      data.setBattery_charging(cdr.read_type_7());
+      data.setBatteryCharging(cdr.read_type_7());
 
-      data.setBattery_voltage(cdr.read_type_5());
+      data.setBatteryVoltage(cdr.read_type_5());
 
-      data.setBattery_current(cdr.read_type_5());
+      data.setBatteryCurrent(cdr.read_type_5());
 
-      data.setRemaining_battery_time(cdr.read_type_5());
+      data.setRemainingBatteryTime(cdr.read_type_5());
 
-      data.setRemaining_amp_hours(cdr.read_type_5());
+      data.setRemainingAmpHours(cdr.read_type_5());
 
-      data.setRemaining_charge_percentage(cdr.read_type_5());
+      data.setRemainingChargePercentage(cdr.read_type_5());
 
-      data.setBattery_cycle_count(cdr.read_type_11());
+      data.setBatteryCycleCount(cdr.read_type_11());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.BatteryState src, controller_msgs.msg.dds.BatteryState dest)
@@ -129,37 +129,37 @@ public class BatteryStatePubSubType implements us.ihmc.pubsub.TopicDataType<cont
    @Override
    public final void serialize(controller_msgs.msg.dds.BatteryState data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_7("battery_charging", data.getBattery_charging());
+      ser.write_type_7("battery_charging", data.getBatteryCharging());
 
-      ser.write_type_5("battery_voltage", data.getBattery_voltage());
+      ser.write_type_5("battery_voltage", data.getBatteryVoltage());
 
-      ser.write_type_5("battery_current", data.getBattery_current());
+      ser.write_type_5("battery_current", data.getBatteryCurrent());
 
-      ser.write_type_5("remaining_battery_time", data.getRemaining_battery_time());
+      ser.write_type_5("remaining_battery_time", data.getRemainingBatteryTime());
 
-      ser.write_type_5("remaining_amp_hours", data.getRemaining_amp_hours());
+      ser.write_type_5("remaining_amp_hours", data.getRemainingAmpHours());
 
-      ser.write_type_5("remaining_charge_percentage", data.getRemaining_charge_percentage());
+      ser.write_type_5("remaining_charge_percentage", data.getRemainingChargePercentage());
 
-      ser.write_type_11("battery_cycle_count", data.getBattery_cycle_count());
+      ser.write_type_11("battery_cycle_count", data.getBatteryCycleCount());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.BatteryState data)
    {
-      data.setBattery_charging(ser.read_type_7("battery_charging"));
+      data.setBatteryCharging(ser.read_type_7("battery_charging"));
 
-      data.setBattery_voltage(ser.read_type_5("battery_voltage"));
+      data.setBatteryVoltage(ser.read_type_5("battery_voltage"));
 
-      data.setBattery_current(ser.read_type_5("battery_current"));
+      data.setBatteryCurrent(ser.read_type_5("battery_current"));
 
-      data.setRemaining_battery_time(ser.read_type_5("remaining_battery_time"));
+      data.setRemainingBatteryTime(ser.read_type_5("remaining_battery_time"));
 
-      data.setRemaining_amp_hours(ser.read_type_5("remaining_amp_hours"));
+      data.setRemainingAmpHours(ser.read_type_5("remaining_amp_hours"));
 
-      data.setRemaining_charge_percentage(ser.read_type_5("remaining_charge_percentage"));
+      data.setRemainingChargePercentage(ser.read_type_5("remaining_charge_percentage"));
 
-      data.setBattery_cycle_count(ser.read_type_11("battery_cycle_count"));
+      data.setBatteryCycleCount(ser.read_type_11("battery_cycle_count"));
    }
 
    @Override

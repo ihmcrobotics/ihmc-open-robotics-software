@@ -1,12 +1,15 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
 /**
  * Definition of the class "WeightedJointTrajectoryPoint" defined in WeightedJointTrajectoryPoint_.idl.
  *
  * This file was automatically generated from WeightedJointTrajectoryPoint_.idl by us.ihmc.idl.generator.IDLGenerator.
  * Do not update this file directly, edit WeightedJointTrajectoryPoint_.idl instead.
  */
-public class WeightedJointTrajectoryPoint
+public class WeightedJointTrajectoryPoint implements Settable<WeightedJointTrajectoryPoint>, EpsilonComparable<WeightedJointTrajectoryPoint>
 {
    private trajectory_msgs.msg.dds.JointTrajectoryPoint point_;
    private double weight_;
@@ -14,6 +17,11 @@ public class WeightedJointTrajectoryPoint
    public WeightedJointTrajectoryPoint()
    {
       point_ = new trajectory_msgs.msg.dds.JointTrajectoryPoint();
+   }
+
+   public WeightedJointTrajectoryPoint(WeightedJointTrajectoryPoint other)
+   {
+      set(other);
    }
 
    public void set(WeightedJointTrajectoryPoint other)
@@ -38,7 +46,24 @@ public class WeightedJointTrajectoryPoint
    }
 
    @Override
-   public boolean equals(java.lang.Object other)
+   public boolean epsilonEquals(WeightedJointTrajectoryPoint other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+
+      if (!this.point_.epsilonEquals(other.point_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_, other.weight_, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
    {
       if (other == null)
          return false;
@@ -46,14 +71,16 @@ public class WeightedJointTrajectoryPoint
          return true;
       if (!(other instanceof WeightedJointTrajectoryPoint))
          return false;
+
       WeightedJointTrajectoryPoint otherMyClass = (WeightedJointTrajectoryPoint) other;
-      boolean returnedValue = true;
 
-      returnedValue &= this.point_.equals(otherMyClass.point_);
+      if (!this.point_.equals(otherMyClass.point_))
+         return false;
 
-      returnedValue &= this.weight_ == otherMyClass.weight_;
+      if (this.weight_ != otherMyClass.weight_)
+         return false;
 
-      return returnedValue;
+      return true;
    }
 
    @Override

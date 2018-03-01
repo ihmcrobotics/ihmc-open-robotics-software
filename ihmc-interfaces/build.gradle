@@ -22,7 +22,8 @@ ihmc {
    loadProductProperties("../product.properties")
 
    configureDependencyResolution()
-   resourceDirectory("main", "rosidl")
+   resourceDirectory("main", "messages")
+   resourceDirectory("main", "generated-idl")
    javaDirectory("main", "generated-java")
    configurePublications()
 }
@@ -46,6 +47,19 @@ testDependencies {
 generatorDependencies {
    compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.3.7"
 }
+
+//task unzipInterfaceDependencies() {
+//      delete("build/tmp/generateMessages")
+//
+//      copy {
+//         configurations.compile.findAll { it.name.contains("ros2-common-interfaces") }.each {
+//            from zipTree(it)
+//         }
+//         into file("build/tmp/generateMessages/ros2-common-interfaces")
+//      }
+//}
+//
+//compileJava.dependsOn unzipInterfaceDependencies
 
 task show() {
    doLast {

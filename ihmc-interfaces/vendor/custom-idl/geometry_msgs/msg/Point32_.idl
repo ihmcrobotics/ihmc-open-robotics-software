@@ -1,0 +1,22 @@
+#ifndef __geometry_msgs__msg__Point32__idl__
+#define __geometry_msgs__msg__Point32__idl__
+
+module geometry_msgs
+{
+    module msg
+    {
+        module dds
+        {
+            @TypeCode(type="geometry_msgs::msg::dds_::Point32_")
+            @Abstract(type="us.ihmc.euclid.tuple3D.Point3D32", impl="new us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.Point3D32PubSubTypeImpl()")
+            struct Point32
+            {
+              float x;
+              float y;
+              float z;
+            };
+        };
+    };
+};
+
+#endif

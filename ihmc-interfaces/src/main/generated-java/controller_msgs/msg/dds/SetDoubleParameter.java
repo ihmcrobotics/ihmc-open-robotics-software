@@ -1,12 +1,15 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
 /**
  * Definition of the class "SetDoubleParameter" defined in SetDoubleParameter_.idl.
  *
  * This file was automatically generated from SetDoubleParameter_.idl by us.ihmc.idl.generator.IDLGenerator.
  * Do not update this file directly, edit SetDoubleParameter_.idl instead.
  */
-public class SetDoubleParameter
+public class SetDoubleParameter implements Settable<SetDoubleParameter>, EpsilonComparable<SetDoubleParameter>
 {
    private java.lang.StringBuilder parameter_name_;
    private double parameter_value_;
@@ -16,41 +19,64 @@ public class SetDoubleParameter
       parameter_name_ = new java.lang.StringBuilder(255);
    }
 
+   public SetDoubleParameter(SetDoubleParameter other)
+   {
+      set(other);
+   }
+
    public void set(SetDoubleParameter other)
    {
       parameter_name_.setLength(0);
       parameter_name_.append(other.parameter_name_);
+
       parameter_value_ = other.parameter_value_;
    }
 
-   public java.lang.String getParameter_nameAsString()
+   public java.lang.String getParameterNameAsString()
    {
-      return getParameter_name().toString();
+      return getParameterName().toString();
    }
 
-   public java.lang.StringBuilder getParameter_name()
+   public java.lang.StringBuilder getParameterName()
    {
       return parameter_name_;
    }
 
-   public void setParameter_name(String parameter_name)
+   public void setParameterName(String parameter_name)
    {
       parameter_name_.setLength(0);
       parameter_name_.append(parameter_name);
    }
 
-   public double getParameter_value()
+   public double getParameterValue()
    {
       return parameter_value_;
    }
 
-   public void setParameter_value(double parameter_value)
+   public void setParameterValue(double parameter_value)
    {
       parameter_value_ = parameter_value;
    }
 
    @Override
-   public boolean equals(java.lang.Object other)
+   public boolean epsilonEquals(SetDoubleParameter other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parameter_name_, other.parameter_name_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.parameter_value_, other.parameter_value_, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
    {
       if (other == null)
          return false;
@@ -58,14 +84,16 @@ public class SetDoubleParameter
          return true;
       if (!(other instanceof SetDoubleParameter))
          return false;
+
       SetDoubleParameter otherMyClass = (SetDoubleParameter) other;
-      boolean returnedValue = true;
 
-      returnedValue &= us.ihmc.idl.IDLTools.equals(this.parameter_name_, otherMyClass.parameter_name_);
+      if (!us.ihmc.idl.IDLTools.equals(this.parameter_name_, otherMyClass.parameter_name_))
+         return false;
 
-      returnedValue &= this.parameter_value_ == otherMyClass.parameter_value_;
+      if (this.parameter_value_ != otherMyClass.parameter_value_)
+         return false;
 
-      return returnedValue;
+      return true;
    }
 
    @Override

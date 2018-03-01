@@ -1,12 +1,15 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
 /**
  * Definition of the class "FootstepList" defined in FootstepList_.idl.
  *
  * This file was automatically generated from FootstepList_.idl by us.ihmc.idl.generator.IDLGenerator.
  * Do not update this file directly, edit FootstepList_.idl instead.
  */
-public class FootstepList
+public class FootstepList implements Settable<FootstepList>, EpsilonComparable<FootstepList>
 {
    private long unique_id_;
    private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Footstep> footsteps_;
@@ -16,25 +19,34 @@ public class FootstepList
 
    public FootstepList()
    {
+
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Footstep>(100, controller_msgs.msg.dds.Footstep.class,
                                                                                         new controller_msgs.msg.dds.FootstepPubSubType());
+   }
+
+   public FootstepList(FootstepList other)
+   {
+      set(other);
    }
 
    public void set(FootstepList other)
    {
       unique_id_ = other.unique_id_;
+
       footsteps_.set(other.footsteps_);
       executing_timing_ = other.executing_timing_;
+
       default_swing_duration_ = other.default_swing_duration_;
+
       final_transfer_duration_ = other.final_transfer_duration_;
    }
 
-   public long getUnique_id()
+   public long getUniqueId()
    {
       return unique_id_;
    }
 
-   public void setUnique_id(long unique_id)
+   public void setUniqueId(long unique_id)
    {
       unique_id_ = unique_id;
    }
@@ -44,38 +56,79 @@ public class FootstepList
       return footsteps_;
    }
 
-   public byte getExecuting_timing()
+   public byte getExecutingTiming()
    {
       return executing_timing_;
    }
 
-   public void setExecuting_timing(byte executing_timing)
+   public void setExecutingTiming(byte executing_timing)
    {
       executing_timing_ = executing_timing;
    }
 
-   public double getDefault_swing_duration()
+   public double getDefaultSwingDuration()
    {
       return default_swing_duration_;
    }
 
-   public void setDefault_swing_duration(double default_swing_duration)
+   public void setDefaultSwingDuration(double default_swing_duration)
    {
       default_swing_duration_ = default_swing_duration;
    }
 
-   public double getFinal_transfer_duration()
+   public double getFinalTransferDuration()
    {
       return final_transfer_duration_;
    }
 
-   public void setFinal_transfer_duration(double final_transfer_duration)
+   public void setFinalTransferDuration(double final_transfer_duration)
    {
       final_transfer_duration_ = final_transfer_duration;
    }
 
    @Override
-   public boolean equals(java.lang.Object other)
+   public boolean epsilonEquals(FootstepList other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.unique_id_, other.unique_id_, epsilon))
+         return false;
+
+      if (this.footsteps_.isEnum())
+      {
+         if (!this.footsteps_.equals(other.footsteps_))
+            return false;
+      }
+      else if (this.footsteps_.size() == other.footsteps_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.footsteps_.size(); i++)
+         {
+            if (!this.footsteps_.get(i).epsilonEquals(other.footsteps_.get(i), epsilon))
+               return false;
+         }
+      }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.executing_timing_, other.executing_timing_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_swing_duration_, other.default_swing_duration_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_transfer_duration_, other.final_transfer_duration_, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
    {
       if (other == null)
          return false;
@@ -83,20 +136,25 @@ public class FootstepList
          return true;
       if (!(other instanceof FootstepList))
          return false;
+
       FootstepList otherMyClass = (FootstepList) other;
-      boolean returnedValue = true;
 
-      returnedValue &= this.unique_id_ == otherMyClass.unique_id_;
+      if (this.unique_id_ != otherMyClass.unique_id_)
+         return false;
 
-      returnedValue &= this.footsteps_.equals(otherMyClass.footsteps_);
+      if (!this.footsteps_.equals(otherMyClass.footsteps_))
+         return false;
 
-      returnedValue &= this.executing_timing_ == otherMyClass.executing_timing_;
+      if (this.executing_timing_ != otherMyClass.executing_timing_)
+         return false;
 
-      returnedValue &= this.default_swing_duration_ == otherMyClass.default_swing_duration_;
+      if (this.default_swing_duration_ != otherMyClass.default_swing_duration_)
+         return false;
 
-      returnedValue &= this.final_transfer_duration_ == otherMyClass.final_transfer_duration_;
+      if (this.final_transfer_duration_ != otherMyClass.final_transfer_duration_)
+         return false;
 
-      return returnedValue;
+      return true;
    }
 
    @Override

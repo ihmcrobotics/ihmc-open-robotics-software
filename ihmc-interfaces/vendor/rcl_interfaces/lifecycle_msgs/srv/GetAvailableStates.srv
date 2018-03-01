@@ -1,0 +1,3 @@
+string node_name
+---
+State[] available_states
