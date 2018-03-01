@@ -9,8 +9,8 @@ buildscript {
    }
    dependencies {
       classpath "us.ihmc:ihmc-build:0.12.8"
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.2"
-      classpath "us.ihmc:ihmc-pub-sub-generator:0.3.7"
+//      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.2"
+//      classpath "us.ihmc:ihmc-pub-sub-generator:0.3.7"
       classpath "org.ajoberstar:grgit:2.1.0"
    }
 }
@@ -55,28 +55,28 @@ task show() {
    }
 }
 
-task generateMessages(type: us.ihmc.ros2.rosidl.RosInterfaceGeneratorTask) {
-   doFirst {
-      delete("build/tmp/generateMessages")
-
-      copy {
-         configurations.compile.findAll { it.name.contains("ros2-common-interfaces") }.each {
-            from zipTree(it)
-         }
-         into file("build/tmp/generateMessages/ros2-common-interfaces")
-      }
-   }
-
-   rosPackages = files("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces",
-                       "build/tmp/generateMessages/ros2-common-interfaces/common_interfaces",
-                       "src/main/rosidl/ihmc_interfaces")
-   outputDirectory = file("build/tmp/generateMessages/java")
-   customIDL = files("build/tmp/generateMessages/ros2-common-interfaces")
-
-   doLast {
-      copy {
-         from "build/tmp/generateMessages/java/controller_msgs"
-         into "src/main/generated-java/controller_msgs"
-      }
-   }
-}
+//task generateMessages(type: us.ihmc.ros2.rosidl.RosInterfaceGeneratorTask) {
+//   doFirst {
+//      delete("build/tmp/generateMessages")
+//
+//      copy {
+//         configurations.compile.findAll { it.name.contains("ros2-common-interfaces") }.each {
+//            from zipTree(it)
+//         }
+//         into file("build/tmp/generateMessages/ros2-common-interfaces")
+//      }
+//   }
+//
+//   rosPackages = files("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces",
+//                       "build/tmp/generateMessages/ros2-common-interfaces/common_interfaces",
+//                       "src/main/rosidl/ihmc_interfaces")
+//   outputDirectory = file("build/tmp/generateMessages/java")
+//   customIDL = files("build/tmp/generateMessages/ros2-common-interfaces")
+//
+//   doLast {
+//      copy {
+//         from "build/tmp/generateMessages/java/controller_msgs"
+//         into "src/main/generated-java/controller_msgs"
+//      }
+//   }
+//}
