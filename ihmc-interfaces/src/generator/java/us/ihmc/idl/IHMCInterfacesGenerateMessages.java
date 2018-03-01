@@ -30,11 +30,11 @@ public class IHMCInterfacesGenerateMessages
 //      generator.generate(Paths.get("build/tmp/idl"), Paths.get("build/tmp/generateMessages/java"));
 
       // Temp stuff for Sylvain
-      generator.addPackageRoot(Paths.get("vendor/rcl_interfaces"));
-      generator.addPackageRoot(Paths.get("vendor/common_interfaces"));
+      generator.addPackageRoot(Paths.get("../../ihmc-java-ros2-communication/ros2-common-interfaces/src/main/vendor/rcl_interfaces"));
+      generator.addPackageRoot(Paths.get("../../ihmc-java-ros2-communication/ros2-common-interfaces/src/main/vendor/common_interfaces"));
       generator.addPackageRoot(Paths.get("src/main/messages/ihmc_interfaces"));
 
-      generator.addCustomIDLFiles(Paths.get("vendor/custom-idl"));
+      generator.addCustomIDLFiles(Paths.get("../../ihmc-java-ros2-communication/ros2-common-interfaces/src/main/custom-idl"));
 
       generator.generate(Paths.get("src/main/generated-idl"), Paths.get("src/main/generated-java"));
 
