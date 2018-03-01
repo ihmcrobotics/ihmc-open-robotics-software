@@ -513,7 +513,7 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
    public static RobotConfigurationData extractRobotConfigurationData(FullHumanoidRobotModel fullRobotModel)
    {
       OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], null, new IMUDefinition[0]);
+      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], new IMUDefinition[0]);
       robotConfigurationData.setJointState(Arrays.stream(joints).collect(Collectors.toList()));
       robotConfigurationData.setRootTranslation(fullRobotModel.getRootJoint().getTranslationForReading());
       robotConfigurationData.setRootOrientation(fullRobotModel.getRootJoint().getRotationForReading());

@@ -23,7 +23,7 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -300,7 +300,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    @Override
-   public AuxiliaryRobotData getAuxiliaryRobotData()
+   public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
    {
       return null;
    }

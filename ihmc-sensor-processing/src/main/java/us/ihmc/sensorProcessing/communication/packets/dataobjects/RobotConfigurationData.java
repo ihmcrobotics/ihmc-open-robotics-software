@@ -39,7 +39,6 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
    public float[][] momentAndForceDataAllForceSensors;
    public IMUPacket[] imuSensorData;
    public byte robotMotionStatus;
-   public AuxiliaryRobotData auxiliaryRobotData;
 
    public int lastReceivedPacketTypeID;
    public long lastReceivedPacketUniqueId;
@@ -75,7 +74,6 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
          imuSensorData[i].set(other.imuSensorData[i]);
       }
       robotMotionStatus = other.robotMotionStatus;
-      auxiliaryRobotData.setAuxiliaryRobotData(other.auxiliaryRobotData);
       lastReceivedPacketTypeID = other.lastReceivedPacketTypeID;
       lastReceivedPacketUniqueId = other.lastReceivedPacketUniqueId;
       lastReceivedPacketRobotTimestamp = other.lastReceivedPacketRobotTimestamp;
@@ -247,19 +245,6 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
    public void setPelvisAngularVelocity(Vector3D pelvisAngularVelocityToPack)
    {
       pelvisAngularVelocity.set(pelvisAngularVelocityToPack);
-   }
-
-   public AuxiliaryRobotData getAuxiliaryRobotData()
-   {
-      return auxiliaryRobotData;
-   }
-
-   public void setAuxiliaryRobotData(AuxiliaryRobotData auxiliaryRobotData)
-   {
-      if (this.auxiliaryRobotData != null && auxiliaryRobotData != null)
-      {
-         this.auxiliaryRobotData.setAuxiliaryRobotData(auxiliaryRobotData);
-      }
    }
 
    public Vector3D32 getPelvisLinearAcceleration()

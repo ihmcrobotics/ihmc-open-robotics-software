@@ -96,7 +96,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkOverTerrainG
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalAction;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WallPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
@@ -189,7 +188,7 @@ import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
@@ -352,6 +351,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);
+      registerPacketClass(AtlasAuxiliaryRobotData.class);
       registerPacketFields(double[].class, Vector3D.class);
       registerPacketFields(DenseMatrix64F.class);
       registerPacketFields(DenseMatrix64F[].class);
@@ -498,8 +498,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketField(RobotMotionStatus.class);
 
-      registerPacketField(AuxiliaryRobotData.class);
-      registerPacketField(AtlasAuxiliaryRobotData.class);
       registerPacketField(long[].class);
       registerPacketField(boolean[].class);
       registerPacketField(float[].class);

@@ -105,7 +105,7 @@ public class AtlasNoSimPacketBlaster implements Runnable
    {
       OneDoFJoint[] joints = Arrays.copyOf(jointList, jointList.length);
 
-      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, null, imuDefinitions);
+      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuDefinitions);
 
       robotConfigurationData.setTimestamp(random.nextInt(1800) * Conversions.millisecondsToNanoseconds(100));
 

@@ -19,6 +19,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class AtlasNetworkProcessor
@@ -131,7 +132,7 @@ public class AtlasNetworkProcessor
       RosAtlasAuxiliaryRobotDataPublisher auxiliaryRobotDataPublisher = new RosAtlasAuxiliaryRobotDataPublisher(rosuri, defaultRosNameSpace);
       PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.ROS_AUXILIARY_ROBOT_DATA_PUBLISHER,
             new IHMCCommunicationKryoNetClassList());
-      packetCommunicator.attachListener(RobotConfigurationData.class, auxiliaryRobotDataPublisher);
+      packetCommunicator.attachListener(AtlasAuxiliaryRobotData.class, auxiliaryRobotDataPublisher::receivedPacket);
 
       networkModuleParams.addRobotSpecificModuleCommunicatorPort(NetworkPorts.ROS_AUXILIARY_ROBOT_DATA_PUBLISHER, PacketDestination.AUXILIARY_ROBOT_DATA_PUBLISHER);
    }
