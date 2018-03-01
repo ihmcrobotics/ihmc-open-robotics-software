@@ -156,7 +156,13 @@ public class RhinoBeetleJointNameMapAndContactDefinition implements JointNameMap
    {
       return null;
    }
-   
+
+   @Override
+   public String getRootBodyName()
+   {
+      return rootJoint;
+   }
+
    @Override
    @Deprecated
    public String getHeadName()

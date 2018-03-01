@@ -29,4 +29,10 @@ public interface HumanoidJointNameMap extends LeggedJointNameMap<RobotSide>
    {
       return RobotSide.values;
    }
+
+   @Override
+   default String getRootBodyName()
+   {
+      return getPelvisName();
+   }
 }
