@@ -176,8 +176,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       }
       stepAdjustmentVector = new FrameVector3D();
       stepGoalPosition = new FramePoint3D();
-      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
-            maximumStepStrideParameter.get());
+      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), registry);
       supportCentroid = new FramePoint3D();
 
       runtimeEnvironment.getParentRegistry().addChild(registry);

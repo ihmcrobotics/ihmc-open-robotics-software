@@ -53,7 +53,7 @@ public class DCMPlanner
       this.robotTimestamp = robotTimestamp;
       this.supportFrame = supportFrame;
       this.currentSolePositions = currentSolePositions;
-      this.dcmTransitionTrajectory = new FrameTrajectory3D(6, worldFrame);
+      this.dcmTransitionTrajectory = new FrameTrajectory3D(6, supportFrame);
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight);
       piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY);
 
@@ -94,11 +94,15 @@ public class DCMPlanner
          double transitionStartTime = Math.max(currentTime, transitionEndTime - initialTransitionDurationParameter.get());
          dcmTrajectory.computeTrajectory(transitionEndTime);
          dcmTrajectory.getPosition(finalDesiredDCM);
-         dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, dcmPosition, finalDesiredDCM);
+
+         tempPoint.set(dcmPosition);
+         tempPoint.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
+         finalDesiredDCM.changeFrame(dcmTransitionTrajectory.getReferenceFrame());
+         dcmTransitionTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(transitionStartTime, transitionEndTime, tempPoint, finalDesiredDCM);
       }
    }
 
-   private void computeDcmTrajectory(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   public void computeDcmTrajectory(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
       if (!stepSequence.isEmpty())
       {
@@ -122,6 +126,8 @@ public class DCMPlanner
 
    public void computeDcmSetpoints(FramePoint3D desiredDCMPositionToPack, FrameVector3D desiredDCMVelocityToPack)
    {
+      //computeDcmTrajectory(taskSpaceControllerSettings);
+
       if (stepSequence.isEmpty())
       {
          // update desired dcm position
@@ -147,5 +153,10 @@ public class DCMPlanner
       tempPoint.setIncludingFrame(finalDesiredDCM);
       tempPoint.changeFrame(finalDesiredDCMToPack.getReferenceFrame());
       finalDesiredDCMToPack.set(tempPoint);
+   }
+
+   public double getFinalTime()
+   {
+      return dcmTransitionTrajectory.getFinalTime();
    }
 }
