@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class SideDependentList<V> extends SegmentDependentList<RobotSide, V> implements Iterable<V>
 {
-   private final RobotSide[][] sideArrays = new RobotSide[2][];
+   private final RobotSide[][] sideArrays = new RobotSide[3][];
    {
       sideArrays[0] = new RobotSide[0];
       sideArrays[1] = new RobotSide[1];
