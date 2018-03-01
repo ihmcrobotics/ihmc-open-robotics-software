@@ -161,7 +161,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setRobotContactPointParameters(contactPointParameters);
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(humanoidReferenceFrames);
       SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());

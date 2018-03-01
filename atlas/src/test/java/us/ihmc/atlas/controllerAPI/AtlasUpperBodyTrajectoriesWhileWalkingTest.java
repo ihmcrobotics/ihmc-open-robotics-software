@@ -216,8 +216,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(
             desiredHeadingControlModule.getDesiredHeadingFrame(), registry);
 
-      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setRobotContactPointParameters(robotModel.getContactPointParameters());
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
       SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());

@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.diagnostics.*;
 import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -51,7 +52,9 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       scsInitialSetup.setInitializeEstimatorToActual(true);
       robotInitialSetup.setInitialGroundHeight(0.0);
 
-      ContactableBodiesFactory contactableBodiesFactory = model.getContactPointParameters().getContactableBodiesFactory();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setRobotContactPointParameters(model.getContactPointParameters());
+
       DRCRobotSensorInformation sensorInformation = model.getSensorInformation();
       SideDependentList<String> footSensorNames = sensorInformation.getFeetForceSensorNames();
       HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();

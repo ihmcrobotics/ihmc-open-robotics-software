@@ -37,6 +37,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotDataLogger.RobotVisualizer;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
@@ -331,7 +332,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
    private HighLevelHumanoidControllerFactory createHighLevelHumanoidControllerFactory(DRCRobotModel robotModel, PacketCommunicator packetCommunicator)
    {
-      ContactableBodiesFactory contactableBodiesFactory = robotModel.getContactPointParameters().getContactableBodiesFactory();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setRobotContactPointParameters(robotModel.getContactPointParameters());
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();

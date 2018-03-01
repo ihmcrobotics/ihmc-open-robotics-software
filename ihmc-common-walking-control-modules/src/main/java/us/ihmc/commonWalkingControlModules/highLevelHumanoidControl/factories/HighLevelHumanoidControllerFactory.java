@@ -328,6 +328,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       SideDependentList<ContactableFoot> feet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
       List<ContactablePlaneBody> additionalContacts = contactableBodiesFactory.createAdditionalContactPoints();
       contactableBodiesFactory.disposeFactory();
+
       List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
       for (RobotSide robotSide : RobotSide.values)
          contactablePlaneBodies.add(feet.get(robotSide));

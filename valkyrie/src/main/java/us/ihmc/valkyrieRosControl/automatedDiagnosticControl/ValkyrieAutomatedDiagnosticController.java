@@ -255,7 +255,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
       HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setRobotContactPointParameters(contactPointParameters);
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(estimatorReferenceFrames);
       SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
