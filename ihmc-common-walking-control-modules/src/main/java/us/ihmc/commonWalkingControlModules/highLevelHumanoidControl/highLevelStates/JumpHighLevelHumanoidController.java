@@ -1,6 +1,11 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
@@ -54,9 +59,11 @@ public class JumpHighLevelHumanoidController
    private final GravityCompensationManager gravityCompensationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
    private final SideDependentList<RigidBodyControlManager> footManagers = new SideDependentList<>();
-   
+   private final List<RigidBodyControlManager> bodyManagers = new ArrayList<>();
+
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(PlaneContactStateCommand.class);
+   private final Map<String, RigidBodyControlManager> rigidBodyManagersByName = new HashMap<>();
 
    public JumpHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                           WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -85,7 +92,10 @@ public class JumpHighLevelHumanoidController
       RigidBody chest = fullRobotModel.getChest();
       ReferenceFrame chestFrame = chest.getBodyFixedFrame();
 
-      RigidBody pelvis= fullRobotModel.getPelvis();
+      RigidBody head = fullRobotModel.getHead();
+      ReferenceFrame headFrame = head.getBodyFixedFrame();
+
+      RigidBody pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
 
       for (RobotSide side : RobotSide.values)
@@ -97,6 +107,7 @@ public class JumpHighLevelHumanoidController
             RigidBodyControlManager handManager = jumpingControlManagerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestFrame,
                                                                                                            trajectoryControlFrames);
             handManagers.put(side, handManager);
+            bodyManagers.add(handManager);
          }
 
          RigidBody foot = fullRobotModel.getFoot(side);
@@ -106,17 +117,39 @@ public class JumpHighLevelHumanoidController
             RigidBodyControlManager footManager = jumpingControlManagerFactory.getOrCreateRigidBodyManager(foot, pelvis, footControlFrame, pelvisFrame,
                                                                                                            trajectoryControlFrames);
             footManagers.put(side, footManager);
+            bodyManagers.add(footManager);
          }
       }
 
+      if (chest != null)
+      {
+         RigidBodyControlManager chestManager = jumpingControlManagerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestFrame, pelvisFrame,
+                                                                                                         trajectoryControlFrames);
+         bodyManagers.add(chestManager);
+      }
+      if (head != null)
+      {
+         RigidBodyControlManager headManager = jumpingControlManagerFactory.getOrCreateRigidBodyManager(head, chest, headFrame, chestFrame,
+                                                                                                        trajectoryControlFrames);
+         bodyManagers.add(headManager);
+      }
+
+      for (RigidBodyControlManager manager : bodyManagers)
+      {
+         if (manager == null)
+         {
+            continue;
+         }
+         rigidBodyManagersByName.put(manager.getControllerBodyName(), manager);
+      }
       setupStateMachine();
    }
-   
+
    // TODO Hacked for now to default to the flight state
    private void setupStateMachine()
    {
       FlightState flightState = new FlightState(controlCoreToolbox, controllerToolbox, wholeBodyMomentumManager, gravityCompensationManager, handManagers,
-                                                footManagers);
+                                                footManagers, rigidBodyManagersByName);
       stateMachine.addState(flightState);
    }
 
@@ -133,11 +166,11 @@ public class JumpHighLevelHumanoidController
    private void submitControllerCommands()
    {
       planeContactStateCommandPool.clear();
+      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+
       controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getMomentumRateCommand());
       controllerCoreCommand.addInverseDynamicsCommand(gravityCompensationManager.getRootJointAccelerationCommand());
 
-      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
-      
       for (RobotSide robotSide : RobotSide.values)
       {
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
@@ -146,17 +179,14 @@ public class JumpHighLevelHumanoidController
          planeContactStateCommand.setUseHighCoPDamping(false);
          controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
 
-         RigidBodyControlManager handManager = handManagers.get(robotSide);
-         if(handManager != null)
+      }
+      for (int i = 0; i < bodyManagers.size(); i++)
+      {
+         RigidBodyControlManager manager = bodyManagers.get(i);
+         if (manager != null)
          {
-            controllerCoreCommand.addFeedbackControlCommand(handManager.getFeedbackControlCommand());
-            controllerCoreCommand.addInverseDynamicsCommand(handManager.getInverseDynamicsCommand());
-         }
-         RigidBodyControlManager footManager = footManagers.get(robotSide);
-         if(footManager != null)
-         {
-            controllerCoreCommand.addFeedbackControlCommand(footManager.getFeedbackControlCommand());
-            controllerCoreCommand.addInverseDynamicsCommand(footManager.getInverseDynamicsCommand());
+            controllerCoreCommand.addFeedbackControlCommand(manager.getFeedbackControlCommand());
+            controllerCoreCommand.addInverseDynamicsCommand(manager.getInverseDynamicsCommand());
          }
       }
    }
@@ -166,7 +196,7 @@ public class JumpHighLevelHumanoidController
       stateMachine.setCurrentState(JumpStateEnum.FLIGHT);
       controllerCoreCommand.requestReinitialization();
       controllerToolbox.initialize();
-      
+
       privilegedConfigurationCommand.clear();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
 
