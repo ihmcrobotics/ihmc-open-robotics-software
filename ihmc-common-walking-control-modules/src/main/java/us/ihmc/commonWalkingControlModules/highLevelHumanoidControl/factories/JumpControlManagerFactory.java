@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.configurations.AbstractHighLevelContr
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.WholeBodyCentoidalAngularVelocityRegulator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.GravityCompensationManager;
@@ -25,7 +26,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -43,6 +43,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
    private FeetJumpManager feetManager;
    private CentroidalMomentumManager momentumManager;
    private GravityCompensationManager gravityCompensationManager;
+   private WholeBodyCentoidalAngularVelocityRegulator angularVelocityRegulator;
    //private PlaneContactControlManager planeContactManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
@@ -148,6 +149,15 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
       return manager;
+   }
+   
+   public WholeBodyCentoidalAngularVelocityRegulator getOrCreateAngularVelocityRegulator()
+   {
+      if(angularVelocityRegulator != null)
+         return angularVelocityRegulator;
+      
+      angularVelocityRegulator = null; //new WholeBodyCentoidalAngularVelocityRegulator(controllerToolbox, registry);
+      return angularVelocityRegulator;
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)

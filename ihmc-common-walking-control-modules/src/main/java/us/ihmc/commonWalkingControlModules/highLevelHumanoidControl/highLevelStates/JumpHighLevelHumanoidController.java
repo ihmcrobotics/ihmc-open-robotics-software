@@ -133,7 +133,7 @@ public class JumpHighLevelHumanoidController
    private void submitControllerCommands()
    {
       planeContactStateCommandPool.clear();
-      controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getMomentumRateCommand());
+      //controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getMomentumRateCommand());
       controllerCoreCommand.addInverseDynamicsCommand(wholeBodyMomentumManager.getCoMAccelerationCommand());
       controllerCoreCommand.addInverseDynamicsCommand(gravityCompensationManager.getRootJointAccelerationCommand());
 

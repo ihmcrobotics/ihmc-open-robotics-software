@@ -302,7 +302,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
     */
    private void computeDerivativeTerm(FrameVector3D feedbackTermToPack)
    {
-      centroidalMomentumHandler.getCenterOfMassVelocity(currentLinearVelocity);
+      centroidalMomentumHandler.getCenterOfMassLinearVelocity(currentLinearVelocity);
       currentLinearVelocity.changeFrame(worldFrame);
       yoCurrentLinearVelocity.set(currentLinearVelocity);
 

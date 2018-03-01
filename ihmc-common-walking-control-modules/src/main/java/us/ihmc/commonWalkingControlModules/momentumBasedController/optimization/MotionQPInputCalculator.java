@@ -610,7 +610,7 @@ public class MotionQPInputCalculator
    
    public void getSpatialCentroidalMomentumMatrix(DenseMatrix64F spatialCentroidaInertiaToPack)
    {
-      centroidalMomentumHandler.computeSpatialIntertiaMatrix(spatialCentroidaInertiaToPack);
+      centroidalMomentumHandler.computeSpatialInertiaMatrix(spatialCentroidaInertiaToPack);
    }
    
    public DenseMatrix64F getCentroidalMomentumConvectiveTerm()

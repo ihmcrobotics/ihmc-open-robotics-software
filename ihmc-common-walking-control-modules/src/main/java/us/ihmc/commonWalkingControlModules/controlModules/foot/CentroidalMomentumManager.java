@@ -84,10 +84,9 @@ public class CentroidalMomentumManager
       desiredAngularMomentumRateOfChange.set(controlFrame, 0.0, 0.0, 0.0);
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
       momentumCommand.setSelectionMatrixToIdentity();
-      
+
       desiredCoMLinearAcceleration.setIncludingFrame(comFrame, 0, 0, -gravityZ);
       comAccelerationCommand.setCoMLinearAcceleration(desiredCoMLinearAcceleration);
-      //PrintTools.debug("Linear weights: " + linearMomentumWeight.toString() + ", AngularMomentumwWeights: " + angularMomentumWeight.toString());
    }
 
    public MomentumRateCommand getMomentumRateCommand()

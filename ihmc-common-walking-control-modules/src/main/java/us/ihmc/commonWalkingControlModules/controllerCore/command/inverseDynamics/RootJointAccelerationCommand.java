@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
-import java.lang.ref.Reference;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,7 +16,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
  * <li> root acceleration for the {@code SpatialAccelerationCalculator} for computing accelerations of other rigid bodies
  * </p>
  * 
- * @author Apoorv Shriavstava
+ * @author Apoorv Shrivastava
  */
 public class RootJointAccelerationCommand implements InverseDynamicsCommand<RootJointAccelerationCommand>
 {

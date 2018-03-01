@@ -99,12 +99,12 @@ public class CentroidalMomentumHandler
       linearMomentumToPack.setIncludingFrame(centerOfMassFrame, 3, momentum);
    }
 
-   public void getCenterOfMassVelocity(FrameVector3D centerOfMassVelocityToPack)
+   public void getCenterOfMassLinearVelocity(FrameVector3D centerOfMassVelocityToPack)
    {
       getLinearMomentum(centerOfMassVelocityToPack);
       centerOfMassVelocityToPack.scale(1.0 / robotMass);
    }
-
+   
    public DenseMatrix64F getCentroidalMomentumMatrixPart(InverseDynamicsJoint[] joints)
    {
       int partDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(joints);
@@ -149,7 +149,7 @@ public class CentroidalMomentumHandler
       return centroidalMomentumEquationRightHandSide;
    }
 
-   public void computeSpatialIntertiaMatrix(DenseMatrix64F spatialCentroidalInertiaToPack)
+   public void computeSpatialInertiaMatrix(DenseMatrix64F spatialCentroidalInertiaToPack)
    {
       spatialCentroidalInertiaToPack.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
       spatialCentroidalInertiaToPack.zero();
