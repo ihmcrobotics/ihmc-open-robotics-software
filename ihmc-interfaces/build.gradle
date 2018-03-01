@@ -45,6 +45,7 @@ testDependencies {
 }
 
 generatorDependencies {
+   compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
    compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.3.7"
 }
 
