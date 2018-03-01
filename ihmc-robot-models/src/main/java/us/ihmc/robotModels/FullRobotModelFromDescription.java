@@ -222,7 +222,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getRootLink()
+   public RigidBody getRootBody()
    {
       return rootLink;
    }

@@ -18,9 +18,9 @@ public interface FullQuadrupedRobotModel extends FullLeggedRobotModel<RobotQuadr
 
    /**
     * Returns the {@link RigidBody} describing the body of this robot.
-    * In the current framework (on the day: 11/18/2014), the pelvis is the the first successor of the root joint.
+    * In the current framework (on the day: 3/1/2014), the body is the the first successor of the root joint.
     */
-   RigidBody getBodyLink();
+   RigidBody getBody();
 
    default RobotQuadrant[] getRobotSegments()
    {

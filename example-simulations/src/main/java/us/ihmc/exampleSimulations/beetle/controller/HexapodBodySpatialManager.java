@@ -50,7 +50,7 @@ public class HexapodBodySpatialManager
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.controllerDt = controllerDt;
-      body = fullRobotModel.getRootLink();
+      body = fullRobotModel.getRootBody();
       controlledBodies[0] = body;
 
       ReferenceFrame bodyZUpFrame = referenceFrames.getBodyZUpFrame();

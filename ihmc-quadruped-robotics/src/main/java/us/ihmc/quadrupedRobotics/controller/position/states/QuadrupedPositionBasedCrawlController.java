@@ -932,7 +932,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
     */
    private void updateEstimates()
    {
-      actualFullRobotModel.getBodyLink().getBodyFixedFrame().getTwistOfFrame(bodyTwist);
+      actualFullRobotModel.getBody().getBodyFixedFrame().getTwistOfFrame(bodyTwist);
 
       actualRobotRootJoint.getRotation(yawPitchRollArray);
       actualYaw.set(yawPitchRollArray[0]);

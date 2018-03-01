@@ -68,7 +68,7 @@ public class FootStepPlanner
    {
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = hexapodReferenceFrames;
-      pelvis = fullRobotModel.getRootLink();
+      pelvis = fullRobotModel.getRootBody();
       swingTimeScalar.set(1.1);
 
       bodyZUpFrame = hexapodReferenceFrames.getBodyZUpFrame();

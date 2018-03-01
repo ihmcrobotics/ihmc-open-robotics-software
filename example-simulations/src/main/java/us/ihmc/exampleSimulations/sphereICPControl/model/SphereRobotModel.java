@@ -168,7 +168,7 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
-   public RigidBody getRootLink()
+   public RigidBody getRootBody()
    {
       return null;
    }
