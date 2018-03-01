@@ -52,9 +52,9 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getJoint_names().size(); ++a)
+      for (int a = 0; a < data.getJointNames().size(); ++a)
       {
-         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getJoint_names().get(a).length() + 1;
+         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getJointNames().get(a).length() + 1;
       }
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int a = 0; a < data.getPoints().size(); ++a)
@@ -70,8 +70,8 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
 
       std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
 
-      if (data.getJoint_names().size() <= 100)
-         cdr.write_type_e(data.getJoint_names());
+      if (data.getJointNames().size() <= 100)
+         cdr.write_type_e(data.getJointNames());
       else
          throw new RuntimeException("joint_names field exceeds the maximum length");
 
@@ -86,7 +86,7 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
 
       std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
 
-      cdr.read_type_e(data.getJoint_names());
+      cdr.read_type_e(data.getJointNames());
 
       cdr.read_type_e(data.getPoints());
    }
@@ -119,7 +119,7 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
    {
       ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
-      ser.write_type_e("joint_names", data.getJoint_names());
+      ser.write_type_e("joint_names", data.getJointNames());
 
       ser.write_type_e("points", data.getPoints());
    }
@@ -129,7 +129,7 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
    {
       ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
-      ser.read_type_e("joint_names", data.getJoint_names());
+      ser.read_type_e("joint_names", data.getJointNames());
 
       ser.read_type_e("points", data.getPoints());
    }

@@ -1,12 +1,15 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
 /**
  * Definition of the class "TaskspaceTrajectoryStamped" defined in TaskspaceTrajectoryStamped_.idl.
  *
  * This file was automatically generated from TaskspaceTrajectoryStamped_.idl by us.ihmc.idl.generator.IDLGenerator.
  * Do not update this file directly, edit TaskspaceTrajectoryStamped_.idl instead.
  */
-public class TaskspaceTrajectoryStamped
+public class TaskspaceTrajectoryStamped implements Settable<TaskspaceTrajectoryStamped>, EpsilonComparable<TaskspaceTrajectoryStamped>
 {
    private std_msgs.msg.dds.Header header_;
    private us.ihmc.idl.IDLSequence.Object<geometry_msgs.msg.dds.PoseStamped> trajectory_points_stamped_;
@@ -21,6 +24,11 @@ public class TaskspaceTrajectoryStamped
       time_from_start_ = new builtin_interfaces.msg.dds.Duration();
    }
 
+   public TaskspaceTrajectoryStamped(TaskspaceTrajectoryStamped other)
+   {
+      set(other);
+   }
+
    public void set(TaskspaceTrajectoryStamped other)
    {
       std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
@@ -33,18 +41,53 @@ public class TaskspaceTrajectoryStamped
       return header_;
    }
 
-   public us.ihmc.idl.IDLSequence.Object<geometry_msgs.msg.dds.PoseStamped> getTrajectory_points_stamped()
+   public us.ihmc.idl.IDLSequence.Object<geometry_msgs.msg.dds.PoseStamped> getTrajectoryPointsStamped()
    {
       return trajectory_points_stamped_;
    }
 
-   public builtin_interfaces.msg.dds.Duration getTime_from_start()
+   public builtin_interfaces.msg.dds.Duration getTimeFromStart()
    {
       return time_from_start_;
    }
 
    @Override
-   public boolean equals(java.lang.Object other)
+   public boolean epsilonEquals(TaskspaceTrajectoryStamped other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
+
+      if (this.trajectory_points_stamped_.isEnum())
+      {
+         if (!this.trajectory_points_stamped_.equals(other.trajectory_points_stamped_))
+            return false;
+      }
+      else if (this.trajectory_points_stamped_.size() == other.trajectory_points_stamped_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.trajectory_points_stamped_.size(); i++)
+         {
+            if (!this.trajectory_points_stamped_.get(i).epsilonEquals(other.trajectory_points_stamped_.get(i), epsilon))
+               return false;
+         }
+      }
+
+      if (!this.time_from_start_.epsilonEquals(other.time_from_start_, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
    {
       if (other == null)
          return false;
@@ -52,16 +95,19 @@ public class TaskspaceTrajectoryStamped
          return true;
       if (!(other instanceof TaskspaceTrajectoryStamped))
          return false;
+
       TaskspaceTrajectoryStamped otherMyClass = (TaskspaceTrajectoryStamped) other;
-      boolean returnedValue = true;
 
-      returnedValue &= this.header_.equals(otherMyClass.header_);
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
 
-      returnedValue &= this.trajectory_points_stamped_.equals(otherMyClass.trajectory_points_stamped_);
+      if (!this.trajectory_points_stamped_.equals(otherMyClass.trajectory_points_stamped_))
+         return false;
 
-      returnedValue &= this.time_from_start_.equals(otherMyClass.time_from_start_);
+      if (!this.time_from_start_.equals(otherMyClass.time_from_start_))
+         return false;
 
-      return returnedValue;
+      return true;
    }
 
    @Override

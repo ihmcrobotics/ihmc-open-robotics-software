@@ -1,0 +1,24 @@
+#ifndef __geometry_msgs__msg__Transform__idl__
+#define __geometry_msgs__msg__Transform__idl__
+
+#include "geometry_msgs/msg/Quaternion_.idl"
+#include "geometry_msgs/msg/Vector3_.idl"
+
+module geometry_msgs
+{
+    module msg
+    {
+        module dds
+        {
+            @TypeCode(type="geometry_msgs::msg::dds_::Transform_")
+            @Abstract(type="us.ihmc.euclid.transform.QuaternionBasedTransform", impl="new us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.TransformPubSubTypeImpl()")
+            struct Transform
+            {
+              geometry_msgs::msg::dds::Vector3 translation;
+              geometry_msgs::msg::dds::Quaternion rotation;
+            };
+        };
+    };
+};
+
+#endif

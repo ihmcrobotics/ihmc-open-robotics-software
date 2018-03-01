@@ -49,12 +49,12 @@ public class TaskspaceTrajectoryStampedPubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getTrajectory_points_stamped().size(); ++a)
+      for (int a = 0; a < data.getTrajectoryPointsStamped().size(); ++a)
       {
-         current_alignment += geometry_msgs.msg.dds.PoseStampedPubSubType.getCdrSerializedSize(data.getTrajectory_points_stamped().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.PoseStampedPubSubType.getCdrSerializedSize(data.getTrajectoryPointsStamped().get(a), current_alignment);
       }
 
-      current_alignment += builtin_interfaces.msg.dds.DurationPubSubType.getCdrSerializedSize(data.getTime_from_start(), current_alignment);
+      current_alignment += builtin_interfaces.msg.dds.DurationPubSubType.getCdrSerializedSize(data.getTimeFromStart(), current_alignment);
 
       return current_alignment - initial_alignment;
    }
@@ -64,12 +64,12 @@ public class TaskspaceTrajectoryStampedPubSubType implements us.ihmc.pubsub.Topi
 
       std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
 
-      if (data.getTrajectory_points_stamped().size() <= 100)
-         cdr.write_type_e(data.getTrajectory_points_stamped());
+      if (data.getTrajectoryPointsStamped().size() <= 100)
+         cdr.write_type_e(data.getTrajectoryPointsStamped());
       else
          throw new RuntimeException("trajectory_points_stamped field exceeds the maximum length");
 
-      builtin_interfaces.msg.dds.DurationPubSubType.write(data.getTime_from_start(), cdr);
+      builtin_interfaces.msg.dds.DurationPubSubType.write(data.getTimeFromStart(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.TaskspaceTrajectoryStamped data, us.ihmc.idl.CDR cdr)
@@ -77,9 +77,9 @@ public class TaskspaceTrajectoryStampedPubSubType implements us.ihmc.pubsub.Topi
 
       std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
 
-      cdr.read_type_e(data.getTrajectory_points_stamped());
+      cdr.read_type_e(data.getTrajectoryPointsStamped());
 
-      builtin_interfaces.msg.dds.DurationPubSubType.read(data.getTime_from_start(), cdr);
+      builtin_interfaces.msg.dds.DurationPubSubType.read(data.getTimeFromStart(), cdr);
    }
 
    public static void staticCopy(controller_msgs.msg.dds.TaskspaceTrajectoryStamped src, controller_msgs.msg.dds.TaskspaceTrajectoryStamped dest)
@@ -110,9 +110,9 @@ public class TaskspaceTrajectoryStampedPubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
-      ser.write_type_e("trajectory_points_stamped", data.getTrajectory_points_stamped());
+      ser.write_type_e("trajectory_points_stamped", data.getTrajectoryPointsStamped());
 
-      ser.write_type_a("time_from_start", new builtin_interfaces.msg.dds.DurationPubSubType(), data.getTime_from_start());
+      ser.write_type_a("time_from_start", new builtin_interfaces.msg.dds.DurationPubSubType(), data.getTimeFromStart());
    }
 
    @Override
@@ -120,9 +120,9 @@ public class TaskspaceTrajectoryStampedPubSubType implements us.ihmc.pubsub.Topi
    {
       ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
-      ser.read_type_e("trajectory_points_stamped", data.getTrajectory_points_stamped());
+      ser.read_type_e("trajectory_points_stamped", data.getTrajectoryPointsStamped());
 
-      ser.read_type_a("time_from_start", new builtin_interfaces.msg.dds.DurationPubSubType(), data.getTime_from_start());
+      ser.read_type_a("time_from_start", new builtin_interfaces.msg.dds.DurationPubSubType(), data.getTimeFromStart());
    }
 
    @Override

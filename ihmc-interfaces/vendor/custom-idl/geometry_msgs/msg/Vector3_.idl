@@ -1,0 +1,22 @@
+#ifndef __geometry_msgs__msg__Vector3__idl__
+#define __geometry_msgs__msg__Vector3__idl__
+
+module geometry_msgs
+{
+    module msg
+    {
+        module dds
+        {
+            @TypeCode(type="geometry_msgs::msg::dds_::Vector3_")
+            @Abstract(type="us.ihmc.euclid.tuple3D.Vector3D", impl="new us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.Vector3PubSubTypeImpl()")
+            struct Vector3
+            {
+              double x;
+              double y;
+              double z;
+            };
+        };
+    };
+};
+
+#endif

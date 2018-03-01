@@ -1,12 +1,15 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
 /**
  * Definition of the class "ElectricJointData" defined in ElectricJointData_.idl.
  *
  * This file was automatically generated from ElectricJointData_.idl by us.ihmc.idl.generator.IDLGenerator.
  * Do not update this file directly, edit ElectricJointData_.idl instead.
  */
-public class ElectricJointData
+public class ElectricJointData implements Settable<ElectricJointData>, EpsilonComparable<ElectricJointData>
 {
    private boolean joint_enabled_;
    private float joint_temperature_;
@@ -17,45 +20,72 @@ public class ElectricJointData
 
    }
 
+   public ElectricJointData(ElectricJointData other)
+   {
+      set(other);
+   }
+
    public void set(ElectricJointData other)
    {
       joint_enabled_ = other.joint_enabled_;
+
       joint_temperature_ = other.joint_temperature_;
+
       joint_current_ = other.joint_current_;
    }
 
-   public boolean getJoint_enabled()
+   public boolean getJointEnabled()
    {
       return joint_enabled_;
    }
 
-   public void setJoint_enabled(boolean joint_enabled)
+   public void setJointEnabled(boolean joint_enabled)
    {
       joint_enabled_ = joint_enabled;
    }
 
-   public float getJoint_temperature()
+   public float getJointTemperature()
    {
       return joint_temperature_;
    }
 
-   public void setJoint_temperature(float joint_temperature)
+   public void setJointTemperature(float joint_temperature)
    {
       joint_temperature_ = joint_temperature;
    }
 
-   public float getJoint_current()
+   public float getJointCurrent()
    {
       return joint_current_;
    }
 
-   public void setJoint_current(float joint_current)
+   public void setJointCurrent(float joint_current)
    {
       joint_current_ = joint_current;
    }
 
    @Override
-   public boolean equals(java.lang.Object other)
+   public boolean epsilonEquals(ElectricJointData other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.joint_enabled_, other.joint_enabled_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_temperature_, other.joint_temperature_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_current_, other.joint_current_, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
    {
       if (other == null)
          return false;
@@ -63,16 +93,19 @@ public class ElectricJointData
          return true;
       if (!(other instanceof ElectricJointData))
          return false;
+
       ElectricJointData otherMyClass = (ElectricJointData) other;
-      boolean returnedValue = true;
 
-      returnedValue &= this.joint_enabled_ == otherMyClass.joint_enabled_;
+      if (this.joint_enabled_ != otherMyClass.joint_enabled_)
+         return false;
 
-      returnedValue &= this.joint_temperature_ == otherMyClass.joint_temperature_;
+      if (this.joint_temperature_ != otherMyClass.joint_temperature_)
+         return false;
 
-      returnedValue &= this.joint_current_ == otherMyClass.joint_current_;
+      if (this.joint_current_ != otherMyClass.joint_current_)
+         return false;
 
-      return returnedValue;
+      return true;
    }
 
    @Override

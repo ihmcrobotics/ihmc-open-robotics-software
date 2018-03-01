@@ -43,10 +43,10 @@ public class SetDoubleArrayParameterPubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParameter_name().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParameterName().length() + 1;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getParameter_value().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (data.getParameterValue().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       return current_alignment - initial_alignment;
    }
@@ -54,13 +54,13 @@ public class SetDoubleArrayParameterPubSubType implements us.ihmc.pubsub.TopicDa
    public static void write(controller_msgs.msg.dds.SetDoubleArrayParameter data, us.ihmc.idl.CDR cdr)
    {
 
-      if (data.getParameter_name().length() <= 255)
-         cdr.write_type_d(data.getParameter_name());
+      if (data.getParameterName().length() <= 255)
+         cdr.write_type_d(data.getParameterName());
       else
          throw new RuntimeException("parameter_name field exceeds the maximum length");
 
-      if (data.getParameter_value().size() <= 100)
-         cdr.write_type_e(data.getParameter_value());
+      if (data.getParameterValue().size() <= 100)
+         cdr.write_type_e(data.getParameterValue());
       else
          throw new RuntimeException("parameter_value field exceeds the maximum length");
    }
@@ -68,9 +68,9 @@ public class SetDoubleArrayParameterPubSubType implements us.ihmc.pubsub.TopicDa
    public static void read(controller_msgs.msg.dds.SetDoubleArrayParameter data, us.ihmc.idl.CDR cdr)
    {
 
-      cdr.read_type_d(data.getParameter_name());
+      cdr.read_type_d(data.getParameterName());
 
-      cdr.read_type_e(data.getParameter_value());
+      cdr.read_type_e(data.getParameterValue());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.SetDoubleArrayParameter src, controller_msgs.msg.dds.SetDoubleArrayParameter dest)
@@ -99,17 +99,17 @@ public class SetDoubleArrayParameterPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(controller_msgs.msg.dds.SetDoubleArrayParameter data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_d("parameter_name", data.getParameter_name());
+      ser.write_type_d("parameter_name", data.getParameterName());
 
-      ser.write_type_e("parameter_value", data.getParameter_value());
+      ser.write_type_e("parameter_value", data.getParameterValue());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SetDoubleArrayParameter data)
    {
-      ser.read_type_d("parameter_name", data.getParameter_name());
+      ser.read_type_d("parameter_name", data.getParameterName());
 
-      ser.read_type_e("parameter_value", data.getParameter_value());
+      ser.read_type_e("parameter_value", data.getParameterValue());
    }
 
    @Override

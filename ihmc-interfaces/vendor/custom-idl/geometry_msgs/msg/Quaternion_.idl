@@ -1,0 +1,23 @@
+#ifndef __geometry_msgs__msg__Quaternion__idl__
+#define __geometry_msgs__msg__Quaternion__idl__
+
+module geometry_msgs
+{
+    module msg
+    {
+        module dds
+        {
+            @TypeCode(type="geometry_msgs::msg::dds_::Quaternion_")
+            @Abstract(type="us.ihmc.euclid.tuple4D.Quaternion", impl="new us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.QuaternionPubSubTypeImpl()")
+            struct Quaternion
+            {
+              double x;
+              double y;
+              double z;
+              double w;
+            };
+        };
+    };
+};
+
+#endif

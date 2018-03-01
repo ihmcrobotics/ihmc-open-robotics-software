@@ -1,12 +1,15 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
 /**
  * Definition of the class "WeightedJointTrajectory" defined in WeightedJointTrajectory_.idl.
  *
  * This file was automatically generated from WeightedJointTrajectory_.idl by us.ihmc.idl.generator.IDLGenerator.
  * Do not update this file directly, edit WeightedJointTrajectory_.idl instead.
  */
-public class WeightedJointTrajectory
+public class WeightedJointTrajectory implements Settable<WeightedJointTrajectory>, EpsilonComparable<WeightedJointTrajectory>
 {
    private std_msgs.msg.dds.Header header_;
    private us.ihmc.idl.IDLSequence.StringBuilderHolder joint_names_;
@@ -21,6 +24,11 @@ public class WeightedJointTrajectory
                                                                                                          new controller_msgs.msg.dds.WeightedJointTrajectoryPointPubSubType());
    }
 
+   public WeightedJointTrajectory(WeightedJointTrajectory other)
+   {
+      set(other);
+   }
+
    public void set(WeightedJointTrajectory other)
    {
       std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
@@ -33,7 +41,7 @@ public class WeightedJointTrajectory
       return header_;
    }
 
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder getJoint_names()
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder getJointNames()
    {
       return joint_names_;
    }
@@ -44,7 +52,42 @@ public class WeightedJointTrajectory
    }
 
    @Override
-   public boolean equals(java.lang.Object other)
+   public boolean epsilonEquals(WeightedJointTrajectory other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.joint_names_, other.joint_names_, epsilon))
+         return false;
+
+      if (this.points_.isEnum())
+      {
+         if (!this.points_.equals(other.points_))
+            return false;
+      }
+      else if (this.points_.size() == other.points_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.points_.size(); i++)
+         {
+            if (!this.points_.get(i).epsilonEquals(other.points_.get(i), epsilon))
+               return false;
+         }
+      }
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
    {
       if (other == null)
          return false;
@@ -52,16 +95,19 @@ public class WeightedJointTrajectory
          return true;
       if (!(other instanceof WeightedJointTrajectory))
          return false;
+
       WeightedJointTrajectory otherMyClass = (WeightedJointTrajectory) other;
-      boolean returnedValue = true;
 
-      returnedValue &= this.header_.equals(otherMyClass.header_);
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
 
-      returnedValue &= this.joint_names_.equals(otherMyClass.joint_names_);
+      if (!this.joint_names_.equals(otherMyClass.joint_names_))
+         return false;
 
-      returnedValue &= this.points_.equals(otherMyClass.points_);
+      if (!this.points_.equals(otherMyClass.points_))
+         return false;
 
-      return returnedValue;
+      return true;
    }
 
    @Override
