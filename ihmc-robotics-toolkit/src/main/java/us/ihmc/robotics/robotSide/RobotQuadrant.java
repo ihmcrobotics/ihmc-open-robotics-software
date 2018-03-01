@@ -661,4 +661,10 @@ public enum RobotQuadrant implements RobotSegment<RobotQuadrant>
    {
       return values;
    }
+
+   @Override
+   public Class<RobotQuadrant> getClassType()
+   {
+      return RobotQuadrant.class;
+   }
 }

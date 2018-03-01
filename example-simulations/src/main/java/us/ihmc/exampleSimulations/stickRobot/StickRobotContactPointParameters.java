@@ -21,13 +21,13 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public class StickRobotContactPointParameters extends RobotContactPointParameters
+public class StickRobotContactPointParameters extends RobotContactPointParameters<RobotSide>
 {
    private final SideDependentList<ArrayList<Point2D>> footGroundContactPoints = new SideDependentList<>();
 
    private final DRCRobotJointMap jointMap;
 
-   public StickRobotContactPointParameters(DRCRobotJointMap jointMap, FootContactPoints footContactPoints)
+   public StickRobotContactPointParameters(DRCRobotJointMap jointMap, FootContactPoints<RobotSide> footContactPoints)
    {
       super(jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
       this.jointMap = jointMap;

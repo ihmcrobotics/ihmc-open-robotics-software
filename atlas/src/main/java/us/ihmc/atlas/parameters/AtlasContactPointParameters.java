@@ -15,16 +15,17 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.partNames.LeggedJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.wholeBodyController.DRCHandType;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-public class AtlasContactPointParameters extends RobotContactPointParameters
+public class AtlasContactPointParameters extends RobotContactPointParameters<RobotSide>
 {
    public static final boolean USE_SIX_CONTACT_POINTS = false;
    private final int numberOfContactableBodies;
@@ -36,9 +37,10 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
    private boolean useSoftGroundContactParameters = false;
 
    public AtlasContactPointParameters(AtlasJointMap jointMap, AtlasRobotVersion atlasVersion, boolean createFootContactPoints,
-         FootContactPoints footContactPoints, boolean createAdditionalContactPoints)
+         FootContactPoints<RobotSide> footContactPoints, boolean createAdditionalContactPoints)
    {
-      super(jointMap, jointMap.getPhysicalProperties().getToeWidthForControl(), jointMap.getPhysicalProperties().getFootWidthForControl(), jointMap.getPhysicalProperties().getFootLengthForControl(), jointMap.getPhysicalProperties().getSoleToAnkleFrameTransforms());
+      super(jointMap, jointMap.getPhysicalProperties().getToeWidthForControl(), jointMap.getPhysicalProperties().getFootWidthForControl(),
+            jointMap.getPhysicalProperties().getFootLengthForControl(), jointMap.getPhysicalProperties().getSoleToAnkleFrameTransforms());
 
       this.jointMap = jointMap;
       this.atlasVersion = atlasVersion;
@@ -228,11 +230,11 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       return numberOfContactableBodies;
    }
    
-   private class AtlasSixContactFoot implements FootContactPoints
+   private class AtlasSixContactFoot implements FootContactPoints<RobotSide>
    {
       @Override
-      public Map<String, List<Tuple3DBasics>> getSimulationContactPoints(double footLength, double footWidth, double toeWidth, DRCRobotJointMap jointMap,
-            SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms)
+      public Map<String, List<Tuple3DBasics>> getSimulationContactPoints(double footLength, double footWidth, double toeWidth, LeggedJointNameMap<RobotSide> jointMap,
+            SegmentDependentList<RobotSide, RigidBodyTransform> soleToAnkleFrameTransforms)
       {
          HashMap<String, List<Tuple3DBasics>> ret = new HashMap<>();
 

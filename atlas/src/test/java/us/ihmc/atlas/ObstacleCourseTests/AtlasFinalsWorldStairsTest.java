@@ -80,7 +80,7 @@ public class AtlasFinalsWorldStairsTest
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
 
-      FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(10, 2, true, true);
+      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 10, 2, true, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
@@ -128,7 +128,7 @@ public class AtlasFinalsWorldStairsTest
 
       DRCStartingLocation selectedLocation = DRCSCStartingLocations.STAIRS_START;
 
-      FootContactPoints simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, true, true);
+      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints);
       DarpaRoboticsChallengeFinalsEnvironment environment = new DarpaRoboticsChallengeFinalsEnvironment(false, false, false, false, true);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);

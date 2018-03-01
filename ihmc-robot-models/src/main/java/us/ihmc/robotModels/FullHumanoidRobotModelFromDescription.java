@@ -408,9 +408,9 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       }
    }
 
-   //   public ArrayList<OneDoFJoint> getArmJointIDs(RobotSide side)
-   //   {
-   //      return armJointIDsList.get(side);
-   //   }
-
+   @Override
+   public RobotSide[] getRobotSegments()
+   {
+      return RobotSide.values;
+   }
 }

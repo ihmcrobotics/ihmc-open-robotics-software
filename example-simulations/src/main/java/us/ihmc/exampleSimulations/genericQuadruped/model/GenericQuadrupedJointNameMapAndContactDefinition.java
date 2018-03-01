@@ -204,13 +204,7 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    }
 
    @Override
-   public Enum<?>[] getRobotSegments()
-   {
-      return RobotQuadrant.values;
-   }
-
-   @Override
-   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   public RobotQuadrant getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {

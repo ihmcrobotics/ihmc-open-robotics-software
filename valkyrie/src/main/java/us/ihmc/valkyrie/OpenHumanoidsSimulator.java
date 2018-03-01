@@ -30,6 +30,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
@@ -72,10 +73,10 @@ public class OpenHumanoidsSimulator
    public OpenHumanoidsSimulator(String model, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
          boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points, Collection<Class> additionalPacketTypes) throws IOException
    {
-         FootContactPoints simulationContactPoints = null;
+         FootContactPoints<RobotSide> simulationContactPoints = null;
          if (extra_sim_points)
          {
-            simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, false, true);
+            simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, false, true);
             System.out.println("Added extra foot contact points.");
          }
 	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, model, simulationContactPoints);
