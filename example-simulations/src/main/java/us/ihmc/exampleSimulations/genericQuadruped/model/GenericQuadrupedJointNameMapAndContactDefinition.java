@@ -223,6 +223,12 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    }
 
    @Override
+   public String getBodyName()
+   {
+      return rootJoint;
+   }
+
+   @Override
    public RobotQuadrant getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)

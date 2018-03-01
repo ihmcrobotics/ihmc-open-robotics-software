@@ -42,6 +42,7 @@ public interface JointNameMap<E extends Enum<E> & RobotSegment<E>> extends Robot
 
    SpineJointName getSpineJointName(String jointName);
 
+   String getRootBodyName();
 
    String getUnsanitizedRootJointInSdf();
 
