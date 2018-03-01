@@ -408,6 +408,14 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
                              zf, zdf);
    }
 
+   public void setQuinticWithZeroTerminalVelocityAndAcceleration(double t0, double tFinal, FramePoint3DReadOnly z0, FramePoint3DReadOnly zFinal)
+   {
+      z0.checkReferenceFrameMatch(referenceFrame);
+      zFinal.checkReferenceFrameMatch(referenceFrame);
+
+      super.setQuinticWithZeroTerminalVelocityAndAcceleration(t0, tFinal, z0, zFinal);
+   }
+
    public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, FramePoint3DReadOnly z0,
                                                                   FrameVector3DReadOnly zd0, FrameVector3DReadOnly zdIntermediate,
                                                                   FrameVector3DReadOnly zddIntermediate, FramePoint3DReadOnly zFinal,

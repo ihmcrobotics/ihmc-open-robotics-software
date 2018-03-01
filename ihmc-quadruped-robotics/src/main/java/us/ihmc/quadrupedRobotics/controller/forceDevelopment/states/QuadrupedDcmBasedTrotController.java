@@ -18,7 +18,6 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseForwardDcmTrajectory;
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewisePeriodicDcmTrajectory;
-import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFMinimumJerkTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
@@ -26,6 +25,7 @@ import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
+import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -332,7 +332,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 
    private class QuadSupportState implements FiniteStateMachineState<TrotEvent>
    {
-      private final ThreeDoFMinimumJerkTrajectory dcmTrajectory;
+      private final FrameTrajectory3D dcmTrajectory;
       private final FramePoint3D cmpPositionAtSoSNominal;
       private final FramePoint3D cmpPositionAtEoSNominal;
       private final FramePoint3D dcmPositionAtSoSNominal;
@@ -341,7 +341,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 
       public QuadSupportState()
       {
-         dcmTrajectory = new ThreeDoFMinimumJerkTrajectory();
+         dcmTrajectory = new FrameTrajectory3D(6, worldFrame);
          cmpPositionAtSoSNominal = new FramePoint3D();
          cmpPositionAtEoSNominal = new FramePoint3D();
          dcmPositionAtSoSNominal = new FramePoint3D();
@@ -362,7 +362,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          computeNominalDcmPositions(cmpPositionAtSoSNominal, cmpPositionAtEoSNominal, dcmPositionAtSoSNominal, dcmPositionAtEoSNominal);
 
          // compute desired dcm trajectory
-         dcmTrajectory.initializeTrajectory(dcmPositionEstimate, dcmPositionAtSoSNominal, timeInterval);
+         dcmTrajectory.setQuinticWithZeroTerminalVelocityAndAcceleration(timeInterval.getStartTime(), timeInterval.getEndTime(), dcmPositionEstimate, dcmPositionAtSoSNominal);
 
          // initialize ground plane points
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -378,9 +378,9 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
          double currentTime = robotTimestamp.getDoubleValue();
 
          // compute dcm setpoint
-         dcmTrajectory.computeTrajectory(currentTime);
-         dcmTrajectory.getPosition(dcmPositionController.getDCMPositionSetpoint());
-         dcmTrajectory.getVelocity(dcmPositionController.getDCMVelocitySetpoint());
+         dcmTrajectory.compute(currentTime);
+         dcmTrajectory.getFramePosition(dcmPositionController.getDCMPositionSetpoint());
+         dcmTrajectory.getFrameVelocity(dcmPositionController.getDCMVelocitySetpoint());
 
          // trigger touch down event
          if (currentTime > timeInterval.getEndTime())

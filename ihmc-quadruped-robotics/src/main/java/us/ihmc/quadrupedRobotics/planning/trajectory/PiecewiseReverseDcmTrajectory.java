@@ -5,6 +5,8 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,8 @@ public class PiecewiseReverseDcmTrajectory
    private final FramePoint3D dcmPosition;
    private final FrameVector3D dcmVelocity;
    private final List<MutableDouble> temporaryDouble;
-   private final List<FramePoint3D> temporaryFramePoint;
+   private final List<FramePoint3D> temporaryFramePoints;
+   private final FramePoint3D tempPoint = new FramePoint3D();
 
    public PiecewiseReverseDcmTrajectory(int maxSteps, double gravity, double comHeight)
    {
@@ -46,8 +49,8 @@ public class PiecewiseReverseDcmTrajectory
       this.dcmVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
       this.temporaryDouble = new ArrayList<>();
       this.temporaryDouble.add(new MutableDouble(0));
-      this.temporaryFramePoint = new ArrayList<>();
-      this.temporaryFramePoint.add(new FramePoint3D());
+      this.temporaryFramePoints = new ArrayList<>();
+      this.temporaryFramePoints.add(new FramePoint3D());
    }
 
    /**
@@ -96,8 +99,8 @@ public class PiecewiseReverseDcmTrajectory
    public void initializeTrajectory(double timeAtSoS, FramePoint3D cmpPositionAtSoS, double timeAtEoS, FramePoint3D dcmPositionAtEoS)
    {
       this.temporaryDouble.get(0).setValue(timeAtSoS);
-      this.temporaryFramePoint.get(0).setIncludingFrame(cmpPositionAtSoS);
-      this.initializeTrajectory(1, temporaryDouble, temporaryFramePoint, timeAtEoS, dcmPositionAtEoS);
+      this.temporaryFramePoints.get(0).setIncludingFrame(cmpPositionAtSoS);
+      this.initializeTrajectory(1, temporaryDouble, temporaryFramePoints, timeAtEoS, dcmPositionAtEoS);
    }
 
    public void computeTrajectory(double currentTime)
@@ -134,9 +137,11 @@ public class PiecewiseReverseDcmTrajectory
       return timeAtSoS[0];
    }
 
-   public void getPosition(FramePoint3D dcmPosition)
+   public void getPosition(FixedFramePoint3DBasics dcmPosition)
    {
-      dcmPosition.setIncludingFrame(this.dcmPosition);
+      tempPoint.setIncludingFrame(this.dcmPosition);
+      tempPoint.changeFrame(dcmPosition.getReferenceFrame());
+      dcmPosition.set(tempPoint);
    }
 
    public void getVelocity(FrameVector3D dcmVelocity)
