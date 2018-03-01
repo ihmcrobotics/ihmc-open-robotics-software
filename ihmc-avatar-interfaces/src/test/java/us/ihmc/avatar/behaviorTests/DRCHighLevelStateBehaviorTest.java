@@ -13,6 +13,7 @@ import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HighLevelStateBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -114,7 +115,7 @@ public abstract class DRCHighLevelStateBehaviorTest implements MultiRobotTestInt
       final HighLevelStateBehavior highLevelStateBehavior = new HighLevelStateBehavior(drcBehaviorTestHelper.getBehaviorCommunicationBridge());
 
       highLevelStateBehavior.initialize();
-      highLevelStateBehavior.setInput(new HighLevelStateMessage(desiredState));
+      highLevelStateBehavior.setInput(HumanoidMessageTools.createHighLevelStateMessage(desiredState));
       assertTrue(highLevelStateBehavior.hasInputBeenSet());
 
       success = drcBehaviorTestHelper.executeBehaviorSimulateAndBlockAndCatchExceptions(highLevelStateBehavior, trajectoryTime);

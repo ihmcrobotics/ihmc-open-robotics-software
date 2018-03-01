@@ -233,7 +233,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
          {
             IndividualRobotiqHandController individualRobotiqHandController = individualHandControllers.get(robotSide);
 
-            HandConfiguration handDesiredConfiguration = handDesiredConfigurationSubscriber.pollMessage().getHandDesiredConfiguration();
+            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(handDesiredConfigurationSubscriber.pollMessage().getHandDesiredConfiguration());
             
             if (DEBUG)
                PrintTools.debug(this, "Recieved new HandDesiredConfiguration: " + handDesiredConfiguration);

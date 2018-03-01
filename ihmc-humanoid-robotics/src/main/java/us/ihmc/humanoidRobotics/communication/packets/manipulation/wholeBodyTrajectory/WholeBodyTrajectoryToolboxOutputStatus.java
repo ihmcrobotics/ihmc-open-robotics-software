@@ -52,6 +52,7 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends SettablePacket<Whole
          trajectoryTimes = null;
          robotConfigurations = null;
       }
+      setPacketInformation(other);
    }
 
    public int getPlanningResult()

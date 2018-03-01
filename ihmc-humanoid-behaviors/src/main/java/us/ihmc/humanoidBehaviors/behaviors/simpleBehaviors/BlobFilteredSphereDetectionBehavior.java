@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -147,7 +148,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 //      depthDataStateCommand.setDestination(PacketDestination.SENSOR_MANAGER);
 //      sendPacket(depthDataStateCommand);
       
-      TextToSpeechPacket textToSpeechPacket = new TextToSpeechPacket("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
+      TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
       textToSpeechPacket.setDestination(PacketDestination.TEXT_TO_SPEECH);
       sendPacket(textToSpeechPacket);
    }

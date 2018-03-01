@@ -23,6 +23,7 @@ public class HeightQuadTreeMessage extends SettablePacket<HeightQuadTreeMessage>
       resolution = other.resolution;
       sizeX = other.sizeX;
       sizeY = other.sizeY;
+      setPacketInformation(other);
    }
 
    @Override

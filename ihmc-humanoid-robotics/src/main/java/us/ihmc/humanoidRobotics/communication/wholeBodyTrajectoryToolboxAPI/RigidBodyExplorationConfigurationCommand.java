@@ -84,7 +84,7 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
 
       for (int i = 0; i < message.getNumberOfDegreesOfFreedomToExplore(); i++)
       {
-         degreesOfFreedomToExplore.add(message.getDegreeOfFreedomToExplore(i));
+         degreesOfFreedomToExplore.add(ConfigurationSpaceName.fromByte(message.getDegreeOfFreedomToExplore(i)));
          explorationRangeUpperLimits.add(message.getExplorationRangeUpperLimits(i));
          explorationRangeLowerLimits.add(message.getExplorationRangeLowerLimits(i));
       }

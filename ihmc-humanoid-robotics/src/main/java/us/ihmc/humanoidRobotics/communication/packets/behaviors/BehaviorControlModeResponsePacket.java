@@ -1,39 +1,35 @@
 package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket.BehaviorControlModeEnum;
 
 public class BehaviorControlModeResponsePacket extends Packet<BehaviorControlModeResponsePacket>
 {
-   public BehaviorControlModeEnum requestedControl;
+   public static final byte STOP = 0;
+   public static final byte PAUSE = 1;
+   public static final byte RESUME = 2;
+
+   public byte behaviorControlModeEnumRequest;
 
    // empty constructor for deserialization
    public BehaviorControlModeResponsePacket()
    {
    }
 
-   public BehaviorControlModeResponsePacket(BehaviorControlModeEnum requestedControl)
+   @Override
+   public void set(BehaviorControlModeResponsePacket other)
    {
-      this.requestedControl = requestedControl;
+      setPacketInformation(other);
+      behaviorControlModeEnumRequest = other.behaviorControlModeEnumRequest;
    }
 
-   public BehaviorControlModeEnum getRequestedControl()
+   public byte getRequestedControl()
    {
-      return requestedControl;
+      return behaviorControlModeEnumRequest;
    }
 
    @Override
    public boolean epsilonEquals(BehaviorControlModeResponsePacket other, double epsilon)
    {
-      return this.requestedControl.equals(other.requestedControl);
-   }
-
-   public BehaviorControlModeResponsePacket(Random random)
-   {
-      this(BehaviorControlModeEnum.values[RandomNumbers.nextInt(random, 0, BehaviorControlModeEnum.values.length - 1)]);
-
+      return this.behaviorControlModeEnumRequest == other.behaviorControlModeEnumRequest;
    }
 }

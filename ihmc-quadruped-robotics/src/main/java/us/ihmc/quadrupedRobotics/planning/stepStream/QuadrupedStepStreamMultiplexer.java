@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -94,6 +95,20 @@ public class QuadrupedStepStreamMultiplexer<E extends Enum<E>> implements Quadru
       if (stepStream != null)
       {
          stepStream.getBodyOrientation(bodyOrientation);
+      }
+      else
+      {
+         throw new RuntimeException("A valid step stream must be selected prior to accessing step stream data.");
+      }
+   }
+
+   @Override
+   public FrameQuaternionReadOnly getBodyOrientation()
+   {
+      QuadrupedStepStream stepStream = stepStreams.get(selectedStepStream.getEnumValue());
+      if (stepStream != null)
+      {
+         return stepStream.getBodyOrientation();
       }
       else
       {

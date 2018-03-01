@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -45,85 +43,17 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
       }
    }
 
-   /**
-    * Use this constructor to go straight to the given end points.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredJointPositions desired joint positions. The array length should be equal to the number of controlled joints.
-    */
-   public JointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
+   @Override
+   public void set(JointspaceTrajectoryMessage other)
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[desiredJointPositions.length];
-      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
-         jointTrajectoryMessages[jointIndex] = new OneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
-   }
-   
-   /**
-    * Use this constructor to go straight to the given end points using the specified qp weights.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param trajectoryTime how long it takes to reach the desired pose.
-    * @param desiredJointPositions desired joint positions. The array length should be equal to the number of controlled joints.
-    * @param weights the qp weights for the joint accelerations
-    */
-   public JointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions,  double[] weights)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[desiredJointPositions.length];
-      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+      queueingProperties.set(other.queueingProperties);
+      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[other.jointTrajectoryMessages.length];
+      for (int i = 0; i < jointTrajectoryMessages.length; i++)
       {
-         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = new OneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
-         oneDoFJointTrajectoryMessage.setWeight(weights[jointIndex]);
-         jointTrajectoryMessages[jointIndex] = oneDoFJointTrajectoryMessage;
+         jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage();
+         jointTrajectoryMessages[i].set(other.jointTrajectoryMessages[i]);
       }
-         
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point.
-    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectory1DMessage(int, OneDoFJointTrajectoryMessage)} for each joint afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param numberOfJoints number of joints that will be executing the message.
-    */
-   public JointspaceTrajectoryMessage(int numberOfJoints)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[numberOfJoints];
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory points.
-    * This constructor only allocates memory for the trajectories, you need to call {@link #setTrajectoryPoint(int, int, double, double, double)} for each joint and trajectory point afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param numberOfJoints number of joints that will be executing the message.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
-    */
-   public JointspaceTrajectoryMessage(int numberOfJoints, int numberOfTrajectoryPoints)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[numberOfJoints];
-      for (int i = 0; i < numberOfJoints; i++)
-         jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(numberOfTrajectoryPoints);
-   }
-
-   /**
-    * Create a message using the given joint trajectory points.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param jointTrajectory1DListMessages joint trajectory points to be executed.
-    */
-   public JointspaceTrajectoryMessage(OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      this.jointTrajectoryMessages = jointTrajectory1DListMessages;
-   }
-
-   public JointspaceTrajectoryMessage(Random random)
-   {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      queueingProperties = new QueueableMessage(random);
-      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[random.nextInt(10) + 1];
-      for (int i = 0; i < getNumberOfJoints(); i++)
-         setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(random));
+      setPacketInformation(other);
    }
 
    /**
@@ -246,14 +176,14 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
       if (!queueingProperties.epsilonEquals(other.queueingProperties, epsilon))
          return false;
 
-      if (this.jointTrajectoryMessages.length != other.jointTrajectoryMessages.length)
+      if (jointTrajectoryMessages.length != other.jointTrajectoryMessages.length)
       {
          return false;
       }
 
-      for (int i = 0; i < this.jointTrajectoryMessages.length; i++)
+      for (int i = 0; i < jointTrajectoryMessages.length; i++)
       {
-         if (!this.jointTrajectoryMessages[i].epsilonEquals(other.jointTrajectoryMessages[i], epsilon))
+         if (!jointTrajectoryMessages[i].epsilonEquals(other.jointTrajectoryMessages[i], epsilon))
          {
             return false;
          }

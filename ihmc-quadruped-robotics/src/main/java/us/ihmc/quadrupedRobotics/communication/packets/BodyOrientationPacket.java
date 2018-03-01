@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class BodyOrientationPacket extends Packet<BodyOrientationPacket>
 {
-   private Quaternion orientation;
+   public Quaternion orientation;
 
    public BodyOrientationPacket()
    {
@@ -21,6 +21,13 @@ public class BodyOrientationPacket extends Packet<BodyOrientationPacket>
    {
       this.orientation = new Quaternion();
       this.orientation.setYawPitchRoll(yaw, pitch, roll);
+   }
+
+   @Override
+   public void set(BodyOrientationPacket other)
+   {
+      setPacketInformation(other);
+      orientation = new Quaternion(other.orientation);
    }
 
    public void get(Quaternion orientation)
@@ -43,7 +50,8 @@ public class BodyOrientationPacket extends Packet<BodyOrientationPacket>
       return this.orientation.getRoll();
    }
 
-   @Override public boolean epsilonEquals(BodyOrientationPacket other, double epsilon)
+   @Override
+   public boolean epsilonEquals(BodyOrientationPacket other, double epsilon)
    {
       return this.orientation.epsilonEquals(other.orientation, epsilon);
    }

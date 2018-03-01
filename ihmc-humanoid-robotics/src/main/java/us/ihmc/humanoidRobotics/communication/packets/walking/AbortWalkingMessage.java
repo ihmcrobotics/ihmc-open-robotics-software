@@ -1,7 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 
@@ -19,9 +17,10 @@ public class AbortWalkingMessage extends Packet<AbortWalkingMessage>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
-   public AbortWalkingMessage(Random random)
+   @Override
+   public void set(AbortWalkingMessage other)
    {
-      this();
+      setPacketInformation(other);
    }
 
    @Override

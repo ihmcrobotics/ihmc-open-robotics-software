@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -55,7 +55,7 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
 
    public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
 
-   public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
+   public abstract SpatialFeedbackControlCommand getFeedbackControlCommand();
 
    @Override
    public void doAction()

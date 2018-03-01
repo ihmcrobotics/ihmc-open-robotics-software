@@ -55,4 +55,14 @@ public enum AtlasElectricMotorPacketEnum
          return null;
       }
    }
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static AtlasElectricMotorPacketEnum fromByte(byte enumAsByte)
+   {
+      return values[enumAsByte];
+   }
 }

@@ -1,56 +1,38 @@
 package us.ihmc.humanoidRobotics.communication.packets.atlas;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 
 public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControlModeMessage>
 {
-   public enum ControlMode
-   {
-      STAND_PREP, FREEZE;
-   }
+   public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_STAND_PREP = 0;
+   public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_FREEZE = 1;
 
-   public ControlMode requestedControlMode;
+   public byte requestedAtlasLowLevelControlMode;
 
    public AtlasLowLevelControlModeMessage()
    {
    }
 
-   public AtlasLowLevelControlModeMessage(ControlMode request)
-   {
-      requestedControlMode = request;
-   }
-
-   public void setRequestedControlMode(ControlMode requestedControlMode)
-   {
-      this.requestedControlMode = requestedControlMode;
-   }
-
-   public ControlMode getRequestedControlMode()
-   {
-      return requestedControlMode;
-   }
-
-   /** {@inheritDoc} */
    @Override
-   public String validateMessage()
+   public void set(AtlasLowLevelControlModeMessage other)
    {
-      String errorMessage = null;
-      if (requestedControlMode == null)
-         errorMessage = "The field requestedControlMode is null.";
-      return errorMessage;
+      setPacketInformation(other);
+      requestedAtlasLowLevelControlMode = other.requestedAtlasLowLevelControlMode;
+   }
+
+   public void setRequestedControlMode(byte requestedControlMode)
+   {
+      this.requestedAtlasLowLevelControlMode = requestedControlMode;
+   }
+
+   public byte getRequestedControlMode()
+   {
+      return requestedAtlasLowLevelControlMode;
    }
 
    @Override
    public boolean epsilonEquals(AtlasLowLevelControlModeMessage other, double epsilon)
    {
-      return requestedControlMode == other.requestedControlMode;
-   }
-
-   public AtlasLowLevelControlModeMessage(Random random)
-   {
-      requestedControlMode = RandomNumbers.nextEnum(random, ControlMode.class);
+      return requestedAtlasLowLevelControlMode == other.requestedAtlasLowLevelControlMode;
    }
 }

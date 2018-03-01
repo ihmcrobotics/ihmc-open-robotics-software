@@ -92,6 +92,6 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
    {
 
       if (handModel != null)
-         packets.get(object.robotSide).set(object);
+         packets.get(RobotSide.fromByte(object.robotSide)).set(object);
    }
 }

@@ -47,7 +47,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       defaultSwingDuration = message.defaultSwingDuration;
       defaultTransferDuration = message.defaultTransferDuration;
       finalTransferDuration = message.finalTransferDuration;
-      executionTiming = message.executionTiming;
+      executionTiming = ExecutionTiming.fromByte(message.executionTiming);
       trustHeightOfFootsteps = message.trustHeightOfFootsteps;
       areFootstepsAdjustable = message.areFootstepsAdjustable;
       offsetFootstepsWithExecutionError = message.isOffsetFootstepsWithExecutionError();

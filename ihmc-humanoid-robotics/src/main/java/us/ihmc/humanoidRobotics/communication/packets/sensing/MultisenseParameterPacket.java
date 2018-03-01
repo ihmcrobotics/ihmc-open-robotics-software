@@ -1,13 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import java.util.Random;
-
 import us.ihmc.communication.packets.Packet;
-
 
 public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
 {
-   public boolean intialize;
+   public boolean initialize;
    public double gain;
    public double motorSpeed;
    public boolean ledEnable;
@@ -16,30 +13,27 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
    public boolean autoExposure;
    public boolean autoWhiteBalance;
 
-
-   public MultisenseParameterPacket(boolean initialize, double gain, double motorSpeed, double dutyCycle, boolean ledEnable,
-                                    boolean flashEnable, boolean autoExposure, boolean autoWhiteBalance)
-   {
-      this.intialize = initialize;
-      this.gain = gain;
-      this.flashEnable = flashEnable;
-      this.motorSpeed = motorSpeed;
-      this.ledEnable = ledEnable;
-      this.dutyCycle = dutyCycle;
-      this.autoExposure = autoExposure;
-      this.autoWhiteBalance = autoWhiteBalance;
-
-   }
-   
    public MultisenseParameterPacket()
    {
-      
    }
 
+   @Override
+   public void set(MultisenseParameterPacket other)
+   {
+      this.initialize = other.initialize;
+      this.gain = other.gain;
+      this.flashEnable = other.flashEnable;
+      this.motorSpeed = other.motorSpeed;
+      this.ledEnable = other.ledEnable;
+      this.dutyCycle = other.dutyCycle;
+      this.autoExposure = other.autoExposure;
+      this.autoWhiteBalance = other.autoWhiteBalance;
+      setPacketInformation(other);
+   }
 
    public boolean isInitialize()
    {
-      return intialize;
+      return initialize;
    }
 
    public boolean isAutoExposure()
@@ -111,11 +105,10 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       }
    }
 
-
    @Override
    public boolean epsilonEquals(MultisenseParameterPacket other, double epsilon)
    {
-      if (intialize)
+      if (initialize)
          return other.isInitialize();
       double roundedGain = Math.round(getGain() * 100) / 100.0;
       double roundedSpeed = Math.round(getMotorSpeed() * 1000) / 1000.0;
@@ -129,12 +122,7 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       System.out.println("auto white balance 1: " + isAutoWhiteBalance() + " auto white balance 2 " + other.isAutoWhiteBalance());
 
       return (other.isInitialize() == isInitialize()) && (other.getGain() == roundedGain) && (other.getMotorSpeed() == roundedSpeed)
-             && (other.getDutyCycle() == roundedDutyCycle) && (other.isFlashEnable() == isFlashEnable())
-             && (other.isLedEnable() == isLedEnable()) && (other.isAutoExposure() == isAutoExposure()) && (other.isAutoWhiteBalance() == isAutoWhiteBalance());
-   }
-
-   public MultisenseParameterPacket(Random random)
-   {
-      this(true, random.nextDouble(), random.nextDouble(), random.nextDouble(), true, true, true, true);
+            && (other.getDutyCycle() == roundedDutyCycle) && (other.isFlashEnable() == isFlashEnable()) && (other.isLedEnable() == isLedEnable())
+            && (other.isAutoExposure() == isAutoExposure()) && (other.isAutoWhiteBalance() == isAutoWhiteBalance());
    }
 }

@@ -8,6 +8,9 @@
 # message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the
 # controller. This rule does not apply to the fields of this message.
 
+# Whether the pelvis orientation is allowed to controlled by the user when the robot is walking.
+bool enable_user_pelvis_control_during_walking
+
 # The orientation trajectory information.
 ihmc_msgs/SO3TrajectoryRosMessage so3_trajectory
 

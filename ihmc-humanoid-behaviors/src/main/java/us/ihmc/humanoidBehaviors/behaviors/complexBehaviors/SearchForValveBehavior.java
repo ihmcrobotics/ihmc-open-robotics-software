@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -24,7 +25,7 @@ public class SearchForValveBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Searching For The Valve");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Searching For The Valve");
       sendPacket(p1);
    }
 
@@ -61,7 +62,7 @@ public class SearchForValveBehavior extends AbstractBehavior
 
    private void recievedValveLocation(ValveLocationPacket valveLocationPacket)
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Recieved Valve Location From UI");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Recieved Valve Location From UI");
       sendPacket(p1);
       valveTransformToWorld = valveLocationPacket.getValveTransformToWorld();
 

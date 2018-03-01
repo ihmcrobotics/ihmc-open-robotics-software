@@ -30,6 +30,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
@@ -105,7 +106,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          ArrayList<Point2D> newContactPoints = generateContactPointsForRotatedLineOfContact(Math.PI/2.0, 0.0, 0.0);
          contactPointController.setNewContacts(newContactPoints, robotSide, true);
 
-         FootstepDataListMessage message = new FootstepDataListMessage(0.6, 0.15);
+         FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(0.6, 0.15);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
@@ -115,7 +116,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
          footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
-         footstepData.setRobotSide(robotSide);
+         footstepData.setRobotSide(robotSide.toByte());
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);
@@ -151,7 +152,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          ArrayList<Point2D> newContactPoints = generateContactPointsForRotatedLineOfContact(0.0, 0.0, 0.0);
          contactPointController.setNewContacts(newContactPoints, robotSide, true);
 
-         FootstepDataListMessage message = new FootstepDataListMessage(0.6, 0.15);
+         FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(0.6, 0.15);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
@@ -161,7 +162,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
          footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
-         footstepData.setRobotSide(robotSide);
+         footstepData.setRobotSide(robotSide.toByte());
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);
@@ -199,7 +200,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          ArrayList<Point2D> newContactPoints = generateContactPointsForRandomRotatedLineOfContact(random);
          contactPointController.setNewContacts(newContactPoints, robotSide, true);
 
-         FootstepDataListMessage message = new FootstepDataListMessage(0.8, 0.15);
+         FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(0.8, 0.15);
          FootstepDataMessage footstepData = new FootstepDataMessage();
 
          ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(robotSide);
@@ -209,7 +210,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
          footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
-         footstepData.setRobotSide(robotSide);
+         footstepData.setRobotSide(robotSide.toByte());
          message.add(footstepData);
 
          drcSimulationTestHelper.send(message);
@@ -381,7 +382,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       for (RobotSide robotSide : RobotSide.values)
       {
          ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-         armTrajectoryMessage.robotSide = robotSide;
+         armTrajectoryMessage.robotSide = robotSide.toByte();
          double[] armConfig = straightArmConfigs.get(robotSide);
          armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
          for (int i = 0; i < armConfig.length; i++)

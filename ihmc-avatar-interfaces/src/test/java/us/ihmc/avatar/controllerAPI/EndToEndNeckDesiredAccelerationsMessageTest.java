@@ -14,9 +14,9 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyUserControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -64,13 +64,13 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
          desiredJointPositions[i] = (joint.getJointLimitLower() + joint.getJointLimitUpper()) / 2.0;
          desiredJointVelcoties[i] = 0.0;
       }
-      NeckTrajectoryMessage neckTrajectoryMessage = new NeckTrajectoryMessage(0.5, desiredJointPositions);
+      NeckTrajectoryMessage neckTrajectoryMessage = HumanoidMessageTools.createNeckTrajectoryMessage(0.5, desiredJointPositions);
       drcSimulationTestHelper.send(neckTrajectoryMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.55);
       assertTrue(success);
 
       double[] neckDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, neckJoints.length, 0.1);
-      NeckDesiredAccelerationsMessage neckDesiredAccelerationsMessage = new NeckDesiredAccelerationsMessage(neckDesiredJointAccelerations);
+      NeckDesiredAccelerationsMessage neckDesiredAccelerationsMessage = HumanoidMessageTools.createNeckDesiredAccelerationsMessage(neckDesiredJointAccelerations);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(headName, scs));

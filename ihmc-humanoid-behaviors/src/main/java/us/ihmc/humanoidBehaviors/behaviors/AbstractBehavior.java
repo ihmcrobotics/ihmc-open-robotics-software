@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
@@ -130,7 +131,7 @@ public abstract class AbstractBehavior implements RobotController
    {
       isAborted.set(true);
       isPaused.set(false);
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Aborting Behavior");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Aborting Behavior");
       sendPacket(p1);
 
       for (BehaviorService behaviorService : behaviorsServices)
@@ -149,7 +150,7 @@ public abstract class AbstractBehavior implements RobotController
     */
    public final void pause()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Pausing Behavior");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Pausing Behavior");
       sendPacket(p1);
       isPaused.set(true);
 
@@ -169,7 +170,7 @@ public abstract class AbstractBehavior implements RobotController
     */
    public final void resume()
    {
-      TextToSpeechPacket p1 = new TextToSpeechPacket("Resuming Behavior");
+      TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Resuming Behavior");
       sendPacket(p1);
       isPaused.set(false);
       isPaused.set(false);

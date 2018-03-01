@@ -6,6 +6,7 @@ import trajectory_msgs.JointTrajectory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -55,7 +56,7 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
       int numberOfJoints = rosMessage.getJointNames().size();
       int numberOfWaypoints = rosMessage.getPoints().size();
       
-      ArmTrajectoryMessage ihmcMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfWaypoints);
+      ArmTrajectoryMessage ihmcMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, numberOfJoints, numberOfWaypoints);
       for (int waypointIndex = 0; waypointIndex < numberOfWaypoints; waypointIndex++)
       {
          double[] positions = rosMessage.getPoints().get(waypointIndex).getPositions();

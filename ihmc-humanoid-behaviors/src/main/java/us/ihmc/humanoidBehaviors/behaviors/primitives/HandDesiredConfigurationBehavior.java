@@ -4,6 +4,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -79,7 +80,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandDesiredConfigurationMessage stopMessage = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
+         HandDesiredConfigurationMessage stopMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
          stopMessage.setDestination(PacketDestination.UI);
          sendPacketToController(stopMessage);
          sendPacket(stopMessage);
@@ -94,7 +95,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         HandDesiredConfigurationMessage stopMessage = new HandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
+         HandDesiredConfigurationMessage stopMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, HandConfiguration.STOP);
          stopMessage.setDestination(PacketDestination.UI);
          sendPacketToController(stopMessage);
          sendPacket(stopMessage);

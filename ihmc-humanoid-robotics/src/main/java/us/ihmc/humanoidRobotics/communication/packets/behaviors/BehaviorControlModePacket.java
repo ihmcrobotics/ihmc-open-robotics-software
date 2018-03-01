@@ -1,44 +1,33 @@
 package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
-import java.util.Random;
-
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 
 public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
 {
-   public static enum BehaviorControlModeEnum
-   {
-      STOP, PAUSE, RESUME;
+   public static final byte STOP = 0;
+   public static final byte PAUSE = 1;
+   public static final byte RESUME = 2;
 
-      public static final BehaviorControlModeEnum[] values = values();
-   }
-
-   public BehaviorControlModeEnum requestedControl;
+   public byte behaviorControlModeEnumRequest;
 
    // empty constructor for deserialization
    public BehaviorControlModePacket()
    {
    }
 
-   public BehaviorControlModePacket(BehaviorControlModeEnum requestedControl)
+   @Override
+   public void set(BehaviorControlModePacket other)
    {
-      this.requestedControl = requestedControl;
+      behaviorControlModeEnumRequest = other.behaviorControlModeEnumRequest;
    }
 
-   public BehaviorControlModeEnum getRequestedControl()
+   public byte getRequestedControl()
    {
-      return requestedControl;
+      return behaviorControlModeEnumRequest;
    }
 
    public boolean epsilonEquals(BehaviorControlModePacket other, double epsilon)
    {
-      return this.requestedControl.equals(other.requestedControl);
-   }
-
-   public BehaviorControlModePacket(Random random)
-   {
-      this(BehaviorControlModeEnum.values[RandomNumbers.nextInt(random, 0, BehaviorControlModeEnum.values.length - 1)]);
-
+      return this.behaviorControlModeEnumRequest == other.behaviorControlModeEnumRequest;
    }
 }

@@ -3,9 +3,9 @@ package us.ihmc.pathPlanning.visibilityGraphs.interfaces;
 import java.util.List;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
+import us.ihmc.pathPlanning.visibilityGraphs.dijkstra.DijkstraVisibilityGraphPlanner;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.JGraphTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
@@ -174,5 +174,11 @@ public interface VisibilityGraphsParameters
             return true;
          }
       };
+   }
+
+   default VisibilityGraphPathPlanner getPathPlanner()
+   {
+      return new DijkstraVisibilityGraphPlanner();
+//      return JGraphTools.getJGraphPlanner();
    }
 }

@@ -45,7 +45,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegion
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -230,7 +230,7 @@ public class WalkingCommandConsumer
 
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (command.getRequest(robotSide, BodyPart.ARM))
+            if (command.getRequest(robotSide, HumanoidBodyPart.ARM))
             {
                RigidBodyControlManager handManager = handManagers.get(robotSide);
                if(handManager != null)
@@ -240,14 +240,14 @@ public class WalkingCommandConsumer
             }
          }
 
-         if (command.getRequest(BodyPart.PELVIS))
+         if (command.getRequest(HumanoidBodyPart.PELVIS))
          {
             pelvisOrientationManager.goToHomeFromCurrentDesired(command.getTrajectoryTime());
             balanceManager.goHome();
             comHeightManager.goHome(command.getTrajectoryTime());
          }
 
-         if (command.getRequest(BodyPart.CHEST))
+         if (command.getRequest(HumanoidBodyPart.CHEST))
          {
             chestManager.goHome(command.getTrajectoryTime());
          }

@@ -26,7 +26,7 @@ public class ParameterSavingNode extends HBox
    private final Text fileName = new Text();
 
    private File activeFile;
-   private GuiRegistry registry;
+   private List<GuiRegistry> registries;
 
    private final List<ParameterFileSavedListener> listeners = new ArrayList<>();
 
@@ -66,9 +66,9 @@ public class ParameterSavingNode extends HBox
       return activeFile;
    }
 
-   public void setRegistry(GuiRegistry registry)
+   public void setRegistries(List<GuiRegistry> registries)
    {
-      this.registry = registry;
+      this.registries = registries;
    }
 
    private void setupNode(boolean showFile, boolean enableSave)
@@ -126,29 +126,29 @@ public class ParameterSavingNode extends HBox
          return;
       }
 
-      GuiRegistry registryAfterModified;
+      List<GuiRegistry> registriesAfterModified;
       if (isModified)
       {
-         registryAfterModified = ParameterSavingTools.filterModified(registry);
+         registriesAfterModified = ParameterSavingTools.filterModified(registries);
       }
       else
       {
-         registryAfterModified = registry;
+         registriesAfterModified = registries;
       }
 
-      GuiRegistry registryAfterMerge;
+      List<GuiRegistry> registriesAfterMerge;
       if (isMerge && activeFile.exists())
       {
          List<Registry> xmlRegistries = ParameterTuningTools.getParameters(activeFile);
-         GuiRegistry existingRegistry = ParameterTuningTools.buildGuiRegistryFromXML(xmlRegistries);
-         registryAfterMerge = ParameterSavingTools.merge(existingRegistry, registryAfterModified);
+         List<GuiRegistry> existingRegistry = ParameterTuningTools.buildGuiRegistryFromXML(xmlRegistries);
+         registriesAfterMerge = ParameterSavingTools.merge(existingRegistry, registriesAfterModified);
       }
       else
       {
-         registryAfterMerge = registryAfterModified;
+         registriesAfterMerge = registriesAfterModified;
       }
 
-      List<Registry> xmlRegistries = ParameterTuningTools.buildXMLRegistryFromGui(registryAfterMerge);
+      List<Registry> xmlRegistries = ParameterTuningTools.buildXMLRegistriesFromGui(registriesAfterMerge);
       ParameterSavingTools.save(activeFile, xmlRegistries);
       informListeners();
    }

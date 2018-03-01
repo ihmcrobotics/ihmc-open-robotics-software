@@ -6,7 +6,15 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket>
 {
    public double beepRate;
    private boolean enableTone;
-   
+
+   @Override
+   public void set(PilotAlarmPacket other)
+   {
+      beepRate = other.beepRate;
+      enableTone = other.enableTone;
+      setPacketInformation(other);
+   }
+
    @Override
    public boolean epsilonEquals(PilotAlarmPacket other, double epsilon)
    {

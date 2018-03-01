@@ -44,6 +44,7 @@ public class TransferToFlamingoStanceState extends TransferState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       double defaultTouchdownDuration = walkingMessageHandler.getDefaultTouchdownTime();
       footstepTiming.setTimings(Double.POSITIVE_INFINITY, defaultTouchdownDuration, initialTransferTime);
+      balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(transferToSide.getOppositeSide()), footstepTiming);
       balanceManager.setICPPlanTransferToSide(transferToSide);
       balanceManager.initializeICPPlanForTransfer(swingTime, initialTransferTime, finalTransferTime);

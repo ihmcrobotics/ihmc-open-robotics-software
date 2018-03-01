@@ -7,13 +7,14 @@ import static org.junit.Assert.fail;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 public abstract class RobotConfigurationDataBufferTest
 {
@@ -32,7 +33,7 @@ public abstract class RobotConfigurationDataBufferTest
 
       for (int i = 0; i < RobotConfigurationDataBuffer.BUFFER_SIZE * 2; i++)
       {
-         RobotConfigurationData test = new RobotConfigurationData(setterJoints, forceSensorDefinitions, null, imuDefinitions);
+         RobotConfigurationData test = RobotConfigurationDataFactory.create(setterJoints, forceSensorDefinitions, null, imuDefinitions);
          test.timestamp = i * 10;
          test.jointAngles[0] = i * 10;
          buffer.receivedPacket(test);
