@@ -7,6 +7,7 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -15,7 +16,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
-public class EnumTuner extends HBox
+public class EnumTuner extends HBox implements InputNode
 {
    private static final String FXML_PATH = "enum_tuner.fxml";
 
@@ -48,9 +49,11 @@ public class EnumTuner extends HBox
 
    }
 
+   private TextField enumString;
    private void createTextField(GuiParameter parameter)
    {
-      TextField enumString = new TextField();
+      enumString = new TextField();
+
       enumString.setText(parameter.getCurrentValue());
       ParameterTuningTools.addThreadSafeListeners(enumString, () -> parameter.setValue(enumString.getText()));
 
@@ -62,9 +65,11 @@ public class EnumTuner extends HBox
       tuningPane.getChildren().add(enumString);
    }
 
+   private ChoiceBox<String> choiceBox;
    private void createChoiceBox(GuiParameter parameter, TObjectIntMap<String> valueOptions)
    {
-      ChoiceBox<String> choiceBox = new ChoiceBox<>();
+      choiceBox = new ChoiceBox<>();
+
       ObservableList<String> items = choiceBox.getItems();
       valueOptions.forEachKey(option -> {
          items.add(option);
@@ -94,5 +99,23 @@ public class EnumTuner extends HBox
          items.add(newValue);
       }
       choiceBox.getSelectionModel().select(newValue);
+   }
+
+   @Override
+   public Node getSimpleInputNode()
+   {
+      if (choiceBox != null)
+      {
+         ChoiceBox<String> duplicate = new ChoiceBox<>(choiceBox.getItems());
+         duplicate.setSelectionModel(choiceBox.getSelectionModel());
+         return duplicate;
+      }
+      else
+      {
+         TextField duplicate = new TextField(enumString.getText());
+         enumString.textProperty().addListener((observable, oldValue, newValue) -> duplicate.setText(newValue));
+         duplicate.textProperty().addListener((observable, oldValue, newValue) -> enumString.setText(newValue));
+         return null;
+      }
    }
 }
