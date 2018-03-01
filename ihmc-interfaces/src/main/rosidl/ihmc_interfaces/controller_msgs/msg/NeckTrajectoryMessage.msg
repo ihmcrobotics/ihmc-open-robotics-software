@@ -1,0 +1,6 @@
+# This message is part of the IHMC whole-body controller API.
+# This message commands the controller to move the neck in jointspace to the desired joint angles while going through the specified trajectory points.
+# A third order polynomial function is used to interpolate between trajectory points.
+
+# The trajectories for each joint in order from the one closest to the chest to the one the closest to the head.
+JointspaceTrajectoryMessage jointspace_trajectory
