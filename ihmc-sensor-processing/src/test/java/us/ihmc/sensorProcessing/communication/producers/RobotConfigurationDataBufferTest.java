@@ -33,7 +33,7 @@ public abstract class RobotConfigurationDataBufferTest
 
       for (int i = 0; i < RobotConfigurationDataBuffer.BUFFER_SIZE * 2; i++)
       {
-         RobotConfigurationData test = RobotConfigurationDataFactory.create(setterJoints, forceSensorDefinitions, null, imuDefinitions);
+         RobotConfigurationData test = RobotConfigurationDataFactory.create(setterJoints, forceSensorDefinitions, imuDefinitions);
          test.timestamp = i * 10;
          test.jointAngles[0] = i * 10;
          buffer.receivedPacket(test);

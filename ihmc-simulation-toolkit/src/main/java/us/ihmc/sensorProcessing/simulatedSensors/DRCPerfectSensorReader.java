@@ -2,7 +2,7 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RawSensorReader;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 
@@ -59,7 +59,7 @@ public class DRCPerfectSensorReader implements SensorReader
    }
 
    @Override
-   public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+   public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
    {
       return null;
    }

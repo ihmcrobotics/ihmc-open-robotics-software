@@ -4,7 +4,7 @@ import java.util.List;
 
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 
 public interface SensorRawOutputMapReadOnly extends SensorTimestampHolder
@@ -27,5 +27,5 @@ public interface SensorRawOutputMapReadOnly extends SensorTimestampHolder
 
    public ForceSensorDataHolderReadOnly getForceSensorRawOutputs();
 
-   public AuxiliaryRobotData getAuxiliaryRobotData();
+   public AtlasAuxiliaryRobotData getAuxiliaryRobotData();
 }
