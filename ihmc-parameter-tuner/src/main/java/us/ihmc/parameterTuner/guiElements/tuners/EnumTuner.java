@@ -95,20 +95,24 @@ public class EnumTuner extends HBox implements InputNode
    }
 
    @Override
-   public Node getSimpleInputNode()
+   public Node getSimpleInputNode(double width, double height)
    {
       if (choiceBox != null)
       {
          ChoiceBox<String> duplicate = new ChoiceBox<>(choiceBox.getItems());
+         duplicate.setPrefHeight(height);
+         duplicate.setPrefWidth(width);
          duplicate.setSelectionModel(choiceBox.getSelectionModel());
          return duplicate;
       }
       else
       {
          TextField duplicate = new TextField(enumString.getText());
+         duplicate.setPrefHeight(height);
+         duplicate.setPrefWidth(width);
          enumString.textProperty().addListener((observable, oldValue, newValue) -> duplicate.setText(newValue));
          duplicate.textProperty().addListener((observable, oldValue, newValue) -> enumString.setText(newValue));
-         return null;
+         return duplicate;
       }
    }
 }
