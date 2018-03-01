@@ -131,7 +131,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // initialize feedback controllers
-      balanceManager.initialize(taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity());
+      balanceManager.initialize(taskSpaceEstimates.getComPosition());
 
       bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
 

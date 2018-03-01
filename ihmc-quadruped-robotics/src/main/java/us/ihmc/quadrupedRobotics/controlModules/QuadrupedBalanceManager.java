@@ -48,7 +48,6 @@ public class QuadrupedBalanceManager
    private final ReferenceFrame supportFrame;
 
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
-   private final DivergentComponentOfMotionEstimator dcmPositionEstimator;
    private final DivergentComponentOfMotionController dcmPositionController;
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
@@ -75,9 +74,9 @@ public class QuadrupedBalanceManager
 
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
 
-   private final YoFramePoint yoDesiredDCM = new YoFramePoint("desiredDCM", worldFrame, registry);
+   private final YoFramePoint yoDesiredDCMPosition = new YoFramePoint("desiredDCMPosition", worldFrame, registry);
    private final YoFrameVector yoDesiredDCMVelocity = new YoFrameVector("desiredDCMVelocity", worldFrame, registry);
-   private final YoFramePoint yoFinalDesiredDCM = new YoFramePoint("finalDesiredDCM", worldFrame, registry);
+   private final YoFramePoint yoFinalDesiredDCM = new YoFramePoint("finalDesiredDCMPosition", worldFrame, registry);
    private final YoFramePoint yoVrpPositionSetpoint = new YoFramePoint("vrpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
 
@@ -117,7 +116,7 @@ public class QuadrupedBalanceManager
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       ReferenceFrame comZUpFrame = controllerToolbox.getReferenceFrames().getCenterOfMassZUpFrame();
-      dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
+      //dcmPositionEstimator = controllerToolbox.getDcmPositionEstimator();
       dcmPositionController = new DivergentComponentOfMotionController(comZUpFrame, runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry);
       comPositionController = new QuadrupedComPositionController(comZUpFrame, runtimeEnvironment.getControlDT(), registry);
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
@@ -147,7 +146,7 @@ public class QuadrupedBalanceManager
       YoGraphicsList graphicsList = new YoGraphicsList(graphicsListName);
       ArtifactList artifactList = new ArtifactList(graphicsListName);
 
-      YoGraphicPosition desiredDCMViz = new YoGraphicPosition("Desired DCM", yoDesiredDCM, 0.01, Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition desiredDCMViz = new YoGraphicPosition("Desired DCM", yoDesiredDCMPosition, 0.01, Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
       YoGraphicPosition finalDesiredDCMViz = new YoGraphicPosition("Final Desired DCM", yoFinalDesiredDCM, 0.01, Beige(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
       YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("Desired CMP", yoCmpPositionSetpoint, 0.012, YoAppearance.Purple(), BALL_WITH_CROSS);
 
@@ -178,13 +177,13 @@ public class QuadrupedBalanceManager
       dcmPlanner.addStepsToSequence(steps);
    }
 
-   public void initialize(FramePoint3D comPosition, FrameVector3D comVelocity)
+   public void initialize(FramePoint3D comPosition)
    {
       // update model
       linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
 
       // update dcm estimate
-      dcmPositionEstimator.compute(dcmPositionEstimate, comVelocity);
+      controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
 
       dcmPositionController.initializeSetpoint(dcmPositionEstimate);
       dcmPositionController.reset();
@@ -209,16 +208,15 @@ public class QuadrupedBalanceManager
       linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
 
       // update dcm estimate
-      dcmPositionEstimator.compute(dcmPositionEstimate, taskSpaceEstimates.getComVelocity());
-
+      controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
       dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getComHeight());
 
 
       // update desired horizontal com forces
-      dcmPlanner.computeDcmSetpoints(taskSpaceControllerSettings, yoDesiredDCM, yoDesiredDCMVelocity);
+      dcmPlanner.computeDcmSetpoints(taskSpaceControllerSettings, yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
 
-      dcmPositionController.compute(yoVrpPositionSetpoint, dcmPositionEstimate, yoDesiredDCM, yoDesiredDCMVelocity);
+      dcmPositionController.compute(yoVrpPositionSetpoint, dcmPositionEstimate, yoDesiredDCMPosition, yoDesiredDCMVelocity);
 
       cmpPositionSetpoint.set(yoVrpPositionSetpoint);
       cmpPositionSetpoint.subZ(linearInvertedPendulumModel.getComHeight());

@@ -128,7 +128,7 @@ public class DivergentComponentOfMotionController
       vrpPositionSetpointToPack.set(vrpPositionSetpoint);
    }
 
-   public void initializeSetpoint(FramePoint3D dcmPositionEstimate)
+   public void initializeSetpoint(FramePoint3DReadOnly dcmPositionEstimate)
    {
       dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
       dcmVelocitySetpoint.setToZero();
