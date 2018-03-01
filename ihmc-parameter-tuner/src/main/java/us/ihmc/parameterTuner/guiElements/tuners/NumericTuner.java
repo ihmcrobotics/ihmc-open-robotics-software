@@ -84,8 +84,11 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    public abstract NumericSlider<T> createSlider();
 
    @Override
-   public Node getSimpleInputNode()
+   public Node getSimpleInputNode(double width, double height)
    {
-      return value.createLinkedDuplicate();
+      NumericSpinner<T> duplicate = value.createLinkedDuplicate();
+      duplicate.setPrefHeight(height);
+      duplicate.setPrefWidth(width);
+      return duplicate;
    }
 }

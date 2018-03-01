@@ -44,9 +44,11 @@ public class BooleanTuner extends HBox implements InputNode
 
 
    @Override
-   public Node getSimpleInputNode()
+   public Node getSimpleInputNode(double width, double height)
    {
       CheckBox duplicate = new CheckBox(value.getText());
+      duplicate.setPrefHeight(height);
+      duplicate.setPrefWidth(width);
       duplicate.setSelected(value.isSelected());
       duplicate.selectedProperty().addListener((observable, oldValue, newValue) -> value.setSelected(newValue));
       value.selectedProperty().addListener((observable, oldValue, newValue) -> duplicate.setSelected(newValue));

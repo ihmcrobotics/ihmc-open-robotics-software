@@ -7,5 +7,5 @@ public interface InputNode
    /**
     * Creates a linked duplicate of the main input node.
     */
-   public abstract Node getSimpleInputNode();
+   public abstract Node getSimpleInputNode(double width, double height);
 }

@@ -108,7 +108,7 @@ public class Tuner extends VBox
 
    public Node getSimpleInputNode()
    {
-      return inputNode.getSimpleInputNode();
+      return inputNode.getSimpleInputNode(100.0, 20.0);
    }
 
 }
