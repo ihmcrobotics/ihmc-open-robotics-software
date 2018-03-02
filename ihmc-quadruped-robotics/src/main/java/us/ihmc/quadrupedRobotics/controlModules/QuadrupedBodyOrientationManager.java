@@ -1,6 +1,10 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.euclid.Axis;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,6 +19,10 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedBodyOrientationManager
@@ -27,6 +35,7 @@ public class QuadrupedBodyOrientationManager
    private final YoPID3DGains gains;
 
    private final ParameterizedPID3DGains bodyOrientationGainsParameter;
+   private final RigidBody body;
 
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -35,6 +44,14 @@ public class QuadrupedBodyOrientationManager
    private final OrientationFrame bodyOrientationReferenceFrame;
 
    private final QuadrupedForceControllerToolbox controllerToolbox;
+
+   private final FrameVector3D desiredBodyAngularAcceleration = new FrameVector3D();
+   private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
+
+   private final Wrench wrenchCommand;
+   private final VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
+
+   private final YoFrameVector bodyAngularWeight = new YoFrameVector("bodyAngularWeight", worldFrame, registry);
 
    public QuadrupedBodyOrientationManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
                                           YoVariableRegistry parentRegistry)
@@ -54,6 +71,13 @@ public class QuadrupedBodyOrientationManager
 
       bodyOrientationReference = new FrameQuaternion();
       bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
+
+      FullQuadrupedRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      orientationFeedbackControlCommand.set(fullRobotModel.getElevator(), fullRobotModel.getBody());
+      bodyAngularWeight.set(5.0, 5.0, 5.0);
+
+      body = fullRobotModel.getBody();
+      wrenchCommand = new Wrench(body.getBodyFixedFrame(), controllerToolbox.getReferenceFrames().getCenterOfMassFrame());
 
       parentRegistry.addChild(registry);
    }
@@ -84,6 +108,28 @@ public class QuadrupedBodyOrientationManager
       setpoints.getComTorqueFeedforward().setToZero();
 
       controller.compute(angularMomentumRateToPack, setpoints, controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity());
+
+      orientationFeedbackControlCommand.set(setpoints.getBodyOrientation(), setpoints.getBodyAngularVelocity(), desiredBodyAngularAcceleration);
+      orientationFeedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
+      orientationFeedbackControlCommand.setGains(gains);
+
+      wrenchCommand.setToZero();
+      wrenchCommand.setAngularPart(angularMomentumRateToPack);
+      virtualWrenchCommand.set(body, wrenchCommand);
    }
 
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
+   }
+
+   public OrientationFeedbackControlCommand getFeedbackControlCommand()
+   {
+      return orientationFeedbackControlCommand;
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return virtualWrenchCommand;
+   }
 }

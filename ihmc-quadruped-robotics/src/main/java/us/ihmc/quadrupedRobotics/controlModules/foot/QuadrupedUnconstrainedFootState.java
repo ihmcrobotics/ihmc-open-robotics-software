@@ -34,6 +34,7 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
    private final VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
+
    private final YoFrameVector currentLinearWeight;
 
    public QuadrupedUnconstrainedFootState(String namePrefix, RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,

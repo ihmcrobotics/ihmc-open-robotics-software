@@ -63,8 +63,8 @@ public class QuadrupedControlManagerFactory
 
       if (feetManager != null)
          ret.addCommandList(feetManager.createFeedbackControlTemplate());
-      //if (bodyOrientationManager != null)
-         //return ret.addCommand(bodyOrientationManager.createFeedbackControlTemplate());
+      if (bodyOrientationManager != null)
+         ret.addCommand(bodyOrientationManager.createFeedbackControlTemplate());
 
       return ret;
    }
