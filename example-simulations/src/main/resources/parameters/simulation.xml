@@ -150,6 +150,20 @@
                 <parameter name="bodyAngularRateUpperLimitZ" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
                 <parameter name="comHeightNominal" type="DoubleParameter" min="0.0" max="1.0" value="0.55"/>
             </registry>
+            <registry name="QuadrupedXGaitSettingsInputProvider">
+                <parameter name="stanceLengthLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                <parameter name="stanceLengthUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.4"/>
+                <parameter name="stanceWidthLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+                <parameter name="stanceWidthUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.6"/>
+                <parameter name="stepGroundClearanceLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="stepGroundClearanceUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.25"/>
+                <parameter name="stepDurationLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
+                <parameter name="stepDurationUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.6"/>
+                <parameter name="endDoubleSupportDurationLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="endDoubleSupportDurationUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.7976931348623157E308"/>
+                <parameter name="endPhaseShiftLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                <parameter name="endPhaseShiftUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+            </registry>
             <!--<registry name="QuadrupedPositionControllerManager">-->
                 <!--<registry name="QuadrupedPositionStandPrepController">-->
                     <!--<parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>-->
