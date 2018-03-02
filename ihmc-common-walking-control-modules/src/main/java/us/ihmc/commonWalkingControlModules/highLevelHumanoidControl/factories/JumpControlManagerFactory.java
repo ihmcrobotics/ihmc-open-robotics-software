@@ -9,9 +9,10 @@ import us.ihmc.commonWalkingControlModules.configurations.AbstractHighLevelContr
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.CentroidalMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalAngularVelocityManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -42,6 +43,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
    private FeetJumpManager feetManager;
    private CentroidalMomentumManager momentumManager;
    private GravityCompensationManager gravityCompensationManager;
+   private CentroidalAngularVelocityManager angularVelocityManager;
    //private PlaneContactControlManager planeContactManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
@@ -84,6 +86,16 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       momentumManager = new CentroidalMomentumManager(controllerToolbox, registry);
 
       return momentumManager;
+   }
+   
+   public CentroidalAngularVelocityManager getOrCreateWholeBodyAngularVelocityManager()
+   {
+      if(angularVelocityManager != null)
+         return angularVelocityManager;
+      
+      angularVelocityManager = new CentroidalAngularVelocityManager(controllerToolbox, jumpControllerParameters, registry);
+      
+      return angularVelocityManager;
    }
 
    public GravityCompensationManager getOrCreateGravityCompensationManager()

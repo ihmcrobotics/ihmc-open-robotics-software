@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot;
+package us.ihmc.commonWalkingControlModules.controlModules.flight;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -7,6 +7,7 @@ import us.ihmc.convexOptimization.quadraticProgram.AbstractSimpleActiveSetQPSolv
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -69,7 +70,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
 
    private final DenseMatrix64F qpSolution;
 
-   private final ReferenceFrame controlFrame;
+   private ReferenceFrame controlFrame;
    private final DenseMatrix64F currentVelocity;
    private final DenseMatrix64F commandedVelocity;
    private final DenseMatrix64F inertia;
@@ -81,11 +82,11 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
    private double minPrincipalInertia;
    private double maxPrincipalInertia;
    private double maxInertiaRateOfChange;
-   
+
    private final DenseMatrix64F tempConstraintMatrixLHS = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F tempConstraintMatrixRHS = new DenseMatrix64F(0, 1);
 
-   public FlightWholeBodyAngularVelocityRegulatorQPSolver(ReferenceFrame comFrame, double controllerDT, YoVariableRegistry registry)
+   public FlightWholeBodyAngularVelocityRegulatorQPSolver(double controllerDT, YoVariableRegistry registry)
    {
       qpTimer = new ExecutionTimer("AngularVelocityRegu", registry);
       qpSolver = new JavaQuadProgSolver();
@@ -105,10 +106,14 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       inertia = new DenseMatrix64F(angularDimensions, angularDimensions);
       velocityError = new DenseMatrix64F(angularDimensions, 1);
       deltaControl = new DenseMatrix64F(angularDimensions, 1);
-      controlFrame = comFrame;
 
       regularizationWeights = new DenseMatrix64F(problem_size, 1);
       reset();
+   }
+
+   public void initialize(ReferenceFrame controlFrame)
+   {
+      this.controlFrame = controlFrame;
    }
 
    public void reset()
@@ -130,6 +135,18 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       computeLinearInequalityConstraints();
       computeLinearEqualityConstraints();
       solve();
+   }
+
+   public void getDesiredInertiaRateOfChange(DenseMatrix64F inertiaRateOfChange)
+   {
+      // Map the decision variables to the inertia tensor
+      for (int i = 0; i < angularDimensions; i++)
+         inertiaRateOfChange.set(i, i, qpSolution.get(i, 0));
+      for (int i = angularDimensions; i < problem_size; i++)
+      {
+         inertiaRateOfChange.set(i % angularDimensions, (i + 1) % angularDimensions, qpSolution.get(i, 0));
+         inertiaRateOfChange.set((i + 1) % angularDimensions, i % angularDimensions, qpSolution.get(i, 0));
+      }
    }
 
    public void setRegularizationWeight(double scalar)
@@ -175,9 +192,12 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
 
    public void setCurrentCentroidalInertiaTensor(DenseMatrix64F centroidalInertia)
    {
-      this.inertia.set(centroidalInertia);
+      // Map the inertia tensor to the decision variables 
+      this.inertia.reshape(problem_size, 1);
+      for (int i = 0; i < problem_size; i++)
+         inertia.set(i, 0, centroidalInertia.get(i % angularDimensions, (i + 1) % angularDimensions));
    }
-   
+
    public void setMaxInertiaRateOfChange(double inertiaRateOfChange)
    {
       this.maxInertiaRateOfChange = inertiaRateOfChange;
@@ -187,12 +207,12 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
    {
       this.maxPrincipalInertia = maxPrincipalInertia;
    }
-   
+
    public void setMinPrincipalInertia(double minPrincipalInertia)
    {
       this.minPrincipalInertia = minPrincipalInertia;
    }
-   
+
    public ReferenceFrame getControlFrame()
    {
       return controlFrame;
@@ -292,7 +312,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       CommonOps.insert(tempConstraintMatrixLHS, solverInput_Ain, currentConstraintSize, 0);
       CommonOps.insert(tempConstraintMatrixRHS, solverInput_bin, currentConstraintSize, 0);
    }
-   
+
    private void setRateLimitConstraint()
    {
       int currentConstraintSize = solverInput_Ain.getNumRows();
@@ -305,18 +325,18 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       tempConstraintMatrixRHS.reshape(taskSize, 1);
 
       tempConstraintMatrixLHS.zero();
-      for(int i = 0; i < taskSize; i++)
+      for (int i = 0; i < taskSize; i++)
       {
          int n = i;
-         for(int j = 0; j < angularDimensions; j++)
+         for (int j = 0; j < angularDimensions; j++)
          {
-            tempConstraintMatrixLHS.set(i, j, Math.pow(-1, n%2) * 1.0);
-            n = n/2;
+            tempConstraintMatrixLHS.set(i, j, Math.pow(-1, n % 2) * 1.0);
+            n = n / 2;
          }
-         for(int j = angularDimensions; j < problem_size; j++)
+         for (int j = angularDimensions; j < problem_size; j++)
          {
-            tempConstraintMatrixLHS.set(i, j, Math.pow(-1, n%2) * 2.0);
-            n = n/2;
+            tempConstraintMatrixLHS.set(i, j, Math.pow(-1, n % 2) * 2.0);
+            n = n / 2;
          }
          tempConstraintMatrixRHS.set(i, 0, maxInertiaRateOfChange);
       }
@@ -346,5 +366,4 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
 
       qpTimer.stopMeasurement();
    }
-
 }

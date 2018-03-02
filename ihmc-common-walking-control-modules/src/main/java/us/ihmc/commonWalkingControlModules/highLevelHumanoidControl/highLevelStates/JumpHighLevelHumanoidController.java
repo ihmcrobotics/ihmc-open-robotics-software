@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -9,8 +8,9 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.CentroidalMomentumManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.GravityCompensationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalAngularVelocityManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -57,6 +57,8 @@ public class JumpHighLevelHumanoidController
 
    private final CentroidalMomentumManager wholeBodyMomentumManager;
    private final GravityCompensationManager gravityCompensationManager;
+   private final CentroidalAngularVelocityManager angularVelocityManager;
+   
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
    private final SideDependentList<RigidBodyControlManager> footManagers = new SideDependentList<>();
    private final List<RigidBodyControlManager> bodyManagers = new ArrayList<>();
@@ -86,6 +88,8 @@ public class JumpHighLevelHumanoidController
       this.wholeBodyMomentumManager.setTotalRobotMass(controlCoreToolbox.getTotalRobotMass());
 
       this.gravityCompensationManager = jumpingControlManagerFactory.getOrCreateGravityCompensationManager();
+      this.angularVelocityManager = jumpingControlManagerFactory.getOrCreateWholeBodyAngularVelocityManager();
+      
       this.fullRobotModel = controllerToolbox.getFullRobotModel();
 
       Collection<ReferenceFrame> trajectoryControlFrames = controllerToolbox.getTrajectoryFrames();

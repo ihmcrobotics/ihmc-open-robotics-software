@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.CentroidalMomentumManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.GravityCompensationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;

@@ -10,7 +10,6 @@ import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;

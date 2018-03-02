@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot;
+package us.ihmc.commonWalkingControlModules.controlModules.flight;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.JumpStateEnum;
