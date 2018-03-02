@@ -15,6 +15,7 @@ import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ public class DCMPlanner
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private static final int STEP_SEQUENCE_CAPACITY = 100;
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstanceCopTrajectory;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
@@ -41,6 +41,8 @@ public class DCMPlanner
 
    private final YoDouble robotTimestamp;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
+
+   private final YoBoolean isStanding = new YoBoolean("isStanding", registry);
 
    private final ReferenceFrame supportFrame;
    private final FramePoint3D finalDesiredDCM = new FramePoint3D();
@@ -81,12 +83,20 @@ public class DCMPlanner
          addStepToSequence(steps.get(i));
    }
 
-   public void initializeDcmSetpoints(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings, FramePoint3DReadOnly dcmPosition)
+   public void initializeForStanding(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings, FramePoint3DReadOnly dcmPosition)
    {
+      isStanding.set(true);
+
       timedContactSequence.initialize();
+   }
+
+   public void initializeForStepping(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings, FramePoint3DReadOnly dcmPosition)
+   {
+      isStanding.set(false);
 
       double currentTime = robotTimestamp.getDoubleValue();
-      if (!stepSequence.isEmpty() && stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime)
+
+      if (!isStanding.getBooleanValue() && stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime)
       {
          // compute dcm trajectory
          computeDcmTrajectory(taskSpaceControllerSettings);
@@ -104,24 +114,21 @@ public class DCMPlanner
 
    private void computeDcmTrajectory(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
-      if (!stepSequence.isEmpty())
-      {
-         // compute piecewise constant center of pressure plan
-         double currentTime = robotTimestamp.getDoubleValue();
-         QuadrantDependentList<ContactState> currentContactState = taskSpaceControllerSettings.getContactState();
-         timedContactSequence.update(stepSequence, currentSolePositions, currentContactState, currentTime);
-         piecewiseConstanceCopTrajectory.initializeTrajectory(timedContactSequence);
+      // compute piecewise constant center of pressure plan
+      double currentTime = robotTimestamp.getDoubleValue();
+      QuadrantDependentList<ContactState> currentContactState = taskSpaceControllerSettings.getContactState();
+      timedContactSequence.update(stepSequence, currentSolePositions, currentContactState, currentTime);
+      piecewiseConstanceCopTrajectory.initializeTrajectory(timedContactSequence);
 
-         // compute dcm trajectory with final boundary constraint
-         int numberOfIntervals = piecewiseConstanceCopTrajectory.getNumberOfIntervals();
-         tempPoint.setIncludingFrame(piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(numberOfIntervals - 1));
-         tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-         tempPoint.add(0, 0, comHeight.getDoubleValue());
+      // compute dcm trajectory with final boundary constraint
+      int numberOfIntervals = piecewiseConstanceCopTrajectory.getNumberOfIntervals();
+      tempPoint.setIncludingFrame(piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(numberOfIntervals - 1));
+      tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      tempPoint.add(0, 0, comHeight.getDoubleValue());
 
-         dcmTrajectory.setComHeight(comHeight.getDoubleValue());
-         dcmTrajectory.initializeTrajectory(numberOfIntervals, piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(), piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(),
-                                            piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1), tempPoint);
-      }
+      dcmTrajectory.setComHeight(comHeight.getDoubleValue());
+      dcmTrajectory.initializeTrajectory(numberOfIntervals, piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(), piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(),
+                                         piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1), tempPoint);
    }
 
    private final FramePoint3D desiredDCMPosition = new FramePoint3D();
@@ -130,25 +137,29 @@ public class DCMPlanner
    public void computeDcmSetpoints(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings, FixedFramePoint3DBasics desiredDCMPositionToPack,
                                    FixedFrameVector3DBasics desiredDCMVelocityToPack)
    {
-      computeDcmTrajectory(taskSpaceControllerSettings);
 
-      if (stepSequence.isEmpty())
+      if (isStanding.getBooleanValue())
       {
          // update desired dcm position
          desiredDCMPosition.setToZero(supportFrame);
          desiredDCMVelocity.setToZero(supportFrame);
       }
-      else if (robotTimestamp.getDoubleValue() <= dcmTransitionTrajectory.getFinalTime())
-      {
-         dcmTransitionTrajectory.compute(robotTimestamp.getDoubleValue());
-         dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
-         dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
-      }
       else
       {
-         dcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
-         dcmTrajectory.getPosition(desiredDCMPosition);
-         dcmTrajectory.getVelocity(desiredDCMVelocity);
+         computeDcmTrajectory(taskSpaceControllerSettings);
+
+         if (robotTimestamp.getDoubleValue() <= dcmTransitionTrajectory.getFinalTime())
+         {
+            dcmTransitionTrajectory.compute(robotTimestamp.getDoubleValue());
+            dcmTransitionTrajectory.getFramePosition(desiredDCMPosition);
+            dcmTransitionTrajectory.getFrameVelocity(desiredDCMVelocity);
+         }
+         else
+         {
+            dcmTrajectory.computeTrajectory(robotTimestamp.getDoubleValue());
+            dcmTrajectory.getPosition(desiredDCMPosition);
+            dcmTrajectory.getVelocity(desiredDCMVelocity);
+         }
       }
 
       desiredDCMPosition.changeFrame(desiredDCMPositionToPack.getReferenceFrame());

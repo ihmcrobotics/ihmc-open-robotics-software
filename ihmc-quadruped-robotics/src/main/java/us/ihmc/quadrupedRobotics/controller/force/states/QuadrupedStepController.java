@@ -168,7 +168,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       RecyclingArrayList<QuadrupedStep> adjustedSteps = balanceManager.computeStepAdjustment(stepMessageHandler.getActiveSteps());
       feetManager.adjustSteps(adjustedSteps);
 
-      balanceManager.initialize(taskSpaceControllerSettings);
+      balanceManager.initializeForStepping(taskSpaceControllerSettings);
    }
 
    @Override
