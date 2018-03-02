@@ -139,7 +139,9 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
 
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
-      mpcOptimization = new QuadrupedDcmBasedMpcOptimizationWithLaneChange(controllerToolbox.getDcmPositionEstimator(), NUMBER_OF_PREVIEW_STEPS, registry,
+      DivergentComponentOfMotionEstimator dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), lipModel,
+                                                                                                         registry, runtimeEnvironment.getGraphicsListRegistry());
+      mpcOptimization = new QuadrupedDcmBasedMpcOptimizationWithLaneChange(dcmPositionEstimator, NUMBER_OF_PREVIEW_STEPS, registry,
             runtimeEnvironment.getGraphicsListRegistry());
       mpcSettings = new QuadrupedMpcOptimizationWithLaneChangeSettings(mpcMaximumPreviewTimeParameter.get(), mpcStepAdjustmentCostParameter.get(),
             mpcCopAdjustmentCostParameter.get(), mpcMinimumNormalizedContactPressureParameter.get());
@@ -176,8 +178,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       }
       stepAdjustmentVector = new FrameVector3D();
       stepGoalPosition = new FramePoint3D();
-      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), minimumStepClearanceParameter.get(),
-            maximumStepStrideParameter.get());
+      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), registry);
       supportCentroid = new FramePoint3D();
 
       runtimeEnvironment.getParentRegistry().addChild(registry);

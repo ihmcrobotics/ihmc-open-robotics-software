@@ -18,12 +18,14 @@ public class QuadrupedRuntimeEnvironment
    private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
    private final GlobalDataProducer globalDataProducer;
 
+   private final double gravityZ;
+
    // TODO: These are used to provide feedback from the controllers to the state estimator. Can they be moved somewhere else?
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
 
    public QuadrupedRuntimeEnvironment(double controlDT, YoDouble robotTimestamp, FullQuadrupedRobotModel fullRobotModel, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry graphicsListRegistry, YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead, GlobalDataProducer globalDataProducer,
-         QuadrantDependentList<FootSwitchInterface> footSwitches)
+         QuadrantDependentList<FootSwitchInterface> footSwitches, double gravity)
    {
       this.controlDT = controlDT;
       this.robotTimestamp = robotTimestamp;
@@ -33,6 +35,7 @@ public class QuadrupedRuntimeEnvironment
       this.graphicsListRegistryForDetachedOverhead = graphicsListRegistryForDetachedOverhead;
       this.globalDataProducer = globalDataProducer;
       this.footSwitches = footSwitches;
+      this.gravityZ = Math.abs(gravity);
    }
 
    public double getControlDT()
@@ -73,5 +76,10 @@ public class QuadrupedRuntimeEnvironment
    public QuadrantDependentList<FootSwitchInterface> getFootSwitches()
    {
       return footSwitches;
+   }
+
+   public double getGravity()
+   {
+      return gravityZ;
    }
 }
