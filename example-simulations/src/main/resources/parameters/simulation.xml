@@ -71,5 +71,15 @@
                 <parameter name="fallDetectorGlitchFilterWindow" type="IntegerParameter" min="0.0" max="1.0" value="1"/>
             </registry>
         </registry>
+        <registry name="QuadrupedPositionControllerManager">
+            <registry name="QuadrupedPositionStandPrepController">
+                <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+            </registry>
+        </registry>
+        <registry name="QuadrupedPositionDevelopmentControllerManager">
+            <registry name="QuadrupedPositionStandPrepController">
+                <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+            </registry>
+        </registry>
     </registry>
 </parameters>
