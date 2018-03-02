@@ -73,12 +73,12 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      return virtualWrenchCommand;
    }
 
    @Override
    public SpatialFeedbackControlCommand getFeedbackControlCommand()
    {
-      return spatialFeedbackControlCommand;
+      return null;
    }
 }
