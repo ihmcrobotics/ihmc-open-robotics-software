@@ -87,7 +87,8 @@ public class QuadrupedBalanceManager
 
       currentSolePositions = controllerToolbox.getTaskSpaceEstimates().getSolePositions();
       ReferenceFrame supportFrame = controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-      dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), postureProvider.getComPositionInput().getZ(), robotTimestamp, supportFrame, currentSolePositions, registry);
+      dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), postureProvider.getComPositionInput().getZ(), robotTimestamp, supportFrame,
+                                  currentSolePositions, registry, yoGraphicsListRegistry);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, postureProvider, registry, yoGraphicsListRegistry);
@@ -169,7 +170,7 @@ public class QuadrupedBalanceManager
    {
       initialize();
 
-      dcmPlanner.initializeForStanding(taskSpaceControllerSettings, dcmPositionEstimate);
+      dcmPlanner.initializeForStanding();
    }
 
    public void initializeForStepping(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)

@@ -67,7 +67,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       this.dcmPositionEstimator = dcmPositionEstimator;
       this.currentDcmEstimate = new FramePoint3D();
       this.timedContactSequence = new QuadrupedTimedContactSequence(0, 2 * maxPreviewSteps + 4);
-      this.piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity());
+      this.piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(timedContactSequence.capacity(), registry);
 
       if (graphicsListRegistry != null)
       {
@@ -238,7 +238,7 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
 
          for (int i = 0; i < numberOfIntervals; i++)
          {
-            piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).changeFrame(ReferenceFrame.getWorldFrame());
+            piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
             x0.set(i * 2 + rowOffset, 0, piecewiseConstantCopTrajectory.getCopPositionAtStartOfInterval(i).getElement(axis));
             B.set(i * 2 + rowOffset, numberOfContacts + rowOffset, piecewiseConstantCopTrajectory.getNormalizedPressureContributedByQueuedSteps(i));
          }

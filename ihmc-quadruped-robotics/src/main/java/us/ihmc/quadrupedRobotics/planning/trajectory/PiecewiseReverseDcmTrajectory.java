@@ -59,15 +59,16 @@ public class PiecewiseReverseDcmTrajectory
     *
     * @param numSteps number of steps
     * @param timeAtSoS time at the start of each step
-    * @param cmpPositionAtSoS centroidal moment pivot position at the start of each step
+    * @param cmpPositionAtStartOfSupport centroidal moment pivot position at the start of each step
     * @param timeAtEoS time at the end of the final step
     * @param dcmPositionAtEoS divergent component of motion position at the end of the final step
     */
-   public void initializeTrajectory(int numSteps, List<MutableDouble> timeAtSoS, List<FramePoint3D> cmpPositionAtSoS, double timeAtEoS, FramePoint3D dcmPositionAtEoS)
+   public void initializeTrajectory(int numSteps, List<MutableDouble> timeAtSoS, List<? extends FixedFramePoint3DBasics> cmpPositionAtStartOfSupport,
+                                    double timeAtEoS, FramePoint3D dcmPositionAtEoS)
    {
       double naturalFrequency = Math.sqrt(gravity / comHeight);
 
-      if ((maxSteps < numSteps) || (timeAtSoS.size() < numSteps) || (cmpPositionAtSoS.size() < numSteps))
+      if ((maxSteps < numSteps) || (timeAtSoS.size() < numSteps) || (cmpPositionAtStartOfSupport.size() < numSteps))
       {
          throw new RuntimeException("number of steps exceeds the maximum buffer size");
       }
@@ -77,7 +78,7 @@ public class PiecewiseReverseDcmTrajectory
       for (int i = 0; i < numSteps; i++)
       {
          this.timeAtSoS[i] = timeAtSoS.get(i).doubleValue();
-         this.vrpPositionAtSoS[i].setIncludingFrame(cmpPositionAtSoS.get(i));
+         this.vrpPositionAtSoS[i].setIncludingFrame(cmpPositionAtStartOfSupport.get(i));
          this.vrpPositionAtSoS[i].changeFrame(ReferenceFrame.getWorldFrame());
          this.vrpPositionAtSoS[i].add(0, 0, comHeight);
       }
