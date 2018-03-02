@@ -8,16 +8,10 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.partNames.JointRole;
-import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -25,18 +19,21 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 
 public class QuadrupedForceBasedFreezeController implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(QuadrupedForceBasedFreezeController.class.getSimpleName());
 
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
-   private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
-   private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
-
+   private final DoubleParameter jointDampingParameter = new DoubleParameter("jointDamping", registry, 15.0);
+   private final DoubleParameter jointPositionLimitDampingParameter = new DoubleParameter("jointPositionLimitDamping", registry, 10.0);
+   private final DoubleParameter jointPositionLimitStiffnessParameter = new DoubleParameter("jointPositionLimitStiffness", registry, 100.0);
+   
    // Yo variables
    private final YoBoolean yoUseForceFeedbackControl;
 
@@ -118,9 +115,9 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    @Override
    public ControllerEvent process()
    {
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.getValue());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.getValue());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.getValue());
 
       controllerToolbox.update();
 
