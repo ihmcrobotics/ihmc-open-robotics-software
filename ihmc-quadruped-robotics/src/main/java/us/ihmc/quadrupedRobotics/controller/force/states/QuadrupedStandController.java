@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,11 +14,9 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbo
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -25,15 +24,14 @@ public class QuadrupedStandController implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   // parameters
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleArrayParameter comForceCommandWeightsParameter = parameterFactory.createDoubleArray("comForceCommandWeights", 1, 1, 1);
-   private final DoubleArrayParameter comTorqueCommandWeightsParameter = parameterFactory.createDoubleArray("comTorqueCommandWeights", 1, 1, 1);
-   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 2);
-   private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
-   private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
-   private final DoubleParameter contactPressureLowerLimitParameter = parameterFactory.createDouble("contactPressureLowerLimit", 50);
-   private final DoubleParameter coefficientOfFrictionParameter = parameterFactory.createDouble("coefficientOfFriction", 0.5);
+   private final DoubleParameter[] comForceCommandWeightsParameter = new DoubleParameter[3];
+   private final DoubleParameter[] comTorqueCommandWeightsParameter = new DoubleParameter[3];
+
+   private final DoubleParameter jointDampingParameter = new DoubleParameter("jointDamping", registry, 2.0);
+   private final DoubleParameter jointPositionLimitDampingParameter = new DoubleParameter("jointPositionLimitDampingParameter", registry, 10);
+   private final DoubleParameter jointPositionLimitStiffnessParameter = new DoubleParameter("jointPositionLimitStiffnessParameter", registry, 100);
+   private final DoubleParameter contactPressureLowerLimitParameter = new DoubleParameter("contactPressureLowerLimitParameter", registry, 50);
+   private final DoubleParameter coefficientOfFrictionParameter = new DoubleParameter("coefficientOfFrictionParameter", registry, 0.5);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -79,6 +77,12 @@ public class QuadrupedStandController implements QuadrupedController
 
       solePositions = controllerToolbox.getTaskSpaceEstimates().getSolePositions();
 
+      for (int i = 0; i < 3; i++)
+      {
+         comForceCommandWeightsParameter[i] = new DoubleParameter("comForceCommandWeight" + Axis.values()[i], registry, 1.0);
+         comTorqueCommandWeightsParameter[i] = new DoubleParameter("comTorqueCommandWeight" + Axis.values()[i], registry, 1.0);
+      }
+
       parentRegistry.addChild(registry);
    }
 
@@ -89,13 +93,13 @@ public class QuadrupedStandController implements QuadrupedController
 
    private void updateGains()
    {
-      taskSpaceControllerSettings.getContactForceLimits().setCoefficientOfFriction(coefficientOfFrictionParameter.get());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
-      taskSpaceControllerSettings.getContactForceOptimizationSettings().setComForceCommandWeights(comForceCommandWeightsParameter.get());
-      taskSpaceControllerSettings.getContactForceOptimizationSettings().setComTorqueCommandWeights(comTorqueCommandWeightsParameter.get());
-      taskSpaceControllerSettings.getContactForceLimits().setPressureLowerLimit(contactPressureLowerLimitParameter.get());
+      taskSpaceControllerSettings.getContactForceLimits().setCoefficientOfFriction(coefficientOfFrictionParameter.getValue());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.getValue());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.getValue());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.getValue());
+      taskSpaceControllerSettings.getContactForceOptimizationSettings().setComForceCommandWeights(comForceCommandWeightsParameter);
+      taskSpaceControllerSettings.getContactForceOptimizationSettings().setComTorqueCommandWeights(comTorqueCommandWeightsParameter);
+      taskSpaceControllerSettings.getContactForceLimits().setPressureLowerLimit(contactPressureLowerLimitParameter.getValue());
    }
 
    @Override
