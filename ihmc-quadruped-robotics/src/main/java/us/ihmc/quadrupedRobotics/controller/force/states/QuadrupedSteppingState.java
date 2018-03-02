@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
@@ -60,11 +62,14 @@ public class QuadrupedSteppingState implements QuadrupedController
       this.controlManagerFactory = controlManagerFactory;
 
       FullQuadrupedRobotModel fullRobotModel = runtimeEnvironment.getFullRobotModel();
-      WholeBodyControlCoreToolbox wholeBodyControlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
-                                                                                                fullRobotModel.getRootJoint(), fullRobotModel.getControllableOneDoFJoints(),
-                                                                                                controllerToolbox.getReferenceFrames().getCenterOfMassFrame(),
-                                                                                                runtimeEnvironment.getControllerCoreOptimizationSettings(),
-                                                                                                runtimeEnvironment.getGraphicsListRegistry(), registry);
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
+                                                                                       fullRobotModel.getRootJoint(), fullRobotModel.getControllableOneDoFJoints(),
+                                                                                       controllerToolbox.getReferenceFrames().getCenterOfMassFrame(),
+                                                                                       runtimeEnvironment.getControllerCoreOptimizationSettings(),
+                                                                                       runtimeEnvironment.getGraphicsListRegistry(), registry);
+      FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
+      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(),
+                                                                           registry);
 
       // Initialize input providers.
       xGaitSettingsProvider = new YoQuadrupedXGaitSettings(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
