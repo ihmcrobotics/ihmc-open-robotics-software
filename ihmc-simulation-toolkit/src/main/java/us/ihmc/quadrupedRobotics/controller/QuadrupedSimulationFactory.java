@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller;
 import java.io.IOException;
 import java.net.BindException;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -22,7 +23,6 @@ import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionController
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.controller.positionDevelopment.QuadrupedPositionDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootContactableBodiesFactory;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
 import us.ihmc.quadrupedRobotics.factories.QuadrupedRobotControllerFactory;
@@ -40,6 +40,7 @@ import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -102,6 +103,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<StateEstimatorParameters> stateEstimatorParameters = new RequiredFactoryField<>("stateEstimatorParameters");
    private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
    private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
+   private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
@@ -176,13 +178,14 @@ public class QuadrupedSimulationFactory
       }
    }
 
-   private void createContactibleFeet()
+   private void createContactableFeet()
    {
-      QuadrupedFootContactableBodiesFactory footContactableBodiesFactory = new QuadrupedFootContactableBodiesFactory();
+      ContactableBodiesFactory<RobotQuadrant> footContactableBodiesFactory = new ContactableBodiesFactory<>();
       footContactableBodiesFactory.setFullRobotModel(fullRobotModel.get());
-      footContactableBodiesFactory.setPhysicalProperties(physicalProperties.get());
+      footContactableBodiesFactory.setFootContactPoints(physicalProperties.get().getFeetGroundContactPoints());
       footContactableBodiesFactory.setReferenceFrames(referenceFrames.get());
-      contactableFeet = footContactableBodiesFactory.createFootContactableBodies();
+      contactableFeet = new QuadrantDependentList<>(footContactableBodiesFactory.createFootContactablePlaneBodies());
+      footContactableBodiesFactory.disposeFactory();
    }
 
    private void createFootSwitches()
@@ -262,16 +265,18 @@ public class QuadrupedSimulationFactory
    {
       if (controlMode.get() == QuadrupedControlMode.POSITION || controlMode.get() == QuadrupedControlMode.POSITION_DEV)
       {
-         legInverseKinematicsCalculator = new QuadrupedInverseKinematicsCalculators(modelFactory.get(), physicalProperties.get(), fullRobotModel.get(), referenceFrames.get(),
+         legInverseKinematicsCalculator = new QuadrupedInverseKinematicsCalculators(modelFactory.get(), jointDesiredOutputList.get(), physicalProperties.get(),
+                                                                                    fullRobotModel.get(), referenceFrames.get(),
                                                                                     sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry);
       }
    }
 
    public void createControllerManager() throws IOException
    {
-
-      QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(), sdfRobot.get().getRobotsYoVariableRegistry(),
-                                                           yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead, globalDataProducer, footSwitches, gravity.get());
+      QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
+                                                                                       jointDesiredOutputList.get(), sdfRobot.get().getRobotsYoVariableRegistry(),
+                                                                                       yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead,
+                                                                                       globalDataProducer, contactableFeet, footSwitches, gravity.get());
       switch (controlMode.get())
       {
       case FORCE:
@@ -411,7 +416,7 @@ public class QuadrupedSimulationFactory
       setupYoRegistries();
       createPushRobotController();
       createSensorReader();
-      createContactibleFeet();
+      createContactableFeet();
       createFootSwitches();
       createStateEstimator();
       createPacketCommunicator();
@@ -471,6 +476,11 @@ public class QuadrupedSimulationFactory
    public void setControlDT(double controlDT)
    {
       this.controlDT.set(controlDT);
+   }
+
+   public void setJointDesiredOutputList(JointDesiredOutputList jointDesiredOutputList)
+   {
+      this.jointDesiredOutputList.set(jointDesiredOutputList);
    }
 
    public void setGravity(double gravity)

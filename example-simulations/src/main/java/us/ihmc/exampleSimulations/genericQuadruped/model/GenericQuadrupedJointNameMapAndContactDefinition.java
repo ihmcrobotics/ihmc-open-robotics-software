@@ -184,7 +184,6 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
       return new NeckJointName[0];
    }
 
-
    @Override
    public ImmutablePair<RobotQuadrant, LegJointName> getLegJointName(String jointName)
    {

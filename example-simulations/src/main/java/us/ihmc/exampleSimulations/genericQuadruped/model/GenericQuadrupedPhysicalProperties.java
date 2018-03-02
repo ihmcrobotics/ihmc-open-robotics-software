@@ -37,4 +37,10 @@ public class GenericQuadrupedPhysicalProperties implements QuadrupedPhysicalProp
    {
       return footGroundContactPoints.get(robotQuadrant);
    }
+
+   @Override
+   public QuadrantDependentList<ArrayList<Point2D>> getFeetGroundContactPoints()
+   {
+      return footGroundContactPoints;
+   }
 }

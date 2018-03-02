@@ -7,6 +7,7 @@ import java.util.Map;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -22,8 +23,12 @@ public class QuadrupedPositionBasedLegJointSliderBoardController implements Quad
    private final Map<String, AlphaFilteredYoVariable> alphaFilteredQDesiredMap = new HashMap<>();
    private final Map<String, YoDouble> QDesiredMap = new HashMap<>();
 
+   private final JointDesiredOutputList jointDesiredOutputList;
+
    public QuadrupedPositionBasedLegJointSliderBoardController(QuadrupedRuntimeEnvironment runtimeEnvironment, YoVariableRegistry parentRegistry)
    {
+      this.jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
+
       jointMap = runtimeEnvironment.getFullRobotModel().getOneDoFJointsAsMap();
       jointMapKeySet.addAll(jointMap.keySet());
 
@@ -49,7 +54,7 @@ public class QuadrupedPositionBasedLegJointSliderBoardController implements Quad
          OneDoFJoint oneDoFJoint = jointMap.get(key);
          AlphaFilteredYoVariable alphaFilteredYoVariable = alphaFilteredQDesiredMap.get(key);
          alphaFilteredYoVariable.update();
-         oneDoFJoint.setqDesired(alphaFilteredYoVariable.getDoubleValue());
+         jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setDesiredPosition(alphaFilteredYoVariable.getDoubleValue());
       }
       return null;
    }

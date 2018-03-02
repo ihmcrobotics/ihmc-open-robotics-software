@@ -1920,7 +1920,8 @@ public class VirtualModelControllerTestHelper
             controllerToeContactLines.put(robotSide, new LineSegment2D(new Point2D(footLength / 2.0, -toeWidth / 2.0), new Point2D(footLength / 2.0, toeWidth / 2.0)));
          }
 
-         contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
+         contactableBodiesFactory.setFootContactPoints(controllerFootGroundContactPoints);
+         contactableBodiesFactory.setToeContactParameters(controllerToeContactPoints, controllerToeContactLines);
 
          for (RobotSide robotSide : RobotSide.values)
          {

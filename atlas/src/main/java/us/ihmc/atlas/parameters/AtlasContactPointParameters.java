@@ -88,6 +88,13 @@ public class AtlasContactPointParameters extends RobotContactPointParameters<Rob
       }
    }
 
+   private void addAdditionalContactPoint(String bodyName, String contactName, RigidBodyTransform transformToContactFrame)
+   {
+      additionalContactRigidBodyNames.add(bodyName);
+      additionalContactNames.add(contactName);
+      additionalContactTransforms.add(transformToContactFrame);
+   }
+
    private void createHandKnobContactPoints()
    {
       if (handContactPointsHaveBeenCreated)
@@ -111,7 +118,8 @@ public class AtlasContactPointParameters extends RobotContactPointParameters<Rob
             transformToContactFrame.appendRollRotation(Math.PI);
 
          addSimulationContactPoint(nameOfJointBeforeHands.get(robotSide), pointLocationInParentJoint);
-         contactableBodiesFactory.addAdditionalContactPoint(bodyName, bodyName + "Contact", transformToContactFrame);
+
+         addAdditionalContactPoint(bodyName, bodyName + "Contact", transformToContactFrame);
       }
    }
 

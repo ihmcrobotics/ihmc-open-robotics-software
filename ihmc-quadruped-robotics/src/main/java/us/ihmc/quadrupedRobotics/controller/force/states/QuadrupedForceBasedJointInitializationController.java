@@ -9,6 +9,8 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 
 /**
  * This controller sets desired joint angles to their actual values when the joint comes online.
@@ -16,6 +18,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 public class QuadrupedForceBasedJointInitializationController implements QuadrupedController
 {
    private final FullQuadrupedRobotModel fullRobotModel;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
    /**
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the {@link FullRobotModel#getOneDoFJoints()}
@@ -26,6 +29,7 @@ public class QuadrupedForceBasedJointInitializationController implements Quadrup
    public QuadrupedForceBasedJointInitializationController(QuadrupedRuntimeEnvironment environment)
    {
       this.fullRobotModel = environment.getFullRobotModel();
+      this.jointDesiredOutputList = environment.getJointDesiredOutputList();
       this.initialized = new BitSet(fullRobotModel.getOneDoFJoints().length);
    }
 
@@ -36,10 +40,9 @@ public class QuadrupedForceBasedJointInitializationController implements Quadrup
       for (int i = 0; i < joints.length; i++)
       {
          OneDoFJoint joint = joints[i];
-
          if (fullRobotModel.getNameForOneDoFJoint(joint).getRole() == JointRole.LEG)
          {
-            joint.setUnderPositionControl(false);
+            jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.EFFORT);
          }
       }
    }
@@ -55,7 +58,7 @@ public class QuadrupedForceBasedJointInitializationController implements Quadrup
          // Only set a desired if the actuator has just come online.
          if (!initialized.get(i) && joint.isOnline())
          {
-            joint.setTau(0.0);
+            jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(0.0);
             initialized.set(i);
          }
       }
