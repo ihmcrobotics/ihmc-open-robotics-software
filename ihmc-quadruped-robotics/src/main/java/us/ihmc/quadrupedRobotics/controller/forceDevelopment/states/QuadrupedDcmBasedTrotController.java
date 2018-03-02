@@ -253,10 +253,6 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
       dcmVelocitySetpoint.setToZero();
 
       dcmPositionController.reset();
-      dcmPositionController.setVrpPositionRateLimit(vrpPositionRateLimitParameter.get());
-      dcmPositionController.getGains().setProportionalGains(dcmPositionProportionalGainsParameter.get());
-      dcmPositionController.getGains().setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
-      dcmPositionController.getGains().setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
 
       comPositionControllerSetpoints.initialize(taskSpaceEstimates.getComPosition());
       comPositionController.reset();
