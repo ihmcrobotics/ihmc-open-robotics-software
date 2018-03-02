@@ -114,6 +114,32 @@
                     <parameter name="bodyOrientationIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                     <parameter name="bodyOrientationMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                 </registry>
+                <registry name="QuadrupedFeetManager">
+                    <registry name="FrontLeftQuadrupedFootControlModule">
+                        <registry name="FrontLeftQuadrupedHoldPositionState">
+                            <parameter name="useSoleForceFeedForward" type="BooleanParameter" min="0.0" max="1.0" value="1.0"/>
+                            <parameter name="feedForwardRampTime" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+                        </registry>
+                    </registry>
+                    <registry name="FrontRightQuadrupedFootControlModule">
+                        <registry name="FrontRightQuadrupedHoldPositionState">
+                            <parameter name="useSoleForceFeedForward" type="BooleanParameter" min="0.0" max="1.0" value="1.0"/>
+                            <parameter name="feedForwardRampTime" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+                        </registry>
+                    </registry>
+                    <registry name="HindLeftQuadrupedFootControlModule">
+                        <registry name="HindLeftQuadrupedHoldPositionState">
+                            <parameter name="useSoleForceFeedForward" type="BooleanParameter" min="0.0" max="1.0" value="1.0"/>
+                            <parameter name="feedForwardRampTime" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+                        </registry>
+                    </registry>
+                    <registry name="HindRightQuadrupedFootControlModule">
+                        <registry name="HindRightQuadrupedHoldPositionState">
+                            <parameter name="useSoleForceFeedForward" type="BooleanParameter" min="0.0" max="1.0" value="1.0"/>
+                            <parameter name="feedForwardRampTime" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+                        </registry>
+                    </registry>
+                </registry>
             </registry>
             <registry name="StateChangeSmootherComponent">
                 <parameter name="stateChangeSmootherSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
