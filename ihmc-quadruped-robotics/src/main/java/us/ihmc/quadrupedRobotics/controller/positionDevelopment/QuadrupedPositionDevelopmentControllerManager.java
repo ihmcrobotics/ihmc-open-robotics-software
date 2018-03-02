@@ -82,7 +82,7 @@ public class QuadrupedPositionDevelopmentControllerManager implements QuadrupedC
    {
       QuadrupedController jointInitializationController = new QuadrupedPositionJointInitializationController(runtimeEnvironment);
       QuadrupedController doNothingController = new QuadrupedPositionDoNothingController(runtimeEnvironment);
-      QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, initialPositionParameters);
+      QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, initialPositionParameters, registry);
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
       QuadrupedController jointSliderBoardController = new QuadrupedPositionBasedLegJointSliderBoardController(runtimeEnvironment, registry);
       QuadrupedController comVerificationController = new QuadrupedPositionBasedCenterOfMassVerificationController(runtimeEnvironment, modelFactory,
