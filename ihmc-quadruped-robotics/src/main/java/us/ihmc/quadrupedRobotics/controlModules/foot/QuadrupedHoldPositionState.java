@@ -7,11 +7,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionControllerSetpoints;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
-import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -22,7 +21,6 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
    private final YoDouble timestamp;
    private double initialTime;
 
-   private final ParameterFactory parameterFactory;
    private final BooleanParameter useSoleForceFeedForwardParameter;
    private final DoubleParameter feedForwardRampTimeParameter;
 
@@ -54,11 +52,10 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
       timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       soleLinearVelocityEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant);
 
-      registry = new YoVariableRegistry(robotQuadrant.getShortName() + getClass().getSimpleName());
+      registry = new YoVariableRegistry(robotQuadrant.getPascalCaseName() + getClass().getSimpleName());
 
-      parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-      useSoleForceFeedForwardParameter = parameterFactory.createBoolean("useSoleForceFeedForward", true);
-      feedForwardRampTimeParameter = parameterFactory.createDouble("feedForwardRampTime", 2.0);
+      useSoleForceFeedForwardParameter = new BooleanParameter("useSoleForceFeedForward", registry, true);
+      feedForwardRampTimeParameter = new DoubleParameter("feedForwardRampTime", registry, 2.0);
 
       solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
@@ -93,9 +90,9 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
       solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, soleLinearVelocityEstimate);
 
       double currentTime = timestamp.getDoubleValue();
-      if (useSoleForceFeedForwardParameter.get())
+      if (useSoleForceFeedForwardParameter.getValue())
       {
-         double rampMultiplier = 1.0 - Math.min(1.0, (currentTime - initialTime) / feedForwardRampTimeParameter.get());
+         double rampMultiplier = 1.0 - Math.min(1.0, (currentTime - initialTime) / feedForwardRampTimeParameter.getValue());
          FrameVector3D feedforward = solePositionControllerSetpoints.getSoleForceFeedforward();
          feedforward.set(initialSoleForces);
          feedforward.scale(rampMultiplier);
