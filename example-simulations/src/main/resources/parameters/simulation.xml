@@ -27,6 +27,19 @@
                 <parameter name="jointPositionLimitStiffnessParameter" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
                 <parameter name="coefficientOfFrictionParameter" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
             </registry>
+            <registry name="QuadrupedForceBasedStandPrepController">
+                <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="stanceLength" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="stanceWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.35"/>
+                <parameter name="stanceHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.6"/>
+                <parameter name="stanceXOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                <parameter name="stanceYOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="stancePitch" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
+                <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                <parameter name="useForceFeedbackControl" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
             </registry>
+        </registry>
     </registry>
 </parameters>

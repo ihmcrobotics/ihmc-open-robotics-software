@@ -49,7 +49,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       forceControllerState = (YoEnum<QuadrupedForceControllerEnum>) scs.getVariable("forceControllerState");
       steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingState");
 
-      stanceHeight = (YoDouble) scs.getVariable("param__stanceHeight");
+      stanceHeight = (YoDouble) scs.getVariable("stanceHeight");
       groundPlanePointZ = (YoDouble) scs.getVariable("groundPlanePointZ");
       
       xGaitEndPhaseShiftInput = (YoDouble) scs.getVariable("endPhaseShiftInput");
