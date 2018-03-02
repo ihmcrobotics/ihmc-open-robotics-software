@@ -30,7 +30,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
    private final FramePoint3D copPositionAtCurrentTime;
    private int numberOfIntervals;
    private final ArrayList<MutableDouble> timeAtStartOfInterval;
-   private final ArrayList<YoFramePoint> copPositionAtStartOfInterval;
+   private final ArrayList<YoFramePoint> copPositionsAtStartOfInterval;
    private final ArrayList<QuadrantDependentList<MutableDouble>> normalizedPressureAtStartOfInterval;
    private final ArrayList<MutableDouble> normalizedPressureContributedByInitialContacts;
    private final ArrayList<MutableDouble> normalizedPressureContributedByQueuedSteps;
@@ -49,14 +49,14 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       copPositionAtCurrentTime = new FramePoint3D();
       numberOfIntervals = 0;
       timeAtStartOfInterval = new ArrayList<>(maxIntervals);
-      copPositionAtStartOfInterval = new ArrayList<>(maxIntervals);
+      copPositionsAtStartOfInterval = new ArrayList<>(maxIntervals);
       normalizedPressureContributedByInitialContacts = new ArrayList<>(maxIntervals);
       normalizedPressureContributedByQueuedSteps = new ArrayList<>(maxIntervals);
       normalizedPressureAtStartOfInterval = new ArrayList<>(maxIntervals);
       for (int i = 0; i < maxIntervals; i++)
       {
          timeAtStartOfInterval.add(i, new MutableDouble(0.0));
-         copPositionAtStartOfInterval.add(i, new YoFramePoint("copPositionWaypoint" + i, ReferenceFrame.getWorldFrame(), registry));
+         copPositionsAtStartOfInterval.add(i, new YoFramePoint("copPositionWaypoint" + i, ReferenceFrame.getWorldFrame(), registry));
 
          normalizedPressureContributedByInitialContacts.add(i, new MutableDouble(0.0));
          normalizedPressureContributedByQueuedSteps.add(i, new MutableDouble(0.0));
@@ -72,15 +72,15 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
    public void resetVariables()
    {
-      for (int i = 0; i < copPositionAtStartOfInterval.size(); i ++)
-         copPositionAtStartOfInterval.get(i).setToNaN();
+      for (int i = 0; i < copPositionsAtStartOfInterval.size(); i ++)
+         copPositionsAtStartOfInterval.get(i).setToNaN();
    }
 
    public void setupVisualizers(YoGraphicsList graphicsList, ArtifactList artifactList, double pointSize)
    {
-      for (int i = 0; i < copPositionAtStartOfInterval.size(); i++)
+      for (int i = 0; i < copPositionsAtStartOfInterval.size(); i++)
       {
-         YoFramePoint copLocation = copPositionAtStartOfInterval.get(i);
+         YoFramePoint copLocation = copPositionsAtStartOfInterval.get(i);
          YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(copLocation.getNamePrefix(), copLocation, pointSize, YoAppearance.Green(),
                                                                      YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
          graphicsList.add(yoGraphicPosition);
@@ -115,7 +115,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
          QuadrantDependentList<ContactState> contactState = timedContactSequence.get(interval).getContactState();
 
          QuadrupedCenterOfPressureTools.computeNominalNormalizedContactPressure(normalizedPressureAtStartOfInterval.get(interval), contactState);
-         QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPositionAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
+         QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPositionsAtStartOfInterval.get(interval), solePosition, normalizedPressureAtStartOfInterval.get(interval));
          normalizedPressureContributedByQueuedSteps.get(interval).setValue(0.0);
          normalizedPressureContributedByInitialContacts.get(interval).setValue(0.0);
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -152,11 +152,11 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       {
          if (currentTime >= timeAtStartOfInterval.get(interval).doubleValue())
          {
-            copPositionAtCurrentTime.setIncludingFrame(copPositionAtStartOfInterval.get(interval));
+            copPositionAtCurrentTime.setIncludingFrame(copPositionsAtStartOfInterval.get(interval));
             return;
          }
       }
-      copPositionAtCurrentTime.setIncludingFrame(copPositionAtStartOfInterval.get(0));
+      copPositionAtCurrentTime.setIncludingFrame(copPositionsAtStartOfInterval.get(0));
    }
 
    public void getPosition(FramePoint3D copPositionAtCurrentTime)
@@ -176,7 +176,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
 
    public FixedFramePoint3DBasics getCopPositionAtStartOfInterval(int interval)
    {
-      return copPositionAtStartOfInterval.get(interval);
+      return copPositionsAtStartOfInterval.get(interval);
    }
 
    public QuadrantDependentList<MutableDouble> getNormalizedPressureAtStartOfInterval(int interval)
@@ -199,9 +199,9 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       return timeAtStartOfInterval;
    }
 
-   public ArrayList<? extends FixedFramePoint3DBasics> getCopPositionAtStartOfInterval()
+   public ArrayList<? extends FixedFramePoint3DBasics> getCopPositionsAtStartOfInterval()
    {
-      return copPositionAtStartOfInterval;
+      return copPositionsAtStartOfInterval;
    }
 
    public ArrayList<QuadrantDependentList<MutableDouble>> getNormalizedPressureAtStartOfInterval()
