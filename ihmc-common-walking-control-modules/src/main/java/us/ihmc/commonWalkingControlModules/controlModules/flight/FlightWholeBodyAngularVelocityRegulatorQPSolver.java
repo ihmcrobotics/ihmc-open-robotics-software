@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.flight;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.AbstractSimpleActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -107,7 +108,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       velocityError = new DenseMatrix64F(angularDimensions, 1);
       deltaControl = new DenseMatrix64F(angularDimensions, 1);
 
-      regularizationWeights = new DenseMatrix64F(problem_size, 1);
+      regularizationWeights = new DenseMatrix64F(problem_size, problem_size);
       reset();
    }
 
@@ -127,6 +128,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       solverInput_beq.reshape(0, 1);
       solverInput_Ain.reshape(0, 1);
       solverInput_bin.reshape(0, 1);
+      regularizationWeights.reshape(problem_size, problem_size);
    }
 
    public void compute()
@@ -134,6 +136,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       computeCostFunctionToOptimize();
       computeLinearInequalityConstraints();
       computeLinearEqualityConstraints();
+      setupBounds();
       solve();
    }
 
@@ -193,9 +196,10 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
    public void setCurrentCentroidalInertiaTensor(DenseMatrix64F centroidalInertia)
    {
       // Map the inertia tensor to the decision variables 
-      this.inertia.reshape(problem_size, 1);
-      for (int i = 0; i < problem_size; i++)
-         inertia.set(i, 0, centroidalInertia.get(i % angularDimensions, (i + 1) % angularDimensions));
+      //      this.inertia.reshape(problem_size, 1);
+      //      for (int i = 0; i < problem_size; i++)
+      //         inertia.set(i, 0, centroidalInertia.get(i % angularDimensions, (i + 1) % angularDimensions));
+      inertia.set(centroidalInertia);
    }
 
    public void setMaxInertiaRateOfChange(double inertiaRateOfChange)
@@ -226,11 +230,11 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
    {
       // Since the quadratic term is only a result of the regularization set it directly 
       // TODO: Evaluate whether each of the terms deserve to have their own independent regularization weight
-      for (int i = 0; i < problem_size; i++)
-         solverInput_H.set(i, i, regularizationWeights.get(i, 1));
+      solverInput_H.zero();
+      CommonOps.addEquals(solverInput_H, regularizationWeights);
 
       // Compute the terms required for the linear term (this is from the Lyapunov derivative
-      CommonOps.subtract(currentVelocity, commandedVelocity, velocityError);
+      CommonOps.subtract(commandedVelocity, currentVelocity, velocityError);
       for (int i = 0; i < angularDimensions; i++)
          deltaControl.set(i, 0, (3 * currentVelocity.get(i, 0) - commandedVelocity.get(i, 0)) * 0.5);
 
@@ -240,6 +244,15 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
          solverInput_f.set(i, 0, velocityError.get(i, 0) * deltaControl.get(i, 0));
          solverInput_f.set(i + angularDimensions, 0, velocityError.get(i, 0) * deltaControl.get((i + 1) % angularDimensions, 0)
                + velocityError.get((i + 1) % angularDimensions, 0) * deltaControl.get(i, 0));
+      }
+   }
+
+   private void setupBounds()
+   {
+      for (int i = 0; i < problem_size; i++)
+      {
+         solverInput_lb.set(i, Double.NEGATIVE_INFINITY);
+         solverInput_ub.set(i, Double.POSITIVE_INFINITY);
       }
    }
 
@@ -298,7 +311,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       int currentConstraintSize = solverInput_Ain.getNumRows();
 
       solverInput_Ain.reshape(currentConstraintSize + angularDimensions, problem_size);
-      solverInput_Ain.reshape(currentConstraintSize + angularDimensions, 1);
+      solverInput_bin.reshape(currentConstraintSize + angularDimensions, 1);
 
       tempConstraintMatrixLHS.reshape(angularDimensions, problem_size);
       tempConstraintMatrixRHS.reshape(angularDimensions, 1);
@@ -319,7 +332,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       int taskSize = (int) Math.pow(2.0, problem_size); // Why is this so large :/
 
       solverInput_Ain.reshape(currentConstraintSize + taskSize, problem_size);
-      solverInput_Ain.reshape(currentConstraintSize + taskSize, 1);
+      solverInput_bin.reshape(currentConstraintSize + taskSize, 1);
 
       tempConstraintMatrixLHS.reshape(taskSize, problem_size);
       tempConstraintMatrixRHS.reshape(taskSize, 1);
@@ -347,8 +360,16 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
    private void computeLinearEqualityConstraints()
    {
       // No equality constraints. May be useful later
-      solverInput_Aeq.reshape(0, 0);
-      solverInput_beq.reshape(0, 0);
+      solverInput_Aeq.reshape(0, problem_size);
+      solverInput_beq.reshape(0, 1);
+   }
+
+   private String printProblem()
+   {
+      String ret = "Minimize " + solverInput_H.toString() + " " + solverInput_f.toString() + " subject to: " + solverInput_Aeq.toString() + " "
+            + solverInput_beq.toString() + solverInput_Ain.toString() + " " + solverInput_bin.toString() + ", bounds: " + solverInput_lb.toString() + solverInput_ub.toString();
+
+      return ret;
    }
 
    private void solve()
@@ -363,7 +384,6 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       qpSolver.setUpperBounds(solverInput_ub);
 
       qpSolver.solve(qpSolution);
-
       qpTimer.stopMeasurement();
    }
 }
