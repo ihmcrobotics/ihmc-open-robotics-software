@@ -177,7 +177,7 @@ public class QuadrupedBalanceManager
       dcmPlanner.addStepsToSequence(steps);
    }
 
-   public void initialize(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   private void initialize()
    {
       // update model
       linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
@@ -192,9 +192,22 @@ public class QuadrupedBalanceManager
 
       // initialize timed contact sequence
       accumulatedStepAdjustment.setToZero();
-
-      dcmPlanner.initializeDcmSetpoints(taskSpaceControllerSettings, dcmPositionEstimate);
    }
+
+   public void initializeForStanding(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   {
+      initialize();
+
+      dcmPlanner.initializeForStanding(taskSpaceControllerSettings, dcmPositionEstimate);
+   }
+
+   public void initializeForStepping(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   {
+      initialize();
+
+      dcmPlanner.initializeForStepping(taskSpaceControllerSettings, dcmPositionEstimate);
+   }
+
 
    public void compute(FrameVector3D linearMomentumRateOfChangeToPack, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
