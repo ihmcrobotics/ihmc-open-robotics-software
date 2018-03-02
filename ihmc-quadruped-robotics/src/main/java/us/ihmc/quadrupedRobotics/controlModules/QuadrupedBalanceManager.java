@@ -16,7 +16,6 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
@@ -42,26 +41,15 @@ public class QuadrupedBalanceManager
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final YoDouble robotTimestamp;
-   private final double gravity;
-   private final double mass;
-
-   private final ReferenceFrame supportFrame;
 
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
-   private final MomentumRateOfChangeModule momentumRateOfChangeModule;
-   private final QuadrupedComPositionController comPositionController;
-   private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
+   private final QuadrupedMomentumRateOfChangeModule momentumRateOfChangeModule;
 
    private final DCMPlanner dcmPlanner;
 
    private final QuadrupedPostureInputProviderInterface postureProvider;
 
    private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
-   private final DoubleArrayParameter comPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("comPositionDerivativeGains", 0, 0, 750);
-   private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
-   private final DoubleParameter comPositionMaxIntegralErrorParameter = parameterFactory.createDouble("comPositionMaxIntegralError", 0);
-   private final DoubleParameter comPositionGravityCompensationParameter = parameterFactory.createDouble("comPositionGravityCompensation", 1);
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentGain", 1.5);
 
    private final YoFrameVector instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
@@ -75,9 +63,6 @@ public class QuadrupedBalanceManager
    private final YoFramePoint yoFinalDesiredDCM = new YoFramePoint("finalDesiredDCMPosition", worldFrame, registry);
    private final YoFramePoint yoVrpPositionSetpoint = new YoFramePoint("vrpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
-
-   private final FramePoint3D cmpPositionSetpoint = new FramePoint3D();
-
 
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -97,23 +82,15 @@ public class QuadrupedBalanceManager
 
       QuadrupedRuntimeEnvironment runtimeEnvironment = controllerToolbox.getRuntimeEnvironment();
       robotTimestamp = runtimeEnvironment.getRobotTimestamp();
-      gravity = 9.81;
-      mass = controllerToolbox.getRuntimeEnvironment().getFullRobotModel().getTotalMass();
 
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
       currentSolePositions = controllerToolbox.getTaskSpaceEstimates().getSolePositions();
-
-      supportFrame = controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-
-      dcmPlanner = new DCMPlanner(gravity, postureProvider.getComPositionInput().getZ(), robotTimestamp, supportFrame, currentSolePositions, registry);
+      ReferenceFrame supportFrame = controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
+      dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), postureProvider.getComPositionInput().getZ(), robotTimestamp, supportFrame, currentSolePositions, registry);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
-
-      ReferenceFrame comZUpFrame = controllerToolbox.getReferenceFrames().getCenterOfMassZUpFrame();
-      momentumRateOfChangeModule = new MomentumRateOfChangeModule(controllerToolbox, postureProvider, registry, yoGraphicsListRegistry);
-      comPositionController = new QuadrupedComPositionController(comZUpFrame, runtimeEnvironment.getControlDT(), registry);
-      comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
+      momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, postureProvider, registry, yoGraphicsListRegistry);
 
       crossoverProjection = new QuadrupedStepCrossoverProjection(controllerToolbox.getReferenceFrames().getBodyZUpFrame(), registry);
 
@@ -183,8 +160,6 @@ public class QuadrupedBalanceManager
       yoDesiredDCMVelocity.setToZero();
 
       momentumRateOfChangeModule.initialize();
-      comPositionControllerSetpoints.initialize(controllerToolbox.getTaskSpaceEstimates().getComPosition());
-      comPositionController.reset();
 
       // initialize timed contact sequence
       accumulatedStepAdjustment.setToZero();
@@ -207,9 +182,6 @@ public class QuadrupedBalanceManager
 
    public void compute(FrameVector3D linearMomentumRateOfChangeToPack, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
-      updateGains();
-
-      QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
       // update model
       linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
 
@@ -221,32 +193,8 @@ public class QuadrupedBalanceManager
       dcmPlanner.computeDcmSetpoints(taskSpaceControllerSettings, yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
 
-      momentumRateOfChangeModule.compute(yoVrpPositionSetpoint, dcmPositionEstimate, yoDesiredDCMPosition, yoDesiredDCMVelocity);
-
-      cmpPositionSetpoint.set(yoVrpPositionSetpoint);
-      cmpPositionSetpoint.subZ(linearInvertedPendulumModel.getComHeight());
-      linearInvertedPendulumModel.computeComForce(linearMomentumRateOfChangeToPack, cmpPositionSetpoint);
-
-      yoCmpPositionSetpoint.setAndMatchFrame(cmpPositionSetpoint);
-
-      linearMomentumRateOfChangeToPack.changeFrame(supportFrame);
-
-      // update desired com position, velocity, and vertical force
-      comPositionControllerSetpoints.getComPosition().changeFrame(supportFrame);
-      comPositionControllerSetpoints.getComPosition().set(postureProvider.getComPositionInput());
-      comPositionControllerSetpoints.getComVelocity().changeFrame(supportFrame);
-      comPositionControllerSetpoints.getComVelocity().set(postureProvider.getComVelocityInput());
-      comPositionControllerSetpoints.getComForceFeedforward().changeFrame(supportFrame);
-      comPositionControllerSetpoints.getComForceFeedforward().set(linearMomentumRateOfChangeToPack);
-      comPositionControllerSetpoints.getComForceFeedforward().setZ(comPositionGravityCompensationParameter.get() * mass * gravity);
-      comPositionController.compute(linearMomentumRateOfChangeToPack, comPositionControllerSetpoints, taskSpaceEstimates);
-   }
-
-   private void updateGains()
-   {
-      comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
-      comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
-      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
+      momentumRateOfChangeModule.compute(linearMomentumRateOfChangeToPack, yoVrpPositionSetpoint, yoCmpPositionSetpoint, dcmPositionEstimate,
+                                         yoDesiredDCMPosition, yoDesiredDCMVelocity);
    }
 
    public void completedStep()
