@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.BindException;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -77,6 +78,7 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 
 public class QuadrupedSimulationFactory
 {
@@ -104,6 +106,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
    private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
    private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
+   private final RequiredFactoryField<String> parameterResourceName = new RequiredFactoryField<>("parameterResourceName");
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
@@ -276,7 +279,7 @@ public class QuadrupedSimulationFactory
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        jointDesiredOutputList.get(), sdfRobot.get().getRobotsYoVariableRegistry(),
                                                                                        yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead,
-                                                                                       globalDataProducer, contactableFeet, footSwitches, gravity.get());
+                                                                                       globalDataProducer, contactableFeet, footSwitches, gravity.get(), parameterResourceName.get());
       switch (controlMode.get())
       {
       case FORCE:
@@ -450,7 +453,10 @@ public class QuadrupedSimulationFactory
          simulationOverheadPlotterFactory.setShowOnStart(showPlotter.get());
          simulationOverheadPlotterFactory.createOverheadPlotter();
       }
-      
+
+      InputStream parameterFile = getClass().getResourceAsStream(parameterResourceName.get());
+      ParameterLoaderHelper.loadParameters(this, parameterFile, sdfRobot.get().getRobotsYoVariableRegistry());
+
       FactoryTools.disposeFactory(this);
       
       return scs;
@@ -616,5 +622,10 @@ public class QuadrupedSimulationFactory
    public void setFootSwitchType(FootSwitchType footSwitchType)
    {
       this.footSwitchType.set(footSwitchType);
+   }
+
+   public void setParameterResourceName(String parameterResourceName)
+   {
+      this.parameterResourceName.set(parameterResourceName);
    }
 }
