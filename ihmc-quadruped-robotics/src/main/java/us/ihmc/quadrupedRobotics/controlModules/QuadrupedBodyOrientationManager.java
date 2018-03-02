@@ -114,6 +114,7 @@ public class QuadrupedBodyOrientationManager
       orientationFeedbackControlCommand.setGains(gains);
 
       wrenchCommand.setToZero();
+      angularMomentumRateToPack.changeFrame(controllerToolbox.getReferenceFrames().getCenterOfMassFrame());
       wrenchCommand.setAngularPart(angularMomentumRateToPack);
       virtualWrenchCommand.set(body, wrenchCommand);
    }

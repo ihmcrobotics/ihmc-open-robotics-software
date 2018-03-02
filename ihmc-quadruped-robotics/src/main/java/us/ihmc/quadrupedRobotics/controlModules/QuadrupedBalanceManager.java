@@ -205,6 +205,7 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule.compute(linearMomentumRateOfChangeToPack, yoVrpPositionSetpoint, yoCmpPositionSetpoint, dcmPositionEstimate,
                                          yoDesiredDCMPosition, yoDesiredDCMVelocity);
 
+      linearMomentumRateOfChangeToPack.changeFrame(worldFrame);
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChangeToPack);
       momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
    }

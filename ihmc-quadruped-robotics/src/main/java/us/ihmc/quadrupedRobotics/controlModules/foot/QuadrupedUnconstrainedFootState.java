@@ -55,7 +55,7 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
       spatialFeedbackControlCommand.setGainsFrames(null, gainsFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
 
-      wrenchCommand = new Wrench(footBody.getBodyFixedFrame(), controllerToolbox.getReferenceFrames().getCenterOfMassFrame());
+      wrenchCommand = new Wrench(footBody.getBodyFixedFrame(), worldFrame);
 
       currentLinearWeight = new YoFrameVector(namePrefix + "CurrentLinearWeight", worldFrame, registry);
       currentLinearWeight.set(30.0, 30.0, 30.0);
