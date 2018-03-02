@@ -70,6 +70,36 @@
                 <parameter name="dcmDistanceOutsideSupportPolygonSupportThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                 <parameter name="fallDetectorGlitchFilterWindow" type="IntegerParameter" min="0.0" max="1.0" value="1"/>
             </registry>
+            <registry name="QuadrupedControlManagerFactory">
+                <registry name="QuadrupedBalanceManager">
+                    <parameter name="comPositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                    <parameter name="comPositionDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="750.0"/>
+                    <parameter name="comPositionIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                    <parameter name="dcmPositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                    <parameter name="dcmPositionProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0"/>
+                    <parameter name="vrpPositionRateLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.7976931348623157E308"/>
+                    <parameter name="comPositionGravityCompensation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                    <parameter name="dcmPositionStepAdjustmentGain" type="DoubleParameter" min="0.0" max="1.0" value="1.5"/>
+                    <parameter name="minimumStepClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.075"/>
+                    <parameter name="maximumStepStride" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                    <parameter name="initialTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                </registry>
+            </registry>
         </registry>
         <registry name="QuadrupedPositionControllerManager">
             <registry name="QuadrupedPositionStandPrepController">
