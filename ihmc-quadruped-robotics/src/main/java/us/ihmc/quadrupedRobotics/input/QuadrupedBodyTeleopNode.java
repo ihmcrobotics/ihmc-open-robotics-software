@@ -69,7 +69,7 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
 
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       this.taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(fullRobotModel, referenceFrames, registry, null);
-      this.xGaitTeleopMode = new QuadrupedXGaitTeleopMode(packetCommunicator, referenceFrames);
+      this.xGaitTeleopMode = new QuadrupedXGaitTeleopMode(packetCommunicator, referenceFrames, registry);
       this.stepTeleopMode = new QuadrupedStepTeleopMode(packetCommunicator, referenceFrames, registry);
 
       // Set the default teleop mode.

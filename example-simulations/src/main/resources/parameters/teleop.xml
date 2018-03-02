@@ -21,5 +21,18 @@
             <parameter name="xGaitEndPhaseShiftMode0" type="DoubleParameter" min="0.0" max="1.0" value="90"/>
             <parameter name="xGaitEndPhaseShiftMode1" type="DoubleParameter" min="0.0" max="1.0" value="180"/>
         </registry>
+        <registry name="QuadrupedXGaitTeleopMode">
+            <parameter name="xScale" type="DoubleParameter" min="0.0" max="1.0" value="0.20"/>
+            <parameter name="rollScale" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
+            <parameter name="pitchScale" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
+            <parameter name="yawScale" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
+            <parameter name="yawRateScale" type="DoubleParameter" min="0.0" max="1.0" value="0.25"/>
+            <parameter name="zRate" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+            <parameter name="xStrideMax" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
+            <parameter name="yStrideMax" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
+            <parameter name="deltaPhaseShift" type="DoubleParameter" min="0.0" max="1.0" value="22.5"/>
+            <parameter name="deltaDoubleSupport" type="DoubleParameter" min="0.0" max="1.0" value="0.0025"/>
+            <parameter name="deltaStanceWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+        </registry>
     </registry>
 </parameters>
