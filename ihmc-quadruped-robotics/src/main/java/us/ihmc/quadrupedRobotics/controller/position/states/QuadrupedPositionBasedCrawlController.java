@@ -125,7 +125,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final NextSwingLegChooser nextSwingLegChooser;
    private final SwingTargetGenerator swingTargetGenerator;
    private final QuadrantDependentList<FootSwitchInterface> footSwitches;
-   private final FullRobotModel actualFullRobotModel;
+   private final FullQuadrupedRobotModel actualFullRobotModel;
    private final FloatingInverseDynamicsJoint actualRobotRootJoint;
 
    private final QuadrupedReferenceFrames referenceFrames;
@@ -507,7 +507,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          swingTrajectoryGenerators.set(robotQuadrant, new QuadrupedSwingTrajectoryGenerator(robotQuadrant, registry, yoGraphicsListRegistry, dt));
 
-         ReferenceFrame footReferenceFrame = referenceFrames.getFootFrame(robotQuadrant);
+         ReferenceFrame footReferenceFrame = referenceFrames.getSoleFrame(robotQuadrant);
          ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
 
          legAttachmentFrames.set(robotQuadrant, legAttachmentFrame);
@@ -803,7 +803,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         ReferenceFrame footFrame = feedForwardReferenceFrames.getFootFrame(robotQuadrant);
+         ReferenceFrame footFrame = feedForwardReferenceFrames.getSoleFrame(robotQuadrant);
          desiredFootPosition.setToZero(footFrame);
          desiredFootPosition.changeFrame(ReferenceFrame.getWorldFrame());
          fourFootSupportPolygon.setFootstep(robotQuadrant, desiredFootPosition);
@@ -820,7 +820,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
+         ReferenceFrame footFrame = referenceFrames.getSoleFrame(robotQuadrant);
          actualFootLocation.setToZero(footFrame);
          actualFootLocation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -932,7 +932,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
     */
    private void updateEstimates()
    {
-      actualFullRobotModel.getPelvis().getBodyFixedFrame().getTwistOfFrame(bodyTwist);
+      actualFullRobotModel.getBody().getBodyFixedFrame().getTwistOfFrame(bodyTwist);
 
       actualRobotRootJoint.getRotation(yawPitchRollArray);
       actualYaw.set(yawPitchRollArray[0]);
@@ -985,7 +985,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         ReferenceFrame footFrame = referenceFrames.getFootFrame(robotQuadrant);
+         ReferenceFrame footFrame = referenceFrames.getSoleFrame(robotQuadrant);
          actualFootLocation.setToZero(footFrame);
          actualFootLocation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -1162,7 +1162,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          packFootPositionUsingDesiredBodyToBodyHack(robotQuadrant);
 
-         actualFootPositionInLegAttachmentFrame.setIncludingFrame(referenceFrames.getFootFrame(robotQuadrant), 0.0, 0.0, 0.0);
+         actualFootPositionInLegAttachmentFrame.setIncludingFrame(referenceFrames.getSoleFrame(robotQuadrant), 0.0, 0.0, 0.0);
          actualFootPositionInLegAttachmentFrame.changeFrame(referenceFrames.getLegAttachmentFrame(robotQuadrant));
          actualFeetPositionsInLegAttachmentFrame.get(robotQuadrant).set(actualFootPositionInLegAttachmentFrame);
       }

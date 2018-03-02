@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -44,7 +45,7 @@ public class PushRobotController implements RobotController
 
    private final YoGraphicVector forceVisualizer;
 
-   public PushRobotController(FloatingRootJointRobot pushableRobot, FullRobotModel fullRobotModel)
+   public PushRobotController(FloatingRootJointRobot pushableRobot, FullHumanoidRobotModel fullRobotModel)
    {
       this(pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, 0.3), 0.005);
    }

@@ -142,9 +142,9 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
 
       // Initialize force feedback
       yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
             oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
@@ -167,9 +167,9 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    public void onExit()
    {
       yoUseForceFeedbackControl.set(false);  // This bool should match that used in the standReady controller (freeze)
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
             oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
