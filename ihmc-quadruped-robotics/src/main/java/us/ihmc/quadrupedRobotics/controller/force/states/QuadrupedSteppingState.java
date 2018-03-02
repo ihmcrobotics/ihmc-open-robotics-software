@@ -1,13 +1,18 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingStatePacket;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -22,9 +27,12 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -54,6 +62,12 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final QuadrupedSteppingStatePacket quadrupedSteppingStatePacket;
    private final AtomicReference<QuadrupedSteppingRequestedEvent> requestedEvent = new AtomicReference<>();
 
+   private final QuadrupedFeetManager feetManager;
+   private final QuadrupedBalanceManager balanceManager;
+   private final QuadrupedBodyOrientationManager bodyOrientationManager;
+
+   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+
    public QuadrupedSteppingState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
                                  QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
    {
@@ -61,15 +75,22 @@ public class QuadrupedSteppingState implements QuadrupedController
       this.controllerToolbox = controllerToolbox;
       this.controlManagerFactory = controlManagerFactory;
 
+      feetManager = controlManagerFactory.getOrCreateFeetManager();
+      balanceManager = controlManagerFactory.getOrCreateBalanceManager();
+      bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
+
       FullQuadrupedRobotModel fullRobotModel = runtimeEnvironment.getFullRobotModel();
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
                                                                                        fullRobotModel.getRootJoint(), fullRobotModel.getControllableOneDoFJoints(),
                                                                                        controllerToolbox.getReferenceFrames().getCenterOfMassFrame(),
                                                                                        runtimeEnvironment.getControllerCoreOptimizationSettings(),
                                                                                        runtimeEnvironment.getGraphicsListRegistry(), registry);
+      //controlCoreToolbox.setupForVirtualModelControlSolver();
       FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
+      /*
       WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(),
                                                                            registry);
+                                                                           */
 
       // Initialize input providers.
       xGaitSettingsProvider = new YoQuadrupedXGaitSettings(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
@@ -229,6 +250,46 @@ public class QuadrupedSteppingState implements QuadrupedController
 
 
       return null;
+   }
+
+   private void submitControllerCoreCommands()
+   {
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotQuadrant));
+         controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotQuadrant));
+
+         /*
+         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+         PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
+         contactState.getPlaneContactStateCommand(planeContactStateCommand);
+         planeContactStateCommand.setUseHighCoPDamping(isHighCoPDampingNeeded);
+         controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
+         */
+      }
+
+      controllerCoreCommand.addFeedbackControlCommand(bodyOrientationManager.getFeedbackControlCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
+
+      /*
+       * FIXME: This is mainly used for resetting the integrators at touchdown.
+       * It is done in SingleSupportState.doTransitionOutOfAction. Need to
+       * figure out how to use directly the joint data holder instead of
+       * OneDoFJoint.
+       */
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredDataHolder = controllerCoreCommand.getLowLevelOneDoFJointDesiredDataHolder();
+
+      for (OneDoFJoint joint : controllerToolbox.getFullRobotModel().getOneDoFJoints())
+      {
+         if (joint.getResetDesiredAccelerationIntegrator())
+         {
+            JointDesiredOutput jointData = jointDesiredDataHolder.getJointDesiredOutput(joint);
+            if (jointData == null)
+               jointData = jointDesiredDataHolder.registerJointWithEmptyData(joint);
+            jointData.setResetIntegrators(true);
+         }
+      }
    }
 
    @Override

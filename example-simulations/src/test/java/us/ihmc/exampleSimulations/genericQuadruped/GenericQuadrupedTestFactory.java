@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
@@ -32,7 +33,6 @@ import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 
-import javax.swing.text.html.Option;
 import java.io.IOException;
 
 public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
@@ -74,6 +74,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
 
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(fullRobotModel.getTotalMass());
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
 
       SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
@@ -96,6 +97,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setUseTrackAndDolly(USE_TRACK_AND_DOLLY);
       simulationFactory.setInitialPositionParameters(initialPositionParameters);
       simulationFactory.setFullRobotModel(fullRobotModel);
+      simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
       simulationFactory.setUseNetworking(USE_NETWORKING);
       simulationFactory.setTimestampHolder(timestampProvider);

@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -152,5 +154,15 @@ public class QuadrupedFeetManager
       }
 
       return ret;
+   }
+
+   public FeedbackControlCommand<?> getFeedbackControlCommand(RobotQuadrant robotQuadrant)
+   {
+      return footControlModules.get(robotQuadrant).getFeedbackControlCommand();
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotQuadrant robotQuadrant)
+   {
+      return footControlModules.get(robotQuadrant).getInverseDynamicsCommand();
    }
 }

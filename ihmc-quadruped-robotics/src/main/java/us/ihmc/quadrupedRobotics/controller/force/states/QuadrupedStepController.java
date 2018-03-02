@@ -1,6 +1,8 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.euclid.Axis;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
