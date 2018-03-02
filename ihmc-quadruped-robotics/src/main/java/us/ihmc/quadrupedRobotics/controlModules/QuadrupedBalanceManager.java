@@ -3,7 +3,6 @@ package us.ihmc.quadrupedRobotics.controlModules;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -49,7 +48,7 @@ public class QuadrupedBalanceManager
    private final ReferenceFrame supportFrame;
 
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
-   private final DivergentComponentOfMotionController dcmPositionController;
+   private final MomentumRateOfChangeModule momentumRateOfChangeModule;
    private final QuadrupedComPositionController comPositionController;
    private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
 
@@ -107,13 +106,12 @@ public class QuadrupedBalanceManager
 
       supportFrame = controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
 
-
       dcmPlanner = new DCMPlanner(gravity, postureProvider.getComPositionInput().getZ(), robotTimestamp, supportFrame, currentSolePositions, registry);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       ReferenceFrame comZUpFrame = controllerToolbox.getReferenceFrames().getCenterOfMassZUpFrame();
-      dcmPositionController = new DivergentComponentOfMotionController(comZUpFrame, runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry);
+      momentumRateOfChangeModule = new MomentumRateOfChangeModule(controllerToolbox, postureProvider, registry, yoGraphicsListRegistry);
       comPositionController = new QuadrupedComPositionController(comZUpFrame, runtimeEnvironment.getControlDT(), registry);
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
 
@@ -184,7 +182,7 @@ public class QuadrupedBalanceManager
       yoDesiredDCMPosition.set(dcmPositionEstimate);
       yoDesiredDCMVelocity.setToZero();
 
-      dcmPositionController.reset();
+      momentumRateOfChangeModule.initialize();
       comPositionControllerSetpoints.initialize(controllerToolbox.getTaskSpaceEstimates().getComPosition());
       comPositionController.reset();
 
@@ -223,7 +221,7 @@ public class QuadrupedBalanceManager
       dcmPlanner.computeDcmSetpoints(taskSpaceControllerSettings, yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
 
-      dcmPositionController.compute(yoVrpPositionSetpoint, dcmPositionEstimate, yoDesiredDCMPosition, yoDesiredDCMVelocity);
+      momentumRateOfChangeModule.compute(yoVrpPositionSetpoint, dcmPositionEstimate, yoDesiredDCMPosition, yoDesiredDCMVelocity);
 
       cmpPositionSetpoint.set(yoVrpPositionSetpoint);
       cmpPositionSetpoint.subZ(linearInvertedPendulumModel.getComHeight());
