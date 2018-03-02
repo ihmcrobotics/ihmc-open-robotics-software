@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -22,7 +23,7 @@ public class CentroidalAngularVelocityManager
    private DenseMatrix64F desiredInertiaRateOfChange = new DenseMatrix64F(3, 3);
    
    private CentroidalMomentumHandler centroidalMomentumHandler;
-
+   private SpatialAccelerationCommand command;
 
    public CentroidalAngularVelocityManager(HighLevelHumanoidControllerToolbox controllerToolbox, JumpControllerParameters jumpControllerParameters,
                                            YoVariableRegistry registry)
@@ -57,6 +58,5 @@ public class CentroidalAngularVelocityManager
       qpSolver.setVelocityCommand(desiredAngularVelocity);
       qpSolver.compute();
       qpSolver.getDesiredInertiaRateOfChange(desiredInertiaRateOfChange);
-      // TODO generate command here
    }
 }

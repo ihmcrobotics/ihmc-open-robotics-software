@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WholeBodyInertiaCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -112,7 +113,6 @@ public class MotionQPInputCalculator
       privilegedConfigurationHandler.submitPrivilegedConfigurationCommand(command);
    }
 
-
    public void submitPrivilegedAccelerations(PrivilegedAccelerationCommand command)
    {
       if (privilegedConfigurationHandler == null)
@@ -126,7 +126,6 @@ public class MotionQPInputCalculator
          throw new NullPointerException("JointPrivilegedConfigurationParameters have to be set to enable this feature.");
       privilegedConfigurationHandler.submitPrivilegedVelocities(command);
    }
-
 
    public boolean computePrivilegedJointAccelerations(MotionQPInput motionQPInputToPack)
    {
@@ -244,11 +243,10 @@ public class MotionQPInputCalculator
       jacobianCalculator.computeConvectiveTerm();
 
       /*
-       * @formatter:off
-       * Compute the M-by-1 task objective vector p as follows:
-       * p = S * ( TDot - JDot * qDot )
-       * where TDot is the 6-by-1 end-effector desired acceleration vector and (JDot * qDot) is the 6-by-1
-       * convective term vector resulting from the Coriolis and Centrifugal effects.
+       * @formatter:off Compute the M-by-1 task objective vector p as follows: p
+       * = S * ( TDot - JDot * qDot ) where TDot is the 6-by-1 end-effector
+       * desired acceleration vector and (JDot * qDot) is the 6-by-1 convective
+       * term vector resulting from the Coriolis and Centrifugal effects.
        * @formatter:on
        */
       jacobianCalculator.getConvectiveTerm(convectiveTermMatrix);
@@ -270,13 +268,13 @@ public class MotionQPInputCalculator
 
       if (primaryBase == null)
       { // No primary base provided for this task.
-           // Record the resulting Jacobian matrix for the privileged configuration.
+        // Record the resulting Jacobian matrix for the privileged configuration.
          recordTaskJacobian(motionQPInputToPack.taskJacobian);
          // We're done!
       }
       else
       { // A primary base has been provided, two things are happening here:
-           // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
+        // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
         // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
          tempPrimaryTaskJacobian.set(motionQPInputToPack.taskJacobian);
 
@@ -290,7 +288,7 @@ public class MotionQPInputCalculator
 
             if (isJointUpstreamOfPrimaryBase)
             { // The current joint is located between the base and the primary base:
-                 // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
+              // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
                int[] jointIndices = jointIndexHandler.getJointIndices(joint);
 
                for (int dofIndex : jointIndices)
@@ -362,10 +360,8 @@ public class MotionQPInputCalculator
       jacobianCalculator.computeJacobianMatrix();
 
       /*
-       * @formatter:off
-       * Compute the M-by-1 task objective vector p as follows:
-       * p = S * T
-       * where T is the 6-by-1 end-effector desired velocity vector.
+       * @formatter:off Compute the M-by-1 task objective vector p as follows: p
+       * = S * T where T is the 6-by-1 end-effector desired velocity vector.
        * @formatter:on
        */
       commandToConvert.getDesiredSpatialVelocity(tempTaskObjective);
@@ -385,13 +381,13 @@ public class MotionQPInputCalculator
 
       if (primaryBase == null)
       { // No primary base provided for this task.
-           // Record the resulting Jacobian matrix for the privileged configuration.
+        // Record the resulting Jacobian matrix for the privileged configuration.
          recordTaskJacobian(motionQPInputToPack.taskJacobian);
          // We're done!
       }
       else
       { // A primary base has been provided, two things are happening here:
-           // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
+        // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
         // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
          tempPrimaryTaskJacobian.set(motionQPInputToPack.taskJacobian);
 
@@ -405,7 +401,7 @@ public class MotionQPInputCalculator
 
             if (isJointUpstreamOfPrimaryBase)
             { // The current joint is located between the base and the primary base:
-                 // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
+              // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
                int[] jointIndices = jointIndexHandler.getJointIndices(joint);
 
                for (int dofIndex : jointIndices)
@@ -529,7 +525,7 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY :ConstraintType.OBJECTIVE);
+      motionQPInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
       motionQPInputToPack.taskJacobian.zero();
       motionQPInputToPack.taskWeightMatrix.zero();
       motionQPInputToPack.setUseWeightScalar(false);
@@ -569,7 +565,7 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY :ConstraintType.OBJECTIVE);
+      motionQPInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
       motionQPInputToPack.taskJacobian.zero();
       motionQPInputToPack.taskWeightMatrix.zero();
       motionQPInputToPack.setUseWeightScalar(false);
@@ -596,6 +592,11 @@ public class MotionQPInputCalculator
       return true;
    }
 
+   public boolean convertWholeBodyInertiaCommand(WholeBodyInertiaCommand command, MotionQPInput motionQPInputToPack)
+   {
+      return false;
+   }
+
    private void recordTaskJacobian(DenseMatrix64F taskJacobian)
    {
       int taskSize = taskJacobian.getNumRows();
@@ -607,12 +608,12 @@ public class MotionQPInputCalculator
    {
       return centroidalMomentumHandler.getCentroidalMomentumMatrixPart(jointsToOptimizeFor);
    }
-   
+
    public void getSpatialCentroidalMomentumMatrix(DenseMatrix64F spatialCentroidaInertiaToPack)
    {
       centroidalMomentumHandler.computeSpatialInertiaMatrix(spatialCentroidaInertiaToPack);
    }
-   
+
    public DenseMatrix64F getCentroidalMomentumConvectiveTerm()
    {
       return centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();

@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WholeBodyInertiaCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedAccelerationCommand;
@@ -182,7 +183,7 @@ public class InverseDynamicsOptimizationControlModule
       }
 
       NoConvergenceException noConvergenceException = null;
-      
+
       try
       {
          qpSolver.solve();
@@ -301,6 +302,14 @@ public class InverseDynamicsOptimizationControlModule
    {
       boolean success = motionQPInputCalculator.convertMomentumRateCommand(command, motionQPInput);
       if (success)
+         qpSolver.addMotionInput(motionQPInput);
+   }
+
+
+   public void submitWholeBodyInertiaCommand(WholeBodyInertiaCommand command)
+   {
+      boolean success = motionQPInputCalculator.convertWholeBodyInertiaCommand(command, motionQPInput);
+      if(success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
