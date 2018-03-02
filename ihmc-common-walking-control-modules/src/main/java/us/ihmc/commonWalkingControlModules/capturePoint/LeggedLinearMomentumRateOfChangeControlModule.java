@@ -25,39 +25,13 @@ public abstract class LeggedLinearMomentumRateOfChangeControlModule extends Line
    protected RobotSide transferToSide = null;
    protected final YoEnum<RobotSide> supportLegPreviousTick;
 
-   protected final YoFramePoint2d yoUnprojectedDesiredCMP;
-   protected final CMPProjector cmpProjector;
-
    public LeggedLinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, double totalMass,
                                                        YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
                                                        boolean use2dProjection)
    {
-      super(namePrefix, referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry);
+      super(namePrefix, referenceFrames, gravityZ, totalMass, parentRegistry, yoGraphicsListRegistry, use2dProjection);
 
       supportLegPreviousTick = YoEnum.create(namePrefix + "SupportLegPreviousTick", "", RobotSide.class, registry, true);
-      yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
-
-      if (use2dProjection)
-         cmpProjector = new SmartCMPProjector(yoGraphicsListRegistry, registry);
-      else
-         cmpProjector = new SmartCMPPlanarProjector(registry);
-
-      if (yoGraphicsListRegistry != null)
-      {
-         String graphicListName = getClass().getSimpleName();
-         YoGraphicPosition unprojectedDesiredCMPViz = new YoGraphicPosition("Unprojected Desired CMP", yoUnprojectedDesiredCMP, 0.008, Purple(),
-                                                                            YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoArtifactPosition artifact = unprojectedDesiredCMPViz.createArtifact();
-         artifact.setVisible(false);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, artifact);
-
-         //         YoArtifactPolygon yoSafeArea = new YoArtifactPolygon("SafeArea", yoSafeAreaPolygon, Color.GREEN, false);
-         //         yoGraphicsListRegistry.registerArtifact(graphicListName, yoSafeArea);
-         //
-         //         YoArtifactPolygon yoProjectionArea = new YoArtifactPolygon("ProjectionArea", yoProjectionPolygon, Color.RED, false);
-         //         yoGraphicsListRegistry.registerArtifact(graphicListName, yoProjectionArea);
-      }
-      yoUnprojectedDesiredCMP.setToNaN();
    }
 
    public void setSupportLeg(RobotSide newSupportSide)

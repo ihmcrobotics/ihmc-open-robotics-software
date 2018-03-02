@@ -13,14 +13,19 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 public abstract class LinearMomentumRateOfChangeControlModule
 {
@@ -69,11 +74,14 @@ public abstract class LinearMomentumRateOfChangeControlModule
    private final YoFrameConvexPolygon2d yoSafeAreaPolygon;
    private final YoFrameConvexPolygon2d yoProjectionPolygon;
 
+   protected final YoFramePoint2d yoUnprojectedDesiredCMP;
+   protected final CMPProjector cmpProjector;
+
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
    private double desiredCoMHeightAcceleration = 0.0;
 
    public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, double totalMass,
-                                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2dProjection)
    {
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -109,6 +117,30 @@ public abstract class LinearMomentumRateOfChangeControlModule
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
 
       perfectCoP.setToNaN();
+
+      yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
+
+      if (use2dProjection)
+         cmpProjector = new SmartCMPProjector(yoGraphicsListRegistry, registry);
+      else
+         cmpProjector = new SmartCMPPlanarProjector(registry);
+
+      if (yoGraphicsListRegistry != null)
+      {
+         String graphicListName = getClass().getSimpleName();
+         YoGraphicPosition unprojectedDesiredCMPViz = new YoGraphicPosition("Unprojected Desired CMP", yoUnprojectedDesiredCMP, 0.008, Purple(),
+                                                                            YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoArtifactPosition artifact = unprojectedDesiredCMPViz.createArtifact();
+         artifact.setVisible(false);
+         yoGraphicsListRegistry.registerArtifact(graphicListName, artifact);
+
+         //         YoArtifactPolygon yoSafeArea = new YoArtifactPolygon("SafeArea", yoSafeAreaPolygon, Color.GREEN, false);
+         //         yoGraphicsListRegistry.registerArtifact(graphicListName, yoSafeArea);
+         //
+         //         YoArtifactPolygon yoProjectionArea = new YoArtifactPolygon("ProjectionArea", yoProjectionPolygon, Color.RED, false);
+         //         yoGraphicsListRegistry.registerArtifact(graphicListName, yoProjectionArea);
+      }
+      yoUnprojectedDesiredCMP.setToNaN();
 
       parentRegistry.addChild(registry);
    }
