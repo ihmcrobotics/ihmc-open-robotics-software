@@ -68,7 +68,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       QuadrupedPhysicalProperties physicalProperties = new GenericQuadrupedPhysicalProperties();
       GenericQuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
-      GenericQuadrupedControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings();
+      GenericQuadrupedControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(fullRobotModel.getTotalMass());
 
       /*
        * Create registries for every thread

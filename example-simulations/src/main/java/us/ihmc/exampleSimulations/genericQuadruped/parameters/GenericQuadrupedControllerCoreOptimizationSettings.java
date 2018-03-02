@@ -5,81 +5,117 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 
 public class GenericQuadrupedControllerCoreOptimizationSettings implements ControllerCoreOptimizationSettings
 {
+   private static final double jointAccelerationWeight = 0.005;
+   private static final double jointJerkWeight = 0.1;
+
+   private static final double defaultRhoWeight = 5e-8;
+   private static final double defaultRhoMin = 0.025;
+   private static final double defaultRhoRateDefaultWeight = 1e-5;
+   private static final double defaultRhoRateHighWeight = 3e-3;
+
+   private final double rhoWeight;
+   private final double rhoMin;
+   private final double rhoRateDefaultWeight;
+   private final double rhoRateHighWeight;
+
+   private static final Vector2D copWeight = new Vector2D(100.0, 200.0);
+   private static final Vector2D copRateDefaultWeight = new Vector2D(20000.0, 20000.0);
+   private static final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
+
+   private final int nBasisVectorsPerContactPoint = 4;
+   private final int nContactPointsPerContactableBody = 1;
+   private final int nContactableBodies;
+
+   public GenericQuadrupedControllerCoreOptimizationSettings(double totalMass)
+   {
+      this(totalMass, 4);
+   }
+
+   public GenericQuadrupedControllerCoreOptimizationSettings(double totalMass, int numberOfContactableBodies)
+   {
+      rhoWeight = defaultRhoWeight * totalMass;
+      rhoMin = defaultRhoMin * totalMass;
+      rhoRateDefaultWeight = defaultRhoRateDefaultWeight * totalMass;
+      rhoRateHighWeight = defaultRhoRateHighWeight * totalMass;
+
+      this.nContactableBodies = numberOfContactableBodies;
+   }
+
    @Override
    public double getJointAccelerationWeight()
    {
-      return 0;
+      return jointAccelerationWeight;
    }
 
    @Override
    public double getJointJerkWeight()
    {
-      return 0;
+      return jointJerkWeight;
    }
 
    @Override
    public double getRhoWeight()
    {
-      return 0;
+      return rhoWeight;
    }
 
    @Override
    public double getRhoMin()
    {
-      return 0;
+      return rhoMin;
    }
 
    @Override
    public double getRhoRateDefaultWeight()
    {
-      return 0;
+      return rhoRateDefaultWeight;
    }
 
    @Override
    public double getRhoRateHighWeight()
    {
-      return 0;
+      return rhoRateHighWeight;
    }
 
    @Override
    public Vector2D getCoPWeight()
    {
-      return null;
+      return copWeight;
    }
 
    @Override
    public Vector2D getCoPRateDefaultWeight()
    {
-      return null;
+      return copRateDefaultWeight;
    }
 
    @Override
    public Vector2D getCoPRateHighWeight()
    {
-      return null;
+      return copRateHighWeight;
    }
 
    @Override
    public int getNumberOfBasisVectorsPerContactPoint()
    {
-      return 0;
+      return nBasisVectorsPerContactPoint;
    }
 
    @Override
    public int getNumberOfContactPointsPerContactableBody()
    {
-      return 0;
+      return nContactPointsPerContactableBody;
    }
 
    @Override
    public int getNumberOfContactableBodies()
    {
-      return 0;
+      return nContactableBodies;
    }
 
    @Override
    public int getRhoSize()
    {
-      return 0;
+      return nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
    }
 }
