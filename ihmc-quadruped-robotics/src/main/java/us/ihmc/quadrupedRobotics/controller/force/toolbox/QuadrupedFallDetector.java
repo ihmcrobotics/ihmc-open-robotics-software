@@ -22,10 +22,11 @@ public class QuadrupedFallDetector
    }
 
    // Parameters
+   private static final int DEFAULT_FALL_GLITCH_WINDOW = 1;
    private final DoubleParameter maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, 1.0);
    private final DoubleParameter maxRollInRad = new DoubleParameter("maxRollInRad", registry, 1.0);
    private final DoubleParameter dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry,  0.05);
-   private final IntegerParameter fallDetectorGlitchFilterWindow = new IntegerParameter("fallDetectorGlitchFilterWindow", registry, 1);
+   private final IntegerParameter fallDetectorGlitchFilterWindow = new IntegerParameter("fallDetectorGlitchFilterWindow", registry, DEFAULT_FALL_GLITCH_WINDOW);
    
    //Estimation Variables
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates;
@@ -44,7 +45,7 @@ public class QuadrupedFallDetector
    {
       this.fallDetectionType.set(FallDetectionType.DCM_OUTSIDE_SUPPORT_POLYGON_LIMIT);
       this.taskSpaceEstimator = taskSpaceEstimator;
-      this.isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, fallDetectorGlitchFilterWindow.getValue());
+      this.isFallDetected = new GlitchFilteredYoBoolean("isFallDetected", registry, DEFAULT_FALL_GLITCH_WINDOW);
       this.isFallDetected.set(false);
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
       dcmPositionEstimate = new FramePoint3D();
