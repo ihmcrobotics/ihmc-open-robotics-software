@@ -16,6 +16,9 @@ import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
+import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -37,7 +40,12 @@ public class DivergentComponentOfMotionController
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoDouble yoVrpPositionRateLimit;
+   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
+   private final DoubleArrayParameter dcmPositionProportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 1, 1, 0);
+   private final DoubleArrayParameter dcmPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("dcmPositionDerivativeGains", 0, 0, 0);
+   private final DoubleArrayParameter dcmPositionIntegralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
+   private final DoubleParameter dcmPositionMaxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
+
    private final RateLimitedYoFramePoint yoLimitedVrpPositionSetpoint;
 
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
@@ -58,10 +66,8 @@ public class DivergentComponentOfMotionController
       pidController[2] = new PIDController("dcmPositionZ", registry);
       pidControllerGains = new DefaultYoPID3DGains("dcmPosition", GainCoupling.NONE, true, registry);
 
-      yoVrpPositionRateLimit = new YoDouble("vrpPositionRateLimit", registry);
-      yoVrpPositionRateLimit.set(Double.MAX_VALUE);
-
-      yoLimitedVrpPositionSetpoint = new RateLimitedYoFramePoint("vrpPositionSetpointInCoMZUpFrame", "", registry, yoVrpPositionRateLimit, controlDT, comZUpFrame);
+      DoubleParameter vrpPositionRateLimitParameter = parameterFactory.createDouble("vrpPositionRateLimit", Double.MAX_VALUE);
+      yoLimitedVrpPositionSetpoint = new RateLimitedYoFramePoint("vrpPositionSetpointInCoMZUpFrame", "", registry, vrpPositionRateLimitParameter, controlDT, comZUpFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -75,19 +81,18 @@ public class DivergentComponentOfMotionController
       yoLimitedVrpPositionSetpoint.reset();
    }
 
-   public YoPID3DGains getGains()
+   private void updateGains()
    {
-      return pidControllerGains;
-   }
-
-   public void setVrpPositionRateLimit(double vrpPositionRateLimit)
-   {
-      yoVrpPositionRateLimit.set(vrpPositionRateLimit);
+      pidControllerGains.setProportionalGains(dcmPositionProportionalGainsParameter.get());
+      pidControllerGains.setIntegralGains(dcmPositionIntegralGainsParameter.get(), dcmPositionMaxIntegralErrorParameter.get());
+      pidControllerGains.setDerivativeGains(dcmPositionDerivativeGainsParameter.get());
    }
 
    public void compute(FixedFramePoint3DBasics vrpPositionSetpointToPack, FramePoint3DReadOnly dcmPositionEstimate, FramePoint3DReadOnly dcmPositionSetpoint,
                        FrameVector3DReadOnly dcmVelocitySetpoint)
    {
+      updateGains();
+
       this.dcmPositionEstimate.setIncludingFrame(dcmPositionEstimate);
       this.dcmPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
       this.dcmVelocitySetpoint.setIncludingFrame(dcmVelocitySetpoint);

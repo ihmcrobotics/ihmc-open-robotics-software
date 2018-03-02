@@ -1,6 +1,8 @@
 package us.ihmc.robotics.dataStructures.parameter;
 
-public class DoubleParameter extends Parameter
+import us.ihmc.yoVariables.providers.DoubleProvider;
+
+public class DoubleParameter extends Parameter implements DoubleProvider
 {
    private double value;
 
@@ -10,7 +12,7 @@ public class DoubleParameter extends Parameter
       this.value =  0.0;
    }
 
-   DoubleParameter(String path, double defaultValue)
+   public DoubleParameter(String path, double defaultValue)
    {
       super(path);
       this.value = defaultValue;
@@ -19,6 +21,11 @@ public class DoubleParameter extends Parameter
    public double get()
    {
       return value;
+   }
+
+   public double getValue()
+   {
+      return get();
    }
 
    public void set(double value)
