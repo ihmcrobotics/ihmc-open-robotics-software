@@ -17,11 +17,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class WholeBodyAngularVelocityRegulatorQPSolverTest
 {
    private final String namePrefix = getClass().getSimpleName();
-   private final double defaultControllerDT = 0.001;
+   private final double defaultControllerDT = 0.01;
    private final double defaultMaxInertia = 100.0;
    private final double defaultMinInertia = 1.0;
-   private final double defaultMaxInertiaRate = 40.0;
-   private final double defaultRegularizationWeight = 1;
+   private final double defaultMaxInertiaRate = 100.0;
+   private final double defaultRegularizationWeight = 1e-3;
    private final Random random = new Random(1124125l);
    private final ReferenceFrame controlFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("DummyCenterOfMassFrame",
                                                                                                               ReferenceFrame.getWorldFrame(),
@@ -57,15 +57,16 @@ public class WholeBodyAngularVelocityRegulatorQPSolverTest
    public void testSolverRuns()
    {
       setupTest();
-      DenseMatrix64F I0 = CommonOps.diag((new double[] {10.0, 20.0, 30.0}));//generateValidInertiaTensor();
+      DenseMatrix64F I0 = CommonOps.diag((new double[] {20.0, 25.0, 29.0}));//generateValidInertiaTensor();
       DenseMatrix64F dI = new DenseMatrix64F(3, 3);
       FrameVector3D w0 = new FrameVector3D(controlFrame, 1.0, 2.0, 3.0);
-      FrameVector3D wD = new FrameVector3D(controlFrame, 2.0, 2.0, 3.0);
+      FrameVector3D wD = new FrameVector3D(controlFrame, 3.0, 0.0, 6.7);
       qpSolver.setCurrentCentroidalInertiaTensor(I0);
       qpSolver.setCurrentVelocityEstimate(w0);
       qpSolver.setVelocityCommand(wD);
       qpSolver.compute();
       qpSolver.getDesiredInertiaRateOfChange(dI);
+      PrintTools.debug(dI.toString());
       assertRealNumber(dI);
       assertSymmertry(dI);
       assertNorm(dI, defaultMaxInertiaRate);
@@ -96,16 +97,16 @@ public class WholeBodyAngularVelocityRegulatorQPSolverTest
       double Iyy = matrix.get(1, 1);
       double Izz = matrix.get(2, 2);
       
-      assertTrue("Ixx: " + Ixx + ", Iyy: " + Iyy + ", Izz: " + Izz, Ixx < Iyy + Izz);
-      assertTrue("Ixx: " + Ixx + ", Iyy: " + Iyy + ", Izz: " + Izz, Iyy < Ixx + Izz);
-      assertTrue("Ixx: " + Ixx + ", Iyy: " + Iyy + ", Izz: " + Izz, Izz < Iyy + Ixx);
+      assertTrue("Triangle inequality does not hold, Ixx: " + Ixx + ", Iyy: " + Iyy + ", Izz: " + Izz, Ixx <= Iyy + Izz);
+      assertTrue("Triangle inequality does not hold, Ixx: " + Ixx + ", Iyy: " + Iyy + ", Izz: " + Izz, Iyy <= Ixx + Izz);
+      assertTrue("Triangle inequality does not hold, Ixx: " + Ixx + ", Iyy: " + Iyy + ", Izz: " + Izz, Izz <= Iyy + Ixx);
    }
 
    private void assertPositiveDefinite(DenseMatrix64F matrix)
    {
-      assertTrue(matrix.get(0, 0) > 0);
-      assertTrue(matrix.get(0, 0) * matrix.get(1, 1) - matrix.get(0, 1) * matrix.get(1, 0) > 0);
-      assertTrue(CommonOps.det(matrix) > 0);
+      assertTrue("Diagonal element not positive", matrix.get(0, 0) > 0);
+      assertTrue("First minor not positive", matrix.get(0, 0) * matrix.get(1, 1) - matrix.get(0, 1) * matrix.get(1, 0) > 0);
+      assertTrue("Determinant not positive", CommonOps.det(matrix) > 0);
    }
 
    private void assertNorm(DenseMatrix64F matrix, double limit)
@@ -113,23 +114,23 @@ public class WholeBodyAngularVelocityRegulatorQPSolverTest
       double val = 0.0;
       for (int i = 0; i < matrix.numRows; i++)
          for (int j = 0; j < matrix.numCols; j++)
-            val += matrix.get(i, j);
+            val += Math.abs(matrix.get(i, j));
 
-      assertTrue(val <= limit);
+      assertTrue("Norm constraint violated, Norm: " + val + ", Should be: " + limit,val <= limit);
    }
 
    private void assertSymmertry(DenseMatrix64F matrix)
    {
       for (int i = 1; i < matrix.numRows; i++)
          for (int j = 0; j < i; j++)
-            assertTrue(matrix.get(i, j) == matrix.get(j, i));
+            assertTrue("Symmetry constraint violated, " + matrix.toString(), matrix.get(i, j) == matrix.get(j, i));
    }
 
    private void assertRealNumber(DenseMatrix64F matrix)
    {
       for (int i = 0; i < matrix.numRows; i++)
          for (int j = 0; j < matrix.numCols; j++)
-            assertTrue(Double.isFinite(matrix.get(i, j)));
+            assertTrue("Inertia tensor contains non real numbers, " + matrix.toString(), Double.isFinite(matrix.get(i, j)));
    }
 
 }

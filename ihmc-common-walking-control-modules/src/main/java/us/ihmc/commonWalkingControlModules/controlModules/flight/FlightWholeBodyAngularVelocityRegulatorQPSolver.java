@@ -34,9 +34,10 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  *       <li> Valid inertia tensor constraints: Ensure that the determined inertia rate of change results in a valid inertia 
  *       tensor for the next iteration
  *       <ul>
- *          <li> Positive diagonal elements: The diagonal elements are given a minimum value (e.g. for the x axis Ixx + dt * dIxx > Ixxmin)
+ *          <li> Positive diagonal elements: The diagonal elements are given a minimum and maximum value (e.g. for the x axis Ixx + dt * dIxx > Ixxmin)
  *          <li> Triangle inequality constraints: The resultant diagonal elements must satisfy the triangle inequality 
  *          (e.g. Ixx + Iyy - Izz + dt * (dIxx + dIyy - dIzz) > 0)
+ *          <li> Dominant diagonal element constraint: This along with the other constraints imposes positive definiteness
  *       </ul>
  *       <li> Rate of change constraints: 1st norm of the decision variables is restricted. This is done by imposing all
  *       sign combinations (2<sup>6</sup>) of the 1st norm inequality constraint. Can use a more efficient implementation.
@@ -53,6 +54,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 // TODO: A lot of the RHS can be computed and stored before hand since they do not change at runtime. Evaluate whether this is preferred
 public class FlightWholeBodyAngularVelocityRegulatorQPSolver
 {
+   private static final boolean useRateLimitConstraints = false;
    private static final int problem_size = 6;
    private static final int angularDimensions = 3;
    // Create large arrays to that dense matrix resizing dosen't need to copy large data at runtime
@@ -259,9 +261,11 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
    private void computeLinearInequalityConstraints()
    {
       setDiagonalElementNonnegativityConstraints();
-      setOffDiagonalElementConstraints();
+      setPositiveDefinitenessConstraints();
       setDiagonalElementMaxConstraints();
-      setRateLimitConstraint();
+      setTriangleInequalityConstraints();
+      if (useRateLimitConstraints)
+         setRateLimitConstraint();
    }
 
    private void setDiagonalElementNonnegativityConstraints()
@@ -284,8 +288,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       CommonOps.insert(tempConstraintMatrixRHS, solverInput_bin, currentConstraintSize, 0);
    }
 
-   // Note: This also imposes the triangle inequality constraints on the 
-   private void setOffDiagonalElementConstraints()
+   private void setTriangleInequalityConstraints()
    {
       int currentConstraintSize = solverInput_Ain.getNumRows();
 
@@ -298,9 +301,41 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       tempConstraintMatrixLHS.zero();
       for (int i = 0; i < angularDimensions; i++)
       {
-         tempConstraintMatrixLHS.set(i, i, -controllerDT);
-         tempConstraintMatrixLHS.set(i, (i + 1) % angularDimensions + angularDimensions, controllerDT * 2);
-         tempConstraintMatrixRHS.set(i, 0, inertia.get(i, i) - 2 * inertia.get((i + 1) % angularDimensions, (i + 2) % angularDimensions));
+         int otherAxis1 = (i + 1) % angularDimensions;
+         int otherAxis = (i + 2) % angularDimensions;
+         tempConstraintMatrixLHS.set(i, i, controllerDT);
+         tempConstraintMatrixLHS.set(i, otherAxis1, -controllerDT);
+         tempConstraintMatrixLHS.set(i, otherAxis, -controllerDT);
+         tempConstraintMatrixRHS.set(i, 0, -inertia.get(i, i) + inertia.get(otherAxis1, otherAxis1) + inertia.get(otherAxis, otherAxis));
+      }
+      PrintTools.debug("TE: " + tempConstraintMatrixLHS.toString());
+      CommonOps.insert(tempConstraintMatrixLHS, solverInput_Ain, currentConstraintSize, 0);
+      CommonOps.insert(tempConstraintMatrixRHS, solverInput_bin, currentConstraintSize, 0);
+   }
+
+   private void setPositiveDefinitenessConstraints()
+   {
+      int currentConstraintSize = solverInput_Ain.getNumRows();
+
+      solverInput_Ain.reshape(currentConstraintSize + 4 * angularDimensions, problem_size);
+      solverInput_bin.reshape(currentConstraintSize + 4 * angularDimensions, 1);
+
+      tempConstraintMatrixLHS.reshape(4 * angularDimensions, problem_size);
+      tempConstraintMatrixRHS.reshape(4 * angularDimensions, 1);
+
+      tempConstraintMatrixLHS.zero();
+      for (int i = 0; i < angularDimensions; i++)
+      {
+         for (int j = 0; j < 4; j++)
+         {
+            double sign1 = Math.pow(-1.0, j);
+            double sign2 = Math.pow(-1.0, j / 2);
+            tempConstraintMatrixLHS.set(2 * i + j, i, -controllerDT);
+            tempConstraintMatrixLHS.set(2 * i + j, i + angularDimensions, sign1 * controllerDT);
+            tempConstraintMatrixLHS.set(2 * i + j, (i + 2) % angularDimensions + angularDimensions, sign2 * controllerDT);
+            tempConstraintMatrixRHS.set(2 * i + j, 0, inertia.get(i, i) - sign1 * inertia.get(i, (i + 1) % angularDimensions)
+                  - sign1 * inertia.get(i, (i + 2) % angularDimensions));
+         }
       }
       CommonOps.insert(tempConstraintMatrixLHS, solverInput_Ain, currentConstraintSize, 0);
       CommonOps.insert(tempConstraintMatrixRHS, solverInput_bin, currentConstraintSize, 0);
@@ -364,10 +399,12 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       solverInput_beq.reshape(0, 1);
    }
 
-   private String printProblem()
+   //TODO improve this print
+   private String viewQPFormulation()
    {
       String ret = "Minimize " + solverInput_H.toString() + " " + solverInput_f.toString() + " subject to: " + solverInput_Aeq.toString() + " "
-            + solverInput_beq.toString() + solverInput_Ain.toString() + " " + solverInput_bin.toString() + ", bounds: " + solverInput_lb.toString() + solverInput_ub.toString();
+            + solverInput_beq.toString() + solverInput_Ain.toString() + " " + solverInput_bin.toString() + ", bounds: " + solverInput_lb.toString()
+            + solverInput_ub.toString();
 
       return ret;
    }
