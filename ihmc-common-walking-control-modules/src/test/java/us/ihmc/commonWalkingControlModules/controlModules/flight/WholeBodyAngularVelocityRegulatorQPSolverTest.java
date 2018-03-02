@@ -66,7 +66,6 @@ public class WholeBodyAngularVelocityRegulatorQPSolverTest
       qpSolver.setVelocityCommand(wD);
       qpSolver.compute();
       qpSolver.getDesiredInertiaRateOfChange(dI);
-      PrintTools.debug(dI.toString());
       assertRealNumber(dI);
       assertSymmertry(dI);
       assertNorm(dI, defaultMaxInertiaRate);
@@ -111,12 +110,13 @@ public class WholeBodyAngularVelocityRegulatorQPSolverTest
 
    private void assertNorm(DenseMatrix64F matrix, double limit)
    {
+      double epsilon = 1e-3;
       double val = 0.0;
       for (int i = 0; i < matrix.numRows; i++)
          for (int j = 0; j < matrix.numCols; j++)
             val += Math.abs(matrix.get(i, j));
 
-      assertTrue("Norm constraint violated, Norm: " + val + ", Should be: " + limit,val <= limit);
+      assertTrue("Norm constraint violated, Norm: " + val + ", Should be: " + limit, val <= limit + epsilon);
    }
 
    private void assertSymmertry(DenseMatrix64F matrix)

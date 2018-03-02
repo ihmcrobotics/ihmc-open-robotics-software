@@ -54,7 +54,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 // TODO: A lot of the RHS can be computed and stored before hand since they do not change at runtime. Evaluate whether this is preferred
 public class FlightWholeBodyAngularVelocityRegulatorQPSolver
 {
-   private static final boolean useRateLimitConstraints = false;
+   private static final boolean useRateLimitConstraints = true;
    private static final int problem_size = 6;
    private static final int angularDimensions = 3;
    // Create large arrays to that dense matrix resizing dosen't need to copy large data at runtime
@@ -308,7 +308,6 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
          tempConstraintMatrixLHS.set(i, otherAxis, -controllerDT);
          tempConstraintMatrixRHS.set(i, 0, -inertia.get(i, i) + inertia.get(otherAxis1, otherAxis1) + inertia.get(otherAxis, otherAxis));
       }
-      PrintTools.debug("TE: " + tempConstraintMatrixLHS.toString());
       CommonOps.insert(tempConstraintMatrixLHS, solverInput_Ain, currentConstraintSize, 0);
       CommonOps.insert(tempConstraintMatrixRHS, solverInput_bin, currentConstraintSize, 0);
    }
