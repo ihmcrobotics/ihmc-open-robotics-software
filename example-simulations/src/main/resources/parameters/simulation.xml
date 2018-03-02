@@ -38,13 +38,13 @@
                 <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
                 <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
                 <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-                <parameter name="useForceFeedbackControl" type="BooleanParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="requestUseForceFeedbackControl" type="BooleanParameter" min="0.0" max="1.0" value="0.0"/>
             </registry>
             <registry name="QuadrupedForceBasedSoleWaypointController">
                 <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
                 <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
                 <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-                <parameter name="useForceFeedbackControl" type="BooleanParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="requestUseForceFeedbackControl" type="BooleanParameter" min="0.0" max="1.0" value="0.0"/>
                 <parameter name="useInitialSoleForces" type="BooleanParameter" min="0.0" max="1.0" value="1.0"/>
             </registry>
             <registry name="QuadrupedForceBasedFreezeController">
@@ -62,7 +62,7 @@
                 <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
                 <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
                 <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-                <parameter name="useForceFeedbackControl" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="requestUseForceFeedbackControl" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
             </registry>
             <registry name="QuadrupedFallDetector">
                 <parameter name="maxPitchInRad" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>

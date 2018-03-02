@@ -41,10 +41,10 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final DoubleParameter jointDampingParameter = new DoubleParameter("jointDamping", registry, 15.0);
    private final DoubleParameter jointPositionLimitDampingParameter = new DoubleParameter("jointPositionLimitDamping", registry, 10.0);
    private final DoubleParameter jointPositionLimitStiffnessParameter = new DoubleParameter("jointPositionLimitStiffness", registry, 100.0);
-   private final BooleanParameter useForceFeedbackControlParameter = new BooleanParameter("useForceFeedbackControl", registry, false);
+   private final BooleanParameter requestUseForceFeedbackControlParameter = new BooleanParameter("requestUseForceFeedbackControl", registry, false);
 
    // Yo variables
-   private final YoBoolean yoUseForceFeedbackControl;
+   private final YoBoolean forceFeedbackControlEnabled;
 
    // Task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
@@ -85,7 +85,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
-      yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
+      forceFeedbackControlEnabled = new YoBoolean("forceFeedbackControlEnabled", registry);
 
       // Calculate the robot length
       referenceFrames.updateFrames();
@@ -138,13 +138,13 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
       taskSpaceController.reset();
 
       // Initialize force feedback
-      yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.getValue());
+      forceFeedbackControlEnabled.set(requestUseForceFeedbackControlParameter.getValue());
       for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
          QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            if (useForceFeedbackControlParameter.getValue())
+            if (forceFeedbackControlEnabled.getValue())
                jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.EFFORT);
             else
                jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.POSITION);
@@ -166,13 +166,13 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    @Override
    public void onExit()
    {
-      yoUseForceFeedbackControl.set(false);  // This bool should match that used in the standReady controller (freeze)
+      forceFeedbackControlEnabled.set(false);  // This bool should match that used in the standReady controller (freeze)
       for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
          QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            if (yoUseForceFeedbackControl.getBooleanValue())
+            if (forceFeedbackControlEnabled.getBooleanValue())
                jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.EFFORT);
             else
                jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.POSITION);
