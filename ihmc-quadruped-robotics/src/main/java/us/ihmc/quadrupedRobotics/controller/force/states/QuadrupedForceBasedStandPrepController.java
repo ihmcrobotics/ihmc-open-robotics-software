@@ -26,6 +26,8 @@ import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -67,11 +69,13 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final YoBoolean isDoneMoving = new YoBoolean("standPrepDoneMoving", registry);
 
    private final QuadrupedForceControllerToolbox controllerToolbox;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
    public QuadrupedForceBasedStandPrepController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                                  YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
+      this.jointDesiredOutputList = controllerToolbox.getRuntimeEnvironment().getJointDesiredOutputList();
 
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       referenceFrames = controllerToolbox.getReferenceFrames();
@@ -147,7 +151,10 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
          QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
+            if (useForceFeedbackControlParameter.get())
+               jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.EFFORT);
+            else
+               jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.POSITION);
          }
       }
 
@@ -172,7 +179,10 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
          QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
+            if (yoUseForceFeedbackControl.getBooleanValue())
+               jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.EFFORT);
+            else
+               jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.POSITION);
          }
       }
 

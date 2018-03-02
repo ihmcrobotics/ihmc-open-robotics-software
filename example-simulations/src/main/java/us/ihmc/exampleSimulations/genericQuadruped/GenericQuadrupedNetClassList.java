@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
@@ -61,7 +61,7 @@ public class GenericQuadrupedNetClassList extends IHMCCommunicationKryoNetClassL
       registerPacketField(QuadrupedForceControllerRequestedEvent.class);
 
       registerPacketClass(QuadrupedForceControllerStatePacket.class);
-      registerPacketField(QuadrupedForceControllerState.class);
+      registerPacketField(QuadrupedForceControllerEnum.class);
 
       registerPacketClass(QuadrupedXGaitSettingsPacket.class);
       registerPacketField(QuadrupedXGaitSettings.class);

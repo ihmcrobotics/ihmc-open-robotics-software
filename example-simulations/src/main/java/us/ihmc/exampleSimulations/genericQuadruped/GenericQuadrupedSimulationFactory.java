@@ -22,6 +22,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
@@ -63,8 +64,9 @@ public class GenericQuadrupedSimulationFactory
 
       SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
 
+      JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      OutputWriter outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
+      OutputWriter outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel, jointDesiredOutputList);
 
       simulationFactory.setControlDT(SIMULATION_DT);
       simulationFactory.setSimulationDT(SIMULATION_DT);
@@ -87,6 +89,7 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setUseStateEstimator(USE_STATE_ESTIMATOR);
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
       simulationFactory.setSensorInformation(sensorInformation);
+      simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);

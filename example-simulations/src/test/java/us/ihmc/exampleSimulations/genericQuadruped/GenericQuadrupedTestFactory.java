@@ -24,6 +24,7 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -78,8 +79,9 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
 
+      JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      OutputWriter outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
+      OutputWriter outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel, jointDesiredOutputList);
 
       QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
       simulationFactory.setControlDT(SIMULATION_DT);
@@ -102,6 +104,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
       simulationFactory.setSensorInformation(sensorInformation);
       simulationFactory.setReferenceFrames(referenceFrames);
+      simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
       if (groundContactModelType.hasValue())

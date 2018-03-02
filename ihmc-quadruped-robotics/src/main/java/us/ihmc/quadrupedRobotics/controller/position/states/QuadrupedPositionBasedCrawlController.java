@@ -3,6 +3,11 @@ package us.ihmc.quadrupedRobotics.controller.position.states;
 import java.awt.Color;
 import java.util.Random;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.map.TDoubleCharMap;
+import gnu.trove.map.TDoubleObjectMap;
+import gnu.trove.map.hash.TCharDoubleHashMap;
+import gnu.trove.map.hash.TDoubleCharHashMap;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -46,6 +51,9 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -353,23 +361,18 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
    private final Twist bodyTwist = new Twist();
 
+   private final JointDesiredOutputList jointDesiredOutputList;
+
    public QuadrupedPositionBasedCrawlController(QuadrupedRuntimeEnvironment environment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedPostureInputProvider postureProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrupedLegInverseKinematicsCalculator legIkCalculator)
    {
-      this(environment.getControlDT(), modelFactory, physicalProperties, crawlControllerParameters, environment.getFullRobotModel(), postureProvider, planarVelocityProvider, environment.getFootSwitches(), legIkCalculator, environment.getGlobalDataProducer(), environment.getRobotTimestamp(),
-            environment.getParentRegistry(), environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
-   }
+      this.jointDesiredOutputList = environment.getJointDesiredOutputList();
 
-   public QuadrupedPositionBasedCrawlController(final double dt, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedPositionBasedCrawlControllerParameters quadrupedControllerParameters, FullQuadrupedRobotModel fullRobotModel,
-         QuadrupedPostureInputProviderInterface postureProvider, QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrantDependentList<FootSwitchInterface> footSwitches, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, final GlobalDataProducer dataProducer, YoDouble yoTime,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, YoGraphicsListRegistry yoGraphicsListRegistryForDetachedOverhead)
-   {
-
-      swingDuration.set(quadrupedControllerParameters.getDefaultSwingDuration());
-      swingHeight.set(quadrupedControllerParameters.getDefaultSwingHeight());
-      subCircleRadius.set(quadrupedControllerParameters.getDefaultSubCircleRadius());
-      comCloseRadius.set(quadrupedControllerParameters.getDefaultCoMCloseToFinalDesiredTransitionRadius());
-      minYawRate.set(quadrupedControllerParameters.getMaxYawRate() * -1.0);
-      maxYawRate.set(quadrupedControllerParameters.getMaxYawRate());
+      swingDuration.set(crawlControllerParameters.getDefaultSwingDuration());
+      swingHeight.set(crawlControllerParameters.getDefaultSwingHeight());
+      subCircleRadius.set(crawlControllerParameters.getDefaultSubCircleRadius());
+      comCloseRadius.set(crawlControllerParameters.getDefaultCoMCloseToFinalDesiredTransitionRadius());
+      minYawRate.set(crawlControllerParameters.getMaxYawRate() * -1.0);
+      maxYawRate.set(crawlControllerParameters.getMaxYawRate());
       distanceInsideSupportPolygonBeforeSwingingLeg.set(0.02);
       turnInPlaceCoMTrajectoryBuffer.set(0.5);
 
@@ -391,13 +394,13 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       this.postureProvider = postureProvider;
       this.planarVelocityProvider = planarVelocityProvider;
-      this.robotTimestamp = yoTime;
-      this.dt = dt;
-      this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      this.actualFullRobotModel = fullRobotModel;
-      this.centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator());
-      this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>("QuadrupedCrawlState", "walkingStateTranistionTime", CrawlGateWalkingState.class, yoTime, registry);
-      this.inverseKinematicsCalculators = quadrupedInverseKinematicsCalulcator;
+      this.robotTimestamp = environment.getRobotTimestamp();
+      this.dt = environment.getControlDT();
+      this.referenceFrames = new QuadrupedReferenceFrames(environment.getFullRobotModel(), physicalProperties);
+      this.actualFullRobotModel = environment.getFullRobotModel();
+      this.centerOfMassJacobian = new CenterOfMassJacobian(environment.getFullRobotModel().getElevator());
+      this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>("QuadrupedCrawlState", "walkingStateTranistionTime", CrawlGateWalkingState.class, robotTimestamp, registry);
+      this.inverseKinematicsCalculators = legIkCalculator;
 
       actualRobotRootJoint = actualFullRobotModel.getRootJoint();
       referenceFrames.updateFrames();
@@ -413,10 +416,10 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       this.nextSwingLegChooser = new DefaultGaitSwingLegChooser();
 
       oneDoFJointsFeedforward = feedForwardFullRobotModel.getOneDoFJoints();
-      oneDoFJointsActual = fullRobotModel.getOneDoFJoints();
+      oneDoFJointsActual = actualFullRobotModel.getOneDoFJoints();
 
       desiredCoMOffset = new YoFramePoint2d("desiredCoMOffset", feedForwardReferenceFrames.getBodyZUpFrame(), registry);
-      desiredCoMOffset.set(quadrupedControllerParameters.getDefaultDesiredCoMOffset());
+      desiredCoMOffset.set(crawlControllerParameters.getDefaultDesiredCoMOffset());
 
       updateFeedForwardModelAndFrames();
 
@@ -428,12 +431,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
     	  YoGraphicReferenceFrame actualAttachmentFrame = new YoGraphicReferenceFrame("legAttachment", referenceFrames.getLegAttachmentFrame(robotQuadrant), registry, 0.25, YoAppearance.Green());
     	  actualAttachmentFrames.set(robotQuadrant, actualAttachmentFrame);
 
-          yoGraphicsListRegistry.registerYoGraphic("AttachementFrames", desiredAttachmentFrame);
-          yoGraphicsListRegistry.registerYoGraphic("AttachementFrames", actualAttachmentFrame);
+        environment.getGraphicsListRegistry().registerYoGraphic("AttachementFrames", desiredAttachmentFrame);
+        environment.getGraphicsListRegistry().registerYoGraphic("AttachementFrames", actualAttachmentFrame);
       }
 
-      this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(quadrupedControllerParameters, feedForwardReferenceFrames, registry);
-      this.footSwitches = footSwitches;
+      this.swingTargetGenerator = new MidFootZUpSwingTargetGenerator(crawlControllerParameters, feedForwardReferenceFrames, registry);
+      this.footSwitches = environment.getFootSwitches();
 
       desiredVelocity = new YoFrameVector("desiredVelocity", feedForwardBodyFrame, registry);
       lastDesiredVelocity = new YoFrameVector("lastDesiredVelocity", feedForwardBodyFrame, registry);
@@ -505,7 +508,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       referenceFrames.updateFrames();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         swingTrajectoryGenerators.set(robotQuadrant, new QuadrupedSwingTrajectoryGenerator(robotQuadrant, registry, yoGraphicsListRegistry, dt));
+         swingTrajectoryGenerators.set(robotQuadrant, new QuadrupedSwingTrajectoryGenerator(robotQuadrant, registry, environment.getGraphicsListRegistry(), dt));
 
          ReferenceFrame footReferenceFrame = referenceFrames.getSoleFrame(robotQuadrant);
          ReferenceFrame legAttachmentFrame = referenceFrames.getLegAttachmentFrame(robotQuadrant);
@@ -559,18 +562,18 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          YoArtifactPolygon yoArtifactPolygon = new YoArtifactPolygon(polygonName, yoFrameConvexPolygon2d, Color.getHSBColor(hue, saturation, brightness), false);
          tripleSupportArtifactPolygons.set(robotQuadrant, yoArtifactPolygon);
-         yoGraphicsListRegistry.registerArtifact(polygonName, yoArtifactPolygon);
-         yoGraphicsListRegistryForDetachedOverhead.registerArtifact(polygonName, yoArtifactPolygon);
+         environment.getGraphicsListRegistry().registerArtifact(polygonName, yoArtifactPolygon);
+         environment.getGraphicsListRegistryForDetachedOverhead().registerArtifact(polygonName, yoArtifactPolygon);
       }
 
-      createGraphicsAndArtifacts(yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead);
+      createGraphicsAndArtifacts(environment.getGraphicsListRegistry(), environment.getGraphicsListRegistryForDetachedOverhead());
 
       referenceFrames.updateFrames();
       updateFeetLocations();
 
       FramePose3D centerOfMassPose = new FramePose3D(referenceFrames.getCenterOfFourHipsFrame());
       centerOfMassPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredCoMHeight.set(quadrupedControllerParameters.getInitialCoMHeight());
+      desiredCoMHeight.set(crawlControllerParameters.getInitialCoMHeight());
       filteredDesiredCoMHeight.update();
       centerOfMassPose.setZ(filteredDesiredCoMHeight.getDoubleValue());
       desiredCoMPose.set(centerOfMassPose);
@@ -599,7 +602,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       YoBoolean applyJoystickInput = new YoBoolean("applyJoystickInput", registry);
       applyJoystickInput.set(true);
 
-      parentRegistry.addChild(registry);
+      environment.getParentRegistry().addChild(registry);
    }
 
 
@@ -741,7 +744,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       if(walkingStateMachine.isCurrentState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS))
       {
-         filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds(oneDoFJointsActual);
+         filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds();
       }
 
       updateFeedForwardModelAndFrames();
@@ -779,7 +782,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          OneDoFJoint oneDoFJoint = oneDoFJointsActual[i];
          OneDoFJoint oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
 
-         oneDoFJointFeedforward.setQ(oneDoFJoint.getqDesired());
+         oneDoFJointFeedforward.setQ(jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).getDesiredPosition());
       }
 
       feedForwardReferenceFrames.updateFrames();
@@ -840,11 +843,12 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 	   {
 		   OneDoFJoint oneDoFJoint = oneDoFJointsActual[i];
 		   OneDoFJoint oneDoFJointFeedforward = oneDoFJointsFeedforward[i];
+         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
 
 //		   oneDoFJointFeedforward.setQ(oneDoFJoint.getQ());
-		   double qd = oneDoFJoint.getqDesired() - oneDoFJointFeedforward.getQ();
+		   double qd = jointDesiredOutput.getDesiredVelocity() - oneDoFJointFeedforward.getQ();
 		   oneDoFJointFeedforward.setQd(qd * 1.0 / dt);
-		   oneDoFJointFeedforward.setQ(oneDoFJoint.getqDesired());
+		   oneDoFJointFeedforward.setQ(jointDesiredOutput.getDesiredPosition());
 	   }
 
 	   FloatingInverseDynamicsJoint feedForwardRootJoint = feedForwardFullRobotModel.getRootJoint();
@@ -1345,30 +1349,28 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
    private class FilterDesiredsToMatchCrawlControllerState extends State<CrawlGateWalkingState>
    {
-      private final FullRobotModel initialDesiredsUponEnteringFullRobotModel;
-
       private final MinimumJerkTrajectory minimumJerkTrajectory = new MinimumJerkTrajectory();
+      private final TDoubleArrayList initialPositions = new TDoubleArrayList();
 
       public FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState stateEnum, QuadrupedModelFactory robotParameters)
       {
          super(stateEnum);
-
-         initialDesiredsUponEnteringFullRobotModel = robotParameters.createFullRobotModel();
       }
 
-      public void filterDesireds(OneDoFJoint[] oneDoFJointsActual)
+      public void filterDesireds()
       {
          for(int i = 0; i < oneDoFJointsActual.length; i++)
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
             String jointName = actualOneDoFJoint.getName();
 
-            OneDoFJoint intialOneDoFJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(jointName);
+            double initialPosition = initialPositions.get(i);
 
             double alpha = minimumJerkTrajectory.getPosition(); //filterStandPrepDesiredsToWalkingDesireds.getDoubleValue();
 
-            double alphaFilteredQ = (1.0 - alpha) * intialOneDoFJoint.getqDesired() + alpha * actualOneDoFJoint.getqDesired();
-            actualOneDoFJoint.setqDesired(alphaFilteredQ);
+            double alphaFilteredQ = (1.0 - alpha) * initialPosition + alpha * jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).getDesiredPosition();
+
+            jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).setDesiredPosition(alphaFilteredQ);
          }
       }
 
@@ -1389,11 +1391,11 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       {
          minimumJerkTrajectory.setMoveParameters(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, timeToFilterDesiredAtCrawlStart.getDoubleValue());
 
+         initialPositions.clear();
          for(int i = 0; i < oneDoFJointsActual.length; i++)
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
-            OneDoFJoint initialOneDofJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(actualOneDoFJoint.getName());
-            initialOneDofJoint.setqDesired(actualOneDoFJoint.getqDesired());
+            initialPositions.add(jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).getDesiredPosition());
          }
       }
 

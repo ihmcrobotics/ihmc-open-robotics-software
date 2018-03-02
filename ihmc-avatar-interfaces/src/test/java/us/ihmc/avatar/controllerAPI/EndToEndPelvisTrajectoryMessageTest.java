@@ -8,6 +8,7 @@ import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.fin
 import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
 import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findVector3d;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.After;
@@ -278,8 +279,19 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
             desiredHeadingControlModule.getDesiredHeadingFrame(), registry);
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
-      SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames));
+      ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
+      ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
+      ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
+
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i), additionalContactTransforms.get(i));
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(referenceFrames);
+      SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
+      contactableBodiesFactory.disposeFactory();
 
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(referenceFrames.getPelvisZUpFrame(),
             bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);

@@ -71,7 +71,7 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
       variables.getTimedStepGroundClearance().set(0.15);
       variables.getTimedStepDuration().set(0.6);
       variables.getTimedStepGoalPositionX().set(commandedStepPositionX);
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_STEP);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 3.0));
       conductor.simulate();

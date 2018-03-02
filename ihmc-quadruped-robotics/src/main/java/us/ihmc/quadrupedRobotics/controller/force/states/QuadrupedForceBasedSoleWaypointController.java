@@ -16,6 +16,8 @@ import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -44,11 +46,13 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
 
    private final YoBoolean isDoneMoving = new YoBoolean("soleWaypointDoneMoving", registry);
    private final QuadrupedForceControllerToolbox controllerToolbox;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
    public QuadrupedForceBasedSoleWaypointController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                                     QuadrupedSoleWaypointInputProvider inputProvider, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
+      this.jointDesiredOutputList = controllerToolbox.getRuntimeEnvironment().getJointDesiredOutputList();
       soleWaypointInputProvider = inputProvider;
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
@@ -91,7 +95,10 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
          QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
+            if (yoUseForceFeedbackControl.getBooleanValue())
+               jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.EFFORT);
+            else
+               jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.POSITION);
          }
       }
 
@@ -116,7 +123,10 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
          QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
+            if (yoUseForceFeedbackControl.getBooleanValue())
+               jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.EFFORT);
+            else
+               jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.POSITION);
          }
       }
 

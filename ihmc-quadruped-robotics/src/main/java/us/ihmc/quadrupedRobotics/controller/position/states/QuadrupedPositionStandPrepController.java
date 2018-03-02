@@ -13,6 +13,8 @@ import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 
 /**
  * A controller that will track the minimum jerk trajectory to bring joints to a preparatory pose.
@@ -27,6 +29,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
    private final double dt;
 
    private final List<MinimumJerkTrajectory> trajectories;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
    /**
     * The time from the beginning of the current preparation trajectory in seconds.
@@ -37,6 +40,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
    {
       this.initialPositionParameters = initialPositionParameters;
       this.fullRobotModel = environment.getFullRobotModel();
+      this.jointDesiredOutputList = environment.getJointDesiredOutputList();
       this.dt = environment.getControlDT();
 
       this.trajectories = new ArrayList<>(fullRobotModel.getOneDoFJoints().length);
@@ -52,15 +56,14 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
       for (int i = 0; i < fullRobotModel.getOneDoFJoints().length; i++)
       {
          OneDoFJoint joint = fullRobotModel.getOneDoFJoints()[i];
-         joint.setUnderPositionControl(true);
+         jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.POSITION);
 
          QuadrupedJointName jointId = fullRobotModel.getNameForOneDoFJoint(joint);
          double desiredPosition = initialPositionParameters.getInitialJointPosition(jointId);
 
          // Start the trajectory from the current pos/vel/acc.
          MinimumJerkTrajectory trajectory = trajectories.get(i);
-         trajectory.setMoveParameters(joint.getQ(), joint.getQd(), joint.getQdd(), desiredPosition, 0.0, 0.0,
-               trajectoryTimeParameter.get());
+         trajectory.setMoveParameters(joint.getQ(), joint.getQd(), joint.getQdd(), desiredPosition, 0.0, 0.0, trajectoryTimeParameter.get());
       }
 
       // This is a new trajectory. We start at time 0.
@@ -78,7 +81,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
          MinimumJerkTrajectory trajectory = trajectories.get(i);
 
          trajectory.computeTrajectory(timeInTrajectory);
-         joint.setqDesired(trajectory.getPosition());
+         jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(trajectory.getPosition());
       }
 
       timeInTrajectory += dt;
