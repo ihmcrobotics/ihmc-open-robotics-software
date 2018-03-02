@@ -26,6 +26,9 @@
                 <parameter name="jointPositionLimitDampingParameter" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
                 <parameter name="jointPositionLimitStiffnessParameter" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
                 <parameter name="coefficientOfFrictionParameter" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                <registry name="QuadrupedStepMessageHandler">
+                    <parameter name="haltTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                </registry>
             </registry>
             <registry name="QuadrupedForceBasedStandPrepController">
                 <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
