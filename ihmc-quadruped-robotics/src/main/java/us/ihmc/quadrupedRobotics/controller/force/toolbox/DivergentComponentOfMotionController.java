@@ -66,12 +66,6 @@ public class DivergentComponentOfMotionController
       parentRegistry.addChild(registry);
    }
 
-
-   public ReferenceFrame getReferenceFrame()
-   {
-      return comZUpFrame;
-   }
-
    public void reset()
    {
       for (int i = 0; i < 3; i++)
@@ -91,7 +85,8 @@ public class DivergentComponentOfMotionController
       yoVrpPositionRateLimit.set(vrpPositionRateLimit);
    }
 
-   public void compute(FixedFramePoint3DBasics vrpPositionSetpointToPack, FramePoint3DReadOnly dcmPositionEstimate, FramePoint3DReadOnly dcmPositionSetpoint, FrameVector3DReadOnly dcmVelocitySetpoint)
+   public void compute(FixedFramePoint3DBasics vrpPositionSetpointToPack, FramePoint3DReadOnly dcmPositionEstimate, FramePoint3DReadOnly dcmPositionSetpoint,
+                       FrameVector3DReadOnly dcmVelocitySetpoint)
    {
       this.dcmPositionEstimate.setIncludingFrame(dcmPositionEstimate);
       this.dcmPositionSetpoint.setIncludingFrame(dcmPositionSetpoint);
@@ -126,21 +121,5 @@ public class DivergentComponentOfMotionController
       vrpPositionSetpoint.setIncludingFrame(yoLimitedVrpPositionSetpoint);
       vrpPositionSetpoint.changeFrame(vrpPositionSetpointToPack.getReferenceFrame());
       vrpPositionSetpointToPack.set(vrpPositionSetpoint);
-   }
-
-   public void initializeSetpoint(FramePoint3DReadOnly dcmPositionEstimate)
-   {
-      dcmPositionSetpoint.setIncludingFrame(dcmPositionEstimate);
-      dcmVelocitySetpoint.setToZero();
-   }
-
-   public FramePoint3D getDCMPositionSetpoint()
-   {
-      return dcmPositionSetpoint;
-   }
-
-   public FrameVector3D getDCMVelocitySetpoint()
-   {
-      return dcmVelocitySetpoint;
    }
 }

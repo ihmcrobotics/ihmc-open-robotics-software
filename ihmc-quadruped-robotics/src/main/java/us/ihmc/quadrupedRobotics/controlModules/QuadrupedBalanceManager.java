@@ -73,6 +73,7 @@ public class QuadrupedBalanceManager
    private final YoFrameVector instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
    private final YoFrameVector accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
 
+   private final FramePoint3D dcmPositionSetpoint = new FramePoint3D();
    private final FramePoint3D dcmPositionEstimate = new FramePoint3D();
 
    private final YoFramePoint yoDesiredDCMPosition = new YoFramePoint("desiredDCMPosition", worldFrame, registry);
@@ -185,7 +186,9 @@ public class QuadrupedBalanceManager
       // update dcm estimate
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
 
-      dcmPositionController.initializeSetpoint(dcmPositionEstimate);
+      yoDesiredDCMPosition.set(dcmPositionEstimate);
+      yoDesiredDCMVelocity.setToZero();
+
       dcmPositionController.reset();
       comPositionControllerSetpoints.initialize(controllerToolbox.getTaskSpaceEstimates().getComPosition());
       comPositionController.reset();
@@ -271,7 +274,7 @@ public class QuadrupedBalanceManager
       if (robotTimestamp.getDoubleValue() > dcmPlanner.getFinalTime())
       {
          // compute step adjustment for ongoing steps (proportional to dcm tracking error)
-         FramePoint3D dcmPositionSetpoint = dcmPositionController.getDCMPositionSetpoint();
+         dcmPositionSetpoint.setIncludingFrame(yoDesiredDCMPosition);
          dcmPositionSetpoint.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
          dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
 
