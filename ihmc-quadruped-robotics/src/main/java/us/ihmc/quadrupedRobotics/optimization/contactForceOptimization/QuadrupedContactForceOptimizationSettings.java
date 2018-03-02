@@ -1,7 +1,9 @@
 package us.ihmc.quadrupedRobotics.optimization.contactForceOptimization;
 
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class QuadrupedContactForceOptimizationSettings
 {
@@ -51,11 +53,11 @@ public class QuadrupedContactForceOptimizationSettings
       this.solver = solver;
    }
 
-   public void setComTorqueCommandWeights(double[] weights)
+   public void setComTorqueCommandWeights(us.ihmc.yoVariables.parameters.DoubleParameter[] weights)
    {
       for (int i = 0; i < 3; i++)
       {
-         comTorqueCommandWeights[i] = Math.max(weights[i], 0.0);
+         comTorqueCommandWeights[i] = Math.max(weights[i].getValue(), 0.0);
       }
    }
 
@@ -66,11 +68,11 @@ public class QuadrupedContactForceOptimizationSettings
       comTorqueCommandWeights[2] = Math.max(weightZ, 0.0);
    }
 
-   public void setComForceCommandWeights(double[] weights)
+   public void setComForceCommandWeights(us.ihmc.yoVariables.parameters.DoubleParameter[] weights)
    {
       for (int i = 0; i < 3; i++)
       {
-         comForceCommandWeights[i] = Math.max(weights[i], 0.0);
+         comForceCommandWeights[i] = Math.max(weights[i].getValue(), 0.0);
       }
    }
 

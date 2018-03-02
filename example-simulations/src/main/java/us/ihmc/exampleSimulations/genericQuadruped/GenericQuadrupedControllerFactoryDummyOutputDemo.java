@@ -40,10 +40,12 @@ import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public class GenericQuadrupedControllerFactoryDummyOutputDemo
 {
@@ -143,9 +145,11 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       YoGraphicsListRegistry ignoredYoGraphicsListRegistry  = new YoGraphicsListRegistry();
 
       runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, jointDesiredOutputList, registry, yoGraphicsListRegistry,
-                                                           ignoredYoGraphicsListRegistry, dataProducer, contactableFeet, footSwitches, GRAVITY);
-
+                                                           ignoredYoGraphicsListRegistry, dataProducer, contactableFeet, footSwitches, GRAVITY, GenericQuadrupedModelFactory.getParameterResourceName());
       controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
+
+      InputStream resourceAsStream = getClass().getResourceAsStream(runtimeEnvironment.getParameterResourceName());
+      ParameterLoaderHelper.loadParameters(this, resourceAsStream, registry);
 
 //      PrintTools.debug(this, "Warming up JIT compiler.");
 //      controllerManager.warmup(2000);  // Compile threshold == 1000

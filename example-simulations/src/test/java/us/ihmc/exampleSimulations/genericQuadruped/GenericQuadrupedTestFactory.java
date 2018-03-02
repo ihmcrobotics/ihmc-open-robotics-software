@@ -107,6 +107,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
+      simulationFactory.setParameterResourceName(GenericQuadrupedModelFactory.getParameterResourceName());
+
       if (groundContactModelType.hasValue())
       {
          simulationFactory.setGroundContactModelType(groundContactModelType.get());
