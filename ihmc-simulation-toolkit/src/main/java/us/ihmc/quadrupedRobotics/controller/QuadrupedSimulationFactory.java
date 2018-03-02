@@ -455,7 +455,7 @@ public class QuadrupedSimulationFactory
       }
 
       InputStream parameterFile = getClass().getResourceAsStream(parameterResourceName.get());
-      ParameterLoaderHelper.loadParameters(this, parameterFile, sdfRobot.get().getRobotsYoVariableRegistry());
+      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry());
 
       FactoryTools.disposeFactory(this);
       
