@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
@@ -18,6 +19,7 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
@@ -56,6 +58,13 @@ public class QuadrupedSteppingState implements QuadrupedController
       this.runtimeEnvironment = runtimeEnvironment;
       this.controllerToolbox = controllerToolbox;
       this.controlManagerFactory = controlManagerFactory;
+
+      FullQuadrupedRobotModel fullRobotModel = runtimeEnvironment.getFullRobotModel();
+      WholeBodyControlCoreToolbox wholeBodyControlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
+                                                                                                fullRobotModel.getRootJoint(), fullRobotModel.getControllableOneDoFJoints(),
+                                                                                                controllerToolbox.getReferenceFrames().getCenterOfMassFrame(),
+                                                                                                runtimeEnvironment.getControllerCoreOptimizationSettings(),
+                                                                                                runtimeEnvironment.getGraphicsListRegistry(), registry);
 
       // Initialize input providers.
       xGaitSettingsProvider = new YoQuadrupedXGaitSettings(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);

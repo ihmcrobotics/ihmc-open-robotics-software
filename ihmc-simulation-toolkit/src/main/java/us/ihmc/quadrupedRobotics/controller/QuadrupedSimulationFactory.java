@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.BindException;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -86,6 +87,7 @@ import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 public class QuadrupedSimulationFactory
 {
    private final RequiredFactoryField<FullQuadrupedRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
+   private final RequiredFactoryField<ControllerCoreOptimizationSettings> controllerCoreOptimizationSettings = new RequiredFactoryField<>("controllerCoreOptimizationSettings");
    private final RequiredFactoryField<QuadrupedPhysicalProperties> physicalProperties = new RequiredFactoryField<>("physicalProperties");
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
    private final RequiredFactoryField<FloatingRootJointRobot> sdfRobot = new RequiredFactoryField<>("sdfRobot");
@@ -285,10 +287,10 @@ public class QuadrupedSimulationFactory
    public void createControllerManager() throws IOException
    {
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
-                                                                                       jointDesiredOutputList.get(), sdfRobot.get().getRobotsYoVariableRegistry(),
-                                                                                       yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead,
-                                                                                       globalDataProducer, contactableFeet, xGaitSettings.get(), footSwitches,
-                                                                                       gravity.get());
+                                                                                       controllerCoreOptimizationSettings.get(), jointDesiredOutputList.get(),
+                                                                                       sdfRobot.get().getRobotsYoVariableRegistry(), yoGraphicsListRegistry,
+                                                                                       yoGraphicsListRegistryForDetachedOverhead, globalDataProducer,
+                                                                                       contactableFeet, xGaitSettings.get(), footSwitches, gravity.get());
       switch (controlMode.get())
       {
       case FORCE:
@@ -582,6 +584,11 @@ public class QuadrupedSimulationFactory
    public void setFullRobotModel(FullQuadrupedRobotModel fullRobotModel)
    {
       this.fullRobotModel.set(fullRobotModel);
+   }
+
+   public void setControllerCoreOptimizationSettings(ControllerCoreOptimizationSettings controllerCoreOptimizationSettings)
+   {
+      this.controllerCoreOptimizationSettings.set(controllerCoreOptimizationSettings);
    }
 
    public void setUseNetworking(boolean useNetworking)
