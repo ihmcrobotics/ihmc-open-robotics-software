@@ -29,9 +29,9 @@ public class DCMPlanner
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private static final boolean VISUALIZE = true;
-   private static final double COP_POINT_SIZE = 0.005;
+   private static final double POINT_SIZE = 0.005;
 
-   private static final int STEP_SEQUENCE_CAPACITY = 100;
+   private static final int STEP_SEQUENCE_CAPACITY = 50;
 
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstanceCopTrajectory;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
@@ -62,7 +62,7 @@ public class DCMPlanner
       this.supportFrame = supportFrame;
       this.currentSolePositions = currentSolePositions;
       this.dcmTransitionTrajectory = new FrameTrajectory3D(6, supportFrame);
-      dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight);
+      dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
       piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, registry);
 
       parentRegistry.addChild(registry);
@@ -76,7 +76,8 @@ public class DCMPlanner
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      piecewiseConstanceCopTrajectory.setupVisualizers(yoGraphicsList, artifactList, COP_POINT_SIZE);
+      piecewiseConstanceCopTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
+      dcmTrajectory.setupVisualizers(yoGraphicsList, artifactList, POINT_SIZE);
 
       artifactList.setVisible(VISUALIZE);
       yoGraphicsList.setVisible(VISUALIZE);
@@ -110,6 +111,7 @@ public class DCMPlanner
    {
       isStanding.set(true);
       piecewiseConstanceCopTrajectory.resetVariables();
+      dcmTrajectory.resetVariables();
    }
 
    public void initializeForStepping(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings, FramePoint3DReadOnly dcmPosition)
@@ -122,7 +124,7 @@ public class DCMPlanner
       if (!isStanding.getBooleanValue() && stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime)
       {
          // compute dcm trajectory
-         computeDcmTrajectory(taskSpaceControllerSettings);
+         computeDcmTrajectory(taskSpaceControllerSettings.getContactState());
          double transitionEndTime = piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(1);
          double transitionStartTime = Math.max(currentTime, transitionEndTime - initialTransitionDurationParameter.get());
          dcmTrajectory.computeTrajectory(transitionEndTime);
@@ -135,12 +137,11 @@ public class DCMPlanner
       }
    }
 
-   private void computeDcmTrajectory(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   private void computeDcmTrajectory(QuadrantDependentList<ContactState> currentContactStates)
    {
       // compute piecewise constant center of pressure plan
       double currentTime = robotTimestamp.getDoubleValue();
-      QuadrantDependentList<ContactState> currentContactState = taskSpaceControllerSettings.getContactState();
-      timedContactSequence.update(stepSequence, currentSolePositions, currentContactState, currentTime);
+      timedContactSequence.update(stepSequence, currentSolePositions, currentContactStates, currentTime);
       piecewiseConstanceCopTrajectory.initializeTrajectory(timedContactSequence);
 
       // compute dcm trajectory with final boundary constraint
@@ -150,7 +151,7 @@ public class DCMPlanner
       tempPoint.add(0, 0, comHeight.getDoubleValue());
 
       dcmTrajectory.setComHeight(comHeight.getDoubleValue());
-      dcmTrajectory.initializeTrajectory(numberOfIntervals, piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(), piecewiseConstanceCopTrajectory.getCopPositionAtStartOfInterval(),
+      dcmTrajectory.initializeTrajectory(numberOfIntervals, piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(), piecewiseConstanceCopTrajectory.getCopPositionsAtStartOfInterval(),
                                          piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(numberOfIntervals - 1), tempPoint);
    }
 
@@ -168,7 +169,7 @@ public class DCMPlanner
       }
       else
       {
-         computeDcmTrajectory(taskSpaceControllerSettings);
+         computeDcmTrajectory(taskSpaceControllerSettings.getContactState());
 
          if (robotTimestamp.getDoubleValue() <= dcmTransitionTrajectory.getFinalTime())
          {
