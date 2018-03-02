@@ -1,129 +1,147 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <parameters>
     <registry name="QuadrupedSimulationController">
-    <registry name="QuadrupedForceControllerManager">
-    <registry name="QuadrupedStandController">
-        <parameter name="comForceCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="comForceCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="comForceCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="comTorqueCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="comTorqueCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="comTorqueCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
-        <parameter name="jointPositionLimitDampingParameter" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-        <parameter name="jointPositionLimitStiffnessParameter" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-        <parameter name="contactPressureLowerLimitParameter" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
-        <parameter name="coefficientOfFrictionParameter" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-    </registry>
-    <registry name="QuadrupedStepController">
-        <parameter name="comForceCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="comForceCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="comForceCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="comTorqueCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="comTorqueCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="comTorqueCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="jointPositionLimitDampingParameter" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-        <parameter name="jointPositionLimitStiffnessParameter" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-        <parameter name="coefficientOfFrictionParameter" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-    </registry>
-    <registry name="QuadrupedForceBasedStandPrepController">
-        <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="stanceLength" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="stanceWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.35"/>
-        <parameter name="stanceHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.6"/>
-        <parameter name="stanceXOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
-        <parameter name="stanceYOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-        <parameter name="stancePitch" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-        <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
-        <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-        <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-        <parameter name="requestUseForceFeedbackControl" type="BooleanParameter" min="0.0" max="1.0" value="0.0"/>
-    </registry>
-    <registry name="QuadrupedForceBasedSoleWaypointController">
-        <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
-        <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-        <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-        <parameter name="requestUseForceFeedbackControl" type="BooleanParameter" min="0.0" max="1.0" value="0.0"/>
-        <parameter name="useInitialSoleForces" type="BooleanParameter" min="0.0" max="1.0" value="1.0"/>
-    </registry>
-    <registry name="QuadrupedForceBasedFreezeController">
-        <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
-        <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-        <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-    </registry>
-    <registry name="QuadrupedForceBasedFallController">
-        <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="3.0"/>
-        <parameter name="stanceLength" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="stanceWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.35"/>
-        <parameter name="stanceHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-        <parameter name="stanceXOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-        <parameter name="stanceYOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-        <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
-        <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
-        <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
-        <parameter name="requestUseForceFeedbackControl" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-    </registry>
-    <registry name="QuadrupedFallDetector">
-        <parameter name="maxPitchInRad" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="maxRollInRad" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        <parameter name="dcmDistanceOutsideSupportPolygonSupportThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
-        <parameter name="fallDetectorGlitchFilterWindow" type="IntegerParameter" min="0.0" max="1.0" value="1"/>
-    </registry>
-    <registry name="QuadrupedControlManagerFactory">
-        <registry name="QuadrupedBalanceManager">
-            <parameter name="comPositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="comPositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="comPositionProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
-            <parameter name="comPositionDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="comPositionDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="comPositionDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="750.0"/>
-            <parameter name="comPositionIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="comPositionIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="comPositionIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="dcmPositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-            <parameter name="dcmPositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-            <parameter name="dcmPositionProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="dcmPositionDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="dcmPositionDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="dcmPositionDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="dcmPositionIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="dcmPositionIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="dcmPositionIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="comPositionMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="dcmPositionMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0"/>
-            <parameter name="vrpPositionRateLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.7976931348623157E308"/>
-            <parameter name="comPositionGravityCompensation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-            <parameter name="dcmPositionStepAdjustmentGain" type="DoubleParameter" min="0.0" max="1.0" value="1.5"/>
-            <parameter name="minimumStepClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.075"/>
-            <parameter name="maximumStepStride" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-            <parameter name="initialTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-        </registry>
-        <registry name="QuadrupedBodyOrientationManager">
-            <parameter name="bodyOrientationProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
-            <parameter name="bodyOrientationProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
-            <parameter name="bodyOrientationProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
-            <parameter name="bodyOrientationDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="750.0"/>
-            <parameter name="bodyOrientationDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="750.0"/>
-            <parameter name="bodyOrientationDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="750.0"/>
-            <parameter name="bodyOrientationIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="bodyOrientationIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="bodyOrientationIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-            <parameter name="bodyOrientationMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-        </registry>
-    </registry>
-    <registry name="QuadrupedPositionControllerManager">
-        <registry name="QuadrupedPositionStandPrepController">
-            <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-        </registry>
-        <registry name="QuadrupedPositionControllerManager">
-            <registry name="QuadrupedPositionStandPrepController">
-                <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+        <registry name="QuadrupedForceControllerManager">
+            <registry name="QuadrupedStandController">
+                <parameter name="comForceCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="comForceCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="comForceCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="comTorqueCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="comTorqueCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="comTorqueCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+                <parameter name="jointPositionLimitDampingParameter" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                <parameter name="jointPositionLimitStiffnessParameter" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                <parameter name="contactPressureLowerLimitParameter" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
+                <parameter name="coefficientOfFrictionParameter" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
             </registry>
-        </registry>
-        <registry name="QuadrupedPositionDevelopmentControllerManager">
-            <registry name="QuadrupedPositionStandPrepController">
+            <registry name="QuadrupedStepController">
+                <parameter name="comForceCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="comForceCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="comForceCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="comTorqueCommandWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="comTorqueCommandWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="comTorqueCommandWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="jointPositionLimitDampingParameter" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                <parameter name="jointPositionLimitStiffnessParameter" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                <parameter name="coefficientOfFrictionParameter" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+            </registry>
+            <registry name="QuadrupedForceBasedStandPrepController">
                 <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="stanceLength" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="stanceWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.35"/>
+                <parameter name="stanceHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.6"/>
+                <parameter name="stanceXOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                <parameter name="stanceYOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="stancePitch" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
+                <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                <parameter name="requestUseForceFeedbackControl" type="BooleanParameter" min="0.0" max="1.0" value="0.0"/>
+            </registry>
+            <registry name="QuadrupedForceBasedSoleWaypointController">
+                <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
+                <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                <parameter name="requestUseForceFeedbackControl" type="BooleanParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="useInitialSoleForces" type="BooleanParameter" min="0.0" max="1.0" value="1.0"/>
+            </registry>
+            <registry name="QuadrupedForceBasedFreezeController">
+                <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
+                <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+            </registry>
+            <registry name="QuadrupedForceBasedFallController">
+                <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="3.0"/>
+                <parameter name="stanceLength" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="stanceWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.35"/>
+                <parameter name="stanceHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                <parameter name="stanceXOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="stanceYOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
+                <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                <parameter name="jointPositionLimitStiffness" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                <parameter name="requestUseForceFeedbackControl" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+            </registry>
+            <registry name="QuadrupedFallDetector">
+                <parameter name="maxPitchInRad" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="maxRollInRad" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="dcmDistanceOutsideSupportPolygonSupportThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                <parameter name="fallDetectorGlitchFilterWindow" type="IntegerParameter" min="0.0" max="1.0" value="1"/>
+            </registry>
+            <registry name="QuadrupedControlManagerFactory">
+                <registry name="QuadrupedBalanceManager">
+                    <parameter name="comPositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                    <parameter name="comPositionDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="750.0"/>
+                    <parameter name="comPositionIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                    <parameter name="dcmPositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                    <parameter name="dcmPositionProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="comPositionMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="dcmPositionMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0"/>
+                    <parameter name="vrpPositionRateLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.7976931348623157E308"/>
+                    <parameter name="comPositionGravityCompensation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                    <parameter name="dcmPositionStepAdjustmentGain" type="DoubleParameter" min="0.0" max="1.0" value="1.5"/>
+                    <parameter name="minimumStepClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.075"/>
+                    <parameter name="maximumStepStride" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                    <parameter name="initialTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                </registry>
+                <registry name="QuadrupedBodyOrientationManager">
+                    <parameter name="bodyOrientationProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                    <parameter name="bodyOrientationProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                    <parameter name="bodyOrientationProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                    <parameter name="bodyOrientationDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="750.0"/>
+                    <parameter name="bodyOrientationDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="750.0"/>
+                    <parameter name="bodyOrientationDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="750.0"/>
+                    <parameter name="bodyOrientationIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="bodyOrientationIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="bodyOrientationIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="bodyOrientationMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                </registry>
+            </registry>
+            <!--<registry name="QuadrupedPositionControllerManager">-->
+                <!--<registry name="QuadrupedPositionStandPrepController">-->
+                    <!--<parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>-->
+                <!--</registry>-->
+                <!--<registry name="QuadrupedPositionControllerManager">-->
+                    <!--<registry name="QuadrupedPositionStandPrepController">-->
+                        <!--<parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>-->
+                    <!--</registry>-->
+                <!--</registry>-->
+                <!--<registry name="QuadrupedPositionDevelopmentControllerManager">-->
+                    <!--<registry name="QuadrupedPositionStandPrepController">-->
+                        <!--<parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>-->
+                    <!--</registry>-->
+                <!--</registry>-->
+            <!--</registry>-->
+            <registry name="QuadrupedFootControlModule">
+                <parameter name="solePositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
+                <parameter name="solePositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
+                <parameter name="solePositionProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                <parameter name="solePositionDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                <parameter name="solePositionDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                <parameter name="solePositionDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                <parameter name="solePositionIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="solePositionIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="solePositionIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="solePositionMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0"/>
+                <parameter name="touchdownPressureLimit" type="DoubleParameter" min="0.0" max="1.0" value="50"/>
+                <parameter name="touchdownTriggerWindow" type="IntegerParameter" min="0.0" max="1.0" value="1"/>
+                <parameter name="minimumStepAdjustmentTime" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+                <parameter name="stepGoalOffsetZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
             </registry>
         </registry>
     </registry>

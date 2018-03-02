@@ -55,7 +55,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
       this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
-                                                          parameters.getTouchdownTriggerWindowParameter());
+                                                          QuadrupedFootControlModuleParameters.getDefaultTouchdownTriggerWindow());
    }
 
    @Override
