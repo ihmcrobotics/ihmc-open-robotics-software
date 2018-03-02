@@ -751,13 +751,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getPelvis()
-      {
-         return null;
-      }
-
-      @Override
-      public RigidBody getChest()
+      public RigidBody getRootBody()
       {
          return null;
       }
@@ -1050,13 +1044,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getPelvis()
-      {
-         return null;
-      }
-
-      @Override
-      public RigidBody getChest()
+      public RigidBody getRootBody()
       {
          return null;
       }
@@ -1407,13 +1395,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getPelvis()
-      {
-         return null;
-      }
-
-      @Override
-      public RigidBody getChest()
+      public RigidBody getRootBody()
       {
          return null;
       }
@@ -1753,13 +1735,7 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getPelvis()
-      {
-         return null;
-      }
-
-      @Override
-      public RigidBody getChest()
+      public RigidBody getRootBody()
       {
          return null;
       }
@@ -2035,15 +2011,9 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public RigidBody getPelvis()
+      public RigidBody getRootBody()
       {
          return pelvis;
-      }
-
-      @Override
-      public RigidBody getChest()
-      {
-         return null;
       }
 
       @Override

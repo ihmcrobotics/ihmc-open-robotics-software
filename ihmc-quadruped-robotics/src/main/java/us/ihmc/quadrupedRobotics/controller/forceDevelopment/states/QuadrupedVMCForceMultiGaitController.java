@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
@@ -48,6 +49,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -83,7 +85,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
    private final YoVariableRegistry registry = new YoVariableRegistry("TrotWalkController");
    private final QuadrupedReferenceFrames referenceFrames;
    private final FullRobotModel fullRobotModel;
-   private final QuadrantDependentList<ArrayList<OneDoFJoint>> oneDofJoints = new QuadrantDependentList<>();
+   private final QuadrantDependentList<List<OneDoFJoint>> oneDofJoints = new QuadrantDependentList<>();
    private boolean hasInitializedInheritedYoVariables = false;
    private YoDouble q_z;
 
@@ -242,9 +244,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         ArrayList<OneDoFJoint> jointsToControl = new ArrayList<OneDoFJoint>();
-         OneDoFJoint oneDoFJointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
-         fullRobotModel.getOneDoFJointsFromRootToHere(oneDoFJointBeforeFoot, jointsToControl);
+         List<OneDoFJoint> jointsToControl = fullRobotModel.getLegJointsList(robotQuadrant);
          oneDofJoints.set(robotQuadrant, jointsToControl);
       }
 
@@ -375,7 +375,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         ArrayList<OneDoFJoint> legJoints = oneDofJoints.get(robotQuadrant);
+         List<OneDoFJoint> legJoints = oneDofJoints.get(robotQuadrant);
          for (int i = 0; i < legJoints.size(); i++)
          {
             legJoints.get(i).setUnderPositionControl(false);

@@ -142,9 +142,9 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
 
       // Initialize force feedback
       yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
             oneDoFJoint.setUseFeedBackForceControl(useForceFeedbackControlParameter.get());
@@ -168,9 +168,9 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
    public void onExit()
    {
       yoUseForceFeedbackControl.set(true);
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
             oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());

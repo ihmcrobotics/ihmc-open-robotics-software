@@ -904,7 +904,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       FootstepDataListMessage footstepDataList = createFootstepsForTurningInPlaceAndPassingPI(scriptedFootstepGenerator);
       drcSimulationTestHelper.send(footstepDataList);
 
-      FullRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       final YoDouble pelvisOrientationError = getPelvisOrientationErrorVariableName(simulationConstructionSet, fullRobotModel);
 
       SimulationDoneCriterion checkPelvisOrientationError = new SimulationDoneCriterion()
@@ -1178,7 +1178,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
    protected abstract double getFootSlipTimeDeltaAfterTouchdown();
 
-   private YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs, FullRobotModel fullRobotModel)
+   private YoDouble getPelvisOrientationErrorVariableName(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel)
    {
       String pelvisName = fullRobotModel.getPelvis().getName();
       String namePrefix = pelvisName + FeedbackControllerDataReadOnly.Type.ERROR.getName() + FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR.getName();

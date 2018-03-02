@@ -86,9 +86,9 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
 
       yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
       // Initialize force feedback
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
             oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());
@@ -111,9 +111,9 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    public void onExit()
    {
       yoUseForceFeedbackControl.set(true);
-      for (QuadrupedJointName jointName : QuadrupedJointName.values())
+      for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
-         OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+         QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
             oneDoFJoint.setUseFeedBackForceControl(yoUseForceFeedbackControl.getBooleanValue());

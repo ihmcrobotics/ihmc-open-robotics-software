@@ -6,7 +6,6 @@ import java.util.Set;
 
 public interface JointNameMap<E extends Enum<E> & RobotSegment<E>> extends RobotSpecificJointNames
 {
-
    String getModelName();
 
    default double getModelScale()
@@ -43,11 +42,9 @@ public interface JointNameMap<E extends Enum<E> & RobotSegment<E>> extends Robot
 
    SpineJointName getSpineJointName(String jointName);
 
-   String getPelvisName();
+   String getRootBodyName();
 
    String getUnsanitizedRootJointInSdf();
-
-   String getChestName();
 
    String getHeadName();
 

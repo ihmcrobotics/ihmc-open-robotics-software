@@ -206,6 +206,12 @@ public class StickRobotJointMap implements DRCRobotJointMap
    @Override
    public RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide robotSide)
    {
+      return getSoleToParentFrameTransform(robotSide);
+   }
+
+   @Override
+   public RigidBodyTransform getSoleToParentFrameTransform(RobotSide robotSide)
+   {
       return StickRobotPhysicalProperties.soleToAnkleFrameTransforms.get(robotSide);
    }
 

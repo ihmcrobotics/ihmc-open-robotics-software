@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -74,7 +75,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final StateMachine<COM_ESTIMATE_STATES> stateMachine;
    private final FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerOnTransitionIn;
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
-   private final FullRobotModel fullRobotModel;
+   private final FullQuadrupedRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final OneDoFJoint[] oneDoFJoints;
 
@@ -168,7 +169,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          RobotQuadrant hindSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide);
          RobotQuadrant frontSoleQuadrantOppositeSide = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide.getOppositeSide());
 
-         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, referenceFrames.getFootFrame(hindSoleQuadrant), referenceFrames.getFootFrame(frontSoleQuadrantOppositeSide));
+         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, referenceFrames.getSoleFrame(hindSoleQuadrant), referenceFrames.getSoleFrame(frontSoleQuadrantOppositeSide));
          sideDependentMidTrotLineZUpFrames.put(robotSide, midTrotLineZUpFrame);
       }
 
@@ -509,7 +510,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          intialCenterOfMassReferenceFrame.updateTranslation(intialCenterOfMass);
 
          totalMass = fullRobotModel.getTotalMass();
-         bodyMass = fullRobotModel.getPelvis().getInertia().getMass();
+         bodyMass = fullRobotModel.getBody().getInertia().getMass();
 
          for (TrotPair trotPair : TrotPair.values())
          {
