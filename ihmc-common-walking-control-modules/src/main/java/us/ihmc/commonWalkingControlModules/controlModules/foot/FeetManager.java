@@ -503,8 +503,7 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
       {
          FeedbackControlCommandList template = footControlModules.get(robotSide).createFeedbackControlTemplate();
-         for (int i = 0; i < template.getNumberOfCommands(); i++)
-            ret.addCommand(template.getCommand(i));
+         ret.addCommandList(template);
       }
       return ret;
    }

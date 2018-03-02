@@ -355,8 +355,7 @@ public class HighLevelControlManagerFactory
       if (feetManager != null)
       {
          FeedbackControlCommandList template = feetManager.createFeedbackControlTemplate();
-         for (int i = 0; i < template.getNumberOfCommands(); i++)
-            ret.addCommand(template.getCommand(i));
+         ret.addCommandList(template);
       }
 
       Collection<RigidBodyControlManager> bodyManagers = rigidBodyManagerMapByBodyName.values();

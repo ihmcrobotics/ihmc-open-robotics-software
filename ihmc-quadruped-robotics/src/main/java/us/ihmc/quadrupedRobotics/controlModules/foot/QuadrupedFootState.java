@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
@@ -13,6 +15,10 @@ public abstract class QuadrupedFootState implements FiniteStateMachineState<Quad
 
    protected QuadrupedStepTransitionCallback stepTransitionCallback = null;
    protected QuadrupedWaypointCallback waypointCallback = null;
+
+   public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
+
+   public abstract SpatialFeedbackControlCommand getFeedbackControlCommand();
 
    public FrameVector3DReadOnly getSoleForceCommand()
    {

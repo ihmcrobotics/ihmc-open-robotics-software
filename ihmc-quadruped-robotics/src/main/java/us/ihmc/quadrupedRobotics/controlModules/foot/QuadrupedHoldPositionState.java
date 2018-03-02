@@ -10,23 +10,19 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionC
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedHoldPositionState extends QuadrupedFootState
+public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
 {
    // YoVariables
-   private final YoVariableRegistry registry;
    private final YoDouble timestamp;
    private double initialTime;
 
    private final BooleanParameter useSoleForceFeedForwardParameter;
    private final DoubleParameter feedForwardRampTimeParameter;
-
-   // Feedback controller
-   private final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
-   private final FrameVector3D initialSoleForces = new FrameVector3D();
-   private final QuadrupedSolePositionController solePositionController;
 
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame soleFrame;
@@ -37,28 +33,23 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
 
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
-
    public QuadrupedHoldPositionState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, QuadrupedSolePositionController solePositionController,
-                                     YoVariableRegistry parentRegistry)
+                                     YoVariableRegistry registry)
    {
+      super("holdPosition", robotQuadrant, controllerToolbox, solePositionController, registry);
       this.robotQuadrant = robotQuadrant;
       this.controllerToolbox = controllerToolbox;
-      this.solePositionController = solePositionController;
 
+      FullQuadrupedRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      RigidBody footBody = fullRobotModel.getFoot(robotQuadrant);
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
       parameters = controllerToolbox.getFootControlModuleParameters();
       timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       soleLinearVelocityEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant);
 
-      registry = new YoVariableRegistry(robotQuadrant.getPascalCaseName() + getClass().getSimpleName());
-
       useSoleForceFeedForwardParameter = new BooleanParameter("useSoleForceFeedForward", registry, true);
       feedForwardRampTimeParameter = new DoubleParameter("feedForwardRampTime", registry, 2.0);
-
-      solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
-
-      parentRegistry.addChild(registry);
    }
 
    @Override
@@ -96,6 +87,8 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
       }
       solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, soleLinearVelocityEstimate);
 
+      super.doControl();
+
       return null;
    }
 
@@ -104,4 +97,5 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
    {
       soleForceCommand.setToZero();
    }
+
 }
