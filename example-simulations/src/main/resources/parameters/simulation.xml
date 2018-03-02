@@ -123,6 +123,33 @@
                 <parameter name="initialStepDelay" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                 <parameter name="minimumStepClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.075"/>
             </registry>
+            <registry name="QuadrupedPostureInputProvider">
+                <parameter name="comPositionLowerLimitX" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="comPositionLowerLimitY" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="comPositionLowerLimitZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="comPositionUpperLimitX" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="comPositionUpperLimitY" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="comPositionUpperLimitZ" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="comVelocityLowerLimitX" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="comVelocityLowerLimitY" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="comVelocityLowerLimitZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="comVelocityUpperLimitX" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="comVelocityUpperLimitY" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="comVelocityUpperLimitZ" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="bodyOrientationLowerLimitX" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="bodyOrientationLowerLimitY" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="bodyOrientationLowerLimitZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="bodyOrientationUpperLimitX" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="bodyOrientationUpperLimitY" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="bodyOrientationUpperLimitZ" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="bodyAngularRateLowerLimitX" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="bodyAngularRateLowerLimitY" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="bodyAngularRateLowerLimitZ" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
+                <parameter name="bodyAngularRateUpperLimitX" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="bodyAngularRateUpperLimitY" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="bodyAngularRateUpperLimitZ" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                <parameter name="comHeightNominal" type="DoubleParameter" min="0.0" max="1.0" value="0.55"/>
+            </registry>
             <!--<registry name="QuadrupedPositionControllerManager">-->
                 <!--<registry name="QuadrupedPositionStandPrepController">-->
                     <!--<parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>-->
