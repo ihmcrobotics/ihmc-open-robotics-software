@@ -6,6 +6,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
@@ -24,6 +27,9 @@ import java.util.List;
 public class DCMPlanner
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private static final boolean VISUALIZE = true;
+   private static final double COP_POINT_SIZE = 0.005;
 
    private static final int STEP_SEQUENCE_CAPACITY = 100;
 
@@ -50,16 +56,33 @@ public class DCMPlanner
    private final FramePoint3D tempPoint = new FramePoint3D();
 
    public DCMPlanner(double gravity, double nominalHeight, YoDouble robotTimestamp, ReferenceFrame supportFrame,
-                     QuadrantDependentList<FramePoint3D> currentSolePositions, YoVariableRegistry parentRegistry)
+                     QuadrantDependentList<FramePoint3D> currentSolePositions, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.robotTimestamp = robotTimestamp;
       this.supportFrame = supportFrame;
       this.currentSolePositions = currentSolePositions;
       this.dcmTransitionTrajectory = new FrameTrajectory3D(6, supportFrame);
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight);
-      piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY);
+      piecewiseConstanceCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, registry);
 
       parentRegistry.addChild(registry);
+
+      if (yoGraphicsListRegistry != null)
+         setupVisualizers(yoGraphicsListRegistry);
+   }
+
+   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+
+      piecewiseConstanceCopTrajectory.setupVisualizers(yoGraphicsList, artifactList, COP_POINT_SIZE);
+
+      artifactList.setVisible(VISUALIZE);
+      yoGraphicsList.setVisible(VISUALIZE);
+
+      yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
    public void clearStepSequence()
@@ -83,17 +106,17 @@ public class DCMPlanner
          addStepToSequence(steps.get(i));
    }
 
-   public void initializeForStanding(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings, FramePoint3DReadOnly dcmPosition)
+   public void initializeForStanding()
    {
       isStanding.set(true);
-
-      timedContactSequence.initialize();
+      piecewiseConstanceCopTrajectory.resetVariables();
    }
 
    public void initializeForStepping(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings, FramePoint3DReadOnly dcmPosition)
    {
       isStanding.set(false);
 
+      timedContactSequence.initialize();
       double currentTime = robotTimestamp.getDoubleValue();
 
       if (!isStanding.getBooleanValue() && stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() > currentTime)
@@ -137,7 +160,6 @@ public class DCMPlanner
    public void computeDcmSetpoints(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings, FixedFramePoint3DBasics desiredDCMPositionToPack,
                                    FixedFrameVector3DBasics desiredDCMVelocityToPack)
    {
-
       if (isStanding.getBooleanValue())
       {
          // update desired dcm position
