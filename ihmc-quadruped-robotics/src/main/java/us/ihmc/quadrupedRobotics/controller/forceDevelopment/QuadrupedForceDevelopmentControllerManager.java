@@ -38,7 +38,7 @@ public class QuadrupedForceDevelopmentControllerManager implements QuadrupedCont
    public QuadrupedForceDevelopmentControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties)
          throws IOException
    {
-      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry);
+      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry, runtimeEnvironment.getGraphicsListRegistry());
       this.stateMachine = buildStateMachine(runtimeEnvironment, physicalProperties);
       this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceDevelopmentControllerRequestedEvent.class);
       this.runtimeEnvironment = runtimeEnvironment;

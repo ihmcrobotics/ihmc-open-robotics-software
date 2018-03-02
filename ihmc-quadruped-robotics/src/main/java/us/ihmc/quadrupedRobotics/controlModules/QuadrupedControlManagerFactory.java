@@ -49,7 +49,7 @@ public class QuadrupedControlManagerFactory
       if (balanceManager != null)
          return balanceManager;
 
-      balanceManager = new QuadrupedBalanceManager(toolbox, postureProvider, registry);
+      balanceManager = new QuadrupedBalanceManager(toolbox, postureProvider, registry, toolbox.getRuntimeEnvironment().getGraphicsListRegistry());
       return balanceManager;
    }
 
