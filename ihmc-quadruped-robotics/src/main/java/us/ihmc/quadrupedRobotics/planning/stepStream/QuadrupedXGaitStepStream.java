@@ -2,8 +2,6 @@ package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
@@ -12,6 +10,7 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -27,9 +26,8 @@ import java.util.ArrayList;
 public class QuadrupedXGaitStepStream implements QuadrupedStepStream
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter initialStepDelayParameter = parameterFactory.createDouble("initialStepDelay", 0.5);
-   private final DoubleParameter minimumStepClearanceParameter = parameterFactory.createDouble("minimumStepClearance", 0.075);
+   private final DoubleParameter initialStepDelayParameter = new DoubleParameter("initialStepDelay", registry, 0.5);
+   private final DoubleParameter minimumStepClearanceParameter = new DoubleParameter("minimumStepClearance", registry, 0.075);
    private static int NUMBER_OF_PREVIEW_STEPS = 16;
 
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
@@ -101,8 +99,8 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       double strideWidth = Math.abs(2 * planarVelocityProvider.get().getY() * xGaitSettings.getStepDuration());
       strideLength += Math.abs(xGaitSettings.getStanceWidth() / 2 * Math.sin(2 * strideRotation));
       strideWidth += Math.abs(xGaitSettings.getStanceLength() / 2 * Math.sin(2 * strideRotation));
-      xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength / 2 + minimumStepClearanceParameter.get()));
-      xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + minimumStepClearanceParameter.get()));
+      xGaitSettings.setStanceLength(Math.max(xGaitSettings.getStanceLength(), strideLength / 2 + minimumStepClearanceParameter.getValue()));
+      xGaitSettings.setStanceWidth(Math.max(xGaitSettings.getStanceWidth(), strideWidth / 2 + minimumStepClearanceParameter.getValue()));
    }
 
    @Override
@@ -116,7 +114,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       updateXGaitSettings();
       supportCentroid.setToZero(supportFrame);
       double initialYaw = bodyYaw.getDoubleValue();
-      double initialTime = timestamp.getDoubleValue() + initialStepDelayParameter.get();
+      double initialTime = timestamp.getDoubleValue() + initialStepDelayParameter.getValue();
       Vector3D initialVelocity = planarVelocityProvider.get();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, initialVelocity, initialQuadrant, supportCentroid, initialTime, initialYaw, xGaitSettings);
