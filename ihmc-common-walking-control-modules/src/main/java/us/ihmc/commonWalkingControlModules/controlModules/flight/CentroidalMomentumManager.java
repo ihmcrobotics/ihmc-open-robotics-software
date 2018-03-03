@@ -61,7 +61,6 @@ public class CentroidalMomentumManager
    {
       this.angularMomentumWeight.set(angularWeight, angularWeight, angularWeight);
       this.linearMomentumWeight.set(linearWeight, linearWeight, linearWeight);
-      ;
    }
 
    public void initialize()
@@ -80,11 +79,12 @@ public class CentroidalMomentumManager
    {
       //FIXME This is a hack to confirm that the controller core is working. This should be based on the controller state. Currently hacked to work with flight controller
       desiredLinearMomentumRateOfChange.set(controlFrame, 0.0, 0.0, -gravityZ * totalMass);
-      desiredAngularMomentumRateOfChange.set(controlFrame, 0.0, 0.0, 0.0);
+      desiredAngularMomentumRateOfChange.set(controlFrame, 0.0, -100.0, 0.0);
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
-      momentumCommand.setAngularWeightsToZero();
-      momentumCommand.setSelectionMatrixForLinearControl();
-
+      setOptimizationWeights(100.0, 100.0);
+      setMomentumCommandWeights();
+      momentumCommand.setSelectionMatrixToIdentity();
+      //momentumCommand.setSelectionMatrixForLinearControl();
       // TODO remove this command. Its not needed since the momentum rate of change command captures the free fall effect (does not mean the robot does nothing since it'll try to regularize the overall acceleration)      
       desiredCoMLinearAcceleration.setIncludingFrame(comFrame, 0, 0, 0.0);
    }

@@ -53,7 +53,7 @@ public class FlightState extends AbstractJumpingState
       gravityCompensationManager.compute();
       for (RobotSide side : RobotSide.values)
       {
-         handManagers.get(side).compute();
+         //handManagers.get(side).compute();
          footManagers.get(side).compute();
       }
       chestManager.compute();
@@ -73,7 +73,7 @@ public class FlightState extends AbstractJumpingState
       for (RobotSide side : RobotSide.values)
       {
          RigidBodyControlManager handManager = handManagers.get(side);
-         handManager.holdInJointspace();
+         //handManager.holdInJointspace();
          RigidBodyControlManager footManger = footManagers.get(side);
          footManger.holdInJointspace();
       }
