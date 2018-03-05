@@ -20,7 +20,6 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -53,7 +52,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
-   private final OptionalFactoryField<QuadrupedParameterSet> parameterSet = new OptionalFactoryField<>("parameterSet");
 
    @Override
    public GoalOrientedTestConductor createTestConductor() throws IOException
@@ -152,11 +150,5 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public void setUsePushRobotController(boolean usePushRobotController)
    {
       this.usePushRobotController.set(usePushRobotController);
-   }
-
-   @Override
-   public void setParameterSet(QuadrupedParameterSet parameterSet)
-   {
-      this.parameterSet.set(parameterSet);
    }
 }
