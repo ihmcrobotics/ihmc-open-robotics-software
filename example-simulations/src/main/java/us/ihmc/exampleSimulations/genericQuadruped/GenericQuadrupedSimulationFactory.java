@@ -90,7 +90,7 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
-      simulationFactory.setParameterResourceName(GenericQuadrupedModelFactory.getParameterResourceName());
+      simulationFactory.setParameterResourceName(modelFactory.getParameterResourceName());
 
       return simulationFactory.createSimulation();
    }

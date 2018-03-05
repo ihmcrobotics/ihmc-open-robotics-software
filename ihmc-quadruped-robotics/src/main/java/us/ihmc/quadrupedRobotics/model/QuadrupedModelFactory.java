@@ -17,4 +17,6 @@ public abstract class QuadrupedModelFactory implements FullQuadrupedRobotModelFa
    public abstract Collection<QuadrupedJointName> getQuadrupedJointNames();
 
    public abstract String getSDFNameForJointName(QuadrupedJointName quadrupedJointName);
+
+   public abstract String getParameterResourceName();
 }
