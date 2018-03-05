@@ -66,6 +66,18 @@
                     <parameter name="minimumStepClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.075"/>
                     <parameter name="maximumStepStride" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                     <parameter name="initialTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                    <registry name="QuadrupedMomentumRateOfChangeModule">
+                        <registry name="DivergentComponentOfMotionController">
+                            <parameter name="dcmPositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                            <parameter name="dcmPositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                            <parameter name="dcmPositionProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                            <parameter name="dcmPositionIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                            <parameter name="dcmPositionIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                            <parameter name="dcmPositionIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                            <parameter name="dcmPositionMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                            <parameter name="vrpPositionRateLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.7E308"/>
+                        </registry>
+                    </registry>
                 </registry>
                 <registry name="QuadrupedBodyOrientationManager">
                     <parameter name="bodyOrientationProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
