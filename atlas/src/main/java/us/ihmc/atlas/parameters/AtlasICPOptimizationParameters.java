@@ -8,8 +8,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
-   private final boolean useAngularMomentum = false;
-   private final boolean useStepAdjustment = false;
+   private final boolean useAngularMomentum = true;
+   private final boolean useStepAdjustment = true;
 
    public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
    {
@@ -34,7 +34,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFootstepRateWeight()
    {
-      return runningOnRealRobot ? 0.001 : 0.001;
+      return runningOnRealRobot ? 0.00001 : 0.001;
    }
 
    /** {@inheritDoc} */
@@ -55,7 +55,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackRateWeight()
    {
-      return runningOnRealRobot ? 1e-5 : 1e-9;
+      return 1e-9;
    }
 
    /** {@inheritDoc} */
@@ -125,7 +125,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean useFeedbackRate()
    {
-      return !runningOnRealRobot;
+      return true;
    }
 
    /** {@inheritDoc} */
@@ -153,7 +153,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean useFootstepRate()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
