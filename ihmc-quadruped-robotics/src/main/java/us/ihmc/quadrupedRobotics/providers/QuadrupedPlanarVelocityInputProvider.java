@@ -1,12 +1,12 @@
 package us.ihmc.quadrupedRobotics.providers;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -14,9 +14,8 @@ public class QuadrupedPlanarVelocityInputProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleArrayParameter planarVelocityLowerLimitsParameter = parameterFactory.createDoubleArray("planarVelocityLowerLimits", -Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-   private final DoubleArrayParameter planarVelocityUpperLimitsParameter = parameterFactory.createDoubleArray("planarVelocityUpperLimits", Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+   private final DoubleParameter[] planarVelocityLowerLimitsParameter = new DoubleParameter[3];
+   private final DoubleParameter[] planarVelocityUpperLimitsParameter = new DoubleParameter[3];
 
    private final YoDouble yoPlanarVelocityInputX;
    private final YoDouble yoPlanarVelocityInputY;
@@ -33,6 +32,12 @@ public class QuadrupedPlanarVelocityInputProvider
       yoPlanarVelocityInputZ.set(0);
       planarVelocityInput = new Vector3D();
 
+      for (int i = 0; i < 3; i++)
+      {
+         planarVelocityLowerLimitsParameter[i] = new DoubleParameter("planarVelocityLowerLimit" + Axis.values[i], registry, - Double.MAX_VALUE, - Double.MAX_VALUE, Double.MAX_VALUE);
+         planarVelocityUpperLimitsParameter[i] = new DoubleParameter("planarVelocityUpperLimit" + Axis.values[i], registry, Double.MAX_VALUE, - Double.MAX_VALUE, Double.MAX_VALUE);
+      }
+
       if (globalDataProducer != null)
       {
          globalDataProducer.attachListener(PlanarVelocityPacket.class, new PacketConsumer<PlanarVelocityPacket>()
@@ -42,11 +47,11 @@ public class QuadrupedPlanarVelocityInputProvider
             {
                packet.get(planarVelocityInput);
                yoPlanarVelocityInputX.set(MathTools
-                     .clamp(planarVelocityInput.getX(), planarVelocityLowerLimitsParameter.get(0), planarVelocityUpperLimitsParameter.get(0)));
+                     .clamp(planarVelocityInput.getX(), planarVelocityLowerLimitsParameter[0].getValue(), planarVelocityUpperLimitsParameter[0].getValue()));
                yoPlanarVelocityInputY.set(MathTools
-                     .clamp(planarVelocityInput.getY(), planarVelocityLowerLimitsParameter.get(1), planarVelocityUpperLimitsParameter.get(1)));
+                     .clamp(planarVelocityInput.getY(), planarVelocityLowerLimitsParameter[1].getValue(), planarVelocityUpperLimitsParameter[1].getValue()));
                yoPlanarVelocityInputZ.set(MathTools
-                     .clamp(planarVelocityInput.getZ(), planarVelocityLowerLimitsParameter.get(2), planarVelocityUpperLimitsParameter.get(2)));
+                     .clamp(planarVelocityInput.getZ(), planarVelocityLowerLimitsParameter[2].getValue(), planarVelocityUpperLimitsParameter[2].getValue()));
             }
          });
       }

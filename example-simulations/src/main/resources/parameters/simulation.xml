@@ -164,6 +164,14 @@
                 <parameter name="comHeightNominal" type="DoubleParameter" min="0.0" max="1.0" value="0.55"/>
             </registry>
             <registry name="QuadrupedSteppingState">
+                <registry name="QuadrupedPlanarVelocityInputProvider">
+                    <parameter name="planarVelocityLowerLimitX" min="0.0" max="1.0" value="-1.7E308"/>
+                    <parameter name="planarVelocityLowerLimitY" min="0.0" max="1.0" value="-1.7E308"/>
+                    <parameter name="planarVelocityLowerLimitZ" min="0.0" max="1.0" value="-1.7E308"/>
+                    <parameter name="planarVelocityUpperLimitX" min="0.0" max="1.0" value="1.7E308"/>
+                    <parameter name="planarVelocityUpperLimitY" min="0.0" max="1.0" value="1.7E308"/>
+                    <parameter name="planarVelocityUpperLimitZ" min="0.0" max="1.0" value="1.7E308"/>
+                </registry>
                 <registry name="QuadrupedXGaitSettingsInputProvider">
                     <parameter name="stanceLengthLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
                     <parameter name="stanceLengthUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.4"/>
@@ -218,21 +226,21 @@
                     <parameter name="useInitialSoleForces" type="BooleanParameter" min="0.0" max="1.0" value="1.0"/>
                 </registry>
             </registry>
-            <!--<registry name="QuadrupedPositionControllerManager">-->
-                <!--<registry name="QuadrupedPositionStandPrepController">-->
-                    <!--<parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>-->
-                <!--</registry>-->
-                <!--<registry name="QuadrupedPositionControllerManager">-->
-                    <!--<registry name="QuadrupedPositionStandPrepController">-->
-                        <!--<parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>-->
-                    <!--</registry>-->
-                <!--</registry>-->
-                <!--<registry name="QuadrupedPositionDevelopmentControllerManager">-->
-                    <!--<registry name="QuadrupedPositionStandPrepController">-->
-                        <!--<parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>-->
-                    <!--</registry>-->
-                <!--</registry>-->
-            <!--</registry>-->
+            <registry name="QuadrupedPositionControllerManager">
+                <registry name="QuadrupedPositionStandPrepController">
+                    <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                </registry>
+                <registry name="QuadrupedPositionControllerManager">
+                    <registry name="QuadrupedPositionStandPrepController">
+                        <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                    </registry>
+                </registry>
+                <registry name="QuadrupedPositionDevelopmentControllerManager">
+                    <registry name="QuadrupedPositionStandPrepController">
+                        <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                    </registry>
+                </registry>
+            </registry>
             <registry name="QuadrupedFootControlModule">
                 <parameter name="solePositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
                 <parameter name="solePositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
