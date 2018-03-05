@@ -183,7 +183,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
 
       Point3D center = new Point3D(-3.7944324216932475, -5.38051322671167, 0.7893380490431007);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
