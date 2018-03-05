@@ -78,7 +78,7 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
 
       for (int i = 0; i < 3; i++)
       {
-         double negMaxDouble = - Double.MIN_VALUE;
+         double negMaxDouble = - Double.MAX_VALUE;
          double maxDouble = Double.MAX_VALUE;
          double comLowerLimit = (i == 2) ? 0.2 : negMaxDouble;
 
