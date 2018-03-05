@@ -1011,7 +1011,7 @@ public class ICPOptimizationQPSolver
     */
    private void setPreviousFeedbackDeltaSolution(DenseMatrix64F copFeedbackSolution, DenseMatrix64F cmpFeedbackSolution)
    {
-      CommonOps.add(previousFeedbackDeltaSolution, copFeedbackSolution, cmpFeedbackSolution);
+      CommonOps.add(cmpFeedbackSolution, copFeedbackSolution, previousFeedbackDeltaSolution);
    }
 
    /**
