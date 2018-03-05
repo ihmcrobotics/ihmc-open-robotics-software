@@ -43,7 +43,7 @@ public class QuadrupedTimedStepController
    private final double[] solePositionIntegralGains = new double[3];
 
    private final DoubleParameter solePositionMaxIntegralErrorParameter = new DoubleParameter("solePositionMaxIntegralError", registry, 0.0, 0.0, 1.0);
-   private final DoubleParameter touchdownPressureLimitParameter = new DoubleParameter("touchdownPressureLimit", registry, 550., 0.0, 1.0);
+   private final DoubleParameter touchdownPressureLimitParameter = new DoubleParameter("touchdownPressureLimit", registry, 50.0, 0.0, 1.0);
    private final IntegerParameter touchdownTriggerWindowParameter = new IntegerParameter("touchdownTriggerWindow", registry, 1,0, 1);
    private final DoubleParameter contactPressureLowerLimitParameter = new DoubleParameter("contactPressureLowerLimit", registry, 500., 0.0, 1.0);
    private final DoubleParameter contactPressureUpperLimitParameter = new DoubleParameter("contactPressureUpperLimit", registry, 1000.0, 0.0, 1.0);
@@ -110,8 +110,7 @@ public class QuadrupedTimedStepController
 
       for (int i = 0; i < 3; i++)
       {
-         double defaultProportionalGain = (i == 2) ? 5000.0 : 10000.0;
-         solePositionProportionalGainsParameter[i] = new DoubleParameter("solePositionProportionalGain" + Axis.values()[i], registry, defaultProportionalGain);
+         solePositionProportionalGainsParameter[i] = new DoubleParameter("solePositionProportionalGain" + Axis.values()[i], registry, 20000.0);
          solePositionDerivativeGainsParameter[i] = new DoubleParameter("solePositionDerivativeGain" + Axis.values()[i], registry, 200.0);
          solePositionIntegralGainsParameter[i] = new DoubleParameter("solePositionIntegralGain" + Axis.values()[i], registry, 0.0);
       }

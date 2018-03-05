@@ -23,9 +23,9 @@ public class QuadrupedFallDetector
 
    // Parameters
    private static final int DEFAULT_FALL_GLITCH_WINDOW = 1;
-   private final DoubleParameter maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, 1.0);
-   private final DoubleParameter maxRollInRad = new DoubleParameter("maxRollInRad", registry, 1.0);
-   private final DoubleParameter dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry,  0.05);
+   private final DoubleParameter maxPitchInRad = new DoubleParameter("maxPitchInRad", registry, 0.5);
+   private final DoubleParameter maxRollInRad = new DoubleParameter("maxRollInRad", registry, 0.5);
+   private final DoubleParameter dcmOutsideSupportThreshold = new DoubleParameter("dcmDistanceOutsideSupportPolygonSupportThreshold", registry,  0.15);
    private final IntegerParameter fallDetectorGlitchFilterWindow = new IntegerParameter("fallDetectorGlitchFilterWindow", registry, DEFAULT_FALL_GLITCH_WINDOW);
    
    //Estimation Variables
