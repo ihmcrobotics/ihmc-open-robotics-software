@@ -592,7 +592,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getDoubleValue());
 
       if (useFeedbackRate.getBooleanValue())
-         solver.setFeedbackRateWeight(copFeedbackRateWeight.getDoubleValue() / controlDT);
+         solver.setFeedbackRateWeight(copFeedbackRateWeight.getDoubleValue() * controlDT);
    }
 
    private void submitCMPFeedbackTaskConditionsToSolver()
@@ -627,7 +627,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       }
 
       if (useFootstepRate.getBooleanValue())
-         solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDT);
+         solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() * controlDT);
    }
 
    private NoConvergenceException solveQP()
