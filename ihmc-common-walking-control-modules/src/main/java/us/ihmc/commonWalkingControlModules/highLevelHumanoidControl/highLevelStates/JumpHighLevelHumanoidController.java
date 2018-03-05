@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -83,9 +84,6 @@ public class JumpHighLevelHumanoidController
       this.controllerToolbox = controllerToolbox;
       this.jumpControlManagerFactory = jumpingControlManagerFactory;
       this.wholeBodyMomentumManager = jumpingControlManagerFactory.getOrCreateWholeBodyMomentumManager();
-      this.wholeBodyMomentumManager.setOptimizationWeights(momentumOptimizationSettings.getAngularMomentumWeight(),
-                                                           momentumOptimizationSettings.getLinearMomentumWeight());
-      this.wholeBodyMomentumManager.setTotalRobotMass(controlCoreToolbox.getTotalRobotMass());
 
       this.gravityCompensationManager = jumpingControlManagerFactory.getOrCreateGravityCompensationManager();
       this.angularVelocityManager = jumpingControlManagerFactory.getOrCreateWholeBodyAngularVelocityManager();
@@ -147,6 +145,7 @@ public class JumpHighLevelHumanoidController
          rigidBodyManagersByName.put(manager.getControllerBodyName(), manager);
       }
       setupStateMachine();
+      initializeManagers();
    }
 
    // TODO Hacked for now to default to the flight state
@@ -208,12 +207,20 @@ public class JumpHighLevelHumanoidController
       {
          ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
          for (int i = 0; i < armJointNames.length; i++)
-            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+            privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_ZERO);
 
          LegJointName[] legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
          for (int i = 0; i < legJointNames.length; i++)
-            privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, legJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+            privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, legJointNames[i]), PrivilegedConfigurationOption.AT_ZERO);
       }
+   }
+   
+   private void initializeManagers()
+   {
+      this.angularVelocityManager.initialize(controlCoreToolbox);
+      this.wholeBodyMomentumManager.setOptimizationWeights(momentumOptimizationSettings.getAngularMomentumWeight(),
+                                                           momentumOptimizationSettings.getLinearMomentumWeight());
+      this.wholeBodyMomentumManager.initialize(angularVelocityManager, controlCoreToolbox.getTotalRobotMass());
    }
 
    public ControllerCoreCommand getControllerCoreCommand()

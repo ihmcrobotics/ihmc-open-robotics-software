@@ -9,6 +9,7 @@ import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -72,6 +73,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
    private final DenseMatrix64F solverInput_ub;
 
    private final DenseMatrix64F qpSolution;
+   private final DenseMatrix64F previousQPSolution;
 
    private ReferenceFrame controlFrame;
    private final DenseMatrix64F currentVelocity;
@@ -103,6 +105,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       solverInput_lb = new DenseMatrix64F(problem_size, 1);
       solverInput_ub = new DenseMatrix64F(problem_size, 1);
       qpSolution = new DenseMatrix64F(problem_size, 1);
+      previousQPSolution = new DenseMatrix64F(problem_size, 1);
 
       currentVelocity = new DenseMatrix64F(angularDimensions, 1);
       commandedVelocity = new DenseMatrix64F(angularDimensions, 1);
@@ -419,7 +422,18 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       qpSolver.setLowerBounds(solverInput_lb);
       qpSolver.setUpperBounds(solverInput_ub);
 
-      qpSolver.solve(qpSolution);
+      int numberOfItertaions = qpSolver.solve(qpSolution);
+      
+      if(MatrixTools.containsNaN(qpSolution))
+      {
+         PrintTools.debug("!!!!!!!!!!!! QP optimization resulted in NaNs. Using previous result  !!!!!!!!!!!!");
+         qpSolution.set(previousQPSolution);
+      }
+      else
+         previousQPSolution.set(qpSolution);
+         
+      
+      PrintTools.debug("NumberOfIterations: " + numberOfItertaions);
       qpTimer.stopMeasurement();
    }
 }

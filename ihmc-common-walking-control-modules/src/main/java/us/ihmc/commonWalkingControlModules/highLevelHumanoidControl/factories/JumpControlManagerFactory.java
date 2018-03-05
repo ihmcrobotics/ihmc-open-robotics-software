@@ -83,7 +83,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       if (!hasHighLevelHumanoidControllerToolbox(CentroidalMomentumManager.class))
          return null;
 
-      momentumManager = new CentroidalMomentumManager(controllerToolbox, registry);
+      momentumManager = new CentroidalMomentumManager(controllerToolbox, jumpControllerParameters, registry);
 
       return momentumManager;
    }

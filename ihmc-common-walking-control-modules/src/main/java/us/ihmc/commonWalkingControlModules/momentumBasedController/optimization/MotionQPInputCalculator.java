@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.WholeBodyInertiaCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
@@ -462,7 +463,8 @@ public class MotionQPInputCalculator
       DenseMatrix64F convectiveTerm = centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
 
       // Compute the task objective: p = S * ( hDot - ADot qDot )
-      CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
+      // FIXME Hacked by Apoorv
+      //CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
       CommonOps.mult(tempSelectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);

@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import org.ejml.data.DenseMatrix64F;
-
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 
 public abstract class JumpControllerParameters extends AbstractHighLevelControllerParameters
