@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines.eventBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.eventBasedStateMachine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
  * @param <S> the state enum type
  * @param <E> the default event enum type, for convenience
  */
+@Deprecated
 public class FiniteStateMachine<S extends Enum<S>, E extends Enum<E>, C extends FiniteStateMachineState<E>>
 {
    private final Map<S, C> states;

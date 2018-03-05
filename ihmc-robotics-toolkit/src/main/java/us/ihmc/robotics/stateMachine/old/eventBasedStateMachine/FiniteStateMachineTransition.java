@@ -1,10 +1,11 @@
-package us.ihmc.robotics.stateMachines.eventBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.eventBasedStateMachine;
 
 /**
  * Defines a state machine edge, specifying a source state and event, along with the destination state.
  *
  * @param <E> the event enum type.
  */
+@Deprecated
 public class FiniteStateMachineTransition<S extends Enum<S>, E extends Enum<E>>
 {
    /**
