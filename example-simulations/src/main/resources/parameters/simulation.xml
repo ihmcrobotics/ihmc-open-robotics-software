@@ -67,6 +67,17 @@
                     <parameter name="maximumStepStride" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                     <parameter name="initialTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
                     <registry name="QuadrupedMomentumRateOfChangeModule">
+                        <parameter name="comPositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="comPositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="comPositionProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                        <parameter name="comPositionDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="comPositionDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="comPositionDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="750.0"/>
+                        <parameter name="comPositionIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="comPositionIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="comPositionIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="comPositionMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0"/>
+                        <parameter name="comPositionGravityCompensation" type="DoubleParameter" min="0.0" max="1.0" value="1"/>
                         <registry name="DivergentComponentOfMotionController">
                             <parameter name="dcmPositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                             <parameter name="dcmPositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
