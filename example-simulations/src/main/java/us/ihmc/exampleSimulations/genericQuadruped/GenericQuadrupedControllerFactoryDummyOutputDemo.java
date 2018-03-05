@@ -140,7 +140,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       YoGraphicsListRegistry ignoredYoGraphicsListRegistry  = new YoGraphicsListRegistry();
 
       runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, jointDesiredOutputList, registry, yoGraphicsListRegistry,
-                                                           ignoredYoGraphicsListRegistry, dataProducer, contactableFeet, footSwitches, GRAVITY, GenericQuadrupedModelFactory.getParameterResourceName());
+                                                           ignoredYoGraphicsListRegistry, dataProducer, contactableFeet, footSwitches, GRAVITY, modelFactory.getParameterResourceName());
       controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
 
       InputStream resourceAsStream = getClass().getResourceAsStream(runtimeEnvironment.getParameterResourceName());

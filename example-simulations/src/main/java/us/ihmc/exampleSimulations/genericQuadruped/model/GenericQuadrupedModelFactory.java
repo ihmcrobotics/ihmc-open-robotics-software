@@ -94,7 +94,8 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
       return robotDescription;
    }
 
-   public static String getParameterResourceName()
+   @Override
+   public String getParameterResourceName()
    {
       return "/parameters/simulation.xml";
    }
