@@ -66,6 +66,9 @@
                     <parameter name="minimumStepClearance" type="DoubleParameter" min="0.0" max="1.0" value="0.075"/>
                     <parameter name="maximumStepStride" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                     <parameter name="initialTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                    <registry name="DCMPlanner">
+                        <parameter name="initialTransitionDuration" min="0.0" max="1.0" value="0.5"/>
+                    </registry>
                     <registry name="QuadrupedMomentumRateOfChangeModule">
                         <parameter name="comPositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="comPositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
