@@ -23,9 +23,9 @@
             <registry name="QuadrupedForceBasedFallController">
                 <parameter name="trajectoryTime" type="DoubleParameter" min="0.0" max="1.0" value="3.0"/>
                 <parameter name="stanceLength" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                <parameter name="stanceWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.35"/>
-                <parameter name="stanceHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                <parameter name="stanceXOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                <parameter name="stanceWidth" type="DoubleParameter" min="0.0" max="1.0" value="0.8"/>
+                <parameter name="stanceHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.4"/>
+                <parameter name="stanceXOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
                 <parameter name="stanceYOffset" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                 <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="15.0"/>
                 <parameter name="jointPositionLimitDamping" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
@@ -33,9 +33,9 @@
                 <parameter name="requestUseForceFeedbackControl" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
             </registry>
             <registry name="QuadrupedFallDetector">
-                <parameter name="maxPitchInRad" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                <parameter name="maxRollInRad" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                <parameter name="dcmDistanceOutsideSupportPolygonSupportThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+                <parameter name="maxPitchInRad" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                <parameter name="maxRollInRad" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                <parameter name="dcmDistanceOutsideSupportPolygonSupportThreshold" type="DoubleParameter" min="0.0" max="1.0" value="0.15"/>
                 <parameter name="fallDetectorGlitchFilterWindow" type="IntegerParameter" min="0.0" max="1.0" value="1"/>
             </registry>
             <registry name="QuadrupedControlManagerFactory">
@@ -133,8 +133,8 @@
                 </registry>
             </registry>
             <registry name="StateChangeSmootherComponent">
-                <parameter name="stateChangeSmootherSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                <parameter name="stateChangeSmootherSlopBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
+                <parameter name="stateChangeSmootherSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.04"/>
+                <parameter name="stateChangeSmootherSlopBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="30.0"/>
             </registry>
             <registry name="QuadrupedPostureInputProvider">
                 <parameter name="comPositionLowerLimitX" type="DoubleParameter" min="0.0" max="1.0" value="-1.7E308"/>
@@ -183,8 +183,8 @@
                     <parameter name="stepDurationUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.6"/>
                     <parameter name="endDoubleSupportDurationLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                     <parameter name="endDoubleSupportDurationUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="1.7976931348623157E308"/>
-                    <parameter name="endPhaseShiftLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
-                    <parameter name="endPhaseShiftUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                    <parameter name="endPhaseShiftLowerLimit" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                    <parameter name="endPhaseShiftUpperLimit" type="DoubleParameter" min="0.0" max="1.0" value="359.0"/>
                 </registry>
                 <registry name="QuadrupedXGaitStepStream">
                     <parameter name="initialStepDelay" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
