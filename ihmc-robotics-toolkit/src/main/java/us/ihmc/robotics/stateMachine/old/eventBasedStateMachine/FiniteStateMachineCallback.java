@@ -1,10 +1,11 @@
-package us.ihmc.robotics.stateMachines.eventBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.eventBasedStateMachine;
 
 /**
  * Defines a callback for a given state as triggered by an event. Note a callback does not necessarily result in a transition.
  *
  * @param <E> the event enum type.
  */
+@Deprecated
 public class FiniteStateMachineCallback<S extends Enum<S>, E extends Enum<E>>
 {
    /**

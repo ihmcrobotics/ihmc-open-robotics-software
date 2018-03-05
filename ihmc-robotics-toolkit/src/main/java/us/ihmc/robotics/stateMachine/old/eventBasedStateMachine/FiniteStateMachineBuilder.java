@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines.eventBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.eventBasedStateMachine;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +7,7 @@ import java.util.Map;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+@Deprecated
 public class FiniteStateMachineBuilder<S extends Enum<S>, E extends Enum<E>, C extends FiniteStateMachineState<E>>
 {
    private final Class<S> enumType;
