@@ -13,7 +13,7 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallb
 import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines.eventBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.eventBasedStateMachine;
 
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -10,6 +10,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  *
  * @param <E> the state machine event type.
  */
+@Deprecated
 public class FiniteStateMachineYoVariableTrigger<E extends Enum<E>>
 {
    public FiniteStateMachineYoVariableTrigger(final FiniteStateMachine<?, ?, ?> stateMachine, String name, YoVariableRegistry registry,

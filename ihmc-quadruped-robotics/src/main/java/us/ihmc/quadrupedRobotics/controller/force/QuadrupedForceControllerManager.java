@@ -20,17 +20,17 @@ import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineState;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachine;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineBuilder;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineState;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 
 /**

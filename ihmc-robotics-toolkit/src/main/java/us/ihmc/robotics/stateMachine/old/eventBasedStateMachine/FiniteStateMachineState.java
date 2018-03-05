@@ -1,5 +1,6 @@
-package us.ihmc.robotics.stateMachines.eventBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.eventBasedStateMachine;
 
+@Deprecated
 public interface FiniteStateMachineState<E extends Enum<E>>
 {
    /**
