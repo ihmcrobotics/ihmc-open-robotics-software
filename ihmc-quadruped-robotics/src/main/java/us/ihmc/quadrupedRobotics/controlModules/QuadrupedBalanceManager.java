@@ -63,16 +63,11 @@ public class QuadrupedBalanceManager
    private final double[] dcmPositionDerivativeGains = new double[3];
    private final double[] dcmPositionIntegralGains = new double[3];
 
-   private static final double defaultMinimumStepClearanceParameter = 0.075;
-   private static final double defaultMaximumStepStrideParameter = 1.0;
-
    private final DoubleParameter comPositionMaxIntegralErrorParameter = new DoubleParameter("comPositionMaxIntegralError", registry, 0);
    private final DoubleParameter dcmPositionMaxIntegralErrorParameter = new DoubleParameter("dcmPositionMaxIntegralError", registry, 0);
    private final DoubleParameter vrpPositionRateLimitParameter = new DoubleParameter("vrpPositionRateLimit", registry, Double.MAX_VALUE);
    private final DoubleParameter comPositionGravityCompensationParameter = new DoubleParameter("comPositionGravityCompensation", registry, 1);
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = new DoubleParameter("dcmPositionStepAdjustmentGain", registry, 1.5);
-   private final DoubleParameter minimumStepClearanceParameter = new DoubleParameter("minimumStepClearance", registry, defaultMinimumStepClearanceParameter);
-   private final DoubleParameter maximumStepStrideParameter = new DoubleParameter("maximumStepStride", registry, defaultMaximumStepStrideParameter);
    private final DoubleParameter initialTransitionDurationParameter = new DoubleParameter("initialTransitionDuration", registry, 0.5);
 
    private final YoFrameVector instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
