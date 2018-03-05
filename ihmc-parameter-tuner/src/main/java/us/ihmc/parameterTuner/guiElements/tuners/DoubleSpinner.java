@@ -2,8 +2,13 @@ package us.ihmc.parameterTuner.guiElements.tuners;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
 
 public class DoubleSpinner extends NumericSpinner<Double>
 {
@@ -33,16 +38,47 @@ public class DoubleSpinner extends NumericSpinner<Double>
    }
 
    @Override
-   public List<ImmutablePair<String, String>> getSpecialStringOptions()
+   public List<MenuItem> getContextMenuOptions()
+   {
+      List<MenuItem> items = new ArrayList<>();
+      for (ImmutablePair<String, String> option : getSpecialStringOptions())
+      {
+         MenuItem menuItem = new MenuItem(option.getLeft());
+         Double number = getValueFactory().getConverter().fromString(option.getRight());
+         menuItem.setOnAction(actionEvent -> setValue(number));
+         items.add(menuItem);
+      }
+      items.add(new SeparatorMenuItem());
+      items.add(getAngleConversionOption());
+      return items;
+   }
+
+   private List<ImmutablePair<String, String>> getSpecialStringOptions()
    {
       List<ImmutablePair<String, String>> ret = new ArrayList<>();
       ret.add(new ImmutablePair<String, String>("Infinity", convertNumberToString(Double.POSITIVE_INFINITY)));
       ret.add(new ImmutablePair<String, String>("Negative Infinity", convertNumberToString(Double.NEGATIVE_INFINITY)));
-      ret.add(new ImmutablePair<String, String>("2.0 * PI", convertNumberToString(2.0 * Math.PI)));
-      ret.add(new ImmutablePair<String, String>("PI", convertNumberToString(Math.PI)));
-      ret.add(new ImmutablePair<String, String>("PI / 2.0", convertNumberToString(Math.PI / 2.0)));
-      ret.add(new ImmutablePair<String, String>("PI / 4.0", convertNumberToString(Math.PI / 4.0)));
-      ret.add(new ImmutablePair<String, String>("Zero", convertNumberToString(0.0)));
       return ret;
+   }
+
+   private MenuItem getAngleConversionOption()
+   {
+      MenuItem menuItem = new MenuItem("Input Angle");
+
+      menuItem.setOnAction(actionEvent -> {
+         TextInputDialog dialog = new TextInputDialog();
+         dialog.setTitle("Convert Angle");
+         dialog.setHeaderText("Convert Degree to Radian");
+         dialog.setContentText("Enter Angle in Degrees:");
+
+         Optional<String> result = dialog.showAndWait();
+         if (result.isPresent() && isValidString(result.get()))
+         {
+            Double number = getValueFactory().getConverter().fromString(result.get());
+            setValue(Math.toRadians(number));
+         }
+      });
+
+      return menuItem;
    }
 }
