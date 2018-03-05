@@ -1,9 +1,9 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 
 public class BehaviorStateMachine<E extends Enum<E>> extends GenericStateMachine<E, BehaviorAction<E>>
 {

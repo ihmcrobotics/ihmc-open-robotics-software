@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -21,6 +21,7 @@ import us.ihmc.robotics.trajectories.providers.DoubleProvider;
  * @param <E> Type of Enum that lists the potential states.
  * @param <T> Type of State that is contained in the state machine.
  */
+@Deprecated
 public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implements TimeInCurrentStateProvider, PreviousStateProvider<E, State<E>>
 {
    private static final boolean DEBUG = false;

@@ -12,9 +12,9 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedListener;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.State;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateChangedListener;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 
 public class StateMachineExampleOneTest

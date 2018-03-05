@@ -1,10 +1,11 @@
-package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.TreeMap;
 
+@Deprecated
 public class StateChangeRecorder<E extends Enum<E>> implements StateChangedListener<E>
 {
    private final LinkedHashMap<State<E>, ArrayList<Double>> statesAndTheirEntryTimes = new LinkedHashMap<State<E>, ArrayList<Double>>();

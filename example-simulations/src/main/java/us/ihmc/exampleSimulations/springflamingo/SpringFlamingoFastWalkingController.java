@@ -11,11 +11,11 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.State;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 
 /**
