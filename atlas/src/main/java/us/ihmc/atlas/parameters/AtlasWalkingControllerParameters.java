@@ -78,7 +78,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       angularMomentumModifierParameters = new ICPAngularMomentumModifierParameters();
 
       minimumHeightAboveGround = jointMap.getModelScale() * ( 0.625 );
-      nominalHeightAboveGround = jointMap.getModelScale() * ( 0.705 );
+      nominalHeightAboveGround = jointMap.getModelScale() * ( 0.785 );
       maximumHeightAboveGround = jointMap.getModelScale() * ( 0.765 + 0.08 );
 
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
@@ -329,20 +329,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), -0.337807);
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(0.207730));
          jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SECOND_WRIST_PITCH), -0.026599);
-
-
-
-
-
-         /*
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), robotSide.negateIfRightSide(0.785398));
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-0.1));
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), 3.00);
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), robotSide.negateIfRightSide(1.8));
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), -0.30);
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(0.70));
-         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SECOND_WRIST_PITCH), 0.15);
-         */
       }
 
       return jointHomeConfiguration;
