@@ -1,9 +1,7 @@
 package us.ihmc.quadrupedRobotics.optimization.contactForceOptimization;
 
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class QuadrupedContactForceOptimizationSettings
 {

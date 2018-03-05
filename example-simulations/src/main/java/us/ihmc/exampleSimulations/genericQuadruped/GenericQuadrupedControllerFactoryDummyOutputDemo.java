@@ -24,7 +24,6 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -61,9 +60,6 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
    
    public GenericQuadrupedControllerFactoryDummyOutputDemo() throws IOException
    {
-      // Load parameters. Note that this happens after initializing all other modules so all parameters are registered before loading.
-      ParameterRegistry.getInstance().loadFromResources(QuadrupedParameterSet.SIMULATION_IDEAL.getPath());
-
       /*
        * Create GenericQuadruped model
        */
