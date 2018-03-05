@@ -11,8 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangeRecorder;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.State;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateChangeRecorder;
 
 public class StateChangeRecorderTest
 {

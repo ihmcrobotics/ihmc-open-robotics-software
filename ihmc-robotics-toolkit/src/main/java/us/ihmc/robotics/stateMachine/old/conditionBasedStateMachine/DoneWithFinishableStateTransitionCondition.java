@@ -1,5 +1,6 @@
-package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 
+@Deprecated
 public class DoneWithFinishableStateTransitionCondition implements StateTransitionCondition
 {
    private final FinishableState<?> state;

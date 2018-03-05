@@ -1,7 +1,8 @@
-package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 
 import java.util.ArrayList;
 
+@Deprecated
 public abstract class State<E extends Enum<E>>
 {
    private final E stateEnum;

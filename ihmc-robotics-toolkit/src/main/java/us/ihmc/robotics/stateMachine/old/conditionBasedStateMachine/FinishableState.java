@@ -1,5 +1,6 @@
-package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 
+@Deprecated
 public abstract class FinishableState<E extends Enum<E>> extends State<E>
 {
    public FinishableState(E stateEnum)

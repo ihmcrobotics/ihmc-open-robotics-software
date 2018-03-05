@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -29,6 +29,7 @@ import com.jgraph.layout.tree.JGraphTreeLayout;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
+@Deprecated
 public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements StateChangedListener<E>
 {
    private static final long serialVersionUID = 2453853798153829891L;

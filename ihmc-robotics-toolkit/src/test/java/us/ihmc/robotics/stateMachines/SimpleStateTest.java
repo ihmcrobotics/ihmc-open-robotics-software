@@ -6,8 +6,8 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.SimpleState;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.SimpleState;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 
 public class SimpleStateTest
