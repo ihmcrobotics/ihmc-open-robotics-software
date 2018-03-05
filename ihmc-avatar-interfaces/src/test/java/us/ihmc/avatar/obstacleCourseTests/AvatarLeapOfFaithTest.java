@@ -135,7 +135,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -205,7 +205,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -275,7 +275,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -346,7 +346,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -451,7 +451,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -553,7 +553,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double timeOverrunFactor = 1.2;
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeOverrunFactor * (executionDuration + transferTime));
 
-      assertTrue(success);
+      assertTrue("Robot had an exception, probably fell.", success);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
