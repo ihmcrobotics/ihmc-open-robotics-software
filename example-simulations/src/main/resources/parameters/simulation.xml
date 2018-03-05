@@ -242,16 +242,12 @@
                 </registry>
             </registry>
             <registry name="QuadrupedFootControlModule">
-                <parameter name="solePositionProportionalGainX" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
-                <parameter name="solePositionProportionalGainY" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
-                <parameter name="solePositionProportionalGainZ" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
-                <parameter name="solePositionDerivativeGainX" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
-                <parameter name="solePositionDerivativeGainY" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
-                <parameter name="solePositionDerivativeGainZ" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
-                <parameter name="solePositionIntegralGainX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                <parameter name="solePositionIntegralGainY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                <parameter name="solePositionIntegralGainZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
-                <parameter name="solePositionMaxIntegralError" type="DoubleParameter" min="0.0" max="1.0" value="0"/>
+                <parameter name="kpX_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
+                <parameter name="kpY_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="10000.0"/>
+                <parameter name="kpZ_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
+                <parameter name="zetaX_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="zetaY_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                <parameter name="zetaZ_solePosition" type="DoubleParameter" min="0.0" max="1.0" value="1.414"/>
                 <parameter name="touchdownPressureLimit" type="DoubleParameter" min="0.0" max="1.0" value="50"/>
                 <parameter name="touchdownTriggerWindow" type="IntegerParameter" min="0.0" max="1.0" value="1"/>
                 <parameter name="minimumStepAdjustmentTime" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>

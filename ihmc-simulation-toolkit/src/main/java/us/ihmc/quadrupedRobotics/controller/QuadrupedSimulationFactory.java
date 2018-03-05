@@ -456,6 +456,7 @@ public class QuadrupedSimulationFactory
 
       InputStream parameterFile = getClass().getResourceAsStream(parameterResourceName.get());
       ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry());
+      scs.setParameterRootPath(simulationController.getYoVariableRegistry());
 
       FactoryTools.disposeFactory(this);
       

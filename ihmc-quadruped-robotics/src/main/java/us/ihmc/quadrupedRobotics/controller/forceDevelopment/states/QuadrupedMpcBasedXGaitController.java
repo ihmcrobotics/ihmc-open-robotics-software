@@ -29,6 +29,9 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -49,13 +52,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final double mass;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleParameter[] comPositionProportionalGainsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] comPositionDerivativeGainsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] comPositionIntegralGainsParameter = new DoubleParameter[3];
-
-   private final double[] comPositionProportionalGains = new double[3];
-   private final double[] comPositionDerivativeGains = new double[3];
-   private final double[] comPositionIntegralGains = new double[3];
+   private final ParameterizedPID3DGains comPositionGains;
 
    private static final double defaultMinimumStepClearanceParameter = 0.075;
    private static final double defaultMaximumStepStrideParameter = 1.0;
@@ -147,15 +144,11 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
       comPositionController = new QuadrupedComPositionController(referenceFrames.getCenterOfMassZUpFrame(), runtimeEnvironment.getControlDT(), registry);
 
-      for (int i = 0; i < 3; i++)
-      {
-         double comPositionProportionalGain = (i == 2) ? 0.0 : 5000.0;
-         double comPositionDerivativeGain = (i == 2) ? 0.0 : 750.0;
-
-         comPositionProportionalGainsParameter[i] = new DoubleParameter("comPositionProportionalGain" + Axis.values[i], registry, comPositionProportionalGain);
-         comPositionDerivativeGainsParameter[i] = new DoubleParameter("comPositionDerivativeGain" + Axis.values[i], registry, comPositionDerivativeGain);
-         comPositionIntegralGainsParameter[i] = new DoubleParameter("comPositionIntegralGain" + Axis.values[i], registry, 0.0);
-      }
+      DefaultPID3DGains defaultComPositionGains = new DefaultPID3DGains();
+      defaultComPositionGains.setProportionalGains(5000.0, 5000.0, 0.0);
+      defaultComPositionGains.setDerivativeGains(750.0, 750.0, 0.0);
+      defaultComPositionGains.setProportionalGains(0.0, 0.0, 0.0);
+      comPositionGains = new ParameterizedPID3DGains("_comPosition", GainCoupling.NONE, false, defaultComPositionGains, registry);
 
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
       DivergentComponentOfMotionEstimator dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), lipModel,
@@ -216,20 +209,11 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
    private void updateGains()
    {
-      for (int i = 0; i < 3; i++)
-      {
-         comPositionProportionalGains[i] = comPositionProportionalGainsParameter[i].getValue();
-         comPositionDerivativeGains[i] = comPositionDerivativeGainsParameter[i].getValue();
-         comPositionIntegralGains[i] = comPositionIntegralGainsParameter[i].getValue();
-      }
-
       mpcSettings.setMaximumPreviewTime(mpcMaximumPreviewTimeParameter.getValue());
       mpcSettings.setStepAdjustmentCost(mpcStepAdjustmentCostParameter.getValue());
       mpcSettings.setCopAdjustmentCost(mpcCopAdjustmentCostParameter.getValue());
       mpcSettings.setMinimumNormalizedContactPressure(mpcMinimumNormalizedContactPressureParameter.getValue());
-      comPositionController.getGains().setProportionalGains(comPositionProportionalGains);
-      comPositionController.getGains().setIntegralGains(comPositionIntegralGains, comPositionMaxIntegralErrorParameter.getValue());
-      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGains);
+      comPositionController.getGains().set(comPositionGains);
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.getValue());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.getValue());
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.getValue());

@@ -89,9 +89,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    public void onEntry()
    {
       solePositionController.reset();
-      solePositionController.getGains().setProportionalGains(parameters.getSolePositionProportionalGainsParameter());
-      solePositionController.getGains().setDerivativeGains(parameters.getSolePositionDerivativeGainsParameter());
-      solePositionController.getGains().setIntegralGains(parameters.getSolePositionIntegralGainsParameter(), parameters.getSolePositionMaxIntegralErrorParameter());
+      solePositionController.getGains().set(parameters.getSolePositionGains());
       solePositionControllerSetpoints.initialize(soleFrame);
    }
 
