@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules;
 import static org.junit.Assert.assertTrue;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public abstract class AvatarICPOptimizationPushRecoveryTestA extends AvatarICPOptimizationPushRecoveryTestSetup

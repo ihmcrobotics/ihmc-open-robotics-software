@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.SingleSupportState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferState;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 
 public class SingleSupportToTransferToCondition implements StateTransitionCondition
 {

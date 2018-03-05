@@ -16,9 +16,9 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.FinishableState;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachineTools;
 
 import java.util.ArrayList;
 import java.util.List;

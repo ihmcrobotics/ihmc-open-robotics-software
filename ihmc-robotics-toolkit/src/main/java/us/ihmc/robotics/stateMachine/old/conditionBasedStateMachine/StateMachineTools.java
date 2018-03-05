@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +9,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
  * @author twan
  *         Date: 5/30/13
  */
+@Deprecated
 public class StateMachineTools
 {
    @SafeVarargs

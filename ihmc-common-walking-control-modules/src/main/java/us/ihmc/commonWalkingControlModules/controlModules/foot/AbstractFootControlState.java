@@ -13,7 +13,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.FinishableState;
 
 public abstract class AbstractFootControlState extends FinishableState<ConstraintType>
 {

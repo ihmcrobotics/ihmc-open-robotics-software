@@ -1,10 +1,11 @@
-package us.ihmc.robotics.stateMachines.conditionBasedStateMachine;
+package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
+@Deprecated
 public class StateTransition<E extends Enum<E>>
 {
    private final E nextStateEnum;
