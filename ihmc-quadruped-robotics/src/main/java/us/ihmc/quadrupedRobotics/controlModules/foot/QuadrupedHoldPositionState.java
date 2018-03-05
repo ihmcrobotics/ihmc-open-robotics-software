@@ -67,9 +67,7 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
       initialTime = timestamp.getDoubleValue();
 
       solePositionController.reset();
-      solePositionController.getGains().setProportionalGains(parameters.getSolePositionProportionalGainsParameter());
-      solePositionController.getGains().setDerivativeGains(parameters.getSolePositionDerivativeGainsParameter());
-      solePositionController.getGains().setIntegralGains(parameters.getSolePositionIntegralGainsParameter(), parameters.getSolePositionMaxIntegralErrorParameter());
+      solePositionController.getGains().set(parameters.getSolePositionGains());
 
       solePositionControllerSetpoints.initialize(soleFrame);
       FramePoint3D solePositionSetpoint = solePositionControllerSetpoints.getSolePosition();
