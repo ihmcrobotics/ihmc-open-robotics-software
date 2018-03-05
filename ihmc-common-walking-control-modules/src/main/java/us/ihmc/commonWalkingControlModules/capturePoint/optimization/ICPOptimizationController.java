@@ -144,8 +144,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
 
-   private final boolean useFootstepRate;
-   private final boolean useFeedbackRate;
+   private final YoBoolean useFootstepRate = new YoBoolean(yoNamePrefix + "UseFootstepRate", registry);
+   private final YoBoolean useFeedbackRate = new YoBoolean(yoNamePrefix + "UseFeedbackRate", registry);
 
    private boolean localUseStepAdjustment;
 
@@ -189,8 +189,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       dynamicsObjectiveDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicsObjectiveDoubleSupportWeightModifier();
 
-      useFootstepRate = icpOptimizationParameters.useFootstepRate();
-      useFeedbackRate = icpOptimizationParameters.useFeedbackRate();
+      useFootstepRate.set(icpOptimizationParameters.useFootstepRate());
+      useFeedbackRate.set(icpOptimizationParameters.useFeedbackRate());
 
       allowStepAdjustment.set(icpOptimizationParameters.allowStepAdjustment());
       useCMPFeedback.set(icpOptimizationParameters.useCMPFeedback());
@@ -432,7 +432,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       this.initialTime.set(initialTime);
 
-      if (useFootstepRate)
+      if (useFootstepRate.getBooleanValue())
       {
          upcomingFootsteps.get(0).getPosition(tempPoint3d);
 
@@ -591,7 +591,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getDoubleValue());
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getDoubleValue());
 
-      if (useFeedbackRate)
+      if (useFeedbackRate.getBooleanValue())
          solver.setFeedbackRateWeight(copFeedbackRateWeight.getDoubleValue() / controlDT);
    }
 
@@ -626,7 +626,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          solver.setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getDoubleValue(), projectedTempPoint3d);
       }
 
-      if (useFootstepRate)
+      if (useFootstepRate.getBooleanValue())
          solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDT);
    }
 
