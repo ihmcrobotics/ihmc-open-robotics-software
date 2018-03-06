@@ -6,7 +6,7 @@ byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
 # Specifies which foot is expected to be executing the footstep to be adjusted.
-byte robot_side -1
+byte robot_side 255
 # Specifies the adjusted position of the footstep. It is expressed in world frame.
 geometry_msgs/Point location
 # Specifies the adjusted orientation of the footstep. It is expressed in world frame.

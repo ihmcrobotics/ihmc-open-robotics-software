@@ -5,7 +5,7 @@ byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
 # The robot side of the hand that will be load bearing.
-byte robot_side -1
+byte robot_side 255
 # Determines whether hybrid load bearing and jointspace control will be used.
 bool use_jointspace_command false
 # The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
