@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "SetBooleanParameter" defined in SetBooleanParameter_.idl.
- *
- * This file was automatically generated from SetBooleanParameter_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit SetBooleanParameter_.idl instead.
- */
 public class SetBooleanParameter implements Settable<SetBooleanParameter>, EpsilonComparable<SetBooleanParameter>
 {
    private java.lang.StringBuilder parameter_name_;

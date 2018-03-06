@@ -1,0 +1,27 @@
+#ifndef __controller_msgs__msg__IMUPacket__idl__
+#define __controller_msgs__msg__IMUPacket__idl__
+
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * General purpose packet to carry IMU data. (need to be replace with the ROS IMUData)
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::IMUPacket_")
+      struct IMUPacket
+      {
+        geometry_msgs::msg::dds::Quaternion orientation;
+        geometry_msgs::msg::dds::Vector3 angular_velocity;
+        geometry_msgs::msg::dds::Vector3 linear_acceleration;
+      };
+    };
+  };
+};
+
+#endif

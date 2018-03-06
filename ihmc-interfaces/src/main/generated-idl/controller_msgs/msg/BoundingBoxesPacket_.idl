@@ -1,0 +1,24 @@
+#ifndef __controller_msgs__msg__BoundingBoxesPacket__idl__
+#define __controller_msgs__msg__BoundingBoxesPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::BoundingBoxesPacket_")
+      struct BoundingBoxesPacket
+      {
+        sequence<double> bounding_boxes_x_coordinates;
+        sequence<double> bounding_boxes_y_coordinates;
+        sequence<double> bounding_boxes_widths;
+        sequence<double> bounding_boxes_heights;
+        sequence<string> labels;
+      };
+    };
+  };
+};
+
+#endif

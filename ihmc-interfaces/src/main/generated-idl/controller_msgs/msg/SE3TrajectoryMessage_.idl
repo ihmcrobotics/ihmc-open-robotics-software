@@ -1,0 +1,68 @@
+#ifndef __controller_msgs__msg__SE3TrajectoryMessage__idl__
+#define __controller_msgs__msg__SE3TrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./FrameInformation_.idl"
+#include "controller_msgs/msg/./QueueableMessage_.idl"
+#include "controller_msgs/msg/./SE3TrajectoryPointMessage_.idl"
+#include "controller_msgs/msg/./SelectionMatrix3DMessage_.idl"
+#include "controller_msgs/msg/./WeightMatrix3DMessage_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message carries the information to execute a trajectory in taskspace (position and orientation) by defining trajectory points.
+       * A third order polynomial function is used to interpolate positions and a Hermite based curve (third order) is used to interpolate the orientations.
+       * To execute a single straight line trajectory to reach a desired pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::SE3TrajectoryMessage_")
+      struct SE3TrajectoryMessage
+      {
+        /**
+         * List of trajectory points (in taskpsace) to go through while executing the trajectory.
+         */
+        sequence<controller_msgs::msg::dds::SE3TrajectoryPointMessage, 2000> taskspace_trajectory_points;
+        /**
+         * The selection matrix for each axis of the angular part of this trajectory.
+         */
+        controller_msgs::msg::dds::SelectionMatrix3DMessage angular_selection_matrix;
+        /**
+         * The selection matrix for each axis of the linear part of this trajectory.
+         */
+        controller_msgs::msg::dds::SelectionMatrix3DMessage linear_selection_matrix;
+        /**
+         * Frame information for this message.
+         */
+        controller_msgs::msg::dds::FrameInformation frame_information;
+        /**
+         * The weight matrix for each axis of the angular part of this trajectory.
+         */
+        controller_msgs::msg::dds::WeightMatrix3DMessage angular_weight_matrix;
+        /**
+         * The weight matrix for each axis of the linear part of this trajectory.
+         */
+        controller_msgs::msg::dds::WeightMatrix3DMessage linear_weight_matrix;
+        /**
+         * Flag that tells the controller whether the use of a custom control frame is requested.
+         */
+        boolean use_custom_control_frame;
+        /**
+         * Pose of custom control frame expressed in the end-effector frame.
+         * This is the frame attached to the rigid body that the taskspace trajectory is defined for.
+         */
+        geometry_msgs::msg::dds::Pose control_frame_pose;
+        /**
+         * Properties for queueing trajectories.
+         */
+        controller_msgs::msg::dds::QueueableMessage queueing_properties;
+      };
+    };
+  };
+};
+
+#endif

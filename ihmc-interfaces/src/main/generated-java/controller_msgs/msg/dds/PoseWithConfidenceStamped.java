@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "PoseWithConfidenceStamped" defined in PoseWithConfidenceStamped_.idl.
- *
- * This file was automatically generated from PoseWithConfidenceStamped_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit PoseWithConfidenceStamped_.idl instead.
- */
 public class PoseWithConfidenceStamped implements Settable<PoseWithConfidenceStamped>, EpsilonComparable<PoseWithConfidenceStamped>
 {
    private geometry_msgs.msg.dds.PoseStamped pose_;

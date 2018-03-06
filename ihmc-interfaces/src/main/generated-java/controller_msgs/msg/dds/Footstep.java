@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "Footstep" defined in Footstep_.idl.
- *
- * This file was automatically generated from Footstep_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit Footstep_.idl instead.
- */
 public class Footstep implements Settable<Footstep>, EpsilonComparable<Footstep>
 {
    private long unique_id_;

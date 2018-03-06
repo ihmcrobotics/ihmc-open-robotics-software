@@ -1,0 +1,21 @@
+#ifndef __controller_msgs__msg__FisheyePacket__idl__
+#define __controller_msgs__msg__FisheyePacket__idl__
+
+#include "controller_msgs/msg/./VideoPacket_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::FisheyePacket_")
+      struct FisheyePacket
+      {
+        controller_msgs::msg::dds::VideoPacket video_packet;
+      };
+    };
+  };
+};
+
+#endif

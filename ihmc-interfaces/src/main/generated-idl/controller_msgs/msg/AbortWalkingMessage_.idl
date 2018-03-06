@@ -1,0 +1,24 @@
+#ifndef __controller_msgs__msg__AbortWalkingMessage__idl__
+#define __controller_msgs__msg__AbortWalkingMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message is used to abort walking, forcing the robot to switch back to double support and clear the footstep list.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::AbortWalkingMessage_")
+      struct AbortWalkingMessage
+      {
+        boolean unused_placeholder_field;
+      };
+    };
+  };
+};
+
+#endif
