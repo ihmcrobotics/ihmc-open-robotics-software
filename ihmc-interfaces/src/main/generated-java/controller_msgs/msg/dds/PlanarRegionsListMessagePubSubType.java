@@ -27,7 +27,7 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.PlanarRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -45,9 +45,9 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getPlanarRegions().size(); ++a)
+      for (int i0 = 0; i0 < data.getPlanarRegions().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.PlanarRegionMessagePubSubType.getCdrSerializedSize(data.getPlanarRegions().get(a), current_alignment);
+         current_alignment += controller_msgs.msg.dds.PlanarRegionMessagePubSubType.getCdrSerializedSize(data.getPlanarRegions().get(i0), current_alignment);
       }
 
       return current_alignment - initial_alignment;

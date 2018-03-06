@@ -33,7 +33,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
       current_alignment += (50 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 50; ++a)
+      for (int i0 = 0; i0 < 50; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -56,10 +56,10 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
       current_alignment += (data.getTrajectoryTimes().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getRobotConfigurations().size(); ++a)
+      for (int i0 = 0; i0 < data.getRobotConfigurations().size(); ++i0)
       {
          current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType
-               .getCdrSerializedSize(data.getRobotConfigurations().get(a), current_alignment);
+               .getCdrSerializedSize(data.getRobotConfigurations().get(i0), current_alignment);
       }
 
       return current_alignment - initial_alignment;

@@ -32,7 +32,7 @@ public class FootstepPlanRequestPacketPubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -57,9 +57,9 @@ public class FootstepPlanRequestPacketPubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getGoals().size(); ++a)
+      for (int i0 = 0; i0 < data.getGoals().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getGoals().get(a), current_alignment);
+         current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getGoals().get(i0), current_alignment);
       }
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);

@@ -27,7 +27,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -53,10 +53,10 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getTaskspaceTrajectoryPoints().size(); ++a)
+      for (int i0 = 0; i0 < data.getTaskspaceTrajectoryPoints().size(); ++i0)
       {
          current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType
-               .getCdrSerializedSize(data.getTaskspaceTrajectoryPoints().get(a), current_alignment);
+               .getCdrSerializedSize(data.getTaskspaceTrajectoryPoints().get(i0), current_alignment);
       }
 
       current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getSelectionMatrix(), current_alignment);

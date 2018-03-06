@@ -33,7 +33,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -59,9 +59,9 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsList(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getBodyPath().size(); ++a)
+      for (int i0 = 0; i0 < data.getBodyPath().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBodyPath().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBodyPath().get(i0), current_alignment);
       }
 
       current_alignment += geometry_msgs.msg.dds.Pose2DPubSubType.getCdrSerializedSize(data.getLowLevelPlannerGoal(), current_alignment);

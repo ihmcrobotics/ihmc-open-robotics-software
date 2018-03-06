@@ -39,11 +39,11 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += ((15) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      for (int a = 0; a < (15); ++a)
+      for (int i0 = 0; i0 < (15); ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
       }
-      for (int a = 0; a < (15); ++a)
+      for (int i0 = 0; i0 < (15); ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -98,13 +98,13 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += ((15) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += ((15) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getRawImuRates().length; ++a)
+      for (int i0 = 0; i0 < data.getRawImuRates().length; ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRawImuRates()[a], current_alignment);
+         current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRawImuRates()[i0], current_alignment);
       }
-      for (int a = 0; a < data.getRawImuDeltas().length; ++a)
+      for (int i0 = 0; i0 < data.getRawImuDeltas().length; ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRawImuDeltas()[a], current_alignment);
+         current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRawImuDeltas()[i0], current_alignment);
       }
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -155,24 +155,24 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
       else
          throw new RuntimeException("electric_joint_enabled_array field exceeds the maximum length");
 
-      for (int a = 0; a < data.getRawImuTimestamps().length; ++a)
+      for (int i0 = 0; i0 < data.getRawImuTimestamps().length; ++i0)
       {
-         cdr.write_type_5(data.getRawImuTimestamps()[a]);
+         cdr.write_type_5(data.getRawImuTimestamps()[i0]);
       }
 
-      for (int a = 0; a < data.getRawImuPacketCounts().length; ++a)
+      for (int i0 = 0; i0 < data.getRawImuPacketCounts().length; ++i0)
       {
-         cdr.write_type_5(data.getRawImuPacketCounts()[a]);
+         cdr.write_type_5(data.getRawImuPacketCounts()[i0]);
       }
 
-      for (int a = 0; a < data.getRawImuRates().length; ++a)
+      for (int i0 = 0; i0 < data.getRawImuRates().length; ++i0)
       {
-         geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRawImuRates()[a], cdr);
+         geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRawImuRates()[i0], cdr);
       }
 
-      for (int a = 0; a < data.getRawImuDeltas().length; ++a)
+      for (int i0 = 0; i0 < data.getRawImuDeltas().length; ++i0)
       {
-         geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRawImuDeltas()[a], cdr);
+         geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRawImuDeltas()[i0], cdr);
       }
 
       cdr.write_type_7(data.getBatteryCharging());
@@ -213,24 +213,24 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
 
       cdr.read_type_e(data.getElectricJointEnabledArray());
 
-      for (int a = 0; a < data.getRawImuTimestamps().length; ++a)
+      for (int i0 = 0; i0 < data.getRawImuTimestamps().length; ++i0)
       {
-         data.getRawImuTimestamps()[a] = cdr.read_type_5();
+         data.getRawImuTimestamps()[i0] = cdr.read_type_5();
       }
 
-      for (int a = 0; a < data.getRawImuPacketCounts().length; ++a)
+      for (int i0 = 0; i0 < data.getRawImuPacketCounts().length; ++i0)
       {
-         data.getRawImuPacketCounts()[a] = cdr.read_type_5();
+         data.getRawImuPacketCounts()[i0] = cdr.read_type_5();
       }
 
-      for (int a = 0; a < data.getRawImuRates().length; ++a)
+      for (int i0 = 0; i0 < data.getRawImuRates().length; ++i0)
       {
-         geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRawImuRates()[a], cdr);
+         geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRawImuRates()[i0], cdr);
       }
 
-      for (int a = 0; a < data.getRawImuDeltas().length; ++a)
+      for (int i0 = 0; i0 < data.getRawImuDeltas().length; ++i0)
       {
-         geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRawImuDeltas()[a], cdr);
+         geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRawImuDeltas()[i0], cdr);
       }
 
       data.setBatteryCharging(cdr.read_type_7());

@@ -31,7 +31,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -41,13 +41,13 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 2; ++a)
+      for (int i0 = 0; i0 < 2; ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -79,9 +79,9 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLocation(), current_alignment);
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getPredictedContactPoints2d().size(); ++a)
+      for (int i0 = 0; i0 < data.getPredictedContactPoints2d().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPredictedContactPoints2d().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPredictedContactPoints2d().get(i0), current_alignment);
       }
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -89,16 +89,16 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getCustomPositionWaypoints().size(); ++a)
+      for (int i0 = 0; i0 < data.getCustomPositionWaypoints().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCustomPositionWaypoints().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCustomPositionWaypoints().get(i0), current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getSwingTrajectory().size(); ++a)
+      for (int i0 = 0; i0 < data.getSwingTrajectory().size(); ++i0)
       {
          current_alignment += controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType
-               .getCdrSerializedSize(data.getSwingTrajectory().get(a), current_alignment);
+               .getCdrSerializedSize(data.getSwingTrajectory().get(i0), current_alignment);
       }
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);

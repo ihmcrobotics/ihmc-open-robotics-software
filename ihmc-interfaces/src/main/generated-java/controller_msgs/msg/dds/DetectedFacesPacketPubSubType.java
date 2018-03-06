@@ -27,7 +27,7 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
@@ -46,9 +46,9 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getIds().size(); ++a)
+      for (int i0 = 0; i0 < data.getIds().size(); ++i0)
       {
-         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getIds().get(a).length() + 1;
+         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getIds().get(i0).length() + 1;
       }
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPositions(), current_alignment);
 

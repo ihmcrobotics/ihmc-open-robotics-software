@@ -28,12 +28,12 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.WeightedJointTrajectoryPointPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -52,14 +52,14 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getJointNames().size(); ++a)
+      for (int i0 = 0; i0 < data.getJointNames().size(); ++i0)
       {
-         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getJointNames().get(a).length() + 1;
+         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getJointNames().get(i0).length() + 1;
       }
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getPoints().size(); ++a)
+      for (int i0 = 0; i0 < data.getPoints().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.WeightedJointTrajectoryPointPubSubType.getCdrSerializedSize(data.getPoints().get(a), current_alignment);
+         current_alignment += controller_msgs.msg.dds.WeightedJointTrajectoryPointPubSubType.getCdrSerializedSize(data.getPoints().get(i0), current_alignment);
       }
 
       return current_alignment - initial_alignment;
