@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
@@ -129,5 +131,62 @@ public class MomentumTrajectoryHandler
 
       trajectoryPoint.setPosition(tempPosition);
       trajectoryPoint.setLinearVelocity(tempVelocity);
+   }
+
+   public boolean packDesiredAngularMomentumAtTime(double time, FrameVector3DBasics angularMomentumToPack, FrameVector3DBasics angularMomentumRateToPack)
+   {
+      if (!isWithinInterval(time))
+      {
+         angularMomentumToPack.setToNaN(ReferenceFrame.getWorldFrame());
+         angularMomentumRateToPack.setToNaN(ReferenceFrame.getWorldFrame());
+         return false;
+      }
+
+      int endIndex = 0;
+      while (angularMomentumTrajectoryPoints.get(endIndex).getTime() < time)
+      {
+         endIndex++;
+      }
+
+      SimpleEuclideanTrajectoryPoint startPoint = angularMomentumTrajectoryPoints.get(endIndex - 1);
+      SimpleEuclideanTrajectoryPoint endPoint = angularMomentumTrajectoryPoints.get(endIndex);
+
+      double t0 = startPoint.getTime();
+      double t1 = endPoint.getTime();
+
+      for (int i = 0; i < 3; i++)
+      {
+         double p0 = startPoint.getEuclideanWaypoint().getPosition().getElement(i);
+         double v0 = startPoint.getEuclideanWaypoint().getLinearVelocity().getElement(i);
+         double p1 = endPoint.getEuclideanWaypoint().getPosition().getElement(i);
+         double v1 = endPoint.getEuclideanWaypoint().getLinearVelocity().getElement(i);
+
+         polynomial.setCubic(t0, t1, p0, v0, p1, v1);
+         polynomial.compute(time);
+
+         tempPosition.setElement(i, polynomial.getPosition());
+         tempVelocity.setElement(i, polynomial.getVelocity());
+      }
+
+      angularMomentumToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), tempPosition);
+      angularMomentumRateToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), tempVelocity);
+      return true;
+   }
+
+   public boolean isWithinInterval(double time)
+   {
+      if (angularMomentumTrajectoryPoints.size() < 2)
+      {
+         return false;
+      }
+      if (time <= angularMomentumTrajectoryPoints.get(0).getTime())
+      {
+         return false;
+      }
+      if (time > angularMomentumTrajectoryPoints.getLast().getTime())
+      {
+         return false;
+      }
+      return true;
    }
 }
