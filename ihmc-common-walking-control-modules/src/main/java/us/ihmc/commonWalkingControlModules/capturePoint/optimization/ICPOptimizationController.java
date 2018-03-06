@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPOptimizationController implements ICPOptimizationControllerInterface
 {
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static final boolean DEBUG = false;
    private static final boolean COMPUTE_COST_TO_GO = false;
 
@@ -113,7 +113,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoBoolean useICPControlPolygons = new YoBoolean(yoNamePrefix + "UseICPControlPolygons", registry);
 
    private final YoICPControlGains feedbackGains = new YoICPControlGains("", registry);
-   private final YoFrameVector2d feedbackGainsInWorld = new YoFrameVector2d(yoNamePrefix + "ICPGainsInWorld", worldFrame, registry);
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
    private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
@@ -582,7 +581,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private void submitCoPFeedbackTaskConditionsToSolver()
    {
       helper.transformFromDynamicsFrame(tempVector2d, desiredICPVelocity, feedbackGains.getKpParallelToMotion(), feedbackGains.getKpOrthogonalToMotion());
-      feedbackGainsInWorld.set(tempVector2d);
 
       double dynamicsObjectiveWeight = this.dynamicsObjectiveWeight.getDoubleValue();
       if (isInDoubleSupport.getBooleanValue())
