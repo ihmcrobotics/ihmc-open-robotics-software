@@ -13,6 +13,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -140,10 +141,10 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       YoGraphicsListRegistry ignoredYoGraphicsListRegistry  = new YoGraphicsListRegistry();
 
       runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, jointDesiredOutputList, registry, yoGraphicsListRegistry,
-                                                           ignoredYoGraphicsListRegistry, dataProducer, contactableFeet, footSwitches, GRAVITY, modelFactory.getParameterResourceName());
+                                                           ignoredYoGraphicsListRegistry, dataProducer, contactableFeet, footSwitches, GRAVITY);
       controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
 
-      InputStream resourceAsStream = getClass().getResourceAsStream(runtimeEnvironment.getParameterResourceName());
+      InputStream resourceAsStream = getClass().getResourceAsStream(modelFactory.getParameterResourceName(QuadrupedControlMode.FORCE));
       ParameterLoaderHelper.loadParameters(this, resourceAsStream, registry);
 
 //      PrintTools.debug(this, "Warming up JIT compiler.");
