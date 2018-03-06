@@ -4,6 +4,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -15,6 +16,7 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -24,8 +26,8 @@ public class QuadrupedStandController implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleParameter[] comForceCommandWeightsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] comTorqueCommandWeightsParameter = new DoubleParameter[3];
+   private final ParameterVector3D comForceCommandWeightsParameter;
+   private final ParameterVector3D comTorqueCommandWeightsParameter;
 
    private final DoubleParameter jointDampingParameter = new DoubleParameter("jointDamping", registry, 2.0);
    private final DoubleParameter jointPositionLimitDampingParameter = new DoubleParameter("jointPositionLimitDampingParameter", registry, 10);
@@ -77,11 +79,11 @@ public class QuadrupedStandController implements QuadrupedController
 
       solePositions = controllerToolbox.getTaskSpaceEstimates().getSolePositions();
 
-      for (int i = 0; i < 3; i++)
-      {
-         comForceCommandWeightsParameter[i] = new DoubleParameter("comForceCommandWeight" + Axis.values()[i], registry, 1.0);
-         comTorqueCommandWeightsParameter[i] = new DoubleParameter("comTorqueCommandWeight" + Axis.values()[i], registry, 1.0);
-      }
+      Vector3D defaultComForceCommandWeights = new Vector3D(1.0, 1.0, 1.0);
+      Vector3D defaultComTorqueCommandWeights = new Vector3D(1.0, 1.0, 1.0);
+
+      comForceCommandWeightsParameter = new ParameterVector3D("comForceCommandWeight", defaultComForceCommandWeights, registry);
+      comTorqueCommandWeightsParameter = new ParameterVector3D("comTorqueCommandWeight", defaultComTorqueCommandWeights, registry);
 
       parentRegistry.addChild(registry);
    }
