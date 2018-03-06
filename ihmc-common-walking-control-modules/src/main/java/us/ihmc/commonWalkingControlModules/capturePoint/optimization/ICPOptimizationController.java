@@ -39,6 +39,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private static final boolean DEBUG = false;
    private static final boolean COMPUTE_COST_TO_GO = false;
 
+   private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
+
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -699,6 +701,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       if (limitReachabilityFromAdjustment.getBooleanValue() && localUseStepAdjustment && includeFootsteps)
          updateReachabilityRegionFromAdjustment();
+
+      if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)
+         upcomingFootstepLocation.set(footstepSolution);
    }
 
    private void updateReachabilityRegionFromAdjustment()
