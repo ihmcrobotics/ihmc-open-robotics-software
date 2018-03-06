@@ -13,6 +13,7 @@ public abstract class NumericSlider<T extends Number> extends Slider
    {
       setShowTickMarks(true);
       setShowTickLabels(true);
+      setPrefWidth(200.0);
 
       // Sets up a context menu that will show the current value while the slider is dragged.
       ContextMenu contextMenu = new ContextMenu();

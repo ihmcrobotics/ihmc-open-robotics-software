@@ -31,9 +31,6 @@ public class Tuner extends VBox
    {
       setupNode();
 
-      setId("tuner-window");
-      name.setId("parameter-name-in-tuner");
-
       name.setText(parameter.getName());
       description.setText(parameter.getCurrentDescription());
       description.setTextFormatter(TextFormatterTools.maxLengthTextFormatter(MAX_DESCRIPTION_CHARACTERS));
@@ -74,13 +71,11 @@ public class Tuner extends VBox
    private void setupNode()
    {
       setSpacing(10.0);
-      setMaxHeight(Double.NEGATIVE_INFINITY);
-      setMaxWidth(Double.NEGATIVE_INFINITY);
-      setPrefWidth(700);
 
       name = new Label();
       remove = new Button("Remove");
       description = new TextField();
+      HBox.setHgrow(this, Priority.ALWAYS);
       HBox.setHgrow(name, Priority.ALWAYS);
       HBox.setHgrow(description, Priority.ALWAYS);
 
@@ -90,6 +85,7 @@ public class Tuner extends VBox
       parameterInfoBox.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
       parameterInfoBox.getChildren().add(remove);
       parameterInfoBox.getChildren().add(name);
+      HBox.setHgrow(parameterInfoBox, Priority.ALWAYS);
       getChildren().add(parameterInfoBox);
 
       HBox parameterDescriptionBox = new HBox();
@@ -98,7 +94,11 @@ public class Tuner extends VBox
       parameterDescriptionBox.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
       parameterDescriptionBox.getChildren().add(new Text("Description"));
       parameterDescriptionBox.getChildren().add(description);
+      HBox.setHgrow(parameterDescriptionBox, Priority.ALWAYS);
       getChildren().add(parameterDescriptionBox);
+
+      setId("tuner-window");
+      name.setId("parameter-name-in-tuner");
    }
 
    public void setCloseHandler(EventHandler<ActionEvent> closeHandler)

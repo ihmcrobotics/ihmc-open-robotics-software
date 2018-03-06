@@ -21,6 +21,8 @@ public abstract class NumericSpinner<T extends Number> extends Spinner<T>
       super(valueFactory);
 
       setEditable(true);
+      setPrefWidth(120.0);
+      setMinWidth(80.0);
 
       // Add formatter that will prevent any input that is not a number with a few exceptions (e.g. '-').
       UnaryOperator<TextFormatter.Change> filter = new UnaryOperator<TextFormatter.Change>()
