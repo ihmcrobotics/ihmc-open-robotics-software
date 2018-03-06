@@ -1,3 +1,0 @@
-bool joint_enabled
-float32 joint_temperature
-float32 joint_current
