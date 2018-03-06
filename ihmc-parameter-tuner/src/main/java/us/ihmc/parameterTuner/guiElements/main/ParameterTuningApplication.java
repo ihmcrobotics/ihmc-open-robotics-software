@@ -14,7 +14,6 @@ import us.ihmc.parameterTuner.guiElements.GuiRegistry;
 public abstract class ParameterTuningApplication extends Application
 {
    private static final String FXML_FILE = "/gui.fxml";
-   private static final String CSS_FILE = "/gui.css";
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -24,7 +23,6 @@ public abstract class ParameterTuningApplication extends Application
       FXMLLoader mainLoader = new FXMLLoader();
       mainLoader.setLocation(ParameterTuningApplication.class.getResource(FXML_FILE));
       Scene mainScene = new Scene(mainLoader.<Pane> load());
-      mainScene.getStylesheets().add(ParameterTuningApplication.class.getResource(CSS_FILE).toString());
 
       GuiController controller = mainLoader.getController();
       controller.addInputNode(guiInterface.getInputManagerNode());
