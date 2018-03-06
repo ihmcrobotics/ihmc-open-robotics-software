@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.model;
 
 import java.util.Collection;
 
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
@@ -18,5 +19,5 @@ public abstract class QuadrupedModelFactory implements FullQuadrupedRobotModelFa
 
    public abstract String getSDFNameForJointName(QuadrupedJointName quadrupedJointName);
 
-   public abstract String getParameterResourceName();
+   public abstract String getParameterResourceName(QuadrupedControlMode controlMode);
 }

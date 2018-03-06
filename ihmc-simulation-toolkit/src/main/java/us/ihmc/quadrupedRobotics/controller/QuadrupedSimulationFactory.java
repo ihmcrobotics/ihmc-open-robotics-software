@@ -106,7 +106,6 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
    private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
    private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
-   private final RequiredFactoryField<String> parameterResourceName = new RequiredFactoryField<>("parameterResourceName");
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
@@ -279,7 +278,7 @@ public class QuadrupedSimulationFactory
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        jointDesiredOutputList.get(), sdfRobot.get().getRobotsYoVariableRegistry(),
                                                                                        yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead,
-                                                                                       globalDataProducer, contactableFeet, footSwitches, gravity.get(), parameterResourceName.get());
+                                                                                       globalDataProducer, contactableFeet, footSwitches, gravity.get());
       switch (controlMode.get())
       {
       case FORCE:
@@ -454,9 +453,9 @@ public class QuadrupedSimulationFactory
          simulationOverheadPlotterFactory.createOverheadPlotter();
       }
 
-      InputStream parameterFile = getClass().getResourceAsStream(parameterResourceName.get());
+      InputStream parameterFile = getClass().getResourceAsStream(modelFactory.get().getParameterResourceName(controlMode.get()));
       ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry());
-      scs.setParameterRootPath(simulationController.getYoVariableRegistry());
+      scs.setParameterRootPath(simulationController.getYoVariableRegistry().getParent());
 
       FactoryTools.disposeFactory(this);
       
@@ -623,10 +622,5 @@ public class QuadrupedSimulationFactory
    public void setFootSwitchType(FootSwitchType footSwitchType)
    {
       this.footSwitchType.set(footSwitchType);
-   }
-
-   public void setParameterResourceName(String parameterResourceName)
-   {
-      this.parameterResourceName.set(parameterResourceName);
    }
 }

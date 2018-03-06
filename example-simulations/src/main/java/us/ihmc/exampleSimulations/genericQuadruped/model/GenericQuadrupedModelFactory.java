@@ -4,6 +4,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFromDescription;
@@ -95,8 +96,16 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
    }
 
    @Override
-   public String getParameterResourceName()
+   public String getParameterResourceName(QuadrupedControlMode controlMode)
    {
-      return "/parameters/simulation.xml";
+      switch(controlMode)
+      {
+      case FORCE:
+         return "/parameters/simulation_force_controller.xml";
+      case FORCE_DEV:
+         return "parameters/simulation_force_dev_controller.xml";
+      default:
+         throw new RuntimeException("No parameter file exists for control mode: " + controlMode);
+      }
    }
 }
