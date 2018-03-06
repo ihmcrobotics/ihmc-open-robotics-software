@@ -14,6 +14,9 @@ import us.ihmc.quadrupedRobotics.optimization.contactForceOptimization.Quadruped
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
@@ -34,15 +37,8 @@ public class QuadrupedTimedStepController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    // parameters
-   private final DoubleParameter[] solePositionProportionalGainsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] solePositionDerivativeGainsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] solePositionIntegralGainsParameter = new DoubleParameter[3];
+   private final ParameterizedPID3DGains solePositionGains;
 
-   private final double[] solePositionProportionalGains = new double[3];
-   private final double[] solePositionDerivativeGains = new double[3];
-   private final double[] solePositionIntegralGains = new double[3];
-
-   private final DoubleParameter solePositionMaxIntegralErrorParameter = new DoubleParameter("solePositionMaxIntegralError", registry, 0.0, 0.0, 1.0);
    private final DoubleParameter touchdownPressureLimitParameter = new DoubleParameter("touchdownPressureLimit", registry, 50.0, 0.0, 1.0);
    private final IntegerParameter touchdownTriggerWindowParameter = new IntegerParameter("touchdownTriggerWindow", registry, 1,0, 1);
    private final DoubleParameter contactPressureLowerLimitParameter = new DoubleParameter("contactPressureLowerLimit", registry, 500., 0.0, 1.0);
@@ -108,12 +104,10 @@ public class QuadrupedTimedStepController
       contactForceLimits = new QuadrupedContactForceLimits();
       taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
 
-      for (int i = 0; i < 3; i++)
-      {
-         solePositionProportionalGainsParameter[i] = new DoubleParameter("solePositionProportionalGain" + Axis.values()[i], registry, 20000.0);
-         solePositionDerivativeGainsParameter[i] = new DoubleParameter("solePositionDerivativeGain" + Axis.values()[i], registry, 200.0);
-         solePositionIntegralGainsParameter[i] = new DoubleParameter("solePositionIntegralGain" + Axis.values()[i], registry, 0.0);
-      }
+      DefaultPID3DGains solePositionDefaultGains = new DefaultPID3DGains();
+      solePositionDefaultGains.setProportionalGains(20000.0, 20000.0, 20000.0);
+      solePositionDefaultGains.setDerivativeGains(200.0, 200.0, 200.0);
+      solePositionGains = new ParameterizedPID3DGains("_solePosition", GainCoupling.NONE, false, solePositionDefaultGains, registry);
 
       // state machine
       stepStateMachine = new QuadrantDependentList<>();
@@ -330,16 +324,6 @@ public class QuadrupedTimedStepController
       }
    }
 
-   private void updateGainsFromParameters()
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         solePositionDerivativeGains[i] = solePositionDerivativeGainsParameter[i].getValue();
-         solePositionProportionalGains[i] = solePositionProportionalGainsParameter[i].getValue();
-         solePositionIntegralGains[i] = solePositionIntegralGainsParameter[i].getValue();
-      }
-   }
-
    private class SwingState implements FiniteStateMachineState<StepEvent>
    {
       private RobotQuadrant robotQuadrant;
@@ -371,12 +355,8 @@ public class QuadrupedTimedStepController
          swingTrajectory.initializeTrajectory(solePosition, goalPosition, groundClearance, timeInterval);
 
          // initialize contact state and feedback gains
-         updateGainsFromParameters();
          solePositionController.get(robotQuadrant).reset();
-         solePositionController.get(robotQuadrant).getGains().setProportionalGains(solePositionProportionalGains);
-         solePositionController.get(robotQuadrant).getGains().setDerivativeGains(solePositionDerivativeGains);
-         solePositionController.get(robotQuadrant).getGains()
-               .setIntegralGains(solePositionIntegralGains, solePositionMaxIntegralErrorParameter.getValue());
+         solePositionController.get(robotQuadrant).getGains().set(solePositionGains);
          solePositionControllerSetpoints.get(robotQuadrant).initialize(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
 
          touchdownTrigger.set(false);
