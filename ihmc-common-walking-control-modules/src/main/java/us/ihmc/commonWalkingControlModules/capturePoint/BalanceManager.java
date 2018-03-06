@@ -550,7 +550,7 @@ public class BalanceManager
 
    public double getTimeRemainingInCurrentState()
    {
-      return icpPlanner.getTimeInCurrentState();
+      return icpPlanner.getTimeInCurrentStateRemaining();
    }
 
    public void goHome()
