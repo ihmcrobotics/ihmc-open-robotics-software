@@ -1,0 +1,23 @@
+#ifndef __controller_msgs__msg__AtlasElectricMotorAutoEnableFlagPacket__idl__
+#define __controller_msgs__msg__AtlasElectricMotorAutoEnableFlagPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Atlas specific message.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::AtlasElectricMotorAutoEnableFlagPacket_")
+      struct AtlasElectricMotorAutoEnableFlagPacket
+      {
+        boolean should_auto_enable;
+      };
+    };
+  };
+};
+
+#endif

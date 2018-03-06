@@ -1,0 +1,209 @@
+package controller_msgs.msg.dds;
+
+/**
+ * Topic data type of the struct "EuclideanTrajectoryMessage" defined in "EuclideanTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
+ *
+ * This file was automatically generated from EuclideanTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
+ * Do not update this file directly, edit EuclideanTrajectoryMessage_.idl instead.
+ */
+public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.EuclideanTrajectoryMessage>
+{
+   public static final java.lang.String name = "controller_msgs::msg::dds_::EuclideanTrajectoryMessage_";
+   private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
+   private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
+
+   public EuclideanTrajectoryMessagePubSubType()
+   {
+
+   }
+
+   public static int getMaxCdrSerializedSize()
+   {
+      return getMaxCdrSerializedSize(0);
+   }
+
+   public static int getMaxCdrSerializedSize(int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int a = 0; a < 100; ++a)
+      {
+         current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      }
+
+      current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.FrameInformationPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.EuclideanTrajectoryMessage data)
+   {
+      return getCdrSerializedSize(data, 0);
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.EuclideanTrajectoryMessage data, int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int a = 0; a < data.getTaskspaceTrajectoryPoints().size(); ++a)
+      {
+         current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType
+               .getCdrSerializedSize(data.getTaskspaceTrajectoryPoints().get(a), current_alignment);
+      }
+
+      current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getSelectionMatrix(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.FrameInformationPubSubType.getCdrSerializedSize(data.getFrameInformation(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getCdrSerializedSize(data.getWeightMatrix(), current_alignment);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getControlFramePose(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public static void write(controller_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.CDR cdr)
+   {
+
+      if (data.getTaskspaceTrajectoryPoints().size() <= 100)
+         cdr.write_type_e(data.getTaskspaceTrajectoryPoints());
+      else
+         throw new RuntimeException("taskspace_trajectory_points field exceeds the maximum length");
+
+      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getSelectionMatrix(), cdr);
+
+      controller_msgs.msg.dds.FrameInformationPubSubType.write(data.getFrameInformation(), cdr);
+
+      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.write(data.getWeightMatrix(), cdr);
+
+      cdr.write_type_7(data.getUseCustomControlFrame());
+
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getControlFramePose(), cdr);
+
+      controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
+   }
+
+   public static void read(controller_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.CDR cdr)
+   {
+
+      cdr.read_type_e(data.getTaskspaceTrajectoryPoints());
+
+      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getSelectionMatrix(), cdr);
+
+      controller_msgs.msg.dds.FrameInformationPubSubType.read(data.getFrameInformation(), cdr);
+
+      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getWeightMatrix(), cdr);
+
+      data.setUseCustomControlFrame(cdr.read_type_7());
+
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getControlFramePose(), cdr);
+
+      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.EuclideanTrajectoryMessage src, controller_msgs.msg.dds.EuclideanTrajectoryMessage dest)
+   {
+      dest.set(src);
+   }
+
+   @Override
+   public void serialize(controller_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
+         throws java.io.IOException
+   {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
+
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.EuclideanTrajectoryMessage data)
+         throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
+   }
+
+   @Override
+   public final void serialize(controller_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_e("taskspace_trajectory_points", data.getTaskspaceTrajectoryPoints());
+
+      ser.write_type_a("selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
+
+      ser.write_type_a("frame_information", new controller_msgs.msg.dds.FrameInformationPubSubType(), data.getFrameInformation());
+
+      ser.write_type_a("weight_matrix", new controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType(), data.getWeightMatrix());
+
+      ser.write_type_7("use_custom_control_frame", data.getUseCustomControlFrame());
+
+      ser.write_type_a("control_frame_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getControlFramePose());
+
+      ser.write_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+   }
+
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.EuclideanTrajectoryMessage data)
+   {
+      ser.read_type_e("taskspace_trajectory_points", data.getTaskspaceTrajectoryPoints());
+
+      ser.read_type_a("selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
+
+      ser.read_type_a("frame_information", new controller_msgs.msg.dds.FrameInformationPubSubType(), data.getFrameInformation());
+
+      ser.read_type_a("weight_matrix", new controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType(), data.getWeightMatrix());
+
+      data.setUseCustomControlFrame(ser.read_type_7("use_custom_control_frame"));
+
+      ser.read_type_a("control_frame_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getControlFramePose());
+
+      ser.read_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+   }
+
+   @Override
+   public controller_msgs.msg.dds.EuclideanTrajectoryMessage createData()
+   {
+      return new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
+   }
+
+   @Override
+   public int getTypeSize()
+   {
+      return us.ihmc.idl.CDR.getTypeSize(getMaxCdrSerializedSize());
+   }
+
+   @Override
+   public java.lang.String getName()
+   {
+      return name;
+   }
+
+   public void serialize(controller_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.CDR cdr)
+   {
+      write(data, cdr);
+   }
+
+   public void deserialize(controller_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.CDR cdr)
+   {
+      read(data, cdr);
+   }
+
+   public void copy(controller_msgs.msg.dds.EuclideanTrajectoryMessage src, controller_msgs.msg.dds.EuclideanTrajectoryMessage dest)
+   {
+      staticCopy(src, dest);
+   }
+
+   @Override
+   public EuclideanTrajectoryMessagePubSubType newInstance()
+   {
+      return new EuclideanTrajectoryMessagePubSubType();
+   }
+}

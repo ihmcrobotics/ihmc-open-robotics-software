@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "SetDoubleParameter" defined in SetDoubleParameter_.idl.
- *
- * This file was automatically generated from SetDoubleParameter_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit SetDoubleParameter_.idl instead.
- */
 public class SetDoubleParameter implements Settable<SetDoubleParameter>, EpsilonComparable<SetDoubleParameter>
 {
    private java.lang.StringBuilder parameter_name_;

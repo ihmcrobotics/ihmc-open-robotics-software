@@ -1,0 +1,58 @@
+#ifndef __controller_msgs__msg__HighLevelStateChangeStatusMessage__idl__
+#define __controller_msgs__msg__HighLevelStateChangeStatusMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet DO_NOTHING_BEHAVIOR =
+      0;
+
+      const octet STAND_PREP_STATE =
+      1;
+
+      const octet STAND_READY =
+      2;
+
+      const octet FREEZE_STATE =
+      3;
+
+      const octet STAND_TRANSITION_STATE =
+      4;
+
+      const octet WALKING =
+      5;
+
+      const octet DIAGNOSTICS =
+      6;
+
+      const octet CALIBRATION =
+      7;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message notifies the user of a change in the high level state.
+       * This message's primary use is to signal a requested state change is completed.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HighLevelStateChangeStatusMessage_")
+      struct HighLevelStateChangeStatusMessage
+      {
+        /**
+         * Specifies the controller's state prior to transition.
+         */
+        @defaultValue(value=255)
+        octet initial_high_level_controller_name;
+        /**
+         * Specifies the state the controller has transitioned into.
+         */
+        @defaultValue(value=255)
+        octet end_high_level_controller_name;
+      };
+    };
+  };
+};
+
+#endif

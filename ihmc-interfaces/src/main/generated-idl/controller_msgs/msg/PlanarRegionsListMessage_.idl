@@ -1,0 +1,25 @@
+#ifndef __controller_msgs__msg__PlanarRegionsListMessage__idl__
+#define __controller_msgs__msg__PlanarRegionsListMessage__idl__
+
+#include "controller_msgs/msg/./PlanarRegionMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC robot environment awareness module.
+       * This message contains a list of planar regions.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::PlanarRegionsListMessage_")
+      struct PlanarRegionsListMessage
+      {
+        sequence<controller_msgs::msg::dds::PlanarRegionMessage> planar_regions;
+      };
+    };
+  };
+};
+
+#endif

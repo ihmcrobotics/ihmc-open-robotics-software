@@ -1,0 +1,26 @@
+#ifndef __controller_msgs__msg__AtlasDesiredPumpPSIPacket__idl__
+#define __controller_msgs__msg__AtlasDesiredPumpPSIPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Send a request to change the desired PSI of the Atlas hydraulic pump.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::AtlasDesiredPumpPSIPacket_")
+      struct AtlasDesiredPumpPSIPacket
+      {
+        /**
+         * The desired hydraulic pump PSI.
+         */
+        long desired_pump_psi;
+      };
+    };
+  };
+};
+
+#endif
