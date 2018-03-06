@@ -463,8 +463,7 @@ public class MotionQPInputCalculator
       DenseMatrix64F convectiveTerm = centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
 
       // Compute the task objective: p = S * ( hDot - ADot qDot )
-      // FIXME Hacked by Apoorv
-      //CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
+      CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
       CommonOps.mult(tempSelectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);

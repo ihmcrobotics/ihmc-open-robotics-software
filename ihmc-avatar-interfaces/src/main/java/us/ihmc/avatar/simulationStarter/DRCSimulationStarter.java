@@ -138,6 +138,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       this.createSCSSimulatedSensors = true;
 
       this.scsInitialSetup = new DRCSCSInitialSetup(groundProfile3D, robotModel.getSimulateDT());
+      this.scsInitialSetup.setGravity(environment.getGravityVectorWorldFrame());
       this.scsInitialSetup.setDrawGroundProfile(environment == null);
       this.scsInitialSetup.setInitializeEstimatorToActual(false);
       this.scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());

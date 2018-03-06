@@ -67,7 +67,7 @@ public class DRCSimulationTestHelper
    private AvatarSimulation avatarSimulation;
 
    protected final PacketCommunicator controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
-         new IHMCCommunicationKryoNetClassList());
+                                                                                                                       new IHMCCommunicationKryoNetClassList());
    private CommonAvatarEnvironmentInterface testEnvironment = new DefaultCommonAvatarEnvironment();
 
    private final SimulationTestingParameters simulationTestingParameters;
@@ -94,7 +94,6 @@ public class DRCSimulationTestHelper
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
    private final DRCGuiInitialSetup guiInitialSetup;
-
    private final boolean checkIfDesiredICPHasBeenInvalid = true;
 
    public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel)
@@ -102,7 +101,8 @@ public class DRCSimulationTestHelper
       this(simulationTestParameters, robotModel, null);
    }
 
-   public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel, CommonAvatarEnvironmentInterface testEnvironment)
+   public DRCSimulationTestHelper(SimulationTestingParameters simulationTestParameters, DRCRobotModel robotModel,
+                                  CommonAvatarEnvironmentInterface testEnvironment)
    {
       this.robotModel = robotModel;
       this.walkingControlParameters = robotModel.getWalkingControllerParameters();
@@ -376,7 +376,7 @@ public class DRCSimulationTestHelper
          BambooTools.createVideoWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(simplifiedRobotModelName, scs, callStackHeight);
       }
    }
-   
+
    public void createVideo(String videoName)
    {
       if (simulationTestingParameters.getCreateSCSVideos())
@@ -413,7 +413,7 @@ public class DRCSimulationTestHelper
    public void setupCameraForUnitTest(boolean enableTracking, Point3D cameraFix, Point3D cameraPosition)
    {
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-      
+
       cameraConfiguration.setCameraFix(cameraFix);
       cameraConfiguration.setCameraPosition(cameraPosition);
       cameraConfiguration.setCameraTracking(enableTracking, true, true, false);

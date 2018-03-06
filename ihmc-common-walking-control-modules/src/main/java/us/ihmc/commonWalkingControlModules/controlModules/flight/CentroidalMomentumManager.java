@@ -95,12 +95,12 @@ public class CentroidalMomentumManager
    {
       //FIXME This is a hack to confirm that the controller core is working. This should be based on the controller state. Currently hacked to work with flight controller
       desiredLinearMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, -gravityZ * totalMass);
-      computeDesiredAngularMomentumRateOfChange();
-      //desiredAngularMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
+      //computeDesiredAngularMomentumRateOfChange();
+      desiredAngularMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
       yoDesiredAngularMomentumRateOfChange.set(desiredAngularMomentumRateOfChange);
       yoDesiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
-      setOptimizationWeights(400.0, 2.0);
+      setOptimizationWeights(100.0, 2.0);
       setMomentumCommandWeights();
       momentumCommand.setSelectionMatrixToIdentity();
       //desiredCoMLinearAcceleration.setIncludingFrame(comFrame, 0, 0, 0.0);
