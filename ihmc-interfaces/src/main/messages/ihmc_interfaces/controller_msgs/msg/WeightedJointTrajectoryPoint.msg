@@ -1,2 +1,0 @@
-trajectory_msgs/JointTrajectoryPoint point
-float64 weight

@@ -1,2 +1,0 @@
-string parameter_name
-string parameter_value
