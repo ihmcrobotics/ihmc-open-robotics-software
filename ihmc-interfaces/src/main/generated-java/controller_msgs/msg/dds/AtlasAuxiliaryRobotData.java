@@ -43,15 +43,15 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       raw_imu_packet_counts_ = new float[15];
 
       raw_imu_rates_ = new us.ihmc.euclid.tuple3D.Vector3D[15];
-      for (int b = 0; b < raw_imu_rates_.length; ++b)
+      for (int i1 = 0; i1 < raw_imu_rates_.length; ++i1)
       {
-         raw_imu_rates_[b] = new us.ihmc.euclid.tuple3D.Vector3D();
+         raw_imu_rates_[i1] = new us.ihmc.euclid.tuple3D.Vector3D();
       }
 
       raw_imu_deltas_ = new us.ihmc.euclid.tuple3D.Vector3D[15];
-      for (int d = 0; d < raw_imu_deltas_.length; ++d)
+      for (int i3 = 0; i3 < raw_imu_deltas_.length; ++i3)
       {
-         raw_imu_deltas_[d] = new us.ihmc.euclid.tuple3D.Vector3D();
+         raw_imu_deltas_[i3] = new us.ihmc.euclid.tuple3D.Vector3D();
       }
    }
 
@@ -65,24 +65,24 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       electric_joint_temperatures_.set(other.electric_joint_temperatures_);
       electric_joint_currents_.set(other.electric_joint_currents_);
       electric_joint_enabled_array_.set(other.electric_joint_enabled_array_);
-      for (int f = 0; f < raw_imu_timestamps_.length; ++f)
+      for (int i5 = 0; i5 < raw_imu_timestamps_.length; ++i5)
       {
-         raw_imu_timestamps_[f] = other.raw_imu_timestamps_[f];
+         raw_imu_timestamps_[i5] = other.raw_imu_timestamps_[i5];
       }
 
-      for (int h = 0; h < raw_imu_packet_counts_.length; ++h)
+      for (int i7 = 0; i7 < raw_imu_packet_counts_.length; ++i7)
       {
-         raw_imu_packet_counts_[h] = other.raw_imu_packet_counts_[h];
+         raw_imu_packet_counts_[i7] = other.raw_imu_packet_counts_[i7];
       }
 
-      for (int j = 0; j < raw_imu_rates_.length; ++j)
+      for (int i9 = 0; i9 < raw_imu_rates_.length; ++i9)
       {
-         geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.raw_imu_rates_[j], raw_imu_rates_[j]);
+         geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.raw_imu_rates_[i9], raw_imu_rates_[i9]);
       }
 
-      for (int l = 0; l < raw_imu_deltas_.length; ++l)
+      for (int i11 = 0; i11 < raw_imu_deltas_.length; ++i11)
       {
-         geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.raw_imu_deltas_[l], raw_imu_deltas_[l]);
+         geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.raw_imu_deltas_[i11], raw_imu_deltas_[i11]);
       }
 
       battery_charging_ = other.battery_charging_;
@@ -306,27 +306,27 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.electric_joint_enabled_array_, other.electric_joint_enabled_array_, epsilon))
          return false;
 
-      for (int n = 0; n < raw_imu_timestamps_.length; ++n)
+      for (int i13 = 0; i13 < raw_imu_timestamps_.length; ++i13)
       {
-         if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.raw_imu_timestamps_[n], other.raw_imu_timestamps_[n], epsilon))
+         if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.raw_imu_timestamps_[i13], other.raw_imu_timestamps_[i13], epsilon))
             return false;
       }
 
-      for (int p = 0; p < raw_imu_packet_counts_.length; ++p)
+      for (int i15 = 0; i15 < raw_imu_packet_counts_.length; ++i15)
       {
-         if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.raw_imu_packet_counts_[p], other.raw_imu_packet_counts_[p], epsilon))
+         if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.raw_imu_packet_counts_[i15], other.raw_imu_packet_counts_[i15], epsilon))
             return false;
       }
 
-      for (int r = 0; r < raw_imu_rates_.length; ++r)
+      for (int i17 = 0; i17 < raw_imu_rates_.length; ++i17)
       {
-         if (!this.raw_imu_rates_[r].epsilonEquals(other.raw_imu_rates_[r], epsilon))
+         if (!this.raw_imu_rates_[i17].epsilonEquals(other.raw_imu_rates_[i17], epsilon))
             return false;
       }
 
-      for (int t = 0; t < raw_imu_deltas_.length; ++t)
+      for (int i19 = 0; i19 < raw_imu_deltas_.length; ++i19)
       {
-         if (!this.raw_imu_deltas_[t].epsilonEquals(other.raw_imu_deltas_[t], epsilon))
+         if (!this.raw_imu_deltas_[i19].epsilonEquals(other.raw_imu_deltas_[i19], epsilon))
             return false;
       }
 
@@ -396,27 +396,28 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       if (!this.electric_joint_enabled_array_.equals(otherMyClass.electric_joint_enabled_array_))
          return false;
 
-      for (int v = 0; v < raw_imu_timestamps_.length; ++v)
+      for (int i21 = 0; i21 < raw_imu_timestamps_.length; ++i21)
       {
-         if (this.raw_imu_timestamps_[v] != otherMyClass.raw_imu_timestamps_[v])
+         if (this.raw_imu_timestamps_[i21] != otherMyClass.raw_imu_timestamps_[i21])
             return false;
       }
-      for (int x = 0; x < raw_imu_packet_counts_.length; ++x)
+      for (int i23 = 0; i23 < raw_imu_packet_counts_.length; ++i23)
       {
-         if (this.raw_imu_packet_counts_[x] != otherMyClass.raw_imu_packet_counts_[x])
+         if (this.raw_imu_packet_counts_[i23] != otherMyClass.raw_imu_packet_counts_[i23])
             return false;
       }
-      for (int z = 0; z < raw_imu_rates_.length; ++z)
+      for (int i25 = 0; i25 < raw_imu_rates_.length; ++i25)
       {
-         if (!this.raw_imu_rates_[z].equals(otherMyClass.raw_imu_rates_[z]))
+         if (!this.raw_imu_rates_[i25].equals(otherMyClass.raw_imu_rates_[i25]))
             return false;
       }
-      for (int | =0; | <raw_imu_deltas_.length;
-      ++ |)
+      for (int i27 = 0; i27 < raw_imu_deltas_.length; ++i27)
       {
-         if (!this.raw_imu_deltas_[ |].equals(otherMyClass.raw_imu_deltas_[ |]))return false;
-      } if (this.battery_charging_ != otherMyClass.battery_charging_)
-      return false;
+         if (!this.raw_imu_deltas_[i27].equals(otherMyClass.raw_imu_deltas_[i27]))
+            return false;
+      }
+      if (this.battery_charging_ != otherMyClass.battery_charging_)
+         return false;
 
       if (this.battery_voltage_ != otherMyClass.battery_voltage_)
          return false;

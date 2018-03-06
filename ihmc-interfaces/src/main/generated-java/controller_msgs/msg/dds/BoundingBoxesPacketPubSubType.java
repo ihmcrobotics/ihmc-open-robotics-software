@@ -39,7 +39,7 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
@@ -69,9 +69,9 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += (data.getBoundingBoxesHeights().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getLabels().size(); ++a)
+      for (int i0 = 0; i0 < data.getLabels().size(); ++i0)
       {
-         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getLabels().get(a).length() + 1;
+         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getLabels().get(i0).length() + 1;
       }
 
       return current_alignment - initial_alignment;

@@ -32,7 +32,7 @@ public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -61,9 +61,9 @@ public class WaypointBasedTrajectoryMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += (data.getWaypointTimes().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getWaypoints().size(); ++a)
+      for (int i0 = 0; i0 < data.getWaypoints().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getWaypoints().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getWaypoints().get(i0), current_alignment);
       }
 
       current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getAngularSelectionMatrix(), current_alignment);

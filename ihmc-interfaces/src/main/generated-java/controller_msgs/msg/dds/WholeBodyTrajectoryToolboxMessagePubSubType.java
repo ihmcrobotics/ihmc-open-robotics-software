@@ -28,19 +28,19 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 10; ++a)
+      for (int i0 = 0; i0 < 10; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.WaypointBasedTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 10; ++a)
+      for (int i0 = 0; i0 < 10; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 10; ++a)
+      for (int i0 = 0; i0 < 10; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.ReachingManifoldMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -60,24 +60,24 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
       current_alignment += controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
             .getCdrSerializedSize(data.getConfiguration(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getEndEffectorTrajectories().size(); ++a)
+      for (int i0 = 0; i0 < data.getEndEffectorTrajectories().size(); ++i0)
       {
          current_alignment += controller_msgs.msg.dds.WaypointBasedTrajectoryMessagePubSubType
-               .getCdrSerializedSize(data.getEndEffectorTrajectories().get(a), current_alignment);
+               .getCdrSerializedSize(data.getEndEffectorTrajectories().get(i0), current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getExplorationConfigurations().size(); ++a)
+      for (int i0 = 0; i0 < data.getExplorationConfigurations().size(); ++i0)
       {
          current_alignment += controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessagePubSubType
-               .getCdrSerializedSize(data.getExplorationConfigurations().get(a), current_alignment);
+               .getCdrSerializedSize(data.getExplorationConfigurations().get(i0), current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getReachingManifolds().size(); ++a)
+      for (int i0 = 0; i0 < data.getReachingManifolds().size(); ++i0)
       {
          current_alignment += controller_msgs.msg.dds.ReachingManifoldMessagePubSubType
-               .getCdrSerializedSize(data.getReachingManifolds().get(a), current_alignment);
+               .getCdrSerializedSize(data.getReachingManifolds().get(i0), current_alignment);
       }
 
       return current_alignment - initial_alignment;

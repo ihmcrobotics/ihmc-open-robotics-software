@@ -27,7 +27,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 2000; ++a)
+      for (int i0 = 0; i0 < 2000; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -55,10 +55,10 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getTaskspaceTrajectoryPoints().size(); ++a)
+      for (int i0 = 0; i0 < data.getTaskspaceTrajectoryPoints().size(); ++i0)
       {
          current_alignment += controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType
-               .getCdrSerializedSize(data.getTaskspaceTrajectoryPoints().get(a), current_alignment);
+               .getCdrSerializedSize(data.getTaskspaceTrajectoryPoints().get(i0), current_alignment);
       }
 
       current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getAngularSelectionMatrix(), current_alignment);

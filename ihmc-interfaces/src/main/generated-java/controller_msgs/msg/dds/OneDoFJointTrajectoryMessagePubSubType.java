@@ -27,7 +27,7 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 2000; ++a)
+      for (int i0 = 0; i0 < 2000; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -47,10 +47,10 @@ public class OneDoFJointTrajectoryMessagePubSubType implements us.ihmc.pubsub.To
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getTrajectoryPoints().size(); ++a)
+      for (int i0 = 0; i0 < data.getTrajectoryPoints().size(); ++i0)
       {
          current_alignment += controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType
-               .getCdrSerializedSize(data.getTrajectoryPoints().get(a), current_alignment);
+               .getCdrSerializedSize(data.getTrajectoryPoints().get(i0), current_alignment);
       }
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);

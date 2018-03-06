@@ -30,13 +30,13 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 8; ++a)
+      for (int i0 = 0; i0 < 8; ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 8; ++a)
+      for (int i0 = 0; i0 < 8; ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -57,15 +57,15 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredCapturePoint2d(), current_alignment);
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCenterOfMass3d(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getLeftFootSupportPolygon2d().size(); ++a)
+      for (int i0 = 0; i0 < data.getLeftFootSupportPolygon2d().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLeftFootSupportPolygon2d().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLeftFootSupportPolygon2d().get(i0), current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getRightFootSupportPolygon2d().size(); ++a)
+      for (int i0 = 0; i0 < data.getRightFootSupportPolygon2d().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRightFootSupportPolygon2d().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRightFootSupportPolygon2d().get(i0), current_alignment);
       }
 
       return current_alignment - initial_alignment;

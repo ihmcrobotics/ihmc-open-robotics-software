@@ -28,7 +28,7 @@ public class TaskspaceTrajectoryStampedPubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.PoseStampedPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -49,9 +49,9 @@ public class TaskspaceTrajectoryStampedPubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getTrajectoryPointsStamped().size(); ++a)
+      for (int i0 = 0; i0 < data.getTrajectoryPointsStamped().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PoseStampedPubSubType.getCdrSerializedSize(data.getTrajectoryPointsStamped().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.PoseStampedPubSubType.getCdrSerializedSize(data.getTrajectoryPointsStamped().get(i0), current_alignment);
       }
 
       current_alignment += builtin_interfaces.msg.dds.DurationPubSubType.getCdrSerializedSize(data.getTimeFromStart(), current_alignment);

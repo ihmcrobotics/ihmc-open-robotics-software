@@ -35,7 +35,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 5000; ++a)
+      for (int i0 = 0; i0 < 5000; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -61,9 +61,9 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getLeaves().size(); ++a)
+      for (int i0 = 0; i0 < data.getLeaves().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType.getCdrSerializedSize(data.getLeaves().get(a), current_alignment);
+         current_alignment += controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType.getCdrSerializedSize(data.getLeaves().get(i0), current_alignment);
       }
 
       return current_alignment - initial_alignment;

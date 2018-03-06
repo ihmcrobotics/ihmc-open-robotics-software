@@ -27,7 +27,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -47,10 +47,10 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getJointTrajectoryMessages().size(); ++a)
+      for (int i0 = 0; i0 < data.getJointTrajectoryMessages().size(); ++i0)
       {
          current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType
-               .getCdrSerializedSize(data.getJointTrajectoryMessages().get(a), current_alignment);
+               .getCdrSerializedSize(data.getJointTrajectoryMessages().get(i0), current_alignment);
       }
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
