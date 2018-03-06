@@ -98,8 +98,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    {
       super.doAction();
 
-      boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
-      boolean requestSwingSpeedUp = icpErrorIsTooLarge;
+      boolean requestSwingSpeedUp = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
+      //boolean requestSwingSpeedUp = icpErrorIsTooLarge;
 
       if (walkingMessageHandler.hasRequestedFootstepAdjustment())
       {
@@ -123,14 +123,14 @@ public class WalkingSingleSupportState extends SingleSupportState
 
          if (footstepIsBeingAdjusted)
          {
-            requestSwingSpeedUp = true;
+            //requestSwingSpeedUp = true;
             walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
 
             feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
-            balanceManager.updateCurrentICPPlan();
+            //balanceManager.updateCurrentICPPlan();
             //legConfigurationManager.prepareForLegBracing(swingSide);
          }
       }
