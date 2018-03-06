@@ -11,4 +11,4 @@ byte USER = 7
 byte CALIBRATE = 8
 byte SOFT_STOP = 9
 
-byte current_bdi_robot_behavior -1
+byte current_bdi_robot_behavior 255

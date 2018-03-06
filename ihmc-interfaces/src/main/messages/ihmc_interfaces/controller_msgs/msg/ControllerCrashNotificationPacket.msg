@@ -7,5 +7,5 @@ byte ESTIMATOR_READ = 3
 byte ESTIMATOR_WRITE = 4
 byte ESTIMATOR_RUN = 5
 
-byte controller_crash_location -1
+byte controller_crash_location 255
 string stacktrace
