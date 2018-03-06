@@ -1,4 +1,4 @@
-package us.ihmc.robotics.stateMachines;
+package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 
 import static org.junit.Assert.assertEquals;
 
