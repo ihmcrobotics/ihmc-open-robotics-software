@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -23,14 +24,14 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
 
    private static final double defaultCoMHeightNominalParameter = 0.55;
    private final DoubleParameter comHeightNominalParameter = new DoubleParameter("comHeightNominal", registry, defaultCoMHeightNominalParameter);
-   private final DoubleParameter[] comPositionLowerLimitsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] comPositionUpperLimitsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] comVelocityLowerLimitsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] comVelocityUpperLimitsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] bodyOrientationLowerLimitsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] bodyOrientationUpperLimitsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] bodyAngularRateLowerLimitsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] bodyAngularRateUpperLimitsParameter = new DoubleParameter[3];
+   private final ParameterVector3D comPositionLowerLimitsParameter;
+   private final ParameterVector3D comPositionUpperLimitsParameter;
+   private final ParameterVector3D comVelocityLowerLimitsParameter;
+   private final ParameterVector3D comVelocityUpperLimitsParameter;
+   private final ParameterVector3D bodyOrientationLowerLimitsParameter;
+   private final ParameterVector3D bodyOrientationUpperLimitsParameter;
+   private final ParameterVector3D bodyAngularRateLowerLimitsParameter;
+   private final ParameterVector3D bodyAngularRateUpperLimitsParameter;
 
    private final AtomicReference<ComPositionPacket> comPositionPacket;
    private final AtomicReference<ComVelocityPacket> comVelocityPacket;
@@ -76,21 +77,18 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
       bodyOrientationInput = new Quaternion();
       bodyAngularRateInput = new Vector3D();
 
-      for (int i = 0; i < 3; i++)
-      {
-         double negMaxDouble = - Double.MAX_VALUE;
-         double maxDouble = Double.MAX_VALUE;
-         double comLowerLimit = (i == 2) ? 0.2 : negMaxDouble;
+      Vector3D defaultComPositionLowerLimits = new Vector3D(-Double.MAX_VALUE, - Double.MAX_VALUE, 0.2);
+      Vector3D negativeMaximumLimit = new Vector3D(- Double.MAX_VALUE, - Double.MAX_VALUE, - Double.MAX_VALUE);
+      Vector3D positiveMaximumLimit = new Vector3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 
-         comPositionLowerLimitsParameter[i] = new DoubleParameter("comPositionLowerLimit" + Axis.values[i], registry, comLowerLimit);
-         comPositionUpperLimitsParameter[i] = new DoubleParameter("comPositionUpperLimit" + Axis.values[i], registry, maxDouble);
-         comVelocityLowerLimitsParameter[i] = new DoubleParameter("comVelocityLowerLimit" + Axis.values[i], registry, negMaxDouble);
-         comVelocityUpperLimitsParameter[i] = new DoubleParameter("comVelocityUpperLimit" + Axis.values[i], registry, maxDouble);
-         bodyOrientationLowerLimitsParameter[i] = new DoubleParameter("bodyOrientationLowerLimit" + Axis.values[i], registry, negMaxDouble);
-         bodyOrientationUpperLimitsParameter[i] = new DoubleParameter("bodyOrientationUpperLimit" + Axis.values[i], registry, maxDouble);
-         bodyAngularRateLowerLimitsParameter[i] = new DoubleParameter("bodyAngularRateLowerLimit" + Axis.values[i], registry, negMaxDouble);
-         bodyAngularRateUpperLimitsParameter[i] = new DoubleParameter("bodyAngularRateUpperLimit" + Axis.values[i], registry, maxDouble);
-      }
+      comPositionLowerLimitsParameter = new ParameterVector3D("comPositionLowerLimit", defaultComPositionLowerLimits, registry);
+      comPositionUpperLimitsParameter = new ParameterVector3D("comPositionUpperLimit", positiveMaximumLimit, registry);
+      comVelocityLowerLimitsParameter = new ParameterVector3D("comVelocityLowerLimit", negativeMaximumLimit, registry);
+      comVelocityUpperLimitsParameter = new ParameterVector3D("comVelocityUpperLimit", positiveMaximumLimit, registry);
+      bodyOrientationLowerLimitsParameter = new ParameterVector3D("bodyOrientationLowerLimit", negativeMaximumLimit, registry);
+      bodyOrientationUpperLimitsParameter = new ParameterVector3D("bodyOrientationUpperLimit", positiveMaximumLimit, registry);
+      bodyAngularRateLowerLimitsParameter = new ParameterVector3D("bodyAngularRateLowerLimit", negativeMaximumLimit, registry);
+      bodyAngularRateUpperLimitsParameter = new ParameterVector3D("bodyAngularRateUpperLimit", positiveMaximumLimit, registry);
 
       // initialize com height
       yoComPositionInputZ.set(defaultCoMHeightNominalParameter);
@@ -104,11 +102,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             {
                comPositionPacket.set(packet);
                yoComPositionInputX.set(
-                     MathTools.clamp(comPositionPacket.get().getX(), comPositionLowerLimitsParameter[0].getValue(), comPositionUpperLimitsParameter[0].getValue()));
+                     MathTools.clamp(comPositionPacket.get().getX(), comPositionLowerLimitsParameter.getX(), comPositionUpperLimitsParameter.getX()));
                yoComPositionInputY.set(
-                     MathTools.clamp(comPositionPacket.get().getY(), comPositionLowerLimitsParameter[1].getValue(), comPositionUpperLimitsParameter[1].getValue()));
+                     MathTools.clamp(comPositionPacket.get().getY(), comPositionLowerLimitsParameter.getY(), comPositionUpperLimitsParameter.getY()));
                yoComPositionInputZ.set(
-                     MathTools.clamp(comPositionPacket.get().getZ(), comPositionLowerLimitsParameter[2].getValue(), comPositionUpperLimitsParameter[2].getValue()));
+                     MathTools.clamp(comPositionPacket.get().getZ(), comPositionLowerLimitsParameter.getZ(), comPositionUpperLimitsParameter.getZ()));
             }
          });
 
@@ -119,11 +117,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             {
                comVelocityPacket.set(packet);
                yoComVelocityInputX.set(
-                     MathTools.clamp(comVelocityPacket.get().getX(), comVelocityLowerLimitsParameter[0].getValue(), comVelocityUpperLimitsParameter[0].getValue()));
+                     MathTools.clamp(comVelocityPacket.get().getX(), comVelocityLowerLimitsParameter.getX(), comVelocityUpperLimitsParameter.getX()));
                yoComVelocityInputY.set(
-                     MathTools.clamp(comVelocityPacket.get().getY(), comVelocityLowerLimitsParameter[1].getValue(), comVelocityUpperLimitsParameter[1].getValue()));
+                     MathTools.clamp(comVelocityPacket.get().getY(), comVelocityLowerLimitsParameter.getY(), comVelocityUpperLimitsParameter.getY()));
                yoComVelocityInputZ.set(
-                     MathTools.clamp(comVelocityPacket.get().getZ(), comVelocityLowerLimitsParameter[2].getValue(), comVelocityUpperLimitsParameter[2].getValue()));
+                     MathTools.clamp(comVelocityPacket.get().getZ(), comVelocityLowerLimitsParameter.getZ(), comVelocityUpperLimitsParameter.getZ()));
             }
          });
 
@@ -133,12 +131,12 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             public void receivedPacket(BodyOrientationPacket packet)
             {
                bodyOrientationPacket.set(packet);
-               yoBodyOrientationInputYaw.set(MathTools.clamp(bodyOrientationPacket.get().getYaw(), bodyOrientationLowerLimitsParameter[0].getValue(),
-                     bodyOrientationUpperLimitsParameter[0].getValue()));
-               yoBodyOrientationInputPitch.set(MathTools.clamp(bodyOrientationPacket.get().getPitch(), bodyOrientationLowerLimitsParameter[1].getValue(),
-                     bodyOrientationUpperLimitsParameter[1].getValue()));
-               yoBodyOrientationInputRoll.set(MathTools.clamp(bodyOrientationPacket.get().getRoll(), bodyOrientationLowerLimitsParameter[2].getValue(),
-                     bodyOrientationUpperLimitsParameter[2].getValue()));
+               yoBodyOrientationInputYaw.set(MathTools.clamp(bodyOrientationPacket.get().getYaw(), bodyOrientationLowerLimitsParameter.getX(),
+                     bodyOrientationUpperLimitsParameter.getX()));
+               yoBodyOrientationInputPitch.set(MathTools.clamp(bodyOrientationPacket.get().getPitch(), bodyOrientationLowerLimitsParameter.getY(),
+                     bodyOrientationUpperLimitsParameter.getY()));
+               yoBodyOrientationInputRoll.set(MathTools.clamp(bodyOrientationPacket.get().getRoll(), bodyOrientationLowerLimitsParameter.getZ(),
+                     bodyOrientationUpperLimitsParameter.getZ()));
             }
          });
 
@@ -148,12 +146,12 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             public void receivedPacket(BodyAngularRatePacket packet)
             {
                bodyAngularRatePacket.set(packet);
-               yoBodyAngularRateInputX.set(MathTools.clamp(bodyAngularRatePacket.get().getX(), bodyAngularRateLowerLimitsParameter[0].getValue(),
-                     bodyAngularRateUpperLimitsParameter[0].getValue()));
-               yoBodyAngularRateInputY.set(MathTools.clamp(bodyAngularRatePacket.get().getY(), bodyAngularRateLowerLimitsParameter[1].getValue(),
-                     bodyAngularRateUpperLimitsParameter[1].getValue()));
-               yoBodyAngularRateInputZ.set(MathTools.clamp(bodyAngularRatePacket.get().getZ(), bodyAngularRateLowerLimitsParameter[2].getValue(),
-                     bodyAngularRateUpperLimitsParameter[2].getValue()));
+               yoBodyAngularRateInputX.set(MathTools.clamp(bodyAngularRatePacket.get().getX(), bodyAngularRateLowerLimitsParameter.getX(),
+                     bodyAngularRateUpperLimitsParameter.getX()));
+               yoBodyAngularRateInputY.set(MathTools.clamp(bodyAngularRatePacket.get().getY(), bodyAngularRateLowerLimitsParameter.getY(),
+                     bodyAngularRateUpperLimitsParameter.getY()));
+               yoBodyAngularRateInputZ.set(MathTools.clamp(bodyAngularRatePacket.get().getZ(), bodyAngularRateLowerLimitsParameter.getZ(),
+                     bodyAngularRateUpperLimitsParameter.getZ()));
             }
          });
       }

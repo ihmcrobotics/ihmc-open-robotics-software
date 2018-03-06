@@ -6,6 +6,7 @@ import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -14,8 +15,8 @@ public class QuadrupedPlanarVelocityInputProvider
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleParameter[] planarVelocityLowerLimitsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] planarVelocityUpperLimitsParameter = new DoubleParameter[3];
+   private final ParameterVector3D planarVelocityLowerLimitsParameter;
+   private final ParameterVector3D planarVelocityUpperLimitsParameter;
 
    private final YoDouble yoPlanarVelocityInputX;
    private final YoDouble yoPlanarVelocityInputY;
@@ -32,11 +33,11 @@ public class QuadrupedPlanarVelocityInputProvider
       yoPlanarVelocityInputZ.set(0);
       planarVelocityInput = new Vector3D();
 
-      for (int i = 0; i < 3; i++)
-      {
-         planarVelocityLowerLimitsParameter[i] = new DoubleParameter("planarVelocityLowerLimit" + Axis.values[i], registry, - Double.MAX_VALUE, - Double.MAX_VALUE, Double.MAX_VALUE);
-         planarVelocityUpperLimitsParameter[i] = new DoubleParameter("planarVelocityUpperLimit" + Axis.values[i], registry, Double.MAX_VALUE, - Double.MAX_VALUE, Double.MAX_VALUE);
-      }
+      Vector3D defaultPlanarVelocityLowerLimits = new Vector3D(- Double.MAX_VALUE, - Double.MAX_VALUE, - Double.MAX_VALUE);
+      Vector3D defaultPlanarVelocityUpperLimits = new Vector3D(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+
+      planarVelocityLowerLimitsParameter = new ParameterVector3D("planarVelocityLowerLimit", defaultPlanarVelocityLowerLimits, registry);
+      planarVelocityUpperLimitsParameter = new ParameterVector3D("planarVelocityUpperLimit", defaultPlanarVelocityUpperLimits, registry);
 
       if (globalDataProducer != null)
       {
@@ -47,11 +48,11 @@ public class QuadrupedPlanarVelocityInputProvider
             {
                packet.get(planarVelocityInput);
                yoPlanarVelocityInputX.set(MathTools
-                     .clamp(planarVelocityInput.getX(), planarVelocityLowerLimitsParameter[0].getValue(), planarVelocityUpperLimitsParameter[0].getValue()));
+                     .clamp(planarVelocityInput.getX(), planarVelocityLowerLimitsParameter.getX(), planarVelocityUpperLimitsParameter.getX()));
                yoPlanarVelocityInputY.set(MathTools
-                     .clamp(planarVelocityInput.getY(), planarVelocityLowerLimitsParameter[1].getValue(), planarVelocityUpperLimitsParameter[1].getValue()));
+                     .clamp(planarVelocityInput.getY(), planarVelocityLowerLimitsParameter.getY(), planarVelocityUpperLimitsParameter.getY()));
                yoPlanarVelocityInputZ.set(MathTools
-                     .clamp(planarVelocityInput.getZ(), planarVelocityLowerLimitsParameter[2].getValue(), planarVelocityUpperLimitsParameter[2].getValue()));
+                     .clamp(planarVelocityInput.getZ(), planarVelocityLowerLimitsParameter.getZ(), planarVelocityUpperLimitsParameter.getZ()));
             }
          });
       }
