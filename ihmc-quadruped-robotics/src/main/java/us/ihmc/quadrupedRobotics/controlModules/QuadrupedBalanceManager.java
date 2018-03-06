@@ -49,26 +49,7 @@ public class QuadrupedBalanceManager
 
    private final QuadrupedPostureInputProviderInterface postureProvider;
 
-   private final DoubleParameter[] comPositionProportionalGainsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] comPositionDerivativeGainsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] comPositionIntegralGainsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] dcmPositionProportionalGainsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] dcmPositionDerivativeGainsParameter = new DoubleParameter[3];
-   private final DoubleParameter[] dcmPositionIntegralGainsParameter = new DoubleParameter[3];
-
-   private final double[] comPositionProportionalGains = new double[3];
-   private final double[] comPositionDerivativeGains = new double[3];
-   private final double[] comPositionIntegralGains = new double[3];
-   private final double[] dcmPositionProportionalGains = new double[3];
-   private final double[] dcmPositionDerivativeGains = new double[3];
-   private final double[] dcmPositionIntegralGains = new double[3];
-
-   private final DoubleParameter comPositionMaxIntegralErrorParameter = new DoubleParameter("comPositionMaxIntegralError", registry, 0);
-   private final DoubleParameter dcmPositionMaxIntegralErrorParameter = new DoubleParameter("dcmPositionMaxIntegralError", registry, 0);
-   private final DoubleParameter vrpPositionRateLimitParameter = new DoubleParameter("vrpPositionRateLimit", registry, Double.MAX_VALUE);
-   private final DoubleParameter comPositionGravityCompensationParameter = new DoubleParameter("comPositionGravityCompensation", registry, 1);
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = new DoubleParameter("dcmPositionStepAdjustmentGain", registry, 1.5);
-   private final DoubleParameter initialTransitionDurationParameter = new DoubleParameter("initialTransitionDuration", registry, 0.5);
 
    private final YoFrameVector instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
    private final YoFrameVector accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
@@ -112,20 +93,6 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, postureProvider, registry, yoGraphicsListRegistry);
 
       crossoverProjection = new QuadrupedStepCrossoverProjection(controllerToolbox.getReferenceFrames().getBodyZUpFrame(), registry);
-
-      for (int i = 0; i < 3; i++)
-      {
-         double comPositionProportionalGain = (i == 2) ? 5000.0 : 0.0;
-         double comPositionDerivativeGain = (i == 2) ? 750.0 : 0.0;
-         double dcmPositionProportionalGain = (i == 2) ? 0.0 : 1.0;
-
-         comPositionProportionalGainsParameter[i] = new DoubleParameter("comPositionProportionalGain" + Axis.values[i], registry, comPositionProportionalGain);
-         comPositionDerivativeGainsParameter[i] = new DoubleParameter("comPositionDerivativeGain" + Axis.values[i], registry, comPositionDerivativeGain);
-         comPositionIntegralGainsParameter[i] = new DoubleParameter("comPositionIntegralGain" + Axis.values[i], registry, 0.0);
-         dcmPositionProportionalGainsParameter[i] = new DoubleParameter("dcmPositionProportionalGain" + Axis.values[i], registry, dcmPositionProportionalGain);
-         dcmPositionDerivativeGainsParameter[i] = new DoubleParameter("dcmPositionDerivativeGain" + Axis.values[i], registry, 0.0);
-         dcmPositionIntegralGainsParameter[i] = new DoubleParameter("dcmPositionIntegralGain" + Axis.values[i], registry, 0.0);
-      }
 
       adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
       {
