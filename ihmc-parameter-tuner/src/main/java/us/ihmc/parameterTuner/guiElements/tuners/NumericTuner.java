@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.text.Text;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
@@ -51,10 +52,8 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    {
       setSpacing(10.0);
       setAlignment(Pos.CENTER_LEFT);
-      setMaxHeight(Double.NEGATIVE_INFINITY);
-      setMaxWidth(Double.NEGATIVE_INFINITY);
-      setPrefWidth(800.0);
       setPadding(new Insets(0.0, 5.0, 5.0, 5.0));
+      HBox.setHgrow(slider, Priority.ALWAYS);
 
       getChildren().add(new Text("Value"));
       getChildren().add(value);

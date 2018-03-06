@@ -10,8 +10,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.ClipboardContent;
@@ -41,9 +41,9 @@ public class GuiController
    @FXML
    private CheckBox hideNamespaces;
    @FXML
-   private ParameterTree tree;
+   private StackPane treePane;
    @FXML
-   private ScrollPane scrollPane;
+   private TabPane tabPane;
    @FXML
    private VBox tuningBox;
    @FXML
@@ -55,6 +55,8 @@ public class GuiController
    private ChangeCollector changeCollector;
    private TuningBoxManager tuningBoxManager;
 
+   private final ParameterTree tree = new ParameterTree();
+
    public void initialize()
    {
       searchFieldParameters.textProperty().addListener(observable -> updateTree());
@@ -65,6 +67,7 @@ public class GuiController
       statusFilter.getSelectionModel().select(GuiParameterStatus.ANY);
       statusFilter.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> updateTree());
 
+      treePane.getChildren().add(tree);
       tree.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
       tree.setOnMouseClicked(new EventHandler<MouseEvent>()
       {
@@ -100,7 +103,7 @@ public class GuiController
             dragboard.setContent(clipboardContent);
          }
       });
-      scrollPane.setOnDragOver(new EventHandler<DragEvent>()
+      tabPane.setOnDragOver(new EventHandler<DragEvent>()
       {
          @Override
          public void handle(DragEvent event)
@@ -108,7 +111,7 @@ public class GuiController
             event.acceptTransferModes(TransferMode.MOVE);
          }
       });
-      scrollPane.setOnDragDropped(new EventHandler<DragEvent>()
+      tabPane.setOnDragDropped(new EventHandler<DragEvent>()
       {
          @Override
          public void handle(DragEvent event)
