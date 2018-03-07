@@ -47,6 +47,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GenericQuadrupedControllerFactoryDummyOutputDemo
 {
@@ -112,6 +114,10 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       footSwitchFactory.setFootSwitchType(FootSwitchType.TouchdownBased);
       QuadrantDependentList<FootSwitchInterface> footSwitches = footSwitchFactory.createFootSwitches();
 
+      List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         contactablePlaneBodies.add(contactableFeet.get(robotQuadrant));
+
       SensorOutputMapReadOnly sensorOutputMapReadOnly = createSensorProcessing(fullRobotModel, stateEstimatorParameters, registry);
       if (USE_KINEMATICS_BASED_STATE_ESTIMATOR)
       {
@@ -143,7 +149,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
 
       runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, controllerCoreOptimizationSettings, jointDesiredOutputList,
                                                            registry, yoGraphicsListRegistry, ignoredYoGraphicsListRegistry, dataProducer, contactableFeet,
-                                                           xGaitSettings, footSwitches, GRAVITY);
+                                                           contactablePlaneBodies, xGaitSettings, footSwitches, GRAVITY);
 
       controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
 

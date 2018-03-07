@@ -17,6 +17,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+import java.util.List;
+
 public class QuadrupedForceControllerToolbox
 {
    private final QuadrupedReferenceFrames referenceFrames;
@@ -34,6 +36,7 @@ public class QuadrupedForceControllerToolbox
    private final FullQuadrupedRobotModel fullRobotModel;
 
    private final QuadrantDependentList<YoPlaneContactState> footContactStates = new QuadrantDependentList<>();
+   private final List<ContactablePlaneBody> contactablePlaneBodies;
 
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                           YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -56,6 +59,7 @@ public class QuadrupedForceControllerToolbox
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
 
+      contactablePlaneBodies = runtimeEnvironment.getContactablePlaneBodies();
       double coefficientOfFriction = 0.5; // TODO: magic number...
       QuadrantDependentList<ContactablePlaneBody> contactableFeet = runtimeEnvironment.getContactableFeet();
 
@@ -135,5 +139,10 @@ public class QuadrupedForceControllerToolbox
    public YoPlaneContactState getFootContactState(RobotQuadrant robotQuadrant)
    {
       return footContactStates.get(robotQuadrant);
+   }
+
+   public List<ContactablePlaneBody> getContactablePlaneBodies()
+   {
+      return contactablePlaneBodies;
    }
 }

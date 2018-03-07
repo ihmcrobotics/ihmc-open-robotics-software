@@ -32,6 +32,7 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
@@ -70,6 +71,7 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
 
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+   private final WholeBodyControllerCore controllerCore;
 
    public QuadrupedSteppingState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
                                  QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
@@ -88,12 +90,13 @@ public class QuadrupedSteppingState implements QuadrupedController
                                                                                        controllerToolbox.getReferenceFrames().getCenterOfMassFrame(),
                                                                                        runtimeEnvironment.getControllerCoreOptimizationSettings(),
                                                                                        runtimeEnvironment.getGraphicsListRegistry(), registry);
-      //controlCoreToolbox.setupForVirtualModelControlSolver();
+
+      RigidBody[] controlledBodies = {fullRobotModel.getBody(), fullRobotModel.getFoot(RobotQuadrant.FRONT_LEFT), fullRobotModel.getFoot(RobotQuadrant.FRONT_RIGHT),
+            fullRobotModel.getFoot(RobotQuadrant.HIND_LEFT), fullRobotModel.getFoot(RobotQuadrant.HIND_RIGHT) };
+      controlCoreToolbox.setupForVirtualModelControlSolver(fullRobotModel.getBody(), controlledBodies, controllerToolbox.getContactablePlaneBodies());
       FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
-      /*
-      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(),
-                                                                           registry);
-                                                                           */
+      controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(),
+                                                   registry);
 
       // Initialize input providers.
       xGaitSettingsProvider = new YoQuadrupedXGaitSettings(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
