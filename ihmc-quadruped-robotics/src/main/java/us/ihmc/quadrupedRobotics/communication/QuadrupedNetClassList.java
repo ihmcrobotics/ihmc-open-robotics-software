@@ -26,12 +26,6 @@ import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.IntegerParameter;
-import us.ihmc.communication.packets.ParameterListPacket;
-import us.ihmc.communication.packets.RequestParameterListPacket;
-import us.ihmc.communication.packets.SetBooleanParameterPacket;
-import us.ihmc.communication.packets.SetDoubleArrayParameterPacket;
-import us.ihmc.communication.packets.SetDoubleParameterPacket;
-import us.ihmc.communication.packets.SetStringParameterPacket;
 import us.ihmc.robotics.dataStructures.parameter.StringParameter;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
@@ -87,19 +81,15 @@ public class QuadrupedNetClassList extends IHMCCommunicationKryoNetClassList
       registerPacketClass(QuadrupedXGaitSettingsPacket.class);
       registerPacketField(QuadrupedXGaitSettings.class);
 
-      registerPacketClass(SetBooleanParameterPacket.class);
       registerPacketField(String.class);
       registerPacketField(boolean.class);
 
-      registerPacketClass(SetDoubleArrayParameterPacket.class);
       registerPacketField(String.class);
       registerPacketField(double[].class);
 
-      registerPacketClass(SetDoubleParameterPacket.class);
       registerPacketField(String.class);
       registerPacketField(double.class);
 
-      registerPacketClass(SetStringParameterPacket.class);
       registerPacketField(String.class);
 
       registerPacketClass(QuadrupedTimedStepPacket.class);
@@ -109,8 +99,6 @@ public class QuadrupedNetClassList extends IHMCCommunicationKryoNetClassList
       registerPacketField(RobotQuadrant.class);
       registerPacketField(TimeInterval.class);
 
-      registerPacketClass(RequestParameterListPacket.class);
-      registerPacketClass(ParameterListPacket.class);
       registerPacketField(BooleanParameter.class);
       registerPacketField(DoubleArrayParameter.class);
       registerPacketField(DoubleParameter.class);

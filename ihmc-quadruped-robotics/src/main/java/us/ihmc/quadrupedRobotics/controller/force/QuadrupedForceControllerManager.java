@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerStatePacket;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -14,23 +13,13 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.force.states.*;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedStandController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
 import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
-import us.ihmc.communication.subscribers.ParameterPacketListener;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPreplannedStepStream;
-import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStreamMultiplexer;
-import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineState;
@@ -104,8 +93,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
                requestedEvent.set(packet.get());
             }
          });
-
-         ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
       }
       this.quadrupedForceControllerStatePacket = new QuadrupedForceControllerStatePacket();
 

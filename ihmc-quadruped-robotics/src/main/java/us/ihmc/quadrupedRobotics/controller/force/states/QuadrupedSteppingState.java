@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.communication.subscribers.ParameterPacketListener;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingStatePacket;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -87,8 +86,6 @@ public class QuadrupedSteppingState implements QuadrupedController
                requestedEvent.set(packet.get());
             }
          });
-
-         ParameterPacketListener parameterPacketListener = new ParameterPacketListener(globalDataProducer);
       }
 
       this.quadrupedSteppingStatePacket = new QuadrupedSteppingStatePacket();
