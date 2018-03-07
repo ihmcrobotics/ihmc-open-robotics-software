@@ -107,15 +107,13 @@ public class Capsule3D extends Shape3D<Capsule3D>
    @Override
    protected double evaluateQuery(double x, double y, double z, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalAtClosestPointToPack)
    {
-      // TODO 
-      return 0;
+      throw new RuntimeException("implement this method");
    }
 
    @Override
    protected boolean isInsideEpsilonShapeFrame(double x, double y, double z, double epsilon)
    {
-      // TODO
-      return false;
+      throw new RuntimeException("implement this method");
    }
 
 }
