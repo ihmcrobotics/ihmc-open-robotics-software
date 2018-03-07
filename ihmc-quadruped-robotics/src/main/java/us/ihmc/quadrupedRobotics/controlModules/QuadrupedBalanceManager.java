@@ -77,6 +77,7 @@ public class QuadrupedBalanceManager
    private final QuadrantDependentList<FramePoint3D> currentSolePositions;
    private final FramePoint3D tempPoint = new FramePoint3D();
 
+   private final FrameVector3D momentumRateForCommand = new FrameVector3D();
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
 
    public QuadrupedBalanceManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
@@ -103,6 +104,7 @@ public class QuadrupedBalanceManager
       linearMomentumRateWeight = new YoFrameVector("LinearMomentumRateWeight", worldFrame, registry);
       linearMomentumRateWeight.set(0.05, 0.05, 0.01);
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+      momentumRateCommand.setSelectionMatrixForLinearControl();
 
       adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
       {
@@ -206,7 +208,9 @@ public class QuadrupedBalanceManager
                                          yoDesiredDCMPosition, yoDesiredDCMVelocity);
 
       linearMomentumRateOfChangeToPack.changeFrame(worldFrame);
-      momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChangeToPack);
+      momentumRateForCommand.setIncludingFrame(linearMomentumRateOfChangeToPack);
+
+      momentumRateCommand.setLinearMomentumRate(momentumRateForCommand);
       momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
    }
 

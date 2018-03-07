@@ -8,8 +8,8 @@ public class GenericQuadrupedControllerCoreOptimizationSettings implements Contr
    private static final double jointAccelerationWeight = 0.005;
    private static final double jointJerkWeight = 0.1;
 
-   private static final double defaultRhoWeight = 5e-8;
-   private static final double defaultRhoMin = 0.025;
+   private static final double defaultRhoWeight = 5e-3;
+   private static final double defaultRhoMin = 0.1;
    private static final double defaultRhoRateDefaultWeight = 1e-5;
    private static final double defaultRhoRateHighWeight = 3e-3;
 

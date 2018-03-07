@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -20,6 +21,7 @@ import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedBodyOrientationManager
@@ -46,6 +48,8 @@ public class QuadrupedBodyOrientationManager
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
    private final MomentumRateCommand angularMomentumCommand = new MomentumRateCommand();
+   private final Wrench wrenchCommand;
+   private final VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
 
    private final YoFrameVector bodyAngularWeight = new YoFrameVector("bodyAngularWeight", worldFrame, registry);
 
@@ -73,6 +77,7 @@ public class QuadrupedBodyOrientationManager
       bodyAngularWeight.set(5.0, 5.0, 5.0);
 
       body = fullRobotModel.getBody();
+      wrenchCommand = new Wrench(body.getBodyFixedFrame(), worldFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -111,6 +116,9 @@ public class QuadrupedBodyOrientationManager
       angularMomentumRateToPack.changeFrame(worldFrame);
       angularMomentumCommand.setAngularMomentumRate(angularMomentumRateToPack);
       angularMomentumCommand.setAngularWeights(bodyAngularWeight);
+
+      wrenchCommand.setAngularPart(angularMomentumRateToPack);
+      virtualWrenchCommand.set(body, wrenchCommand);
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
@@ -120,11 +128,11 @@ public class QuadrupedBodyOrientationManager
 
    public OrientationFeedbackControlCommand getFeedbackControlCommand()
    {
-      return orientationFeedbackControlCommand;
+      return null;
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return angularMomentumCommand;
+      return virtualWrenchCommand;
    }
 }

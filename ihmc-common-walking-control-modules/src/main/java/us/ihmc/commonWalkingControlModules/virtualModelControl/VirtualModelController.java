@@ -28,7 +28,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 
 public class VirtualModelController
 {
-   private final static boolean USE_SUPER_JACOBIAN = true;
+   private final static boolean USE_SUPER_JACOBIAN = false;
    private final static boolean DISPLAY_GRAVITY_WRENCHES = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

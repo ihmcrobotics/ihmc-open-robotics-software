@@ -122,7 +122,7 @@ public class QuadrupedStandController implements QuadrupedController
       bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation);
 
       // update joint setpoints
-      taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
+      //taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
       return null;
    }
