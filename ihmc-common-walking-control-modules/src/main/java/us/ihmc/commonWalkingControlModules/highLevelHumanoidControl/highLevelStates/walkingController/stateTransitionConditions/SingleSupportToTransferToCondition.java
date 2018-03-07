@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.SingleSupportState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferState;
 
@@ -19,9 +19,9 @@ public class SingleSupportToTransferToCondition implements StateTransitionCondit
    }
 
    @Override
-   public boolean checkCondition()
+   public boolean testCondition(double timeInState)
    {
-      if (!singleSupportState.isDone())
+      if (!singleSupportState.isDone(timeInState))
          return false;
       return walkingMessageHandler.isNextFootstepFor(transferState.getTransferToSide().getOppositeSide());
    }

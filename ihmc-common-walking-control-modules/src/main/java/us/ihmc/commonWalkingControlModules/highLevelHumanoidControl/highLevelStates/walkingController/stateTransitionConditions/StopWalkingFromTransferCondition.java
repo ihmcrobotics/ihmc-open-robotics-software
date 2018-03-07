@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions;
 
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferState;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 public class StopWalkingFromTransferCondition implements StateTransitionCondition
 {
@@ -17,7 +17,7 @@ public class StopWalkingFromTransferCondition implements StateTransitionConditio
    }
 
    @Override
-   public boolean checkCondition()
+   public boolean testCondition(double timeInState)
    {
       RobotSide trailingFootSide = transferState.getTransferToSide().getOppositeSide();
       boolean noFootstep = !walkingMessageHandler.isNextFootstepFor(trailingFootSide);

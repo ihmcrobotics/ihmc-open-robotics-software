@@ -28,10 +28,10 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -40,7 +40,10 @@ public class SphereICPOptimizationController implements GenericSphereController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private enum SupportState {STANDING, DOUBLE, SINGLE}
+   private enum SupportState
+   {
+      STANDING, DOUBLE, SINGLE
+   }
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -57,7 +60,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    private final SphereControlToolbox controlToolbox;
    private final BasicHeightController heightController;
 
-   private final StateMachine<SupportState> stateMachine;
+   private final StateMachine<SupportState, State> stateMachine;
 
    private final ContinuousCMPBasedICPPlanner icpPlanner;
 
@@ -81,7 +84,6 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private final int numberOfBalls = 100;
    private final int simulatedTicksPerGraphicUpdate = 16;
-
 
    private final YoDouble yoTime;
 
@@ -109,7 +111,8 @@ public class SphereICPOptimizationController implements GenericSphereController
       omega0.set(controlToolbox.getOmega0());
       heightController = new BasicHeightController(controlToolbox, registry);
       icpPlanner = new ContinuousCMPBasedICPPlanner(controlToolbox.getBipedSupportPolygons(), controlToolbox.getContactableFeet(),
-            controlToolbox.getCapturePointPlannerParameters().getNumberOfFootstepsToConsider(), registry, yoGraphicsListRegistry);
+                                                    controlToolbox.getCapturePointPlannerParameters().getNumberOfFootstepsToConsider(), registry,
+                                                    yoGraphicsListRegistry);
       icpPlanner.setOmega0(omega0.getDoubleValue());
       icpPlanner.initializeParameters(controlToolbox.getCapturePointPlannerParameters());
 
@@ -118,23 +121,20 @@ public class SphereICPOptimizationController implements GenericSphereController
       icpGains.setKpParallelToMotion(2.0);
 
       icpOptimizationController = new ICPOptimizationController(null, controlToolbox.getICPOptimizationParameters(), controlToolbox.getBipedSupportPolygons(),
-                                                                controlToolbox.getICPControlPolygons(), controlToolbox.getContactableFeet(), controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
+                                                                controlToolbox.getICPControlPolygons(), controlToolbox.getContactableFeet(),
+                                                                controlToolbox.getControlDT(), registry, yoGraphicsListRegistry);
 
-      stateMachine = new StateMachine<>("supportStateMachine", "supportStateTime", SupportState.class, controlToolbox.getYoTime(), registry);
-      StandingState standingState = new StandingState();
-      DoubleSupportState doubleSupportState = new DoubleSupportState();
-      SingleSupportState singleSupportState = new SingleSupportState();
+      StateMachineFactory<SupportState, State> factory = new StateMachineFactory<>(SupportState.class);
+      factory.setNamePrefix("supportstateMachine").setRegistry(registry).buildYoClock(yoTime);
 
-      standingState.setDefaultNextState(doubleSupportState.getStateEnum());
-      doubleSupportState.setDefaultNextState(singleSupportState.getStateEnum());
+      factory.addStateAndDoneTransition(SupportState.STANDING, new StandingState(), SupportState.DOUBLE);
+      factory.addStateAndDoneTransition(SupportState.DOUBLE, new DoubleSupportState(), SupportState.SINGLE);
+      factory.addState(SupportState.SINGLE, new SingleSupportState());
 
-      singleSupportState.addStateTransition(new StateTransition<>(doubleSupportState.getStateEnum(), new TransitionToDoubleSupportCondition()));
-      singleSupportState.addStateTransition(new StateTransition<>(standingState.getStateEnum(), new TransitionToStandingCondition()));
+      factory.addTransition(SupportState.SINGLE, SupportState.DOUBLE, new TransitionToDoubleSupportCondition());
+      factory.addTransition(SupportState.SINGLE, SupportState.STANDING, new TransitionToStandingCondition());
 
-      stateMachine.addState(standingState);
-      stateMachine.addState(doubleSupportState);
-      stateMachine.addState(singleSupportState);
-      stateMachine.setCurrentState(SupportState.STANDING);
+      stateMachine = factory.build(SupportState.STANDING);
 
       cmpTrack = new BagOfBalls(numberOfBalls, 0.01, "eCMP", YoAppearance.Red(), registry, yoGraphicsListRegistry);
       icpReferenceTrack = new BagOfBalls(numberOfBalls, 0.01, "ICPReference", YoAppearance.Yellow(), registry, yoGraphicsListRegistry);
@@ -158,10 +158,11 @@ public class SphereICPOptimizationController implements GenericSphereController
    private final FramePoint2D perfectCMP = new FramePoint2D();
 
    private int counter = 0;
+
+   @Override
    public void doControl()
    {
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
+      stateMachine.doControlAndTransition();
 
       heightController.doControl();
 
@@ -196,6 +197,7 @@ public class SphereICPOptimizationController implements GenericSphereController
       }
    }
 
+   @Override
    public Vector3D getForces()
    {
       desiredForces.setX(planarForces.getX());
@@ -208,6 +210,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    private final FramePoint3D cmp3d = new FramePoint3D();
    private final FrameVector3D groundReactionForce = new FrameVector3D();
    private final FramePoint3D centerOfMass = new FramePoint3D();
+
    private FrameVector3D computeGroundReactionForce(FramePoint2D cmp2d, double fZ)
    {
       centerOfMass.setToZero(centerOfMassFrame);
@@ -239,27 +242,21 @@ public class SphereICPOptimizationController implements GenericSphereController
       }
    }
 
-   private class StandingState extends State<SupportState>
+   private class StandingState implements State
    {
       private final FramePoint2D desiredCMP = new FramePoint2D();
 
-      public StandingState()
+      @Override
+      public void doAction(double timeInState)
       {
-         super(SupportState.STANDING);
-      }
-
-      @Override public void doAction()
-      {
-         if (controlToolbox.hasFootsteps())
-            this.transitionToDefaultNextState();
-
          icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP, capturePoint2d,
                                            capturePointVelocity2d, omega0.getDoubleValue());
          icpOptimizationController.getDesiredCMP(desiredCMP);
          yoDesiredCMP.set(desiredCMP, 0.0);
       }
 
-      @Override public void doTransitionIntoAction()
+      @Override
+      public void onEntry()
       {
          nextFootsteps.clear();
 
@@ -276,23 +273,26 @@ public class SphereICPOptimizationController implements GenericSphereController
             contactStates.get(robotSide).setFullyConstrained();
       }
 
-      @Override public void doTransitionOutOfAction()
+      @Override
+      public void onExit()
       {
+      }
 
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return controlToolbox.hasFootsteps();
       }
    }
 
    private final FootstepTiming timing = new FootstepTiming();
-   private class SingleSupportState extends State<SupportState>
+
+   private class SingleSupportState implements State
    {
       private final FramePoint2D desiredCMP = new FramePoint2D();
 
-      public SingleSupportState()
-      {
-         super(SupportState.SINGLE);
-      }
-
-      @Override public void doAction()
+      @Override
+      public void doAction(double timeInState)
       {
          icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP, capturePoint2d,
                                            capturePointVelocity2d, omega0.getDoubleValue());
@@ -312,7 +312,8 @@ public class SphereICPOptimizationController implements GenericSphereController
          updateViz(false);
       }
 
-      @Override public void doTransitionIntoAction()
+      @Override
+      public void onEntry()
       {
          nextFootsteps.clear();
 
@@ -358,31 +359,31 @@ public class SphereICPOptimizationController implements GenericSphereController
          updateViz(false);
       }
 
-      @Override public void doTransitionOutOfAction()
+      @Override
+      public void onExit()
       {
+      }
+
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return false;
       }
    }
 
-   private class DoubleSupportState extends State<SupportState>
+   private class DoubleSupportState implements State
    {
       private final FramePoint2D desiredCMP = new FramePoint2D();
 
-      public DoubleSupportState()
+      @Override
+      public void doAction(double timeInState)
       {
-         super(SupportState.DOUBLE);
-      }
-
-      @Override public void doAction()
-      {
-         if (icpPlanner.isDone())
-            transitionToDefaultNextState();
-
          icpOptimizationController.compute(yoTime.getDoubleValue(), desiredCapturePoint2d, desiredCapturePointVelocity2d, perfectCMP, capturePoint2d,
                                            capturePointVelocity2d, omega0.getDoubleValue());
          icpOptimizationController.getDesiredCMP(desiredCMP);
          yoDesiredCMP.set(desiredCMP, 0.0);
 
-         if (getPreviousState().getStateEnum() != SupportState.STANDING)
+         if (stateMachine.getPreviousStateKey() != SupportState.STANDING)
          {
             if (icpOptimizationController.useStepAdjustment())
             {
@@ -398,7 +399,8 @@ public class SphereICPOptimizationController implements GenericSphereController
          updateViz(true);
       }
 
-      @Override public void doTransitionIntoAction()
+      @Override
+      public void onEntry()
       {
          nextFootsteps.clear();
 
@@ -438,15 +440,22 @@ public class SphereICPOptimizationController implements GenericSphereController
          updateViz(true);
       }
 
-      @Override public void doTransitionOutOfAction()
+      @Override
+      public void onExit()
       {
+      }
 
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         return icpPlanner.isDone();
       }
    }
 
    private class TransitionToStandingCondition implements StateTransitionCondition
    {
-      public boolean checkCondition()
+      @Override
+      public boolean testCondition(double timeInState)
       {
          if (icpPlanner.isDone())
             return !controlToolbox.hasFootsteps();
@@ -457,7 +466,8 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private class TransitionToDoubleSupportCondition implements StateTransitionCondition
    {
-      public boolean checkCondition()
+      @Override
+      public boolean testCondition(double timeInState)
       {
          if (icpPlanner.isDone())
             return controlToolbox.hasFootsteps();

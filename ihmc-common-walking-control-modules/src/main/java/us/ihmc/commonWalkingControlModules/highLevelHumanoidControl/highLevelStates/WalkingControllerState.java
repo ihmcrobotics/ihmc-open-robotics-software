@@ -138,7 +138,7 @@ public class WalkingControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       walkingController.doAction();
 
@@ -164,14 +164,14 @@ public class WalkingControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       initialize();
       walkingController.resetJointIntegrators();
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       walkingController.resetJointIntegrators();
    }

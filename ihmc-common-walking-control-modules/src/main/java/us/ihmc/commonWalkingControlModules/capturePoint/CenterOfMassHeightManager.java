@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
@@ -25,8 +22,9 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.GenericStateMachine;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -46,7 +44,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class CenterOfMassHeightManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final GenericStateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> stateMachine;
+   private final StateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> stateMachine;
    private final YoEnum<PelvisHeightControlMode> requestedState;
 
    /** Manages the height of the robot by default, Tries to adjust the pelvis based on the nominal height requested **/
@@ -69,7 +67,6 @@ public class CenterOfMassHeightManager
       parentRegistry.addChild(registry);
       YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
-      stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", PelvisHeightControlMode.class, yoTime, registry);
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
 
       PDGains gains = walkingControllerParameters.getCoMHeightControlGains();
@@ -91,29 +88,27 @@ public class CenterOfMassHeightManager
       //normal control
       centerOfMassHeightControlState = new CenterOfMassHeightControlState(comHeightGains, controllerToolbox, walkingControllerParameters, registry);
 
-      setupStateMachine();
+      stateMachine = setupStateMachine(namePrefix, yoTime);
       enableUserPelvisControlDuringWalking.set(false);
    }
 
-   private void setupStateMachine()
+   private StateMachine<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
    {
-      List<PelvisAndCenterOfMassHeightControlState> states = new ArrayList<>();
-      states.add(centerOfMassHeightControlState);
-      states.add(pelvisHeightControlState);
+      StateMachineFactory<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> factory = new StateMachineFactory<>(PelvisHeightControlMode.class);
+      factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(timeProvider);
+      
+      factory.addState(PelvisHeightControlMode.WALKING_CONTROLLER, centerOfMassHeightControlState);
+      factory.addState(PelvisHeightControlMode.USER, pelvisHeightControlState);
+      
+      for (PelvisHeightControlMode from : PelvisHeightControlMode.values())
+         factory.addRequestedTransition(from, requestedState);
 
-      for (PelvisAndCenterOfMassHeightControlState fromState : states)
-      {
-         for (PelvisAndCenterOfMassHeightControlState toState : states)
-         {
-            StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
-         }
-         stateMachine.addState(fromState);
-      }
+      return factory.build(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
    public void initialize()
    {
-      requestState(centerOfMassHeightControlState.getStateEnum());
+      requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
    /**
@@ -127,8 +122,7 @@ public class CenterOfMassHeightManager
 
    public void compute()
    {
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
+      stateMachine.doControlAndTransition();
    }
 
    /**
@@ -140,17 +134,17 @@ public class CenterOfMassHeightManager
       if (enableUserPelvisControlDuringWalking.getBooleanValue())
          return;
 
-      if(stateMachine.getCurrentStateEnum().equals(PelvisHeightControlMode.USER))
+      if(stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.USER))
       {
          //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
          centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
-         requestState(centerOfMassHeightControlState.getStateEnum());
+         requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
       }
    }
 
    private void requestState(PelvisHeightControlMode state)
    {
-      if (stateMachine.getCurrentStateEnum() != state)
+      if (stateMachine.getCurrentStateKey() != state)
       {
          requestedState.set(state);
       }
@@ -178,7 +172,7 @@ public class CenterOfMassHeightManager
 
          if (pelvisHeightControlState.handlePelvisTrajectoryCommand(command, tempPose))
          {
-            requestState(pelvisHeightControlState.getStateEnum());
+            requestState(PelvisHeightControlMode.USER);
             return;
          }
 
@@ -187,7 +181,7 @@ public class CenterOfMassHeightManager
       }
 
       centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
-      requestState(centerOfMassHeightControlState.getStateEnum());
+      requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
    /**
@@ -207,7 +201,7 @@ public class CenterOfMassHeightManager
 
          if (pelvisHeightControlState.handlePelvisHeightTrajectoryCommand(command, tempPose))
          {
-            requestState(pelvisHeightControlState.getStateEnum());
+            requestState(PelvisHeightControlMode.USER);
             return;
          }
          PrintTools.info("pelvisHeightControlState failed to handle PelvisTrajectoryCommand");
@@ -215,7 +209,7 @@ public class CenterOfMassHeightManager
       }
 
       centerOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
-      requestState(centerOfMassHeightControlState.getStateEnum());
+      requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
    /**
@@ -284,7 +278,7 @@ public class CenterOfMassHeightManager
    public boolean getControlHeightWithMomentum()
    {
       // GW: revert this from returning true always for now to fix a test.
-      return stateMachine.getCurrentStateEnum().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
+      return stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.WALKING_CONTROLLER);
    }
 
    public YoPDGains getComHeightGains()

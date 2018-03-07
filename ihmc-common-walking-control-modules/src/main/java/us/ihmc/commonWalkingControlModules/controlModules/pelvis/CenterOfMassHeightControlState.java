@@ -35,7 +35,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightControlState
+public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeightControlState
 {
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -72,7 +72,6 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    public CenterOfMassHeightControlState(YoPDGains comHeightGains, HighLevelHumanoidControllerToolbox controllerToolbox,
                                          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
-      super(PelvisHeightControlMode.WALKING_CONTROLLER);
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
@@ -303,7 +302,7 @@ public class CenterOfMassHeightControlState extends PelvisAndCenterOfMassHeightC
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
    }
 

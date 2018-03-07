@@ -1,19 +1,19 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.FinishableState;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
 import java.util.EnumMap;
+
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public interface ControllerStateTransitionFactory<E extends Enum<E>>
 {
    /**
-    * Gets the new transition. If it has not been created previously, this creates it, and then returns it.
+    * Gets the new transition. If it has not been created previously, this creates it, and then returns
+    * it.
     */
-   StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends FinishableState<E>> stateMap, HighLevelControllerFactoryHelper controllerFactoryHelper,
+   StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends State> stateMap, HighLevelControllerFactoryHelper controllerFactoryHelper,
                                                  YoVariableRegistry parentRegistry);
 
    /**

@@ -1,8 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -18,8 +15,9 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.GenericStateMachine;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -29,7 +27,7 @@ public class PelvisOrientationManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final GenericStateMachine<PelvisOrientationControlMode, PelvisOrientationControlState> stateMachine;
+   private final StateMachine<PelvisOrientationControlMode, PelvisOrientationControlState> stateMachine;
    private final YoEnum<PelvisOrientationControlMode> requestedState;
    private final YoBoolean enableUserPelvisControlDuringWalking = new YoBoolean("EnableUserPelvisControlDuringWalking", registry);
 
@@ -45,30 +43,31 @@ public class PelvisOrientationManager
       parentRegistry.addChild(registry);
       YoDouble yoTime = controllerToolbox.getYoTime();
       String namePrefix = getClass().getSimpleName();
-      stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", PelvisOrientationControlMode.class, yoTime, registry);
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisOrientationControlMode.class, true);
 
       walkingManager = new ControllerPelvisOrientationManager(gains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox, registry);
       userManager = new UserPelvisOrientationManager(gains, controllerToolbox, registry);
-      setupStateMachine();
+
+      stateMachine = setupStateMachine(namePrefix, yoTime);
 
       enableUserPelvisControlDuringWalking.set(false);
    }
 
-   private void setupStateMachine()
+   private StateMachine<PelvisOrientationControlMode, PelvisOrientationControlState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
    {
-      List<PelvisOrientationControlState> states = new ArrayList<>();
-      states.add(walkingManager);
-      states.add(userManager);
+      StateMachineFactory<PelvisOrientationControlMode, PelvisOrientationControlState> factory = new StateMachineFactory<>(PelvisOrientationControlMode.class);
+      factory.setNamePrefix(namePrefix + "State").setRegistry(registry).buildYoClock(timeProvider);
+      
+      factory.addState(PelvisOrientationControlMode.WALKING_CONTROLLER, walkingManager);
+      factory.addState(PelvisOrientationControlMode.USER, userManager);
 
-      for (PelvisOrientationControlState fromState : states)
+      for (PelvisOrientationControlMode from : PelvisOrientationControlMode.values())
       {
-         for (PelvisOrientationControlState toState : states)
-         {
-            StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
-         }
-         stateMachine.addState(fromState);
+         factory.addRequestedTransition(from, requestedState);
+         factory.addRequestedTransition(from, from, requestedState);
       }
+
+      return factory.build(PelvisOrientationControlMode.WALKING_CONTROLLER);
    }
 
    public void setWeights(Vector3DReadOnly weight)
@@ -79,21 +78,20 @@ public class PelvisOrientationManager
 
    public void compute()
    {
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
+      stateMachine.doControlAndTransition();
    }
 
    public void initialize()
    {
       walkingManager.resetOrientationOffset();
-      requestState(walkingManager.getStateEnum());
+      requestState(PelvisOrientationControlMode.WALKING_CONTROLLER);
       walkingManager.setToZeroInMidFeetZUpFrame();
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
       updateOffsetInWalkingManager();
-      requestState(walkingManager.getStateEnum());
+      requestState(PelvisOrientationControlMode.WALKING_CONTROLLER);
    }
 
    public void prepareForLocomotion()
@@ -102,12 +100,12 @@ public class PelvisOrientationManager
          return;
 
       updateOffsetInWalkingManager();
-      requestState(walkingManager.getStateEnum());
+      requestState(PelvisOrientationControlMode.WALKING_CONTROLLER);
    }
 
    private void updateOffsetInWalkingManager()
    {
-      if (stateMachine.getCurrentStateEnum() == walkingManager.getStateEnum())
+      if (stateMachine.getCurrentStateKey() == PelvisOrientationControlMode.WALKING_CONTROLLER)
       {
          return;
       }
@@ -212,7 +210,7 @@ public class PelvisOrientationManager
       stateMachine.getCurrentState().getCurrentDesiredOrientation(tempOrientation);
       if (userManager.handlePelvisOrientationTrajectoryCommands(command, tempOrientation))
       {
-         requestState(userManager.getStateEnum());
+         requestState(PelvisOrientationControlMode.USER);
          return true;
       }
       return false;
@@ -237,7 +235,7 @@ public class PelvisOrientationManager
 
    private void requestState(PelvisOrientationControlMode state)
    {
-      if (stateMachine.getCurrentStateEnum() != state)
+      if (stateMachine.getCurrentStateKey() != state)
       {
          requestedState.set(state);
       }

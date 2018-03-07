@@ -5,27 +5,27 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotics.partNames.FingerName;
-import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.partNames.FingerName;
+import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotiq.RobotiqGraspMode;
+import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
-import us.ihmc.robotiq.RobotiqGraspMode;
-import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class IndividualRobotiqHandController implements RobotController
 {
@@ -67,7 +67,7 @@ public class IndividualRobotiqHandController implements RobotController
    private final YoEnum<HandConfiguration> handConfiguration;
    private final YoEnum<HandConfiguration> handDesiredConfiguration;
    
-   private StateMachine<GraspState> stateMachine;
+   private StateMachine<GraspState, State> stateMachine;
 
    public IndividualRobotiqHandController(RobotSide robotSide, YoDouble yoTime, YoDouble trajectoryTime, FloatingRootJointRobot simulatedRobot,
          YoVariableRegistry parentRegistry)
@@ -143,328 +143,192 @@ public class IndividualRobotiqHandController implements RobotController
       handDesiredConfiguration = new YoEnum<>(sidePrefix + "RobotiqHandDesiredConfiguration", registry, HandConfiguration.class);
       handDesiredConfiguration.set(HandConfiguration.OPEN);
       
-      stateMachine = new StateMachine<>(sidePrefix + "RobotiqGraspStateMachine", "FingerTrajectoryTime", GraspState.class, yoTime, registry);
-      setupStateMachine();
+      stateMachine = setupStateMachine(sidePrefix);
    }
    
-   private void setupStateMachine()
+   private StateMachine<GraspState, State> setupStateMachine(String sidePrefix)
    {
-      State<GraspState> stateOpenBasicGrip = new OpenBasicGrip();
-      State<GraspState> stateOpenThumbBasicGrip = new OpenThumbBasicGrip();
-      State<GraspState> stateClosedBasicGrip = new ClosedBasicGrip();
-      State<GraspState> stateClosedThumbBasicGrip = new ClosedThumbBasicGrip();
-      State<GraspState> stateOpenPinchGrip = new OpenPinchGrip();
-      State<GraspState> stateOpenThumbPinchGrip = new OpenThumbPinchGrip();
-      State<GraspState> stateClosedPinchGrip = new ClosedPinchGrip();
-      State<GraspState> stateClosedThumbPinchGrip = new ClosedThumbPinchGrip();
-      State<GraspState> stateOpenWideGrip = new OpenWideGrip();
-      State<GraspState> stateOpenThumbWideGrip = new OpenThumbWideGrip();
-      State<GraspState> stateClosedWideGrip = new ClosedWideGrip();
-      State<GraspState> stateClosedThumbWideGrip = new ClosedThumbWideGrip();
-      State<GraspState> stateHookGrip = new HookGrip();
+      StateMachineFactory<GraspState, State> factory = new StateMachineFactory<>(GraspState.class);
+      factory.setNamePrefix(sidePrefix + "RobotiqGraspStateMachine").setRegistry(registry).buildYoClock(yoTime);
+      State stateOpenBasicGrip = new OpenBasicGrip();
+      State stateOpenThumbBasicGrip = new OpenThumbBasicGrip();
+      State stateClosedBasicGrip = new ClosedBasicGrip();
+      State stateClosedThumbBasicGrip = new ClosedThumbBasicGrip();
+      State stateOpenPinchGrip = new OpenPinchGrip();
+      State stateOpenThumbPinchGrip = new OpenThumbPinchGrip();
+      State stateClosedPinchGrip = new ClosedPinchGrip();
+      State stateClosedThumbPinchGrip = new ClosedThumbPinchGrip();
+      State stateOpenWideGrip = new OpenWideGrip();
+      State stateOpenThumbWideGrip = new OpenThumbWideGrip();
+      State stateClosedWideGrip = new ClosedWideGrip();
+      State stateClosedThumbWideGrip = new ClosedThumbWideGrip();
+      State stateHookGrip = new HookGrip();
       
-      stateMachine.addState(stateOpenBasicGrip);
-      stateMachine.addState(stateOpenThumbBasicGrip);
-      stateMachine.addState(stateClosedBasicGrip);
-      stateMachine.addState(stateClosedThumbBasicGrip);
-      stateMachine.addState(stateOpenPinchGrip);
-      stateMachine.addState(stateOpenThumbPinchGrip);
-      stateMachine.addState(stateClosedPinchGrip);
-      stateMachine.addState(stateClosedThumbPinchGrip);
-      stateMachine.addState(stateOpenWideGrip);
-      stateMachine.addState(stateOpenThumbWideGrip);
-      stateMachine.addState(stateClosedWideGrip);
-      stateMachine.addState(stateClosedThumbWideGrip);
-      stateMachine.addState(stateHookGrip);
-      stateMachine.setCurrentState(GraspState.BASIC_OPEN);
+      factory.addState(GraspState.BASIC_OPEN, stateOpenBasicGrip);
+      factory.addState(GraspState.BASIC_ONLY_THUMB_OPEN, stateOpenThumbBasicGrip);
+      factory.addState(GraspState.BASIC_CLOSED, stateClosedBasicGrip);
+      factory.addState(GraspState.BASIC_ONLY_THUMB_CLOSED, stateClosedThumbBasicGrip);
+      factory.addState(GraspState.PINCH_OPEN, stateOpenPinchGrip);
+      factory.addState(GraspState.PINCH_ONLY_THUMB_OPEN, stateOpenThumbPinchGrip);
+      factory.addState(GraspState.PINCH_CLOSED, stateClosedPinchGrip);
+      factory.addState(GraspState.PINCH_ONLY_THUMB_CLOSED, stateClosedThumbPinchGrip);
+      factory.addState(GraspState.WIDE_OPEN, stateOpenWideGrip);
+      factory.addState(GraspState.WIDE_ONLY_THUMB_OPEN, stateOpenThumbWideGrip);
+      factory.addState(GraspState.WIDE_CLOSED, stateClosedWideGrip);
+      factory.addState(GraspState.WIDE_ONLY_THUMB_CLOSED, stateClosedThumbWideGrip);
+      factory.addState(GraspState.HOOK, stateHookGrip);
       
-      StateTransitionCondition openBasicGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN);
-         }
-      };
+      StateTransitionCondition openBasicGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN);
       
-      StateTransitionCondition openThumbBasicGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_THUMB);
-         }
-      };
+      StateTransitionCondition openThumbBasicGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_THUMB);
       
-      StateTransitionCondition openFingersBasicGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_FINGERS);
-         }
-      };
+      StateTransitionCondition openFingersBasicGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_FINGERS);
       
-      StateTransitionCondition closedBasicGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE);
-         }
-      };
+      StateTransitionCondition closedBasicGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE);
       
-      StateTransitionCondition closedThumbBasicGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_THUMB);
-         }
-      };
+      StateTransitionCondition closedThumbBasicGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_THUMB);
       
-      StateTransitionCondition closedFingersBasicGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS);
-         }
-      };
+      StateTransitionCondition closedFingersBasicGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.BASIC_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS);
       
-      StateTransitionCondition openPinchGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN);
-         }
-      };
+      StateTransitionCondition openPinchGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN);
       
-      StateTransitionCondition openThumbPinchGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_THUMB);
-         }
-      };
+      StateTransitionCondition openThumbPinchGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_THUMB);
       
-      StateTransitionCondition openFingersPinchGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_FINGERS);
-         }
-      };
+      StateTransitionCondition openFingersPinchGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_FINGERS);
       
-      StateTransitionCondition closedPinchGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE);
-         }
-      };
+      StateTransitionCondition closedPinchGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE);
       
-      StateTransitionCondition closedThumbPinchGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_THUMB);
-         }
-      };
+      StateTransitionCondition closedThumbPinchGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_THUMB);
       
-      StateTransitionCondition closedFingersPinchGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS);
-         }
-      };
+      StateTransitionCondition closedFingersPinchGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.PINCH_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS);
       
-      StateTransitionCondition openWideGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN);
-         }
-      };
+      StateTransitionCondition openWideGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN);
       
-      StateTransitionCondition openThumbWideGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_THUMB);
-         }
-      };
+      StateTransitionCondition openThumbWideGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_THUMB);
       
-      StateTransitionCondition openFingersWideGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_FINGERS);
-         }
-      };
+      StateTransitionCondition openFingersWideGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.OPEN_FINGERS);
       
-      StateTransitionCondition closedWideGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE);
-         }
-      };
+      StateTransitionCondition closedWideGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE);
       
-      StateTransitionCondition closedThumbWideGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_THUMB);
-         }
-      };
+      StateTransitionCondition closedThumbWideGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_THUMB);
       
-      StateTransitionCondition closedFingersWideGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS);
-         }
-      };
+      StateTransitionCondition closedFingersWideGripCondition = time -> desiredGraspMode.getEnumValue().equals(RobotiqGraspMode.WIDE_MODE) && handDesiredConfiguration.getEnumValue().equals(HandConfiguration.CLOSE_FINGERS);
       
-      StateTransitionCondition hookGripCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return handDesiredConfiguration.getEnumValue().equals(HandConfiguration.HOOK);
-         }
-      };
+      StateTransitionCondition hookGripCondition = time -> handDesiredConfiguration.getEnumValue().equals(HandConfiguration.HOOK);
       
       //BASIC_OPEN
-      stateOpenBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_CLOSED, closedBasicGripCondition));
-      stateOpenBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_ONLY_THUMB_CLOSED, closedThumbBasicGripCondition));
-      stateOpenBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_ONLY_THUMB_OPEN, closedFingersBasicGripCondition));
-      stateOpenBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
-      stateOpenBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
-      stateOpenBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.HOOK, hookGripCondition));
+      factory.addTransition(GraspState.BASIC_OPEN, GraspState.BASIC_CLOSED, closedBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_OPEN, GraspState.BASIC_ONLY_THUMB_CLOSED, closedThumbBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_OPEN, GraspState.BASIC_ONLY_THUMB_OPEN, closedFingersBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_OPEN, GraspState.PINCH_OPEN, openPinchGripCondition);
+      factory.addTransition(GraspState.BASIC_OPEN, GraspState.WIDE_OPEN, openWideGripCondition);
+      factory.addTransition(GraspState.BASIC_OPEN, GraspState.HOOK, hookGripCondition);
       
       //BASIC_ONLY_THUMB_OPEN
-      stateOpenThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateOpenThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openFingersBasicGripCondition));
-      stateOpenThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_CLOSED, closedBasicGripCondition));
-      stateOpenThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_CLOSED, closedThumbBasicGripCondition));
-      stateOpenThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
-      stateOpenThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
-      stateOpenThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.HOOK, hookGripCondition));
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_OPEN, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_OPEN, GraspState.BASIC_OPEN, openFingersBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_OPEN, GraspState.BASIC_CLOSED, closedBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_OPEN, GraspState.BASIC_CLOSED, closedThumbBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_OPEN, GraspState.PINCH_OPEN, openPinchGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_OPEN, GraspState.WIDE_OPEN, openWideGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_OPEN, GraspState.HOOK, hookGripCondition);
       
       //BASIC_CLOSED
-      stateClosedBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateClosedBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_ONLY_THUMB_OPEN, openThumbBasicGripCondition));
-      stateClosedBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_ONLY_THUMB_CLOSED, openFingersBasicGripCondition));
-      stateClosedBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
-      stateClosedBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
-      stateClosedBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.HOOK, hookGripCondition));
+      factory.addTransition(GraspState.BASIC_CLOSED, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_CLOSED, GraspState.BASIC_ONLY_THUMB_OPEN, openThumbBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_CLOSED, GraspState.BASIC_ONLY_THUMB_CLOSED, openFingersBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_CLOSED, GraspState.PINCH_OPEN, openPinchGripCondition);
+      factory.addTransition(GraspState.BASIC_CLOSED, GraspState.WIDE_OPEN, openWideGripCondition);
+      factory.addTransition(GraspState.BASIC_CLOSED, GraspState.HOOK, hookGripCondition);
       
       //BASIC_ONLY_THUMB_CLOSED
-      stateClosedThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateClosedThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openThumbBasicGripCondition));
-      stateClosedThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_CLOSED, closedBasicGripCondition));
-      stateClosedThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_CLOSED, closedFingersBasicGripCondition));
-      stateClosedThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
-      stateClosedThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
-      stateClosedThumbBasicGrip.addStateTransition(new StateTransition<GraspState>(GraspState.HOOK, hookGripCondition));
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_CLOSED, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_CLOSED, GraspState.BASIC_OPEN, openThumbBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_CLOSED, GraspState.BASIC_CLOSED, closedBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_CLOSED, GraspState.BASIC_CLOSED, closedFingersBasicGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_CLOSED, GraspState.PINCH_OPEN, openPinchGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_CLOSED, GraspState.WIDE_OPEN, openWideGripCondition);
+      factory.addTransition(GraspState.BASIC_ONLY_THUMB_CLOSED, GraspState.HOOK, hookGripCondition);
       
       //PINCH_OPEN
-      stateOpenPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_CLOSED, closedPinchGripCondition));
-      stateOpenPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_ONLY_THUMB_CLOSED, closedThumbPinchGripCondition));
-      stateOpenPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_ONLY_THUMB_OPEN, closedFingersPinchGripCondition));
-      stateOpenPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateOpenPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
-      stateOpenPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.HOOK, hookGripCondition));
+      factory.addTransition(GraspState.PINCH_OPEN, GraspState.PINCH_CLOSED, closedPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_OPEN, GraspState.PINCH_ONLY_THUMB_CLOSED, closedThumbPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_OPEN, GraspState.PINCH_ONLY_THUMB_OPEN, closedFingersPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_OPEN, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.PINCH_OPEN, GraspState.WIDE_OPEN, openWideGripCondition);
+      factory.addTransition(GraspState.PINCH_OPEN, GraspState.HOOK, hookGripCondition);
       
       //PINCH_ONLY_THUMB_OPEN
-      stateOpenThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
-      stateOpenThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openFingersPinchGripCondition));
-      stateOpenThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_CLOSED, closedPinchGripCondition));
-      stateOpenThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_CLOSED, closedThumbPinchGripCondition));
-      stateOpenThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateOpenThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_OPEN, GraspState.PINCH_OPEN, openPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_OPEN, GraspState.PINCH_OPEN, openFingersPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_OPEN, GraspState.PINCH_CLOSED, closedPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_OPEN, GraspState.PINCH_CLOSED, closedThumbPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_OPEN, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_OPEN, GraspState.WIDE_OPEN, openWideGripCondition);
       
       //PINCH_CLOSED
-      stateClosedPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
-      stateClosedPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_ONLY_THUMB_OPEN, openThumbPinchGripCondition));
-      stateClosedPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_ONLY_THUMB_CLOSED, openFingersPinchGripCondition));
-      stateClosedPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateClosedPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
+      factory.addTransition(GraspState.PINCH_CLOSED, GraspState.PINCH_OPEN, openPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_CLOSED, GraspState.PINCH_ONLY_THUMB_OPEN, openThumbPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_CLOSED, GraspState.PINCH_ONLY_THUMB_CLOSED, openFingersPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_CLOSED, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.PINCH_CLOSED, GraspState.WIDE_OPEN, openWideGripCondition);
       
       //PINCH_ONLY_THUMB_CLOSED
-      stateClosedThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
-      stateClosedThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openThumbPinchGripCondition));
-      stateClosedThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_CLOSED, closedPinchGripCondition));
-      stateClosedThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_CLOSED, closedFingersPinchGripCondition));
-      stateClosedThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateClosedThumbPinchGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_CLOSED, GraspState.PINCH_OPEN, openPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_CLOSED, GraspState.PINCH_OPEN, openThumbPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_CLOSED, GraspState.PINCH_CLOSED, closedPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_CLOSED, GraspState.PINCH_CLOSED, closedFingersPinchGripCondition);
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_CLOSED, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.PINCH_ONLY_THUMB_CLOSED, GraspState.WIDE_OPEN, openWideGripCondition);
       
       //WIDE_OPEN
-      stateOpenWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_CLOSED, closedWideGripCondition));
-      stateOpenWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_ONLY_THUMB_CLOSED, closedThumbWideGripCondition));
-      stateOpenWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_ONLY_THUMB_OPEN, closedFingersWideGripCondition));
-      stateOpenWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateOpenWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
-      stateOpenWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.HOOK, hookGripCondition));
+      factory.addTransition(GraspState.WIDE_OPEN, GraspState.WIDE_CLOSED, closedWideGripCondition);
+      factory.addTransition(GraspState.WIDE_OPEN, GraspState.WIDE_ONLY_THUMB_CLOSED, closedThumbWideGripCondition);
+      factory.addTransition(GraspState.WIDE_OPEN, GraspState.WIDE_ONLY_THUMB_OPEN, closedFingersWideGripCondition);
+      factory.addTransition(GraspState.WIDE_OPEN, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.WIDE_OPEN, GraspState.PINCH_OPEN, openPinchGripCondition);
+      factory.addTransition(GraspState.WIDE_OPEN, GraspState.HOOK, hookGripCondition);
       
       //WIDE_ONLY_THUMB_OPEN
-      stateOpenThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
-      stateOpenThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openFingersWideGripCondition));
-      stateOpenThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_CLOSED, closedWideGripCondition));
-      stateOpenThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_CLOSED, closedThumbWideGripCondition));
-      stateOpenThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateOpenThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_OPEN, GraspState.WIDE_OPEN, openWideGripCondition);
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_OPEN, GraspState.WIDE_OPEN, openFingersWideGripCondition);
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_OPEN, GraspState.WIDE_CLOSED, closedWideGripCondition);
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_OPEN, GraspState.WIDE_CLOSED, closedThumbWideGripCondition);
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_OPEN, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_OPEN, GraspState.PINCH_OPEN, openPinchGripCondition);
       
       //WIDE_CLOSED
-      stateClosedWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
-      stateClosedWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_ONLY_THUMB_OPEN, openThumbWideGripCondition));
-      stateClosedWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_ONLY_THUMB_CLOSED, openFingersWideGripCondition));
-      stateClosedWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateClosedWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
+      factory.addTransition(GraspState.WIDE_CLOSED, GraspState.WIDE_OPEN, openWideGripCondition);
+      factory.addTransition(GraspState.WIDE_CLOSED, GraspState.WIDE_ONLY_THUMB_OPEN, openThumbWideGripCondition);
+      factory.addTransition(GraspState.WIDE_CLOSED, GraspState.WIDE_ONLY_THUMB_CLOSED, openFingersWideGripCondition);
+      factory.addTransition(GraspState.WIDE_CLOSED, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.WIDE_CLOSED, GraspState.PINCH_OPEN, openPinchGripCondition);
       
       //WIDE_ONLY_THUMB_CLOSED
-      stateClosedThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
-      stateClosedThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openThumbWideGripCondition));
-      stateClosedThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_CLOSED, closedWideGripCondition));
-      stateClosedThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_CLOSED, closedFingersWideGripCondition));
-      stateClosedThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateClosedThumbWideGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_CLOSED, GraspState.WIDE_OPEN, openWideGripCondition);
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_CLOSED, GraspState.WIDE_OPEN, openThumbWideGripCondition);
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_CLOSED, GraspState.WIDE_CLOSED, closedWideGripCondition);
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_CLOSED, GraspState.WIDE_CLOSED, closedFingersWideGripCondition);
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_CLOSED, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.WIDE_ONLY_THUMB_CLOSED, GraspState.PINCH_OPEN, openPinchGripCondition);
       
       //HOOK
-      stateHookGrip.addStateTransition(new StateTransition<GraspState>(GraspState.BASIC_OPEN, openBasicGripCondition));
-      stateHookGrip.addStateTransition(new StateTransition<GraspState>(GraspState.PINCH_OPEN, openPinchGripCondition));
-      stateHookGrip.addStateTransition(new StateTransition<GraspState>(GraspState.WIDE_OPEN, openWideGripCondition));
+      factory.addTransition(GraspState.HOOK, GraspState.BASIC_OPEN, openBasicGripCondition);
+      factory.addTransition(GraspState.HOOK, GraspState.PINCH_OPEN, openPinchGripCondition);
+      factory.addTransition(GraspState.HOOK, GraspState.WIDE_OPEN, openWideGripCondition);
+
+      return factory.build(GraspState.BASIC_OPEN);
    }
    
-   private class OpenBasicGrip extends State<GraspState>
+   private class OpenBasicGrip implements State
    {
-      public OpenBasicGrip()
-      {
-         super(GraspState.BASIC_OPEN);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.BASIC_MODE);
@@ -473,25 +337,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class OpenThumbBasicGrip extends State<GraspState>
+   private class OpenThumbBasicGrip implements State
    {
-      public OpenThumbBasicGrip()
-      {
-         super(GraspState.BASIC_ONLY_THUMB_OPEN);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.BASIC_MODE);
@@ -509,25 +368,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class ClosedBasicGrip extends State<GraspState>
+   private class ClosedBasicGrip implements State
    {
-      public ClosedBasicGrip()
-      {
-         super(GraspState.BASIC_CLOSED);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.BASIC_MODE);
@@ -536,25 +390,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class ClosedThumbBasicGrip extends State<GraspState>
+   private class ClosedThumbBasicGrip implements State
    {
-      public ClosedThumbBasicGrip()
-      {
-         super(GraspState.BASIC_ONLY_THUMB_CLOSED);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.BASIC_MODE);
@@ -572,25 +421,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class OpenPinchGrip extends State<GraspState>
+   private class OpenPinchGrip implements State
    {
-      public OpenPinchGrip()
-      {
-         super(GraspState.PINCH_OPEN);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.PINCH_MODE);
@@ -599,25 +443,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class OpenThumbPinchGrip extends State<GraspState>
+   private class OpenThumbPinchGrip implements State
    {
-      public OpenThumbPinchGrip()
-      {
-         super(GraspState.PINCH_ONLY_THUMB_OPEN);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.PINCH_MODE);
@@ -635,25 +474,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class ClosedPinchGrip extends State<GraspState>
+   private class ClosedPinchGrip implements State
    {
-      public ClosedPinchGrip()
-      {
-         super(GraspState.PINCH_CLOSED);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.PINCH_MODE);
@@ -662,25 +496,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class ClosedThumbPinchGrip extends State<GraspState>
+   private class ClosedThumbPinchGrip implements State
    {
-      public ClosedThumbPinchGrip()
-      {
-         super(GraspState.PINCH_ONLY_THUMB_CLOSED);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.PINCH_MODE);
@@ -698,25 +527,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class OpenWideGrip extends State<GraspState>
+   private class OpenWideGrip implements State
    {
-      public OpenWideGrip()
-      {
-         super(GraspState.WIDE_OPEN);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.WIDE_MODE);
@@ -725,25 +549,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class OpenThumbWideGrip extends State<GraspState>
+   private class OpenThumbWideGrip implements State
    {
-      public OpenThumbWideGrip()
-      {
-         super(GraspState.WIDE_ONLY_THUMB_OPEN);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.WIDE_MODE);
@@ -761,25 +580,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class ClosedWideGrip extends State<GraspState>
+   private class ClosedWideGrip implements State
    {
-      public ClosedWideGrip()
-      {
-         super(GraspState.WIDE_CLOSED);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.WIDE_MODE);
@@ -788,25 +602,20 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class ClosedThumbWideGrip extends State<GraspState>
+   private class ClosedThumbWideGrip implements State
    {
-      public ClosedThumbWideGrip()
-      {
-         super(GraspState.WIDE_ONLY_THUMB_CLOSED);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.WIDE_MODE);
@@ -824,26 +633,21 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
    
-   private class HookGrip extends State<GraspState>
+   private class HookGrip implements State
    {
-      public HookGrip()
-      {
-         super(GraspState.HOOK);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          isStopped.set(false);
          graspMode.set(RobotiqGraspMode.BASIC_MODE);
@@ -854,7 +658,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
@@ -862,8 +666,7 @@ public class IndividualRobotiqHandController implements RobotController
    @Override
    public void doControl()
    {
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
+      stateMachine.doControlAndTransition();
       computeDesiredJointAngles();
    }
    

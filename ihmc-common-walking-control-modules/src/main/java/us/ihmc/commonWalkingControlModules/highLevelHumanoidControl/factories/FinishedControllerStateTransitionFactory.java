@@ -1,13 +1,11 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.FinishableState;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachineTools;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
 import java.util.EnumMap;
+
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FinishedControllerStateTransitionFactory<E extends Enum<E>> implements ControllerStateTransitionFactory<E>
 {
@@ -46,11 +44,13 @@ public class FinishedControllerStateTransitionFactory<E extends Enum<E>> impleme
 
    /** {@inheritDoc} */
    @Override
-   public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends FinishableState<E>> stateMap, HighLevelControllerFactoryHelper controllerFactoryHelper,
+   public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends State> stateMap, HighLevelControllerFactoryHelper controllerFactoryHelper,
                                                         YoVariableRegistry parentRegistry)
    {
       if (stateTransition == null)
-         stateTransition = StateMachineTools.buildFinishedStateTransition(stateMap.get(currentStateEnum), nextStateEnum);
+      {
+         stateTransition = new StateTransition<>(nextStateEnum, stateMap.get(currentStateEnum)::isDone);
+      }
 
       return stateTransition;
    }

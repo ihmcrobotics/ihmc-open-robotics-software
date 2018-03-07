@@ -43,7 +43,7 @@ public class HoldPositionControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       for (int jointIndex = 0; jointIndex < jointSetpoints.size(); jointIndex++)
       {
@@ -58,7 +58,7 @@ public class HoldPositionControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       for (int jointIndex = 0; jointIndex < jointSetpoints.size(); jointIndex++)
       {
@@ -76,7 +76,7 @@ public class HoldPositionControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       // Do nothing
 

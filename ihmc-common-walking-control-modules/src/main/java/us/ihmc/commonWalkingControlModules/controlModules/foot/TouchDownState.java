@@ -6,9 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.contactPoints.ContactStateRhoRamping;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -102,7 +100,7 @@ public class TouchDownState extends AbstractFootControlState
     */
    public TouchDownState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly swingFootControlGains, YoVariableRegistry parentRegistry)
    {
-      super(ConstraintType.TOUCHDOWN, footControlHelper);
+      super(footControlHelper);
 
       this.gains = swingFootControlGains;
 
@@ -158,14 +156,12 @@ public class TouchDownState extends AbstractFootControlState
    }
 
    @Override
-   public void doSpecificAction()
+   public void doSpecificAction(double timeInState)
    {
-      double timeInCurrentState = getTimeInCurrentState();
+      timeInContact.set(timeInState);
+      footContactRhoRamper.update(timeInState);
 
-      timeInContact.set(timeInCurrentState);
-      footContactRhoRamper.update(timeInCurrentState);
-
-      orientationTrajectory.compute(timeInCurrentState);
+      orientationTrajectory.compute(timeInState);
       orientationTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       feedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
@@ -217,9 +213,9 @@ public class TouchDownState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      super.doTransitionIntoAction();
+      super.onEntry();
       
       enableLineContactAndSetTheGroundContactFrame(contactPointPosition, groundContactFrame);
       footContactRhoRamper.initialize(desiredTouchdownDuration.getDoubleValue());
@@ -235,9 +231,9 @@ public class TouchDownState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      super.doTransitionOutOfAction();
+      super.onExit();
       footContactRhoRamper.resetContactState();
    }
 
@@ -319,9 +315,9 @@ public class TouchDownState extends AbstractFootControlState
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
-      return getTimeInCurrentState() > desiredTouchdownDuration.getDoubleValue();
+      return timeInState > desiredTouchdownDuration.getDoubleValue();
    }
 
    /**

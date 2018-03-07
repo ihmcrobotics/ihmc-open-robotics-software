@@ -3,29 +3,28 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class TransferToFlamingoStanceState extends TransferState
 {
    private final FootstepTiming footstepTiming = new FootstepTiming();
 
-   public TransferToFlamingoStanceState(RobotSide transferToSide, WalkingControllerParameters walkingControllerParameters,
-         WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-         WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
+   public TransferToFlamingoStanceState(WalkingStateEnum stateEnum, WalkingControllerParameters walkingControllerParameters,
+                                        WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                        HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
+                                        YoVariableRegistry parentRegistry)
    {
-      super(transferToSide, WalkingStateEnum.getFlamingoTransferState(transferToSide), walkingControllerParameters, walkingMessageHandler, controllerToolbox,
-            managerFactory, failureDetectionControlModule, parentRegistry);
+      super(stateEnum, walkingControllerParameters, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, parentRegistry);
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      super.doTransitionIntoAction();
+      super.onEntry();
 
       if (!comHeightManager.hasBeenInitializedWithNextStep())
       {
