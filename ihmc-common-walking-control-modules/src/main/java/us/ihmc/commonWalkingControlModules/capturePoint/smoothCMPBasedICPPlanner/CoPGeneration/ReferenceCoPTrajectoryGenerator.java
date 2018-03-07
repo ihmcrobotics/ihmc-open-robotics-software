@@ -706,27 +706,31 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                                             supportFootPolygon.getReferenceFrame());
    }
 
+   // do not use these temporary variables anywhere except this method to avoid modifying them in unwanted places.
+   private final FramePoint3D fractionTempMidPoint = new FramePoint3D();
+   private final FramePoint3D fractionTempPoint1 = new FramePoint3D();
+   private final FramePoint3D fractionTempPoint2 = new FramePoint3D();
    private void computeMidFeetPointByPositionFraction(FramePoint3D framePointToPack, FrameConvexPolygon2d footPolygonA, FrameConvexPolygon2d footPolygonB,
                                                       double fraction, ReferenceFrame referenceFrameToConvertTo)
    {
-      getDoubleSupportPolygonCentroid(tempDoubleSupportPolygonCentroid, footPolygonA, footPolygonB, referenceFrameToConvertTo);
+      getDoubleSupportPolygonCentroid(fractionTempMidPoint, footPolygonA, footPolygonB, referenceFrameToConvertTo);
 
-      tempFramePoint1.setIncludingFrame(footPolygonA.getCentroid(), 0.0);
-      tempFramePoint1.changeFrame(referenceFrameToConvertTo);
+      fractionTempPoint1.setIncludingFrame(footPolygonA.getCentroid(), 0.0);
+      fractionTempPoint1.changeFrame(referenceFrameToConvertTo);
 
-      tempFramePoint2.setIncludingFrame(footPolygonB.getCentroid(), 0.0);
-      tempFramePoint2.changeFrame(referenceFrameToConvertTo);
+      fractionTempPoint2.setIncludingFrame(footPolygonB.getCentroid(), 0.0);
+      fractionTempPoint2.changeFrame(referenceFrameToConvertTo);
 
       framePointToPack.setToZero(referenceFrameToConvertTo);
 
       fraction = MathTools.clamp(fraction, 0.0, 1.0);
       if (fraction < 0.5)
       {
-         framePointToPack.interpolate(tempFramePoint1, tempDoubleSupportPolygonCentroid, 2.0 * fraction);
+         framePointToPack.interpolate(fractionTempPoint1, fractionTempMidPoint, 2.0 * fraction);
       }
       else
       {
-         framePointToPack.interpolate(tempDoubleSupportPolygonCentroid, tempFramePoint2, 2.0 * (fraction - 0.5));
+         framePointToPack.interpolate(fractionTempMidPoint, fractionTempPoint2, 2.0 * (fraction - 0.5));
       }
    }
 
@@ -1202,6 +1206,9 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
+   // do not use these temporary variables anywhere except this method to avoid modifying them in unwanted places.
+   private final FramePoint3D doubleSupportCentroidTempPoint1 = new FramePoint3D();
+   private final FramePoint3D doubleSupportCentroidTempPoint2 = new FramePoint3D();
    /**
     * Updates the variable {@code currentDoubleSupportPolygon} from the specified swing and support
     * polygons
@@ -1209,12 +1216,12 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private void getDoubleSupportPolygonCentroid(FramePoint3D framePointToPack, FrameConvexPolygon2d supportFootPolygon, FrameConvexPolygon2d swingFootPolygon,
                                                 ReferenceFrame referenceFrameToStoreResultIn)
    {
-      tempFramePoint1.setIncludingFrame(swingFootPolygon.getCentroid(), 0.0);
-      tempFramePoint1.changeFrame(referenceFrameToStoreResultIn);
-      tempFramePoint2.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
-      tempFramePoint2.changeFrame(referenceFrameToStoreResultIn);
+      doubleSupportCentroidTempPoint1.setIncludingFrame(swingFootPolygon.getCentroid(), 0.0);
+      doubleSupportCentroidTempPoint1.changeFrame(referenceFrameToStoreResultIn);
+      doubleSupportCentroidTempPoint2.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
+      doubleSupportCentroidTempPoint2.changeFrame(referenceFrameToStoreResultIn);
       framePointToPack.changeFrame(referenceFrameToStoreResultIn);
-      framePointToPack.interpolate(tempFramePoint1, tempFramePoint2, 0.5);
+      framePointToPack.interpolate(doubleSupportCentroidTempPoint1, doubleSupportCentroidTempPoint2, 0.5);
    }
 
    /**
