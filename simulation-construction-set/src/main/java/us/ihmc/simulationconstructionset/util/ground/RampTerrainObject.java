@@ -25,7 +25,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
    private Graphics3DObject linkGraphics;
 
-   private static double rampPlaneThickness = 0.02;
+   private static final double rampPlaneThickness = 0.02;
 
    private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
 

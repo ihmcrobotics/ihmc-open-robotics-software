@@ -9,8 +9,8 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 
 public class FlatGroundTerrainObject extends FlatGroundProfile implements TerrainObject3D
 {
-   private static double groundSize = 20.0;
-   private static double groundThickness = 0.03;
+   private static final double groundSize = 20.0;
+   private static final double groundThickness = 0.03;
    
    private final Graphics3DObject groundGraphics;
    
