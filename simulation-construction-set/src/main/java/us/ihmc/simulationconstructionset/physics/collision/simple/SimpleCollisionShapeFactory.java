@@ -9,7 +9,7 @@ import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.ConvexPolytopeConstructor;
 import us.ihmc.robotics.robotDescription.CapsuleDescriptionReadOnly;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
-import us.ihmc.robotics.robotDescription.ConvexShapeDescription;
+import us.ihmc.robotics.robotDescription.ConvexShapeDescriptionReadOnly;
 import us.ihmc.robotics.robotDescription.CubeDescriptionReadOnly;
 import us.ihmc.robotics.robotDescription.CylinderDescriptionReadOnly;
 import us.ihmc.robotics.robotDescription.SphereDescriptionReadOnly;
@@ -93,10 +93,10 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    @Override
    public void addCollisionMeshDescription(Link link, CollisionMeshDescription collisionMeshDescription)
    {
-      ArrayList<ConvexShapeDescription> convexShapeDescriptions = new ArrayList<>();
+      ArrayList<ConvexShapeDescriptionReadOnly> convexShapeDescriptions = new ArrayList<>();
       collisionMeshDescription.getConvexShapeDescriptions(convexShapeDescriptions);
 
-      for (ConvexShapeDescription convexShapeDescription : convexShapeDescriptions)
+      for (ConvexShapeDescriptionReadOnly convexShapeDescription : convexShapeDescriptions)
       {
          if (convexShapeDescription instanceof CapsuleDescriptionReadOnly)
          {
