@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parameters>
+    <registry name="DRCControllerThread">
+        <registry name="DRCMomentumBasedController">
+            <registry name="HumanoidHighLevelControllerManager">
+                <registry name="HighLevelHumanoidControllerFactory">
+                    <registry name="JointspaceGains">
+                        <parameter name="zetaSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
+                        <parameter name="maximumFeedbackSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                        <parameter name="maximumFeedbackRateSpineJoints" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="zetaNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.4"/>
+                        <parameter name="maximumFeedbackNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="6.0"/>
+                        <parameter name="maximumFeedbackRateNeckJoints" type="DoubleParameter" min="0.0" max="1.0" value="60.0"/>
+                        <parameter name="kpArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="zetaArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
+                        <parameter name="maximumFeedbackArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
+                        <parameter name="maximumFeedbackRateArmJoints" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                    </registry>
+                    <registry name="RigidBodyGains">
+                        <parameter name="zetaXYChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                        <parameter name="zetaZChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.22"/>
+                        <parameter name="maximumFeedbackChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="6.0"/>
+                        <parameter name="maximumFeedbackRateChestOrientation" type="DoubleParameter" min="0.0" max="1.0" value="60.0"/>
+                        <parameter name="zetaXYZHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.4"/>
+                        <parameter name="maximumFeedbackHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="6.0"/>
+                        <parameter name="maximumFeedbackRateHeadOrientation" type="DoubleParameter" min="0.0" max="1.0" value="60.0"/>
+                        <parameter name="kpXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="zetaXYZHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="maximumFeedbackHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                        <parameter name="maximumFeedbackRateHandOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="zetaXYPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.2"/>
+                        <parameter name="zetaZPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.5"/>
+                        <parameter name="maximumFeedbackPelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="12.0"/>
+                        <parameter name="maximumFeedbackRatePelvisOrientation" type="DoubleParameter" min="0.0" max="1.0" value="180.0"/>
+                        <parameter name="kpXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="40.0"/>
+                        <parameter name="zetaXYZHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="maximumFeedbackHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
+                        <parameter name="maximumFeedbackRateHandPosition" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                    </registry>
+                    <registry name="FootGains">
+                        <parameter name="maximumFeedbackSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="20.0"/>
+                        <parameter name="maximumFeedbackRateSwingFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="300.0"/>
+                        <parameter name="maximumFeedbackSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="maximumFeedbackRateSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1500.0"/>
+                        <parameter name="zetaXYHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.2"/>
+                        <parameter name="maximumFeedbackHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="6.0"/>
+                        <parameter name="maximumFeedbackRateHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
+                        <parameter name="kpXYHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="kpZHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="zetaXYHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.2"/>
+                        <parameter name="zetaZHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="0.2"/>
+                        <parameter name="maximumFeedbackHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="maximumFeedbackRateHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1500.0"/>
+                        <parameter name="maximumFeedbackToeOffFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="6.0"/>
+                        <parameter name="maximumFeedbackRateToeOffFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
+                        <parameter name="maximumFeedbackToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="100.0"/>
+                        <parameter name="maximumFeedbackRateToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1500.0"/>
+                    </registry>
+                </registry>
+            </registry>
+        </registry>
+    </registry>
+</parameters>
