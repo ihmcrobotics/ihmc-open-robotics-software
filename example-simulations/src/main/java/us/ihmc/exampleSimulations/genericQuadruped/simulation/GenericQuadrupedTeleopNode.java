@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.simulation;
 
+import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedNetClassList;
@@ -13,6 +14,7 @@ import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedSimulationFac
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.parameters.YoParameter;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -49,6 +51,9 @@ public class GenericQuadrupedTeleopNode
       {
          throw new RuntimeException("No joystick detected!");
       }
+
+      if (SystemUtils.IS_OS_WINDOWS)
+         new JFrame("CLICK HERE TO DRIVE").setVisible(true);
 
       new GenericQuadrupedTeleopNode();
    }
