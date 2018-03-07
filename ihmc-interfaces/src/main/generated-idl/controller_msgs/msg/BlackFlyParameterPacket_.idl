@@ -1,0 +1,38 @@
+#ifndef __controller_msgs__msg__BlackFlyParameterPacket__idl__
+#define __controller_msgs__msg__BlackFlyParameterPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+
+      /**
+       * Atlas specific message
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::BlackFlyParameterPacket_")
+      struct BlackFlyParameterPacket
+      {
+        boolean auto_exposure;
+        boolean auto_gain;
+        boolean auto_shutter;
+        double exposure;
+        double frame_rate;
+        boolean from_ui;
+        double gain;
+        double shutter;
+        @defaultValue(value=255)
+        octet robot_side;
+      };
+    };
+  };
+};
+
+#endif

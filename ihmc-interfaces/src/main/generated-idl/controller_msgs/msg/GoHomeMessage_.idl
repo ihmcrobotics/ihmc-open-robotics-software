@@ -1,0 +1,57 @@
+#ifndef __controller_msgs__msg__GoHomeMessage__idl__
+#define __controller_msgs__msg__GoHomeMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet HUMANOID_BODY_PART_ARM =
+      0;
+
+      const octet HUMANOID_BODY_PART_CHEST =
+      1;
+
+      const octet HUMANOID_BODY_PART_PELVIS =
+      2;
+
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * The message commands the controller to bring the given part of the body back to a default configuration called 'home'.
+       * It is useful to get back to a safe configuration before walking.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::GoHomeMessage_")
+      struct GoHomeMessage
+      {
+        /**
+         * Specifies the part of the body the use wants to move back to its home configuration.
+         */
+        @defaultValue(value=255)
+        octet humanoid_body_part;
+        /**
+         * Needed to identify a side dependent end-effector.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * How long the trajectory will spline from the current desired to the home configuration.
+         */
+        double trajectory_time;
+        /**
+         * The time to delay this command on the controller side before being executed.
+         */
+        double execution_delay_time;
+      };
+    };
+  };
+};
+
+#endif

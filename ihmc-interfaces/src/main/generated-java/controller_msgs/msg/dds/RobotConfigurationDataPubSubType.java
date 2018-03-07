@@ -43,13 +43,13 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += (50 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 50; ++a)
+      for (int i0 = 0; i0 < 50; ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 5; ++a)
+      for (int i0 = 0; i0 < 5; ++i0)
       {
          current_alignment += sensor_msgs.msg.dds.ImuPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -96,15 +96,15 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += (data.getJointTorques().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getForceSensorData().size(); ++a)
+      for (int i0 = 0; i0 < data.getForceSensorData().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getCdrSerializedSize(data.getForceSensorData().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getCdrSerializedSize(data.getForceSensorData().get(i0), current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getImuSensorData().size(); ++a)
+      for (int i0 = 0; i0 < data.getImuSensorData().size(); ++i0)
       {
-         current_alignment += sensor_msgs.msg.dds.ImuPubSubType.getCdrSerializedSize(data.getImuSensorData().get(a), current_alignment);
+         current_alignment += sensor_msgs.msg.dds.ImuPubSubType.getCdrSerializedSize(data.getImuSensorData().get(i0), current_alignment);
       }
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRootTranslation(), current_alignment);

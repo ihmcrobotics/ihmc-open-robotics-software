@@ -1,0 +1,30 @@
+#ifndef __controller_msgs__msg__ChestTrajectoryMessage__idl__
+#define __controller_msgs__msg__ChestTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./SO3TrajectoryMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points.
+       * A Hermite based curve (third order) is used to interpolate the orientations.
+       * To execute a simple trajectory to reach a desired chest orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::ChestTrajectoryMessage_")
+      struct ChestTrajectoryMessage
+      {
+        /**
+         * The orientation trajectory information.
+         */
+        controller_msgs::msg::dds::SO3TrajectoryMessage so3_trajectory;
+      };
+    };
+  };
+};
+
+#endif

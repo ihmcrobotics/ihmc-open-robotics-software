@@ -1,0 +1,29 @@
+#ifndef __controller_msgs__msg__NeckTrajectoryMessage__idl__
+#define __controller_msgs__msg__NeckTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message commands the controller to move the neck in jointspace to the desired joint angles while going through the specified trajectory points.
+       * A third order polynomial function is used to interpolate between trajectory points.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::NeckTrajectoryMessage_")
+      struct NeckTrajectoryMessage
+      {
+        /**
+         * The trajectories for each joint in order from the one closest to the chest to the one the closest to the head.
+         */
+        controller_msgs::msg::dds::JointspaceTrajectoryMessage jointspace_trajectory;
+      };
+    };
+  };
+};
+
+#endif

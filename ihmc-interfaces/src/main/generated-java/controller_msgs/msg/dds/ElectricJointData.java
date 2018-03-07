@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "ElectricJointData" defined in ElectricJointData_.idl.
- *
- * This file was automatically generated from ElectricJointData_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit ElectricJointData_.idl instead.
- */
 public class ElectricJointData implements Settable<ElectricJointData>, EpsilonComparable<ElectricJointData>
 {
    private boolean joint_enabled_;

@@ -11,4 +11,4 @@ string NETWORKPROCESSOR_ONLINE = "Reestablished Connection To The Network Proces
 
 bool speak_packet false
 bool beep true
-string textToSpeak
+string text_to_speak

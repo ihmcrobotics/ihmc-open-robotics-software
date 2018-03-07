@@ -9,7 +9,7 @@ byte LOAD_BEARING_REQUEST_LOAD = 0
 byte LOAD_BEARING_REQUEST_UNLOAD = 1
 
 # Needed to identify a side dependent end-effector.
-byte robot_side -1
+byte robot_side 255
 # Whether the end-effector should be loaded or unloaded.
 byte load_bearing_request
 # The time to delay this command on the controller side before being executed.

@@ -7,6 +7,6 @@ byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
 # Specifies the side of the robot that will execute the command.
-byte robot_side -1
+byte robot_side 255
 # The desired joint acceleration information.
 DesiredAccelerationsMessage desired_accelerations

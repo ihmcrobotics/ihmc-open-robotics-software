@@ -1,0 +1,33 @@
+#ifndef __controller_msgs__msg__ToolboxStateMessage__idl__
+#define __controller_msgs__msg__ToolboxStateMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet WAKE_UP =
+      0;
+
+      const octet REINITIALIZE =
+      1;
+
+      const octet SLEEP =
+      2;
+
+
+      /**
+       * This message is part of the IHMC toolbox framework.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::ToolboxStateMessage_")
+      struct ToolboxStateMessage
+      {
+        @defaultValue(value=255)
+        octet requested_toolbox_state;
+      };
+    };
+  };
+};
+
+#endif

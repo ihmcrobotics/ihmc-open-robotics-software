@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "PumpState" defined in PumpState_.idl.
- *
- * This file was automatically generated from PumpState_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit PumpState_.idl instead.
- */
 public class PumpState implements Settable<PumpState>, EpsilonComparable<PumpState>
 {
    private float pump_inlet_pressure_;

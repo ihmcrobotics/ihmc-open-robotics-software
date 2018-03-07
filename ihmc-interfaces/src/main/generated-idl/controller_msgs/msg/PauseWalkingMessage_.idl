@@ -1,0 +1,28 @@
+#ifndef __controller_msgs__msg__PauseWalkingMessage__idl__
+#define __controller_msgs__msg__PauseWalkingMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message pauses the execution of a list of footsteps.
+       * If this message is in the middle of executing a footstep, the robot will finish the step and pause when back in double support.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::PauseWalkingMessage_")
+      struct PauseWalkingMessage
+      {
+        /**
+         * True to pause walking, false to unpause and resume an existing footstep plan.
+         */
+        boolean pause;
+      };
+    };
+  };
+};
+
+#endif

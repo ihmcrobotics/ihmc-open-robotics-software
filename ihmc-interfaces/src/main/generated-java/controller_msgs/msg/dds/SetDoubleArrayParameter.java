@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "SetDoubleArrayParameter" defined in SetDoubleArrayParameter_.idl.
- *
- * This file was automatically generated from SetDoubleArrayParameter_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit SetDoubleArrayParameter_.idl instead.
- */
 public class SetDoubleArrayParameter implements Settable<SetDoubleArrayParameter>, EpsilonComparable<SetDoubleArrayParameter>
 {
    private java.lang.StringBuilder parameter_name_;

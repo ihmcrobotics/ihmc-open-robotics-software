@@ -1,0 +1,25 @@
+#ifndef __controller_msgs__msg__HeightQuadTreeLeafMessage__idl__
+#define __controller_msgs__msg__HeightQuadTreeLeafMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC height quad tree module
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HeightQuadTreeLeafMessage_")
+      struct HeightQuadTreeLeafMessage
+      {
+        float x_center;
+        float y_center;
+        float height;
+      };
+    };
+  };
+};
+
+#endif
