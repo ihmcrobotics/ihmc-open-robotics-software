@@ -131,7 +131,7 @@ public class RobotDescription implements RobotDescriptionNode, GraphicsObjectsHo
          }
          else
          {
-            throw new RuntimeException("There is no matched among the simple shape Box3D, Sphere3D, Cylinder3D, Capsule3D");
+            throw new IllegalArgumentException("The type of "+ getName() + " is not matched among the simple shape Box3D, Sphere3D, Cylinder3D, Capsule3D");
          }
       }
    }
