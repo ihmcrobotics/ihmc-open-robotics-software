@@ -5,7 +5,7 @@ import java.util.List;
 
 public class CollisionMeshDefinitionDataHolder
 {
-   private List<CollisionMeshDefinitionData> collisionMeshDefinitionDataList = new ArrayList<>();
+   private final List<CollisionMeshDefinitionData> collisionMeshDefinitionDataList = new ArrayList<>();
    private boolean isVisible = false;
 
    public void addCollisionMeshDefinitionData(CollisionMeshDefinitionData collisionMeshData)
