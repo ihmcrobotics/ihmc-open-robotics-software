@@ -122,6 +122,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
          if (footstepIsBeingAdjusted)
          {
+            requestSwingSpeedUp = true;
             walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
             failureDetectionControlModule.setNextFootstep(nextFootstep);
             updateFootstepParameters();
