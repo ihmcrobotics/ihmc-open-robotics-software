@@ -173,7 +173,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
-      collisionMeshDefinitionDataHolder = new AtlasCollisionMeshDefinitionDataHolder(jointMap);
+      collisionMeshDefinitionDataHolder = new AtlasCollisionMeshDefinitionDataHolder(jointMap, atlasPhysicalProperties);
 
       robotDescription = createRobotDescription();
    }
