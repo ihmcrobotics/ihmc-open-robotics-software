@@ -34,7 +34,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFootstepRateWeight()
    {
-      return runningOnRealRobot ? 1e-6 : 1e-4;
+      return runningOnRealRobot ? 1e-6 : 0.001;
    }
 
    /** {@inheritDoc} */
@@ -77,27 +77,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getDynamicsObjectiveWeight()
    {
-      if (runningOnRealRobot)
-         return 10000.0;
-      else if (useAngularMomentum)
-         return 100000.0;
-      else if (useStepAdjustment)
-         return 1000.0;
-      else
-         return 10000.0;
-      //return runningOnRealRobot ? 10000.0 : (useAngularMomentum ? 100000.0 : 1000.0);
+      return 10000.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicsObjectiveDoubleSupportWeightModifier()
    {
-      if (useAngularMomentum)
-         return runningOnRealRobot ? 50.0 : 100.0;
-      else if (useStepAdjustment)
-         return runningOnRealRobot ? 1.0 : 4.0;
-      else
-         return 1.0;
+      return 1.0;
    }
 
    /** {@inheritDoc} */
@@ -153,7 +140,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean useFootstepRate()
    {
-      return true;
+      return runningOnRealRobot;
    }
 
    /** {@inheritDoc} */
