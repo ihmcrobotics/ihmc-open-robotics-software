@@ -14,10 +14,14 @@ public class AtlasCollisionMeshDefinitionDataHolder extends CollisionMeshDefinit
    public static double footWidth = 0.135;
    public static double footHeight = 0.06;
 
-   public AtlasCollisionMeshDefinitionDataHolder(AtlasJointMap jointMap)
+   public AtlasCollisionMeshDefinitionDataHolder(AtlasJointMap jointMap, AtlasPhysicalProperties atlasPhysicalProperties)
    {
-      RigidBodyTransform transformToAnkle = new RigidBodyTransform();
-      transformToAnkle.appendTranslation(0.04, 0, -0.05);
+      footLength = atlasPhysicalProperties.getActualFootLength();
+      footWidth = atlasPhysicalProperties.getActualFootWidth();
+      footHeight = Math.abs(atlasPhysicalProperties.getSoleToAnkleFrameTransforms().get(RobotSide.RIGHT).getM23());
+
+      RigidBodyTransform transformToAnkle = new RigidBodyTransform(atlasPhysicalProperties.getSoleToAnkleFrameTransforms().get(RobotSide.RIGHT));
+      transformToAnkle.appendTranslation(0.0, 0, 0.5 * footHeight);
 
       CollisionMeshDefinitionData rightFootCollisionMeshData = new BoxCollisionMeshDefinitionData(jointMap.getLegJointName(RobotSide.RIGHT,
                                                                                                                            LegJointName.ANKLE_ROLL),
