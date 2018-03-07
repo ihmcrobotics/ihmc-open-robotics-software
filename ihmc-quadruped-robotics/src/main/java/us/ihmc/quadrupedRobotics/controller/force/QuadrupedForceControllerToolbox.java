@@ -116,4 +116,9 @@ public class QuadrupedForceControllerToolbox
    {
       dcmPositionEstimator.getDCMPositionEstimate(dcmPositionEstimateToPack);
    }
+
+   public YoPlaneContactState getFootContactState(RobotQuadrant robotQuadrant)
+   {
+      return footContactStates.get(robotQuadrant);
+   }
 }
