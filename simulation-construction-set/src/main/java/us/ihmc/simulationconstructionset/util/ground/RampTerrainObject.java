@@ -27,7 +27,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
    private static double rampPlaneThickness = 0.02;
 
-   private ArrayList<Shape3D> simpleShapes = new ArrayList<>();
+   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
 
    public RampTerrainObject(double xStart, double yStart, double xEnd, double yEnd, double height, AppearanceDefinition appearance)
    {
@@ -66,7 +66,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
       boxShape.appendPitchRotation(-slopAngle);
       boxShape.appendTranslation(0, 0, -rampPlaneThickness / 2.0);
 
-      simpleShapes.add(boxShape);
+      terrainCollisionShapes.add(boxShape);
    }
 
    public RampTerrainObject(double xStart, double yStart, double xEnd, double yEnd, double height)
@@ -218,8 +218,8 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
    }
 
    @Override
-   public List<? extends Shape3D> getSimpleShapes()
+   public List<? extends Shape3D> getTerrainCollisionShapes()
    {
-      return simpleShapes;
+      return terrainCollisionShapes;
    }
 }

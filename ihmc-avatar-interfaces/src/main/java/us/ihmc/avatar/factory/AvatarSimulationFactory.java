@@ -400,7 +400,7 @@ public class AvatarSimulationFactory
       CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
 
       simulationConstructionSet.initializeCollisionDetector(collisionVisualizer, collisionHandler);
-      simulationConstructionSet.addEnvironmentCollisionShapes(commonAvatarEnvironment.get().getTerrainObject3D().getSimpleShapes());
+      simulationConstructionSet.addEnvironmentCollisionShapes(commonAvatarEnvironment.get().getTerrainObject3D().getTerrainCollisionShapes());
       simulationConstructionSet.initializeCollisionHandler(collisionVisualizer, collisionHandler);
    }
 

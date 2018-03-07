@@ -251,7 +251,7 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
    }
 
    @Override
-   public List<? extends Shape3D> getSimpleShapes()
+   public List<? extends Shape3D> getTerrainCollisionShapes()
    {
       return null;
    }
