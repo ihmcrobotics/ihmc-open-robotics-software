@@ -18,7 +18,7 @@ public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    private final BoundingBox3D boundingBox;
    private Graphics3DObject linkGraphics;
-   private ArrayList<Shape3D> simpleShapes = new ArrayList<>();
+   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
 
    public BoxTerrainObject(double xStart, double yStart, double xEnd, double yEnd, double zStart, double zEnd, AppearanceDefinition appearance)
    {
@@ -45,7 +45,7 @@ public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
      Box3D boxShape = new Box3D(Math.abs(xStart - xEnd), Math.abs(yStart - yEnd), Math.abs(zStart - zEnd));
      boxShape.appendTranslation((xStart+xEnd)/2.0, (yStart+yEnd)/2.0, (zStart+zEnd)/2.0);
      
-     this.simpleShapes.add(boxShape);
+     this.terrainCollisionShapes.add(boxShape);
  }
 
  public BoxTerrainObject(double xStart, double yStart, double xEnd, double yEnd, double height, AppearanceDefinition appearance)
@@ -192,9 +192,9 @@ public double heightAt(double x, double y, double z)
    }
 
    @Override
-   public List<? extends Shape3D> getSimpleShapes()
+   public List<? extends Shape3D> getTerrainCollisionShapes()
    {
-      return simpleShapes;
+      return terrainCollisionShapes;
    }
 
 }

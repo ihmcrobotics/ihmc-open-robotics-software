@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.Box3D;
-import us.ihmc.euclid.geometry.Cylinder3D;
 import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 
@@ -15,7 +14,7 @@ public class FlatGroundTerrainObject extends FlatGroundProfile implements Terrai
    
    private final Graphics3DObject groundGraphics;
    
-   private ArrayList<Shape3D> simpleShapes = new ArrayList<>();
+   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
    
    public FlatGroundTerrainObject()
    {
@@ -25,7 +24,7 @@ public class FlatGroundTerrainObject extends FlatGroundProfile implements Terrai
       
       Box3D boxShape = new Box3D(groundSize, groundSize, groundThickness);
       boxShape.appendTranslation(0.0, 0.0, -groundThickness);  
-      this.simpleShapes.add(boxShape);
+      this.terrainCollisionShapes.add(boxShape);
    }
    
    @Override
@@ -35,8 +34,8 @@ public class FlatGroundTerrainObject extends FlatGroundProfile implements Terrai
    }
 
    @Override
-   public List<? extends Shape3D> getSimpleShapes()
+   public List<? extends Shape3D> getTerrainCollisionShapes()
    {
-      return simpleShapes;
+      return terrainCollisionShapes;
    }
 }

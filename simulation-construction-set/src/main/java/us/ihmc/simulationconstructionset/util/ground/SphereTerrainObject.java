@@ -12,75 +12,66 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 
-
 public class SphereTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    private final BoundingBox3D boundingBox;
    private Graphics3DObject linkGraphics;
 
-   private ArrayList<Shape3D> simpleShapes = new ArrayList<>();
+   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
 
-   public SphereTerrainObject(double centerX, double centerY,double centerZ, double radius, AppearanceDefinition appearance)
+   public SphereTerrainObject(double centerX, double centerY, double centerZ, double radius, AppearanceDefinition appearance)
    {
-     double xMin = centerX - radius;
-     double xMax = centerX + radius;
+      double xMin = centerX - radius;
+      double xMax = centerX + radius;
 
-     double yMin = centerY - radius;
-     double yMax = centerY + radius;
+      double yMin = centerY - radius;
+      double yMax = centerY + radius;
 
-     double zMin = centerZ - radius;
-     double zMax = centerZ + radius;
+      double zMin = centerZ - radius;
+      double zMax = centerZ + radius;
 
-     
-     Point3D minPoint = new Point3D(xMin, yMin, zMin);
-     Point3D maxPoint = new Point3D(xMax, yMax, zMax);
-     
-     boundingBox = new BoundingBox3D(minPoint, maxPoint);
-     
-     linkGraphics = new Graphics3DObject();
-          
-     linkGraphics.translate(centerX,centerY, centerZ);
+      Point3D minPoint = new Point3D(xMin, yMin, zMin);
+      Point3D maxPoint = new Point3D(xMax, yMax, zMax);
 
-     linkGraphics.addSphere(radius, appearance);
-     
-     Sphere3D sphereShape = new Sphere3D(centerX, centerY, centerZ, radius);
-     simpleShapes.add(sphereShape);
- }
+      boundingBox = new BoundingBox3D(minPoint, maxPoint);
 
- 
+      linkGraphics = new Graphics3DObject();
 
+      linkGraphics.translate(centerX, centerY, centerZ);
 
+      linkGraphics.addSphere(radius, appearance);
 
-
-
- @Override
-public Graphics3DObject getLinkGraphics()
- {
-   return linkGraphics;
-
- }
-
- @Override
-public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
- {
-    double heightAt = this.heightAt(x, y, z);
-    this.surfaceNormalAt(x, y, z, normalToPack);
-    
-    return heightAt;
- }
- 
- @Override
-public double heightAt(double x, double y, double z)
- {
-   if ((x > boundingBox.getMinX()) && (x < boundingBox.getMaxX()) && (y > boundingBox.getMinY()) && (y < boundingBox.getMaxY()))
-   {
-     return boundingBox.getMaxZ();
+      Sphere3D sphereShape = new Sphere3D(centerX, centerY, centerZ, radius);
+      terrainCollisionShapes.add(sphereShape);
    }
 
-   return 0.0;
- }
- 
- 
+   @Override
+   public Graphics3DObject getLinkGraphics()
+   {
+      return linkGraphics;
+
+   }
+
+   @Override
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
+   {
+      double heightAt = this.heightAt(x, y, z);
+      this.surfaceNormalAt(x, y, z, normalToPack);
+
+      return heightAt;
+   }
+
+   @Override
+   public double heightAt(double x, double y, double z)
+   {
+      if ((x > boundingBox.getMinX()) && (x < boundingBox.getMaxX()) && (y > boundingBox.getMinY()) && (y < boundingBox.getMaxY()))
+      {
+         return boundingBox.getMaxZ();
+      }
+
+      return 0.0;
+   }
+
    private void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       double threshhold = 0.015;
@@ -122,7 +113,7 @@ public double heightAt(double x, double y, double z)
 
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersection, Vector3D normal)
    {
-      intersection.setX(x);    // Go Straight Up for now...
+      intersection.setX(x); // Go Straight Up for now...
       intersection.setY(y);
       intersection.setZ(heightAt(x, y, z));
 
@@ -132,12 +123,12 @@ public double heightAt(double x, double y, double z)
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
-      intersectionToPack.setX(x);    // Go Straight Up for now...
+      intersectionToPack.setX(x); // Go Straight Up for now...
       intersectionToPack.setY(y);
       intersectionToPack.setZ(heightAt(x, y, z));
 
       surfaceNormalAt(x, y, z, normalToPack);
-      
+
       return (z < intersectionToPack.getZ());
    }
 
@@ -146,7 +137,6 @@ public double heightAt(double x, double y, double z)
    {
       return (boundingBox.isXYInsideInclusive(x, y));
    }
-
 
    public double getXMin()
    {
@@ -180,16 +170,10 @@ public double heightAt(double x, double y, double z)
       return this;
    }
 
-
-
-
-
-
-
    @Override
-   public List<? extends Shape3D> getSimpleShapes()
+   public List<? extends Shape3D> getTerrainCollisionShapes()
    {
-      return simpleShapes;
+      return terrainCollisionShapes;
    }
 
 }

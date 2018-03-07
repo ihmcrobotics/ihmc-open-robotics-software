@@ -25,7 +25,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
 
    private final Point3D tempPointToCheck = new Point3D();
 
-   private ArrayList<Shape3D> simpleShapes = new ArrayList<>();
+   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
 
    public CombinedTerrainObject3D(String name)
    {
@@ -134,9 +134,9 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       terrainObjects.add(object);
       linkGraphics.combine(object.getLinkGraphics());
 
-      if (object.getSimpleShapes() != null)
+      if (object.getTerrainCollisionShapes() != null)
       {
-         simpleShapes.addAll(object.getSimpleShapes());
+         terrainCollisionShapes.addAll(object.getTerrainCollisionShapes());
       }
 
       if (boundingBox == null)
@@ -355,8 +355,8 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
    }
 
    @Override
-   public List<? extends Shape3D> getSimpleShapes()
+   public List<? extends Shape3D> getTerrainCollisionShapes()
    {
-      return simpleShapes;
+      return terrainCollisionShapes;
    }
 }
