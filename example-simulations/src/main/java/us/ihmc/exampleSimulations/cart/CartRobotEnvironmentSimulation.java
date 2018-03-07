@@ -6,7 +6,6 @@ import java.util.List;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.CartRobotRacingEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.environments.SmallStepDownEnvironment;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
@@ -20,8 +19,6 @@ public class CartRobotEnvironmentSimulation
 {
    public CartRobotEnvironmentSimulation()
    {
-      System.out.println("Hello World.");
-
       double dt = 0.001;
 
       Vector3D startingPoint = new Vector3D(0.0, 0.0, 0.3);
@@ -47,10 +44,7 @@ public class CartRobotEnvironmentSimulation
       cartRobot.setController(controller);
 
       // Stair Env Robot
-      //SmallStepDownEnvironment environment = createEnvironment();
       CartRobotRacingEnvironment environment = new CartRobotRacingEnvironment(false);
-      //      ArrayList<Robot> environmentRobots = environment.getEnvironmentRobots();
-      //      allSimulatedRobotList.addAll(environmentRobots);
 
       // Scs
       SimulationConstructionSet scs = new SimulationConstructionSet(allSimulatedRobotList.toArray(new Robot[0]), parameters);
@@ -59,19 +53,11 @@ public class CartRobotEnvironmentSimulation
       scs.addStaticLinkGraphics(staticLinkGraphics);
       scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
 
-      //      List<? extends Shape3D> simpleShapes = environment.getTerrainObject3D().getSimpleShapes();
-      //      for(int i=0;i<simpleShapes.size();i++)
-      //      {
-      //         Graphics3DObject graphicsObject = new Graphics3DObject(simpleShapes.get(i), YoAppearance.Aqua());
-      //         scs.addStaticLinkGraphics(graphicsObject);
-      //      }
-
       // simulate.
       DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(100.0, 100.0, 0.01, scs, 1000);
       double coefficientOfRestitution = 0.2;
       double coefficientOfFriction = 0.7;
       CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
-      // OLD //     scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
       scs.initializeCollisionDetector(collisionVisualizer, collisionHandler);
       scs.addEnvironmentCollisionShapes(environment.getTerrainObject3D().getSimpleShapes());
       scs.initializeCollisionHandler(collisionVisualizer, collisionHandler);
@@ -89,37 +75,4 @@ public class CartRobotEnvironmentSimulation
    {
       new CartRobotEnvironmentSimulation();
    }
-
-   private SmallStepDownEnvironment createEnvironment()
-   {
-      double stepLength = 0.35;
-      double stepDownHeight = 0.15;
-      int stepsBeforeDrop = 1;
-      double dropHeight = -stepDownHeight;
-
-      int numberOfDrops = 4;
-
-      ArrayList<Double> stepHeights = new ArrayList<>();
-      ArrayList<Double> stepLengths = new ArrayList<>();
-
-      double currentHeight = 0.0;
-
-      for (int i = 0; i < numberOfDrops; i++)
-      {
-         for (int j = 0; j < stepsBeforeDrop; j++)
-         {
-            stepHeights.add(currentHeight);
-            stepLengths.add(stepLength);
-         }
-
-         currentHeight += dropHeight;
-
-         stepHeights.add(currentHeight);
-         stepLengths.add(stepLength);
-      }
-
-      double starterLength = 0.35;
-      return new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, currentHeight);
-   }
-
 }

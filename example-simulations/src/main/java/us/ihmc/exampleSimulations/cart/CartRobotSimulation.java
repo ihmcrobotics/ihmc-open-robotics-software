@@ -6,7 +6,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.newtonsCradle.GroundAsABoxRobot;
 import us.ihmc.exampleSimulations.newtonsCradle.PileOfRandomObjectsRobot;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.robotics.robotDescription.CollisionMasksHelper;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -17,11 +16,8 @@ import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisua
 
 public class CartRobotSimulation
 {
-
    public CartRobotSimulation()
    {
-      System.out.println("Hello World.");
-
       double dt = 0.001;
 
       Vector3D startingPoint = new Vector3D(-3.0, 0.0, 0.3);
@@ -39,11 +35,6 @@ public class CartRobotSimulation
       Graphics3DObject staticLinkGraphics = new Graphics3DObject();
       staticLinkGraphics.addCoordinateSystem(0.1);
       scs.addStaticLinkGraphics(staticLinkGraphics);
-
-      CollisionMasksHelper helper = new CollisionMasksHelper();
-      int nextGroupBitMask = helper.getNextGroupBitMask();
-
-      // add group and mask for every links for robot.
 
       // create robot.
       Robot cartRobot = scs.addRobot(robotDescription);

@@ -1,7 +1,10 @@
 package us.ihmc.exampleSimulations.cart;
 
+import java.util.ArrayList;
+
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.newtonsCradle.GroundAsABoxRobot;
+import us.ihmc.exampleSimulations.newtonsCradle.PileOfRandomObjectsRobot;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -15,8 +18,6 @@ public class TriWheelCartSimulation
 {
    public TriWheelCartSimulation()
    {
-      System.out.println("Hello World.");
-
       double dt = 0.001;
 
       TriWheelCartDescription robotDescription = new TriWheelCartDescription("triwheel");
@@ -33,8 +34,6 @@ public class TriWheelCartSimulation
       staticLinkGraphics.addCoordinateSystem(0.1);
       scs.addStaticLinkGraphics(staticLinkGraphics);
 
-      // add group and mask for every links for robot.
-
       // create robot.
       Robot triWheelRobot = scs.addRobot(robotDescription);
       FloatingJoint floatingJoint = (FloatingJoint) triWheelRobot.getRootJoints().get(0);
@@ -45,17 +44,15 @@ public class TriWheelCartSimulation
       triWheelRobot.setController(controller);
 
       // obstacles.
-      //      PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
-      //      pileOfRandomObjectsRobot.setSizeScale(2.0);
-      //      pileOfRandomObjectsRobot.setGroupAndCollisionMask(0xffff, 0xffff);
-      //      pileOfRandomObjectsRobot.setNumberOfObjects(100);
-      //      pileOfRandomObjectsRobot.setXYExtents(1.0, 1.0);
-      //      pileOfRandomObjectsRobot.setZMinAndMax(1.0, 2.0);
-      //      ArrayList<Robot> robots = pileOfRandomObjectsRobot.createAndGetRobots();
-      //      for (Robot robot : robots)
-      //      {
-      //         scs.addRobot(robot);
-      //      }
+      PileOfRandomObjectsRobot pileOfRandomObjectsRobot = new PileOfRandomObjectsRobot();
+      pileOfRandomObjectsRobot.setSizeScale(2.0);
+      pileOfRandomObjectsRobot.setGroupAndCollisionMask(0xffff, 0xffff);
+      pileOfRandomObjectsRobot.setNumberOfObjects(100);
+      pileOfRandomObjectsRobot.setXYExtents(1.0, 1.0);
+      pileOfRandomObjectsRobot.setZMinAndMax(1.0, 2.0);
+      ArrayList<Robot> robots = pileOfRandomObjectsRobot.createAndGetRobots();
+      for (Robot robot : robots)
+         scs.addRobot(robot);
 
       // ground.
       int estimatedNumberOfContactPoints = 100;
