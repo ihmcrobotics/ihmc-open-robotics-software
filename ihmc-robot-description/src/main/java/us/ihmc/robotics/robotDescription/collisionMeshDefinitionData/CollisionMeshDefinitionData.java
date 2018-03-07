@@ -8,7 +8,7 @@ public abstract class CollisionMeshDefinitionData
 {
    private String parentJointName;
 
-   private RigidBodyTransform transformToParentJoint = new RigidBodyTransform();
+   private final RigidBodyTransform transformToParentJoint = new RigidBodyTransform();
 
    private AppearanceDefinition yoAppearance = YoAppearance.Beige();
 
@@ -52,7 +52,7 @@ public abstract class CollisionMeshDefinitionData
 
    public void setTransformToParentJoint(RigidBodyTransform transformToParentJoint)
    {
-      this.transformToParentJoint = transformToParentJoint;
+      this.transformToParentJoint.set(transformToParentJoint);
    }
 
    public void setYoAppearance(AppearanceDefinition yoAppearance)
