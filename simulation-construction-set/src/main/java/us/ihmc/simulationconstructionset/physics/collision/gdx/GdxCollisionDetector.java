@@ -158,7 +158,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
 
       @Override
-      public CollisionShapeDescription<?> createSimpleShape(Shape3D shape3D)
+      public CollisionShapeDescription<?> createSimpleCollisionShape(Shape3D shape3D)
       {
          if (!(shape3D instanceof Box3D))
             return createBox(shape3D);
@@ -169,7 +169,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          if (!(shape3D instanceof Capsule3D))
             return createCapsule(shape3D);
 
-         throw new RuntimeException("There is no matched among the simple shape Box3D, Sphere3D, Cylinder3D, Capsule3D");
+         throw new IllegalArgumentException("The type of "+ shape3D.getClass() + " is not matched among the simple shape Box3D, Sphere3D, Cylinder3D, Capsule3D");
       }
 
       private CollisionShapeDescription createBox(Shape3D shape3D)
