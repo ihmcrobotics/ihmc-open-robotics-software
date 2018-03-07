@@ -102,7 +102,7 @@ public class QuadrupedBalanceManager
       crossoverProjection = new QuadrupedStepCrossoverProjection(controllerToolbox.getReferenceFrames().getBodyZUpFrame(), registry);
 
       linearMomentumRateWeight = new YoFrameVector("LinearMomentumRateWeight", worldFrame, registry);
-      linearMomentumRateWeight.set(0.05, 0.05, 0.01);
+      linearMomentumRateWeight.set(0.5, 0.5, 0.1);
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
       momentumRateCommand.setSelectionMatrixForLinearControl();
 
@@ -209,6 +209,7 @@ public class QuadrupedBalanceManager
 
       linearMomentumRateOfChangeToPack.changeFrame(worldFrame);
       momentumRateForCommand.setIncludingFrame(linearMomentumRateOfChangeToPack);
+      momentumRateForCommand.subZ(controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getRuntimeEnvironment().getGravity());
 
       momentumRateCommand.setLinearMomentumRate(momentumRateForCommand);
       momentumRateCommand.setLinearWeights(linearMomentumRateWeight);

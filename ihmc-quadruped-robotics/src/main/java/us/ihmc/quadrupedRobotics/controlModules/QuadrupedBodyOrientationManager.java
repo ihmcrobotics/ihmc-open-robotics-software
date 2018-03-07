@@ -118,6 +118,7 @@ public class QuadrupedBodyOrientationManager
       angularMomentumCommand.setAngularWeights(bodyAngularWeight);
 
       wrenchCommand.setAngularPart(angularMomentumRateToPack);
+      wrenchCommand.negate();
       virtualWrenchCommand.set(body, wrenchCommand);
    }
 
@@ -133,6 +134,6 @@ public class QuadrupedBodyOrientationManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return virtualWrenchCommand;
+      return null;
    }
 }
