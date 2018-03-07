@@ -8,21 +8,12 @@ import us.ihmc.robotics.robotDescription.collisionMeshDefinitionData.CylinderCol
 
 public class CartRobotCollisionMeshDefinitionDataHolder extends CollisionMeshDefinitionDataHolder
 {
-   private double massBody = 100.0;
-   private double xLengthBody = 0.8;
-   private double yLengthBody = 0.4;
-   private double zLengthBody = 0.1;
+   private final double xLengthBody = 0.8;
+   private final double yLengthBody = 0.4;
+   private final double zLengthBody = 0.1;
 
-   private double heightPoll = 0.6;
-   private double radiusPoll = 0.02;
-   private double widthFlag = 0.4;
-   private double heightFlag = 0.2;
-   private double thicknessFlag = 0.01;
-
-   private double massWheel = 50;
-   private double wheelPlacementRatio = 0.8; // ratio with length of x from center to the end in x direction
-   private double radiusWheel = 0.08;
-   private double lengthWheel = yLengthBody * 0.8;
+   private final double radiusWheel = 0.08;
+   private final double lengthWheel = yLengthBody * 0.8;
 
    public CartRobotCollisionMeshDefinitionDataHolder()
    {
