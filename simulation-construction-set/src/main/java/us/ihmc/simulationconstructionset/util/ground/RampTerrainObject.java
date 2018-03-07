@@ -7,7 +7,6 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Shape3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -58,10 +57,6 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
       double planeLength = Math.sqrt(rampLenth * rampLenth + height * height);
       double slopAngle = Math.atan(height / (xEnd - xStart));
       Box3D boxShape = new Box3D(planeLength, planeWidth, rampPlaneThickness);
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.appendTranslation((xStart + xEnd) / 2.0, (yStart + yEnd) / 2.0, height / 2);
-      transform.appendPitchRotation(-slopAngle);
-      transform.appendTranslation(0, 0, -rampPlaneThickness / 2.0);
       boxShape.appendTranslation((xStart + xEnd) / 2.0, (yStart + yEnd) / 2.0, height / 2);
       boxShape.appendPitchRotation(-slopAngle);
       boxShape.appendTranslation(0, 0, -rampPlaneThickness / 2.0);
