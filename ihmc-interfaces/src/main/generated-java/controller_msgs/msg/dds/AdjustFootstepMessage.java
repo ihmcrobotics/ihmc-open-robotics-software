@@ -146,12 +146,7 @@ public class AdjustFootstepMessage implements Settable<AdjustFootstepMessage>, E
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
          return false;
 
-      if (this.predicted_contact_points_2d_.isEnum())
-      {
-         if (!this.predicted_contact_points_2d_.equals(other.predicted_contact_points_2d_))
-            return false;
-      }
-      else if (this.predicted_contact_points_2d_.size() == other.predicted_contact_points_2d_.size())
+      if (this.predicted_contact_points_2d_.size() == other.predicted_contact_points_2d_.size())
       {
          return false;
       }

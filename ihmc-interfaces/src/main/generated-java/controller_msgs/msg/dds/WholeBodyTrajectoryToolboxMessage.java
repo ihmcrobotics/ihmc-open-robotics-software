@@ -74,12 +74,7 @@ public class WholeBodyTrajectoryToolboxMessage implements Settable<WholeBodyTraj
       if (!this.configuration_.epsilonEquals(other.configuration_, epsilon))
          return false;
 
-      if (this.end_effector_trajectories_.isEnum())
-      {
-         if (!this.end_effector_trajectories_.equals(other.end_effector_trajectories_))
-            return false;
-      }
-      else if (this.end_effector_trajectories_.size() == other.end_effector_trajectories_.size())
+      if (this.end_effector_trajectories_.size() == other.end_effector_trajectories_.size())
       {
          return false;
       }
@@ -92,12 +87,7 @@ public class WholeBodyTrajectoryToolboxMessage implements Settable<WholeBodyTraj
          }
       }
 
-      if (this.exploration_configurations_.isEnum())
-      {
-         if (!this.exploration_configurations_.equals(other.exploration_configurations_))
-            return false;
-      }
-      else if (this.exploration_configurations_.size() == other.exploration_configurations_.size())
+      if (this.exploration_configurations_.size() == other.exploration_configurations_.size())
       {
          return false;
       }
@@ -110,12 +100,7 @@ public class WholeBodyTrajectoryToolboxMessage implements Settable<WholeBodyTraj
          }
       }
 
-      if (this.reaching_manifolds_.isEnum())
-      {
-         if (!this.reaching_manifolds_.equals(other.reaching_manifolds_))
-            return false;
-      }
-      else if (this.reaching_manifolds_.size() == other.reaching_manifolds_.size())
+      if (this.reaching_manifolds_.size() == other.reaching_manifolds_.size())
       {
          return false;
       }

@@ -114,12 +114,7 @@ public class WaypointBasedTrajectoryMessage implements Settable<WaypointBasedTra
       if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.waypoint_times_, other.waypoint_times_, epsilon))
          return false;
 
-      if (this.waypoints_.isEnum())
-      {
-         if (!this.waypoints_.equals(other.waypoints_))
-            return false;
-      }
-      else if (this.waypoints_.size() == other.waypoints_.size())
+      if (this.waypoints_.size() == other.waypoints_.size())
       {
          return false;
       }

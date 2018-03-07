@@ -82,12 +82,7 @@ public class PlanarRegionMessage implements Settable<PlanarRegionMessage>, Epsil
       if (!this.region_normal_.epsilonEquals(other.region_normal_, epsilon))
          return false;
 
-      if (this.convex_polygons_.isEnum())
-      {
-         if (!this.convex_polygons_.equals(other.convex_polygons_))
-            return false;
-      }
-      else if (this.convex_polygons_.size() == other.convex_polygons_.size())
+      if (this.convex_polygons_.size() == other.convex_polygons_.size())
       {
          return false;
       }

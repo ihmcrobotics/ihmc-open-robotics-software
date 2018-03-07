@@ -98,12 +98,7 @@ public class FootstepPlanRequestPacket implements Settable<FootstepPlanRequestPa
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_sub_optimality_, other.max_sub_optimality_, epsilon))
          return false;
 
-      if (this.goals_.isEnum())
-      {
-         if (!this.goals_.equals(other.goals_))
-            return false;
-      }
-      else if (this.goals_.size() == other.goals_.size())
+      if (this.goals_.size() == other.goals_.size())
       {
          return false;
       }

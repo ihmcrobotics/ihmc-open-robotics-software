@@ -40,12 +40,7 @@ public class PlanarRegionsListMessage implements Settable<PlanarRegionsListMessa
       if (other == this)
          return true;
 
-      if (this.planar_regions_.isEnum())
-      {
-         if (!this.planar_regions_.equals(other.planar_regions_))
-            return false;
-      }
-      else if (this.planar_regions_.size() == other.planar_regions_.size())
+      if (this.planar_regions_.size() == other.planar_regions_.size())
       {
          return false;
       }

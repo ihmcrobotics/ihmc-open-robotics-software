@@ -85,12 +85,7 @@ public class CapturabilityBasedStatus implements Settable<CapturabilityBasedStat
       if (!this.center_of_mass_3d_.epsilonEquals(other.center_of_mass_3d_, epsilon))
          return false;
 
-      if (this.left_foot_support_polygon_2d_.isEnum())
-      {
-         if (!this.left_foot_support_polygon_2d_.equals(other.left_foot_support_polygon_2d_))
-            return false;
-      }
-      else if (this.left_foot_support_polygon_2d_.size() == other.left_foot_support_polygon_2d_.size())
+      if (this.left_foot_support_polygon_2d_.size() == other.left_foot_support_polygon_2d_.size())
       {
          return false;
       }
@@ -103,12 +98,7 @@ public class CapturabilityBasedStatus implements Settable<CapturabilityBasedStat
          }
       }
 
-      if (this.right_foot_support_polygon_2d_.isEnum())
-      {
-         if (!this.right_foot_support_polygon_2d_.equals(other.right_foot_support_polygon_2d_))
-            return false;
-      }
-      else if (this.right_foot_support_polygon_2d_.size() == other.right_foot_support_polygon_2d_.size())
+      if (this.right_foot_support_polygon_2d_.size() == other.right_foot_support_polygon_2d_.size())
       {
          return false;
       }

@@ -91,12 +91,7 @@ public class FootstepList implements Settable<FootstepList>, EpsilonComparable<F
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.unique_id_, other.unique_id_, epsilon))
          return false;
 
-      if (this.footsteps_.isEnum())
-      {
-         if (!this.footsteps_.equals(other.footsteps_))
-            return false;
-      }
-      else if (this.footsteps_.size() == other.footsteps_.size())
+      if (this.footsteps_.size() == other.footsteps_.size())
       {
          return false;
       }

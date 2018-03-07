@@ -59,12 +59,7 @@ public class WeightedJointTrajectory implements Settable<WeightedJointTrajectory
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.joint_names_, other.joint_names_, epsilon))
          return false;
 
-      if (this.points_.isEnum())
-      {
-         if (!this.points_.equals(other.points_))
-            return false;
-      }
-      else if (this.points_.size() == other.points_.size())
+      if (this.points_.size() == other.points_.size())
       {
          return false;
       }

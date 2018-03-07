@@ -56,12 +56,7 @@ public class TaskspaceTrajectoryStamped implements Settable<TaskspaceTrajectoryS
       if (!this.header_.epsilonEquals(other.header_, epsilon))
          return false;
 
-      if (this.trajectory_points_stamped_.isEnum())
-      {
-         if (!this.trajectory_points_stamped_.equals(other.trajectory_points_stamped_))
-            return false;
-      }
-      else if (this.trajectory_points_stamped_.size() == other.trajectory_points_stamped_.size())
+      if (this.trajectory_points_stamped_.size() == other.trajectory_points_stamped_.size())
       {
          return false;
       }
