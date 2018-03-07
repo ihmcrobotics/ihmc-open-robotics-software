@@ -177,7 +177,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private RobotDescription createRobotDescription()
    {
-      boolean useCollisionMeshes = true;
+      boolean useCollisionMeshes = false;
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
