@@ -1,8 +1,8 @@
 # Message specific to Atlas, it is reported by the IHMC state estimator.
 
-float32[=6] electric_joint_temperatures
-float32[=6] electric_joint_currents
-float32[=6] electric_joint_enabled_array
+float32[<=6] electric_joint_temperatures
+float32[<=6] electric_joint_currents
+float32[<=6] electric_joint_enabled_array
 
 float32[15] raw_imu_timestamps
 float32[15] raw_imu_packet_counts

@@ -1,0 +1,33 @@
+#ifndef __controller_msgs__msg__BehaviorStatusPacket__idl__
+#define __controller_msgs__msg__BehaviorStatusPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet NO_BEHAVIOR_RUNNING =
+      0;
+
+      const octet BEHAVIOS_RUNNING =
+      1;
+
+      const octet BEHAVIOR_PAUSED =
+      2;
+
+
+      /**
+       * This message is part of the IHMC humanoid behavior module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::BehaviorStatusPacket_")
+      struct BehaviorStatusPacket
+      {
+        @defaultValue(value=255)
+        octet current_behavior_status;
+      };
+    };
+  };
+};
+
+#endif

@@ -14,7 +14,7 @@ FootstepDataMessage[] footstep_data_list
 #   The controller will compute the expected times for swing start and touchdown and attempt to start a footstep at that time.
 #   If a footstep touches down early, the following transfer will be extended to make up for this
 #   time difference and the footstep plan will finish at the expected time.
-byte execution_timing EXECUTION_TIMING_CONTROL_DURATIONS
+byte execution_timing 0
 # The swing_duration is the time a foot is not in ground contact during a step.
 # Each step in a list of footsteps might have a different swing duration.
 # The value specified here is a default value, used if a footstep in this list was created without a swing_duration.

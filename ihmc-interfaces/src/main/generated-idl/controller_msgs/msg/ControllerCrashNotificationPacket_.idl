@@ -1,0 +1,43 @@
+#ifndef __controller_msgs__msg__ControllerCrashNotificationPacket__idl__
+#define __controller_msgs__msg__ControllerCrashNotificationPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet CONTROLLER_READ =
+      0;
+
+      const octet CONTROLLER_WRITE =
+      1;
+
+      const octet CONTROLLER_RUN =
+      2;
+
+      const octet ESTIMATOR_READ =
+      3;
+
+      const octet ESTIMATOR_WRITE =
+      4;
+
+      const octet ESTIMATOR_RUN =
+      5;
+
+
+      /**
+       * Message notifying if the IHMC whole-body controller has crashed unexpectedly.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::ControllerCrashNotificationPacket_")
+      struct ControllerCrashNotificationPacket
+      {
+        @defaultValue(value=255)
+        octet controller_crash_location;
+        string stacktrace;
+      };
+    };
+  };
+};
+
+#endif

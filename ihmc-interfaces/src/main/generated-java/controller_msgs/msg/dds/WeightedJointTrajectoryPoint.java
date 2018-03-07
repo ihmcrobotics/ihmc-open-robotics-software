@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "WeightedJointTrajectoryPoint" defined in WeightedJointTrajectoryPoint_.idl.
- *
- * This file was automatically generated from WeightedJointTrajectoryPoint_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit WeightedJointTrajectoryPoint_.idl instead.
- */
 public class WeightedJointTrajectoryPoint implements Settable<WeightedJointTrajectoryPoint>, EpsilonComparable<WeightedJointTrajectoryPoint>
 {
    private trajectory_msgs.msg.dds.JointTrajectoryPoint point_;

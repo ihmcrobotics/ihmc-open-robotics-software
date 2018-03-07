@@ -9,6 +9,6 @@ bool enable_user_pelvis_control false
 # If enable_user_pelvis_control is true then enable_user_pelvis_control_during_walking
 # will keep the manager in user mode while walking.
 # If this is false the manager will switch back to controller mode when walking.
-bool enable_user_pelvis__control_during_walking false
+bool enable_user_pelvis_control_during_walking false
 # The position/orientation trajectory information.
 SE3TrajectoryMessage se3_trajectory

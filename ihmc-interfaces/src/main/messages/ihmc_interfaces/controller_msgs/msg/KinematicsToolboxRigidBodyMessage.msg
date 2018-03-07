@@ -17,7 +17,7 @@ geometry_msgs/Quaternion desired_orientation_in_world
 # This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
 # By default, the control frame is coincident to endEffector.getBodyFixedFrame().
 # The control frame is rigidly attached to the end-effector.
-control_frame_position_in_end_effector
+geometry_msgs/Point control_frame_position_in_end_effector
 # This is the orientation of the control frame expressed in endEffector.getBodyFixedFrame().
 # By default, the control frame is coincident to endEffector.getBodyFixedFrame().
 geometry_msgs/Quaternion control_frame_orientation_in_end_effector

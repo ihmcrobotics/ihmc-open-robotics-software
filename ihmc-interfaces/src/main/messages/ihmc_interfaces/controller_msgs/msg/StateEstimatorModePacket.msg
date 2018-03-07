@@ -3,4 +3,4 @@
 byte NORMAL = 0
 byte FROZEN = 1
 
-byte requested_state_estimator_mode -1
+byte requested_state_estimator_mode 255

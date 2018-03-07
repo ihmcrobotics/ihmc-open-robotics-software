@@ -8,11 +8,11 @@ byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
 # The current footstep status enum value.
-byte footstep_status -1
+byte footstep_status 255
 # footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
 int32 footstep_index
 # The robot side (left or right) that this footstep status correlates to.
-byte robot_side -1
+byte robot_side 255
 # Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
 geometry_msgs/Point desired_foot_position_in_world
 # Specifies the desired orientation of the foot sent to the controller as opposed to where the foot actually landed.

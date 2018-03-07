@@ -1,0 +1,38 @@
+#ifndef __controller_msgs__msg__RequestPlanarRegionsListMessage__idl__
+#define __controller_msgs__msg__RequestPlanarRegionsListMessage__idl__
+
+#include "controller_msgs/msg/./BoundingBox3DMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet SINGLE_UPDATE =
+      0;
+
+      const octet CONTINUOUS_UPDATE =
+      1;
+
+      const octet STOP_UPDATE =
+      2;
+
+      const octet CLEAR =
+      3;
+
+
+      /**
+       * This message is part of the IHMC robot environment awareness module.
+       * Use this message to request new planar regions
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::RequestPlanarRegionsListMessage_")
+      struct RequestPlanarRegionsListMessage
+      {
+        octet planar_regions_request_type;
+        controller_msgs::msg::dds::BoundingBox3DMessage bounding_box_in_world_for_request;
+      };
+    };
+  };
+};
+
+#endif

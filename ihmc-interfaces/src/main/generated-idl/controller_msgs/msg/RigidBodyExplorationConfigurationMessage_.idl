@@ -1,0 +1,45 @@
+#ifndef __controller_msgs__msg__RigidBodyExplorationConfigurationMessage__idl__
+#define __controller_msgs__msg__RigidBodyExplorationConfigurationMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet CONFIGURATION_SPACE_NAME_X =
+      0;
+
+      const octet CONFIGURATION_SPACE_NAME_Y =
+      1;
+
+      const octet CONFIGURATION_SPACE_NAME_Z =
+      2;
+
+      const octet CONFIGURATION_SPACE_NAME_ROLL =
+      3;
+
+      const octet CONFIGURATION_SPACE_NAME_PITCH =
+      4;
+
+      const octet CONFIGURATION_SPACE_NAME_YAW =
+      5;
+
+
+      /**
+       * Message used to configure the exploration for a RRT-based planner.
+       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::RigidBodyExplorationConfigurationMessage_")
+      struct RigidBodyExplorationConfigurationMessage
+      {
+        long long rigid_body_name_based_hash_code;
+        sequence<octet> configuration_space_names_to_explore;
+        sequence<double> exploration_range_upper_limits;
+        sequence<double> exploration_range_lower_limits;
+      };
+    };
+  };
+};
+
+#endif

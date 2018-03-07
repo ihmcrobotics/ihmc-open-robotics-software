@@ -16,4 +16,4 @@ byte ROBOT_SIDE_RIGHT = 1
 # correspond to joints HPZ, HPX, HPY, KNY, AKY, AKX, respectively.
 float64[] max_velocity_deltas
 
-byte robot_side -1
+byte robot_side 255

@@ -1,0 +1,24 @@
+#ifndef __controller_msgs__msg__InvalidPacketNotificationPacket__idl__
+#define __controller_msgs__msg__InvalidPacketNotificationPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message notifies the user that a previously sent message was rejected by the whole-body controller.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::InvalidPacketNotificationPacket_")
+      struct InvalidPacketNotificationPacket
+      {
+        string packet_class_simple_name;
+        string error_message;
+      };
+    };
+  };
+};
+
+#endif

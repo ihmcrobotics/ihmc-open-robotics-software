@@ -1,0 +1,41 @@
+#ifndef __controller_msgs__msg__ManualHandControlPacket__idl__
+#define __controller_msgs__msg__ManualHandControlPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+      const long VELOCITY =
+      0;
+
+      const long POSITION =
+      1;
+
+
+      /**
+       * Atlas specific message
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::ManualHandControlPacket_")
+      struct ManualHandControlPacket
+      {
+        @defaultValue(value=255)
+        octet robot_side;
+        double index;
+        double middle;
+        double thumb;
+        double spread;
+        long control_type;
+      };
+    };
+  };
+};
+
+#endif
