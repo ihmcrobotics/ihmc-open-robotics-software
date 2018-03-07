@@ -1137,7 +1137,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             computeMidFeetPointByPositionFraction(copPointToPlan, swingFootInitialPolygon, supportFootPolygon,
                                                   transferSplitFractions.get(footstepIndex).getDoubleValue(), supportFootPolygon.getReferenceFrame());
          else
-            getDoubleSupportPolygonCentroid(copPointToPlan, supportFootPolygon, swingFootInitialPolygon, supportFootPolygon.getReferenceFrame());
+            computeMidFeetPointByPositionFraction(copPointToPlan, swingFootInitialPolygon, supportFootPolygon, percentageChickenSupport.getDoubleValue(),
+                                                  supportFootPolygon.getReferenceFrame());
          return;
       case FINAL_DOUBLE_SUPPORT_POLYGON:
          if (copPointName == CoPPointName.MIDFEET_COP)
