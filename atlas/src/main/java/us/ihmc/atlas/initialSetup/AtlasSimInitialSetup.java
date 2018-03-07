@@ -70,12 +70,12 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
          {
             for (GroundContactPoint groundContactPoint : robot.getFootGroundContactPoints(robotSide))
             {
-               if(Double.isNaN(minZ) || Double.isInfinite(minZ))
+               if (Double.isNaN(minZ) || Double.isInfinite(minZ))
                {
                   minZ = groundContactPoint.getPositionPoint().getZ();
                   lowestGroundContactPoint = groundContactPoint;
                }
-               else if(groundContactPoint.getPositionPoint().getZ() <= minZ)
+               else if (groundContactPoint.getPositionPoint().getZ() <= minZ)
                {
                   minZ = groundContactPoint.getPositionPoint().getZ();
                   lowestGroundContactPoint = groundContactPoint;
@@ -83,10 +83,15 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
             }
          }
 
-         double pelvisToFoot = positionInWorld.getZ() - lowestGroundContactPoint.getPositionPoint().getZ();
+         double pelvisToFoot = 0.0;
+
+         if (lowestGroundContactPoint == null)
+            pelvisToFoot = 0.9286147465454951; // for AtlasStraightLegWalkingTest
+         else
+            pelvisToFoot = positionInWorld.getZ() - lowestGroundContactPoint.getPositionPoint().getZ();
 
          // Hardcoded for gazebo integration
-         //      double pelvisToFoot = 0.887;
+         //double pelvisToFoot = 0.887; 
 
          positionInWorld.setZ(groundZ + pelvisToFoot);
          positionInWorld.add(offset);
