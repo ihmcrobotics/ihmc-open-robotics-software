@@ -6,6 +6,7 @@ import java.util.List;
 import com.jme3.math.Transform;
 
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
+import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
@@ -111,6 +112,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final PlanarRegionFootstepPlanningParameters planarRegionFootstepPlannerParameters;
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
+   private final AtlasCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder;
 
    private final RobotDescription robotDescription;
 
@@ -171,18 +173,23 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
+      collisionMeshDefinitionDataHolder = new AtlasCollisionMeshDefinitionDataHolder(jointMap);
 
       robotDescription = createRobotDescription();
    }
 
    private RobotDescription createRobotDescription()
    {
-      boolean useCollisionMeshes = false;
+      boolean useCollisionMeshes = false; // This is to use mesh from sdf. Those meshes make scs very slow.
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
       RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters,
                                                                                         useCollisionMeshes);
+
+      collisionMeshDefinitionDataHolder.setVisible(false);
+      robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
+
       return robotDescription;
    }
 
