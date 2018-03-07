@@ -66,7 +66,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
 
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
-   {      
+   {  
       int boundingBoxChecks = 0;
       int collisionChecks = 0;
       int numberOfCollisions = 0;
@@ -97,6 +97,9 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             CollisionShape objectTwo = collisionObjects.get(j);
             CollisionShapeDescription<?> descriptionTwo = objectTwo.getTransformedCollisionShapeDescription();
 
+            if(objectOne.isGround() && objectTwo.isGround())
+               continue;
+            
             if ((objectOne.getCollisionGroup() & objectTwo.getCollisionMask()) == 0x00)
             {
                continue;
@@ -106,7 +109,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             {
                continue;
             }
-
+            
             objectOne.getBoundingBox(boundingBoxOne);
             objectTwo.getBoundingBox(boundingBoxTwo);
 
