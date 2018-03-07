@@ -51,7 +51,7 @@ public abstract class AvatarPushAndWalkBehaviorTest implements MultiRobotTestInt
 
       drcBehaviorTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 1.0), new Point3D(10.0, 10.0, 3.0));
       ThreadTools.sleep(1000);
-      assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      assertTrue("Caught an exception, robot probably fell", drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5));
       drcBehaviorTestHelper.dispatchBehavior(pushAndWalkBehavior);
 
       double totalMass = fullRobotModel.getTotalMass();
@@ -63,21 +63,21 @@ public abstract class AvatarPushAndWalkBehaviorTest implements MultiRobotTestInt
       {
          direction.set(1.0, 0.0, 0.0);
          pushRobotController.applyForce(direction, force, duration);
-         assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
+         assertTrue("Caught an exception, robot probably fell", drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
       }
 
       for (int i = 0; i < 5; i++)
       {
          direction.set(0.0, 1.0, 0.0);
          pushRobotController.applyForce(direction, force, duration);
-         assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
+         assertTrue("Caught an exception, robot probably fell", drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
       }
 
       for (int i = 0; i < 5; i++)
       {
          direction.set(1.0, 1.0, 0.0);
          pushRobotController.applyForce(direction, force, duration);
-         assertTrue(drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
+         assertTrue("Caught an exception, robot probably fell", drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
       }
    }
 
