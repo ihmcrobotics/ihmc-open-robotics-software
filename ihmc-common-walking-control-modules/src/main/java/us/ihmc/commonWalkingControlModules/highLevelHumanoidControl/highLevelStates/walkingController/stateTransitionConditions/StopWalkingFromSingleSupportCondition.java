@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.SingleSupportState;
 
 public class StopWalkingFromSingleSupportCondition implements StateTransitionCondition
@@ -16,9 +16,9 @@ public class StopWalkingFromSingleSupportCondition implements StateTransitionCon
    }
 
    @Override
-   public boolean checkCondition()
+   public boolean testCondition(double timeInState)
    {
-      if (!singleSupportState.isDone())
+      if (!singleSupportState.isDone(timeInState))
          return false;
 
       return !walkingMessageHandler.hasUpcomingFootsteps();

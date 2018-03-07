@@ -3,7 +3,7 @@ package us.ihmc.valkyrie.fingers;
 import java.util.EnumMap;
 import java.util.Map;
 
-import us.ihmc.euclid.tools.TupleTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
@@ -11,11 +11,12 @@ import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.FinishableState;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -54,7 +55,7 @@ public class ValkyrieFingerSetController implements RobotController
 
    private final EnumMap<ValkyrieHandJointName, YoEffortJointHandleHolder> jointHandles;
 
-   private final StateMachine<GraspState> stateMachine;
+   private final StateMachine<GraspState, State> stateMachine;
    private final YoEnum<GraspState> requestedState;
 
    private final double controlDT;
@@ -88,10 +89,9 @@ public class ValkyrieFingerSetController implements RobotController
       fingerPolynomial = new YoPolynomial(sidePrefix + "FingersPolynomial", 4, registry);
       thumbPolynomial = new YoPolynomial(sidePrefix + "ThumbPolynomial", 4, registry);
 
-      stateMachine = new StateMachine<>(sidePrefix + "GripCurrent", "SwitchTime", GraspState.class, yoTime, registry);
       requestedState = new YoEnum<>(sidePrefix + "RequestedGrip", registry, GraspState.class, true);
       requestedState.set(null);
-      setupStateMachine();
+      stateMachine = setupStateMachine(sidePrefix, yoTime);
 
       parentRegistry.addChild(registry);
    }
@@ -127,17 +127,20 @@ public class ValkyrieFingerSetController implements RobotController
       }
    }
 
-   private void setupStateMachine()
+   private StateMachine<GraspState, State> setupStateMachine(String sidePrefix, DoubleProvider time)
    {
+      StateMachineFactory<GraspState, State> factory = new StateMachineFactory<>(GraspState.class);
+      factory.setNamePrefix(sidePrefix + "GripCurrent").setRegistry(registry).buildYoClock(time);
+
       GripState stateOpenGrip = new OpenGrip();
       GripState stateClosedGrip = new ClosedGrip();
 
-      stateMachine.addState(stateOpenGrip);
-      stateMachine.addState(stateClosedGrip);
-      stateMachine.setCurrentState(GraspState.OPEN);
+      factory.addState(GraspState.OPEN, stateOpenGrip);
+      factory.addState(GraspState.CLOSE, stateClosedGrip);
+      factory.addRequestedTransition(GraspState.OPEN, GraspState.CLOSE, requestedState, true);
+      factory.addRequestedTransition(GraspState.CLOSE, GraspState.OPEN, requestedState, true);
 
-      StateMachineTools.addRequestedStateTransition(requestedState, true, stateOpenGrip, stateClosedGrip);
-      StateMachineTools.addRequestedStateTransition(requestedState, true, stateClosedGrip, stateOpenGrip);
+      return factory.build(GraspState.OPEN);
    }
 
    public void requestState(GraspState requestedState)
@@ -147,13 +150,8 @@ public class ValkyrieFingerSetController implements RobotController
 
    private class OpenGrip extends GripState
    {
-      public OpenGrip()
-      {
-         super(GraspState.OPEN);
-      }
-
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          fingerPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 1.0);
          thumbPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 1.0);
@@ -187,13 +185,8 @@ public class ValkyrieFingerSetController implements RobotController
 
    private class ClosedGrip extends GripState
    {
-      public ClosedGrip()
-      {
-         super(GraspState.CLOSE);
-      }
-
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          fingerPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 1.0);
          thumbPolynomial.setCubic(0.0, trajectoryTime.getDoubleValue(), 0.0, 1.0);
@@ -225,18 +218,12 @@ public class ValkyrieFingerSetController implements RobotController
       }
    }
 
-   public abstract class GripState extends FinishableState<GraspState>
+   public abstract class GripState implements State
    {
-
-      public GripState(GraspState stateEnum)
-      {
-         super(stateEnum);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
-         double fingerTime = getTimeInCurrentState() - getFingerDelay();
+         double fingerTime = timeInState - getFingerDelay();
          double fingerAlpha, fingerAlphaDot;
 
          if (fingerTime <= 0.0)
@@ -256,7 +243,7 @@ public class ValkyrieFingerSetController implements RobotController
             fingerAlphaDot = fingerPolynomial.getVelocity();
          }
 
-         double thumbTime = getTimeInCurrentState() - getThumbDelay();
+         double thumbTime = timeInState - getThumbDelay();
          double thumbAlpha, thumbAlphaDot;
          
          if (thumbTime <= 0.0)
@@ -282,14 +269,14 @@ public class ValkyrieFingerSetController implements RobotController
             {
                double q0 = initialDesiredAngles.get(jointEnum).getDoubleValue();
                double qf = finalDesiredAngles.get(jointEnum).getDoubleValue();
-               desiredAngles.get(jointEnum).set(TupleTools.interpolate(q0, qf, thumbAlpha));
+               desiredAngles.get(jointEnum).set(EuclidCoreTools.interpolate(q0, qf, thumbAlpha));
                desiredVelocities.get(jointEnum).set(thumbAlphaDot * (qf - q0));
             }
             else
             {
                double q0 = initialDesiredAngles.get(jointEnum).getDoubleValue();
                double qf = finalDesiredAngles.get(jointEnum).getDoubleValue();
-               desiredAngles.get(jointEnum).set(TupleTools.interpolate(q0, qf, fingerAlpha));
+               desiredAngles.get(jointEnum).set(EuclidCoreTools.interpolate(q0, qf, fingerAlpha));
                desiredVelocities.get(jointEnum).set(fingerAlphaDot * (qf - q0));
             }
          }
@@ -300,13 +287,13 @@ public class ValkyrieFingerSetController implements RobotController
       protected abstract double getThumbDelay();
 
       @Override
-      public boolean isDone()
+      public boolean isDone(double timeInState)
       {
-         return getTimeInCurrentState() >= trajectoryTime.getDoubleValue();
+         return timeInState >= trajectoryTime.getDoubleValue();
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
@@ -314,8 +301,7 @@ public class ValkyrieFingerSetController implements RobotController
    @Override
    public void doControl()
    {
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
+      stateMachine.doControlAndTransition();
 
       for (ValkyrieHandJointName jointEnum : controlledJoints)
       {

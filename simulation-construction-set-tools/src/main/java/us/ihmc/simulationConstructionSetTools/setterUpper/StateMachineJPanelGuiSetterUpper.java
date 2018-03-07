@@ -5,15 +5,16 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.extra.StateMachinesJPanel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class StateMachineJPanelGuiSetterUpper implements GUISetterUpper
+public class StateMachineJPanelGuiSetterUpper<K extends Enum<K>> implements GUISetterUpper
 {
-   private final StateMachine stateMachine;
+   private final StateMachine<K, ? extends State> stateMachine;
    private final boolean inJFrame;
-   public StateMachineJPanelGuiSetterUpper(StateMachine stateMachine, boolean inJFrame)
+   public StateMachineJPanelGuiSetterUpper(StateMachine<K, ? extends State> stateMachine, boolean inJFrame)
    {
       this.stateMachine = stateMachine;
       this.inJFrame = inJFrame;
@@ -22,7 +23,7 @@ public class StateMachineJPanelGuiSetterUpper implements GUISetterUpper
    @Override
    public void setupGUI(SimulationConstructionSet scs)
    {
-      StateMachinesJPanel walkingStatePanel = new StateMachinesJPanel(stateMachine);
+      StateMachinesJPanel<K> walkingStatePanel = new StateMachinesJPanel<>(stateMachine);
       String name = "State Machine";
       if (inJFrame)
       {
@@ -45,7 +46,7 @@ public class StateMachineJPanelGuiSetterUpper implements GUISetterUpper
 
       // Doing the following will cause redraw when the state changes, but not
       // during replay or rewind:
-      stateMachine.attachStateChangedListener(walkingStatePanel);
+      stateMachine.addStateChangedListener(walkingStatePanel);
    }
 
 }

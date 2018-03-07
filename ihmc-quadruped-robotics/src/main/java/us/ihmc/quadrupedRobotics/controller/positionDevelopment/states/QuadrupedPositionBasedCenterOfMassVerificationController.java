@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.positionDevelopment.states;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -9,14 +10,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -26,14 +24,8 @@ import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverse
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -50,10 +42,18 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class QuadrupedPositionBasedCenterOfMassVerificationController implements QuadrupedController
 {
@@ -75,7 +75,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       MOVE_COM_AROUND, ALPHA_FILTERING_DESIREDS, PICK_UP_FEET, PUT_DOWN_FEET
    }
 
-   private final StateMachine<COM_ESTIMATE_STATES> stateMachine;
+   private final StateMachine<COM_ESTIMATE_STATES, State> stateMachine;
    private final FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerOnTransitionIn;
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
    private final FullQuadrupedRobotModel fullRobotModel;
@@ -180,33 +180,34 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
 
       //Create State Machine and States
-      this.stateMachine = new StateMachine<COM_ESTIMATE_STATES>("centerOfMassVerificationStateMachine", "walkingStateTranistionTime", COM_ESTIMATE_STATES.class, runtimeEnvironment.getRobotTimestamp(), registry);
+      StateMachineFactory<COM_ESTIMATE_STATES, State> factory = new StateMachineFactory<>(COM_ESTIMATE_STATES.class);
+      factory.setNamePrefix("centerOfMassVerificationStateMachine").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
       this.filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState();
       MoveCenterOfMassAround moveCenterOfMassAroundState = new MoveCenterOfMassAround();
       MoveFeet pickFeetUp = new MoveFeet("pickFeetUp", footZHeightOnPickUp, trotPairToRaise, COM_ESTIMATE_STATES.PICK_UP_FEET);
       MoveFeet putFeetDown = new MoveFeet("putFeetDown", footZHeightOnTouchdown, trotPairInAir, COM_ESTIMATE_STATES.PUT_DOWN_FEET);
 
-      stateMachine.addState(pickFeetUp);
-      stateMachine.addState(putFeetDown);
-      stateMachine.addState(moveCenterOfMassAroundState);
-      stateMachine.addState(filterDesiredsToMatchCrawlControllerOnTransitionIn);
+      factory.addState(COM_ESTIMATE_STATES.PICK_UP_FEET, pickFeetUp);
+      factory.addState(COM_ESTIMATE_STATES.PUT_DOWN_FEET, putFeetDown);
+      factory.addState(COM_ESTIMATE_STATES.MOVE_COM_AROUND, moveCenterOfMassAroundState);
+      factory.addState(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS, filterDesiredsToMatchCrawlControllerOnTransitionIn);
+
+      factory.addTransition(Arrays.asList(COM_ESTIMATE_STATES.PICK_UP_FEET, COM_ESTIMATE_STATES.PUT_DOWN_FEET), COM_ESTIMATE_STATES.MOVE_COM_AROUND, timeInState -> timeInState > swingTime.getDoubleValue() + timeToSTayInMoveFeetAfterTouchDown.getDoubleValue());
 
       //setup transitions
       //start with ALPHA_FILTERING_DESIREDS, once finished goto ESTIMATE_COM,
       //once in ESTIMATE_COM, trotPairToRaise can trigger pick up and put down,
       //both pick up and put down transition back to ESTIMATE_COM when done
       FilterToCoMShiftTransition filterDesiredsToCoMShiftTransitionCondition = new FilterToCoMShiftTransition(filterDesiredsToMatchCrawlControllerOnTransitionIn);
-      StateTransition<COM_ESTIMATE_STATES> filterDesiredsToCoMShiftTransition = new StateTransition<COM_ESTIMATE_STATES>(COM_ESTIMATE_STATES.MOVE_COM_AROUND, filterDesiredsToCoMShiftTransitionCondition);
-      filterDesiredsToMatchCrawlControllerOnTransitionIn.addStateTransition(filterDesiredsToCoMShiftTransition);
+      factory.addTransition(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS, COM_ESTIMATE_STATES.MOVE_COM_AROUND, filterDesiredsToCoMShiftTransitionCondition);
 
       PickUpTrotLineFeetTransitionCondition pickUpTransitionCondition = new PickUpTrotLineFeetTransitionCondition();
       PutDownTrotLineFeetTransitionCondition putDownTransitionCondition = new PutDownTrotLineFeetTransitionCondition();
 
-      StateTransition<COM_ESTIMATE_STATES> pickUpFeetTransition = new StateTransition<QuadrupedPositionBasedCenterOfMassVerificationController.COM_ESTIMATE_STATES>(COM_ESTIMATE_STATES.PICK_UP_FEET, pickUpTransitionCondition);
-      StateTransition<COM_ESTIMATE_STATES> putDownFeetTransition = new StateTransition<QuadrupedPositionBasedCenterOfMassVerificationController.COM_ESTIMATE_STATES>(COM_ESTIMATE_STATES.PUT_DOWN_FEET, putDownTransitionCondition);
+      factory.addTransition(COM_ESTIMATE_STATES.MOVE_COM_AROUND, COM_ESTIMATE_STATES.PICK_UP_FEET, pickUpTransitionCondition);
+      factory.addTransition(COM_ESTIMATE_STATES.MOVE_COM_AROUND, COM_ESTIMATE_STATES.PUT_DOWN_FEET, putDownTransitionCondition);
 
-      moveCenterOfMassAroundState.addStateTransition(pickUpFeetTransition);
-      moveCenterOfMassAroundState.addStateTransition(putDownFeetTransition);
+      stateMachine = factory.build(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS);
 
       createGraphicsAndArtifacts(runtimeEnvironment.getGraphicsListRegistry());
       parentRegistry.addChild(registry);
@@ -259,14 +260,13 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       referenceFrames.updateFrames();
       updateFeetLocations();
       updateGraphics();
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
+      stateMachine.doControlAndTransition();
       updateDesiredHeight();
       updateDesiredCoMPose();
       updateDesiredFootPositionsBasedOnDesiredCenterOfMass();
       useInverseKinematicsToGetJointPositionsAndStoreInFullRobotModel(fullRobotModel);
 
-      if (stateMachine.isCurrentState(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS))
+      if (stateMachine.getCurrentStateKey() == COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS)
       {
          filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds();
       }
@@ -367,7 +367,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          return filterDesiredsToMatchCrawlControllerState.isInterpolationFinished();
       }
@@ -380,7 +380,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          return (trotPairInAir.getEnumValue() == TrotPair.NONE && trotPairToRaise.getEnumValue() != TrotPair.NONE);
       }
@@ -393,7 +393,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          return (trotPairInAir.getEnumValue() != TrotPair.NONE && trotPairToRaise.getEnumValue() != trotPairInAir.getEnumValue());
       }
@@ -492,7 +492,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
    }
 
-   private class MoveCenterOfMassAround extends State<COM_ESTIMATE_STATES>
+   private class MoveCenterOfMassAround implements State
    {
       private final YoEnum<TrotPair> frameToIncrementOver = new YoEnum<>("trotPairToMoveCenterOfMassOver", registry, TrotPair.class);
       private final ReferenceFrame rootFrame = referenceFrames.getRootJointFrame();
@@ -509,7 +509,6 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
       public MoveCenterOfMassAround()
       {
-         super(COM_ESTIMATE_STATES.MOVE_COM_AROUND);
          frameToIncrementOver.set(TrotPair.NONE);
          intialCenterOfMass.changeFrame(worldFrame);
          intialCenterOfMass.set(desiredCenterOfMassPosition);
@@ -552,7 +551,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -594,19 +593,19 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
 
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 
       }
    }
 
-   private class MoveFeet extends State<COM_ESTIMATE_STATES>
+   private class MoveFeet implements State
    {
       private final YoDouble zHeight;
       private final COM_ESTIMATE_STATES state;
@@ -615,24 +614,15 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
       public MoveFeet(String name, YoDouble zHeight, YoEnum<TrotPair> trotPairToManage, COM_ESTIMATE_STATES state)
       {
-         super(state);
          this.state = state;
          this.zHeight = zHeight;
          this.trotPairSource = trotPairToManage;
          this.currentTrotPairToMove = new YoEnum<>(name + "CurrentTrotPairToMove", registry, TrotPair.class);
-         this.setDefaultNextState(COM_ESTIMATE_STATES.MOVE_COM_AROUND);
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
-         double timeInState = this.getTimeInCurrentState();
-
-         if (timeInState > swingTime.getDoubleValue() + timeToSTayInMoveFeetAfterTouchDown.getDoubleValue())
-         {
-            this.transitionToDefaultNextState();
-         }
-
          TrotPair trotPair = currentTrotPairToMove.getEnumValue();
          RobotQuadrant[] trotPairQuadrants = trotPair.getQuadrants();
 
@@ -654,7 +644,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
 
          TrotPair trotPair = trotPairSource.getEnumValue();
@@ -672,7 +662,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
          if (state == COM_ESTIMATE_STATES.PUT_DOWN_FEET)
          {
@@ -686,15 +676,13 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
    }
 
-   private class FilterDesiredsToMatchCrawlControllerState extends State<COM_ESTIMATE_STATES>
+   private class FilterDesiredsToMatchCrawlControllerState implements State
    {
       private final AlphaFilteredYoVariable filterStandPrepDesiredsToWalkingDesireds;
       private final TDoubleArrayList initialPositions = new TDoubleArrayList();
 
       public FilterDesiredsToMatchCrawlControllerState()
       {
-         super(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS);
-
          double filterStandPrepDesiredsToWalkingDesiredsAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5, dt);
          filterStandPrepDesiredsToWalkingDesireds = new AlphaFilteredYoVariable("filterStandPrepDesiredsToWalkingDesireds", registry, filterStandPrepDesiredsToWalkingDesiredsAlpha);
       }
@@ -719,13 +707,13 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          filterStandPrepDesiredsToWalkingDesireds.update(1.0);
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          filterStandPrepDesiredsToWalkingDesireds.reset();
          filterStandPrepDesiredsToWalkingDesireds.update(0.0);
@@ -739,7 +727,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 
       }
@@ -760,7 +748,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
-      stateMachine.setCurrentState(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS);
+      stateMachine.reset();
    }
 
    @Override

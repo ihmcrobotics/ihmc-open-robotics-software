@@ -9,19 +9,14 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class FootstepTask<E extends Enum<E>> extends BehaviorAction<E>
+public class FootstepTask extends BehaviorAction
 {
    private final FootstepListBehavior footstepListBehavior;
    private ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
 
    public FootstepTask(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide, FootstepListBehavior footstepListBehavior, FramePose3D footPose)
    {
-      this(null, fullRobotModel, robotSide, footstepListBehavior, footPose);
-   }
-
-   public FootstepTask(E stateEnum, FullHumanoidRobotModel fullRobotModel, RobotSide robotSide, FootstepListBehavior footstepListBehavior, FramePose3D footPose)
-   {
-      super(stateEnum, footstepListBehavior);
+      super(footstepListBehavior);
       footsteps.add(new Footstep(robotSide, footPose));
       this.footstepListBehavior = footstepListBehavior;
    }

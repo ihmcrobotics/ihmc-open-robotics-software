@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 public class StartFlamingoCondition implements StateTransitionCondition
 {
@@ -16,7 +16,7 @@ public class StartFlamingoCondition implements StateTransitionCondition
    }
 
    @Override
-   public boolean checkCondition()
+   public boolean testCondition(double timeInState)
    {
       return walkingMessageHandler.hasFootTrajectoryForFlamingoStance(transferToSide.getOppositeSide());
    }

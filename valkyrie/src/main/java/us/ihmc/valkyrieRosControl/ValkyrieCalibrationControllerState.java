@@ -9,7 +9,8 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -33,7 +34,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    private static final double timeToMove = 3.0;
 
    private ForceSensorCalibrationModule forceSensorCalibrationModule;
-   private final GenericStateMachine<CalibrationStates, CalibrationState<CalibrationStates>> stateMachine;
+   private final StateMachine<CalibrationStates, CalibrationState> stateMachine;
 
    private final PairList<OneDoFJoint, TrajectoryData> jointsData = new PairList<>();
 
@@ -75,22 +76,13 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       OneDoFJoint[] jointArray = ScrewTools.filterJoints(highLevelControllerToolbox.getControlledJoints(), OneDoFJoint.class);
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
 
-      CalibrationEntry calibrationEntry = new CalibrationEntry();
-      Calibration calibration = new Calibration();
-      CalibrationExit calibrationExit = new CalibrationExit();
-
-      calibrationEntry.setDefaultNextState(CalibrationStates.CALIBRATE);
-      calibration.setDefaultNextState(CalibrationStates.EXIT);
-
-      stateMachine = new GenericStateMachine<>("calibrationState", "calibrationTime", CalibrationStates.class, highLevelControllerToolbox.getYoTime(),
-                                               registry);
-
-      stateMachine.addState(calibrationEntry);
-      stateMachine.addState(calibration);
-      stateMachine.addState(calibrationExit);
-
-      stateMachine.setCurrentState(CalibrationStates.ENTRY);
-
+      
+      StateMachineFactory<CalibrationStates, CalibrationState> factory = new StateMachineFactory<>(CalibrationStates.class);
+      factory.setNamePrefix("calibrationState").setRegistry(registry).buildYoClock(highLevelControllerToolbox.getYoTime());
+      factory.addStateAndDoneTransition(CalibrationStates.ENTRY, new CalibrationEntry(), CalibrationStates.CALIBRATE);
+      factory.addStateAndDoneTransition(CalibrationStates.CALIBRATE, new Calibration(), CalibrationStates.EXIT);
+      factory.addState(CalibrationStates.EXIT, new CalibrationExit());
+      stateMachine = factory.build(CalibrationStates.ENTRY);
    }
 
    public void attachForceSensorCalibrationModule(ForceSensorCalibrationModule forceSensorCalibrationModule)
@@ -99,33 +91,31 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
-      if (stateMachine.isCurrentState(CalibrationStates.EXIT))
-         return stateMachine.getCurrentState().isDone();
+      if (stateMachine.getCurrentStateKey() == CalibrationStates.EXIT)
+         return stateMachine.getCurrentState().isDone(stateMachine.getTimeInCurrentState());
       else
          return false;
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      stateMachine.getCurrentState().doTransitionOutOfAction();
+      stateMachine.getCurrentState().onExit();
 
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      stateMachine.setCurrentState(CalibrationStates.ENTRY);
-      stateMachine.getCurrentState().doTransitionIntoAction();
+      stateMachine.reset();
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
+      stateMachine.doControlAndTransition();
    }
 
    @Override
@@ -139,14 +129,8 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       return jointTorqueOffsetEstimatorController;
    }
 
-   private class CalibrationEntry extends CalibrationState<CalibrationStates>
+   private class CalibrationEntry implements CalibrationState
    {
-
-      public CalibrationEntry()
-      {
-         super(CalibrationStates.ENTRY);
-      }
-
       @Override
       public JointDesiredOutputListReadOnly getOutputForLowLevelController()
       {
@@ -154,18 +138,15 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public boolean isDone()
+      public boolean isDone(double timeInState)
       {
-         return getTimeInCurrentState() > timeToMoveForCalibration.getDoubleValue();
+         return timeInState > timeToMoveForCalibration.getDoubleValue();
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
-         double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, timeToMoveForCalibration.getDoubleValue());
-
-         if (isDone())
-            transitionToDefaultNextState();
+         double timeInTrajectory = MathTools.clamp(timeInState, 0.0, timeToMoveForCalibration.getDoubleValue());
 
          jointTorqueOffsetEstimatorController.doControl();
 
@@ -198,7 +179,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          for (int i = 0; i < jointsData.size(); i++)
          {
@@ -225,35 +206,27 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
 
-   private class Calibration extends CalibrationState<CalibrationStates>
+   private class Calibration implements CalibrationState
    {
-      public Calibration()
-      {
-         super(CalibrationStates.CALIBRATE);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
-         if (isDone())
-            transitionToDefaultNextState();
-
          jointTorqueOffsetEstimatorController.doControl();
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          jointTorqueOffsetEstimatorController.estimateTorqueOffset(true);
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
          jointTorqueOffsetEstimatorController.estimateTorqueOffset(false);
          jointTorqueOffsetEstimatorController.exportTorqueOffsets();
@@ -263,9 +236,9 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public boolean isDone()
+      public boolean isDone(double timeInState)
       {
-         return getTimeInCurrentState() > timeForEstimatingOffset.getDoubleValue();
+         return timeInState > timeForEstimatingOffset.getDoubleValue();
       }
 
       @Override
@@ -275,13 +248,8 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
    }
 
-   private class CalibrationExit extends CalibrationState<CalibrationStates>
+   private class CalibrationExit implements CalibrationState
    {
-      public CalibrationExit()
-      {
-         super(CalibrationStates.EXIT);
-      }
-
       @Override
       public JointDesiredOutputListReadOnly getOutputForLowLevelController()
       {
@@ -289,15 +257,15 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public boolean isDone()
+      public boolean isDone(double timeInState)
       {
-         return getTimeInCurrentState() > timeToMoveForCalibration.getDoubleValue();
+         return timeInState > timeToMoveForCalibration.getDoubleValue();
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
-         double timeInTrajectory = MathTools.clamp(getTimeInCurrentState(), 0.0, timeToMoveForCalibration.getDoubleValue());
+         double timeInTrajectory = MathTools.clamp(timeInState, 0.0, timeToMoveForCalibration.getDoubleValue());
 
          for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
          {
@@ -328,7 +296,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          for (int i = 0; i < jointsData.size(); i++)
          {
@@ -349,7 +317,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }

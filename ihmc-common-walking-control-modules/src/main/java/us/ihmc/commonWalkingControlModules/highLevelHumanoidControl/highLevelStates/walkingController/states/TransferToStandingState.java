@@ -51,14 +51,14 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(RobotSide.LEFT);
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
       if (!balanceManager.isICPPlanDone())
          return false;
@@ -67,15 +67,15 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       balanceManager.clearICPPlan();
       balanceManager.resetPushRecovery();
 
       feetManager.initializeContactStatesForDoubleSupport(null);
 
-      WalkingState previousState = (WalkingState) getPreviousState();
-      RobotSide previousSupportSide = previousState.getSupportSide();
+      WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
+      RobotSide previousSupportSide = previousStateEnum != null ? previousStateEnum.getSupportSide() : null;
 
       if (doFootExplorationInTransferToStanding.getBooleanValue())
       {
@@ -117,7 +117,7 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
    }
 }
