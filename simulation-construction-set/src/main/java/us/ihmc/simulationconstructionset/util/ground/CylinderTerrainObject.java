@@ -1,10 +1,14 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Cylinder3D;
 import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -24,6 +28,8 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 
    private final Point3D tempPoint = new Point3D();
    private final Vector3D zVector = new Vector3D(0.0, 0.0, -1.0);
+   
+   private ArrayList<Shape3D> simpleShapes = new ArrayList<>();
 
    // TODO: change box based surface equations to cylinder surface equations
 
@@ -54,6 +60,10 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       boundingBox = new BoundingBox3D(minPoint, maxPoint);
 
       addGraphics(appearance);
+      
+      Cylinder3D cylinderShape = new Cylinder3D(location, height, radius);
+      
+      this.simpleShapes.add(cylinderShape);
    }
 
    public CylinderTerrainObject(Vector3D center, double pitchDownDegrees, double yawDegrees, double height, double radius, AppearanceDefinition app)
@@ -201,5 +211,11 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;
+   }
+   
+   @Override
+   public List<? extends Shape3D> getSimpleShapes()
+   {
+      return simpleShapes;
    }
 }

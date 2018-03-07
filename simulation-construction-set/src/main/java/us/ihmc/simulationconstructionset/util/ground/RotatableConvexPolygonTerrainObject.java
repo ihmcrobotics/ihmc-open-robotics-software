@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -375,5 +376,10 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       return this;
    }
 
+   @Override
+   public List<? extends Shape3D> getSimpleShapes()
+   {
+      return null;
+   }
 }
 

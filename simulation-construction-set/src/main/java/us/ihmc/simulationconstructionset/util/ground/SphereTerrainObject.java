@@ -1,6 +1,11 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Shape3D;
+import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -13,6 +18,7 @@ public class SphereTerrainObject implements TerrainObject3D, HeightMapWithNormal
    private final BoundingBox3D boundingBox;
    private Graphics3DObject linkGraphics;
 
+   private ArrayList<Shape3D> simpleShapes = new ArrayList<>();
 
    public SphereTerrainObject(double centerX, double centerY,double centerZ, double radius, AppearanceDefinition appearance)
    {
@@ -36,6 +42,9 @@ public class SphereTerrainObject implements TerrainObject3D, HeightMapWithNormal
      linkGraphics.translate(centerX,centerY, centerZ);
 
      linkGraphics.addSphere(radius, appearance);
+     
+     Sphere3D sphereShape = new Sphere3D(centerX, centerY, centerZ, radius);
+     simpleShapes.add(sphereShape);
  }
 
  
@@ -169,6 +178,18 @@ public double heightAt(double x, double y, double z)
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;
+   }
+
+
+
+
+
+
+
+   @Override
+   public List<? extends Shape3D> getSimpleShapes()
+   {
+      return simpleShapes;
    }
 
 }

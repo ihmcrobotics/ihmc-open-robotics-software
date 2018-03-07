@@ -1,7 +1,10 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import java.util.List;
+
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -247,4 +250,9 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
       return this;
    }
 
+   @Override
+   public List<? extends Shape3D> getSimpleShapes()
+   {
+      return null;
+   }
 }

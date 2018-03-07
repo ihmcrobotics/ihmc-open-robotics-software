@@ -1,9 +1,11 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -22,6 +24,8 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
    private final String name;
 
    private final Point3D tempPointToCheck = new Point3D();
+
+   private ArrayList<Shape3D> simpleShapes = new ArrayList<>();
 
    public CombinedTerrainObject3D(String name)
    {
@@ -129,6 +133,11 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
    {
       terrainObjects.add(object);
       linkGraphics.combine(object.getLinkGraphics());
+
+      if (object.getSimpleShapes() != null)
+      {
+         simpleShapes.addAll(object.getSimpleShapes());
+      }
 
       if (boundingBox == null)
       {
@@ -345,4 +354,9 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       return boundingBox.getMaxY();
    }
 
+   @Override
+   public List<? extends Shape3D> getSimpleShapes()
+   {
+      return simpleShapes;
+   }
 }
