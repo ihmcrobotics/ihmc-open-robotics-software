@@ -4,6 +4,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
@@ -13,6 +14,7 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedForceControllerToolbox
@@ -53,6 +55,19 @@ public class QuadrupedForceControllerToolbox
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
+
+      double coefficientOfFriction = 0.5; // TODO: magic number...
+      QuadrantDependentList<ContactablePlaneBody> contactableFeet = runtimeEnvironment.getContactableFeet();
+
+      for (RobotQuadrant robotSide : RobotQuadrant.values)
+      {
+         ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
+         RigidBody rigidBody = contactableFoot.getRigidBody();
+         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(), rigidBody, contactableFoot.getSoleFrame(),
+                                                                    contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
+
+         footContactStates.put(robotSide, contactState);
+      }
    }
 
    public void update()
