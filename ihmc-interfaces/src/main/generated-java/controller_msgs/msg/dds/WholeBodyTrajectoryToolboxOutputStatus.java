@@ -71,12 +71,7 @@ public class WholeBodyTrajectoryToolboxOutputStatus
       if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.trajectory_times_, other.trajectory_times_, epsilon))
          return false;
 
-      if (this.robot_configurations_.isEnum())
-      {
-         if (!this.robot_configurations_.equals(other.robot_configurations_))
-            return false;
-      }
-      else if (this.robot_configurations_.size() == other.robot_configurations_.size())
+      if (this.robot_configurations_.size() == other.robot_configurations_.size())
       {
          return false;
       }

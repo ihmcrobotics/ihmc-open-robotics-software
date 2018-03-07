@@ -111,12 +111,7 @@ public class FootstepPathPlanPacket implements Settable<FootstepPathPlanPacket>,
       if (!this.start_.epsilonEquals(other.start_, epsilon))
          return false;
 
-      if (this.original_goals_.isEnum())
-      {
-         if (!this.original_goals_.equals(other.original_goals_))
-            return false;
-      }
-      else if (this.original_goals_.size() == other.original_goals_.size())
+      if (this.original_goals_.size() == other.original_goals_.size())
       {
          return false;
       }
@@ -129,12 +124,7 @@ public class FootstepPathPlanPacket implements Settable<FootstepPathPlanPacket>,
          }
       }
 
-      if (this.path_plan_.isEnum())
-      {
-         if (!this.path_plan_.equals(other.path_plan_))
-            return false;
-      }
-      else if (this.path_plan_.size() == other.path_plan_.size())
+      if (this.path_plan_.size() == other.path_plan_.size())
       {
          return false;
       }

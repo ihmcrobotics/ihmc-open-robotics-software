@@ -111,12 +111,7 @@ public class FootstepPlanningToolboxOutputStatus
       if (!this.planar_regions_list_.epsilonEquals(other.planar_regions_list_, epsilon))
          return false;
 
-      if (this.body_path_.isEnum())
-      {
-         if (!this.body_path_.equals(other.body_path_))
-            return false;
-      }
-      else if (this.body_path_.size() == other.body_path_.size())
+      if (this.body_path_.size() == other.body_path_.size())
       {
          return false;
       }

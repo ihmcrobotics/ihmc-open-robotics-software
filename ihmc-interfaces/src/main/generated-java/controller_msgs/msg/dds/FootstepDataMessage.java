@@ -359,12 +359,7 @@ public class FootstepDataMessage implements Settable<FootstepDataMessage>, Epsil
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
          return false;
 
-      if (this.predicted_contact_points_2d_.isEnum())
-      {
-         if (!this.predicted_contact_points_2d_.equals(other.predicted_contact_points_2d_))
-            return false;
-      }
-      else if (this.predicted_contact_points_2d_.size() == other.predicted_contact_points_2d_.size())
+      if (this.predicted_contact_points_2d_.size() == other.predicted_contact_points_2d_.size())
       {
          return false;
       }
@@ -383,12 +378,7 @@ public class FootstepDataMessage implements Settable<FootstepDataMessage>, Epsil
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_height_, other.swing_height_, epsilon))
          return false;
 
-      if (this.custom_position_waypoints_.isEnum())
-      {
-         if (!this.custom_position_waypoints_.equals(other.custom_position_waypoints_))
-            return false;
-      }
-      else if (this.custom_position_waypoints_.size() == other.custom_position_waypoints_.size())
+      if (this.custom_position_waypoints_.size() == other.custom_position_waypoints_.size())
       {
          return false;
       }
@@ -401,12 +391,7 @@ public class FootstepDataMessage implements Settable<FootstepDataMessage>, Epsil
          }
       }
 
-      if (this.swing_trajectory_.isEnum())
-      {
-         if (!this.swing_trajectory_.equals(other.swing_trajectory_))
-            return false;
-      }
-      else if (this.swing_trajectory_.size() == other.swing_trajectory_.size())
+      if (this.swing_trajectory_.size() == other.swing_trajectory_.size())
       {
          return false;
       }

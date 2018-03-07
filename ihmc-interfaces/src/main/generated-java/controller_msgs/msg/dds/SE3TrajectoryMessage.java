@@ -173,12 +173,7 @@ public class SE3TrajectoryMessage implements Settable<SE3TrajectoryMessage>, Eps
       if (other == this)
          return true;
 
-      if (this.taskspace_trajectory_points_.isEnum())
-      {
-         if (!this.taskspace_trajectory_points_.equals(other.taskspace_trajectory_points_))
-            return false;
-      }
-      else if (this.taskspace_trajectory_points_.size() == other.taskspace_trajectory_points_.size())
+      if (this.taskspace_trajectory_points_.size() == other.taskspace_trajectory_points_.size())
       {
          return false;
       }

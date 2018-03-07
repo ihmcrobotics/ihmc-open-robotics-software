@@ -84,12 +84,7 @@ public class OneDoFJointTrajectoryMessage implements Settable<OneDoFJointTraject
       if (other == this)
          return true;
 
-      if (this.trajectory_points_.isEnum())
-      {
-         if (!this.trajectory_points_.equals(other.trajectory_points_))
-            return false;
-      }
-      else if (this.trajectory_points_.size() == other.trajectory_points_.size())
+      if (this.trajectory_points_.size() == other.trajectory_points_.size())
       {
          return false;
       }

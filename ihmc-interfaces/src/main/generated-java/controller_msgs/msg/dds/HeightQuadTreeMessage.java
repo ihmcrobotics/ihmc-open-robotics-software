@@ -105,12 +105,7 @@ public class HeightQuadTreeMessage implements Settable<HeightQuadTreeMessage>, E
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_size_, other.y_size_, epsilon))
          return false;
 
-      if (this.leaves_.isEnum())
-      {
-         if (!this.leaves_.equals(other.leaves_))
-            return false;
-      }
-      else if (this.leaves_.size() == other.leaves_.size())
+      if (this.leaves_.size() == other.leaves_.size())
       {
          return false;
       }

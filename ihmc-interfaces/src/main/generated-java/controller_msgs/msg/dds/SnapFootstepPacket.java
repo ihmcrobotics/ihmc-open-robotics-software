@@ -57,12 +57,7 @@ public class SnapFootstepPacket implements Settable<SnapFootstepPacket>, Epsilon
       if (other == this)
          return true;
 
-      if (this.footstep_data_.isEnum())
-      {
-         if (!this.footstep_data_.equals(other.footstep_data_))
-            return false;
-      }
-      else if (this.footstep_data_.size() == other.footstep_data_.size())
+      if (this.footstep_data_.size() == other.footstep_data_.size())
       {
          return false;
       }

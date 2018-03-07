@@ -261,12 +261,7 @@ public class FootstepDataListMessage implements Settable<FootstepDataListMessage
       if (other == this)
          return true;
 
-      if (this.footstep_data_list_.isEnum())
-      {
-         if (!this.footstep_data_list_.equals(other.footstep_data_list_))
-            return false;
-      }
-      else if (this.footstep_data_list_.size() == other.footstep_data_list_.size())
+      if (this.footstep_data_list_.size() == other.footstep_data_list_.size())
       {
          return false;
       }

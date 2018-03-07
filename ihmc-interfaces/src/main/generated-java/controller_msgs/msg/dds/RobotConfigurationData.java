@@ -253,12 +253,7 @@ public class RobotConfigurationData implements Settable<RobotConfigurationData>,
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.joint_torques_, other.joint_torques_, epsilon))
          return false;
 
-      if (this.force_sensor_data_.isEnum())
-      {
-         if (!this.force_sensor_data_.equals(other.force_sensor_data_))
-            return false;
-      }
-      else if (this.force_sensor_data_.size() == other.force_sensor_data_.size())
+      if (this.force_sensor_data_.size() == other.force_sensor_data_.size())
       {
          return false;
       }
@@ -271,12 +266,7 @@ public class RobotConfigurationData implements Settable<RobotConfigurationData>,
          }
       }
 
-      if (this.imu_sensor_data_.isEnum())
-      {
-         if (!this.imu_sensor_data_.equals(other.imu_sensor_data_))
-            return false;
-      }
-      else if (this.imu_sensor_data_.size() == other.imu_sensor_data_.size())
+      if (this.imu_sensor_data_.size() == other.imu_sensor_data_.size())
       {
          return false;
       }

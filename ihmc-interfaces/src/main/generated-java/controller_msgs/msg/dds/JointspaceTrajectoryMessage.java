@@ -65,12 +65,7 @@ public class JointspaceTrajectoryMessage implements Settable<JointspaceTrajector
       if (other == this)
          return true;
 
-      if (this.joint_trajectory_messages_.isEnum())
-      {
-         if (!this.joint_trajectory_messages_.equals(other.joint_trajectory_messages_))
-            return false;
-      }
-      else if (this.joint_trajectory_messages_.size() == other.joint_trajectory_messages_.size())
+      if (this.joint_trajectory_messages_.size() == other.joint_trajectory_messages_.size())
       {
          return false;
       }
