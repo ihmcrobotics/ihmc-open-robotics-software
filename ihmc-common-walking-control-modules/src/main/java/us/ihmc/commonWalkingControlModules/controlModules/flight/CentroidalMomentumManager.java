@@ -100,7 +100,7 @@ public class CentroidalMomentumManager
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
       yoDesiredAngularMomentumRateOfChange.set(desiredAngularMomentumRateOfChange);
       yoDesiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
-      setOptimizationWeights(100.0, 2.0);
+      setOptimizationWeights(50.0, 2.0);
       setMomentumCommandWeights();
       momentumCommand.setSelectionMatrixToIdentity();
       //desiredCoMLinearAcceleration.setIncludingFrame(comFrame, 0, 0, 0.0);
@@ -114,7 +114,7 @@ public class CentroidalMomentumManager
 
    private void computeDesiredAngularMomentumRateOfChange()
    {
-      angularVelocityManager.setDesiredAngularVelocity(new FrameVector3D(comFrame, 0.0, 0.75, 0.0));
+      angularVelocityManager.setDesiredAngularVelocity(new FrameVector3D(comFrame, 0.0, 0.60, 0.0));
       angularVelocityManager.compute();
       angularVelocityManager.getRateLimitedDesiredMomentumRateOfChange(desiredAngularMomentumRateOfChange);
       desiredAngularMomentumRateOfChange.changeFrame(controlFrame);

@@ -64,7 +64,11 @@ public class CentroidalAngularVelocityManager
       qpSolver.setMaxPrincipalInertia(parameters.getMaximumPrincipalInertia());
       qpSolver.setMinPrincipalInertia(parameters.getMaximumPrincipalInertia());
       qpSolver.setMaxInertiaRateOfChange(parameters.getMaximumInertiaRateOfChange());
-      qpSolver.setRegularizationWeights(parameters.getAngularVelocityRegularizationWeights());
+      qpSolver.setDiagonalTermsRegularizationWeights(parameters.getAngularVelocityRegularizationWeights());
+      qpSolver.setCrossTermsRegularizationWeights(parameters.getAngularVelocityRegularizationWeights());
+      qpSolver.setDiagonalTermsDampingWeight(1e-4);
+      qpSolver.setCrossTermsDampingWeight(1e-3);
+
    }
 
    public void setDesiredAngularVelocity(FrameVector3D desiredAngularVelocity)
@@ -118,7 +122,7 @@ public class CentroidalAngularVelocityManager
 
    public void getRateLimitedDesiredMomentumRateOfChange(FrameVector3D desiredAngularMomentumRateOfChange)
    {
-      double alpha = 0.03;
+      double alpha = 1.0;
       computeDesiredMomentumRateOfChange();
       CommonOps.scale(alpha, desiredMomentumRateOfChange);
       previousAngularMomentumRateLimit.scale(1 - alpha);
