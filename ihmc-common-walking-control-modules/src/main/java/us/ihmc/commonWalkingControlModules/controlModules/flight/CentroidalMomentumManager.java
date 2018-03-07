@@ -106,17 +106,11 @@ public class CentroidalMomentumManager
       //desiredCoMLinearAcceleration.setIncludingFrame(comFrame, 0, 0, 0.0);
    }
    
-   private void rateLimitAngularMomentumRateOfChange(FrameVector3D desiredAngularMomentumRateOfChange2)
-   {
-      // TODO Auto-generated method stub
-      
-   }
-
    private void computeDesiredAngularMomentumRateOfChange()
    {
-      angularVelocityManager.setDesiredAngularVelocity(new FrameVector3D(comFrame, 0.0, 0.60, 0.0));
+      angularVelocityManager.setDesiredAngularVelocity(new FrameVector3D(comFrame, 0.0, 3.0, 0.0));
       angularVelocityManager.compute();
-      angularVelocityManager.getRateLimitedDesiredMomentumRateOfChange(desiredAngularMomentumRateOfChange);
+      angularVelocityManager.getFilteredDesiredMomentumRateOfChange(desiredAngularMomentumRateOfChange);
       desiredAngularMomentumRateOfChange.changeFrame(controlFrame);
    }
 

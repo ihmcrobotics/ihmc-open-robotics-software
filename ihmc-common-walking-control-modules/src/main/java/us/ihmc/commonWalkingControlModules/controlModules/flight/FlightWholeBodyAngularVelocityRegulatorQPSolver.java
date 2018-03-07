@@ -8,6 +8,7 @@ import us.ihmc.convexOptimization.quadraticProgram.AbstractSimpleActiveSetQPSolv
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -87,10 +88,11 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
    private final double controllerDT;
    private double minPrincipalInertia;
    private double maxPrincipalInertia;
-   private double maxInertiaRateOfChange;
+   private double maxInertiaRateOfChangeConstant;
 
    private final DenseMatrix64F tempMatrixLHS = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F tempMatrixRHS = new DenseMatrix64F(0, 1);
+   private double errorNorm = 0.0;
 
    public FlightWholeBodyAngularVelocityRegulatorQPSolver(double controllerDT, YoVariableRegistry registry)
    {
@@ -141,6 +143,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
 
    public void compute()
    {
+      computeError();
       computeCostFunctionToOptimize();
       computeLinearInequalityConstraints();
       computeLinearEqualityConstraints();
@@ -240,9 +243,9 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       inertia.set(centroidalInertia);
    }
 
-   public void setMaxInertiaRateOfChange(double inertiaRateOfChange)
+   public void setMaxInertiaRateOfChangeProportionalConstant(double inertiaRateOfChange)
    {
-      this.maxInertiaRateOfChange = inertiaRateOfChange;
+      this.maxInertiaRateOfChangeConstant = inertiaRateOfChange;
    }
 
    public void setMaxPrincipalInertia(double maxPrincipalInertia)
@@ -267,7 +270,6 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
    private void computeCostFunctionToOptimize()
    {
       // Since the quadratic term is only a result of the regularization set it directly 
-      // TODO: Evaluate whether each of the terms deserve to have their own independent regularization weight
       solverInput_H.zero();
       setRegularizationTerms();
       setDampingTerms();
@@ -284,17 +286,11 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       CommonOps.addEquals(solverInput_H, dampingWeights);
       tempMatrixRHS.reshape(problem_size, 1);
       CommonOps.mult(dampingWeights, previousQPSolution, tempMatrixRHS);
-//      CommonOps.transpose(tempMatrixRHS);
       CommonOps.addEquals(solverInput_f, tempMatrixRHS);
    }
 
    private void setLyapunovFunctionCost()
    {
-      // Compute the terms required for the linear term (this is from the Lyapunov derivative
-      CommonOps.subtract(commandedVelocity, currentVelocity, velocityError);
-      for (int i = 0; i < angularDimensions; i++)
-         deltaControl.set(i, 0, (3 * currentVelocity.get(i, 0) - commandedVelocity.get(i, 0)) * 0.5);
-
       // Compute the linear terms 
       for (int i = 0; i < angularDimensions; i++)
       {
@@ -302,6 +298,19 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
          solverInput_f.set(i + angularDimensions, 0, velocityError.get(i, 0) * deltaControl.get((i + 1) % angularDimensions, 0)
                + velocityError.get((i + 1) % angularDimensions, 0) * deltaControl.get(i, 0));
       }
+   }
+
+   private void computeError()
+   {
+      // Compute the terms required for the linear term (this is from the Lyapunov derivative
+      CommonOps.subtract(commandedVelocity, currentVelocity, velocityError);
+      errorNorm = 0.0;
+      for (int i = 0; i < angularDimensions; i++)
+      {
+         errorNorm += velocityError.get(i, 0) * velocityError.get(i, 0);
+         deltaControl.set(i, 0, (3 * currentVelocity.get(i, 0) - commandedVelocity.get(i, 0)) * 0.5);
+      }
+      errorNorm = Math.sqrt(errorNorm);
    }
 
    private void setupBounds()
@@ -417,6 +426,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
 
    private void setRateLimitConstraint()
    {
+      double maxInertiaRate = maxInertiaRateOfChangeConstant * errorNorm;
       int currentConstraintSize = solverInput_Ain.getNumRows();
       int taskSize = (int) Math.pow(2.0, problem_size); // Why is this so large :/
 
@@ -440,7 +450,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
             tempMatrixLHS.set(i, j, Math.pow(-1, n % 2) * 2.0);
             n = n / 2;
          }
-         tempMatrixRHS.set(i, 0, maxInertiaRateOfChange);
+         tempMatrixRHS.set(i, 0, maxInertiaRateOfChangeConstant);
       }
       CommonOps.insert(tempMatrixLHS, solverInput_Ain, currentConstraintSize, 0);
       CommonOps.insert(tempMatrixRHS, solverInput_bin, currentConstraintSize, 0);

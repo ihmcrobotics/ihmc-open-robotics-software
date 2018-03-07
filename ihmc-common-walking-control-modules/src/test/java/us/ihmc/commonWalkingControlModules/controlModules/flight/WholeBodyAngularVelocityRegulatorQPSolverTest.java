@@ -40,7 +40,7 @@ public class WholeBodyAngularVelocityRegulatorQPSolverTest
       registry = new YoVariableRegistry(namePrefix);
       qpSolver = new FlightWholeBodyAngularVelocityRegulatorQPSolver(controllerDT, registry);
       qpSolver.initialize(controlFrame);
-      qpSolver.setMaxInertiaRateOfChange(maxInertiaRate);
+      qpSolver.setMaxInertiaRateOfChangeProportionalConstant(maxInertiaRate);
       qpSolver.setMaxPrincipalInertia(maxInertia);
       qpSolver.setMinPrincipalInertia(minInertia);
       qpSolver.setRegularizationWeight(regularizationWeight);

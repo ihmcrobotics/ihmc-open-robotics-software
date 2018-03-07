@@ -27,11 +27,11 @@ public class CentroidalAngularVelocityManager
    private final DenseMatrix64F inertiaTensor = new DenseMatrix64F(3, 3);
    private FrameVector3D currentAngularVelocity;
    private FrameVector3D desiredAngularVelocity;
-   private FrameVector3D previousAngularMomentumRateLimit;
    private DenseMatrix64F desiredInertiaRateOfChange = new DenseMatrix64F(3, 3);
    // Adot v desired -> Adot is based on desired angular velocity v is from current system angular velocity
    private DenseMatrix64F desiredMomentumRateOfChange = new DenseMatrix64F(3, 1);
    private DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 1);
+   private FrameVector3D previousAngularMomentumRateLimit;
 
    private CentroidalMomentumHandler centroidalMomentumHandler;
    private SpatialAccelerationCommand command;
@@ -39,6 +39,7 @@ public class CentroidalAngularVelocityManager
    private final YoFrameVector yoCurrentAngularVelocity;
    private final YoFrameVector yoDesiredAngularVelocity;
    private final YoBoolean yoEnable;
+
    public CentroidalAngularVelocityManager(HighLevelHumanoidControllerToolbox controllerToolbox, JumpControllerParameters jumpControllerParameters,
                                            YoVariableRegistry registry)
    {
@@ -63,11 +64,11 @@ public class CentroidalAngularVelocityManager
       qpSolver.initialize(centerOfMassFrame);
       qpSolver.setMaxPrincipalInertia(parameters.getMaximumPrincipalInertia());
       qpSolver.setMinPrincipalInertia(parameters.getMaximumPrincipalInertia());
-      qpSolver.setMaxInertiaRateOfChange(parameters.getMaximumInertiaRateOfChange());
+      qpSolver.setMaxInertiaRateOfChangeProportionalConstant(parameters.getMaximumInertiaRateOfChangeConstant());
       qpSolver.setDiagonalTermsRegularizationWeights(parameters.getAngularVelocityRegularizationWeights());
       qpSolver.setCrossTermsRegularizationWeights(parameters.getAngularVelocityRegularizationWeights());
-      qpSolver.setDiagonalTermsDampingWeight(1e-4);
-      qpSolver.setCrossTermsDampingWeight(1e-3);
+      qpSolver.setDiagonalTermsDampingWeight(parameters.getDiagonalTermDampingWeight());
+      qpSolver.setCrossTermsDampingWeight(parameters.getCrossTermDampingWeight());
 
    }
 
@@ -79,7 +80,7 @@ public class CentroidalAngularVelocityManager
 
    public void compute()
    {
-      if(yoEnable.getBooleanValue())
+      if (yoEnable.getBooleanValue())
       {
          centroidalMomentumHandler.getCenterOfMassAngularVelocity(currentAngularVelocity);
          centroidalMomentumHandler.getCentroidalAngularInertia(inertiaTensor);
@@ -120,9 +121,9 @@ public class CentroidalAngularVelocityManager
       CommonOps.mult(desiredInertiaRateOfChange, tempMatrix, desiredMomentumRateOfChange);
    }
 
-   public void getRateLimitedDesiredMomentumRateOfChange(FrameVector3D desiredAngularMomentumRateOfChange)
+   public void getFilteredDesiredMomentumRateOfChange(FrameVector3D desiredAngularMomentumRateOfChange)
    {
-      double alpha = 1.0;
+      double alpha = 1.5;
       computeDesiredMomentumRateOfChange();
       CommonOps.scale(alpha, desiredMomentumRateOfChange);
       previousAngularMomentumRateLimit.scale(1 - alpha);

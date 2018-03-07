@@ -8,5 +8,7 @@ public abstract class JumpControllerParameters extends AbstractHighLevelControll
    public abstract double getMinimumPrincipalInertia();
    public abstract double getMaximumPrincipalInertia();
    public abstract double getAngularVelocityRegularizationWeights();
-   public abstract double getMaximumInertiaRateOfChange();
+   public abstract double getMaximumInertiaRateOfChangeConstant();
+   public abstract double getDiagonalTermDampingWeight();
+   public abstract double getCrossTermDampingWeight();
 }
