@@ -108,6 +108,7 @@ public class QuadrupedBodyOrientationManager
       orientationFeedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
       orientationFeedbackControlCommand.setGains(gains);
 
+      angularMomentumRateToPack.changeFrame(worldFrame);
       angularMomentumCommand.setAngularMomentumRate(angularMomentumRateToPack);
       angularMomentumCommand.setAngularWeights(bodyAngularWeight);
    }
