@@ -68,6 +68,8 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
       FrameVector3DReadOnly forceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
       initialSoleForces.setIncludingFrame(forceEstimate);
       initialSoleForces.changeFrame(bodyFrame);
+
+      controllerToolbox.getFootContactState(robotQuadrant).clear();
    }
 
    @Override

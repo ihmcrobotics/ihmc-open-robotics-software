@@ -76,6 +76,8 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
       solePositionController.reset();
       solePositionController.getGains().set(parameters.getSolePositionGains());
       solePositionControllerSetpoints.initialize(soleFrame);
+
+      controllerToolbox.getFootContactState(robotQuadrant).clear();
    }
 
    @Override
