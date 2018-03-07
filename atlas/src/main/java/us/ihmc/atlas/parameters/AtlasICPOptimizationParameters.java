@@ -8,8 +8,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 {
    private final boolean runningOnRealRobot;
-   private final boolean useAngularMomentum = false;
-   private final boolean useStepAdjustment = false;
+   private final boolean useAngularMomentum = true;
+   private final boolean useStepAdjustment = true;
 
    public AtlasICPOptimizationParameters(boolean runningOnRealRobot)
    {
@@ -34,7 +34,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFootstepRateWeight()
    {
-      return runningOnRealRobot ? 0.001 : 0.001;
+      return runningOnRealRobot ? 1e-6 : 1e-4;
    }
 
    /** {@inheritDoc} */
@@ -55,7 +55,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getFeedbackRateWeight()
    {
-      return runningOnRealRobot ? 1e-5 : 1e-9;
+      return 1e-9;
    }
 
    /** {@inheritDoc} */
@@ -77,27 +77,14 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public double getDynamicsObjectiveWeight()
    {
-      if (runningOnRealRobot)
-         return 10000.0;
-      else if (useAngularMomentum)
-         return 100000.0;
-      else if (useStepAdjustment)
-         return 1000.0;
-      else
-         return 10000.0;
-      //return runningOnRealRobot ? 10000.0 : (useAngularMomentum ? 100000.0 : 1000.0);
+      return 10000.0;
    }
 
    /** {@inheritDoc} */
    @Override
    public double getDynamicsObjectiveDoubleSupportWeightModifier()
    {
-      if (useAngularMomentum)
-         return runningOnRealRobot ? 50.0 : 100.0;
-      else if (useStepAdjustment)
-         return runningOnRealRobot ? 1.0 : 4.0;
-      else
-         return 1.0;
+      return 1.0;
    }
 
    /** {@inheritDoc} */
@@ -125,7 +112,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean useFeedbackRate()
    {
-      return !runningOnRealRobot;
+      return true;
    }
 
    /** {@inheritDoc} */
@@ -153,7 +140,7 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    @Override
    public boolean useFootstepRate()
    {
-      return false;
+      return true;
    }
 
    /** {@inheritDoc} */
