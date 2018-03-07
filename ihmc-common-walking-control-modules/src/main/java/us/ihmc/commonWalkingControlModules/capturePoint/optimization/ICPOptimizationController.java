@@ -77,6 +77,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFramePoint2d feedbackCMP = new YoFramePoint2d(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
    private final YoFramePoint2d yoPerfectCoP = new YoFramePoint2d(yoNamePrefix + "PerfectCoP", worldFrame, registry);
    private final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d(yoNamePrefix + "PerfectCMP", worldFrame, registry);
+   private final YoFramePoint2d yoPerfectCMPOffset = new YoFramePoint2d(yoNamePrefix + "PerfectCMPOffset", worldFrame, registry);
    private final YoFramePoint2d predictedEndOfStateICP = new YoFramePoint2d(yoNamePrefix + "PredictedEndOfStateICP", worldFrame, registry);
 
    private final YoFrameVector2d feedbackCoPDelta = new YoFrameVector2d(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
@@ -516,6 +517,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       this.yoPerfectCoP.set(this.perfectCoP);
       this.yoPerfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
+      this.yoPerfectCMPOffset.set(this.perfectCMPOffset);
 
       this.icpError.sub(currentICP, desiredICP);
 
@@ -638,6 +640,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       try
       {
          perfectCoP.set(yoPerfectCoP);
+         perfectCMPOffset.set(yoPerfectCMPOffset);
          solver.compute(icpError, perfectCoP, perfectCMPOffset);
       }
       catch (NoConvergenceException e)
@@ -696,7 +699,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       computeICPIntegralTerm();
 
       feedbackCoP.add(yoPerfectCoP, feedbackCoPDelta);
-      feedbackCMP.add(feedbackCoP, feedbackCMPDelta);
+      feedbackCMP.add(feedbackCoP, perfectCMPOffset);
+      feedbackCMP.add(feedbackCMPDelta);
       feedbackCMP.add(feedbackCMPIntegral);
 
       if (limitReachabilityFromAdjustment.getBooleanValue() && localUseStepAdjustment && includeFootsteps)
