@@ -482,7 +482,7 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
    {
       CollisionShapeFactory shapeFactory = collisionDetector.getShapeFactory();
 
-      CollisionShapeDescription<?> collisionShapeDescription = shapeFactory.createSimpleShape(simpleShape);
+      CollisionShapeDescription<?> collisionShapeDescription = shapeFactory.createSimpleCollisionShape(simpleShape);
 
       CollisionShape collisionShape = shapeFactory.addShape(collisionShapeDescription);
 

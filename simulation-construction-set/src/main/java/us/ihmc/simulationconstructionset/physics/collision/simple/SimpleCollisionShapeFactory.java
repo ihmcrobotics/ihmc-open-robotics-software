@@ -40,7 +40,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    }
    
    @Override
-   public CollisionShapeDescription<?> createSimpleShape(Shape3D shape3D)
+   public CollisionShapeDescription<?> createSimpleCollisionShape(Shape3D shape3D)
    {
       if ((shape3D instanceof Box3D))
          return createBox(shape3D);
@@ -51,13 +51,13 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
       if ((shape3D instanceof Capsule3D))
          return createCapsule(shape3D);
       
-      throw new RuntimeException("There is no matched among the simple shape Box3D, Sphere3D, Cylinder3D, Capsule3D");      
+      throw new IllegalArgumentException("The type of "+ shape3D.getClass() + " is not matched among the simple shape Box3D, Sphere3D, Cylinder3D, Capsule3D");      
    } 
 
    private CollisionShapeDescription<?> createBox(Shape3D shape3D)
    {
       if (!(shape3D instanceof Box3D))
-         throw new RuntimeException("Check Shape3D is Box3D");
+         throw new IllegalArgumentException("Check Shape3D is Box3D");
       Box3D box3D = (Box3D) shape3D;
       return createBox(0.5 * box3D.getLength(), 0.5 * box3D.getWidth(), 0.5 * box3D.getHeight());
    }
@@ -65,7 +65,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    private CollisionShapeDescription<?> createSphere(Shape3D shape3D)
    {
       if (!(shape3D instanceof Sphere3D))
-         throw new RuntimeException("Check Shape3D is Sphere3D");
+         throw new IllegalArgumentException("Check Shape3D is Sphere3D");
       Sphere3D sphere3D = (Sphere3D) shape3D;
       return createSphere(sphere3D.getRadius());
    }
@@ -73,7 +73,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    private CollisionShapeDescription<?> createCylinder(Shape3D shape3D)
    {
       if (!(shape3D instanceof Cylinder3D))
-         throw new RuntimeException("Check Shape3D is Cylinder3D");
+         throw new IllegalArgumentException("Check Shape3D is Cylinder3D");
       Cylinder3D cylinder3D = (Cylinder3D) shape3D;
       return createCylinder(cylinder3D.getRadius(), cylinder3D.getHeight());
    }
@@ -81,7 +81,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    private CollisionShapeDescription<?> createCapsule(Shape3D shape3D)
    {
       if (!(shape3D instanceof Capsule3D))
-         throw new RuntimeException("Check Shape3D is Capsule3D");
+         throw new IllegalArgumentException("Check Shape3D is Capsule3D");
       Capsule3D capsule3D = (Capsule3D) shape3D;
       return createCapsule(capsule3D.getRadius(), capsule3D.getLineSegment());
    }
@@ -194,7 +194,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
 
          else
          {
-            throw new RuntimeException(getClass().getSimpleName() + ". Don't recognize convexShapeDescription type!");
+            throw new IllegalArgumentException(getClass().getSimpleName() + ". Don't recognize convexShapeDescription type!");
          }
       }
 
