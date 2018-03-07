@@ -696,7 +696,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       computeICPIntegralTerm();
 
       feedbackCoP.add(yoPerfectCoP, feedbackCoPDelta);
-      feedbackCMP.add(feedbackCoP, feedbackCMPDelta);
+      feedbackCMP.add(feedbackCoP, perfectCMPOffset);
+      feedbackCMP.add(feedbackCMPDelta);
       feedbackCMP.add(feedbackCMPIntegral);
 
       if (limitReachabilityFromAdjustment.getBooleanValue() && localUseStepAdjustment && includeFootsteps)
