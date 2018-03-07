@@ -39,6 +39,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private static final boolean DEBUG = false;
    private static final boolean COMPUTE_COST_TO_GO = false;
 
+   private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
+
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -610,7 +612,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
          helper.transformToWorldFrame(footstepWeights, forwardFootstepWeight.getDoubleValue(), lateralFootstepWeight.getDoubleValue(), soleFrame);
 
-         double recursionTime = timeRemainingInState.getDoubleValue() + transferDurationSplitFraction.getDoubleValue() * nextTransferDuration.getDoubleValue();
+         double recursionTime = Math.max(timeRemainingInState.getDoubleValue(), 0.0) + transferDurationSplitFraction.getDoubleValue() * nextTransferDuration.getDoubleValue();
          double recursionMultiplier = Math.exp(-omega0 * recursionTime);
          this.footstepMultiplier.set(recursionMultiplier);
 
@@ -699,6 +701,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       if (limitReachabilityFromAdjustment.getBooleanValue() && localUseStepAdjustment && includeFootsteps)
          updateReachabilityRegionFromAdjustment();
+
+      if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)
+         upcomingFootstepLocation.set(footstepSolution);
    }
 
    private void updateReachabilityRegionFromAdjustment()
