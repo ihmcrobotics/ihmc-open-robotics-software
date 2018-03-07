@@ -23,7 +23,6 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
    protected final QuadrupedSolePositionController solePositionController;
    protected final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
 
-   protected final FrameVector3D soleForceCommand = new FrameVector3D();
    protected final FrameVector3D initialSoleForces = new FrameVector3D();
 
    protected final FrameVector3D desiredLinearAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
@@ -32,10 +31,10 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
    private final Wrench wrenchCommand;
 
    private final VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
-   private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
+   //private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
 
-   private final YoFrameVector currentLinearWeight;
+   //private final YoFrameVector currentLinearWeight;
 
    public QuadrupedUnconstrainedFootState(String namePrefix, RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,
                                           QuadrupedSolePositionController solePositionController, YoVariableRegistry registry)
@@ -47,6 +46,7 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
       footBody = fullRobotModel.getFoot(robotQuadrant);
       ReferenceFrame soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
 
+      /*
       ReferenceFrame gainsFrame = controllerToolbox.getReferenceFrames().getBodyZUpFrame();
       FramePose3D controlFramePose = new FramePose3D(soleFrame);
       controlFramePose.changeFrame(footBody.getBodyFixedFrame());
@@ -54,18 +54,23 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
       spatialFeedbackControlCommand.setPrimaryBase(fullRobotModel.getBody());
       spatialFeedbackControlCommand.setGainsFrames(null, gainsFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
+      */
 
       wrenchCommand = new Wrench(footBody.getBodyFixedFrame(), worldFrame);
 
+      /*
       currentLinearWeight = new YoFrameVector(namePrefix + "CurrentLinearWeight", worldFrame, registry);
       currentLinearWeight.set(30.0, 30.0, 30.0);
+      */
    }
 
    protected void doControl()
    {
+      /*
       spatialFeedbackControlCommand.set(solePositionControllerSetpoints.getSolePosition(), solePositionControllerSetpoints.getSoleLinearVelocity(), desiredLinearAcceleration);
       spatialFeedbackControlCommand.setLinearWeightsForSolver(currentLinearWeight);
       spatialFeedbackControlCommand.setPositionGains(solePositionController.getGains());
+      */
 
       wrenchCommand.setLinearPart(soleForceCommand);
       virtualWrenchCommand.set(footBody, wrenchCommand);
