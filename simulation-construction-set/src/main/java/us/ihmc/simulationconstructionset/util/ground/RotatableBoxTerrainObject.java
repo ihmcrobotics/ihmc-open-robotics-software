@@ -1,7 +1,11 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -22,6 +26,8 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
    private final Point3D intersectionA = new Point3D();
    private final Point3D intersectionB = new Point3D();
 
+   private ArrayList<Shape3D> simpleShapes = new ArrayList<>();
+   
    public RotatableBoxTerrainObject(Box3D box, AppearanceDefinition appearance)
    {
       this.box = box;
@@ -30,6 +36,8 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
       box.getBoundingBox3D(boundingBox);
 
       addGraphics();
+      
+      simpleShapes.add(this.box);
    }
 
    public RotatableBoxTerrainObject(RigidBodyTransform configuration, double lengthX, double widthY, double heightZ, AppearanceDefinition appearance)
@@ -157,5 +165,11 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;
+   }
+   
+   @Override
+   public List<? extends Shape3D> getSimpleShapes()
+   {
+      return simpleShapes;
    }
 }
