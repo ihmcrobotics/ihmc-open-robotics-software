@@ -81,5 +81,6 @@ public class GenericQuadrupedNetClassList extends IHMCCommunicationKryoNetClassL
       registerPacketField(TimeInterval.class);
 
       registerPacketClass(QuadrupedSoleWaypointPacket.class);
+      registerPacketClass(QuadrupedSteppingEventPacket.class);
    }
 }
