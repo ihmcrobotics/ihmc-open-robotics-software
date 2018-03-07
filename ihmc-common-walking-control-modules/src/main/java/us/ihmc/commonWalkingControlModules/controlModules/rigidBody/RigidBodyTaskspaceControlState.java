@@ -396,7 +396,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    {
       if (hasOrientaionGains.getBooleanValue() && hasPositionGains.getBooleanValue())
       {
-         PrintTools.debug(getControlFrame().getName() + "This should happen");
          selectionMatrix.resetSelection();
          trajectoryDone.set(false);
          trackingOrientation.set(true);
@@ -404,7 +403,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
       else if (hasOrientaionGains.getBooleanValue())
       {
-         PrintTools.debug(getControlFrame().getName() + "Not this");
          selectionMatrix.setToAngularSelectionOnly();
          trajectoryDone.set(false);
          trackingOrientation.set(true);
@@ -412,14 +410,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       }
       else if (hasPositionGains.getBooleanValue())
       {
-         PrintTools.debug(getControlFrame().getName() + "No this as well");
          selectionMatrix.setToLinearSelectionOnly();
          trajectoryDone.set(false);
          trackingOrientation.set(false);
          trackingPosition.set(true);
       }
-      else
-         PrintTools.debug(getControlFrame().getName() + "Apparently has nothing");
    }
 
    private void setControlFrame(ReferenceFrame controlFrame)

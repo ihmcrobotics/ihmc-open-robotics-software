@@ -265,7 +265,7 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
    {
       setDiagonalElementNonnegativityConstraints();
       setPositiveDefinitenessConstraints();
-      setDiagonalElementMaxConstraints();
+      //setDiagonalElementMaxConstraints();
       setTriangleInequalityConstraints();
       if (useRateLimitConstraints)
          setRateLimitConstraint();
@@ -431,9 +431,6 @@ public class FlightWholeBodyAngularVelocityRegulatorQPSolver
       }
       else
          previousQPSolution.set(qpSolution);
-         
-      
-      PrintTools.debug("NumberOfIterations: " + numberOfItertaions);
       qpTimer.stopMeasurement();
    }
 }

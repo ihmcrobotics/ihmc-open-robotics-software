@@ -8,11 +8,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class CentroidalAngularVelocityManager
 {
@@ -23,17 +27,18 @@ public class CentroidalAngularVelocityManager
    private final DenseMatrix64F inertiaTensor = new DenseMatrix64F(3, 3);
    private FrameVector3D currentAngularVelocity;
    private FrameVector3D desiredAngularVelocity;
+   private FrameVector3D previousAngularMomentumRateLimit;
    private DenseMatrix64F desiredInertiaRateOfChange = new DenseMatrix64F(3, 3);
    // Adot v desired -> Adot is based on desired angular velocity v is from current system angular velocity
    private DenseMatrix64F desiredMomentumRateOfChange = new DenseMatrix64F(3, 1);
    private DenseMatrix64F tempMatrix = new DenseMatrix64F(3, 1);
-   
+
    private CentroidalMomentumHandler centroidalMomentumHandler;
    private SpatialAccelerationCommand command;
-   
-   private final YoFrameVector yoCurrentAngularVelocity;   
-   private final YoFrameVector yoDesiredAngularVelocity;   
 
+   private final YoFrameVector yoCurrentAngularVelocity;
+   private final YoFrameVector yoDesiredAngularVelocity;
+   private final YoBoolean yoEnable;
    public CentroidalAngularVelocityManager(HighLevelHumanoidControllerToolbox controllerToolbox, JumpControllerParameters jumpControllerParameters,
                                            YoVariableRegistry registry)
    {
@@ -41,16 +46,19 @@ public class CentroidalAngularVelocityManager
       this.parameters = jumpControllerParameters;
       yoCurrentAngularVelocity = new YoFrameVector(getClass().getSimpleName() + "CurrentAngularVelocity", controllerToolbox.getCenterOfMassFrame(), registry);
       yoDesiredAngularVelocity = new YoFrameVector(getClass().getSimpleName() + "DesiredAngularVelocity", controllerToolbox.getCenterOfMassFrame(), registry);
+      yoEnable = new YoBoolean(getClass().getSimpleName() + "Enable", registry);
+      yoEnable.set(true);
       qpSolver = new FlightWholeBodyAngularVelocityRegulatorQPSolver(controllerToolbox.getControlDT(), registry);
    }
 
    public void initialize(WholeBodyControlCoreToolbox controlCoreToolbox)
    {
       this.centroidalMomentumHandler = controlCoreToolbox.getCentroidalMomentumHandler();
-      
+
       ReferenceFrame centerOfMassFrame = controlCoreToolbox.getCenterOfMassFrame();
       this.currentAngularVelocity = new FrameVector3D(centerOfMassFrame);
       this.desiredAngularVelocity = new FrameVector3D(centerOfMassFrame);
+      this.previousAngularMomentumRateLimit = new FrameVector3D(centerOfMassFrame);
 
       qpSolver.initialize(centerOfMassFrame);
       qpSolver.setMaxPrincipalInertia(parameters.getMaximumPrincipalInertia());
@@ -58,7 +66,7 @@ public class CentroidalAngularVelocityManager
       qpSolver.setMaxInertiaRateOfChange(parameters.getMaximumInertiaRateOfChange());
       qpSolver.setRegularizationWeights(parameters.getAngularVelocityRegularizationWeights());
    }
-   
+
    public void setDesiredAngularVelocity(FrameVector3D desiredAngularVelocity)
    {
       this.desiredAngularVelocity.setIncludingFrame(desiredAngularVelocity);
@@ -67,31 +75,54 @@ public class CentroidalAngularVelocityManager
 
    public void compute()
    {
-      centroidalMomentumHandler.getCenterOfMassAngularVelocity(currentAngularVelocity);
-      centroidalMomentumHandler.getCentroidalAngularInertia(inertiaTensor);
-      qpSolver.setCurrentCentroidalInertiaTensor(inertiaTensor);
-      qpSolver.setCurrentVelocityEstimate(currentAngularVelocity);
-      qpSolver.setVelocityCommand(desiredAngularVelocity);
-      qpSolver.compute();
-      qpSolver.getDesiredInertiaRateOfChange(desiredInertiaRateOfChange);
+      if(yoEnable.getBooleanValue())
+      {
+         centroidalMomentumHandler.getCenterOfMassAngularVelocity(currentAngularVelocity);
+         centroidalMomentumHandler.getCentroidalAngularInertia(inertiaTensor);
+         qpSolver.setCurrentCentroidalInertiaTensor(inertiaTensor);
+         qpSolver.setCurrentVelocityEstimate(currentAngularVelocity);
+         qpSolver.setVelocityCommand(desiredAngularVelocity);
+         qpSolver.compute();
+         qpSolver.getDesiredInertiaRateOfChange(desiredInertiaRateOfChange);
+      }
+      else
+      {
+         desiredInertiaRateOfChange.reshape(3, 3);
+         desiredInertiaRateOfChange.zero();
+      }
       updateYoVariables();
    }
-   
+
    private void updateYoVariables()
    {
       yoCurrentAngularVelocity.set(currentAngularVelocity);
       yoDesiredAngularVelocity.set(desiredAngularVelocity);
    }
-   
+
    public void getInertiaRateOfChange(DenseMatrix64F desiredInertiaRateOfChange)
    {
       desiredInertiaRateOfChange.set(this.desiredInertiaRateOfChange);
    }
-   
+
    public void getDesiredMomentumRateOfChange(FrameVector3D momentumRateOfChange)
+   {
+      computeDesiredMomentumRateOfChange();
+      momentumRateOfChange.setIncludingFrame(qpSolver.getControlFrame(), desiredMomentumRateOfChange);
+   }
+
+   private void computeDesiredMomentumRateOfChange()
    {
       currentAngularVelocity.get(tempMatrix);
       CommonOps.mult(desiredInertiaRateOfChange, tempMatrix, desiredMomentumRateOfChange);
-      momentumRateOfChange.setIncludingFrame(qpSolver.getControlFrame(), desiredMomentumRateOfChange);
+   }
+
+   public void getRateLimitedDesiredMomentumRateOfChange(FrameVector3D desiredAngularMomentumRateOfChange)
+   {
+      double alpha = 0.03;
+      computeDesiredMomentumRateOfChange();
+      CommonOps.scale(alpha, desiredMomentumRateOfChange);
+      previousAngularMomentumRateLimit.scale(1 - alpha);
+      previousAngularMomentumRateLimit.add(desiredMomentumRateOfChange.get(0, 0), desiredMomentumRateOfChange.get(1, 0), desiredMomentumRateOfChange.get(2, 0));
+      desiredAngularMomentumRateOfChange.setIncludingFrame(previousAngularMomentumRateLimit);
    }
 }

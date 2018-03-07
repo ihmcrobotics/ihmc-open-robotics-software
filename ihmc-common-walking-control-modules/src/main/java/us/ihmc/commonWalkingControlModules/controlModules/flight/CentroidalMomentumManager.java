@@ -95,8 +95,8 @@ public class CentroidalMomentumManager
    {
       //FIXME This is a hack to confirm that the controller core is working. This should be based on the controller state. Currently hacked to work with flight controller
       desiredLinearMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, -gravityZ * totalMass);
-      //computeDesiredAngularMomentumRateOfChange();
-      desiredAngularMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
+      computeDesiredAngularMomentumRateOfChange();
+      //desiredAngularMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
       momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
       yoDesiredAngularMomentumRateOfChange.set(desiredAngularMomentumRateOfChange);
       yoDesiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
@@ -106,14 +106,18 @@ public class CentroidalMomentumManager
       //desiredCoMLinearAcceleration.setIncludingFrame(comFrame, 0, 0, 0.0);
    }
    
+   private void rateLimitAngularMomentumRateOfChange(FrameVector3D desiredAngularMomentumRateOfChange2)
+   {
+      // TODO Auto-generated method stub
+      
+   }
+
    private void computeDesiredAngularMomentumRateOfChange()
    {
-      angularVelocityManager.setDesiredAngularVelocity(new FrameVector3D(comFrame, 0.0, 1.5, 0.0));
+      angularVelocityManager.setDesiredAngularVelocity(new FrameVector3D(comFrame, 0.0, 0.75, 0.0));
       angularVelocityManager.compute();
-      angularVelocityManager.getDesiredMomentumRateOfChange(desiredAngularMomentumRateOfChange);
-//      desiredAngularMomentumRateOfChange.scale(-1.0);
+      angularVelocityManager.getRateLimitedDesiredMomentumRateOfChange(desiredAngularMomentumRateOfChange);
       desiredAngularMomentumRateOfChange.changeFrame(controlFrame);
-      PrintTools.debug("Desired momentum rate of change: " + desiredAngularMomentumRateOfChange.toString());
    }
 
    public MomentumRateCommand getMomentumRateCommand()
