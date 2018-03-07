@@ -22,6 +22,7 @@ public class DivergentComponentOfMotionEstimator
 
    private final YoFramePoint yoDcmPositionEstimate = new YoFramePoint("dcmPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
@@ -78,6 +79,7 @@ public class DivergentComponentOfMotionEstimator
       yoDcmPositionEstimate.setAndMatchFrame(dcmPositionEstimateToPack);
       yoIcpPositionEstimate.set(yoDcmPositionEstimate);
       yoIcpPositionEstimate.add(0, 0, -lipModel.getComHeight());
+      centerOfMass.setFromReferenceFrame(comZUpFrame);
 
       dcmPositionEstimateToPack.changeFrame(dcmPositionEstimateFrame);
       comVelocityEstimate.changeFrame(comVelocityEstimateFrame);
