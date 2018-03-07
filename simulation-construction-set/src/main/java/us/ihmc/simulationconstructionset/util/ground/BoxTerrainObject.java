@@ -1,6 +1,11 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Box3D;
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -13,7 +18,7 @@ public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    private final BoundingBox3D boundingBox;
    private Graphics3DObject linkGraphics;
-
+   private ArrayList<Shape3D> simpleShapes = new ArrayList<>();
 
    public BoxTerrainObject(double xStart, double yStart, double xEnd, double yEnd, double zStart, double zEnd, AppearanceDefinition appearance)
    {
@@ -36,6 +41,11 @@ public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
      linkGraphics.translate((xStart+xEnd)/2.0,(yStart+yEnd)/2.0, zMin);
 
      linkGraphics.addCube(Math.abs(xEnd-xStart), Math.abs(yEnd-yStart), zMax-zMin, appearance);
+     
+     Box3D boxShape = new Box3D(Math.abs(xStart - xEnd), Math.abs(yStart - yEnd), Math.abs(zStart - zEnd));
+     boxShape.appendTranslation((xStart+xEnd)/2.0, (yStart+yEnd)/2.0, (zStart+zEnd)/2.0);
+     
+     this.simpleShapes.add(boxShape);
  }
 
  public BoxTerrainObject(double xStart, double yStart, double xEnd, double yEnd, double height, AppearanceDefinition appearance)
@@ -179,6 +189,12 @@ public double heightAt(double x, double y, double z)
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;
+   }
+
+   @Override
+   public List<? extends Shape3D> getSimpleShapes()
+   {
+      return simpleShapes;
    }
 
 }

@@ -1,6 +1,9 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import java.util.List;
+
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -161,4 +164,9 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
       return this;
    }
 
+   @Override
+   public List<? extends Shape3D> getSimpleShapes()
+   {
+      return null;
+   }
 }

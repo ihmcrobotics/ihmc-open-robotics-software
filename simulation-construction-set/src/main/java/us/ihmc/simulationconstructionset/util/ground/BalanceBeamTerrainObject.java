@@ -1,7 +1,10 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import java.util.List;
+
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -165,4 +168,9 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
       return this;
    }
 
+   @Override
+   public List<? extends Shape3D> getSimpleShapes()
+   {
+      return null;
+   }
 }
