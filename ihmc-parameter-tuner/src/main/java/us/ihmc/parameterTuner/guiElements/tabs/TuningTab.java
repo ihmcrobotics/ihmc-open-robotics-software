@@ -1,5 +1,6 @@
 package us.ihmc.parameterTuner.guiElements.tabs;
 
+import java.util.List;
 import java.util.Map;
 
 import javafx.geometry.Insets;
@@ -12,7 +13,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 import us.ihmc.parameterTuner.guiElements.tuners.TuningBoxManager;
 
@@ -78,6 +78,7 @@ public class TuningTab extends Tab
       });
 
       parent.getTabs().add(this);
+      parent.getSelectionModel().select(this);
    }
 
    private void showTextInput()
@@ -106,8 +107,13 @@ public class TuningTab extends Tab
       tuningBoxManager.setTunerMap(tunerMap);
    }
 
-   public void handleNewParameter(GuiParameter parameter)
+   public void handleNewParameter(String uniqueName)
    {
-      tuningBoxManager.handleNewParameter(parameter);
+      tuningBoxManager.handleNewParameter(uniqueName);
+   }
+
+   public List<String> getParameterUniqueNames()
+   {
+      return tuningBoxManager.getParameterUniqueNames();
    }
 }
