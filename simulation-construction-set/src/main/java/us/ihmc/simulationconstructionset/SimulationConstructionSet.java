@@ -4581,19 +4581,15 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       mySimulation.initializeCollisionDetector(collisionVisualizer, collisionHandler);
    }
 
-   public void addEnvironmentCollisionShapes(Shape3D simpleShape)
+   public void addEnvironmentCollisionShapes(Shape3D<?> simpleShape)
    {
       mySimulation.addEnvironmentCollisionShapes(simpleShape);
    }
 
-   public void addEnvironmentCollisionShapes(List<? extends Shape3D> simpleShapes)
+   public void addEnvironmentCollisionShapes(List<? extends Shape3D<?>> simpleShapes)
    {
       for (int i = 0; i < simpleShapes.size(); i++)
-      {
-         //         System.out.println(
-         //                            "[" + i + "] Env is successfully added " + simpleShapes.get(i));
          mySimulation.addEnvironmentCollisionShapes(simpleShapes.get(i));
-      }
    }
 
    public void initializeCollisionHandler(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
