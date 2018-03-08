@@ -75,7 +75,6 @@ public class TriWheelCartSimulation
 
       scs.setDT(dt, 1);
       scs.setFastSimulate(true);
-      // scs.setGroundVisible(false);
 
       scs.setCameraFix(0.0, 0.0, 0.8);
       scs.setCameraPosition(0.0, -8.0, 1.4);

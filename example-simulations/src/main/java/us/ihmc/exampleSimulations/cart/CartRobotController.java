@@ -9,25 +9,16 @@ public class CartRobotController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("MobileRobotController");
 
-   private final Robot robot;
+   private final PinJoint frontWheelJoint;
 
-   private final PinJoint frontWheelJoint, rearWheelJoint;
-
-   private final double dt;
-
-   
    public CartRobotController(Robot robot, double dt)
    {
-      this.robot = robot;
-      this.dt = dt;
-
       frontWheelJoint = (PinJoint) robot.getJoint("frontwheel");
-      rearWheelJoint = (PinJoint) robot.getJoint("rearwheel");
    }
-   
+
    @Override
    public void initialize()
-   {      
+   {
    }
 
    @Override
@@ -52,7 +43,5 @@ public class CartRobotController implements RobotController
    public void doControl()
    {
       frontWheelJoint.setTau(50.0);
-      
    }
-
 }
