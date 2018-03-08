@@ -1,12 +1,9 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -24,7 +21,6 @@ public class Tuner extends VBox
 
    private Label name;
    private TextField description;
-   private Button remove;
    private InputNode inputNode;
 
    public Tuner(GuiParameter parameter)
@@ -73,7 +69,6 @@ public class Tuner extends VBox
       setSpacing(10.0);
 
       name = new Label();
-      remove = new Button("Remove");
       description = new TextField();
       HBox.setHgrow(this, Priority.ALWAYS);
       HBox.setHgrow(name, Priority.ALWAYS);
@@ -83,7 +78,6 @@ public class Tuner extends VBox
       parameterInfoBox.setSpacing(10.0);
       parameterInfoBox.setAlignment(Pos.CENTER_LEFT);
       parameterInfoBox.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
-      parameterInfoBox.getChildren().add(remove);
       parameterInfoBox.getChildren().add(name);
       HBox.setHgrow(parameterInfoBox, Priority.ALWAYS);
       getChildren().add(parameterInfoBox);
@@ -99,11 +93,6 @@ public class Tuner extends VBox
 
       setId("tuner-window");
       name.setId("parameter-name-in-tuner");
-   }
-
-   public void setCloseHandler(EventHandler<ActionEvent> closeHandler)
-   {
-      remove.setOnAction(closeHandler);
    }
 
    public Node getSimpleInputNode()

@@ -3,7 +3,9 @@ package us.ihmc.parameterTuner;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -14,6 +16,7 @@ import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
+import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 import us.ihmc.yoVariables.parameters.ParameterLoadStatus;
 import us.ihmc.yoVariables.parameters.xml.Parameter;
 import us.ihmc.yoVariables.parameters.xml.Parameters;
@@ -140,5 +143,19 @@ public class ParameterTuningTools
             runnable.run();
          }
       });
+   }
+
+   public static Map<String, Tuner> createTunerMap(List<GuiRegistry> registries)
+   {
+      Map<String, Tuner> tunerMap = new HashMap<>();
+
+      List<GuiParameter> allParameters = new ArrayList<>();
+      registries.stream().forEach(registry -> allParameters.addAll(registry.getAllParameters()));
+      allParameters.stream().forEach(parameter -> {
+         Tuner tuner = new Tuner(parameter);
+         tunerMap.put(parameter.getUniqueName(), tuner);
+      });
+
+      return tunerMap;
    }
 }

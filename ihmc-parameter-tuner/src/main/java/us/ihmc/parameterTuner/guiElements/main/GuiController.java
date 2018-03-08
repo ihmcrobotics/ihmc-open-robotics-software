@@ -3,6 +3,7 @@ package us.ihmc.parameterTuner.guiElements.main;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -23,6 +24,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
@@ -30,6 +32,7 @@ import us.ihmc.parameterTuner.guiElements.tabs.TuningTabManager;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTree;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTreeParameter;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTreeValue;
+import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 
 public class GuiController
 {
@@ -127,7 +130,7 @@ public class GuiController
          if (selectedItem != null && !selectedItem.getValue().isRegistry())
          {
             GuiParameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
-            tuningTabManager.getTuningBoxManager().handleNewParameter(parameter);
+            tuningTabManager.handleNewParameter(parameter);
          }
       }
    }
@@ -149,8 +152,9 @@ public class GuiController
 
    public void setRegistries(List<GuiRegistry> registries)
    {
-      tuningTabManager.getTuningBoxManager().setRegistries(registries);
-      tree.setRegistries(registries, tuningTabManager.getTuningBoxManager().getTunerMap());
+      Map<String, Tuner> tunerMap = ParameterTuningTools.createTunerMap(registries);
+      tuningTabManager.setTunerMap(tunerMap);
+      tree.setRegistries(registries, tunerMap);
       updateTree();
 
       changeCollector = new ChangeCollector();

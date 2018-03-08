@@ -1,22 +1,29 @@
 package us.ihmc.parameterTuner.guiElements.tabs;
 
+import java.util.Map;
+
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import us.ihmc.parameterTuner.guiElements.GuiParameter;
+import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
+import us.ihmc.parameterTuner.guiElements.tuners.TuningBoxManager;
 
 public class TuningTab extends Tab
 {
    private final Label label = new Label();
    private final TextField textField = new TextField();
-   private final VBox tuningBox = new VBox();
 
-   public TuningTab(String name)
+   private final TuningBoxManager tuningBoxManager;
+
+   public TuningTab(String name, TabPane parent)
    {
       textField.setText(name);
       showLabel();
@@ -40,8 +47,10 @@ public class TuningTab extends Tab
          }
       });
 
+      VBox tuningBox = new VBox();
       tuningBox.setFillWidth(true);
       tuningBox.setSpacing(10.0);
+      tuningBoxManager = new TuningBoxManager(tuningBox);
 
       ScrollPane scrollPane = new ScrollPane();
       AnchorPane.setLeftAnchor(scrollPane, 0.0);
@@ -57,6 +66,13 @@ public class TuningTab extends Tab
       setContent(anchorPane);
       anchorPane.getChildren().add(scrollPane);
       scrollPane.setContent(tuningBox);
+
+      parent.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+         if (this == newValue)
+         {
+            tuningBoxManager.updateView();
+         }
+      });
    }
 
    private void showTextInput()
@@ -72,13 +88,18 @@ public class TuningTab extends Tab
       setGraphic(label);
    }
 
-   public VBox getTuningBox()
-   {
-      return tuningBox;
-   }
-
    public String getName()
    {
       return textField.getText();
+   }
+
+   public void setTunerMap(Map<String, Tuner> tunerMap)
+   {
+      tuningBoxManager.setTunerMap(tunerMap);
+   }
+
+   public void handleNewParameter(GuiParameter parameter)
+   {
+      tuningBoxManager.handleNewParameter(parameter);
    }
 }
