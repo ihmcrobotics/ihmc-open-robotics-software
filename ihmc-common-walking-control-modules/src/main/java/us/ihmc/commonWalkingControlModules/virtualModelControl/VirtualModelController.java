@@ -18,8 +18,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -52,9 +50,6 @@ public class VirtualModelController
    public VirtualModelController(RigidBody defaultRootBody, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.defaultRootBody = defaultRootBody;
-
-      fullJTMatrix.reshape(0, 0);
-      fullObjectiveWrench.reshape(0, 0);
 
       if (DISPLAY_GRAVITY_WRENCHES)
       {
@@ -123,11 +118,6 @@ public class VirtualModelController
    {
       vmcDataHandler.addDesiredWrench(controlledBody, wrench);
       vmcDataHandler.addDesiredSelectionMatrix(controlledBody, selectionMatrix);
-   }
-
-   public List<RigidBody> getControlledBodies()
-   {
-      return vmcDataHandler.getControlledBodies();
    }
 
    public void reset()
