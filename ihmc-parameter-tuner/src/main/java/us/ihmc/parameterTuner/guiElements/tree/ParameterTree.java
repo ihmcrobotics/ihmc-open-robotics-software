@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import javafx.scene.Node;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeView;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
@@ -38,9 +39,19 @@ public class ParameterTree extends TreeView<ParameterTreeValue>
          createItemsRecursive(child, tuningNodes);
       });
       registry.getParameters().stream().forEach(parameter -> {
-         Node inputNode = tuningNodes.get(parameter.getUniqueName()).getSimpleInputNode();
+         Tuner tuner = tuningNodes.get(parameter.getUniqueName());
+         Node inputNode = tuner.getSimpleInputNode();
          ParameterTreeItem parameterItem = new ParameterTreeItem(new ParameterTreeParameter(parameter, inputNode));
          treeItemMap.put(parameter.getUniqueName(), parameterItem);
+
+         MenuItem revealInTree = new MenuItem("Reveal in Tree");
+         revealInTree.setOnAction(event -> {
+            getSelectionModel().clearSelection();
+            getSelectionModel().select(parameterItem);
+            scrollTo(getSelectionModel().getSelectedIndex());
+            requestFocus();
+         });
+         tuner.getContextMenu().getItems().add(revealInTree);
       });
    }
 

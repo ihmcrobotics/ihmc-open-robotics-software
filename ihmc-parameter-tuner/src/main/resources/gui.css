@@ -27,8 +27,3 @@
 	-fx-text-fill: -fx-text-inner-color;
 	-fx-font-weight: bold;
 }
-
-#tuner-window {
-	-fx-border-color: gray;
-	-fx-border-radius: 5;
-}
