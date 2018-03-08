@@ -87,7 +87,7 @@ public class TabSavingTools
       if (file != null)
       {
          setDefaultFilePath(file);
-         TuningTab newTab = loadTab(tabPane, tunerMap, file);
+         TuningTab newTab = loadTab(tabPane, tunerMap, file, true);
          if (newTab != null)
          {
             return new ImmutablePair<>(newTab, file);
@@ -100,7 +100,7 @@ public class TabSavingTools
    {
       List<ImmutablePair<TuningTab, File>> loadedFiles = new ArrayList<>();
       getDefaultTuningTabFiles().forEach(file -> {
-         TuningTab newTab = loadTab(tabPane, tunerMap, file);
+         TuningTab newTab = loadTab(tabPane, tunerMap, file, false);
          if (newTab != null)
          {
             loadedFiles.add(new ImmutablePair<>(newTab, file));
@@ -109,7 +109,7 @@ public class TabSavingTools
       return loadedFiles;
    }
 
-   public static TuningTab loadTab(TabPane tabPane, Map<String, Tuner> tunerMap, File file)
+   public static TuningTab loadTab(TabPane tabPane, Map<String, Tuner> tunerMap, File file, boolean showWarning)
    {
       try
       {
@@ -141,7 +141,7 @@ public class TabSavingTools
          }
          reader.close();
 
-         if (!namesNotFound.isEmpty())
+         if (!namesNotFound.isEmpty() && showWarning)
          {
             showParametersNotFound(namesNotFound);
          }
