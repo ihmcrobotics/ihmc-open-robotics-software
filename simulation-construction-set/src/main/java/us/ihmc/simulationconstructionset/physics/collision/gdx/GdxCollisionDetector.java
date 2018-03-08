@@ -175,7 +175,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       private CollisionShapeDescription<?> createBox(Shape3D<?> shape3D)
       {
          if (!(shape3D instanceof Box3D))
-            throw new RuntimeException("Check Shape3D is Box3D");
+            throw new IllegalArgumentException("Check Shape3D is Box3D");
          Box3D box3D = (Box3D) shape3D;
          return createBox(0.5 * box3D.getLength(), 0.5 * box3D.getWidth(), 0.5 * box3D.getHeight());
       }
@@ -183,7 +183,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       private CollisionShapeDescription<?> createCylinder(Shape3D<?> shape3D)
       {
          if (!(shape3D instanceof Cylinder3D))
-            throw new RuntimeException("Check Shape3D is Cylinder3D");
+            throw new IllegalArgumentException("Check Shape3D is Cylinder3D");
          Cylinder3D cylinder3D = (Cylinder3D) shape3D;
          return createCylinder(cylinder3D.getRadius(), cylinder3D.getHeight());
       }
@@ -191,7 +191,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       private CollisionShapeDescription<?> createSphere(Shape3D<?> shape3D)
       {
          if (!(shape3D instanceof Sphere3D))
-            throw new RuntimeException("Check Shape3D is Sphere3D");
+            throw new IllegalArgumentException("Check Shape3D is Sphere3D");
          Sphere3D sphere3D = (Sphere3D) shape3D;
          return createSphere(sphere3D.getRadius());
       }
@@ -199,7 +199,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       private CollisionShapeDescription<?> createCapsule(Shape3D<?> shape3D)
       {
          if (!(shape3D instanceof Capsule3D))
-            throw new RuntimeException("Check Shape3D is Capsule3D");
+            throw new IllegalArgumentException("Check Shape3D is Capsule3D");
          Capsule3D capsule3D = (Capsule3D) shape3D;
          return createCapsule(capsule3D.getRadius(), capsule3D.getLineSegment().length());
       }
