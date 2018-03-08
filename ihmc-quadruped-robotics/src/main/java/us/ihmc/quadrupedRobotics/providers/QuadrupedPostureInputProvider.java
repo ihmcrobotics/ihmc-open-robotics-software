@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
 import us.ihmc.commons.MathTools;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -22,8 +23,6 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private static final double defaultCoMHeightNominalParameter = 0.55;
-   private final DoubleParameter comHeightNominalParameter = new DoubleParameter("comHeightNominal", registry, defaultCoMHeightNominalParameter);
    private final ParameterVector3D comPositionLowerLimitsParameter;
    private final ParameterVector3D comPositionUpperLimitsParameter;
    private final ParameterVector3D comVelocityLowerLimitsParameter;
@@ -54,7 +53,7 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
    private final Quaternion bodyOrientationInput;
    private final Vector3D bodyAngularRateInput;
 
-   public QuadrupedPostureInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
+   public QuadrupedPostureInputProvider(QuadrupedPhysicalProperties physicalProperties, GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
       comPositionPacket = new AtomicReference<>(new ComPositionPacket());
       comVelocityPacket = new AtomicReference<>(new ComVelocityPacket());
@@ -91,7 +90,7 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
       bodyAngularRateUpperLimitsParameter = new ParameterVector3D("bodyAngularRateUpperLimit", positiveMaximumLimit, registry);
 
       // initialize com height
-      yoComPositionInputZ.set(defaultCoMHeightNominalParameter);
+      yoComPositionInputZ.set(physicalProperties.getNominalCoMHeight());
 
       if (globalDataProducer != null)
       {
