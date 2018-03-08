@@ -1,5 +1,7 @@
 package us.ihmc.parameterTuner.guiElements.tree;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -11,6 +13,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
+import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 
@@ -62,6 +65,7 @@ public class ParameterTreeParameter implements ParameterTreeValue
       private final MenuItem discard = new MenuItem("Discard");
       private final MenuItem markModified = new MenuItem("Mark as Modified");
       private final MenuItem copyName = new MenuItem("Copy Name");
+      private final MenuItem copyNamespace = new MenuItem("Copy Namespace");
       private final Clipboard clipboard = Clipboard.getSystemClipboard();
       private final ClipboardContent content = new ClipboardContent();
 
@@ -74,10 +78,18 @@ public class ParameterTreeParameter implements ParameterTreeValue
          getChildren().add(name);
 
          // Setup context menu for copying name to system clipboard.
-         content.putString(parameter.getName());
          contextMenu.getItems().add(copyName);
+         copyName.setOnAction((event) -> {
+            content.putString(parameter.getName());
+            clipboard.setContent(content);
+         });
+         contextMenu.getItems().add(copyNamespace);
+         copyNamespace.setOnAction((event) -> {
+            String[] splitNamespace = StringUtils.split(parameter.getUniqueName(), GuiElement.SEPERATOR);
+            content.putString(splitNamespace[splitNamespace.length - 2]);
+            clipboard.setContent(content);
+         });
          contextMenu.getItems().add(new SeparatorMenuItem());
-         copyName.setOnAction((event) -> clipboard.setContent(content));
 
          // Setup context menu for discarding changes.
          discard.setDisable(true);
@@ -98,9 +110,7 @@ public class ParameterTreeParameter implements ParameterTreeValue
 
          name.setText(parameter.getName());
 
-         Tooltip tooltip = new Tooltip();
-         tooltip.setText(parameter.getCurrentDescription());
-         parameter.addChangedListener(p -> tooltip.setText(parameter.getCurrentDescription()));
+         Tooltip tooltip = new Tooltip(StringUtils.replaceAll(parameter.getUniqueName(), GuiElement.SEPERATOR, "\n"));
          Tooltip.install(this, tooltip);
       }
 
