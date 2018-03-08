@@ -4,23 +4,22 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 
-public class VirtualWrenchCommand implements VirtualModelControlCommand<VirtualWrenchCommand>
+public class VirtualWrenchCommandOld implements VirtualModelControlCommand<VirtualWrenchCommandOld>
 {
-   private RigidBody controlledBody;
+   private RigidBody endEffector;
    private final Wrench virtualWrenchAppliedByRigidBody = new Wrench();
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
-   public VirtualWrenchCommand()
+   public VirtualWrenchCommandOld()
    {
    }
 
    public void setRigidBody(RigidBody controlledBody)
    {
-      this.controlledBody = controlledBody;
+      this.endEffector = controlledBody;
    }
 
    public void set(RigidBody controlledBody, Wrench virtualWrench)
@@ -36,9 +35,10 @@ public class VirtualWrenchCommand implements VirtualModelControlCommand<VirtualW
       this.selectionMatrix.set(selectionMatrix);
    }
 
-   public RigidBody getControlledBody()
+   /** {@inheritDoc} */
+   public RigidBody getEndEffector()
    {
-      return controlledBody;
+      return endEffector;
    }
 
    public Wrench getVirtualWrench()
@@ -52,9 +52,9 @@ public class VirtualWrenchCommand implements VirtualModelControlCommand<VirtualW
    }
 
    @Override
-   public void set(VirtualWrenchCommand other)
+   public void set(VirtualWrenchCommandOld other)
    {
-      controlledBody = other.controlledBody;
+      endEffector = other.endEffector;
       virtualWrenchAppliedByRigidBody.set(other.virtualWrenchAppliedByRigidBody);
       selectionMatrix.set(other.selectionMatrix);
    }

@@ -11,7 +11,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.After;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommandOld;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.RobotLegs;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -563,7 +563,7 @@ public class VirtualModelControllerTest
       VirtualModelController virtualModelController = new VirtualModelController(pelvis, registry, null);
       virtualModelController.registerControlledBody(endEffector, pelvis);
 
-      VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
+      VirtualWrenchCommandOld virtualWrenchCommand = new VirtualWrenchCommandOld();
       virtualWrenchCommand.set(foot, desiredWrench, selectionMatrix);
 
       virtualModelController.submitControlledBodyVirtualWrench(virtualWrenchCommand);
