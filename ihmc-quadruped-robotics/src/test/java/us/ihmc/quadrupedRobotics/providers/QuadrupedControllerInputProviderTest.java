@@ -60,7 +60,7 @@ public class QuadrupedControllerInputProviderTest
       
       YoVariableRegistry registry = new YoVariableRegistry("inputProvider");
       GlobalDataProducer dataProducer = new GlobalDataProducer(mockCommunicator);
-      QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(dataProducer, registry);
+      QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(null, dataProducer, registry);
       QuadrupedPlanarVelocityInputProvider planarVelocityInputProvider = new QuadrupedPlanarVelocityInputProvider(dataProducer, registry);
 
       // load default parameters
