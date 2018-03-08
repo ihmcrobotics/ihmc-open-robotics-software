@@ -7,19 +7,19 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 
 /**
- * {@link VirtualForceCommand} is a command meant to be submitted to the
+ * {@link VirtualTorqueCommand} is a command meant to be submitted to the
  * {@link WholeBodyControllerCore} via the {@link ControllerCoreCommand}.
  * <p>
- * The objective of a {@link VirtualForceCommand} is to notify the virtual model control
+ * The objective of a {@link VirtualTorqueCommand} is to notify the virtual model control
  * module that the given end-effector is to execute a desired force during the
  * next control tick.
  * </p>
@@ -30,16 +30,16 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
  * @author Robert Griffin
  *
  */
-public class VirtualForceCommand implements VirtualModelControlCommand<VirtualForceCommand>
+public class VirtualTorqueCommand implements VirtualModelControlCommand<VirtualTorqueCommand>
 {
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose3D controlFramePose = new FramePose3D();
 
    /**
-    * It defines the desired linear force of the origin of the control frame, with respect to
+    * It defines the desired angular torque of the origin of the control frame, with respect to
     * the base. The vector is expressed in the control frame.
     */
-   private final Vector3D desiredLinearForce = new Vector3D();
+   private final Vector3D desiredAngularTorque = new Vector3D();
 
    /**
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
@@ -67,7 +67,7 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     *  Creates an empty command. It needs to be configured before being submitted to the controller
     *  core.
      */
-   private VirtualForceCommand()
+   private VirtualTorqueCommand()
    {
    }
 
@@ -75,7 +75,7 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     * Performs a full-depth copy of the data contained in the other command.
     */
    @Override
-   public void set(VirtualForceCommand other)
+   public void set(VirtualTorqueCommand other)
    {
       selectionMatrix.set(other.selectionMatrix);
       base = other.getBase();
@@ -85,7 +85,7 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
 
 
       controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
-      desiredLinearForce.set(other.desiredLinearForce);
+      desiredAngularTorque.set(other.desiredAngularTorque);
    }
 
    /**
@@ -109,9 +109,9 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
    }
 
    /**
-    * Sets the desired linear force to submit for the optimization to zero.
+    * Sets the desired angular torque to submit for the optimization to zero.
     * <p>
-    * This is useful when the end-effector is in contact with the environment. Its force has
+    * This is useful when the end-effector is in contact with the environment. Its torque has
     * to be set to zero so it can exert the required wrench from the contact optimization.
     * </p>
     * <p>
@@ -127,17 +127,17 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     * @param controlFrame specifies the location and orientation of interest for controlling the
     *           end-effector.
     */
-   public void setLinearForceToZero(ReferenceFrame controlFrame)
+   public void setAngularTorqueToZero(ReferenceFrame controlFrame)
    {
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredLinearForce.setToZero();
+      desiredAngularTorque.setToZero();
    }
 
    /**
-    * Sets the desired linear force to submit for the virtual model controller.
+    * Sets the desired angular torque to submit for the virtual model controller.
     * <p>
-    * It is important that the linear force describes the force of the control frame.
+    * It is important that the angular torque describes the torque of the control frame.
     * </p>
     * <p>
     * The given {@code controlFrame} should be located at the point of interest and has to be
@@ -151,25 +151,25 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     *
     * @param controlFrame specifies the location  of interest for controlling the end-effector.
     * @param desiredWrench the desired end-effector wrench with respect to the expressed in the control frame.
-    * @throws ReferenceFrameMismatchException if the {@code desiredLinearForce} is not setup
+    * @throws ReferenceFrameMismatchException if the {@code desiredAngularTorque} is not setup
     *            as follows: {@code bodyFrame = endEffector.getBodyFixedFrame()},
     *            {@code baseFrame = base.getBodyFixedFrame()},
     *            {@code expressedInFrame = controlFrame}.
     */
-   public void setLinearForce(ReferenceFrame controlFrame, Wrench desiredWrench)
+   public void setAngularTorque(ReferenceFrame controlFrame, Wrench desiredWrench)
    {
       desiredWrench.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       desiredWrench.getExpressedInFrame().checkReferenceFrameMatch(controlFrame);
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      desiredWrench.getLinearPart(desiredLinearForce);
+      desiredWrench.getAngularPart(desiredAngularTorque);
    }
 
    /**
-    * Sets the desired linear force to submit for the optimization.
+    * Sets the desired angular torque to submit for the optimization.
     * <p>
-    * The {@code desiredLinearForce} has to defined the desired linear force of the
+    * The {@code desiredAngularTorque} has to defined the desired angular torque of the
     * origin of the {@code controlFrame}. It has to be expressed in {@code controlFrame}.
     * </p>
     * <p>
@@ -184,46 +184,46 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     *
     * @param controlFrame specifies the location and orientation of interest for controlling the
     *           end-effector.
-    * @param desiredLinearForce the desired linear force of the origin of the control
+    * @param desiredAngularTorque the desired angular torque of the origin of the control
     *           frame with respect to the base. Not modified.
-    * @throws ReferenceFrameMismatchException if {@code desiredLinearForce} is not expressed
+    * @throws ReferenceFrameMismatchException if {@code desiredAngularTorque} is not expressed
     *             control frame.
     */
-   public void setLinearForce(ReferenceFrame controlFrame, FrameVector3D desiredLinearForce)
+   public void setAngularTorque(ReferenceFrame controlFrame, FrameVector3D desiredAngularTorque)
    {
-      controlFrame.checkReferenceFrameMatch(desiredLinearForce);
+      controlFrame.checkReferenceFrameMatch(desiredAngularTorque);
 
       controlFramePose.setToZero(controlFrame);
       controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
-      this.desiredLinearForce.set(desiredLinearForce);
+      this.desiredAngularTorque.set(desiredAngularTorque);
    }
 
    /**
     * Sets the selection matrix to be used for the next control tick to the 3-by-3 identity matrix.
     * <p>
-    * This specifies that the 3 linear degrees of freedom of the end-effector are to be controlled.
+    * This specifies that the 3 angular degrees of freedom of the end-effector are to be controlled.
     * </p>
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.setToAngularSelectionOnly();
    }
 
    /**
     * Convenience method that sets up the selection matrix applying the given selection matrix
-    * to the linear part.
+    * to the angular part.
     * <p>
     * If the selection frame is not set, i.e. equal to {@code null}, it is assumed that the
     * selection frame is equal to the control frame.
     * </p>
     *
-    * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
+    * @param angularSelectionMatrix the selection matrix to apply to the angular part of this command.
     *           Not modified.
     */
-   public void setSelectionMatrixToIdentity(SelectionMatrix3D linearSelectionMatrix)
+   public void setSelectionMatrixToIdentity(SelectionMatrix3D angularSelectionMatrix)
    {
       selectionMatrix.clearSelection();
-      selectionMatrix.setLinearPart(linearSelectionMatrix);
+      selectionMatrix.setAngularPart(angularSelectionMatrix);
    }
 
    /**
@@ -246,38 +246,38 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
    }
 
    /**
-    * Packs the control frame and desired linear force held in this command.
+    * Packs the control frame and desired angular torque held in this command.
     * <p>
     * The first argument {@code controlFrameToPack} is required to properly express the
-    * {@code desiredLinearForce}. Indeed the desired linear force has to be
+    * {@code desiredAngularTorque}. Indeed the desired angular torque has to be
     * expressed in the control frame.
     * </p>
     *
     * @param controlFrameToPack the frame of interest for controlling the end-effector. Modified.
-    * @param desiredLinearForceToPack the desired linear force of the end-effector with respect to
+    * @param desiredAngularTorqueToPack the desired angular torque of the end-effector with respect to
     *           the base, expressed in the control frame. Modified.
     */
-   public void getDesiredLinearForce(PoseReferenceFrame controlFrameToPack, FrameVector3D desiredLinearForceToPack)
+   public void getDesiredAngularTorque(PoseReferenceFrame controlFrameToPack, FrameVector3D desiredAngularTorqueToPack)
    {
       getControlFrame(controlFrameToPack);
-      desiredLinearForceToPack.set(controlFrameToPack, desiredLinearForce);
+      desiredAngularTorqueToPack.set(controlFrameToPack, desiredAngularTorque);
    }
 
    /**
-    * Packs the value of the desired linear force of the end-effector with respect to the
+    * Packs the value of the desired angular torque of the end-effector with respect to the
     * base, expressed in the control frame.
     * <p>
     * The control frame can be obtained via {@link #getControlFrame(PoseReferenceFrame)}.
     * </p>
     *
-    * @param desiredLinearForceToPack the 3-by-1 matrix in which the value of the desired
-    *           linear force is stored. The given matrix is reshaped to ensure proper size.
+    * @param desiredAngularTorqueToPack the 3-by-1 matrix in which the value of the desired
+    *           angular torque is stored. The given matrix is reshaped to ensure proper size.
     *           Modified.
     */
-   public void getDesiredLinearForce(DenseMatrix64F desiredLinearForceToPack)
+   public void getDesiredAngularTorque(DenseMatrix64F desiredAngularTorqueToPack)
    {
-      desiredLinearForceToPack.reshape(6, 1);
-      desiredLinearForce.get(0, desiredLinearForceToPack);
+      desiredAngularTorqueToPack.reshape(6, 1);
+      desiredAngularTorque.get(0, desiredAngularTorqueToPack);
    }
 
    /**
@@ -287,7 +287,7 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
     * The control frame is assumed to be attached to the end-effector.
     * </p>
     * <p>
-    * The linear force that this command holds onto is expressed in the control frame.
+    * The angular torque that this command holds onto is expressed in the control frame.
     * </p>
     *
     * @param controlFrameToPack the {@code PoseReferenceFrame} used to clone the control frame.
@@ -400,19 +400,19 @@ public class VirtualForceCommand implements VirtualModelControlCommand<VirtualFo
    /**
     * {@inheritDoc}
     *
-    * @return {@link ControllerCoreCommandType#VIRTUAL_FORCE}.
+    * @return {@link ControllerCoreCommandType#VIRTUAL_TORQUE}.
     */
    @Override
    public ControllerCoreCommandType getCommandType()
    {
-      return ControllerCoreCommandType.VIRTUAL_FORCE;
+      return ControllerCoreCommandType.VIRTUAL_TORQUE;
    }
 
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", linear = "
-            + desiredLinearForce;
+      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", angular = "
+            + desiredAngularTorque;
       return ret;
    }
 }
