@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.After;
@@ -559,7 +560,7 @@ public class VirtualModelControllerTest
       CommonOps.invert(transposeJacobianMatrix);
 
       YoVariableRegistry registry = new YoVariableRegistry(this.getClass().getSimpleName());
-      VirtualModelController virtualModelController = new VirtualModelController(pelvis, null, registry, null);
+      VirtualModelController virtualModelController = new VirtualModelController(pelvis, registry, null);
       virtualModelController.registerControlledBody(endEffector, pelvis);
 
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
@@ -574,11 +575,11 @@ public class VirtualModelControllerTest
       desiredWrench.changeFrame(pelvis.getBodyFixedFrame());
 
       // compute end effector force from torques
-      Map<InverseDynamicsJoint, Double> jointTorques = virtualModelControlSolution.getJointTorques();
+      Map<InverseDynamicsJoint, MutableDouble> jointTorques = virtualModelControlSolution.getJointTorques();
       DenseMatrix64F jointEffortMatrix = new DenseMatrix64F(controlledJoints.length, 1);
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         jointEffortMatrix.set(i, 0, jointTorques.get(controlledJoints[i]));
+         jointEffortMatrix.set(i, 0, jointTorques.get(controlledJoints[i]).doubleValue());
       }
 
       DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
@@ -775,7 +776,7 @@ public class VirtualModelControllerTest
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps.invert(transposeJacobianMatrix);
 
-      VirtualModelController virtualModelController = new VirtualModelController(base, null, registry, null);
+      VirtualModelController virtualModelController = new VirtualModelController(base, registry, null);
       virtualModelController.registerControlledBody(endEffector, base);
 
       desiredWrench.changeFrame(base.getBodyFixedFrame());
@@ -790,11 +791,11 @@ public class VirtualModelControllerTest
       virtualModelController.compute(virtualModelControlSolution);
 
       // compute end effector force from torques
-      Map<InverseDynamicsJoint, Double> jointTorques = virtualModelControlSolution.getJointTorques();
+      Map<InverseDynamicsJoint, MutableDouble> jointTorques = virtualModelControlSolution.getJointTorques();
       DenseMatrix64F jointEffortMatrix = new DenseMatrix64F(controlledJoints.length, 1);
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         jointEffortMatrix.set(i, 0, jointTorques.get(controlledJoints[i]));
+         jointEffortMatrix.set(i, 0, jointTorques.get(controlledJoints[i]).doubleValue());
       }
 
       DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
