@@ -10,7 +10,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommandOld;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -108,9 +108,9 @@ public class VirtualModelController
       submitControlledBodyVirtualWrench(controlledBody, wrench, CommonOps.identity(Wrench.SIZE, Wrench.SIZE));
    }
 
-   public void submitControlledBodyVirtualWrench(VirtualWrenchCommand virtualWrenchCommand)
+   public void submitControlledBodyVirtualWrench(VirtualWrenchCommandOld virtualWrenchCommand)
    {
-      submitControlledBodyVirtualWrench(virtualWrenchCommand.getControlledBody(), virtualWrenchCommand.getVirtualWrench(),
+      submitControlledBodyVirtualWrench(virtualWrenchCommand.getEndEffector(), virtualWrenchCommand.getVirtualWrench(),
                                         virtualWrenchCommand.getSelectionMatrix());
    }
 

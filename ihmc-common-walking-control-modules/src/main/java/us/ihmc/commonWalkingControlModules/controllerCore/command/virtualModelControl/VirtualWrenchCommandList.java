@@ -8,19 +8,19 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class VirtualWrenchCommandList
 {
-   private final List<VirtualWrenchCommand> commandList = new ArrayList<>();
+   private final List<VirtualWrenchCommandOld> commandList = new ArrayList<>();
    private final List<RigidBody> commandBodies = new ArrayList<>();
 
    public VirtualWrenchCommandList()
    {
    }
 
-   public void addCommand(VirtualWrenchCommand command)
+   public void addCommand(VirtualWrenchCommandOld command)
    {
       if (command != null)
       {
          commandList.add(command);
-         commandBodies.add(command.getControlledBody());
+         commandBodies.add(command.getEndEffector());
       }
    }
 
@@ -30,12 +30,12 @@ public class VirtualWrenchCommandList
       commandBodies.clear();
    }
 
-   public VirtualWrenchCommand getCommand(int commandIndex)
+   public VirtualWrenchCommandOld getCommand(int commandIndex)
    {
       return commandList.get(commandIndex);
    }
 
-   public VirtualWrenchCommand pollCommand()
+   public VirtualWrenchCommandOld pollCommand()
    {
       if (commandList.isEmpty() || commandBodies.isEmpty())
          return null;

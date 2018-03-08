@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommandOld;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -16,7 +16,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 {
    private final JointspaceAccelerationCommand inverseDynamicsOutput = new JointspaceAccelerationCommand();
    private final JointspaceVelocityCommand inverseKinematicsOutput = new JointspaceVelocityCommand();
-   private final VirtualWrenchCommand virtualModelControlOutput = new VirtualWrenchCommand();
+   private final VirtualWrenchCommandOld virtualModelControlOutput = new VirtualWrenchCommandOld();
 
    private final OneDoFJoint joint;
 
@@ -247,7 +247,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    }
 
    @Override
-   public VirtualWrenchCommand getVirtualModelControlOutput()
+   public VirtualWrenchCommandOld getVirtualModelControlOutput()
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");

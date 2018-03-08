@@ -187,15 +187,15 @@ public class WholeBodyVirtualModelControlSolver
       // submit virtual wrenches for bodies not in contact
       for (int i = 0; i < virtualWrenchCommandList.getNumberOfCommands(); i++)
       {
-         VirtualWrenchCommand virtualWrenchCommand = virtualWrenchCommandList.getCommand(i);
-         if (!bodiesInContact.contains(virtualWrenchCommand.getControlledBody()))
+         VirtualWrenchCommandOld virtualWrenchCommand = virtualWrenchCommandList.getCommand(i);
+         if (!bodiesInContact.contains(virtualWrenchCommand.getEndEffector()))
          {
-            if (controlledBodies.contains(virtualWrenchCommand.getControlledBody()))
+            if (controlledBodies.contains(virtualWrenchCommand.getEndEffector()))
             {
                virtualModelController.submitControlledBodyVirtualWrench(virtualWrenchCommand);
             }
             else
-               PrintTools.warn(this, "Received a command for " + virtualWrenchCommand.getControlledBody().getName()
+               PrintTools.warn(this, "Received a command for " + virtualWrenchCommand.getEndEffector().getName()
                      + ", which is not registered. Skipping this body.");
          }
       }
@@ -263,7 +263,7 @@ public class WholeBodyVirtualModelControlSolver
             optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
             break;
          case VIRTUAL_WRENCH:
-            handleVirtualWrenchCommand((VirtualWrenchCommand) command);
+            handleVirtualWrenchCommand((VirtualWrenchCommandOld) command);
             break;
             /* TODO
          case VIRTUAL_FORCE:
@@ -294,15 +294,15 @@ public class WholeBodyVirtualModelControlSolver
 
    private final Wrench tmpExternalWrench = new Wrench();
 
-   private void handleVirtualWrenchCommand(VirtualWrenchCommand command)
+   private void handleVirtualWrenchCommand(VirtualWrenchCommandOld command)
    {
       virtualWrenchCommandList.addCommand(command);
 
-      if (command.getControlledBody() == controlRootBody)
+      if (command.getEndEffector() == controlRootBody)
       {
          tmpExternalWrench.set(command.getVirtualWrench());
          tmpExternalWrench.negate();
-         optimizationControlModule.submitExternalWrench(command.getControlledBody(), tmpExternalWrench);
+         optimizationControlModule.submitExternalWrench(command.getEndEffector(), tmpExternalWrench);
       }
 
       optimizationControlModule.addSelection(command.getSelectionMatrix());
@@ -315,7 +315,7 @@ public class WholeBodyVirtualModelControlSolver
       tmpWrench.set(command.getExternalWrench());
       tmpWrench.negate();
 
-      VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
+      VirtualWrenchCommandOld virtualWrenchCommand = new VirtualWrenchCommandOld();
       virtualWrenchCommand.set(command.getRigidBody(), tmpWrench);
       virtualWrenchCommandList.addCommand(virtualWrenchCommand);
    }
