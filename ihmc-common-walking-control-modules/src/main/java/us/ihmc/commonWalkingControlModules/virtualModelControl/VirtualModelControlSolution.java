@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.virtualModelControl;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -13,7 +14,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 public class VirtualModelControlSolution
 {
    private InverseDynamicsJoint[] jointsToCompute;
-   private Map<InverseDynamicsJoint, Double> jointTorques;
+   private Map<InverseDynamicsJoint, MutableDouble> jointTorques;
    private SpatialForceVector centroidalMomentumRateSolution;
    private DenseMatrix64F centroidalMomentumSelectionMatrix;
    private Map<RigidBody, Wrench> externalWrenchSolution;
@@ -29,7 +30,7 @@ public class VirtualModelControlSolution
       this.jointsToCompute = jointsToCompute;
    }
 
-   public void setJointTorques(Map<InverseDynamicsJoint, Double> jointTorques)
+   public void setJointTorques(Map<InverseDynamicsJoint, MutableDouble> jointTorques)
    {
       this.jointTorques = jointTorques;
    }
@@ -75,7 +76,7 @@ public class VirtualModelControlSolution
       return jointsToCompute;
    }
 
-   public Map<InverseDynamicsJoint, Double> getJointTorques()
+   public Map<InverseDynamicsJoint, MutableDouble> getJointTorques()
    {
       return jointTorques;
    }

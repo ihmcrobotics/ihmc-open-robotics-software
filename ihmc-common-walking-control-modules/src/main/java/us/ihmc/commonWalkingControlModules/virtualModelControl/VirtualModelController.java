@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -28,19 +29,15 @@ import us.ihmc.robotics.screwTheory.Wrench;
 
 public class VirtualModelController
 {
-   private final static boolean DEBUG = false;
    private final static boolean USE_SUPER_JACOBIAN = true;
    private final static boolean DISPLAY_GRAVITY_WRENCHES = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final Map<RigidBody, YoWrench> yoWrenches = new HashMap<>();
-   private final Map<OneDoFJoint, YoDouble> vmcTorques = new HashMap<>();
-
    private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
    private final RigidBody defaultRootBody;
 
-   private final Map<InverseDynamicsJoint, Double> jointTorques = new HashMap<>();
+   private final Map<InverseDynamicsJoint, MutableDouble> jointTorques = new HashMap<>();
 
    private final VirtualModelControlDataHandler vmcDataHandler = new VirtualModelControlDataHandler();
 
@@ -52,19 +49,12 @@ public class VirtualModelController
    private final Map<RigidBody, Wrench> gravityWrenchMap = new HashMap<>();
    private List<RigidBody> allBodies = new ArrayList<>();
 
-   public VirtualModelController(RigidBody defaultRootBody, OneDoFJoint[] controlledJoints, YoVariableRegistry parentRegistry,
-                                 YoGraphicsListRegistry yoGraphicsListRegistry)
+   public VirtualModelController(RigidBody defaultRootBody, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.defaultRootBody = defaultRootBody;
 
       fullJTMatrix.reshape(0, 0);
       fullObjectiveWrench.reshape(0, 0);
-
-      if (DEBUG)
-      {
-         for (OneDoFJoint joint : controlledJoints)
-            vmcTorques.put(joint, new YoDouble("tau_vmc_" + joint.getName(), registry));
-      }
 
       if (DISPLAY_GRAVITY_WRENCHES)
       {
@@ -116,13 +106,6 @@ public class VirtualModelController
    {
       vmcDataHandler.addBodyForControl(controlledBody);
       vmcDataHandler.addJointsForControl(controlledBody, jointsToUse);
-   }
-
-   public void createYoVariable(RigidBody controlledBody)
-   {
-      YoWrench yoWrench = new YoWrench(controlledBody.getName() + "_VMCDesiredWrench", controlledBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(),
-                                       registry);
-      yoWrenches.put(controlledBody, yoWrench);
    }
 
    public void submitControlledBodyVirtualWrench(RigidBody controlledBody, Wrench wrench)
@@ -204,8 +187,6 @@ public class VirtualModelController
 
                   // change wrench frame for yo variable
                   wrench.changeFrame(ReferenceFrame.getWorldFrame());
-                  if (yoWrenches.get(controlledBody) != null)
-                     yoWrenches.get(controlledBody).set(wrench);
 
                   // append wrench to the end of the current objective wrench vector
                   int previousSize = fullObjectiveWrench.getNumRows();
@@ -289,8 +270,6 @@ public class VirtualModelController
                CommonOps.mult(tmpJTMatrix, tmpWrench, jointTorques);
 
                wrench.changeFrame(ReferenceFrame.getWorldFrame());
-               if (yoWrenches.get(controlledBody) != null)
-                  yoWrenches.get(controlledBody).set(wrench);
 
                // put into full thing
                for (int j = 0; j < vmcDataHandler.jointsInChain(controlledBody, 0); j++)
@@ -303,11 +282,8 @@ public class VirtualModelController
       int index = 0;
       for (InverseDynamicsJoint joint : vmcDataHandler.getControlledJoints())
       {
-         jointTorques.put(joint, fullEffortMatrix.get(index));
-         if (DEBUG)
-            vmcTorques.get(joint).set(fullEffortMatrix.get(index));
+         jointTorques.get(joint).setValue(fullEffortMatrix.get(index));
          index++;
-
       }
 
       if (DISPLAY_GRAVITY_WRENCHES)

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
@@ -88,7 +89,7 @@ public class WholeBodyVirtualModelControlSolver
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, JointDesiredControlMode.EFFORT);
 
       controlRootBody = toolbox.getVirtualModelControlMainBody();
-      virtualModelController = new VirtualModelController(controlRootBody, controlledOneDoFJoints, registry, toolbox.getYoGraphicsListRegistry());
+      virtualModelController = new VirtualModelController(controlRootBody, registry, toolbox.getYoGraphicsListRegistry());
 
       yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
       yoAchievedMomentumRateAngular = toolbox.getYoAchievedMomentumRateAngular();
@@ -96,11 +97,6 @@ public class WholeBodyVirtualModelControlSolver
       if (toolbox.getControlledBodies() != null)
       {
          controlledBodies = Arrays.asList(toolbox.getControlledBodies());
-         for (RigidBody controlledBody : controlledBodies)
-         {
-            virtualModelController.createYoVariable(controlledBody);
-         }
-
          wrenchVisualizer = new WrenchVisualizer("VMCDesiredExternalWrench", controlledBodies, 1.0, toolbox.getYoGraphicsListRegistry(), registry,
                                                  YoAppearance.Red(), YoAppearance.Blue());
       }
@@ -205,7 +201,7 @@ public class WholeBodyVirtualModelControlSolver
       }
 
       virtualModelController.compute(virtualModelControlSolution);
-      Map<InverseDynamicsJoint, Double> jointTorquesSolution = virtualModelControlSolution.getJointTorques();
+      Map<InverseDynamicsJoint, MutableDouble> jointTorquesSolution = virtualModelControlSolution.getJointTorques();
 
       for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
       {
@@ -225,7 +221,7 @@ public class WholeBodyVirtualModelControlSolver
       yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
    }
 
-   private void updateLowLevelData(Map<InverseDynamicsJoint, Double> jointTorquesSolution)
+   private void updateLowLevelData(Map<InverseDynamicsJoint, MutableDouble> jointTorquesSolution)
    {
       rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
 
@@ -236,14 +232,14 @@ public class WholeBodyVirtualModelControlSolver
             if (USE_LIMITED_JOINT_TORQUES)
             {
                if (firstTick)
-                  jointTorqueSolutions.get(joint).set(jointTorquesSolution.get(joint));
+                  jointTorqueSolutions.get(joint).set(jointTorquesSolution.get(joint).doubleValue());
                else
-                  jointTorqueSolutions.get(joint).update(jointTorquesSolution.get(joint));
+                  jointTorqueSolutions.get(joint).update(jointTorquesSolution.get(joint).doubleValue());
                lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorqueSolutions.get(joint).getDoubleValue());
             }
             else
             {
-               lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(joint));
+               lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(joint).doubleValue());
             }
          }
       }

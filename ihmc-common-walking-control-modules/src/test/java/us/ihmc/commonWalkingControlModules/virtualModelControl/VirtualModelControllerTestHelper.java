@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 
@@ -127,8 +128,7 @@ public class VirtualModelControllerTestHelper
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
-      VirtualModelController virtualModelController = new VirtualModelController(controllerModel.getElevator(), controllerModel.getOneDoFJoints(),
-            registry, yoGraphicsListRegistry);
+      VirtualModelController virtualModelController = new VirtualModelController(controllerModel.getElevator(), registry, yoGraphicsListRegistry);
 
       List<ReferenceFrame> endEffectorFrames = new ArrayList<>();
       List<FramePose3D> desiredEndEffectorPoses = new ArrayList<>();
@@ -2647,11 +2647,11 @@ public class VirtualModelControllerTestHelper
          }
          virtualModelController.compute(virtualModelControlSolution);
 
-         Map<InverseDynamicsJoint, Double> jointTorques = virtualModelControlSolution.getJointTorques();
+         Map<InverseDynamicsJoint, MutableDouble> jointTorques = virtualModelControlSolution.getJointTorques();
          for (OneDoFJoint joint : controlledJoints)
          {
-            yoJointTorques.get(joint).set(jointTorques.get(joint));
-            joint.setTau(jointTorques.get(joint));
+            yoJointTorques.get(joint).set(jointTorques.get(joint).doubleValue());
+            joint.setTau(jointTorques.get(joint).doubleValue());
          }
 
          // write to scs
