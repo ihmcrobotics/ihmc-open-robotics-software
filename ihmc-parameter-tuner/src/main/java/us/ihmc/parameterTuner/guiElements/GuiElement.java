@@ -2,6 +2,8 @@ package us.ihmc.parameterTuner.guiElements;
 
 public abstract class GuiElement
 {
+   public static final String SEPERATOR = ":";
+
    private final String name;
    private final GuiRegistry parent;
    private final String uniqueName;
@@ -41,7 +43,7 @@ public abstract class GuiElement
       }
       else
       {
-         return parent.getUniqueName() + ":" + name;
+         return parent.getUniqueName() + SEPERATOR + name;
       }
    }
 }
