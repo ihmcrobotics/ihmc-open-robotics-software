@@ -404,6 +404,16 @@ public class AvatarSimulationFactory
       scsInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get(), null);
       robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
       humanoidFloatingRootJointRobot.update();
+
+      // Initialize collision handler.
+      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(100.0, 100.0, 0.01, simulationConstructionSet, 1000);
+      double coefficientOfRestitution = 0.2;
+      double coefficientOfFriction = 0.7;
+      CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+
+      simulationConstructionSet.initializeCollisionDetector(collisionVisualizer, collisionHandler);
+      simulationConstructionSet.addEnvironmentCollisionShapes(commonAvatarEnvironment.get().getTerrainObject3D().getTerrainCollisionShapes());
+      simulationConstructionSet.initializeCollisionHandler(collisionVisualizer, collisionHandler);
    }
 
    public AvatarSimulation createAvatarSimulation()
