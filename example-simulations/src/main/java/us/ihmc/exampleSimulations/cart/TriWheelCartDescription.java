@@ -19,7 +19,6 @@ public class TriWheelCartDescription extends RobotDescription
    private double massBody = 100.0;
    private double massActiveWheel = 50.0;
    private double massCasterAxis = 30.0;
-   private double massCasterWheel = 30.0;
 
    private double heightBody = 0.1;
    private double widthBody = 0.9;
@@ -120,6 +119,7 @@ public class TriWheelCartDescription extends RobotDescription
       // Passive joint on caster wheel.
       PinJointDescription casterWheelJoint = createWheelJoint("casterwheel", new Vector3D(-offsetXCasterWheel, 0.0, 0.0), radiusCasterWheel,
                                                               thicknessCasterWheel, YoAppearance.Aqua());
+
       casterAxisJoint.addJoint(casterWheelJoint);
    }
 

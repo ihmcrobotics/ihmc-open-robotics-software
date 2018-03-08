@@ -12,9 +12,6 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 
 public class CartRobotDescription extends RobotDescription
 {
-   private int collisionGroup = 0xffffffff;
-   private int collisionMask = 0xffffffff;
-
    private double massBody = 100.0;
    private double xLengthBody = 0.8;
    private double yLengthBody = 0.4;
