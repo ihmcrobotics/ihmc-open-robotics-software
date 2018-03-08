@@ -64,7 +64,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       this.runtimeEnvironment = runtimeEnvironment;
 
       // Initialize input providers.
-      postureProvider = new QuadrupedPostureInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      postureProvider = new QuadrupedPostureInputProvider(physicalProperties, runtimeEnvironment.getGlobalDataProducer(), registry);
 
 
       // Initialize control modules
