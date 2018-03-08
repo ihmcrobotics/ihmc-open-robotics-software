@@ -113,6 +113,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
+   private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
 
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -437,6 +438,11 @@ public class QuadrupedSimulationFactory
       {
          scs.setGroundVisible(false);
       }
+      if(scsBufferSize.hasValue())
+      {
+         scs.setMaxBufferSize(scsBufferSize.get());
+      }
+
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setDT(simulationDT.get(), recordFrequency.get());
       if (scs.getSimulationConstructionSetParameters().getCreateGUI())
@@ -622,5 +628,10 @@ public class QuadrupedSimulationFactory
    public void setFootSwitchType(FootSwitchType footSwitchType)
    {
       this.footSwitchType.set(footSwitchType);
+   }
+
+   public void setScsBufferSize(int scsBufferSize)
+   {
+      this.scsBufferSize.set(scsBufferSize);
    }
 }
