@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -21,12 +23,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Window;
 import us.ihmc.parameterTuner.guiElements.GuiElement;
-import us.ihmc.parameterTuner.guiElements.main.ParameterSavingNode;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 
 public class TabSavingTools
 {
-   public static void saveTab(TuningTab tab, Window window)
+   public static File saveTab(TuningTab tab, Window window)
    {
       FileChooser fileChooser = new FileChooser();
       fileChooser.getExtensionFilters().add(getExtensionFilter());
@@ -42,11 +43,15 @@ public class TabSavingTools
       if (file != null)
       {
          setDefaultFilePath(file);
-         saveTab(tab, file);
+         if (saveTab(tab, file))
+         {
+            return file;
+         }
       }
+      return null;
    }
 
-   private static void saveTab(TuningTab tab, File file)
+   private static boolean saveTab(TuningTab tab, File file)
    {
       try
       {
@@ -58,14 +63,16 @@ public class TabSavingTools
             writer.write(name + "\n");
          }
          writer.close();
+         return true;
       }
       catch (IOException e)
       {
          e.printStackTrace();
+         return false;
       }
    }
 
-   public static void loadTab(TabPane tabPane, Map<String, Tuner> tunerMap, Window window)
+   public static ImmutablePair<TuningTab, File> loadTab(TabPane tabPane, Map<String, Tuner> tunerMap, Window window)
    {
       FileChooser fileChooser = new FileChooser();
       fileChooser.getExtensionFilters().add(getExtensionFilter());
@@ -80,11 +87,29 @@ public class TabSavingTools
       if (file != null)
       {
          setDefaultFilePath(file);
-         loadTab(tabPane, tunerMap, file);
+         TuningTab newTab = loadTab(tabPane, tunerMap, file);
+         if (newTab != null)
+         {
+            return new ImmutablePair<>(newTab, file);
+         }
       }
+      return null;
    }
 
-   private static void loadTab(TabPane tabPane, Map<String, Tuner> tunerMap, File file)
+   public static List<ImmutablePair<TuningTab, File>> loadDefaultTabs(TabPane tabPane, Map<String, Tuner> tunerMap)
+   {
+      List<ImmutablePair<TuningTab, File>> loadedFiles = new ArrayList<>();
+      getDefaultTuningTabFiles().forEach(file -> {
+         TuningTab newTab = loadTab(tabPane, tunerMap, file);
+         if (newTab != null)
+         {
+            loadedFiles.add(new ImmutablePair<>(newTab, file));
+         }
+      });
+      return loadedFiles;
+   }
+
+   public static TuningTab loadTab(TabPane tabPane, Map<String, Tuner> tunerMap, File file)
    {
       try
       {
@@ -95,7 +120,7 @@ public class TabSavingTools
          if (name == null)
          {
             reader.close();
-            return;
+            return null;
          }
          TuningTab newTab = new TuningTab(name, tabPane);
          newTab.setTunerMap(tunerMap);
@@ -120,10 +145,13 @@ public class TabSavingTools
          {
             showParametersNotFound(namesNotFound);
          }
+
+         return newTab;
       }
       catch (IOException e)
       {
          e.printStackTrace();
+         return null;
       }
    }
 
@@ -151,7 +179,7 @@ public class TabSavingTools
 
    private static File getDefaultFilePath()
    {
-      Preferences prefs = Preferences.userNodeForPackage(ParameterSavingNode.class);
+      Preferences prefs = Preferences.userNodeForPackage(TuningTabManager.class);
       String filePath = prefs.get("tuningTabConfigurationPath", null);
 
       if (filePath != null && Files.isDirectory(Paths.get(filePath)))
@@ -162,13 +190,62 @@ public class TabSavingTools
 
    private static void setDefaultFilePath(File file)
    {
-      Preferences prefs = Preferences.userNodeForPackage(ParameterSavingNode.class);
+      Preferences prefs = Preferences.userNodeForPackage(TuningTabManager.class);
       if (file != null)
       {
          if (!file.isDirectory())
             file = file.getParentFile();
 
          prefs.put("tuningTabConfigurationPath", file.getAbsolutePath());
+      }
+   }
+
+   public static List<File> getDefaultTuningTabFiles()
+   {
+      Preferences prefs = Preferences.userNodeForPackage(TuningTabManager.class);
+      String prefix = "defaultTuningTab";
+      int index = 0;
+
+      List<File> files = new ArrayList<>();
+
+      while (prefs.get(prefix + index, null) != null)
+      {
+         String filePath = prefs.get(prefix + index, null);
+         if (Files.isRegularFile(Paths.get(filePath)))
+         {
+            files.add(new File(filePath));
+         }
+         index++;
+      }
+
+      return files;
+   }
+
+   public static void saveDefaultTabFiles(List<File> files)
+   {
+      clearDefaultTabFiles();
+
+      Preferences prefs = Preferences.userNodeForPackage(TuningTabManager.class);
+      String prefix = "defaultTuningTab";
+
+      List<File> filteredFiles = files.stream().filter(file -> (file != null && file.isFile())).collect(Collectors.toList());
+      for (int index = 0; index < filteredFiles.size(); index++)
+      {
+         File file = filteredFiles.get(index);
+         prefs.put(prefix + index, file.getAbsolutePath());
+      }
+   }
+
+   public static void clearDefaultTabFiles()
+   {
+      Preferences prefs = Preferences.userNodeForPackage(TuningTabManager.class);
+      String prefix = "defaultTuningTab";
+      int index = 0;
+
+      while (prefs.get(prefix + index, null) != null)
+      {
+         prefs.remove(prefix + index);
+         index++;
       }
    }
 }

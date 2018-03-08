@@ -4,7 +4,6 @@ import java.util.Map;
 
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 
@@ -18,27 +17,28 @@ public class TuningTabManager
    private final MenuItem saveTab = new MenuItem("Save Open Tab");
    private final MenuItem loadTab = new MenuItem("Load Tab");
 
+   private final TabSaver tabSaver;
+
    public TuningTabManager(TabPane tabPane)
    {
       this.tabPane = tabPane;
+      tabSaver = new TabSaver(tabPane);
 
       closeTab.setOnAction(event -> {
-         Tab selectedTab = tabPane.getSelectionModel().getSelectedItem();
+         TuningTab selectedTab = (TuningTab) tabPane.getSelectionModel().getSelectedItem();
          tabPane.getTabs().remove(selectedTab);
+         tabSaver.removeTab(selectedTab);
          updateMenuItems();
       });
       createNewTab.setOnAction(event -> {
-         String name = createUniqueName(tabPane, "NewTab");
-         TuningTab newTab = new TuningTab(name, tabPane);
-         newTab.setTunerMap(tunerMap);
-         updateMenuItems();
+         createNewTab(tabPane);
       });
       saveTab.setOnAction(event -> {
          TuningTab selectedTab = (TuningTab) tabPane.getSelectionModel().getSelectedItem();
-         TabSavingTools.saveTab(selectedTab, tabPane.getScene().getWindow());
+         tabSaver.saveTab(selectedTab);
       });
       loadTab.setOnAction(event -> {
-         TabSavingTools.loadTab(tabPane, tunerMap, tabPane.getScene().getWindow());
+         tabSaver.loadTab(tabPane, tunerMap);
          updateMenuItems();
       });
 
@@ -48,7 +48,13 @@ public class TuningTabManager
       tabContextMenu.getItems().add(saveTab);
       tabContextMenu.getItems().add(closeTab);
       tabPane.setContextMenu(tabContextMenu);
+   }
 
+   private void createNewTab(TabPane tabPane)
+   {
+      String name = createUniqueName(tabPane, "NewTab");
+      TuningTab newTab = new TuningTab(name, tabPane);
+      newTab.setTunerMap(tunerMap);
       updateMenuItems();
    }
 
@@ -77,11 +83,19 @@ public class TuningTabManager
    public void setTunerMap(Map<String, Tuner> tunerMap)
    {
       this.tunerMap = tunerMap;
+      tabPane.getTabs().clear();
+      tabSaver.loadDefaultTabs(tabPane, tunerMap);
       tabPane.getTabs().forEach(tab -> ((TuningTab) tab).setTunerMap(tunerMap));
+      updateMenuItems();
    }
 
    public void handleNewParameter(String uniqueName)
    {
+      if (tabPane.getTabs().isEmpty())
+      {
+         createNewTab(tabPane);
+      }
+
       TuningTab activeTab = (TuningTab) tabPane.getSelectionModel().getSelectedItem();
       activeTab.handleNewParameter(uniqueName);
    }
