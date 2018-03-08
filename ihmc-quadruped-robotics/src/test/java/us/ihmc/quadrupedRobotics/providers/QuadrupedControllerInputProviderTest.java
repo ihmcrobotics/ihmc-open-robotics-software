@@ -26,6 +26,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -147,7 +148,7 @@ public class QuadrupedControllerInputProviderTest
       Vector3D randomPlanarVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
 
       YoVariableRegistry registry = new YoVariableRegistry("inputProvider");
-      QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(null, registry);
+      QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(null, null, registry);
       QuadrupedPlanarVelocityInputProvider planarVelocityInputProvider = new QuadrupedPlanarVelocityInputProvider(null, registry);
 
       YoDouble yoComPositionInputX = (YoDouble) registry.getVariable("comPositionInputX");
