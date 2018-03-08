@@ -31,11 +31,21 @@ package us.ihmc.jMonkeyEngineToolkit.jme;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-import static org.lwjgl.opengl.EXTFramebufferObject.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL12.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL21.*;
+import static org.lwjgl.opengl.EXTFramebufferObject.GL_COLOR_ATTACHMENT0_EXT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_COMPONENT;
+import static org.lwjgl.opengl.GL11.GL_FLOAT;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.glReadBuffer;
+import static org.lwjgl.opengl.GL11.glReadPixels;
+import static org.lwjgl.opengl.GL12.GL_BGRA;
+import static org.lwjgl.opengl.GL15.GL_READ_ONLY;
+import static org.lwjgl.opengl.GL15.GL_STATIC_READ;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL15.glBufferData;
+import static org.lwjgl.opengl.GL15.glGenBuffers;
+import static org.lwjgl.opengl.GL15.glMapBuffer;
+import static org.lwjgl.opengl.GL15.glUnmapBuffer;
+import static org.lwjgl.opengl.GL21.GL_PIXEL_PACK_BUFFER;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -43,6 +53,8 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -53,6 +65,9 @@ import javax.imageio.ImageIO;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+import com.jme3.math.Matrix4f;
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
 import com.jme3.post.SceneProcessor;
 import com.jme3.profile.AppProfiler;
 import com.jme3.renderer.Camera;
@@ -94,6 +109,9 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    private final static boolean USE_PBO = JMERenderer.USE_PBO;
    private final static boolean CAPTURE_IMMEDIATLY_AFTER_PREVIOUS_VIDEOFRAME = true;
 
+   
+   private final boolean captureDepthMap = true;
+   
    private Renderer renderer;
    private RenderManager renderManager;
    private int width, height;
@@ -148,7 +166,14 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    public void reshape(ViewPort vp, int w, int h)
    {
-      dataSize = w * h * 4;
+      if(captureDepthMap)
+      {
+         dataSize = w * h * 8;         
+      }
+      else
+      {
+         dataSize = w * h * 4;         
+      }
       width = w;
       height = h;
       bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
@@ -216,6 +241,11 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
                // Select gpuToVram PBO an read pixels from GPU to VRAM
                glBindBuffer(GL_PIXEL_PACK_BUFFER, bufferId);
                glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+               
+               if(captureDepthMap)
+               {
+                  glReadPixels(0, 0, width, height, GL_DEPTH_COMPONENT, GL_FLOAT, width * height * 4);
+               }
 
                // Select vramToSys PBO, bind it to systemRam and copy the data over
                //             glBindBuffer(GL_PIXEL_PACK_BUFFER, bufferIds[vramToSys]);
@@ -234,6 +264,10 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
             }
             else
             {
+               if(captureDepthMap)
+               {
+                  throw new RuntimeException("Depthmap not implemented for direct pixel buffer reading");
+               }
                systemRam.clear();
                renderer.readFrameBuffer(out, systemRam);
                if (systemRam != null)
@@ -330,6 +364,27 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
          }
       }
    }
+   
+   private void getWorldCoordinates(Matrix4f inverseMat, float x, float y,
+                                       float projectionZPos, Vector3f store)
+   {
+      
+      float viewPortLeft = viewport.getCamera().getViewPortLeft();
+      float viewPortRight = viewport.getCamera().getViewPortRight();
+      float viewPortTop = viewport.getCamera().getViewPortTop();
+      float viewPortBottom = viewport.getCamera().getViewPortBottom();
+      
+      float width = viewport.getCamera().getWidth();
+      float height = viewport.getCamera().getHeight();
+
+
+      store.set((x / width - viewPortLeft) / (viewPortRight - viewPortLeft) * 2 - 1,
+                (y / height - viewPortBottom) / (viewPortTop - viewPortBottom) * 2 - 1, projectionZPos * 2 - 1);
+
+      float w = inverseMat.multProj(store, store);
+      store.multLocal(1f / w);
+
+   }
 
    public void convertScreenShot()
    {
@@ -344,6 +399,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
       byte[] imageArray = db.getData();
 
+      
       // flip the components the way AWT likes them
       for (int y = 0; y < height; y++)
       {
@@ -355,11 +411,38 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
             byte b1 = cpuArray[upperHalfPtrAlpha + 0];
             byte g1 = cpuArray[upperHalfPtrAlpha + 1];
             byte r1 = cpuArray[upperHalfPtrAlpha + 2];
+            
             imageArray[lowerHalfPtr + 0] = b1;
             imageArray[lowerHalfPtr + 1] = g1;
             imageArray[lowerHalfPtr + 2] = r1;
+
+
          }
       }
+      
+      if(captureDepthMap)
+      {
+         ByteBuffer imageBuffer = ByteBuffer.wrap(cpuArray);
+         imageBuffer.order(ByteOrder.nativeOrder());
+         imageBuffer.position(width * height * 4);
+         FloatBuffer depthBuffer = imageBuffer.asFloatBuffer();
+         
+         Matrix4f inverseMat = new Matrix4f(viewport.getCamera().getViewMatrix());
+         inverseMat.invertLocal();
+         
+         Vector3f store = new Vector3f();
+         
+         for (int y = 0; y < height; y++)
+         {
+            for (int x = 0; x < width; x++)
+            {
+               float depth = depthBuffer.get();
+               getWorldCoordinates(inverseMat, x, y, depth, store);
+               
+            }
+         }
+      }
+      
    }
 
    public BufferedImage exportSnapshotAsBufferedImage()

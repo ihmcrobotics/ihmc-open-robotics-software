@@ -17,10 +17,18 @@ import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.JPanelCameraStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
 import us.ihmc.commons.thread.ThreadTools;
 
 public class Graphics3DAdapterCaptureDeviceTester
 {
+   public static void main(String[] args)
+   {
+      JMEGraphics3DAdapter adapter =  new JMEGraphics3DAdapter();
+      Graphics3DAdapterCaptureDeviceTester tester = new Graphics3DAdapterCaptureDeviceTester();
+      tester.doExample(adapter);
+   }
+   
    public void doExample(Graphics3DAdapter graphics3DAdapter)
    {
       Graphics3DNode teapotAndSphereNode = new Graphics3DNode("teaPot", Graphics3DNodeType.JOINT);
@@ -32,7 +40,7 @@ public class Graphics3DAdapterCaptureDeviceTester
 
       PanBackAndForthTrackingAndDollyPositionHolder cameraTrackAndDollyVariablesHolder = new PanBackAndForthTrackingAndDollyPositionHolder(0.0, 2.0, 0.2);
       
-      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false, false);
+      ViewportAdapter viewportAdapter = graphics3DAdapter.createNewViewport(null, false, true);
       ClassicCameraController classicCameraController = new ClassicCameraController(graphics3DAdapter, viewportAdapter, cameraTrackAndDollyVariablesHolder);
       classicCameraController.setTracking(true, true, false, false);
 
