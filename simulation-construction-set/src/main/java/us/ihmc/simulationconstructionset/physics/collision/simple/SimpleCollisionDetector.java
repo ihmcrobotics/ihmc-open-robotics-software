@@ -5,7 +5,6 @@ import java.util.Random;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -95,10 +94,11 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
                continue;
 
             CollisionShape objectTwo = collisionObjects.get(j);
-            CollisionShapeDescription<?> descriptionTwo = objectTwo.getTransformedCollisionShapeDescription();
 
             if(objectOne.isGround() && objectTwo.isGround())
                continue;
+
+            CollisionShapeDescription<?> descriptionTwo = objectTwo.getTransformedCollisionShapeDescription();
             
             if ((objectOne.getCollisionGroup() & objectTwo.getCollisionMask()) == 0x00)
             {
@@ -297,7 +297,6 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private final LineSegment3D lineSegmentTwo = new LineSegment3D();
    private final Point3D closestPointOnOne = new Point3D();
    private final Point3D closestPointOnTwo = new Point3D();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    private boolean doCapsuleSphereCollisionDetection(CollisionShape objectOne, CapsuleShapeDescription<?> descriptionOne, CollisionShape objectTwo,
          SphereShapeDescription<?> descriptionTwo, CollisionDetectionResult result)
