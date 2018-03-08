@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 import javafx.application.Platform;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
 import javafx.scene.layout.VBox;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
@@ -65,8 +67,9 @@ public class TuningBoxManager
       tuningBox.getChildren().clear();
       parametersBeingTuned.forEach(uniqueName ->
       {
-         tuningBox.getChildren().add(removeButtons.get(uniqueName));
          tuningBox.getChildren().add(tunerMap.get(uniqueName));
+         tuningBox.getChildren().add(removeButtons.get(uniqueName));
+         tuningBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
       });
    }
 }
