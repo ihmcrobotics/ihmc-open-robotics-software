@@ -1,0 +1,28 @@
+#ifndef __controller_msgs__msg__CenterOfMassTrajectoryMessage__idl__
+#define __controller_msgs__msg__CenterOfMassTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./EuclideanTrajectoryMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * Request the whole-body controller to track a desired trajectory for the center of mass.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::CenterOfMassTrajectoryMessage_")
+      struct CenterOfMassTrajectoryMessage
+      {
+        /**
+         * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and velocity at a given time.
+         */
+        controller_msgs::msg::dds::EuclideanTrajectoryMessage euclidean_trajectory;
+      };
+    };
+  };
+};
+
+#endif

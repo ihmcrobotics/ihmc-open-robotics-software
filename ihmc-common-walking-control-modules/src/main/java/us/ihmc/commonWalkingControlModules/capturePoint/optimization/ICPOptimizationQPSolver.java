@@ -92,6 +92,7 @@ public class ICPOptimizationQPSolver
    private final DenseMatrix64F referenceFootstepLocation = new DenseMatrix64F(2, 1);
 
    private final DenseMatrix64F desiredCoP = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F desiredCMP = new DenseMatrix64F(2, 1);
    private final DenseMatrix64F desiredCMPOffset = new DenseMatrix64F(2, 1);
    /** Current ICP Error location. */
    private final DenseMatrix64F currentICPError = new DenseMatrix64F(2, 1);
@@ -714,6 +715,7 @@ public class ICPOptimizationQPSolver
       this.desiredCoP.set(1, 0, desiredCoP.getY());
       this.desiredCMPOffset.set(0, 0, desiredCMPOffset.getX());
       this.desiredCMPOffset.set(1, 0, desiredCMPOffset.getY());
+      CommonOps.add(this.desiredCoP, this.desiredCMPOffset, desiredCMP);
 
       addCoPFeedbackTask();
 
@@ -807,7 +809,8 @@ public class ICPOptimizationQPSolver
     */
    private void addCMPFeedbackTask()
    {
-      inputCalculator.computeCMPFeedbackTask(cmpFeedbackTaskInput, cmpFeedbackWeight, desiredCMPOffset);
+      //inputCalculator.computeCMPFeedbackTask(cmpFeedbackTaskInput, cmpFeedbackWeight, desiredCMPOffset);
+      inputCalculator.computeCMPFeedbackTask(cmpFeedbackTaskInput, cmpFeedbackWeight);
       inputCalculator.submitCMPFeedbackTask(cmpFeedbackTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
@@ -858,7 +861,7 @@ public class ICPOptimizationQPSolver
       if (!Double.isFinite(cmpConstraintBound))
          return;
 
-      cmpLocationConstraint.setPositionOffset(desiredCoP);
+      cmpLocationConstraint.setPositionOffset(desiredCMP);
       cmpLocationConstraint.setDeltaInside(cmpConstraintBound);
       cmpLocationConstraint.formulateConstraint();
 

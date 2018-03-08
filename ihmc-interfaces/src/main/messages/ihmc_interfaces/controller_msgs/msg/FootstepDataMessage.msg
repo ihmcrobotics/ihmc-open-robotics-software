@@ -10,7 +10,7 @@ byte TRAJECTORY_TYPE_CUSTOM = 2
 byte TRAJECTORY_TYPE_WAYPOINTS = 3
 
 # Specifies which foot will swing to reach the footstep.
-byte robot_side -1
+byte robot_side 255
 # Specifies the position of the footstep (sole frame) in world frame.
 geometry_msgs/Point location
 # Specifies the orientation of the footstep (sole frame) in world frame.
@@ -26,7 +26,7 @@ geometry_msgs/Quaternion orientation
 # Note: The z coordinate of each point is ignored.
 geometry_msgs/Point[] predicted_contact_points_2d
 # This contains information on what the swing trajectory should be for each step. Recommended is TRAJECTORY_TYPE_DEFAULT.
-byte trajectory_type TRAJECTORY_TYPE_DEFAULT
+byte trajectory_type 0
 # Contains information on how high the robot should swing its foot.
 # This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
 # If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
@@ -43,7 +43,7 @@ geometry_msgs/Point[<=2] custom_position_waypoints
 # (which is specified by the location and orientation fields).
 # All waypoints are for the sole frame and expressed in the trajectory frame.
 # The maximum number of points can be found in the Footstep class.
-SE3TrajectoryPointMessage[] swing_trajectoryTRAJECTORY_TYPE_WAYPOINTS
+SE3TrajectoryPointMessage[] swing_trajectory
 # In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to specify the trajectory blend duration in seconds.
 # If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning the desired blend duration)
 # will be adjusted to account for the initial error between the actual and expected position and orientation of the swing foot.

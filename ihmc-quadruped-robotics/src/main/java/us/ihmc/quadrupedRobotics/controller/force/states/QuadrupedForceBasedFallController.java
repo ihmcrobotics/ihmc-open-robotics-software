@@ -13,9 +13,6 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -23,6 +20,8 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -37,20 +36,19 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
    }
 
    // Parameters
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter trajectoryTimeParameter = parameterFactory.createDouble("trajectoryTime", 3.0);
-   private final DoubleParameter stanceLengthParameter = parameterFactory.createDouble("stanceLength", 1.0);
-   private final DoubleParameter stanceWidthParameter = parameterFactory.createDouble("stanceWidth", 0.35);
-   private final DoubleParameter stanceHeightParameter = parameterFactory.createDouble("stanceHeight", 0.5);
-   private final DoubleParameter stanceXOffsetParameter = parameterFactory.createDouble("stanceXOffset", 0.00);
-   private final DoubleParameter stanceYOffsetParameter = parameterFactory.createDouble("stanceYOffset", 0.0);
-   private final DoubleParameter jointDampingParameter = parameterFactory.createDouble("jointDamping", 15.0);
-   private final DoubleParameter jointPositionLimitDampingParameter = parameterFactory.createDouble("jointPositionLimitDamping", 10);
-   private final DoubleParameter jointPositionLimitStiffnessParameter = parameterFactory.createDouble("jointPositionLimitStiffness", 100);
-   private final BooleanParameter useForceFeedbackControlParameter = parameterFactory.createBoolean("useForceFeedbackControl", false);
+   private final DoubleParameter trajectoryTimeParameter = new DoubleParameter("trajectoryTime", registry, 3.0);
+   private final DoubleParameter stanceLengthParameter = new DoubleParameter("stanceLength", registry, 1.0);
+   private final DoubleParameter stanceWidthParameter = new DoubleParameter("stanceWidth", registry, 0.35);
+   private final DoubleParameter stanceHeightParameter = new DoubleParameter("stanceHeight", registry, 0.5);
+   private final DoubleParameter stanceXOffsetParameter = new DoubleParameter("stanceXOffset", registry, 0.0);
+   private final DoubleParameter stanceYOffsetParameter = new DoubleParameter("stanceYOffset", registry, 0.0);
+   private final DoubleParameter jointDampingParameter = new DoubleParameter("jointDamping", registry, 15.0);
+   private final DoubleParameter jointPositionLimitDampingParameter = new DoubleParameter("jointPositionLimitDamping", registry, 10.0);
+   private final DoubleParameter jointPositionLimitStiffnessParameter = new DoubleParameter("jointPositionLimitStiffness", registry, 100.0);
+   private final BooleanParameter requestUseForceFeedbackControlParameter = new BooleanParameter("requestUseForceFeedbackControl", registry, false);
 
    // YoVariables
-   private final YoBoolean yoUseForceFeedbackControl;
+   private final YoBoolean forceFeedbackControlEnabled;
    private final YoEnum<FallBehaviorType> fallBehaviorType = YoEnum.create("fallBehaviorType", FallBehaviorType.class, registry);
 
    // Task space controller
@@ -93,7 +91,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();
       fullRobotModel = controllerToolbox.getRuntimeEnvironment().getFullRobotModel();
 
-      yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
+      forceFeedbackControlEnabled = new YoBoolean("forceFeedbackControlEnabled", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -118,26 +116,26 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
          switch (fallBehaviorType.getEnumValue())
          {
          case GO_HOME_XYZ:
-            solePositionSetpoint.set(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.get() / 2.0),
-                  quadrant.getSide().negateIfRightSide(stanceWidthParameter.get() / 2.0), 0.0);
-            solePositionSetpoint.add(stanceXOffsetParameter.get(), stanceYOffsetParameter.get(), -stanceHeightParameter.get());
+            solePositionSetpoint.set(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.getValue() / 2.0),
+                  quadrant.getSide().negateIfRightSide(stanceWidthParameter.getValue() / 2.0), 0.0);
+            solePositionSetpoint.add(stanceXOffsetParameter.getValue(), stanceYOffsetParameter.getValue(), -stanceHeightParameter.getValue());
             break;
          case GO_HOME_Z:
-            solePositionSetpoint.setZ(-stanceHeightParameter.get());
+            solePositionSetpoint.setZ(-stanceHeightParameter.getValue());
             break;
          case DO_NOTHING:
             break;
          }
-         quadrupedSoleWaypointLists.get(quadrant).get(1).set(solePositionSetpoint, zeroVelocity, trajectoryTimeParameter.get());
+         quadrupedSoleWaypointLists.get(quadrant).get(1).set(solePositionSetpoint, zeroVelocity, trajectoryTimeParameter.getValue());
       }
 
       feetManager.initializeWaypointTrajectory(quadrupedSoleWaypointLists, false);
 
       // Initialize task space controller
       taskSpaceControllerSettings.initialize();
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.get());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.get());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.get());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.getValue());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.getValue());
+      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.getValue());
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.NO_CONTACT);
@@ -145,13 +143,13 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
       taskSpaceController.reset();
 
       // Initialize force feedback
-      yoUseForceFeedbackControl.set(useForceFeedbackControlParameter.get());
+      forceFeedbackControlEnabled.set(requestUseForceFeedbackControlParameter.getValue());
       for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
          QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            if (useForceFeedbackControlParameter.get())
+            if (forceFeedbackControlEnabled.getValue())
                jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.EFFORT);
             else
                jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.POSITION);
@@ -174,13 +172,13 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
    @Override
    public void onExit()
    {
-      yoUseForceFeedbackControl.set(true);
+      forceFeedbackControlEnabled.set(true);
       for (OneDoFJoint oneDoFJoint : fullRobotModel.getOneDoFJoints())
       {
          QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(oneDoFJoint);
          if (oneDoFJoint != null && jointName.getRole().equals(JointRole.LEG))
          {
-            if (yoUseForceFeedbackControl.getBooleanValue())
+            if (forceFeedbackControlEnabled.getBooleanValue())
                jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.EFFORT);
             else
                jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.POSITION);

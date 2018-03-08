@@ -20,7 +20,6 @@ public class QuadrupedRuntimeEnvironment
    private final YoGraphicsListRegistry graphicsListRegistryForDetachedOverhead;
    private final GlobalDataProducer globalDataProducer;
    private final JointDesiredOutputList jointDesiredOutputList;
-
    private final double gravityZ;
 
    // TODO: These are used to provide feedback from the controllers to the state estimator. Can they be moved somewhere else?

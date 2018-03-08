@@ -11,4 +11,4 @@ TrajectoryPoint1DMessage[<=2000] trajectory_points
 # - if too high, the controller will favor this trajectory over other objectives.
 # - if set to NaN, the controller will use the default weight for that trajectory.
 # The priority of this trajectory is determined from the relative weight of this trajectory and the weight of the other objectives.
-float64 weight NaN
+float64 weight

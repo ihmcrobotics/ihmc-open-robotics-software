@@ -194,22 +194,30 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
             default:
                throw new RuntimeException("Unknown YoVariable type: " + type.name());
             }
-
-            switch (yoVariableDefinition.getLoadStatus())
-            {
-            case Unloaded:
-               SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.UNLOADED);
-               break;
-            case Default:
-               SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.DEFAULT);
-               break;
-            case Loaded:
-               SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.LOADED);
-               break;
-            default:
-               throw new RuntimeException("Unknown load status: " + yoVariableDefinition.getLoadStatus());
-            }
             
+            //This is the case for some logs. A special enum may need to be used here. I'm not sure these matter at all for a log?
+            if(yoVariableDefinition.getLoadStatus() == null)
+            {
+               SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.LOADED);
+            }
+            else
+            {
+               switch (yoVariableDefinition.getLoadStatus())
+               {
+               case Unloaded:
+                  SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.UNLOADED);
+                  break;
+               case Default:
+                  SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.DEFAULT);
+                  break;
+               case Loaded:
+                  SingleParameterReader.readParameter(newParameter, 0.0, ParameterLoadStatus.LOADED);
+                  break;
+               default:
+                  throw new RuntimeException("Unknown load status: " + yoVariableDefinition.getLoadStatus());
+               }
+               
+            }
             YoVariable<?> newVariable = parent.getYoVariable(parent.getNumberOfYoVariables() - 1);
             
             // Test if this is the correct variable

@@ -13,6 +13,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -21,10 +22,8 @@ import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootSwitchFac
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -40,10 +39,12 @@ import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStateUpdater;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 public class GenericQuadrupedControllerFactoryDummyOutputDemo
 {
@@ -59,9 +60,6 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
    
    public GenericQuadrupedControllerFactoryDummyOutputDemo() throws IOException
    {
-      // Load parameters. Note that this happens after initializing all other modules so all parameters are registered before loading.
-      ParameterRegistry.getInstance().loadFromResources(QuadrupedParameterSet.SIMULATION_IDEAL.getPath());
-
       /*
        * Create GenericQuadruped model
        */
@@ -144,8 +142,10 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
 
       runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, jointDesiredOutputList, registry, yoGraphicsListRegistry,
                                                            ignoredYoGraphicsListRegistry, dataProducer, contactableFeet, footSwitches, GRAVITY);
-
       controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
+
+      InputStream resourceAsStream = getClass().getResourceAsStream(modelFactory.getParameterResourceName(QuadrupedControlMode.FORCE));
+      ParameterLoaderHelper.loadParameters(this, resourceAsStream, registry);
 
 //      PrintTools.debug(this, "Warming up JIT compiler.");
 //      controllerManager.warmup(2000);  // Compile threshold == 1000

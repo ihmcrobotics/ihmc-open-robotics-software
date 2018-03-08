@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "Footstep" defined in Footstep_.idl.
- *
- * This file was automatically generated from Footstep_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit Footstep_.idl instead.
- */
 public class Footstep implements Settable<Footstep>, EpsilonComparable<Footstep>
 {
    private long unique_id_;
@@ -182,12 +176,7 @@ public class Footstep implements Settable<Footstep>, EpsilonComparable<Footstep>
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
          return false;
 
-      if (this.predicted_contact_points_2d_.isEnum())
-      {
-         if (!this.predicted_contact_points_2d_.equals(other.predicted_contact_points_2d_))
-            return false;
-      }
-      else if (this.predicted_contact_points_2d_.size() == other.predicted_contact_points_2d_.size())
+      if (this.predicted_contact_points_2d_.size() == other.predicted_contact_points_2d_.size())
       {
          return false;
       }
@@ -206,12 +195,7 @@ public class Footstep implements Settable<Footstep>, EpsilonComparable<Footstep>
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_height_, other.swing_height_, epsilon))
          return false;
 
-      if (this.position_waypoints_.isEnum())
-      {
-         if (!this.position_waypoints_.equals(other.position_waypoints_))
-            return false;
-      }
-      else if (this.position_waypoints_.size() == other.position_waypoints_.size())
+      if (this.position_waypoints_.size() == other.position_waypoints_.size())
       {
          return false;
       }
@@ -224,12 +208,7 @@ public class Footstep implements Settable<Footstep>, EpsilonComparable<Footstep>
          }
       }
 
-      if (this.swing_trajectory_.isEnum())
-      {
-         if (!this.swing_trajectory_.equals(other.swing_trajectory_))
-            return false;
-      }
-      else if (this.swing_trajectory_.size() == other.swing_trajectory_.size())
+      if (this.swing_trajectory_.size() == other.swing_trajectory_.size())
       {
          return false;
       }

@@ -38,6 +38,6 @@ byte HAND_CONFIGURATION_CREEPY_GRASPING_HARD = 29
 byte HAND_CONFIGURATION_SLOW_CLOSE = 30
 
 # Specifies the side of the robot that will execute the trajectory
-byte robot_side -1
+byte robot_side 255
 # Specifies the grasp to perform
-byte desired_hand_configuration -1
+byte desired_hand_configuration 255

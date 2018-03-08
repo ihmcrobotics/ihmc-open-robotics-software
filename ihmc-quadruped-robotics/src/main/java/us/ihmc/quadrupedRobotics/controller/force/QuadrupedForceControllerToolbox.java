@@ -49,7 +49,7 @@ public class QuadrupedForceControllerToolbox
       this.runtimeEnvironment = runtimeEnvironment;
 
       footControlModuleParameters = new QuadrupedFootControlModuleParameters();
-      runtimeEnvironment.getParentRegistry().addChild(footControlModuleParameters.getYoVariableRegistry());
+      registry.addChild(footControlModuleParameters.getYoVariableRegistry());
 
       // create controllers and estimators
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel(), physicalProperties);

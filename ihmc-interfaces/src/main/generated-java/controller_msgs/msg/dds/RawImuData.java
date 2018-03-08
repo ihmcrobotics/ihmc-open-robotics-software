@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "RawImuData" defined in RawImuData_.idl.
- *
- * This file was automatically generated from RawImuData_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit RawImuData_.idl instead.
- */
 public class RawImuData implements Settable<RawImuData>, EpsilonComparable<RawImuData>
 {
    private long timestamp_;

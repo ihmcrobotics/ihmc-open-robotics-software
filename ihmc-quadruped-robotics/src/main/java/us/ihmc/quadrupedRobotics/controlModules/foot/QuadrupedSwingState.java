@@ -55,7 +55,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       this.swingTrajectory = new ThreeDoFSwingFootTrajectory(this.robotQuadrant.getPascalCaseName(), registry);
       this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
-                                                          parameters.getTouchdownTriggerWindowParameter());
+                                                          QuadrupedFootControlModuleParameters.getDefaultTouchdownTriggerWindow());
    }
 
    @Override
@@ -76,10 +76,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       // initialize contact state and feedback gains
       solePositionController.reset();
-      solePositionController.getGains().setProportionalGains(parameters.getSolePositionProportionalGainsParameter());
-      solePositionController.getGains().setDerivativeGains(parameters.getSolePositionDerivativeGainsParameter());
-      solePositionController.getGains()
-                            .setIntegralGains(parameters.getSolePositionIntegralGainsParameter(), parameters.getSolePositionMaxIntegralErrorParameter());
+      solePositionController.getGains().set(parameters.getSolePositionGains());
       solePositionControllerSetpoints.initialize(soleFrame);
 
       touchdownTrigger.set(false);

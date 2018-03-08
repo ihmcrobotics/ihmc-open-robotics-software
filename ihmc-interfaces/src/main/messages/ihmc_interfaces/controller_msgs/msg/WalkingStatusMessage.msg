@@ -6,4 +6,4 @@ byte COMPLETED = 1
 byte ABORT_REQUESTED = 2
 
 # Status of walking.
-byte walking_status -1
+byte walking_status 255

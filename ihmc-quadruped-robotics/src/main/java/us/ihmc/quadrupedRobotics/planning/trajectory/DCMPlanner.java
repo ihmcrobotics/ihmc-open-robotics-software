@@ -13,10 +13,9 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceCont
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -37,8 +36,7 @@ public class DCMPlanner
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
    private final FrameTrajectory3D dcmTransitionTrajectory;
 
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter initialTransitionDurationParameter = parameterFactory.createDouble("initialTransitionDuration", 0.5);
+   private final DoubleParameter initialTransitionDurationParameter = new DoubleParameter("initialTransitionDuration", registry, 0.5);
 
    private final QuadrupedTimedContactSequence timedContactSequence = new QuadrupedTimedContactSequence(4, 2 * STEP_SEQUENCE_CAPACITY);
    private final List<QuadrupedTimedStep> stepSequence = new ArrayList<>();
@@ -126,7 +124,7 @@ public class DCMPlanner
          // compute dcm trajectory
          computeDcmTrajectory(taskSpaceControllerSettings.getContactState());
          double transitionEndTime = piecewiseConstanceCopTrajectory.getTimeAtStartOfInterval(1);
-         double transitionStartTime = Math.max(currentTime, transitionEndTime - initialTransitionDurationParameter.get());
+         double transitionStartTime = Math.max(currentTime, transitionEndTime - initialTransitionDurationParameter.getValue());
          dcmTrajectory.computeTrajectory(transitionEndTime);
          dcmTrajectory.getPosition(finalDesiredDCM);
 

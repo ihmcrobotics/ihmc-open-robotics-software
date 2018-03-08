@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -25,7 +24,6 @@ public class FeatherstoneAlgorithmTest
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      ParameterRegistry.destroyAndRecreateInstance();
    }
 
    @After

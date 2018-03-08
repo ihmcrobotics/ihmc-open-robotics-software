@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.BindException;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -77,6 +78,7 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 
 public class QuadrupedSimulationFactory
 {
@@ -111,6 +113,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
+   private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
 
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -435,6 +438,11 @@ public class QuadrupedSimulationFactory
       {
          scs.setGroundVisible(false);
       }
+      if(scsBufferSize.hasValue())
+      {
+         scs.setMaxBufferSize(scsBufferSize.get());
+      }
+
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.setDT(simulationDT.get(), recordFrequency.get());
       if (scs.getSimulationConstructionSetParameters().getCreateGUI())
@@ -450,7 +458,11 @@ public class QuadrupedSimulationFactory
          simulationOverheadPlotterFactory.setShowOnStart(showPlotter.get());
          simulationOverheadPlotterFactory.createOverheadPlotter();
       }
-      
+
+      InputStream parameterFile = getClass().getResourceAsStream(modelFactory.get().getParameterResourceName(controlMode.get()));
+      ParameterLoaderHelper.loadParameters(this, parameterFile, simulationController.getYoVariableRegistry());
+      scs.setParameterRootPath(simulationController.getYoVariableRegistry().getParent());
+
       FactoryTools.disposeFactory(this);
       
       return scs;
@@ -616,5 +628,10 @@ public class QuadrupedSimulationFactory
    public void setFootSwitchType(FootSwitchType footSwitchType)
    {
       this.footSwitchType.set(footSwitchType);
+   }
+
+   public void setScsBufferSize(int scsBufferSize)
+   {
+      this.scsBufferSize.set(scsBufferSize);
    }
 }

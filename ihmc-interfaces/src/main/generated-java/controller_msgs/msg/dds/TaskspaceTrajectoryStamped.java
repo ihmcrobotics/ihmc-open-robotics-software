@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "TaskspaceTrajectoryStamped" defined in TaskspaceTrajectoryStamped_.idl.
- *
- * This file was automatically generated from TaskspaceTrajectoryStamped_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit TaskspaceTrajectoryStamped_.idl instead.
- */
 public class TaskspaceTrajectoryStamped implements Settable<TaskspaceTrajectoryStamped>, EpsilonComparable<TaskspaceTrajectoryStamped>
 {
    private std_msgs.msg.dds.Header header_;
@@ -62,12 +56,7 @@ public class TaskspaceTrajectoryStamped implements Settable<TaskspaceTrajectoryS
       if (!this.header_.epsilonEquals(other.header_, epsilon))
          return false;
 
-      if (this.trajectory_points_stamped_.isEnum())
-      {
-         if (!this.trajectory_points_stamped_.equals(other.trajectory_points_stamped_))
-            return false;
-      }
-      else if (this.trajectory_points_stamped_.size() == other.trajectory_points_stamped_.size())
+      if (this.trajectory_points_stamped_.size() == other.trajectory_points_stamped_.size())
       {
          return false;
       }

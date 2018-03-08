@@ -6,10 +6,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStream;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -31,8 +30,7 @@ public class QuadrupedStepMessageHandler
    private final QuadrupedStepStream stepStream;
    private final YoDouble robotTimestamp;
 
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter haltTransitionDurationParameter = parameterFactory.createDouble("haltTransitionDuration", 1.0);
+   private final DoubleParameter haltTransitionDurationParameter = new DoubleParameter("haltTransitionDuration", registry, 1.0);
 
    private final FramePoint3D tempPoint = new FramePoint3D();
 
@@ -102,7 +100,7 @@ public class QuadrupedStepMessageHandler
       if (haltFlag.getBooleanValue() == false)
       {
          haltFlag.set(true);
-         haltTime.set(robotTimestamp.getDoubleValue() + haltTransitionDurationParameter.get());
+         haltTime.set(robotTimestamp.getDoubleValue() + haltTransitionDurationParameter.getValue());
       }
    }
 

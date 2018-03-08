@@ -3,12 +3,6 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "WeightedJointTrajectory" defined in WeightedJointTrajectory_.idl.
- *
- * This file was automatically generated from WeightedJointTrajectory_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit WeightedJointTrajectory_.idl instead.
- */
 public class WeightedJointTrajectory implements Settable<WeightedJointTrajectory>, EpsilonComparable<WeightedJointTrajectory>
 {
    private std_msgs.msg.dds.Header header_;
@@ -65,12 +59,7 @@ public class WeightedJointTrajectory implements Settable<WeightedJointTrajectory
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.joint_names_, other.joint_names_, epsilon))
          return false;
 
-      if (this.points_.isEnum())
-      {
-         if (!this.points_.equals(other.points_))
-            return false;
-      }
-      else if (this.points_.size() == other.points_.size())
+      if (this.points_.size() == other.points_.size())
       {
          return false;
       }

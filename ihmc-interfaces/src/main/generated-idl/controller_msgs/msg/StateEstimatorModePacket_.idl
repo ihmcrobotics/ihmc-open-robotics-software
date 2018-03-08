@@ -1,0 +1,30 @@
+#ifndef __controller_msgs__msg__StateEstimatorModePacket__idl__
+#define __controller_msgs__msg__StateEstimatorModePacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet NORMAL =
+      0;
+
+      const octet FROZEN =
+      1;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::StateEstimatorModePacket_")
+      struct StateEstimatorModePacket
+      {
+        @defaultValue(value=255)
+        octet requested_state_estimator_mode;
+      };
+    };
+  };
+};
+
+#endif

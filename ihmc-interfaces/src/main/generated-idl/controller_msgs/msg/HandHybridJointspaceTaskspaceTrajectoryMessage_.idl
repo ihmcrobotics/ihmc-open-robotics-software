@@ -1,0 +1,46 @@
+#ifndef __controller_msgs__msg__HandHybridJointspaceTaskspaceTrajectoryMessage__idl__
+#define __controller_msgs__msg__HandHybridJointspaceTaskspaceTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./SO3TrajectoryMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message commands the controller to move the hand in both taskspace and jointspace
+       * to the desired orientation and joint angles while going through the specified trajectory points.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HandHybridJointspaceTaskspaceTrajectoryMessage_")
+      struct HandHybridJointspaceTaskspaceTrajectoryMessage
+      {
+        /**
+         * Specifies the side of the robot that will execute the trajectory.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * The taskspace trajectory information.
+         */
+        controller_msgs::msg::dds::SO3TrajectoryMessage taskspace_trajectory_message;
+        /**
+         * The jointspace trajectory information.
+         * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+         */
+        controller_msgs::msg::dds::JointspaceTrajectoryMessage jointspace_trajectory_message;
+      };
+    };
+  };
+};
+
+#endif

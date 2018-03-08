@@ -1,0 +1,33 @@
+#ifndef __controller_msgs__msg__PrepareForLocomotionMessage__idl__
+#define __controller_msgs__msg__PrepareForLocomotionMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * Configure the controller manipulation and pelvis managers.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::PrepareForLocomotionMessage_")
+      struct PrepareForLocomotionMessage
+      {
+        /**
+         * When true, the controller will cancel any arm trajectory in progress, if any, before starting to walk.
+         */
+        @defaultValue(value=True)
+        boolean prepare_manipulation;
+        /**
+         * When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
+         */
+        @defaultValue(value=True)
+        boolean prepare_pelvis;
+      };
+    };
+  };
+};
+
+#endif
