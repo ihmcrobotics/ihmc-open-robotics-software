@@ -727,10 +727,13 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
                System.out.println("externalForcePointTwo = " + externalForcePointTwo);
             }
 
-            if ((resolveCollisionWithAnImpact) && (!contactPairAlreadyExists || !performSpringDamper))
+            if (resolveCollisionWithAnImpact)
             {
-               resolveCollisionWithAnImpact(shape1, shape2, shapeOneIsGround, shapeTwoIsGround, externalForcePointOne, externalForcePointTwo,
-                                            allowMicroCollisions);
+               if (!contactPairAlreadyExists || !performSpringDamper)
+               {
+                  resolveCollisionWithAnImpact(shape1, shape2, shapeOneIsGround, shapeTwoIsGround, externalForcePointOne, externalForcePointTwo,
+                                               allowMicroCollisions);
+               }
             }
 
          }
