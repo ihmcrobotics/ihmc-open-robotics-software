@@ -26,10 +26,9 @@ public class TuningTabManager
       });
       MenuItem createNewTab = new MenuItem("New Tab");
       createNewTab.setOnAction(event -> {
-         String name = createUniqueName("NewTab");
+         String name = createUniqueName(tabPane, "NewTab");
          TuningTab newTab = new TuningTab(name, tabPane);
          newTab.setTunerMap(tunerMap);
-         tabPane.getTabs().add(newTab);
          closeTab.setDisable(false);
       });
       ContextMenu tabContextMenu = new ContextMenu();
@@ -37,24 +36,23 @@ public class TuningTabManager
       tabContextMenu.getItems().add(closeTab);
       tabPane.setContextMenu(tabContextMenu);
 
-      TuningTab tuningTab = new TuningTab("TuningTab", tabPane);
-      tabPane.getTabs().add(tuningTab);
+      new TuningTab("TuningTab", tabPane);
    }
 
-   private String createUniqueName(String name)
+   public static String createUniqueName(TabPane tabPane, String name)
    {
       String uniqueName = name;
       int count = 1;
-      while (doesTabExist(uniqueName))
+      while (doesTabExist(tabPane, uniqueName))
       {
          uniqueName = name + count++;
       }
       return uniqueName;
    }
 
-   private boolean doesTabExist(String name)
+   private static boolean doesTabExist(TabPane tabPane, String name)
    {
-      return !tabPane.getTabs().filtered(tab -> ((TuningTab) tab).getName().equals(name)).isEmpty();
+      return !tabPane.getTabs().filtered(tab -> name.equals(((TuningTab) tab).getName())).isEmpty();
    }
 
    public void setTunerMap(Map<String, Tuner> tunerMap)
