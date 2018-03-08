@@ -66,7 +66,6 @@ import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.math.Matrix4f;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.SceneProcessor;
 import com.jme3.profile.AppProfiler;
@@ -81,11 +80,15 @@ import com.jme3.util.BufferUtils;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.RGBDStreamer;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 
 /**
  * Transfer data from GPU to CPU quickly by using two Pixel Buffer Objects (PBO's).
@@ -110,7 +113,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    private final static boolean CAPTURE_IMMEDIATLY_AFTER_PREVIOUS_VIDEOFRAME = true;
 
    
-   private final boolean captureDepthMap = true;
+   private boolean captureDepthMap = false;
    
    private Renderer renderer;
    private RenderManager renderManager;
@@ -118,6 +121,9 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    private ViewPort viewport;
 
    private BufferedImage bufferedImage;
+   
+   private Point3D32[] points;
+   private int[] colors;
 
    private ByteBuffer systemRam;
    private byte[] cpuArray;
@@ -132,11 +138,17 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    private Object captureHolder = new Object();
 
    private CameraStreamer cameraStreamer;
+   private RGBDStreamer rgbdStreamer;
+   
+   
    private Runnable graphicsUpdaterTimerTask;
 
-   public JMEFastCaptureDevice(ViewPort viewport)
+   private final JMERenderer jmeRenderer;
+   
+   public JMEFastCaptureDevice(ViewPort viewport, JMERenderer jmeRenderer)
    {
       this.viewport = viewport;
+      this.jmeRenderer = jmeRenderer;
    }
 
    @Override
@@ -164,19 +176,36 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       return super.isInitialized() && (renderer != null);
    }
 
-   public void reshape(ViewPort vp, int w, int h)
+   public synchronized void reshape(ViewPort vp, int w, int h)
    {
-      if(captureDepthMap)
+
+      width = w;
+      height = h;
+      
+      if(rgbdStreamer != null)
       {
-         dataSize = w * h * 8;         
+         dataSize = w * h * 8;
+         points = new Point3D32[w * h];
+         colors = new int[w * h];
+         for(int i = 0; i < w * h; i++)
+         {
+            points[i] = new Point3D32();
+         }
+         
+         captureDepthMap = true;
+         
+         bufferedImage = null;
       }
       else
       {
          dataSize = w * h * 4;         
+         bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+         
+         captureDepthMap = false;
+         
+         points = null;
+         colors = null;
       }
-      width = w;
-      height = h;
-      bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
 
       // Create PBO buffer in the system memory to store data from vramToSys in
       systemRam = BufferUtils.createByteBuffer(dataSize);
@@ -297,6 +326,11 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    {
 
    }
+   
+   private boolean isStreamingRGBD()
+   {
+      return rgbdStreamer != null;
+   }
 
    private class GraphicsUpdater implements Runnable
    {
@@ -338,9 +372,18 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
          if (alreadyClosing)
             return;
 
-         convertScreenShot();
+         
+         if(!isStreamingRGBD())
+         {
+            convertScreenShot();
+            cameraStreamer.updateImage(bufferedImage, timeStamp, position, orientation, fov);            
+         }
+         else if(captureDepthMap)
+         {
+            convertRGBD();
+            rgbdStreamer.updateRBGD(points, colors, timeStamp, position, orientation);
+         }
 
-         cameraStreamer.updateImage(bufferedImage, timeStamp, position, orientation, fov);
 
          if (CAPTURE_IMMEDIATLY_AFTER_PREVIOUS_VIDEOFRAME)
          {
@@ -420,33 +463,50 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
          }
       }
       
-      if(captureDepthMap)
-      {
-         ByteBuffer imageBuffer = ByteBuffer.wrap(cpuArray);
-         imageBuffer.order(ByteOrder.nativeOrder());
-         imageBuffer.position(width * height * 4);
-         FloatBuffer depthBuffer = imageBuffer.asFloatBuffer();
-         
-         Matrix4f inverseMat = new Matrix4f(viewport.getCamera().getViewMatrix());
-         inverseMat.invertLocal();
-         
-         Vector3f store = new Vector3f();
-         
-         for (int y = 0; y < height; y++)
-         {
-            for (int x = 0; x < width; x++)
-            {
-               float depth = depthBuffer.get();
-               getWorldCoordinates(inverseMat, x, y, depth, store);
-               
-            }
-         }
-      }
+   }
+   
+   public void convertRGBD()
+   {
+      if (alreadyClosing)
+         return;
       
+      
+      ByteBuffer imageBuffer = ByteBuffer.wrap(cpuArray);
+      imageBuffer.order(ByteOrder.nativeOrder());
+      imageBuffer.position(width * height * 4);
+      FloatBuffer depthBuffer = imageBuffer.asFloatBuffer();
+      
+      Matrix4f inverseMat = new Matrix4f(viewport.getCamera().getViewMatrix());
+      inverseMat.invertLocal();
+      
+      Vector3f store = new Vector3f();
+      
+      for (int y = 0; y < height; y++)
+      {
+         for (int x = 0; x < width; x++)
+         {
+            int upperHalfPtrAlpha = (y * width + x) * 4;
+            byte b1 = cpuArray[upperHalfPtrAlpha + 0];
+            byte g1 = cpuArray[upperHalfPtrAlpha + 1];
+            byte r1 = cpuArray[upperHalfPtrAlpha + 2];
+            byte a1 = cpuArray[upperHalfPtrAlpha + 3];
+
+            
+            float depth = depthBuffer.get();
+            getWorldCoordinates(inverseMat, x, y, depth, store);
+            
+            JMEGeometryUtils.transformFromJMECoordinatesToZup(store);
+            JMEDataTypeUtils.packJMEVector3fInVecMathTuple3d(store, points[y * width + x]);            
+            colors[y * width + x] = (a1 << 24) + (r1 << 16) + (g1 << 8) + b1;
+
+         }
+      }      
    }
 
    public BufferedImage exportSnapshotAsBufferedImage()
    {
+      checkIfStreaming();
+      
       if (alreadyClosing)
          return bufferedImage;
 
@@ -503,12 +563,9 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       // Ignore
    }
 
-   public void streamTo(CameraStreamer cameraStreamer, int framesPerSecond)
+   public synchronized void streamTo(CameraStreamer cameraStreamer, int framesPerSecond)
    {
-      if (this.cameraStreamer != null)
-      {
-         throw new RuntimeException("This capture device is already streaming data");
-      }
+      checkIfStreaming();
 
       this.cameraStreamer = cameraStreamer;
 
@@ -517,6 +574,27 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       executor.scheduleAtFixedRate(graphicsUpdaterTimerTask, 0, 1000000 / framesPerSecond, TimeUnit.MICROSECONDS);
    }
 
+   private void checkIfStreaming()
+   {
+      if (this.cameraStreamer != null || this.rgbdStreamer != null)
+      {
+         throw new RuntimeException("This capture device is already streaming data");
+      }
+   }
+
+   public synchronized void streamTo(RGBDStreamer rgbdStreamer, int framesPerSecond)
+   {
+      checkIfStreaming();
+      
+      
+      jmeRenderer.enqueue(() -> reshape(viewport, width, height));
+      this.rgbdStreamer = rgbdStreamer;
+      
+      graphicsUpdaterTimerTask = new GraphicsUpdater();
+      executor.scheduleAtFixedRate(graphicsUpdaterTimerTask, 0, 1000000 / framesPerSecond, TimeUnit.MICROSECONDS);
+      
+   }
+   
    private boolean alreadyClosing = false;
 
    public void closeAndDispose()
