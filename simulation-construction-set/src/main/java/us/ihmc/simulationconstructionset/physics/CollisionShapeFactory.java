@@ -30,7 +30,7 @@ public interface CollisionShapeFactory
     * @param radiusZ Radius of box along z-axis
     * @return Description of the shape.
     */
-   CollisionShapeDescription<?> createSimpleCollisionShape(Shape3D shape3D);
+   CollisionShapeDescription<?> createSimpleCollisionShape(Shape3D<?> shape3D);
 
    CollisionShapeDescription<?> createBox(double radiusX, double radiusY, double radiusZ);
 
