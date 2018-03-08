@@ -397,8 +397,6 @@ public class AvatarSimulationFactory
          simulationConstructionSet.initializeCollisionDetector(collisionVisualizer, collisionHandler);
          simulationConstructionSet.addEnvironmentCollisionShapes(commonAvatarEnvironment.get().getTerrainObject3D().getTerrainCollisionShapes());
          simulationConstructionSet.initializeCollisionHandler(collisionVisualizer, collisionHandler);
-
-         System.out.println("" + commonAvatarEnvironment.get().getTerrainObject3D().getTerrainCollisionShapes().size());
       }
 
       scsInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get(), null);
