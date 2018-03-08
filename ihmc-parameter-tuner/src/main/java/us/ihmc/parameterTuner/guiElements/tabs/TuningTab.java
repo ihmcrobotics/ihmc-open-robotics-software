@@ -18,13 +18,16 @@ import us.ihmc.parameterTuner.guiElements.tuners.TuningBoxManager;
 
 public class TuningTab extends Tab
 {
+   private String name;
    private final Label label = new Label();
    private final TextField textField = new TextField();
+   private final TabPane parent;
 
    private final TuningBoxManager tuningBoxManager;
 
    public TuningTab(String name, TabPane parent)
    {
+      this.parent = parent;
       textField.setText(name);
       showLabel();
 
@@ -73,24 +76,29 @@ public class TuningTab extends Tab
             tuningBoxManager.updateView();
          }
       });
+
+      parent.getTabs().add(this);
    }
 
    private void showTextInput()
    {
-      textField.setText(label.getText());
-      textField.requestFocus();
+      textField.setText(name);
       setGraphic(textField);
+      name = textField.getText();
    }
 
    private void showLabel()
    {
-      label.setText(textField.getText());
+      name = null;
+      String newName = TuningTabManager.createUniqueName(parent, textField.getText());
+      label.setText(newName);
       setGraphic(label);
+      name = label.getText();
    }
 
    public String getName()
    {
-      return textField.getText();
+      return name;
    }
 
    public void setTunerMap(Map<String, Tuner> tunerMap)
