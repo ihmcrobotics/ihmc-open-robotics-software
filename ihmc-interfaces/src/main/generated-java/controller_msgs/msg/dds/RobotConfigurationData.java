@@ -3,15 +3,14 @@ package controller_msgs.msg.dds;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-/**
- * Definition of the class "RobotConfigurationData" defined in RobotConfigurationData_.idl.
- *
- * This file was automatically generated from RobotConfigurationData_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit RobotConfigurationData_.idl instead.
- */
 public class RobotConfigurationData implements Settable<RobotConfigurationData>, EpsilonComparable<RobotConfigurationData>
 {
+   public static final int STANDING = 3;
+   public static final int IN_MOTION = 4;
    private std_msgs.msg.dds.Header header_;
+   /**
+    * debug
+    */
    private long dropped_messages_;
    private long sensor_head_pps_timestamp_;
    private int joint_name_hash_;
@@ -26,6 +25,9 @@ public class RobotConfigurationData implements Settable<RobotConfigurationData>,
    private us.ihmc.euclid.tuple3D.Vector3D pelvis_angular_velocity_;
    private us.ihmc.euclid.tuple3D.Vector3D pelvis_linear_acceleration_;
    private int robot_motion_status_;
+   /**
+    * For verifying the robot is receiving your commands
+    */
    private int last_received_packet_type_id_;
    private long last_received_packet_unique_id_;
    private long last_received_packet_robot_timestamp_;
@@ -90,11 +92,17 @@ public class RobotConfigurationData implements Settable<RobotConfigurationData>,
       return header_;
    }
 
+   /**
+    * debug
+    */
    public long getDroppedMessages()
    {
       return dropped_messages_;
    }
 
+   /**
+    * debug
+    */
    public void setDroppedMessages(long dropped_messages)
    {
       dropped_messages_ = dropped_messages;
@@ -180,11 +188,17 @@ public class RobotConfigurationData implements Settable<RobotConfigurationData>,
       robot_motion_status_ = robot_motion_status;
    }
 
+   /**
+    * For verifying the robot is receiving your commands
+    */
    public int getLastReceivedPacketTypeId()
    {
       return last_received_packet_type_id_;
    }
 
+   /**
+    * For verifying the robot is receiving your commands
+    */
    public void setLastReceivedPacketTypeId(int last_received_packet_type_id)
    {
       last_received_packet_type_id_ = last_received_packet_type_id;
@@ -239,12 +253,7 @@ public class RobotConfigurationData implements Settable<RobotConfigurationData>,
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.joint_torques_, other.joint_torques_, epsilon))
          return false;
 
-      if (this.force_sensor_data_.isEnum())
-      {
-         if (!this.force_sensor_data_.equals(other.force_sensor_data_))
-            return false;
-      }
-      else if (this.force_sensor_data_.size() == other.force_sensor_data_.size())
+      if (this.force_sensor_data_.size() == other.force_sensor_data_.size())
       {
          return false;
       }
@@ -257,12 +266,7 @@ public class RobotConfigurationData implements Settable<RobotConfigurationData>,
          }
       }
 
-      if (this.imu_sensor_data_.isEnum())
-      {
-         if (!this.imu_sensor_data_.equals(other.imu_sensor_data_))
-            return false;
-      }
-      else if (this.imu_sensor_data_.size() == other.imu_sensor_data_.size())
+      if (this.imu_sensor_data_.size() == other.imu_sensor_data_.size())
       {
          return false;
       }

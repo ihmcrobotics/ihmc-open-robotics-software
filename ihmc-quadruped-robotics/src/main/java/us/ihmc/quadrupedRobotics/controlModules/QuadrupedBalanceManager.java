@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,14 +17,13 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -49,8 +49,7 @@ public class QuadrupedBalanceManager
 
    private final QuadrupedPostureInputProviderInterface postureProvider;
 
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter dcmPositionStepAdjustmentGainParameter = parameterFactory.createDouble("dcmPositionStepAdjustmentGain", 1.5);
+   private final DoubleParameter dcmPositionStepAdjustmentGainParameter = new DoubleParameter("dcmPositionStepAdjustmentGain", registry, 1.5);
 
    private final YoFrameVector instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
    private final YoFrameVector accumulatedStepAdjustment = new YoFrameVector("accumulatedStepAdjustment", worldFrame, registry);
@@ -169,7 +168,6 @@ public class QuadrupedBalanceManager
    public void initializeForStanding(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
       initialize();
-
       dcmPlanner.initializeForStanding();
    }
 
@@ -215,7 +213,7 @@ public class QuadrupedBalanceManager
          dcmPositionEstimate.changeFrame(instantaneousStepAdjustment.getReferenceFrame());
 
          instantaneousStepAdjustment.sub(dcmPositionEstimate, dcmPositionSetpoint);
-         instantaneousStepAdjustment.scale(dcmPositionStepAdjustmentGainParameter.get());
+         instantaneousStepAdjustment.scale(dcmPositionStepAdjustmentGainParameter.getValue());
          instantaneousStepAdjustment.setZ(0);
 
          // adjust nominal step goal positions in foot state machine

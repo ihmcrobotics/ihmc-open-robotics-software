@@ -1,21 +1,17 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
-import us.ihmc.communication.packets.*;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
-import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.StringParameter;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -66,19 +62,15 @@ public class GenericQuadrupedNetClassList extends IHMCCommunicationKryoNetClassL
       registerPacketClass(QuadrupedXGaitSettingsPacket.class);
       registerPacketField(QuadrupedXGaitSettings.class);
 
-      registerPacketClass(SetBooleanParameterPacket.class);
       registerPacketField(String.class);
       registerPacketField(boolean.class);
 
-      registerPacketClass(SetDoubleArrayParameterPacket.class);
       registerPacketField(String.class);
       registerPacketField(double[].class);
 
-      registerPacketClass(SetDoubleParameterPacket.class);
       registerPacketField(String.class);
       registerPacketField(double.class);
 
-      registerPacketClass(SetStringParameterPacket.class);
       registerPacketField(String.class);
 
       registerPacketClass(QuadrupedTimedStepPacket.class);
@@ -88,13 +80,7 @@ public class GenericQuadrupedNetClassList extends IHMCCommunicationKryoNetClassL
       registerPacketField(RobotQuadrant.class);
       registerPacketField(TimeInterval.class);
 
-      registerPacketClass(RequestParameterListPacket.class);
-      registerPacketClass(ParameterListPacket.class);
-      registerPacketField(BooleanParameter.class);
-      registerPacketField(DoubleArrayParameter .class);
-      registerPacketField(DoubleParameter.class);
-      registerPacketField(StringParameter.class);
-
       registerPacketClass(QuadrupedSoleWaypointPacket.class);
+      registerPacketClass(QuadrupedSteppingEventPacket.class);
    }
 }

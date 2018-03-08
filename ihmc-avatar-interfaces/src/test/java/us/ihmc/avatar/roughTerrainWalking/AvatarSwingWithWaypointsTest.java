@@ -165,8 +165,8 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       double simulationTime = (swingTime + transferTime) * steps + 1.0;
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
-      Point3D rootJointPosition = new Point3D(2.81, 0.0, 0.79);
-      Vector3D epsilon = new Vector3D(0.05, 0.05, 0.05);
+      Point3D rootJointPosition = new Point3D(2.81, 0.0, 0.82);
+      Vector3D epsilon = new Vector3D(0.05, 0.05, 0.10);
       Point3D min = new Point3D(rootJointPosition);
       Point3D max = new Point3D(rootJointPosition);
       min.sub(epsilon);

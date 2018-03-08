@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -8,10 +9,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePoint;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class DivergentComponentOfMotionController
@@ -25,10 +27,8 @@ public class DivergentComponentOfMotionController
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleArrayParameter proportionalGainsParameter = parameterFactory.createDoubleArray("dcmPositionProportionalGains", 1, 1, 0);
-   private final DoubleArrayParameter integralGainsParameter = parameterFactory.createDoubleArray("dcmPositionIntegralGains", 0, 0, 0);
-   private final DoubleParameter maxIntegralErrorParameter = parameterFactory.createDouble("dcmPositionMaxIntegralError", 0);
+   private final ParameterizedPID3DGains dcmPositionGains;
+   private final DoubleParameter vrpPositionRateLimitParameter = new DoubleParameter("vrpPositionRateLimit", registry, Double.MAX_VALUE);
 
    private final RateLimitedYoFramePoint yoLimitedVrpPositionSetpoint;
 
@@ -49,7 +49,10 @@ public class DivergentComponentOfMotionController
       pidController[1] = new PIDController("dcmPositionY", registry);
       pidController[2] = new PIDController("dcmPositionZ", registry);
 
-      DoubleParameter vrpPositionRateLimitParameter = parameterFactory.createDouble("vrpPositionRateLimit", Double.MAX_VALUE);
+      DefaultPID3DGains defaultDcmPositionGains = new DefaultPID3DGains();
+      defaultDcmPositionGains.setProportionalGains(1.0, 1.0, 0.0);
+      dcmPositionGains = new ParameterizedPID3DGains("_DcmPosition", GainCoupling.NONE, true, defaultDcmPositionGains, registry);
+
       yoLimitedVrpPositionSetpoint = new RateLimitedYoFramePoint("vrpPositionSetpointInCoMZUpFrame", "", registry, vrpPositionRateLimitParameter, controlDT, comZUpFrame);
 
       parentRegistry.addChild(registry);
@@ -80,9 +83,9 @@ public class DivergentComponentOfMotionController
 
       for (int i = 0; i < 3; i++)
       {
-         pidController[i].setProportionalGain(proportionalGainsParameter.get(i));
-         pidController[i].setIntegralGain(integralGainsParameter.get(i));
-         pidController[i].setMaxIntegralError(maxIntegralErrorParameter.get());
+         pidController[i].setProportionalGain(dcmPositionGains.getProportionalGains()[i]);
+         pidController[i].setIntegralGain(dcmPositionGains.getIntegralGains()[i]);
+         pidController[i].setMaxIntegralError(dcmPositionGains.getIntegralGains()[i]);
       }
 
       double omega = lipModel.getNaturalFrequency();

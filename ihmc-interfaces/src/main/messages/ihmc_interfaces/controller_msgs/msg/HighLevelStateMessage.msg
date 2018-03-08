@@ -11,4 +11,4 @@ byte DIAGNOSTICS = 6
 byte CALIBRATION = 7
 
 # Specifies the which state the controller should transition into.
-byte high_level_controller_name -1
+byte high_level_controller_name 255

@@ -29,7 +29,7 @@ public class FootstepListPubSubType implements us.ihmc.pubsub.TopicDataType<cont
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.FootstepPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -55,9 +55,9 @@ public class FootstepListPubSubType implements us.ihmc.pubsub.TopicDataType<cont
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getFootsteps().size(); ++a)
+      for (int i0 = 0; i0 < data.getFootsteps().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.FootstepPubSubType.getCdrSerializedSize(data.getFootsteps().get(a), current_alignment);
+         current_alignment += controller_msgs.msg.dds.FootstepPubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);
       }
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);

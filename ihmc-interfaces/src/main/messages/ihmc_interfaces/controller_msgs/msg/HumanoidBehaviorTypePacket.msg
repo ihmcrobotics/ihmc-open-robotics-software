@@ -15,7 +15,7 @@ byte TEST_PIPELINE = 11
 byte TEST_STATEMACHINE = 12
 byte FOLLOW_FIDUCIAL_50 = 13
 byte LOCATE_FIDUCIAL = 14
-byte WAlK_OVER_TERRAIN = 15
+byte WALK_OVER_TERRAIN = 15
 byte FOLLOW_VALVE = 16
 byte LOCATE_VALVE = 17
 byte WALK_OVER_TERRAIN_TO_VALVE = 18
@@ -30,4 +30,4 @@ byte FIRE_FIGHTING = 26
 byte CUTTING_WALL = 27
 byte REPEATEDLY_WALK_FOOTSTEP_LIST = 28
 
-byte humanoid_behavior_type -1
+byte humanoid_behavior_type 255

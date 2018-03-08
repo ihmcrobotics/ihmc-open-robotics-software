@@ -1,0 +1,24 @@
+#ifndef __controller_msgs__msg__LocalizationStatusPacket__idl__
+#define __controller_msgs__msg__LocalizationStatusPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message part of the localization module
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::LocalizationStatusPacket_")
+      struct LocalizationStatusPacket
+      {
+        double overlap;
+        string status;
+      };
+    };
+  };
+};
+
+#endif

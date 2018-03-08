@@ -8,6 +8,6 @@ byte R_ARM_WRX = 4
 byte R_ARM_WRY2 = 5
 
 # The Enum value of the motor to enable
-byte atlas_electric_motor_packet_enum_enable -1
+byte atlas_electric_motor_packet_enum_enable 255
 # Boolean for enable state; true for enable, false for disable.
 bool enable

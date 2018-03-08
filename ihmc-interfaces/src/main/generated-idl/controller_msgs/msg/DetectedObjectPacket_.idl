@@ -1,0 +1,25 @@
+#ifndef __controller_msgs__msg__DetectedObjectPacket__idl__
+#define __controller_msgs__msg__DetectedObjectPacket__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC behavior module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::DetectedObjectPacket_")
+      struct DetectedObjectPacket
+      {
+        geometry_msgs::msg::dds::Pose pose;
+        long id;
+      };
+    };
+  };
+};
+
+#endif

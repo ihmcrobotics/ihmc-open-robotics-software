@@ -7,9 +7,9 @@ byte VIDEO_SOURCE_CV_THRESHOLD = 4
 byte VIDEO_SOURCE_IMAGE_PROCESSING_BEHAVIOR = 5
 byte VIDEO_SOURCE_AWARE_FACE_TRACKER = 6
 
-byte video_source -1
+byte video_source 255
 int64 timestamp
 byte[] data
 geometry_msgs/Point position
 geometry_msgs/Quaternion orientation
-IntrinsicParametersMessage intrinsicParameters
+IntrinsicParametersMessage intrinsic_parameters

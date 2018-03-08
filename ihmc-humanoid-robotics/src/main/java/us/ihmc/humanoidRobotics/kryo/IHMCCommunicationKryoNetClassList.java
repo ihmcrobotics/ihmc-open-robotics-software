@@ -32,7 +32,6 @@ import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestStereoPointCloudMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
-import us.ihmc.communication.packets.SetBooleanParameterPacket;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.communication.packets.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.TextToSpeechPacket;
@@ -528,7 +527,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(BoundingBoxesPacket.class);
 
       registerPacketClass(WholeBodyTrajectoryToolboxOutputStatus.class);
-      registerPacketClass(SetBooleanParameterPacket.class);
       registerPacketField(KinematicsToolboxOutputStatus[].class);
    }
 }

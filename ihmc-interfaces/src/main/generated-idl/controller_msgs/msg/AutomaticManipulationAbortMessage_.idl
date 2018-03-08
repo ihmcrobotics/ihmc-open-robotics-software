@@ -1,0 +1,25 @@
+#ifndef __controller_msgs__msg__AutomaticManipulationAbortMessage__idl__
+#define __controller_msgs__msg__AutomaticManipulationAbortMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * Request the controller to enable the automatic manipulation abort feature.
+       * When enabled, any arm trajectory will get aborted as soon as the balance controller has a large tracking error.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::AutomaticManipulationAbortMessage_")
+      struct AutomaticManipulationAbortMessage
+      {
+        boolean enable;
+      };
+    };
+  };
+};
+
+#endif

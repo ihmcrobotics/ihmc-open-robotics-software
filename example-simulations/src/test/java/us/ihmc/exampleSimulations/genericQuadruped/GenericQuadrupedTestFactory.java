@@ -20,10 +20,8 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -54,7 +52,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
-   private final OptionalFactoryField<QuadrupedParameterSet> parameterSet = new OptionalFactoryField<>("parameterSet");
 
    @Override
    public GoalOrientedTestConductor createTestConductor() throws IOException
@@ -70,7 +67,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedSimulationInitialPositionParameters initialPositionParameters = new GenericQuadrupedSimulationInitialPositionParameters();
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
-      ParameterRegistry.getInstance().loadFromResources(QuadrupedParameterSet.SIMULATION_IDEAL.getPath());
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters();
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
 
@@ -107,6 +103,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
+
       if (groundContactModelType.hasValue())
       {
          simulationFactory.setGroundContactModelType(groundContactModelType.get());
@@ -152,11 +149,5 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public void setUsePushRobotController(boolean usePushRobotController)
    {
       this.usePushRobotController.set(usePushRobotController);
-   }
-
-   @Override
-   public void setParameterSet(QuadrupedParameterSet parameterSet)
-   {
-      this.parameterSet.set(parameterSet);
    }
 }

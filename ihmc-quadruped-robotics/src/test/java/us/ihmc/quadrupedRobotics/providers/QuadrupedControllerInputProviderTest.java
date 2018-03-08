@@ -26,6 +26,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -60,6 +61,10 @@ public class QuadrupedControllerInputProviderTest
       GlobalDataProducer dataProducer = new GlobalDataProducer(mockCommunicator);
       QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(dataProducer, registry);
       QuadrupedPlanarVelocityInputProvider planarVelocityInputProvider = new QuadrupedPlanarVelocityInputProvider(dataProducer, registry);
+
+      // load default parameters
+      DefaultParameterReader reader = new DefaultParameterReader();
+      reader.readParametersInRegistry(registry);
 
       mockCommunicator.send(comPositionPacket);
       ThreadTools.sleep(3);

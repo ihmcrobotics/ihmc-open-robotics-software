@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,9 +13,10 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulum
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedComPositionController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedMomentumRateOfChangeModule
@@ -32,12 +34,8 @@ public class QuadrupedMomentumRateOfChangeModule
    private final double gravity;
    private final double mass;
 
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleArrayParameter comPositionProportionalGainsParameter = parameterFactory.createDoubleArray("comPositionProportionalGains", 0, 0, 5000);
-   private final DoubleArrayParameter comPositionDerivativeGainsParameter = parameterFactory.createDoubleArray("comPositionDerivativeGains", 0, 0, 750);
-   private final DoubleArrayParameter comPositionIntegralGainsParameter = parameterFactory.createDoubleArray("comPositionIntegralGains", 0, 0, 0);
-   private final DoubleParameter comPositionMaxIntegralErrorParameter = parameterFactory.createDouble("comPositionMaxIntegralError", 0);
-   private final DoubleParameter comPositionGravityCompensationParameter = parameterFactory.createDouble("comPositionGravityCompensation", 1);
+   private final ParameterizedPID3DGains comPositionGainsParameter;
+   private final DoubleParameter comPositionGravityCompensationParameter = new DoubleParameter("comPositionGravityCompensation", registry, 1);
 
    private final ReferenceFrame supportFrame;
    private final FramePoint3D cmpPositionSetpoint = new FramePoint3D();
@@ -61,6 +59,11 @@ public class QuadrupedMomentumRateOfChangeModule
       comPositionController = new QuadrupedComPositionController(comZUpFrame, runtimeEnvironment.getControlDT(), registry);
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
 
+      DefaultPID3DGains defaultComPositionGains = new DefaultPID3DGains();
+      defaultComPositionGains.setProportionalGains(0.0, 0.0, 5000.0);
+      defaultComPositionGains.setDerivativeGains(0.0, 0.0, 750.0);
+      comPositionGainsParameter = new ParameterizedPID3DGains("_comPosition", GainCoupling.NONE, true, defaultComPositionGains, registry);
+
       parentRegistry.addChild(registry);
    }
 
@@ -71,18 +74,11 @@ public class QuadrupedMomentumRateOfChangeModule
       comPositionController.reset();
    }
 
-   private void updateGains()
-   {
-      comPositionController.getGains().setProportionalGains(comPositionProportionalGainsParameter.get());
-      comPositionController.getGains().setIntegralGains(comPositionIntegralGainsParameter.get(), comPositionMaxIntegralErrorParameter.get());
-      comPositionController.getGains().setDerivativeGains(comPositionDerivativeGainsParameter.get());
-   }
-
    public void compute(FrameVector3D linearMomentumRateOfChangeToPack, FixedFramePoint3DBasics vrpPositionSetpointToPack, FixedFramePoint3DBasics cmpPositionSetpointToPack,
                        FramePoint3DReadOnly dcmPositionEstimate, FramePoint3DReadOnly dcmPositionSetpoint,
                        FrameVector3DReadOnly dcmVelocitySetpoint)
    {
-      updateGains();
+      comPositionController.getGains().set(comPositionGainsParameter);
 
       dcmPositionController.compute(vrpPositionSetpointToPack, dcmPositionEstimate, dcmPositionSetpoint, dcmVelocitySetpoint);
 
@@ -102,7 +98,7 @@ public class QuadrupedMomentumRateOfChangeModule
       comPositionControllerSetpoints.getComVelocity().set(postureProvider.getComVelocityInput());
       comPositionControllerSetpoints.getComForceFeedforward().changeFrame(supportFrame);
       comPositionControllerSetpoints.getComForceFeedforward().set(linearMomentumRateOfChangeToPack);
-      comPositionControllerSetpoints.getComForceFeedforward().setZ(comPositionGravityCompensationParameter.get() * mass * gravity);
+      comPositionControllerSetpoints.getComForceFeedforward().setZ(comPositionGravityCompensationParameter.getValue() * mass * gravity);
 
       comPositionController.compute(linearMomentumRateOfChangeToPack, comPositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates());
    }

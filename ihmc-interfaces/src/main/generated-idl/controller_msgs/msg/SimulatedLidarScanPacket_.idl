@@ -1,0 +1,23 @@
+#ifndef __controller_msgs__msg__SimulatedLidarScanPacket__idl__
+#define __controller_msgs__msg__SimulatedLidarScanPacket__idl__
+
+#include "controller_msgs/msg/./LidarScanParametersMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::SimulatedLidarScanPacket_")
+      struct SimulatedLidarScanPacket
+      {
+        sequence<float> ranges;
+        long sensor_id;
+        controller_msgs::msg::dds::LidarScanParametersMessage lidar_scan_parameters;
+      };
+    };
+  };
+};
+
+#endif

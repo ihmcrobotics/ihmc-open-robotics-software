@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.dataStructures.parameter.Parameter;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -76,14 +75,6 @@ public class MessageTools
       return message;
    }
 
-   public static SetBooleanParameterPacket createSetBooleanParameterPacket(String parameterName, boolean parameterValue)
-   {
-      SetBooleanParameterPacket message = new SetBooleanParameterPacket();
-      message.parameterName = parameterName;
-      message.parameterValue = parameterValue;
-      return message;
-   }
-
    /**
     * Creates a new center of mass message.
     * <p>
@@ -99,14 +90,6 @@ public class MessageTools
    {
       KinematicsToolboxCenterOfMassMessage message = new KinematicsToolboxCenterOfMassMessage();
       message.setDesiredPosition(desiredPosition);
-      return message;
-   }
-
-   public static SetDoubleArrayParameterPacket createSetDoubleArrayParameterPacket(String parameterName, double[] parameterValue)
-   {
-      SetDoubleArrayParameterPacket message = new SetDoubleArrayParameterPacket();
-      message.parameterName = parameterName;
-      message.parameterValue = parameterValue;
       return message;
    }
 
@@ -234,14 +217,6 @@ public class MessageTools
       return message;
    }
 
-   public static SetDoubleParameterPacket createSetDoubleParameterPacket(String parameterName, double parameterValue)
-   {
-      SetDoubleParameterPacket message = new SetDoubleParameterPacket();
-      message.parameterName = parameterName;
-      message.parameterValue = parameterValue;
-      return message;
-   }
-
    /**
     * Copy constructor.
     * 
@@ -261,13 +236,6 @@ public class MessageTools
       return message;
    }
 
-   public static ParameterListPacket createParameterListPacket(List<Parameter> parameters)
-   {
-      ParameterListPacket message = new ParameterListPacket();
-      message.parameters = parameters;
-      return message;
-   }
-
    public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(OneDoFJoint[] joints)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
@@ -283,14 +251,6 @@ public class MessageTools
       message.desiredJointAngles = new float[newJointData.length];
       message.jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(newJointData);
       message.setDesiredJointState(rootJoint, newJointData, useQDesired);
-      return message;
-   }
-
-   public static SetStringParameterPacket createSetStringParameterPacket(String parameterName, String parameterValue)
-   {
-      SetStringParameterPacket message = new SetStringParameterPacket();
-      message.parameterName = parameterName;
-      message.parameterValue = parameterValue;
       return message;
    }
 

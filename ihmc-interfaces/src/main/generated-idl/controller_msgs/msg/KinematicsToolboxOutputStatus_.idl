@@ -1,0 +1,30 @@
+#ifndef __controller_msgs__msg__KinematicsToolboxOutputStatus__idl__
+#define __controller_msgs__msg__KinematicsToolboxOutputStatus__idl__
+
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
+       * Main usage is for the IHMC KinematicsToolbox.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::KinematicsToolboxOutputStatus_")
+      struct KinematicsToolboxOutputStatus
+      {
+        long joint_name_hash;
+        sequence<float> desired_joint_angles;
+        geometry_msgs::msg::dds::Vector3 desired_root_translation;
+        geometry_msgs::msg::dds::Quaternion desired_root_orientation;
+        double solution_quality;
+      };
+    };
+  };
+};
+
+#endif

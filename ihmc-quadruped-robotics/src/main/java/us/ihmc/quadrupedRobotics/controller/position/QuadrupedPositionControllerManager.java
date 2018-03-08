@@ -46,7 +46,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       QuadrupedController jointInitializationController = new QuadrupedPositionJointInitializationController(
             runtimeEnvironment);
       QuadrupedController doNothingController = new QuadrupedPositionDoNothingController(runtimeEnvironment);
-      QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, initialPositionParameters);
+      QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, initialPositionParameters, registry);
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
       QuadrupedController crawlController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters, postureProvider, planarVelocityProvider, legIKCalculator);
 

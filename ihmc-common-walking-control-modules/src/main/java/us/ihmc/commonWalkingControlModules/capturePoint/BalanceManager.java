@@ -34,6 +34,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -153,7 +154,7 @@ public class BalanceManager
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      SideDependentList<? extends ContactablePlaneBody> contactableFeet = controllerToolbox.getContactableFeet();
+      SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
       icpControlGains.set(walkingControllerParameters.createICPControlGains());
 
@@ -174,7 +175,7 @@ public class BalanceManager
       if (useICPOptimizationControl)
       {
          linearMomentumRateOfChangeControlModule = new ICPOptimizationLinearMomentumRateOfChangeControlModule(referenceFrames, bipedSupportPolygons,
-               controllerToolbox.getICPControlPolygons(), contactableFeet, icpPlannerParameters, walkingControllerParameters, yoTime, totalMass, gravityZ,
+               controllerToolbox.getICPControlPolygons(), contactableFeet, walkingControllerParameters, yoTime, totalMass, gravityZ,
                controlDT, registry, yoGraphicsListRegistry);
       }
       else
@@ -549,7 +550,7 @@ public class BalanceManager
 
    public double getTimeRemainingInCurrentState()
    {
-      return icpPlanner.getTimeInCurrentState();
+      return icpPlanner.getTimeInCurrentStateRemaining();
    }
 
    public void goHome()

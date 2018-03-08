@@ -98,8 +98,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    {
       super.doAction();
 
-      boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
-      boolean requestSwingSpeedUp = icpErrorIsTooLarge;
+      boolean requestSwingSpeedUp = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
 
       if (walkingMessageHandler.hasRequestedFootstepAdjustment())
       {
