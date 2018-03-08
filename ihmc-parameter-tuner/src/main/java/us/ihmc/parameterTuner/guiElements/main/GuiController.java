@@ -130,7 +130,7 @@ public class GuiController
          if (selectedItem != null && !selectedItem.getValue().isRegistry())
          {
             GuiParameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
-            tuningTabManager.handleNewParameter(parameter);
+            tuningTabManager.handleNewParameter(parameter.getUniqueName());
          }
       }
    }

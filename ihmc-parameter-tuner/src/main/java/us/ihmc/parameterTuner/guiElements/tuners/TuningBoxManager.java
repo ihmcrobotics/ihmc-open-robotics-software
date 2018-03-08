@@ -1,9 +1,11 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
@@ -12,7 +14,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.VBox;
-import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
 public class TuningBoxManager
 {
@@ -28,10 +29,8 @@ public class TuningBoxManager
       this.tuningBox = tuningBox;
    }
 
-   public void handleNewParameter(GuiParameter parameter)
+   public void handleNewParameter(String uniqueName)
    {
-      String uniqueName = parameter.getUniqueName();
-
       if (parametersBeingTuned.contains(uniqueName))
       {
          Platform.runLater(() -> {
@@ -57,8 +56,9 @@ public class TuningBoxManager
 
    public void setTunerMap(Map<String, Tuner> tunerMap)
    {
-      parametersBeingTuned.clear();
       this.tunerMap = tunerMap;
+      List<String> invalidParameters = parametersBeingTuned.stream().filter(name -> !tunerMap.containsKey(name)).collect(Collectors.toList());
+      invalidParameters.forEach(name -> parametersBeingTuned.remove(name));
       updateView();
    }
 
@@ -71,5 +71,10 @@ public class TuningBoxManager
          tuningBox.getChildren().add(removeButtons.get(uniqueName));
          tuningBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
       });
+   }
+
+   public List<String> getParameterUniqueNames()
+   {
+      return Collections.unmodifiableList(parametersBeingTuned);
    }
 }
