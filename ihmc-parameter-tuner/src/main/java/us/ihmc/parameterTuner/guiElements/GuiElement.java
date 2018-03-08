@@ -15,6 +15,11 @@ public abstract class GuiElement
 
    public GuiElement(String name, GuiRegistry parent, String uniqueName)
    {
+      if (name.contains(SEPERATOR))
+      {
+         throw new RuntimeException("Name " + name + " should never contain " + SEPERATOR);
+      }
+
       this.name = name;
       this.parent = parent;
       this.uniqueName = uniqueName;
