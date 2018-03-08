@@ -3,7 +3,6 @@ package us.ihmc.parameterTuner.guiElements.main;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -11,14 +10,9 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.TreeItem;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DragEvent;
@@ -28,15 +22,14 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 import us.ihmc.parameterTuner.guiElements.GuiRegistry;
+import us.ihmc.parameterTuner.guiElements.tabs.TuningTabManager;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTree;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTreeParameter;
 import us.ihmc.parameterTuner.guiElements.tree.ParameterTreeValue;
-import us.ihmc.parameterTuner.guiElements.tuners.TuningBoxManager;
 
 public class GuiController
 {
@@ -51,15 +44,13 @@ public class GuiController
    @FXML
    private TabPane tabPane;
    @FXML
-   private VBox tuningBox;
-   @FXML
    private StackPane inputPane;
    @FXML
    private ChoiceBox<GuiParameterStatus> statusFilter;
 
    private final HashMap<String, GuiParameter> parameterMap = new HashMap<>();
    private ChangeCollector changeCollector;
-   private TuningBoxManager tuningBoxManager;
+   private TuningTabManager tuningTabManager;
 
    private final ParameterTree tree = new ParameterTree();
 
@@ -67,7 +58,6 @@ public class GuiController
    {
       searchFieldParameters.textProperty().addListener(observable -> updateTree());
       searchFieldNamespaces.textProperty().addListener(observable -> updateTree());
-      tuningBoxManager = new TuningBoxManager(tuningBox);
 
       statusFilter.getItems().addAll(GuiParameterStatus.values());
       statusFilter.getSelectionModel().select(GuiParameterStatus.ANY);
@@ -126,51 +116,7 @@ public class GuiController
          }
       });
 
-      MenuItem closeTab = new MenuItem("Close Open Tab");
-      closeTab.setDisable(tabPane.getTabs().size() == 0);
-      closeTab.setOnAction(event -> {
-         Tab tab = tabPane.getSelectionModel().getSelectedItem();
-         tabPane.getTabs().remove(tab);
-         closeTab.setDisable(tabPane.getTabs().size() == 0);
-      });
-      MenuItem newTab = new MenuItem("New Tab");
-      newTab.setOnAction(event -> {
-         TextInputDialog dialog = new TextInputDialog();
-         dialog.setTitle("Create Tab");
-         dialog.setHeaderText("Enter a name for the new tab.");
-         dialog.setContentText("Tab Name:");
-         Optional<String> result = dialog.showAndWait();
-         if (result.isPresent())
-         {
-            Tab tab = new Tab(result.get());
-            tabPane.getTabs().add(tab);
-            tabPane.getSelectionModel().select(tab);
-            closeTab.setDisable(tabPane.getTabs().size() == 0);
-         }
-      });
-      MenuItem renameTab = new MenuItem("Rename Open Tab");
-      renameTab.setOnAction(event -> {
-         TextInputDialog dialog = new TextInputDialog();
-         dialog.setTitle("Rename Tab");
-         dialog.setHeaderText("Enter a new name for the current tab.");
-         dialog.setContentText("New Tab Name:");
-         Optional<String> result = dialog.showAndWait();
-         if (result.isPresent())
-         {
-            tabPane.getSelectionModel().getSelectedItem().setText(result.get());
-         }
-      });
-      MenuItem saveTab = new MenuItem("Save Open Tab");
-      saveTab.setOnAction(event -> {
-         // TODO
-      });
-      ContextMenu tabContextMenu = new ContextMenu();
-      tabContextMenu.getItems().add(saveTab);
-      tabContextMenu.getItems().add(new SeparatorMenuItem());
-      tabContextMenu.getItems().add(newTab);
-      tabContextMenu.getItems().add(renameTab);
-      tabContextMenu.getItems().add(closeTab);
-      tabPane.setContextMenu(tabContextMenu);
+      tuningTabManager = new TuningTabManager(tabPane);
    }
 
    private void addSelectedParametersToTuner()
@@ -181,7 +127,7 @@ public class GuiController
          if (selectedItem != null && !selectedItem.getValue().isRegistry())
          {
             GuiParameter parameter = ((ParameterTreeParameter) selectedItem.getValue()).getParameter();
-            tuningBoxManager.handleNewParameter(parameter);
+            tuningTabManager.getTuningBoxManager().handleNewParameter(parameter);
          }
       }
    }
@@ -203,8 +149,8 @@ public class GuiController
 
    public void setRegistries(List<GuiRegistry> registries)
    {
-      tuningBoxManager.setRegistries(registries);
-      tree.setRegistries(registries, tuningBoxManager.getTunerMap());
+      tuningTabManager.getTuningBoxManager().setRegistries(registries);
+      tree.setRegistries(registries, tuningTabManager.getTuningBoxManager().getTunerMap());
       updateTree();
 
       changeCollector = new ChangeCollector();
