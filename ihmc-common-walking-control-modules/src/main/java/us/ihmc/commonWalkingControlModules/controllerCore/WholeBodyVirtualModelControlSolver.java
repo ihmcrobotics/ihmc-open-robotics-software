@@ -20,9 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.ControlledBodiesCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlModuleException;
@@ -275,11 +273,11 @@ public class WholeBodyVirtualModelControlSolver
       }
    }
 
-   public void submitVirtualModelControlCommandList(InverseDynamicsCommandList virtualModelControlCommandList)
+   public void submitVirtualModelControlCommandList(VirtualModelControlCommandList virtualModelControlCommandList)
    {
       while (virtualModelControlCommandList.getNumberOfCommands() > 0)
       {
-         InverseDynamicsCommand<?> command = virtualModelControlCommandList.pollCommand();
+         VirtualModelControlCommand<?> command = virtualModelControlCommandList.pollCommand();
          switch (command.getCommandType())
          {
          case TASKSPACE:
@@ -305,7 +303,7 @@ public class WholeBodyVirtualModelControlSolver
             registerAllControlledBodies((ControlledBodiesCommand) command);
             break;
          case COMMAND_LIST:
-            submitVirtualModelControlCommandList((InverseDynamicsCommandList) command);
+            submitVirtualModelControlCommandList((VirtualModelControlCommandList) command);
             break;
          case JOINTSPACE:
             handleJointSpaceCommand((JointspaceAccelerationCommand) command);

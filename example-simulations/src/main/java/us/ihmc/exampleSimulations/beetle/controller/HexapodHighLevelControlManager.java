@@ -79,8 +79,8 @@ public class HexapodHighLevelControlManager
       
       controllerCoreCommandList.addVirtualModelControlCommand(hexapodMomentumController.getMomentumRateCommand());
       controllerCoreCommandList.addVirtualModelControlCommand(hexapodMomentumController.getMomentumRateCommand());
-      controllerCoreCommandList.addVirtualModelControlCommand(stepController.getContactStates());
-      controllerCoreCommandList.addInverseDynamicsCommand(stepController.getContactStates());
+      controllerCoreCommandList.addVirtualModelControlCommand(stepController.getVirtualModelControlCommand());
+      controllerCoreCommandList.addInverseDynamicsCommand(stepController.getInverseDynamicsCommand());
       controllerCoreCommandList.addFeedbackControlCommand(bodySpatialManager.getSpatialFeedbackControlCommand());
       controllerCoreCommandList.addFeedbackControlCommand(stepController.getFeedbackCommandList());
    }

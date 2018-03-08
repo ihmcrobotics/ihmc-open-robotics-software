@@ -8,6 +8,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -35,7 +36,7 @@ import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
  * @author Sylvain Bertrand
  *
  */
-public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateCommand>
+public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateCommand>, VirtualModelControlCommand<MomentumRateCommand>
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
