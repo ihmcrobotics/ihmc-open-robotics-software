@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class ControlledBodiesCommand implements InverseDynamicsCommand<ControlledBodiesCommand>
+public class ControlledBodiesCommand implements VirtualModelControlCommand<ControlledBodiesCommand>
 {
    private List<RigidBody> controlledBodies = new ArrayList<>();
    private List<RigidBody> basesForControl = new ArrayList<>();
