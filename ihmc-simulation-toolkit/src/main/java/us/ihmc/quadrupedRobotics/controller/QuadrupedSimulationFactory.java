@@ -18,6 +18,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedForceDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerManager;
@@ -117,6 +118,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
+   private final OptionalFactoryField<QuadrupedForceControllerEnum> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
 
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -290,7 +292,10 @@ public class QuadrupedSimulationFactory
       switch (controlMode.get())
       {
       case FORCE:
-         controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties.get());
+         if(initialForceControlState.hasValue())
+            controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties.get(), initialForceControlState.get());
+         else
+            controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties.get());
          break;
       case FORCE_DEV:
          controllerManager = new QuadrupedForceDevelopmentControllerManager(runtimeEnvironment, physicalProperties.get());
@@ -645,5 +650,10 @@ public class QuadrupedSimulationFactory
    public void setScsBufferSize(int scsBufferSize)
    {
       this.scsBufferSize.set(scsBufferSize);
+   }
+
+   public void setInitialForceControlState(QuadrupedForceControllerEnum initialForceControlState)
+   {
+      this.initialForceControlState.set(initialForceControlState);
    }
 }
