@@ -20,7 +20,7 @@ public class TriWheelCartSimulation
    {
       double dt = 0.001;
 
-      TriWheelCartDescription robotDescription = new TriWheelCartDescription("triwheel");
+      TriWheelCartDescription robotDescription = new TriWheelCartDescription("triWheel");
 
       Vector3D startingPoint = new Vector3D(-2.0, 0.0, robotDescription.getInitialHeight());
 
@@ -40,7 +40,7 @@ public class TriWheelCartSimulation
       floatingJoint.setPosition(startingPoint);
 
       // robot controller.
-      TriWheelCartController controller = new TriWheelCartController(triWheelRobot, dt);
+      TriWheelCartController controller = new TriWheelCartController(triWheelRobot);
       triWheelRobot.setController(controller);
 
       // obstacles.

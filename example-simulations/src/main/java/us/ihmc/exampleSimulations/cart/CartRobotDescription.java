@@ -12,27 +12,27 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 
 public class CartRobotDescription extends RobotDescription
 {
-   private double massBody = 100.0;
-   private double xLengthBody = 0.8;
-   private double yLengthBody = 0.4;
-   private double zLengthBody = 0.1;
+   private final double massBody = 100.0;
+   private final double xLengthBody = 0.8;
+   private final double yLengthBody = 0.4;
+   private final double zLengthBody = 0.1;
 
-   private double heightPoll = 0.6;
-   private double radiusPoll = 0.02;
-   private double widthFlag = 0.4;
-   private double heightFlag = 0.2;
-   private double thicknessFlag = 0.01;
+   private final double heightPoll = 0.6;
+   private final double radiusPoll = 0.02;
+   private final double widthFlag = 0.4;
+   private final double heightFlag = 0.2;
+   private final double thicknessFlag = 0.01;
 
-   private double massWheel = 50;
-   private double wheelPlacementRatio = 0.8; // ratio with length of x from center to the end in x direction
-   private double radiusWheel = 0.08;
-   private double lengthWheel = yLengthBody * 0.8;
+   private final double massWheel = 50;
+   private final double wheelPlacementRatio = 0.8; // ratio with length of x from center to the end in x direction
+   private final double radiusWheel = 0.08;
+   private final double lengthWheel = yLengthBody * 0.8;
 
    public CartRobotDescription(String name)
    {
       super(name);
 
-      FloatingJointDescription bodyJoint = new FloatingJointDescription("body", "bodyjointvariablename");
+      FloatingJointDescription bodyJoint = new FloatingJointDescription("body", "bodyJointVariableName");
 
       LinkDescription bodyLink = new LinkDescription("bodyLink");
       bodyLink.setMassAndRadiiOfGyration(massBody, xLengthBody, yLengthBody, zLengthBody);
@@ -51,7 +51,7 @@ public class CartRobotDescription extends RobotDescription
       bodyJoint.setLink(bodyLink);
       this.addRootJoint(bodyJoint);
 
-      PinJointDescription frontWheelJoint = new PinJointDescription("frontwheel", new Vector3D(xLengthBody / 2.0 * wheelPlacementRatio, 0.0,
+      PinJointDescription frontWheelJoint = new PinJointDescription("frontWheel", new Vector3D(xLengthBody / 2.0 * wheelPlacementRatio, 0.0,
                                                                                                -zLengthBody / 2.0 - radiusWheel),
                                                                     Axis.Y);
       LinkDescription frontWheelLink = new LinkDescription("frontWheelLink");
@@ -72,7 +72,7 @@ public class CartRobotDescription extends RobotDescription
       frontWheelJoint.setLink(frontWheelLink);
       bodyJoint.addJoint(frontWheelJoint);
 
-      PinJointDescription rearWheelJoint = new PinJointDescription("rearwheel", new Vector3D(-xLengthBody / 2.0 * wheelPlacementRatio, 0.0,
+      PinJointDescription rearWheelJoint = new PinJointDescription("rearWheel", new Vector3D(-xLengthBody / 2.0 * wheelPlacementRatio, 0.0,
                                                                                              -zLengthBody / 2.0 - radiusWheel),
                                                                    Axis.Y);
       LinkDescription rearWheelLink = new LinkDescription("rearWheelLink");

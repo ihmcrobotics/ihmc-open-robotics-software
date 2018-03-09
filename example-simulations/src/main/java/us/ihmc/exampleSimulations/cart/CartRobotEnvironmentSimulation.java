@@ -40,7 +40,7 @@ public class CartRobotEnvironmentSimulation
       allSimulatedRobotList.add(cartRobot);
 
       // robot controller.
-      CartRobotController controller = new CartRobotController(cartRobot, dt);
+      CartRobotController controller = new CartRobotController(cartRobot);
       cartRobot.setController(controller);
 
       // Stair Env Robot
