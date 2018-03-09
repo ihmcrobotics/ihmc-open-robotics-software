@@ -26,7 +26,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
 
    private static final double rampPlaneThickness = 0.02;
 
-   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
+   private final ArrayList<Shape3D<?>> terrainCollisionShapes = new ArrayList<>();
 
    public RampTerrainObject(double xStart, double yStart, double xEnd, double yEnd, double height, AppearanceDefinition appearance)
    {
@@ -213,7 +213,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
    }
 
    @Override
-   public List<? extends Shape3D> getTerrainCollisionShapes()
+   public List<Shape3D<?>> getTerrainCollisionShapes()
    {
       return terrainCollisionShapes;
    }

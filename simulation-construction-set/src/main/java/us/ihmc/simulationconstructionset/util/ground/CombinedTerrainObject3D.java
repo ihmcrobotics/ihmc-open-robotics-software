@@ -25,7 +25,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
 
    private final Point3D tempPointToCheck = new Point3D();
 
-   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
+   private final ArrayList<Shape3D<?>> terrainCollisionShapes = new ArrayList<>();
 
    public CombinedTerrainObject3D(String name)
    {
@@ -355,7 +355,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
    }
 
    @Override
-   public List<? extends Shape3D> getTerrainCollisionShapes()
+   public List<Shape3D<?>> getTerrainCollisionShapes()
    {
       return terrainCollisionShapes;
    }

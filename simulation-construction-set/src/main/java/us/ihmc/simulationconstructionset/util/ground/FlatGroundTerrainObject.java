@@ -14,7 +14,7 @@ public class FlatGroundTerrainObject extends FlatGroundProfile implements Terrai
    
    private final Graphics3DObject groundGraphics;
    
-   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
+   private final ArrayList<Shape3D<?>> terrainCollisionShapes = new ArrayList<>();
    
    public FlatGroundTerrainObject()
    {
@@ -34,7 +34,7 @@ public class FlatGroundTerrainObject extends FlatGroundProfile implements Terrai
    }
 
    @Override
-   public List<? extends Shape3D> getTerrainCollisionShapes()
+   public List<Shape3D<?>> getTerrainCollisionShapes()
    {
       return terrainCollisionShapes;
    }

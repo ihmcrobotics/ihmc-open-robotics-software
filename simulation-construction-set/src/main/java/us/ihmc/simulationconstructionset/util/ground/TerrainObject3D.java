@@ -10,7 +10,7 @@ public interface TerrainObject3D extends GroundProfile3D
 {
    Graphics3DObject getLinkGraphics();
 
-   default List<? extends Shape3D> getTerrainCollisionShapes()
+   default List<? extends Shape3D<?>> getTerrainCollisionShapes()
    {
       return null;
    }
