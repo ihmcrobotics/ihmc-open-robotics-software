@@ -10,15 +10,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AtlasCollisionMeshDefinitionDataHolder extends CollisionMeshDefinitionDataHolder
 {
-   public static double footLength = 0.265;
-   public static double footWidth = 0.135;
-   public static double footHeight = 0.06;
-
    public AtlasCollisionMeshDefinitionDataHolder(AtlasJointMap jointMap, AtlasPhysicalProperties atlasPhysicalProperties)
    {
-      footLength = atlasPhysicalProperties.getActualFootLength();
-      footWidth = atlasPhysicalProperties.getActualFootWidth();
-      footHeight = Math.abs(atlasPhysicalProperties.getSoleToAnkleFrameTransforms().get(RobotSide.RIGHT).getM23());
+      double footLength = atlasPhysicalProperties.getActualFootLength();
+      double footWidth = atlasPhysicalProperties.getActualFootWidth();
+      double footHeight = Math.abs(atlasPhysicalProperties.getSoleToAnkleFrameTransforms().get(RobotSide.RIGHT).getM23());
 
       RigidBodyTransform transformToAnkle = new RigidBodyTransform(atlasPhysicalProperties.getSoleToAnkleFrameTransforms().get(RobotSide.RIGHT));
       transformToAnkle.appendTranslation(0.0, 0, 0.5 * footHeight);

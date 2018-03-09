@@ -25,14 +25,14 @@ public class CartRobotCollisionMeshDefinitionDataHolder extends CollisionMeshDef
       RigidBodyTransform transformToFrontWheel = new RigidBodyTransform();
       transformToFrontWheel.appendRollRotation(Math.PI / 2.0);
       transformToFrontWheel.appendTranslation(0.0, 0.0, -lengthWheel / 2.0);
-      CollisionMeshDefinitionData frontWheelCollisionMeshData = new CylinderCollisionMeshDefinitionData("frontwheel", radiusWheel, lengthWheel);
+      CollisionMeshDefinitionData frontWheelCollisionMeshData = new CylinderCollisionMeshDefinitionData("frontWheel", radiusWheel, lengthWheel);
       frontWheelCollisionMeshData.setTransformToParentJoint(transformToFrontWheel);
       addCollisionMeshDefinitionData(frontWheelCollisionMeshData);
 
       RigidBodyTransform transformToRearWheel = new RigidBodyTransform();
       transformToRearWheel.appendRollRotation(Math.PI / 2.0);
       transformToRearWheel.appendTranslation(0.0, 0.0, -lengthWheel / 2.0);
-      CollisionMeshDefinitionData rearWheelCollisionMeshData = new CylinderCollisionMeshDefinitionData("rearwheel", radiusWheel, lengthWheel);
+      CollisionMeshDefinitionData rearWheelCollisionMeshData = new CylinderCollisionMeshDefinitionData("rearWheel", radiusWheel, lengthWheel);
       rearWheelCollisionMeshData.setTransformToParentJoint(transformToRearWheel);
       addCollisionMeshDefinitionData(rearWheelCollisionMeshData);
    }

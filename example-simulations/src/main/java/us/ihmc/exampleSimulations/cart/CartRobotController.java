@@ -7,11 +7,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CartRobotController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("MobileRobotController");
+   private final YoVariableRegistry registry = new YoVariableRegistry("CartRobotController");
 
    private final PinJoint frontWheelJoint;
 
-   public CartRobotController(Robot robot, double dt)
+   public CartRobotController(Robot robot)
    {
       frontWheelJoint = (PinJoint) robot.getJoint("frontwheel");
    }

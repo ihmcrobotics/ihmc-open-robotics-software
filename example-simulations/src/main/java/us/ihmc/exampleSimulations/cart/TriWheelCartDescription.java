@@ -13,39 +13,39 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 
 public class TriWheelCartDescription extends RobotDescription
 {
-   private int collisionGroup = 0xffffffff;
-   private int collisionMask = 0xffffffff;
+   private final int collisionGroup = 0xffffffff;
+   private final int collisionMask = 0xffffffff;
 
-   private double massBody = 100.0;
-   private double massActiveWheel = 50.0;
-   private double massCasterAxis = 30.0;
+   private final double massBody = 100.0;
+   private final double massActiveWheel = 50.0;
+   private final double massCasterAxis = 30.0;
 
-   private double heightBody = 0.1;
-   private double widthBody = 0.9;
-   private double lengthBody = 0.6;
-   private double wheelPlacementRatio = 0.8;
+   private final double heightBody = 0.1;
+   private final double widthBody = 0.9;
+   private final double lengthBody = 0.6;
+   private final double wheelPlacementRatio = 0.8;
 
-   private double radiusActiveWheel = 0.15;
-   private double radiusCasterWheel = 0.1;
-   private double offsetZActiveWheel = 0.2;
-   private double thicknessActiveWheel = 0.05;
-   private double thicknessCasterWheel = 0.03;
-   private double offsetXCasterWheel = 0.15;
-   private double offsetZCasterWheel = offsetZActiveWheel + radiusActiveWheel - radiusCasterWheel;
-   private double radiusOffset = 0.035;
+   private final double radiusActiveWheel = 0.15;
+   private final double radiusCasterWheel = 0.1;
+   private final double offsetZActiveWheel = 0.2;
+   private final double thicknessActiveWheel = 0.05;
+   private final double thicknessCasterWheel = 0.03;
+   private final double offsetXCasterWheel = 0.15;
+   private final double offsetZCasterWheel = offsetZActiveWheel + radiusActiveWheel - radiusCasterWheel;
+   private final double radiusOffset = 0.035;
 
-   private double heightPoll = 0.6;
-   private double radiusPoll = 0.02;
-   private double widthFlag = 0.4;
-   private double heightFlag = 0.2;
-   private double thicknessFlag = 0.01;
+   private final double heightPoll = 0.6;
+   private final double radiusPoll = 0.02;
+   private final double widthFlag = 0.4;
+   private final double heightFlag = 0.2;
+   private final double thicknessFlag = 0.01;
 
    public TriWheelCartDescription(String name)
    {
       super(name);
 
       // Body.
-      FloatingJointDescription bodyJoint = new FloatingJointDescription("body", "bodyjointvariablename");
+      FloatingJointDescription bodyJoint = new FloatingJointDescription("body", "bodyJointVariableName");
 
       LinkDescription bodyLink = new LinkDescription("bodyLink");
       bodyLink.setMassAndRadiiOfGyration(massBody, lengthBody, widthBody, heightBody);
@@ -80,23 +80,23 @@ public class TriWheelCartDescription extends RobotDescription
       this.addRootJoint(bodyJoint);
 
       // Right and left side active wheels.
-      PinJointDescription rightWheelJoint = createWheelJoint("rightwheel",
+      PinJointDescription rightWheelJoint = createWheelJoint("rightWheel",
                                                              new Vector3D(lengthBody / 2.0 * wheelPlacementRatio, -widthBody / 2.0 * wheelPlacementRatio,
                                                                           -heightBody / 2.0 - offsetZActiveWheel),
                                                              radiusActiveWheel, thicknessActiveWheel, YoAppearance.Black());
       bodyJoint.addJoint(rightWheelJoint);
 
-      PinJointDescription leftWheelJoint = createWheelJoint("leftwheel",
+      PinJointDescription leftWheelJoint = createWheelJoint("leftWheel",
                                                             new Vector3D(lengthBody / 2.0 * wheelPlacementRatio, widthBody / 2.0 * wheelPlacementRatio,
                                                                          -heightBody / 2.0 - offsetZActiveWheel),
                                                             radiusActiveWheel, thicknessActiveWheel, YoAppearance.Grey());
       bodyJoint.addJoint(leftWheelJoint);
 
       // Passive joint on caster axis.
-      PinJointDescription casterAxisJoint = new PinJointDescription("casteraxis", new Vector3D(-lengthBody / 2.0 * wheelPlacementRatio, 0.0,
+      PinJointDescription casterAxisJoint = new PinJointDescription("casterAxis", new Vector3D(-lengthBody / 2.0 * wheelPlacementRatio, 0.0,
                                                                                                -heightBody / 2.0 - offsetZCasterWheel),
                                                                     Axis.Z);
-      LinkDescription casterAxisLink = new LinkDescription("casteraxislink");
+      LinkDescription casterAxisLink = new LinkDescription("casterAxisLink");
       casterAxisLink.setCenterOfMassOffset(new Vector3D(0.0, 0.0, 0.0));
       casterAxisLink.setMassAndRadiiOfGyration(massCasterAxis, radiusActiveWheel, radiusOffset, radiusOffset);
 
@@ -117,7 +117,7 @@ public class TriWheelCartDescription extends RobotDescription
       bodyJoint.addJoint(casterAxisJoint);
 
       // Passive joint on caster wheel.
-      PinJointDescription casterWheelJoint = createWheelJoint("casterwheel", new Vector3D(-offsetXCasterWheel, 0.0, 0.0), radiusCasterWheel,
+      PinJointDescription casterWheelJoint = createWheelJoint("casterWheel", new Vector3D(-offsetXCasterWheel, 0.0, 0.0), radiusCasterWheel,
                                                               thicknessCasterWheel, YoAppearance.Aqua());
 
       casterAxisJoint.addJoint(casterWheelJoint);
@@ -131,10 +131,9 @@ public class TriWheelCartDescription extends RobotDescription
       wheelLink.setMassAndRadiiOfGyration(massActiveWheel, offsetXCasterWheel, thickness, radius);
 
       LinkGraphicsDescription wheelGraphics = new LinkGraphicsDescription();
-      AppearanceDefinition wheelAppearance = yoAppearance;
       wheelGraphics.rotate(Math.PI / 2.0, Axis.X);
       wheelGraphics.translate(new Vector3D(0.0, 0.0, -thickness / 2.0));
-      wheelGraphics.addCylinder(thickness, radius, wheelAppearance);
+      wheelGraphics.addCylinder(thickness, radius, yoAppearance);
       wheelGraphics.identity();
       wheelGraphics.translate(new Vector3D(radius, thickness / 2.0, 0.0));
       wheelGraphics.rotate(Math.PI / 2.0, Axis.X);
