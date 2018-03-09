@@ -83,10 +83,9 @@ public class NewVirtualModelController
 
       /*
        * @formatter:off
-       * Compute the M-byobjective-1 task objective vector p as follows:
-       * p = S * ( TDot - JDot * qDot )
-       * where TDot is the 6-by-1 end-effector desired acceleration vector and (JDot * qDot) is the 6-by-1
-       * convective term vector resulting from the Coriolis and Centrifugal effects.
+       * Compute the N-by-1 task objective vector p as follows:
+       * p = S * ( w )
+       * where w is the M-by-1 end-effector desired effort vector.
        * @formatter:on
        */
       commandToAdd.getDesiredEffort(tempTaskObjective);
@@ -166,10 +165,9 @@ public class NewVirtualModelController
 
       /*
        * @formatter:off
-       * Compute the M-byobjective-1 task objective vector p as follows:
-       * p = S * ( TDot - JDot * qDot )
-       * where TDot is the 6-by-1 end-effector desired acceleration vector and (JDot * qDot) is the 6-by-1
-       * convective term vector resulting from the Coriolis and Centrifugal effects.
+       * Compute the N-by-1 task objective vector p as follows:
+       * p = S * ( w )
+       * where w is the M-by-1 end-effector desired effort vector.
        * @formatter:on
        */
       wrench.getMatrix(tempTaskObjective);
