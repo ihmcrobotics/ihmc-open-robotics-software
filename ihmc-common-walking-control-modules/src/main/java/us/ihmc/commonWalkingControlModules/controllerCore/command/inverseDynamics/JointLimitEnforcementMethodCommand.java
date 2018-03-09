@@ -1,10 +1,10 @@
-package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
+package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
