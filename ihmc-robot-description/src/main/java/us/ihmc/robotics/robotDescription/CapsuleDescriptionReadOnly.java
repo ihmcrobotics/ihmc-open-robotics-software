@@ -4,7 +4,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
-public class CapsuleDescriptionReadOnly implements ConvexShapeDescription
+public class CapsuleDescriptionReadOnly implements ConvexShapeDescriptionReadOnly
 {
    private final double radius;
    private final LineSegment3D capToCapLineSegment = new LineSegment3D();
