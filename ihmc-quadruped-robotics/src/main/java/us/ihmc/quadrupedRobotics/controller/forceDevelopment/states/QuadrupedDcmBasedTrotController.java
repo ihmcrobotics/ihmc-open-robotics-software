@@ -22,7 +22,7 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewiseForwardDcmTrajecto
 import us.ihmc.quadrupedRobotics.planning.trajectory.PiecewisePeriodicDcmTrajectory;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
+import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
@@ -41,7 +41,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 {
    private final QuadrupedPostureInputProviderInterface inputProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
-   private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
+   private final YoQuadrupedXGaitSettingsReadOnly xGaitSettingsProvider;
    private final YoDouble robotTimestamp;
    private final double controlDT;
    private final double gravity;
@@ -110,7 +110,7 @@ public class QuadrupedDcmBasedTrotController implements QuadrupedController
 
    public QuadrupedDcmBasedTrotController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
                                           QuadrupedControlManagerFactory controlManagerFactory, QuadrupedPostureInputProviderInterface inputProvider,
-                                          QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrupedXGaitSettingsInputProvider xGaitSettingsInputProvider)
+                                          QuadrupedPlanarVelocityInputProvider planarVelocityProvider, YoQuadrupedXGaitSettingsReadOnly xGaitSettingsInputProvider)
 
    {
       this.controllerToolbox = controllerToolbox;

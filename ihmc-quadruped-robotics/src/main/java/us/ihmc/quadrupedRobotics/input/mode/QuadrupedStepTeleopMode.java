@@ -18,9 +18,11 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
@@ -33,10 +35,6 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private static final double DT = 0.01;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private static final double defaultComHeightParameter = 0.6;
-   private static final double defaultXGaitLength = 1.0;
-   private static final double defaultXGaitWidth = 0.25;
 
    private final DoubleParameter yawScaleParameter = new DoubleParameter("yawScale", registry, 0.15);
    private final DoubleParameter pitchScaleParameter = new DoubleParameter("pitchScale", registry, 0.15);
@@ -52,8 +50,6 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
 
    // xgait step parameters
    private final IntegerParameter xGaitStepPlanSize = new IntegerParameter("xGaitStepPlanSize", registry, 10);
-   private final DoubleParameter xGaitStanceWidth = new DoubleParameter("xGaitStanceWidth", registry, defaultXGaitWidth);
-   private final DoubleParameter xGaitStanceLength = new DoubleParameter("xGaitStanceLength", registry, defaultXGaitLength);
    private final DoubleParameter[] xGaitStepDuration = new DoubleParameter[2];
    private final DoubleParameter[] xGaitEndDoubleSupportDuration = new DoubleParameter[2];
    private final DoubleParameter[] xGaitEndPhaseShift = new DoubleParameter[2];
@@ -61,18 +57,16 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final PacketCommunicator packetCommunicator;
    private final QuadrupedReferenceFrames referenceFrames;
    private InputValueIntegrator comZ;
-   private final QuadrupedXGaitPlanner xGaitStepPlanner;
-   private final QuadrupedXGaitSettings xGaitSettings;
+   private final QuadrupedXGaitPlanner xGaitStepPlanner = new QuadrupedXGaitPlanner();
+   private final YoQuadrupedXGaitSettingsReadOnly xGaitSettings;
 
-   public QuadrupedStepTeleopMode(PacketCommunicator packetCommunicator, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public QuadrupedStepTeleopMode(PacketCommunicator packetCommunicator, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly xGaitSettings,
+                                  QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.packetCommunicator = packetCommunicator;
       this.referenceFrames = referenceFrames;
-      this.comZ = new InputValueIntegrator(DT, defaultComHeightParameter);
-      this.xGaitStepPlanner = new QuadrupedXGaitPlanner();
-      this.xGaitSettings = new QuadrupedXGaitSettings();
-      this.xGaitSettings.setStanceWidth(defaultXGaitWidth);
-      this.xGaitSettings.setStanceLength(defaultXGaitLength);
+      this.comZ = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
+      this.xGaitSettings = new YoQuadrupedXGaitSettingsReadOnly(xGaitSettings, null, registry);
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);
       xGaitStepDuration[1] = new DoubleParameter("xGaitStepDurationMode1", registry, 0.33);
       xGaitEndDoubleSupportDuration[0] = new DoubleParameter("xGaitEndDoubleSupportDurationMode0", registry, 1.0);
@@ -203,7 +197,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       packetCommunicator.send(timedStepPacket);
    }
 
-   private void sendXGaitFootsteps(QuadrupedXGaitSettings xGaitSettings, Vector3D planarVelocity, int numberOfSteps)
+   private void sendXGaitFootsteps(QuadrupedXGaitSettingsReadOnly xGaitSettings, Vector3D planarVelocity, int numberOfSteps)
    {
       ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       FramePoint3D supportCentroid = new FramePoint3D();
