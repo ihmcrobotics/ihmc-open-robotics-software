@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 
-public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenchCommand>
+public class VirtualWrenchCommand implements VirtualModelControlCommand<VirtualWrenchCommand>
 {
    private RigidBody controlledBody;
    private String rigidBodyName;
