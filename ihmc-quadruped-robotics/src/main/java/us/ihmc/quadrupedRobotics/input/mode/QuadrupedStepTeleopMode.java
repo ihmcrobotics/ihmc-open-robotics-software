@@ -22,7 +22,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
@@ -58,7 +58,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final QuadrupedReferenceFrames referenceFrames;
    private InputValueIntegrator comZ;
    private final QuadrupedXGaitPlanner xGaitStepPlanner = new QuadrupedXGaitPlanner();
-   private final YoQuadrupedXGaitSettingsReadOnly xGaitSettings;
+   private final YoQuadrupedXGaitSettings xGaitSettings;
 
    public QuadrupedStepTeleopMode(PacketCommunicator packetCommunicator, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly xGaitSettings,
                                   QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
@@ -66,7 +66,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       this.packetCommunicator = packetCommunicator;
       this.referenceFrames = referenceFrames;
       this.comZ = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
-      this.xGaitSettings = new YoQuadrupedXGaitSettingsReadOnly(xGaitSettings, null, registry);
+      this.xGaitSettings = new YoQuadrupedXGaitSettings(xGaitSettings, null, registry);
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);
       xGaitStepDuration[1] = new DoubleParameter("xGaitStepDurationMode1", registry, 0.33);
       xGaitEndDoubleSupportDuration[0] = new DoubleParameter("xGaitEndDoubleSupportDurationMode0", registry, 1.0);
