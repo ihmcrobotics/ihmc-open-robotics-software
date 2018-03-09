@@ -2,6 +2,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 
 import java.util.List;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -27,6 +28,13 @@ public class CartRobotRacingEnvironment implements CommonAvatarEnvironmentInterf
                                       -plateThickness - plateHeightGap * i, -plateHeightGap * i);
       }
 
+      combinedTerrainObject.addSphere(0.5, 0.0, 0.0, 0.05, YoAppearance.AliceBlue());
+
+      RigidBodyTransform cylinderObstacleTransform = new RigidBodyTransform();
+      cylinderObstacleTransform.appendRollRotation(0.5 * Math.PI);
+
+      combinedTerrainObject.addCylinder(cylinderObstacleTransform, 0.3, 0.05, YoAppearance.AliceBlue());
+      
       if (useRampTerrain)
          combinedTerrainObject.addRamp(0.8, -0.7, 2.0, 0.7, 0.5, YoAppearance.AliceBlue());
    }
