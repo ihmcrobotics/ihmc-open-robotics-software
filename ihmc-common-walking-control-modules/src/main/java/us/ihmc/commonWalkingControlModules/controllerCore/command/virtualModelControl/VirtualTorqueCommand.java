@@ -20,7 +20,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
  * {@link WholeBodyControllerCore} via the {@link ControllerCoreCommand}.
  * <p>
  * The objective of a {@link VirtualTorqueCommand} is to notify the virtual model control
- * module that the given end-effector is to execute a desired force during the
+ * module that the given end-effector is to execute a desired torque during the
  * next control tick.
  * </p>
  * <p>
