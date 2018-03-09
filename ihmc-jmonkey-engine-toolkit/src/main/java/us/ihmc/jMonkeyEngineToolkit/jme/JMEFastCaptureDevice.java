@@ -433,6 +433,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
                                        float projectionZPos, Vector3f store)
    {
       
+      
+      
       float viewPortLeft = viewport.getCamera().getViewPortLeft();
       float viewPortRight = viewport.getCamera().getViewPortRight();
       float viewPortTop = viewport.getCamera().getViewPortTop();
@@ -497,7 +499,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       imageBuffer.position(width * height * 4);
       FloatBuffer depthBuffer = imageBuffer.asFloatBuffer();
       
-      Matrix4f inverseMat = new Matrix4f(viewport.getCamera().getViewMatrix());
+      Matrix4f inverseMat = new Matrix4f(viewport.getCamera().getViewProjectionMatrix());
       inverseMat.invertLocal();
       
       Vector3f store = new Vector3f();
