@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.ControlledBodiesCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
@@ -53,9 +54,9 @@ public enum ControllerCoreCommandType
 
    /**
     * Represents a command for the {@link WholeBodyControllerCore} given in jointspace. This could be a {@link JointspaceVelocityCommand} for the
-    * {@link WholeBodyInverseKinematicsSolver}, a {@link JointspaceAccelerationCommand} for the {@link WholeBodyInverseDynamicsSolver}, or a
-    * {@link SpatialFeedbackControlCommand} for the {@link WholeBodyFeedbackController}. It will also include a joint torque for the
-    * {@link WholeBodyVirtualModelControlSolver}.
+    * {@link WholeBodyInverseKinematicsSolver}, a {@link JointspaceAccelerationCommand} for the {@link WholeBodyInverseDynamicsSolver}, a
+    * {@link JointTorqueCommand} for the {@link WholeBodyVirtualModelControlSolver}, or a {@link SpatialFeedbackControlCommand} for the
+    * {@link WholeBodyFeedbackController}.
     */
    JOINTSPACE,
 
