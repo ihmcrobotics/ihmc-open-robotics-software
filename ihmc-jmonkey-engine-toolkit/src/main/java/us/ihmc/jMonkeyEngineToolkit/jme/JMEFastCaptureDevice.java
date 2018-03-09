@@ -344,9 +344,19 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
          if (alreadyClosing)
             return;
 
-         if (!cameraStreamer.isReadyForNewData())
+         if(cameraStreamer != null)
          {
-            return;
+            if (!cameraStreamer.isReadyForNewData())
+            {
+               return;
+            }
+         }
+         else
+         {
+            if (!rgbdStreamer.isReadyForNewData())
+            {
+               return;
+            }
          }
 
          if (!CAPTURE_IMMEDIATLY_AFTER_PREVIOUS_VIDEOFRAME)
@@ -400,10 +410,21 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
          synchronized (syncObject)
          {
             captureFrame = true;
-            timeStamp = cameraStreamer.getTimeStamp();
-            position = cameraStreamer.getCameraPosition();
-            orientation = cameraStreamer.getCameraOrientation();
-            fov = cameraStreamer.getFieldOfView();
+            
+            if(cameraStreamer != null)
+            {
+               timeStamp = cameraStreamer.getTimeStamp();
+               position = cameraStreamer.getCameraPosition();
+               orientation = cameraStreamer.getCameraOrientation();
+               fov = cameraStreamer.getFieldOfView();
+            }
+            else
+            {
+               timeStamp = rgbdStreamer.getTimeStamp();
+               position = rgbdStreamer.getCameraPosition();
+               orientation = rgbdStreamer.getCameraOrientation();
+               fov = rgbdStreamer.getFieldOfView();
+            }
          }
       }
    }
@@ -627,6 +648,9 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       captureHolder = null;
 
       cameraStreamer = null;
+      rgbdStreamer = null;
+      points = null;
+      colors = null;
    }
 
    @Override
