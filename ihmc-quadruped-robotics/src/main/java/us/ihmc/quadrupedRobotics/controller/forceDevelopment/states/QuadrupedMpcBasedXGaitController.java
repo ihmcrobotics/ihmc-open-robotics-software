@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -25,10 +24,9 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStepCrossoverProjection;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
+import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
@@ -45,7 +43,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 {
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
-   private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
+   private final YoQuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final YoDouble robotTimestamp;
    private final double controlDT;
    private final double gravity;
@@ -101,7 +99,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private double bodyYawSetpoint;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final QuadrantDependentList<FramePoint3D> groundPlanePositions;
-   private final QuadrupedXGaitSettings xGaitSettings;
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final ArrayList<QuadrupedTimedStep> xGaitPreviewSteps;
    private final EndDependentList<QuadrupedTimedStep> xGaitCurrentSteps;
@@ -120,12 +117,11 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
    public QuadrupedMpcBasedXGaitController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
                                            QuadrupedControlManagerFactory controlManagerFactory, QuadrupedPostureInputProviderInterface postureProvider,
-                                           QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider)
+                                           QuadrupedPlanarVelocityInputProvider planarVelocityProvider)
    {
       this.controllerToolbox = controllerToolbox;
       this.postureProvider = postureProvider;
       this.planarVelocityProvider = planarVelocityProvider;
-      this.xGaitSettingsProvider = xGaitSettingsProvider;
       this.robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       this.controlDT = runtimeEnvironment.getControlDT();
       this.gravity = 9.81;
@@ -176,7 +172,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       {
          groundPlanePositions.set(robotQuadrant, new FramePoint3D());
       }
-      xGaitSettings = new QuadrupedXGaitSettings();
+      xGaitSettings = new YoQuadrupedXGaitSettingsReadOnly(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
       xGaitStepPlanner = new QuadrupedXGaitPlanner();
       xGaitPreviewSteps = new ArrayList<>(NUMBER_OF_PREVIEW_STEPS);
       for (int i = 0; i < NUMBER_OF_PREVIEW_STEPS; i++)
@@ -261,8 +257,6 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
    private void updateXGaitSettings()
    {
-      xGaitSettingsProvider.getSettings(xGaitSettings);
-
       // increase stance dimensions to prevent self collisions
       double strideRotation = planarVelocityProvider.get().getZ() * xGaitSettings.getStepDuration();
       double strideLength = Math.abs(2 * planarVelocityProvider.get().getX() * xGaitSettings.getStepDuration());

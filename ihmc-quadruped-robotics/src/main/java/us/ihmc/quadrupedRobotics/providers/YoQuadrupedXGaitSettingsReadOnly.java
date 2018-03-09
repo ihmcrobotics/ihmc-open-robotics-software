@@ -3,22 +3,15 @@ package us.ihmc.quadrupedRobotics.providers;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedXGaitSettingsPacket;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedXGaitSettingsInputProvider
+public class YoQuadrupedXGaitSettingsReadOnly implements QuadrupedXGaitSettingsReadOnly
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private static final double defaultStanceLength = 1.1;
-   private static final double defaultStanceWidth = 0.2;
-   private static final double defaultStepGroundClearance = 0.1;
-   private static final double defaultStepDuration = 0.33;
-   private static final double defaultEndDoubleSupportDuration = 0.0;
-   private static final double defaultEndPhaseShift = 180;
 
    private final DoubleParameter stanceLengthLowerLimitParameter = new DoubleParameter("stanceLengthLowerLimit", registry, 0.8);
    private final DoubleParameter stanceLengthUpperLimitParameter = new DoubleParameter("stanceLengthUpperLimit", registry, 1.4);
@@ -33,28 +26,21 @@ public class QuadrupedXGaitSettingsInputProvider
    private final DoubleParameter endPhaseShiftLowerLimitParameter = new DoubleParameter("endPhaseShiftLowerLimit", registry, 0);
    private final DoubleParameter endPhaseShiftUpperLimitParameter = new DoubleParameter("endPhaseShiftUpperLimit", registry, 359);
 
-   private final YoDouble yoStanceLength;
-   private final YoDouble yoStanceWidth;
-   private final YoDouble yoStepGroundClearance;
-   private final YoDouble yoStepDuration;
-   private final YoDouble yoEndDoubleSupportDuration;
-   private final YoDouble yoEndPhaseShift;
+   private final YoDouble yoStanceLength = new YoDouble("stanceLengthInput", registry);
+   private final YoDouble yoStanceWidth = new YoDouble("stanceWidthInput", registry);
+   private final YoDouble yoStepGroundClearance = new YoDouble("stepGroundClearanceInput", registry);
+   private final YoDouble yoStepDuration = new YoDouble("stepDurationInput", registry);
+   private final YoDouble yoEndDoubleSupportDuration = new YoDouble("endDoubleSupportDurationInput", registry);
+   private final YoDouble yoEndPhaseShift = new YoDouble("endPhaseShiftInput", registry);
 
-   public QuadrupedXGaitSettingsInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
+   public YoQuadrupedXGaitSettingsReadOnly(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
-      yoStanceLength = new YoDouble("stanceLengthInput", registry);
-      yoStanceWidth = new YoDouble("stanceWidthInput", registry);
-      yoStepGroundClearance = new YoDouble("stepGroundClearanceInput", registry);
-      yoStepDuration = new YoDouble("stepDurationInput", registry);
-      yoEndDoubleSupportDuration = new YoDouble("endDoubleSupportDurationInput", registry);
-      yoEndPhaseShift = new YoDouble("endPhaseShiftInput", registry);
-
-      yoStanceLength.set(defaultStanceLength);
-      yoStanceWidth.set(defaultStanceWidth);
-      yoStepGroundClearance.set(defaultStepGroundClearance);
-      yoStepDuration.set(defaultStepDuration);
-      yoEndDoubleSupportDuration.set(defaultEndDoubleSupportDuration);
-      yoEndPhaseShift.set(defaultEndPhaseShift);
+      yoStanceLength.set(defaultXGaitSettings.getStanceLength());
+      yoStanceWidth.set(defaultXGaitSettings.getStanceWidth());
+      yoStepGroundClearance.set(defaultXGaitSettings.getStepGroundClearance());
+      yoStepDuration.set(defaultXGaitSettings.getStepDuration());
+      yoEndDoubleSupportDuration.set(defaultXGaitSettings.getEndDoubleSupportDuration());
+      yoEndPhaseShift.set(defaultXGaitSettings.getEndPhaseShift());
 
       if (globalDataProducer != null)
       {
@@ -63,7 +49,7 @@ public class QuadrupedXGaitSettingsInputProvider
             @Override
             public void receivedPacket(QuadrupedXGaitSettingsPacket xGaitSettingsPacket)
             {
-               QuadrupedXGaitSettings xGaitSettings = xGaitSettingsPacket.get();
+               QuadrupedXGaitSettingsReadOnly xGaitSettings = xGaitSettingsPacket.get();
                yoStanceLength.set(MathTools.clamp(xGaitSettings.getStanceLength(), stanceLengthLowerLimitParameter.getValue(), stanceLengthUpperLimitParameter.getValue()));
                yoStanceWidth.set(MathTools.clamp(xGaitSettings.getStanceWidth(), stanceWidthLowerLimitParameter.getValue(), stanceWidthUpperLimitParameter.getValue()));
                yoStepGroundClearance.set(MathTools.clamp(xGaitSettings.getStepGroundClearance(), stepGroundClearanceLowerLimitParameter.getValue(), stepGroundClearanceUpperLimitParameter.getValue()));
@@ -77,18 +63,72 @@ public class QuadrupedXGaitSettingsInputProvider
       parentRegistry.addChild(registry);
    }
 
-   public void getSettings(QuadrupedXGaitSettings xGaitSettings)
+   @Override
+   public double getStanceLength()
    {
-      xGaitSettings.setStanceLength(yoStanceLength.getDoubleValue());
-      xGaitSettings.setStanceWidth(yoStanceWidth.getDoubleValue());
-      xGaitSettings.setStepGroundClearance(yoStepGroundClearance.getDoubleValue());
-      xGaitSettings.setStepDuration(yoStepDuration.getDoubleValue());
-      xGaitSettings.setEndDoubleSupportDuration(yoEndDoubleSupportDuration.getDoubleValue());
-      xGaitSettings.setEndPhaseShift(yoEndPhaseShift.getDoubleValue());
+      return yoStanceLength.getDoubleValue();
    }
 
-   public static void main(String[] args)
+   @Override
+   public double getStanceWidth()
    {
-      System.out.println(Double.MAX_VALUE);
+      return yoStanceWidth.getDoubleValue();
    }
+
+   @Override
+   public double getStepGroundClearance()
+   {
+      return yoStepGroundClearance.getDoubleValue();
+   }
+
+   @Override
+   public double getStepDuration()
+   {
+      return yoStepDuration.getDoubleValue();
+   }
+
+   @Override
+   public double getEndDoubleSupportDuration()
+   {
+      return yoEndDoubleSupportDuration.getDoubleValue();
+   }
+
+   @Override
+   public double getEndPhaseShift()
+   {
+      return yoEndPhaseShift.getDoubleValue();
+   }
+
+
+
+   public void setStanceLength(double stanceLength)
+   {
+      yoStanceLength.set(stanceLength);
+   }
+
+   public void setStanceWidth(double stanceWidth)
+   {
+      yoStanceWidth.set(stanceWidth);
+   }
+
+   public void setStepGroundClearance(double stepGroundClearance)
+   {
+      yoStepGroundClearance.set(stepGroundClearance);
+   }
+
+   public void setStepDuration(double stepDuration)
+   {
+      yoStepDuration.set(stepDuration);
+   }
+
+   public void setEndDoubleSupportDuration(double endDoubleSupportDuration)
+   {
+      yoEndDoubleSupportDuration.set(endDoubleSupportDuration);
+   }
+
+   public void setEndPhaseShift(double endPhaseShift)
+   {
+      yoEndPhaseShift.set(endPhaseShift);
+   }
+
 }

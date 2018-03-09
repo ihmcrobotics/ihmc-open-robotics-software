@@ -4,10 +4,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedXGaitSettingsInputProvider;
+import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -31,7 +30,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    private static int NUMBER_OF_PREVIEW_STEPS = 16;
 
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
-   private final QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider;
+   private final YoQuadrupedXGaitSettingsReadOnly xGaitSettings;
    private final FramePoint3D supportCentroid;
    private final ReferenceFrame supportFrame;
    private final ReferenceFrame bodyZUpFrame;
@@ -41,17 +40,16 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
 
    private final YoDouble bodyYaw;
    private final YoFrameOrientation bodyOrientation;
-   private final QuadrupedXGaitSettings xGaitSettings;
    private final QuadrupedXGaitPlanner xGaitStepPlanner;
    private final EndDependentList<YoQuadrupedTimedStep> xGaitCurrentSteps;
    private final ArrayList<YoQuadrupedTimedStep> xGaitPreviewSteps;
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
 
-   public QuadrupedXGaitStepStream(QuadrupedPlanarVelocityInputProvider planarVelocityProvider, QuadrupedXGaitSettingsInputProvider xGaitSettingsProvider,
+   public QuadrupedXGaitStepStream(QuadrupedPlanarVelocityInputProvider planarVelocityProvider, YoQuadrupedXGaitSettingsReadOnly xGaitSettings,
          QuadrupedReferenceFrames referenceFrames, double controlDT, YoDouble timestamp, YoVariableRegistry parentRegistry)
    {
       this.planarVelocityProvider = planarVelocityProvider;
-      this.xGaitSettingsProvider = xGaitSettingsProvider;
+      this.xGaitSettings = xGaitSettings;
       this.supportCentroid = new FramePoint3D();
       this.supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       this.bodyZUpFrame = referenceFrames.getBodyZUpFrame();
@@ -61,7 +59,6 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
 
       this.bodyYaw = new YoDouble("bodyYaw", registry);
       this.bodyOrientation = new YoFrameOrientation("bodyOrientation", worldFrame, registry);
-      this.xGaitSettings = new QuadrupedXGaitSettings();
       this.xGaitStepPlanner = new QuadrupedXGaitPlanner();
       this.xGaitCurrentSteps = new EndDependentList<>();
       for (RobotEnd robotEnd : RobotEnd.values)
@@ -91,8 +88,6 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
 
    private void updateXGaitSettings()
    {
-      xGaitSettingsProvider.getSettings(xGaitSettings);
-
       // increase stance dimensions as a function of velocity to prevent self collisions
       double strideRotation = planarVelocityProvider.get().getZ() * xGaitSettings.getStepDuration();
       double strideLength = Math.abs(2 * planarVelocityProvider.get().getX() * xGaitSettings.getStepDuration());

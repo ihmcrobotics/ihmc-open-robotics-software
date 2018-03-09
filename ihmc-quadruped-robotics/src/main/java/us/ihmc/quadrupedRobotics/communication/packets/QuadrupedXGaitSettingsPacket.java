@@ -2,17 +2,17 @@ package us.ihmc.quadrupedRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 
 public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsPacket>
 {
-   private final QuadrupedXGaitSettings xGaitSettings;
+   public QuadrupedXGaitSettings xGaitSettings;
 
    public QuadrupedXGaitSettingsPacket()
    {
-      this.xGaitSettings = new QuadrupedXGaitSettings();
    }
 
-   public QuadrupedXGaitSettingsPacket(QuadrupedXGaitSettings xGaitSettings)
+   public QuadrupedXGaitSettingsPacket(QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       this.xGaitSettings = new QuadrupedXGaitSettings();
       this.xGaitSettings.set(xGaitSettings);
@@ -28,11 +28,6 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
    public QuadrupedXGaitSettings get()
    {
       return xGaitSettings;
-   }
-
-   public void get(QuadrupedXGaitSettings xGaitSettings)
-   {
-      xGaitSettings.set(this.xGaitSettings);
    }
 
    @Override

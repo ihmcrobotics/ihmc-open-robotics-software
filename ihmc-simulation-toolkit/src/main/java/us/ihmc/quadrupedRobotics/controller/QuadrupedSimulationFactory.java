@@ -33,6 +33,8 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.stateEstimator.SimulatedQuadrupedFootSwitchFactory;
@@ -106,6 +108,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedReferenceFrames> referenceFrames = new RequiredFactoryField<>("referenceFrames");
    private final RequiredFactoryField<QuadrupedPositionBasedCrawlControllerParameters> positionBasedCrawlControllerParameters = new RequiredFactoryField<>("positionBasedCrawlControllerParameters");
    private final RequiredFactoryField<JointDesiredOutputList> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
+   private final RequiredFactoryField<QuadrupedXGaitSettingsReadOnly> xGaitSettings = new RequiredFactoryField<>("xGaitSettings");
 
    private final OptionalFactoryField<SimulatedElasticityParameters> simulatedElasticityParameters = new OptionalFactoryField<>("simulatedElasticityParameters");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
@@ -282,7 +285,8 @@ public class QuadrupedSimulationFactory
       QuadrupedRuntimeEnvironment runtimeEnvironment = new QuadrupedRuntimeEnvironment(controlDT.get(), sdfRobot.get().getYoTime(), fullRobotModel.get(),
                                                                                        jointDesiredOutputList.get(), sdfRobot.get().getRobotsYoVariableRegistry(),
                                                                                        yoGraphicsListRegistry, yoGraphicsListRegistryForDetachedOverhead,
-                                                                                       globalDataProducer, contactableFeet, footSwitches, gravity.get());
+                                                                                       globalDataProducer, contactableFeet, xGaitSettings.get(), footSwitches,
+                                                                                       gravity.get());
       switch (controlMode.get())
       {
       case FORCE:
@@ -616,6 +620,11 @@ public class QuadrupedSimulationFactory
    public void setPositionBasedCrawlControllerParameters(QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters)
    {
       this.positionBasedCrawlControllerParameters.set(positionBasedCrawlControllerParameters);
+   }
+
+   public void setXGaitSettings(QuadrupedXGaitSettingsReadOnly xGaitSettings)
+   {
+      this.xGaitSettings.set(xGaitSettings);
    }
 
    public void setGroundProfile3D(GroundProfile3D groundProfile3D)

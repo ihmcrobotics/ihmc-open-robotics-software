@@ -8,11 +8,12 @@ import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.commons.MathTools;
+import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettingsReadOnly;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -28,14 +29,6 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private static final double defaultComHeightParameter = 0.60;
-   private static final double defaultStanceLengthParameter = 1.0;
-   private static final double defaultStanceWidthParameter = 0.35;
-   private static final double defaultStepGroundClearanceParameter = 0.075;
-   private static final double defaultStepDurationParameter = 0.35;
-   private static final double defaultEndDoubleSupportDurationParameter = 0.1;
-   private static final double defaultEndPhaseShiftParameter = 180;
-
    private final DoubleParameter xScaleParameter = new DoubleParameter("xScale", registry, 0.20);
    private final DoubleParameter rollScaleParameter = new DoubleParameter("rollScale", registry, 0.15);
    private final DoubleParameter pitchScaleParameter = new DoubleParameter("pitchScale", registry, 0.15);
@@ -50,23 +43,19 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
 
    private final PacketCommunicator packetCommunicator;
    private final QuadrupedReferenceFrames referenceFrames;
-   private final QuadrupedXGaitSettings xGaitSettings;
+   private final YoQuadrupedXGaitSettingsReadOnly xGaitSettings;
 
    private XGaitInputMode mode = XGaitInputMode.POSITION;
    private InputValueIntegrator comZ;
 
-   public QuadrupedXGaitTeleopMode(PacketCommunicator packetCommunicator, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   public QuadrupedXGaitTeleopMode(PacketCommunicator packetCommunicator, QuadrupedPhysicalProperties physicalProperties,
+                                   QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.packetCommunicator = packetCommunicator;
       this.referenceFrames = referenceFrames;
-      this.comZ = new InputValueIntegrator(DT, defaultComHeightParameter);
-      this.xGaitSettings = new QuadrupedXGaitSettings();
-      this.xGaitSettings.setStanceLength(defaultStanceLengthParameter);
-      this.xGaitSettings.setStanceWidth(defaultStanceWidthParameter);
-      this.xGaitSettings.setStepGroundClearance(defaultStepGroundClearanceParameter);
-      this.xGaitSettings.setStepDuration(defaultStepDurationParameter);
-      this.xGaitSettings.setEndDoubleSupportDuration(defaultEndDoubleSupportDurationParameter);
-      this.xGaitSettings.setEndPhaseShift(defaultEndPhaseShiftParameter);
+      this.comZ = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
+      xGaitSettings = new YoQuadrupedXGaitSettingsReadOnly(defaultXGaitSettings, null, registry);
+
       parentRegistry.addChild(registry);
    }
 
@@ -88,7 +77,6 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       }
       BodyOrientationPacket orientationPacket = new BodyOrientationPacket(bodyYaw, bodyPitch, bodyRoll);
       packetCommunicator.send(orientationPacket);
-
 
       double xVelocity = 0.0;
       double yVelocity = 0.0;
@@ -124,7 +112,8 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       packetCommunicator.send(comPositionPacket);
 
       double deltaTrigger = (channels.get(XBoxOneMapping.LEFT_TRIGGER) - channels.get(XBoxOneMapping.RIGHT_TRIGGER));
-      xGaitSettings.setEndDoubleSupportDuration(MathTools.clamp(xGaitSettings.getEndDoubleSupportDuration() + deltaTrigger * deltaDoubleSupportParameter.getValue(), 0.1, 1));
+      xGaitSettings.setEndDoubleSupportDuration(
+            MathTools.clamp(xGaitSettings.getEndDoubleSupportDuration() + deltaTrigger * deltaDoubleSupportParameter.getValue(), 0.1, 1));
       QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
       packetCommunicator.send(settingsPacket);
    }
