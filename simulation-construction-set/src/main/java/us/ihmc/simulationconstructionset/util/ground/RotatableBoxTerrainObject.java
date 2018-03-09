@@ -26,7 +26,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
    private final Point3D intersectionA = new Point3D();
    private final Point3D intersectionB = new Point3D();
 
-   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
+   private final ArrayList<Shape3D<?>> terrainCollisionShapes = new ArrayList<>();
    
    public RotatableBoxTerrainObject(Box3D box, AppearanceDefinition appearance)
    {
@@ -168,7 +168,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
    }
    
    @Override
-   public List<? extends Shape3D> getTerrainCollisionShapes()
+   public List<Shape3D<?>> getTerrainCollisionShapes()
    {
       return terrainCollisionShapes;
    }

@@ -17,7 +17,7 @@ public class SphereTerrainObject implements TerrainObject3D, HeightMapWithNormal
    private final BoundingBox3D boundingBox;
    private Graphics3DObject linkGraphics;
 
-   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
+   private final ArrayList<Shape3D<?>> terrainCollisionShapes = new ArrayList<>();
 
    public SphereTerrainObject(double centerX, double centerY, double centerZ, double radius, AppearanceDefinition appearance)
    {
@@ -171,7 +171,7 @@ public class SphereTerrainObject implements TerrainObject3D, HeightMapWithNormal
    }
 
    @Override
-   public List<? extends Shape3D> getTerrainCollisionShapes()
+   public List<Shape3D<?>> getTerrainCollisionShapes()
    {
       return terrainCollisionShapes;
    }

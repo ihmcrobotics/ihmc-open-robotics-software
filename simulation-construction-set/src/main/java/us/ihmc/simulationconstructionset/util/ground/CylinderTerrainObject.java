@@ -29,7 +29,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    private final Point3D tempPoint = new Point3D();
    private final Vector3D zVector = new Vector3D(0.0, 0.0, -1.0);
    
-   private final ArrayList<Shape3D> terrainCollisionShapes = new ArrayList<>();
+   private final ArrayList<Shape3D<?>> terrainCollisionShapes = new ArrayList<>();
 
    // TODO: change box based surface equations to cylinder surface equations
 
@@ -214,7 +214,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    }
    
    @Override
-   public List<? extends Shape3D> getTerrainCollisionShapes()
+   public List<Shape3D<?>> getTerrainCollisionShapes()
    {
       return terrainCollisionShapes;
    }
