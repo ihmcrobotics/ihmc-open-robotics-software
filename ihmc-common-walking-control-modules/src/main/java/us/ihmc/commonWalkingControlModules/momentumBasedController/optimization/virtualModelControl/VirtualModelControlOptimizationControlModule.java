@@ -14,20 +14,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ExternalWrenchHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.GroundContactForceOptimizationControlModule;
+import us.ihmc.commonWalkingControlModules.virtualModelControl.NewVirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class VirtualModelControlOptimizationControlModule
@@ -42,6 +40,7 @@ public class VirtualModelControlOptimizationControlModule
    private final SpatialForceVector centroidalMomentumRateSolution = new SpatialForceVector();
 
    private final DenseMatrix64F momentumSelectionMatrix = new DenseMatrix64F(0, 0);
+   private final SelectionMatrix6D centroidalMomentumSelectionMatrix = new SelectionMatrix6D();
 
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
@@ -212,9 +211,111 @@ public class VirtualModelControlOptimizationControlModule
       }
    }
 
+   public void compute(NewVirtualModelControlSolution virtualModelControlSolutionToPack) throws NewVirtualModelControlModuleException
+   {
+      groundReactionWrenches.clear();
+
+      processSelectionMatrices();
+
+      DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
+      DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
+      CommonOps.add(additionalExternalWrench, gravityWrench, additionalWrench);
+
+      groundContactForceOptimization.processMomentumRateCommand(additionalWrench);
+
+      NoConvergenceException noConvergenceException = null;
+
+      // use the force optimization algorithm
+      if (useMomentumQP)
+      {
+         try
+         {
+            groundContactForceOptimization.compute(groundReactionWrenches);
+         }
+         catch (NoConvergenceException e)
+         {
+            if (!hasNotConvergedInPast.getBooleanValue())
+            {
+               e.printStackTrace();
+               PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            }
+
+            hasNotConvergedInPast.set(true);
+            hasNotConvergedCounts.increment();
+
+            noConvergenceException = e;
+         }
+      }
+      // divide the load evenly among all contacting bodies
+      else
+      {
+         momentumObjective.set(groundContactForceOptimization.getMomentumObjective());
+
+         double loadFraction = 1.0 / (double) bodiesInContact.size();
+         CommonOps.scale(loadFraction, momentumObjective);
+
+         for (int i = 0; i < contactablePlaneBodies.size(); i++)
+         {
+            RigidBody controlledBody = contactablePlaneBodies.get(i).getRigidBody();
+
+            Wrench wrench;
+            if (bodiesInContact.contains(controlledBody))
+               wrench = new Wrench(centerOfMassFrame, centerOfMassFrame, momentumObjective);
+            else
+               wrench = new Wrench(centerOfMassFrame, centerOfMassFrame, new DenseMatrix64F(Wrench.SIZE, 1));
+
+            wrench.changeFrame(controlledBody.getBodyFixedFrame());
+            wrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
+            groundReactionWrenches.put(controlledBody, wrench);
+         }
+      }
+      externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
+
+      // get all forces for all contactable bodies
+      Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
+      List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
+
+      // record the momentum rate solution coming from the contact forces, minus gravity fixme we don't currently include external forces
+      contactWrench.zero();
+      for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
+      {
+         externalWrenchSolution.get(rigidBody).changeFrame(centerOfMassFrame);
+         externalWrenchSolution.get(rigidBody).getMatrix(tmpWrench);
+         CommonOps.add(contactWrench, tmpWrench, contactWrench);
+         externalWrenchSolution.get(rigidBody).changeFrame(rigidBody.getBodyFixedFrame());
+      }
+      CommonOps.add(contactWrench, gravityWrench, totalWrench);
+      centroidalMomentumRateSolution.set(centerOfMassFrame, totalWrench);
+
+      // we don't nominally want this stuff
+      if (DEBUG)
+      {
+         achievedLinearMomentumRate.set(totalWrench.get(3), totalWrench.get(4), totalWrench.get(5));
+         achievedAngularMomentumRate.set(totalWrench.get(0), totalWrench.get(1), totalWrench.get(2));
+
+         for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
+         {
+            if (contactWrenchSolutions.containsKey(rigidBody))
+               contactWrenchSolutions.get(rigidBody).set(externalWrenchSolution.get(rigidBody));
+         }
+      }
+
+      virtualModelControlSolutionToPack.setJointsToCompute(jointsToOptimizeFor);
+      virtualModelControlSolutionToPack.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
+      virtualModelControlSolutionToPack.setBodiesInContact(bodiesInContact);
+      virtualModelControlSolutionToPack.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
+      virtualModelControlSolutionToPack.setCentroidalMomentumSelectionMatrix(centroidalMomentumSelectionMatrix);
+
+      if (noConvergenceException != null)
+      {
+         throw new NewVirtualModelControlModuleException(noConvergenceException, virtualModelControlSolutionToPack);
+      }
+   }
+
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       groundContactForceOptimization.submitMomentumRateCommand(command);
+      command.getSelectionMatrix(centroidalMomentumSelectionMatrix);
       command.getSelectionMatrix(centerOfMassFrame, momentumSelectionMatrix);
    }
 
@@ -278,13 +379,6 @@ public class VirtualModelControlOptimizationControlModule
 
       if (command.getNumberOfContactPoints() > 0)
          bodiesInContact.add(command.getContactingRigidBody());
-   }
-
-   public void submitExternalWrenchCommand(ExternalWrenchCommand command)
-   {
-      RigidBody rigidBody = command.getRigidBody();
-      Wrench wrench = command.getExternalWrench();
-      externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
    }
 
    public void submitExternalWrench(RigidBody rigidBody, Wrench wrench)
