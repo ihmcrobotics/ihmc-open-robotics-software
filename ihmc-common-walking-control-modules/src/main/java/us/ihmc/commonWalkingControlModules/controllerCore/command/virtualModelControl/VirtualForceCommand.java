@@ -280,6 +280,25 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
       desiredLinearForce.get(0, desiredLinearForceToPack);
    }
 
+   /**
+    * Packs the control frame and desired wrench held in this command.
+    * <p>
+    * The first argument {@code controlFrameToPack} is required to properly express the
+    * {@code desiredWrenchToPack}. Indeed the desired wrench has to be
+    * expressed in the control frame.
+    * </p>
+    *
+    * @param controlFrameToPack the frame of interest for controlling the end-effector. Modified.
+    * @param desiredWrenchToPack the desired wrench of the end-effector
+    *           with respect to the base, expressed in the control frame. Modified.
+    */
+   public void getDesiredWrench(PoseReferenceFrame controlFrameToPack, Wrench desiredWrenchToPack)
+   {
+      getControlFrame(controlFrameToPack);
+      desiredWrenchToPack.setToZero(endEffector.getBodyFixedFrame(), controlFrameToPack);
+      desiredWrenchToPack.setLinearPart(desiredLinearForce);
+   }
+
    /** {@inheritDoc} */
    @Override
    public void getDesiredEffort(DenseMatrix64F desiredLinearForceToPack)

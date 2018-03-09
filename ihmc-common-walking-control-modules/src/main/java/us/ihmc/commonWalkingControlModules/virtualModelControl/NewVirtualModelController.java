@@ -28,7 +28,6 @@ public class NewVirtualModelController
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tempFullObjective = new DenseMatrix64F(Wrench.SIZE, 1);
 
-
    private final DenseMatrix64F fullEffortMatrix;
 
    public NewVirtualModelController(JointIndexHandler jointIndexHandler)
@@ -177,5 +176,10 @@ public class NewVirtualModelController
       CommonOps.multAddTransA(tempFullJacobian, tempFullObjective, fullEffortMatrix);
 
       return true;
+   }
+
+   public void populateTorqueSolution(NewVirtualModelControlSolution solutionToPack)
+   {
+      solutionToPack.setJointTorques(fullEffortMatrix);
    }
 }
