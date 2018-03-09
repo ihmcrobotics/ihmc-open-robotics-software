@@ -165,26 +165,41 @@ public enum ControllerCoreCommandType
 
    private static final ControllerCoreCommandType[] feedbackControlCommands = { TASKSPACE, POINT, ORIENTATION, JOINTSPACE, MOMENTUM, COMMAND_LIST };
 
+   /**
+    * Gets the list of available commands for the {@link WholeBodyInverseKinematicsSolver}.
+    */
    public static ControllerCoreCommandType[] getInverseKinematicsCommands()
    {
       return inverseKinematicsCommands;
    }
 
+   /**
+    * Gets the list of available commands for the {@link WholeBodyInverseDynamicsSolver}.
+    */
    public static ControllerCoreCommandType[] getInverseDynamicsCommands()
    {
       return inverseDynamicsCommands;
    }
 
+   /**
+    * Gets the list of available commands for the {@link WholeBodyVirtualModelControlSolver}.
+    */
    public static ControllerCoreCommandType[] getVirtualModelControlCommands()
    {
       return virtualModelControlCommands;
    }
 
+   /**
+    * Gets the list of available commands for the {@link WholeBodyFeedbackController}.
+    */
    public static ControllerCoreCommandType[] getFeedbackControlCommands()
    {
       return feedbackControlCommands;
    }
 
+   /**
+    * Polls whether the command {@param commandType} is an available command for the {@link WholeBodyInverseKinematicsSolver}.
+    */
    public static boolean isInverseKinematicsCommand(ControllerCoreCommandType commandType)
    {
       for (ControllerCoreCommandType commandPossibility : getInverseKinematicsCommands())
@@ -196,6 +211,9 @@ public enum ControllerCoreCommandType
       return false;
    }
 
+   /**
+    * Polls whether the command {@param commandType} is an available command for the {@link WholeBodyInverseDynamicsSolver}.
+    */
    public static boolean isInverseDynamicsCommand(ControllerCoreCommandType commandType)
    {
       for (ControllerCoreCommandType commandPossibility : getInverseDynamicsCommands())
@@ -207,6 +225,9 @@ public enum ControllerCoreCommandType
       return false;
    }
 
+   /**
+    * Polls whether the command {@param commandType} is an available command for the {@link WholeBodyVirtualModelControlSolver}.
+    */
    public static boolean isVirtualModelControlCommand(ControllerCoreCommandType commandType)
    {
       for (ControllerCoreCommandType commandPossibility : getVirtualModelControlCommands())
@@ -218,6 +239,9 @@ public enum ControllerCoreCommandType
       return false;
    }
 
+   /**
+    * Polls whether the command {@param commandType} is an available command for the {@link WholeBodyFeedbackController}.
+    */
    public static boolean isFeedbackControlCommand(ControllerCoreCommandType commandType)
    {
       for (ControllerCoreCommandType commandPossibility : getFeedbackControlCommands())
