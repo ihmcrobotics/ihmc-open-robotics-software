@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
@@ -259,7 +260,7 @@ public class WholeBodyControllerCore
    private void doVirtualModelControl()
    {
       feedbackController.computeVirtualModelControl();
-      InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getVirtualModelControlOutput();
+      VirtualModelControlCommandList feedbackControllerOutput = feedbackController.getVirtualModelControlOutput();
       numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
       virtualModelControlSolver.submitVirtualModelControlCommandList(feedbackControllerOutput);
       virtualModelControlSolver.compute();

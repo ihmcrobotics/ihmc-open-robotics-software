@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -46,7 +48,8 @@ public class HexapodStepController
    private RigidBody[] rigidBodiesToControl = new RigidBody[6];
 
    private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
-   private final InverseDynamicsCommandList contactStateCommands = new InverseDynamicsCommandList();
+   private final VirtualModelControlCommandList contactStateVMCCommands = new VirtualModelControlCommandList();
+   private final InverseDynamicsCommandList contactStateIDCommands = new InverseDynamicsCommandList();
    private final SegmentDependentList<RobotSextant, SimulatedPlaneContactStateUpdater> contactStateUpdaters;
 
    private final SegmentDependentList<RobotSextant, RigidBody> shinRigidBodies = new SegmentDependentList<>(RobotSextant.class);
@@ -130,7 +133,8 @@ public class HexapodStepController
 
    public void doControl(HexapodControllerParameters parameters, FrameVector3D desiredBodyLinearVelocity, FrameVector3D desiredAngularVelocity)
    {
-      contactStateCommands.clear();
+      contactStateIDCommands.clear();
+      contactStateVMCCommands.clear();
       feedbackControlCommandList.clear();
       for (RobotSextant robotSextant : RobotSextant.values)
       {
@@ -271,7 +275,8 @@ public class HexapodStepController
       feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
 
       PlaneContactStateCommand contactState = contactStateUpdaters.get(robotSextant).getNotInContactState();
-      contactStateCommands.addCommand(contactState);
+      contactStateIDCommands.addCommand(contactState);
+      contactStateVMCCommands.addCommand(contactState);
    }
 
    private boolean areFeetDoneSwinging()
@@ -304,12 +309,18 @@ public class HexapodStepController
    private void setFootInContact(RobotSextant robotSextant)
    {
       PlaneContactStateCommand inContactState = contactStateUpdaters.get(robotSextant).getInContactState();
-      contactStateCommands.addCommand(inContactState);
+      contactStateVMCCommands.addCommand(inContactState);
+      contactStateIDCommands.addCommand(inContactState);
    }
 
-   public InverseDynamicsCommandList getContactStates()
+   public VirtualModelControlCommandList getVirtualModelControlCommand()
    {
-      return contactStateCommands;
+      return contactStateVMCCommands;
+   }
+
+   public InverseDynamicsCommandList getInverseDynamicsCommand()
+   {
+      return contactStateIDCommands;
    }
 
    public RigidBody[] getRigidBodiesToControl()

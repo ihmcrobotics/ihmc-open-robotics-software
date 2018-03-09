@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfPressureCommand>
+public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfPressureCommand>, VirtualModelControlCommand<CenterOfPressureCommand>
 {
    private RigidBody contactingRigidBody;
    private String contactingRigidBodyName;
