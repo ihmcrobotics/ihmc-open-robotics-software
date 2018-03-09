@@ -2,21 +2,14 @@ package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.screwTheory.*;
 
 import java.util.List;
 
@@ -129,8 +122,62 @@ public class NewVirtualModelController
             int jointIndex = jointIndices[i];
             fullEffortMatrix.add(jointIndex, 0, commandToAdd.getDesiredTorque(jointNumber).get(i, 0));
          }
-
       }
 
       return true;
-   }}
+   }
+
+   /**
+    * Adds a {@link Wrench} to the {@link NewVirtualModelController}.
+    * <p>
+    * The idea is to add the data from the contact force optimization module so that
+    * the virtual model controller exerts the desired forces based on the equation:<br>
+    * J<sub>MxN</sub><sup>T</sup> * w<sub>Mx1</sub> = &tau;<sub>Nx1</sub> <br>
+    * where J is the M-by-N Jacobian matrix, w is the M-by-1 desired joint effort vector,
+    * and &tau; is the N-by-1 torque vector. M is called the task
+    * size and N is the overall number of degrees of freedom (DoFs) to be controlled.
+    * </p>
+    *
+    * @return true if the wrench was successfully added.
+    */
+   public boolean addExternalWrench(RigidBody base, RigidBody endEffector, Wrench wrench, SelectionMatrix6D selectionMatrix)
+   {
+      // Gets the M-by-6 selection matrix S.
+      selectionMatrix.getCompactSelectionMatrixInFrame(wrench.getExpressedInFrame(), tempSelectionMatrix);
+
+      int taskSize = tempSelectionMatrix.getNumRows();
+
+      if (taskSize == 0)
+         return false;
+
+      jacobianCalculator.clear();
+      jacobianCalculator.setKinematicChain(base, endEffector);
+      jacobianCalculator.setJacobianFrame(wrench.getExpressedInFrame());
+      jacobianCalculator.computeJacobianMatrix();
+
+      // Compute the M-by-N task Jacobian: J = S * J
+      // Step 1, let's get the 'small' Jacobian matrix, j.
+      // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain, which is way smaller than the number of robot DoFs.
+      jacobianCalculator.getJacobianMatrix(tempSelectionMatrix, tempTaskJacobian);
+
+      // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
+      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, tempFullJacobian);
+
+      /*
+       * @formatter:off
+       * Compute the M-byobjective-1 task objective vector p as follows:
+       * p = S * ( TDot - JDot * qDot )
+       * where TDot is the 6-by-1 end-effector desired acceleration vector and (JDot * qDot) is the 6-by-1
+       * convective term vector resulting from the Coriolis and Centrifugal effects.
+       * @formatter:on
+       */
+      wrench.getMatrix(tempTaskObjective);
+      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, tempFullObjective);
+
+      // Add these forces to the effort matrix t = J' w
+      CommonOps.multAddTransA(tempFullJacobian, tempFullObjective, fullEffortMatrix);
+
+      return true;
+   }
+}
