@@ -26,7 +26,7 @@ import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
@@ -43,7 +43,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 {
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
-   private final YoQuadrupedXGaitSettingsReadOnly xGaitSettings;
+   private final YoQuadrupedXGaitSettings xGaitSettings;
    private final YoDouble robotTimestamp;
    private final double controlDT;
    private final double gravity;
@@ -172,7 +172,7 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       {
          groundPlanePositions.set(robotQuadrant, new FramePoint3D());
       }
-      xGaitSettings = new YoQuadrupedXGaitSettingsReadOnly(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
+      xGaitSettings = new YoQuadrupedXGaitSettings(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
       xGaitStepPlanner = new QuadrupedXGaitPlanner();
       xGaitPreviewSteps = new ArrayList<>(NUMBER_OF_PREVIEW_STEPS);
       for (int i = 0; i < NUMBER_OF_PREVIEW_STEPS; i++)

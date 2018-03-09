@@ -17,7 +17,7 @@ import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
-import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
@@ -30,7 +30,7 @@ public class QuadrupedSteppingState implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoQuadrupedXGaitSettingsReadOnly xGaitSettingsProvider;
+   private final YoQuadrupedXGaitSettings xGaitSettingsProvider;
    private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
    private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
@@ -58,7 +58,7 @@ public class QuadrupedSteppingState implements QuadrupedController
       this.controlManagerFactory = controlManagerFactory;
 
       // Initialize input providers.
-      xGaitSettingsProvider = new YoQuadrupedXGaitSettingsReadOnly(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
+      xGaitSettingsProvider = new YoQuadrupedXGaitSettings(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
       preplannedStepProvider = new QuadrupedPreplannedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       planarVelocityProvider = new QuadrupedPlanarVelocityInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
       soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);

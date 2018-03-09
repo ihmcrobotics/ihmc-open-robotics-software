@@ -13,7 +13,7 @@ import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.commons.MathTools;
-import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettingsReadOnly;
+import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -43,7 +43,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
 
    private final PacketCommunicator packetCommunicator;
    private final QuadrupedReferenceFrames referenceFrames;
-   private final YoQuadrupedXGaitSettingsReadOnly xGaitSettings;
+   private final YoQuadrupedXGaitSettings xGaitSettings;
 
    private XGaitInputMode mode = XGaitInputMode.POSITION;
    private InputValueIntegrator comZ;
@@ -54,7 +54,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       this.packetCommunicator = packetCommunicator;
       this.referenceFrames = referenceFrames;
       this.comZ = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
-      xGaitSettings = new YoQuadrupedXGaitSettingsReadOnly(defaultXGaitSettings, null, registry);
+      xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
 
       parentRegistry.addChild(registry);
    }

@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class YoQuadrupedXGaitSettingsReadOnly implements QuadrupedXGaitSettingsReadOnly
+public class YoQuadrupedXGaitSettings implements QuadrupedXGaitSettingsReadOnly
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -33,7 +33,7 @@ public class YoQuadrupedXGaitSettingsReadOnly implements QuadrupedXGaitSettingsR
    private final YoDouble yoEndDoubleSupportDuration = new YoDouble("endDoubleSupportDurationInput", registry);
    private final YoDouble yoEndPhaseShift = new YoDouble("endPhaseShiftInput", registry);
 
-   public YoQuadrupedXGaitSettingsReadOnly(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
+   public YoQuadrupedXGaitSettings(QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
       yoStanceLength.set(defaultXGaitSettings.getStanceLength());
       yoStanceWidth.set(defaultXGaitSettings.getStanceWidth());
