@@ -60,6 +60,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties) throws IOException
    {
+      this(runtimeEnvironment, physicalProperties, QuadrupedForceControllerEnum.JOINT_INITIALIZATION);
+   }
+
+   public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, QuadrupedForceControllerEnum initialState) throws IOException
+   {
       this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry, runtimeEnvironment.getGraphicsListRegistry());
       this.runtimeEnvironment = runtimeEnvironment;
 
@@ -68,7 +73,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
 
       // Initialize control modules
-      this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, postureProvider, registry);
+      this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, postureProvider, runtimeEnvironment.getGraphicsListRegistry(), registry);
 
       controlManagerFactory.getOrCreateFeetManager();
       controlManagerFactory.getOrCreateBodyOrientationManager();
@@ -96,7 +101,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       }
       this.quadrupedForceControllerStatePacket = new QuadrupedForceControllerStatePacket();
 
-      this.stateMachine = buildStateMachine(runtimeEnvironment);
+      this.stateMachine = buildStateMachine(runtimeEnvironment, initialState);
       this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedForceControllerRequestedEvent.class);
    }
 
@@ -241,7 +246,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       return motionStatusHolder;
    }
 
-   private FiniteStateMachine<QuadrupedForceControllerEnum, ControllerEvent, QuadrupedController> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment)
+   private FiniteStateMachine<QuadrupedForceControllerEnum, ControllerEvent, QuadrupedController> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
+                                                                                                                    QuadrupedForceControllerEnum initialState)
    {
       // Initialize controllers.
       final QuadrupedController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
@@ -312,6 +318,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       builder.addTransition(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP,
                             QuadrupedForceControllerEnum.STEPPING, QuadrupedForceControllerEnum.STAND_PREP);
 
-      return builder.build(QuadrupedForceControllerEnum.JOINT_INITIALIZATION);
+      return builder.build(initialState);
    }
 }
