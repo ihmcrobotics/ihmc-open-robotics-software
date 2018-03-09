@@ -145,7 +145,10 @@ public class QuadrupedSimulationFactory
    {
       if (usePushRobotController.get())
       {
-         PushRobotController bodyPushRobotController = new PushRobotController(sdfRobot.get(), "body", new Vector3D(0.0, -0.00057633, 0.0383928));
+         FloatingRootJointRobot pushableRobot = sdfRobot.get();
+         String rootJointName = pushableRobot.getRootJoint().getName();
+
+         PushRobotController bodyPushRobotController = new PushRobotController(pushableRobot, rootJointName, new Vector3D(0.0, -0.00057633, 0.0383928));
          yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", bodyPushRobotController.getForceVisualizer());
 
          for (QuadrupedJointName quadrupedJointName : modelFactory.get().getQuadrupedJointNames())
