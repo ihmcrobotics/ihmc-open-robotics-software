@@ -3,12 +3,16 @@ package us.ihmc.simulationconstructionset;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.Shape3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
+import us.ihmc.simulationconstructionset.physics.CollisionShape;
+import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
@@ -29,6 +33,8 @@ import us.ihmc.yoVariables.variable.YoVariableList;
 public class Simulation implements YoVariableHolder, Serializable // Runnable,
 {
    private static final long serialVersionUID = 8438645717978048239L;
+
+   private ScsCollisionDetector collisionDetector;
 
    private Graphics3DAdapter myGraphics;
 
@@ -185,7 +191,7 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
    public Simulation(Robot robot, int dataBufferSize)
    {
-      this(new Robot[] { robot }, dataBufferSize);
+      this(new Robot[] {robot}, dataBufferSize);
    }
 
    public Simulation(Robot[] robots, int dataBufferSize)
@@ -239,27 +245,27 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       myDataBuffer.copyValuesThrough();
       updateRobots(robots);
    }
-   
+
    public void addRobot(Robot robot)
    {
       Robot[] newRobots;
       if (robots == null)
       {
-         newRobots = new Robot[]{robot};
+         newRobots = new Robot[] {robot};
       }
       else
       {
          newRobots = new Robot[robots.length + 1];
-         for (int i=0; i<robots.length; i++)
+         for (int i = 0; i < robots.length; i++)
          {
             newRobots[i] = robots[i];
          }
-         
+
          newRobots[newRobots.length - 1] = robot;
       }
 
       this.robots = newRobots;
-      
+
       if (mySimulator == null)
       {
          mySimulator = new Simulator(simulationSynchronizer, robots, SIMULATION_DT);
@@ -268,7 +274,7 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       {
          mySimulator.setRobots(robots);
       }
-      
+
       this.setDT(SIMULATION_DT, RECORD_FREQ);
       addVariablesFromARobot(robot);
 
@@ -462,16 +468,47 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       return simulationSynchronizer;
    }
 
+   public void initializeCollisionDetector(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
+   {
+      collisionDetector = createCollisionShapesFromLinks(robots, collisionHandler);
+
+      if (collisionVisualizer != null)
+         collisionHandler.addListener(collisionVisualizer);
+
+      collisionDetector.initialize();
+   }
+
+   public void addEnvironmentCollisionShapes(Shape3D<?> simpleShape)
+   {
+      CollisionShapeFactory shapeFactory = collisionDetector.getShapeFactory();
+
+      CollisionShapeDescription<?> collisionShapeDescription = shapeFactory.createSimpleCollisionShape(simpleShape);
+
+      CollisionShape collisionShape = shapeFactory.addShape(collisionShapeDescription);
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      simpleShape.getPose(transform);
+      collisionShape.setTransformToWorld(transform);
+      collisionShape.setIsGround(true);
+   }
+
+   public void initializeCollisionHandler(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
+   {
+      CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
+      this.initPhysics(new ScsPhysics(null, collisionDetector, collisionArbiter, collisionHandler, collisionVisualizer));
+   }
+
    public void initializeCollisionDetectionAndHandling(DefaultCollisionVisualizer collisionVisualizer, CollisionHandler collisionHandler)
    {
       ScsCollisionDetector collisionDetector = createCollisionShapesFromLinks(robots, collisionHandler);
 
-      if (collisionVisualizer != null) collisionHandler.addListener(collisionVisualizer);
+      if (collisionVisualizer != null)
+         collisionHandler.addListener(collisionVisualizer);
 
       collisionDetector.initialize();
-      
+
       CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
-//      CollisionArbiter collisionArbiter = new ExperimentalCollisionArbiter();
+      //      CollisionArbiter collisionArbiter = new ExperimentalCollisionArbiter();
 
       this.initPhysics(new ScsPhysics(null, collisionDetector, collisionArbiter, collisionHandler, collisionVisualizer));
    }
@@ -482,7 +519,7 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
 
       //      collisionDetector = new GdxCollisionDetector(100.0);
       collisionDetector = new SimpleCollisionDetector();
-//      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
+      //      ((SimpleCollisionDetector) collisionDetector).setUseSimpleSpeedupMethod();
 
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(0.002);
@@ -495,7 +532,8 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       return collisionDetector;
    }
 
-   private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory, CollisionHandler collisionHandler, YoVariableRegistry registry)
+   private static void createCollisionShapesFromLinks(Robot robot, CollisionShapeFactory collisionShapeFactory, CollisionHandler collisionHandler,
+                                                      YoVariableRegistry registry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
       for (Joint rootJoint : rootJoints)
@@ -504,7 +542,8 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       }
    }
 
-   private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory, CollisionHandler collisionHandler, YoVariableRegistry registry)
+   private static void createCollisionShapesFromLinksRecursively(Joint joint, CollisionShapeFactory collisionShapeFactory, CollisionHandler collisionHandler,
+                                                                 YoVariableRegistry registry)
    {
       Link link = joint.getLink();
       ArrayList<CollisionMeshDescription> collisionMeshDescriptions = link.getCollisionMeshDescriptions();
@@ -513,7 +552,7 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       {
          int estimatedNumberOfContactPoints = 0;
 
-         for (int i=0; i<collisionMeshDescriptions.size(); i++)
+         for (int i = 0; i < collisionMeshDescriptions.size(); i++)
          {
             CollisionMeshDescription collisionMesh = collisionMeshDescriptions.get(i);
             collisionShapeFactory.addCollisionMeshDescription(link, collisionMesh);
