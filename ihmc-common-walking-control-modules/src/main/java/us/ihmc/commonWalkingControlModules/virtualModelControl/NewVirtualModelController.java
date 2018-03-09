@@ -2,13 +2,20 @@ package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 import java.util.List;
@@ -43,14 +50,32 @@ public class NewVirtualModelController
       fullEffortMatrix.zero();
    }
 
-   public void addVirtualEffortCommand(VirtualEffortCommand commandToConvert)
+   /**
+    * Adds a {@link VirtualEffortCommand} to the {@link NewVirtualModelController}.
+    * <p>
+    * The idea is to add the data from the virtual effort command so that the virtual model
+    * controller exerts the desired forces based on the equation:<br>
+    * J<sub>MxN</sub><sup>T</sup> * w<sub>Mx1</sub> = &tau;<sub>Nx1</sub> <br>
+    * where J is the M-by-N Jacobian matrix, w is the M-by-1 desired joint effort vector,
+    * and &tau; is the N-by-1 torque vector. M is called the task
+    * size and N is the overall number of degrees of freedom (DoFs) to be controlled.
+    * </p>
+    *
+    * @return true if the command was successfully added.
+    */
+   public boolean addVirtualEffortCommand(VirtualEffortCommand commandToAdd)
    {
-      commandToConvert.getControlFrame(controlFrame);
+      commandToAdd.getControlFrame(controlFrame);
       // Gets the M-by-6 selection matrix S.
-      commandToConvert.getSelectionMatrix(controlFrame, tempSelectionMatrix);
+      commandToAdd.getSelectionMatrix(controlFrame, tempSelectionMatrix);
+
+      int taskSize = tempSelectionMatrix.getNumRows();
+
+      if (taskSize == 0)
+         return false;
 
       jacobianCalculator.clear();
-      jacobianCalculator.setKinematicChain(commandToConvert.getBase(), commandToConvert.getEndEffector());
+      jacobianCalculator.setKinematicChain(commandToAdd.getBase(), commandToAdd.getEndEffector());
       jacobianCalculator.setJacobianFrame(controlFrame);
       jacobianCalculator.computeJacobianMatrix();
 
@@ -65,16 +90,47 @@ public class NewVirtualModelController
 
       /*
        * @formatter:off
-       * Compute the M-by-1 task objective vector p as follows:
+       * Compute the M-byobjective-1 task objective vector p as follows:
        * p = S * ( TDot - JDot * qDot )
        * where TDot is the 6-by-1 end-effector desired acceleration vector and (JDot * qDot) is the 6-by-1
        * convective term vector resulting from the Coriolis and Centrifugal effects.
        * @formatter:on
        */
-      commandToConvert.getDesiredEffort(tempTaskObjective);
+      commandToAdd.getDesiredEffort(tempTaskObjective);
       CommonOps.mult(tempSelectionMatrix, tempTaskObjective, tempFullObjective);
 
       // Add these forces to the effort matrix t = J' w
       CommonOps.multAddTransA(tempFullJacobian, tempFullObjective, fullEffortMatrix);
+
+      return true;
    }
-}
+
+   /**
+    * Adds a {@link JointspaceAccelerationCommand} into a {@link MotionQPInput}.
+    *
+    * @return true if the command was successfully added.
+    */
+   public boolean addJointTorqueCommand(JointTorqueCommand commandToAdd)
+   {
+      int taskSize = ScrewTools.computeDegreesOfFreedom(commandToAdd.getJoints());
+
+      if (taskSize == 0)
+         return false;
+
+      for (int jointNumber = 0; jointNumber < commandToAdd.getNumberOfJoints(); jointNumber++)
+      {
+         InverseDynamicsJoint joint = commandToAdd.getJoint(jointNumber);
+         int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+         if (jointIndices == null)
+            return false;
+
+         for (int i = 0; i < jointIndices.length; i++)
+         {
+            int jointIndex = jointIndices[i];
+            fullEffortMatrix.add(jointIndex, 0, commandToAdd.getDesiredTorque(jointNumber).get(i, 0));
+         }
+
+      }
+
+      return true;
+   }}
