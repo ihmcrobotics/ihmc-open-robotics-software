@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -50,7 +51,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
 
    private final JointDesiredOutputList jointDesiredOutputList;
 
-   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+   private final VirtualModelControlCommandList virtualModelControlCommandList = new VirtualModelControlCommandList();
    private final QuadrantDependentList<VirtualWrenchCommand> virtualWrenchCommands = new QuadrantDependentList<>();
 
    public QuadrupedForceBasedFreezeController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
@@ -124,11 +125,11 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       feetManager.compute(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
-      inverseDynamicsCommandList.clear();
+      virtualModelControlCommandList.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          convertToVirtualWrenchCommand(taskSpaceControllerCommands.getSoleForce(robotQuadrant), virtualWrenchCommands.get(robotQuadrant));
-         inverseDynamicsCommandList.addCommand(virtualWrenchCommands.get(robotQuadrant));
+         virtualModelControlCommandList.addCommand(virtualWrenchCommands.get(robotQuadrant));
       }
 
       return null;

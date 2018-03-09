@@ -2,6 +2,8 @@ package us.ihmc.parameterTuner.guiElements;
 
 public abstract class GuiElement
 {
+   public static final String SEPERATOR = ":";
+
    private final String name;
    private final GuiRegistry parent;
    private final String uniqueName;
@@ -13,6 +15,11 @@ public abstract class GuiElement
 
    public GuiElement(String name, GuiRegistry parent, String uniqueName)
    {
+      if (name.contains(SEPERATOR))
+      {
+         throw new RuntimeException("Name " + name + " should never contain " + SEPERATOR);
+      }
+
       this.name = name;
       this.parent = parent;
       this.uniqueName = uniqueName;
@@ -41,7 +48,7 @@ public abstract class GuiElement
       }
       else
       {
-         return parent.getUniqueName() + ":" + name;
+         return parent.getUniqueName() + SEPERATOR + name;
       }
    }
 }
