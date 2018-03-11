@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ExternalWrenchHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.GroundContactForceOptimizationControlModule;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.NewGroundContactForceOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.NewVirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
@@ -46,7 +47,7 @@ public class NewVirtualModelControlOptimizationControlModule
    private final YoFrameVector achievedAngularMomentumRate;
    private final Map<RigidBody, YoWrench> contactWrenchSolutions = new HashMap<>();
 
-   private final GroundContactForceOptimizationControlModule groundContactForceOptimization;
+   private final NewGroundContactForceOptimizationControlModule groundContactForceOptimization;
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
@@ -62,9 +63,10 @@ public class NewVirtualModelControlOptimizationControlModule
       contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
       WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
-      groundContactForceOptimization = new GroundContactForceOptimizationControlModule(wrenchMatrixCalculator, contactablePlaneBodies,
-                                                                                       toolbox.getOptimizationSettings(), parentRegistry,
-                                                                                       toolbox.getYoGraphicsListRegistry());
+      groundContactForceOptimization = new NewGroundContactForceOptimizationControlModule(wrenchMatrixCalculator, contactablePlaneBodies,
+                                                                                          toolbox.getCenterOfMassFrame(),  toolbox.getRootJoint(),
+                                                                                          toolbox.getOptimizationSettings(), parentRegistry,
+                                                                                          toolbox.getYoGraphicsListRegistry());
 
       double gravityZ = toolbox.getGravityZ();
 
@@ -110,17 +112,11 @@ public class NewVirtualModelControlOptimizationControlModule
    {
       groundReactionWrenches.clear();
 
-      processSelectionMatrices();
-
-      DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
-      CommonOps.add(additionalExternalWrench, gravityWrench, additionalWrench);
 
-      groundContactForceOptimization.processMomentumRateCommand(additionalWrench);
+      setupWrenchesEquilibriumConstraint();
 
       NoConvergenceException noConvergenceException = null;
-
-      // use the force optimization algorithm
       try
       {
          groundContactForceOptimization.compute(groundReactionWrenches);
@@ -200,50 +196,6 @@ public class NewVirtualModelControlOptimizationControlModule
       selectionMatrices.add(selectionMatrix);
    }
 
-   // creates the selection matrix for the full problem, compiling all virtual, external, and balancing wrenches
-   private void processSelectionMatrices()
-   {
-      for (int input = 0; input < selectionMatrices.size(); input++)
-      {
-         DenseMatrix64F selectionMatrix = selectionMatrices.get(input);
-
-         CommonOps.sumCols(momentumSelectionMatrix, currentColSum);
-         CommonOps.sumCols(selectionMatrix, inputColSum);
-
-         int currentRow = 0;
-         int inputRow = 0;
-         for (int col = 0; col < SpatialForceVector.SIZE; col++)
-         {
-            // if this column has value, we want to insert the next row below it
-            if (currentColSum.get(col) == 1)
-               currentRow++;
-
-            if (inputColSum.get(col) == 1 && currentColSum.get(col) == 0)
-            {
-               tmpSelectionMatrix.set(momentumSelectionMatrix);
-               momentumSelectionMatrix.reshape(momentumSelectionMatrix.getNumRows() + 1, SpatialForceVector.SIZE);
-
-               // copy rows above
-               if (currentRow > 0)
-               {
-                  CommonOps.extract(tmpSelectionMatrix, 0, currentRow, 0, SpatialForceVector.SIZE, momentumSelectionMatrix, 0, 0);
-               }
-
-               // insert new row
-               CommonOps.extract(selectionMatrix, inputRow, inputRow + 1, 0, SpatialForceVector.SIZE, momentumSelectionMatrix, currentRow, 0);
-
-               // copy rows below
-               CommonOps.extract(tmpSelectionMatrix, currentRow, tmpSelectionMatrix.getNumRows(), 0, SpatialForceVector.SIZE, momentumSelectionMatrix,
-                                 currentRow + 1, 0);
-
-               currentRow++;
-               inputRow++;
-            }
-         }
-      }
-
-      groundContactForceOptimization.submitMomentumSelectionMatrix(momentumSelectionMatrix);
-   }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
    {
@@ -253,5 +205,12 @@ public class NewVirtualModelControlOptimizationControlModule
    public void submitExternalWrench(RigidBody rigidBody, Wrench wrench)
    {
       externalWrenchHandler.setExternalWrenchToCompensateFor(rigidBody, wrench);
+   }
+
+   private void setupWrenchesEquilibriumConstraint()
+   {
+      DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
+      DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
+      groundContactForceOptimization.setupWrenchesEquilibriumConstraint(additionalExternalWrench, gravityWrench);
    }
 }
