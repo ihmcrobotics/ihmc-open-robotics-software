@@ -103,7 +103,6 @@ public class NewVirtualModelControlOptimizationControlModule
    private final DenseMatrix64F totalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tmpWrench = new DenseMatrix64F(Wrench.SIZE, 1);
 
-   private final DenseMatrix64F momentumObjective = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F additionalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final Map<RigidBody, Wrench> groundReactionWrenches = new HashMap<>();
 
