@@ -293,7 +293,6 @@ public class NewWholeBodyVirtualModelControlSolver
       }
 
       commandToSubmit.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
-      optimizationControlModule.addSelection(tempSelectionMatrix);
    }
 
    private void handleVirtualForceCommand(VirtualForceCommand commandToSubmit)
@@ -308,7 +307,6 @@ public class NewWholeBodyVirtualModelControlSolver
       }
 
       commandToSubmit.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
-      optimizationControlModule.addSelection(tempSelectionMatrix);
    }
 
    private void handleVirtualTorqueCommand(VirtualTorqueCommand commandToSubmit)
@@ -323,7 +321,6 @@ public class NewWholeBodyVirtualModelControlSolver
       }
 
       commandToSubmit.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
-      optimizationControlModule.addSelection(tempSelectionMatrix);
    }
 
    private void handleExternalWrenchCommand(ExternalWrenchCommand command)

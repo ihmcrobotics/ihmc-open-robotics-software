@@ -52,7 +52,6 @@ public class NewVirtualModelControlOptimizationControlModule
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
-   private final List<DenseMatrix64F> selectionMatrices = new ArrayList<>();
 
    private final NewVirtualModelControlSolution virtualModelControlSolution = new NewVirtualModelControlSolution();
 
@@ -98,7 +97,6 @@ public class NewVirtualModelControlOptimizationControlModule
    {
       groundContactForceOptimization.initialize();
       externalWrenchHandler.reset();
-      selectionMatrices.clear();
    }
 
    private final DenseMatrix64F contactWrench = new DenseMatrix64F(Wrench.SIZE, 1);
@@ -182,13 +180,6 @@ public class NewVirtualModelControlOptimizationControlModule
       command.getSelectionMatrix(centroidalMomentumSelectionMatrix);
       command.getSelectionMatrix(centerOfMassFrame, momentumSelectionMatrix);
    }
-
-   private final DenseMatrix64F inputColSum = new DenseMatrix64F(1, SpatialForceVector.SIZE);
-   public void addSelection(DenseMatrix64F selectionMatrix)
-   {
-      selectionMatrices.add(selectionMatrix);
-   }
-
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)
    {
