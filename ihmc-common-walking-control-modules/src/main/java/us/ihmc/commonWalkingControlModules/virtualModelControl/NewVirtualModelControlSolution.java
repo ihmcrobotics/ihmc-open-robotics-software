@@ -1,23 +1,55 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.GroundContactForceSolution;
 import us.ihmc.robotics.screwTheory.*;
 
 import java.util.List;
 import java.util.Map;
 
-public class NewVirtualModelControlSolution extends GroundContactForceSolution
+public class NewVirtualModelControlSolution
 {
    private InverseDynamicsJoint[] jointsToCompute;
    private DenseMatrix64F jointTorques;
 
-   public void setGroundContactForceSolution(GroundContactForceSolution other)
+   private SpatialForceVector centroidalMomentumRateSolution;
+   private SelectionMatrix6D centroidalMomentumSelectionMatrix;
+   private Map<RigidBody, Wrench> externalWrenchSolution;
+   private List<RigidBody> rigidBodiesWithExternalWrench;
+
+   public void setCentroidalMomentumRateSolution(SpatialForceVector centroidalMomentumRateSolution)
    {
-      this.centroidalMomentumRateSolution = other.getCentroidalMomentumRateSolution();
-      this.centroidalMomentumSelectionMatrix = other.getCentroidalMomentumSelectionMatrix();
-      this.externalWrenchSolution = other.getExternalWrenchSolution();
-      this.rigidBodiesWithExternalWrench = other.getRigidBodiesWithExternalWrench();
+      this.centroidalMomentumRateSolution = centroidalMomentumRateSolution;
+   }
+
+   public void setExternalWrenchSolution(List<RigidBody> rigidBodiesWithExternalWrench, Map<RigidBody, Wrench> externalWrenchSolution)
+   {
+      this.rigidBodiesWithExternalWrench = rigidBodiesWithExternalWrench;
+      this.externalWrenchSolution = externalWrenchSolution;
+   }
+
+   public void setCentroidalMomentumSelectionMatrix(SelectionMatrix6D selectionMatrix)
+   {
+      this.centroidalMomentumSelectionMatrix = selectionMatrix;
+   }
+
+   public List<RigidBody> getRigidBodiesWithExternalWrench()
+   {
+      return rigidBodiesWithExternalWrench;
+   }
+
+   public Map<RigidBody, Wrench> getExternalWrenchSolution()
+   {
+      return externalWrenchSolution;
+   }
+
+   public SpatialForceVector getCentroidalMomentumRateSolution()
+   {
+      return centroidalMomentumRateSolution;
+   }
+
+   public SelectionMatrix6D getCentroidalMomentumSelectionMatrix()
+   {
+      return centroidalMomentumSelectionMatrix;
    }
 
    public void setJointsToCompute(InverseDynamicsJoint[] jointsToCompute)
