@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.NewVirtualModelControlModuleException;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.NewVirtualModelControlOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.NewVirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.NewVirtualModelController;
@@ -36,14 +37,11 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 public class NewWholeBodyVirtualModelControlSolver
 {
    private static final boolean USE_LIMITED_JOINT_TORQUES = true;
-   private static final boolean USE_CONTACT_FORCE_QP = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final VirtualModelControlOptimizationControlModule optimizationControlModule;
+   private final NewVirtualModelControlOptimizationControlModule optimizationControlModule;
    private final NewVirtualModelController virtualModelController;
-
-   private NewVirtualModelControlSolution virtualModelControlSolution = new NewVirtualModelControlSolution();
 
    private final PlaneContactWrenchProcessor planeContactWrenchProcessor;
    private final WrenchVisualizer wrenchVisualizer;
@@ -85,7 +83,7 @@ public class NewWholeBodyVirtualModelControlSolver
    public NewWholeBodyVirtualModelControlSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       rootJoint = toolbox.getRootJoint();
-      optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, USE_CONTACT_FORCE_QP, registry);
+      optimizationControlModule = new NewVirtualModelControlOptimizationControlModule(toolbox, registry);
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
       jointIndexHandler = toolbox.getJointIndexHandler();
@@ -156,9 +154,11 @@ public class NewWholeBodyVirtualModelControlSolver
 
    public void compute()
    {
+      NewVirtualModelControlSolution virtualModelControlSolution;
+
       try
       {
-         optimizationControlModule.compute(virtualModelControlSolution);
+         virtualModelControlSolution = optimizationControlModule.compute();
       }
       catch (NewVirtualModelControlModuleException virtualModelControlModuleException)
       {
@@ -170,7 +170,6 @@ public class NewWholeBodyVirtualModelControlSolver
       // get output for contact forces
       Map<RigidBody, Wrench> externalWrenchSolution = virtualModelControlSolution.getExternalWrenchSolution();
       List<RigidBody> rigidBodiesWithExternalWrench = virtualModelControlSolution.getRigidBodiesWithExternalWrench();
-      List<RigidBody> bodiesInContact = virtualModelControlSolution.getBodiesInContact();
       SpatialForceVector centroidalMomentumRateSolution = virtualModelControlSolution.getCentroidalMomentumRateSolution();
 
       yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
@@ -178,9 +177,9 @@ public class NewWholeBodyVirtualModelControlSolver
       achievedMomentumRateLinear.setIncludingFrame(yoAchievedMomentumRateLinear);
 
       // submit forces for contact forces
-      for (int bodyIndex = 0; bodyIndex < bodiesInContact.size(); bodyIndex++)
+      for (int bodyIndex = 0; bodyIndex < rigidBodiesWithExternalWrench.size(); bodyIndex++)
       {
-         RigidBody rigidBody = bodiesInContact.get(bodyIndex);
+         RigidBody rigidBody = rigidBodiesWithExternalWrench.get(bodyIndex);
          externalWrenchSolution.get(rigidBody).negate();
          virtualModelController.addExternalWrench(controlRootBody, rigidBody, externalWrenchSolution.get(rigidBody),
                                                   virtualModelControlSolution.getCentroidalMomentumSelectionMatrix());
