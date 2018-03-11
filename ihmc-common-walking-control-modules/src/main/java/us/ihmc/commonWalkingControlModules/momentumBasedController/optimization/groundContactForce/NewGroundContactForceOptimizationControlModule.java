@@ -16,11 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
-import us.ihmc.robotics.math.frames.YoMatrix;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -40,15 +36,13 @@ public class NewGroundContactForceOptimizationControlModule
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
 
-   private final YoDouble rhoMin = new YoDouble("rhoMinGCFOptimization", registry);
+   private final YoDouble rhoMin = new YoDouble("rhoMinGCF", registry);
 
    private final BasisVectorVisualizer basisVectorVisualizer;
 
    private final NewGroundContactForceQPSolver qpSolver;
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
-
-   private final YoMatrix yoMomentumObjective = new YoMatrix("VMCMomentumObjectiveMatrix", SpatialForceVector.SIZE, 1, registry);
 
    private final MotionQPInput motionQPInput;
 
@@ -58,12 +52,19 @@ public class NewGroundContactForceOptimizationControlModule
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
    private final DenseMatrix64F fullMomentumObjective = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
+   private final DenseMatrix64F defaultGravityWrench;
+   private final DenseMatrix64F defaultExternalWrench;
+
+
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentum = new FrameVector3D();
    private final ReferenceFrame centerOfMassFrame;
 
+   private boolean hasWrenchesEquilibriumConstraintBeenSetup = false;
+
    public NewGroundContactForceOptimizationControlModule(WrenchMatrixCalculator wrenchMatrixCalculator, List<? extends ContactablePlaneBody> contactablePlaneBodies,
-                                                         ReferenceFrame centerOfMassFrame, FloatingInverseDynamicsJoint rootJoint, ControllerCoreOptimizationSettings optimizationSettings,
+                                                         ReferenceFrame centerOfMassFrame, FloatingInverseDynamicsJoint rootJoint, double gravityZ,
+                                                         ControllerCoreOptimizationSettings optimizationSettings,
                                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.wrenchMatrixCalculator = wrenchMatrixCalculator;
@@ -71,6 +72,11 @@ public class NewGroundContactForceOptimizationControlModule
       this.centerOfMassFrame = centerOfMassFrame;
       int rhoSize = optimizationSettings.getRhoSize();
       motionQPInput = new MotionQPInput(rhoSize);
+
+      double totalMass = TotalMassCalculator.computeSubTreeMass(rootJoint.getPredecessor());
+      defaultExternalWrench = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+      defaultGravityWrench = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+      defaultGravityWrench.set(5, 0, -gravityZ * totalMass);
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, yoGraphicsListRegistry, registry);
@@ -93,6 +99,9 @@ public class NewGroundContactForceOptimizationControlModule
 
    public Map<RigidBody, Wrench> compute() throws NoConvergenceException
    {
+      if (!hasWrenchesEquilibriumConstraintBeenSetup)
+         setupWrenchesEquilibriumConstraint(defaultExternalWrench, defaultGravityWrench);
+
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
@@ -105,9 +114,10 @@ public class NewGroundContactForceOptimizationControlModule
       // todo add rho max
       // todo add rho warm start
 
+      // todo setup equilibrium constraint if it has not been already
+
       NoConvergenceException noConvergenceException = null;
 
-      // use the force optimization algorithm
       try
       {
          qpSolver.solve();
@@ -143,6 +153,8 @@ public class NewGroundContactForceOptimizationControlModule
          else
             groundReactionWrenches.put(rigidBody, solutionWrench);
       }
+
+      hasWrenchesEquilibriumConstraintBeenSetup = false;
 
       return groundReactionWrenches;
    }
@@ -213,13 +225,13 @@ public class NewGroundContactForceOptimizationControlModule
       linearMomentum.get(3, fullMomentumObjective);
 
       CommonOps.mult(tempSelectionMatrix, fullMomentumObjective, motionQPInputToPack.taskObjective);
-      yoMomentumObjective.set(motionQPInputToPack.taskObjective);
 
       return true;
    }
 
    public void setupWrenchesEquilibriumConstraint(DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench)
    {
+      hasWrenchesEquilibriumConstraintBeenSetup = true;
       DenseMatrix64F rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
       qpSolver.setupWrenchesEquilibriumConstraint(identityMatrix, rhoJacobian, additionalExternalWrench, gravityWrench);
    }

@@ -290,8 +290,11 @@ public class NewGroundContactForceQPSolver
 
       qpSolverTimer.stopMeasurement();
 
+      hasWrenchesEquilibriumConstraintBeenSetup = false;
+
       if (MatrixTools.containsNaN(solverOutput_rhos))
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
+
 
       firstCall.set(false);
    }
