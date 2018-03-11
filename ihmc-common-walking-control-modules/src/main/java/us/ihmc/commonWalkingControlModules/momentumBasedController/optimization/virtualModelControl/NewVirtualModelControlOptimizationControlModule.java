@@ -105,21 +105,18 @@ public class NewVirtualModelControlOptimizationControlModule
    private final DenseMatrix64F totalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tmpWrench = new DenseMatrix64F(Wrench.SIZE, 1);
 
-   private final DenseMatrix64F additionalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final Map<RigidBody, Wrench> groundReactionWrenches = new HashMap<>();
 
    public NewVirtualModelControlSolution compute() throws NewVirtualModelControlModuleException
    {
-      groundReactionWrenches.clear();
-
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
 
       setupWrenchesEquilibriumConstraint();
 
       NoConvergenceException noConvergenceException = null;
+      Map<RigidBody, Wrench> groundReactionWrenches = null;
       try
       {
-         groundContactForceOptimization.compute(groundReactionWrenches);
+         groundReactionWrenches = groundContactForceOptimization.compute();
       }
       catch (NoConvergenceException e)
       {
@@ -134,7 +131,6 @@ public class NewVirtualModelControlOptimizationControlModule
 
          noConvergenceException = e;
       }
-      // divide the load evenly among all contacting bodies
 
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
@@ -187,10 +183,7 @@ public class NewVirtualModelControlOptimizationControlModule
       command.getSelectionMatrix(centerOfMassFrame, momentumSelectionMatrix);
    }
 
-   private final DenseMatrix64F currentColSum = new DenseMatrix64F(1, SpatialForceVector.SIZE);
    private final DenseMatrix64F inputColSum = new DenseMatrix64F(1, SpatialForceVector.SIZE);
-   private final DenseMatrix64F tmpSelectionMatrix = new DenseMatrix64F(1, 1);
-
    public void addSelection(DenseMatrix64F selectionMatrix)
    {
       selectionMatrices.add(selectionMatrix);

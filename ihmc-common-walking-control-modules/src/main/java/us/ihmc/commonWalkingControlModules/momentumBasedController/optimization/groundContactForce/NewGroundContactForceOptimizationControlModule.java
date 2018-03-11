@@ -91,7 +91,7 @@ public class NewGroundContactForceOptimizationControlModule
       qpSolver.reset();
    }
 
-   public void compute(Map<RigidBody, Wrench> groundReactionWrenchesToPack) throws NoConvergenceException
+   public Map<RigidBody, Wrench> compute() throws NoConvergenceException
    {
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
 
@@ -138,11 +138,13 @@ public class NewGroundContactForceOptimizationControlModule
          RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
          Wrench solutionWrench = groundReactionWrenches.get(rigidBody);
 
-         if (groundReactionWrenchesToPack.containsKey(rigidBody))
-            groundReactionWrenchesToPack.get(rigidBody).set(solutionWrench);
+         if (groundReactionWrenches.containsKey(rigidBody))
+            groundReactionWrenches.get(rigidBody).set(solutionWrench);
          else
-            groundReactionWrenchesToPack.put(rigidBody, solutionWrench);
+            groundReactionWrenches.put(rigidBody, solutionWrench);
       }
+
+      return groundReactionWrenches;
    }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
