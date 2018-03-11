@@ -60,8 +60,6 @@ public class NewWholeBodyVirtualModelControlSolver
    private final Wrench tempExternalWrench = new Wrench();
    private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F();
 
-   private final List<RigidBody> controlledBodies;
-
    private final YoFrameVector yoDesiredMomentumRateLinear;
    private final YoFrameVector yoAchievedMomentumRateLinear;
    private final YoFrameVector yoDesiredMomentumRateAngular;
@@ -99,13 +97,12 @@ public class NewWholeBodyVirtualModelControlSolver
 
       if (toolbox.getControlledBodies() != null)
       {
-         controlledBodies = Arrays.asList(toolbox.getControlledBodies());
+         List<RigidBody> controlledBodies = Arrays.asList(toolbox.getControlledBodies());
          wrenchVisualizer = new WrenchVisualizer("VMCDesiredExternalWrench", controlledBodies, 1.0, toolbox.getYoGraphicsListRegistry(), registry,
                                                  YoAppearance.Red(), YoAppearance.Blue());
       }
       else
       {
-         controlledBodies = null;
          wrenchVisualizer = null;
       }
 
@@ -261,9 +258,6 @@ public class NewWholeBodyVirtualModelControlSolver
             break;
          case JOINTSPACE:
             virtualModelController.addJointTorqueCommand((JointTorqueCommand) command);
-            break;
-         case CONTROLLED_BODIES:
-            //registerAllControlledBodies((ControlledBodiesCommand) command);
             break;
          case COMMAND_LIST:
             submitVirtualModelControlCommandList((VirtualModelControlCommandList) command);

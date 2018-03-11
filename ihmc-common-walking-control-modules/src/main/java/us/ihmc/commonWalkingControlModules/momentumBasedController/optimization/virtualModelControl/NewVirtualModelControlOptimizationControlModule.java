@@ -51,15 +51,13 @@ public class NewVirtualModelControlOptimizationControlModule
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
-   private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
-
    private final NewVirtualModelControlSolution virtualModelControlSolution = new NewVirtualModelControlSolution();
 
    public NewVirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       jointsToOptimizeFor = toolbox.getJointIndexHandler().getIndexedJoints();
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
-      contactablePlaneBodies = toolbox.getContactablePlaneBodies();
+      List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
       WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       groundContactForceOptimization = new NewGroundContactForceOptimizationControlModule(wrenchMatrixCalculator, contactablePlaneBodies,
