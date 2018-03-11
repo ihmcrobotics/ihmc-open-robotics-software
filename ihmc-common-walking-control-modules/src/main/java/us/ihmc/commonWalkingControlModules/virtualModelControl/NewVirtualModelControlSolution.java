@@ -14,7 +14,6 @@ public class NewVirtualModelControlSolution
    private SelectionMatrix6D centroidalMomentumSelectionMatrix;
    private Map<RigidBody, Wrench> externalWrenchSolution;
    private List<RigidBody> rigidBodiesWithExternalWrench;
-   private List<RigidBody> bodiesInContact;
 
    public NewVirtualModelControlSolution()
    {
@@ -41,11 +40,6 @@ public class NewVirtualModelControlSolution
       this.externalWrenchSolution = externalWrenchSolution;
    }
 
-   public void setBodiesInContact(List<RigidBody> bodiesInContact)
-   {
-      this.bodiesInContact = bodiesInContact;
-   }
-
    public void setCentroidalMomentumSelectionMatrix(SelectionMatrix6D selectionMatrix)
    {
       this.centroidalMomentumSelectionMatrix = selectionMatrix;
@@ -59,11 +53,6 @@ public class NewVirtualModelControlSolution
    public Map<RigidBody, Wrench> getExternalWrenchSolution()
    {
       return externalWrenchSolution;
-   }
-
-   public List<RigidBody> getBodiesInContact()
-   {
-      return bodiesInContact;
    }
 
    public InverseDynamicsJoint[] getJointsToCompute()
