@@ -2,7 +2,7 @@ package us.ihmc.robotics.robotDescription;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
-public class SphereDescriptionReadOnly implements ConvexShapeDescription
+public class SphereDescriptionReadOnly implements ConvexShapeDescriptionReadOnly
 {
    private final double radius;
    private final RigidBodyTransform rigidBodyTransform;

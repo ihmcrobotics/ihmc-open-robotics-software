@@ -377,7 +377,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    }
 
    @Override
-   public InverseDynamicsCommand<?> getVirtualModelControlOutput()
+   public MomentumRateCommand getVirtualModelControlOutput()
    {
       return getInverseDynamicsOutput();
    }

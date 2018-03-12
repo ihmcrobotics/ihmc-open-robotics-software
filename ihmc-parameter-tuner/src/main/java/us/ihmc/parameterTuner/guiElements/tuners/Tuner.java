@@ -1,14 +1,15 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import org.apache.commons.lang3.StringUtils;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -16,6 +17,7 @@ import javafx.scene.text.Text;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.TextFormatterTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
+import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
 public class Tuner extends VBox
@@ -24,7 +26,6 @@ public class Tuner extends VBox
 
    private Label name;
    private TextField description;
-   private Button remove;
    private InputNode inputNode;
 
    public Tuner(GuiParameter parameter)
@@ -66,6 +67,16 @@ public class Tuner extends VBox
       default:
          PrintTools.info("Implement me.");
       }
+
+      Tooltip tooltip = new Tooltip(StringUtils.replaceAll(parameter.getUniqueName(), GuiElement.SEPERATOR, "\n"));
+      Tooltip.install(name, tooltip);
+      ContextMenu contextMenu = new ContextMenu();
+      name.setContextMenu(contextMenu);
+   }
+
+   public ContextMenu getContextMenu()
+   {
+      return name.getContextMenu();
    }
 
    private void setupNode()
@@ -73,7 +84,6 @@ public class Tuner extends VBox
       setSpacing(10.0);
 
       name = new Label();
-      remove = new Button("Remove");
       description = new TextField();
       HBox.setHgrow(this, Priority.ALWAYS);
       HBox.setHgrow(name, Priority.ALWAYS);
@@ -83,7 +93,6 @@ public class Tuner extends VBox
       parameterInfoBox.setSpacing(10.0);
       parameterInfoBox.setAlignment(Pos.CENTER_LEFT);
       parameterInfoBox.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
-      parameterInfoBox.getChildren().add(remove);
       parameterInfoBox.getChildren().add(name);
       HBox.setHgrow(parameterInfoBox, Priority.ALWAYS);
       getChildren().add(parameterInfoBox);
@@ -99,11 +108,6 @@ public class Tuner extends VBox
 
       setId("tuner-window");
       name.setId("parameter-name-in-tuner");
-   }
-
-   public void setCloseHandler(EventHandler<ActionEvent> closeHandler)
-   {
-      remove.setOnAction(closeHandler);
    }
 
    public Node getSimpleInputNode()

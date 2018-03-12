@@ -2,7 +2,7 @@ package us.ihmc.robotics.robotDescription;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
-public class CylinderDescriptionReadOnly implements ConvexShapeDescription
+public class CylinderDescriptionReadOnly implements ConvexShapeDescriptionReadOnly
 {
    private final double radius, height;
    private final RigidBodyTransform rigidBodyTransformToCenter;
