@@ -19,6 +19,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -34,6 +35,8 @@ import us.ihmc.tools.MemoryTools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static junit.framework.TestCase.assertTrue;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class VirtualModelMomentumControllerTest
@@ -383,7 +386,17 @@ public class VirtualModelMomentumControllerTest
       selectionMatrix.clearSelection();
       selectionMatrix.setToAngularSelectionOnly();
 
-      submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
+      boolean caughtException = false;
+      try
+      {
+         submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
+      }
+      catch (ReferenceFrameMismatchException e)
+      {
+         caughtException = true;
+      }
+
+      assertTrue("Wrong frame", caughtException);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -405,7 +418,17 @@ public class VirtualModelMomentumControllerTest
       selectionMatrix.clearSelection();
       selectionMatrix.setToLinearSelectionOnly();
 
-      submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
+      boolean caughtException = false;
+      try
+      {
+         submitAndCheckVMC(pelvis, foot, desiredWrench, selectionMatrix);
+      }
+      catch (ReferenceFrameMismatchException e)
+      {
+         caughtException = true;
+      }
+
+      assertTrue("Wrong frame", caughtException);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
