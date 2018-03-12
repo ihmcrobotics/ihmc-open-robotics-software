@@ -60,11 +60,18 @@ public class AllocationSampler implements Sampler
    public void sampleAllocation(int count, String desc, Object newObj, long size)
    {
       StackTraceElement[] stackTrace = getCleanedStackTace();
+
       if (!checkIfOfInterest(stackTrace))
       {
          return;
       }
       if (checkIfBlacklisted(stackTrace))
+      {
+         return;
+      }
+
+      // Skip static member initializations.
+      if (stackTrace[0].getMethodName().contains("<clinit>"))
       {
          return;
       }
