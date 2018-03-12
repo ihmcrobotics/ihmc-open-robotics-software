@@ -519,7 +519,7 @@ public class ToeOffManager
       isRearAnklePitchHittingLimit.set(anklePitch.getQ() < lowerLimit);
       isRearAnklePitchHittingLimitFilt.update();
 
-      if (!doToeOffWhenHittingAnkleLimit.getBooleanValue() || !isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
+      if (!doToeOffWhenHittingAnkleLimit.getBooleanValue())// || !isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
          return false;
 
       return isRearAnklePitchHittingLimitFilt.getBooleanValue();
@@ -532,7 +532,7 @@ public class ToeOffManager
       isRearKneePitchHittingLimit.set(kneePitch.getQ() > upperLimit);
       isRearKneePitchHittingLimitFilt.update();
 
-      if (!doToeOffWhenHittingKneeLimit.getBooleanValue() || !isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
+      if (!doToeOffWhenHittingKneeLimit.getBooleanValue())// || !isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
          return false;
 
       return isRearKneePitchHittingLimitFilt.getBooleanValue();
@@ -826,13 +826,6 @@ public class ToeOffManager
       @Override
       public boolean evaluateToeOffConditions(RobotSide trailingLeg)
       {
-         if (!isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
-         {
-            doPointToeOff.set(false);
-            computeToePointContact.set(true);
-            return false;
-         }
-
          boolean ankleAtLimit = checkAnkleLimitForToeOff(trailingLeg);
          boolean kneeAtLimit = checkKneeLimitForToeOff(trailingLeg.getOppositeSide());
          needToSwitchToToeOffForJointLimit.set(ankleAtLimit || kneeAtLimit);
@@ -842,6 +835,15 @@ public class ToeOffManager
             computeToePointContact.set(updatePointContactDuringToeOff.getBooleanValue());
             return false;
          }
+
+         if (!isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
+         {
+            doPointToeOff.set(false);
+            computeToePointContact.set(true);
+            return false;
+         }
+
+
 
          // I don't care about the CoP location during transfer
          if (!isDesiredECMPOKForToeOffFilt.getBooleanValue())
