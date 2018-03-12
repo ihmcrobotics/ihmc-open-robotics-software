@@ -169,11 +169,47 @@ public class NewVirtualModelController
        * where w is the M-by-1 end-effector desired effort vector.
        * @formatter:on
        */
-      wrench.getMatrix(tempTaskObjective);
-      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, tempFullObjective);
+      wrench.getMatrix(tempFullObjective);
+      CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
       // Add these forces to the effort matrix t = J' w
-      CommonOps.multAddTransA(tempFullJacobian, tempFullObjective, fullEffortMatrix);
+      CommonOps.multAddTransA(tempFullJacobian, tempTaskObjective, fullEffortMatrix);
+
+      return true;
+   }
+
+
+   /**
+    * Adds a {@link Wrench} to the {@link NewVirtualModelController}.
+    * <p>
+    * The idea is to add the data from the contact force optimization module so that
+    * the virtual model controller exerts the desired forces based on the equation:<br>
+    * J<sub>MxN</sub><sup>T</sup> * w<sub>Mx1</sub> = &tau;<sub>Nx1</sub> <br>
+    * where J is the M-by-N Jacobian matrix, w is the M-by-1 desired joint effort vector,
+    * and &tau; is the N-by-1 torque vector. M is called the task
+    * size and N is the overall number of degrees of freedom (DoFs) to be controlled.
+    * </p>
+    *
+    * @return true if the wrench was successfully added.
+    */
+   public boolean addExternalWrench(RigidBody base, RigidBody endEffector, Wrench wrench)
+   {
+      jacobianCalculator.clear();
+      jacobianCalculator.setKinematicChain(base, endEffector);
+      jacobianCalculator.setJacobianFrame(wrench.getExpressedInFrame());
+      jacobianCalculator.computeJacobianMatrix();
+
+      // Compute the M-by-N task Jacobian: J = S * J
+      // Step 1, let's get the 'small' Jacobian matrix, j.
+      // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain, which is way smaller than the number of robot DoFs.
+      jacobianCalculator.getJacobianMatrix(tempTaskJacobian);
+
+      // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
+      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, tempFullJacobian);
+
+      // Add these forces to the effort matrix t = J' w
+      CommonOps.multAddTransA(tempFullJacobian, tempTaskObjective, fullEffortMatrix);
 
       return true;
    }
