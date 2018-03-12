@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ExternalWrenchHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.NewGroundContactForceQPSolver;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.GroundContactForceMomentumQPSolver;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
@@ -52,7 +52,7 @@ public class VirtualModelControlOptimizationControlModule
 
    private final BasisVectorVisualizer basisVectorVisualizer;
 
-   private final NewGroundContactForceQPSolver qpSolver;
+   private final GroundContactForceMomentumQPSolver qpSolver;
 
    private final MotionQPInput motionQPInput;
 
@@ -84,7 +84,7 @@ public class VirtualModelControlOptimizationControlModule
       boolean hasFloatingBase = toolbox.getRootJoint() != null;
       rhoMin.set(optimizationSettings.getRhoMin());
       ActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
-      qpSolver = new NewGroundContactForceQPSolver(activeSetQPSolver, rhoSize, hasFloatingBase, registry);
+      qpSolver = new GroundContactForceMomentumQPSolver(activeSetQPSolver, rhoSize, hasFloatingBase, registry);
       qpSolver.setMinRho(optimizationSettings.getRhoMin());
       qpSolver.setUseWarmStart(optimizationSettings.useWarmStartInSolver());
       qpSolver.setMaxNumberOfIterations(optimizationSettings.getMaxNumberOfSolverIterations());
