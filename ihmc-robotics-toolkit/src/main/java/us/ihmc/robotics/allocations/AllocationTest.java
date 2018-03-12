@@ -10,7 +10,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import com.google.monitoring.runtime.instrumentation.AllocationRecorder;
 
-import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 
 /**
  * This interface provides the means to profile the garbage generation of code. This is useful
@@ -37,12 +37,24 @@ public abstract interface AllocationTest
    /**
     * To avoid recording allocations that are of no interest it is possible to specify
     * classes that should be ignored here. This avoids recording any garbage generated in
-    * safe places like the {@link RecyclingArrayList} or in places that are simulation
-    * specific.
+    * places like the {@link ClassLoader} or in places that are simulation specific.
     *
     * @return classes that will be ignored when monitoring for allocations.
     */
    public abstract List<Class<?>> getClassesToIgnore();
+
+   /**
+    * To avoid recording allocations that are of no interest it is possible to specify
+    * methods that should be ignored here. This avoids recording any garbage generated in
+    * safe places like the {@link ConvexPolygon2D#setOrCreate} or in places that are
+    * simulation specific.
+    *
+    * @return classes that will be ignored when monitoring for allocations.
+    */
+   public default List<String> getMethodsToIgnore()
+   {
+      return new ArrayList<>();
+   }
 
    /**
     * Will run the provided runnable and return a list of places where allocations occurred.
@@ -58,6 +70,7 @@ public abstract interface AllocationTest
       AllocationSampler sampler = new AllocationSampler();
       getClassesOfInterest().forEach(clazz -> sampler.addClassToWatch(clazz.getName()));
       getClassesToIgnore().forEach(clazz -> sampler.addClassToIgnore(clazz.getName()));
+      getMethodsToIgnore().forEach(method -> sampler.addBlacklistMethod(method));
 
       AllocationRecorder.addSampler(sampler);
       runnable.run();
