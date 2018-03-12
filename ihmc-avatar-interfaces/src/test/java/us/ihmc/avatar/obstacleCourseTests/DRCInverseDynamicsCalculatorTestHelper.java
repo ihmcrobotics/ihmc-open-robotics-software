@@ -484,8 +484,12 @@ public class DRCInverseDynamicsCalculatorTestHelper
       {
          if (groundContactPointBasedWrenchCalculator instanceof GroundContactPointBasedWrenchCalculator)
          {
-            OneDegreeOfFreedomJoint joint = groundContactPointBasedWrenchCalculator.getJoint();
-            OneDoFJoint oneDoFJoint = fullRobotModel.getOneDoFJointByName(joint.getName());
+            Joint joint = groundContactPointBasedWrenchCalculator.getJoint();
+            OneDoFJoint oneDoFJoint;
+            if (joint instanceof OneDegreeOfFreedomJoint)
+               oneDoFJoint = fullRobotModel.getOneDoFJointByName(joint.getName());
+            else
+               throw new RuntimeException("Force sensor is only supported for OneDegreeOfFreedomJoint.");
 
             RigidBody rigidBodyToApplyWrenchTo = oneDoFJoint.getSuccessor();
             ReferenceFrame bodyFixedFrame = rigidBodyToApplyWrenchTo.getBodyFixedFrame();
