@@ -22,7 +22,8 @@ public class VirtualModelMomentumController
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
    private final JointIndexHandler jointIndexHandler;
 
-   private final DenseMatrix64F tempFullJacobian = new DenseMatrix64F(Wrench.SIZE, 12);
+   private final DenseMatrix64F tempFullJacobian;
+   private final DenseMatrix64F tempReducedJacobian;
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(Wrench.SIZE, 12);
    private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
 
@@ -31,11 +32,16 @@ public class VirtualModelMomentumController
 
    private final DenseMatrix64F fullEffortMatrix;
 
+   private final int numberOfDoFs;
+
    public VirtualModelMomentumController(JointIndexHandler jointIndexHandler)
    {
       this.jointIndexHandler = jointIndexHandler;
+      numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
 
-      fullEffortMatrix = new DenseMatrix64F(jointIndexHandler.getNumberOfDoFs(), 0);
+      fullEffortMatrix = new DenseMatrix64F(jointIndexHandler.getNumberOfDoFs(), 1);
+      tempFullJacobian = new DenseMatrix64F(Wrench.SIZE, jointIndexHandler.getNumberOfDoFs());
+      tempReducedJacobian = new DenseMatrix64F(Wrench.SIZE, jointIndexHandler.getNumberOfDoFs());
    }
 
    public void reset()
@@ -88,11 +94,15 @@ public class VirtualModelMomentumController
        * where w is the M-by-1 end-effector desired effort vector.
        * @formatter:on
        */
-      commandToAdd.getDesiredEffort(tempTaskObjective);
-      CommonOps.mult(tempSelectionMatrix, tempTaskObjective, tempFullObjective);
+      commandToAdd.getDesiredEffort(tempFullObjective);
+
+      tempTaskObjective.reshape(taskSize, 1);
+      tempReducedJacobian.reshape(taskSize, numberOfDoFs);
+      CommonOps.mult(tempSelectionMatrix, tempFullJacobian, tempReducedJacobian);
+      CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
       // Add these forces to the effort matrix t = J' w
-      CommonOps.multAddTransA(tempFullJacobian, tempFullObjective, fullEffortMatrix);
+      CommonOps.multAddTransA(tempReducedJacobian, tempTaskObjective, fullEffortMatrix);
 
       return true;
    }

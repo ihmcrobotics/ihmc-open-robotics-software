@@ -4,30 +4,18 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelMomentumController;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.frames.YoWrench;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.robotics.sensors.ContactSensorDefinition;
-import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
@@ -39,7 +27,7 @@ import java.util.*;
 
 public class VirtualModelMomentumControllerTestHelper
 {
-   public static void createVirtualModelMomentumControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, ReferenceFrame centerOfMassFrame,
+   static void createVirtualModelMomentumControlTest(SCSRobotFromInverseDynamicsRobotModel robotModel, FullRobotModel controllerModel, ReferenceFrame centerOfMassFrame,
          List<RigidBody> endEffectors, List<Vector3D> desiredForces, List<Vector3D> desiredTorques, List<ExternalForcePoint> externalForcePoints, SelectionMatrix6D selectionMatrix, SimulationTestingParameters simulationTestingParameters) throws Exception
    {
       double simulationDuration = 20.0;
@@ -47,10 +35,7 @@ public class VirtualModelMomentumControllerTestHelper
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
-      VirtualModelMomentumController virtualModelController = new VirtualModelMomentumController(new JointIndexHandler(controllerModel.getControllableOneDoFJoints()));
-
-      List<ReferenceFrame> endEffectorFrames = new ArrayList<>();
-      List<FramePose3D> desiredEndEffectorPoses = new ArrayList<>();
+      VirtualModelMomentumController virtualModelController = new VirtualModelMomentumController(new JointIndexHandler(controllerModel.getOneDoFJoints()));
 
       List<YoWrench> desiredWrenches = new ArrayList<>();
       List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers = new ArrayList<>();
@@ -63,9 +48,6 @@ public class VirtualModelMomentumControllerTestHelper
          FramePose3D desiredEndEffectorPose = new FramePose3D(endEffectorFrame);
          desiredEndEffectorPose.setToZero();
          desiredEndEffectorPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-         endEffectorFrames.add(endEffectorFrame);
-         desiredEndEffectorPoses.add(desiredEndEffectorPose);
 
          Wrench desiredWrench = new Wrench(endEffectorFrame, endEffectorFrame);
          Vector3D desiredForce = desiredForces.get(i);
@@ -142,37 +124,37 @@ public class VirtualModelMomentumControllerTestHelper
       }
    }
 
-   public static VirtualModelControllerTestHelper.RobotLegs createRobotLeg(double gravity)
+   static VirtualModelControllerTestHelper.RobotLegs createRobotLeg(double gravity)
    {
       return VirtualModelControllerTestHelper.createRobotLeg(gravity);
    }
 
-   public static VirtualModelControllerTestHelper.RobotArm createRobotArm()
+   static VirtualModelControllerTestHelper.RobotArm createRobotArm()
    {
       return VirtualModelControllerTestHelper.createRobotArm();
    }
 
-   public static VirtualModelControllerTestHelper.PlanarForkedRobotArm createPlanarForkedRobotArm()
+   static VirtualModelControllerTestHelper.PlanarForkedRobotArm createPlanarForkedRobotArm()
    {
       return VirtualModelControllerTestHelper.createPlanarForkedRobotArm();
    }
 
-   public static VirtualModelControllerTestHelper.ForkedRobotArm createForkedRobotArm()
+   static VirtualModelControllerTestHelper.ForkedRobotArm createForkedRobotArm()
    {
       return VirtualModelControllerTestHelper.createForkedRobotArm();
    }
 
-   public static VirtualModelControllerTestHelper.PlanarRobotArm createPlanarArm()
+   static VirtualModelControllerTestHelper.PlanarRobotArm createPlanarArm()
    {
       return VirtualModelControllerTestHelper.createPlanarArm();
    }
 
-   public static void compareWrenches(Wrench wrench1, Wrench wrench2)
+   static void compareWrenches(Wrench wrench1, Wrench wrench2)
    {
       VirtualModelControllerTestHelper.compareWrenches(wrench1, wrench2);
    }
 
-   public static void compareWrenches(Wrench wrench1, Wrench wrench2, SelectionMatrix6D selectionMatrix)
+   static void compareWrenches(Wrench wrench1, Wrench wrench2, SelectionMatrix6D selectionMatrix)
    {
       VirtualModelControllerTestHelper.compareWrenches(wrench1, wrench2, selectionMatrix);
    }
@@ -197,9 +179,7 @@ public class VirtualModelMomentumControllerTestHelper
       private List<RigidBody> endEffectors = new ArrayList<>();
       private final SelectionMatrix6D selectionMatrix;
 
-      private boolean firstTick = true;
-
-      public DummyArmMomentumController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
+      DummyArmMomentumController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
                                         List<VirtualModelControllerTestHelper.ForcePointController> forcePointControllers,
                                         VirtualModelMomentumController virtualModelController, List<RigidBody> endEffectors,
                                         List<YoWrench> yoDesiredWrenches, SelectionMatrix6D selectionMatrix)
@@ -265,32 +245,32 @@ public class VirtualModelMomentumControllerTestHelper
          scsRobot.updateJointTorques_ID_to_SCS();
       }
 
-      public Vector3D getDesiredPosition(int index)
+      Vector3D getDesiredPosition(int index)
       {
          return forcePointControllers.get(index).getDesiredPosition();
       }
 
-      public Quaternion getDesiredOrientation(int index)
+      Quaternion getDesiredOrientation(int index)
       {
          return forcePointControllers.get(index).getDesiredOrientation();
       }
 
-      public Vector3D getCurrentPosition(int index)
+      Vector3D getCurrentPosition(int index)
       {
          return forcePointControllers.get(index).getCurrentPosition();
       }
 
-      public Quaternion getCurrentOrientation(int index)
+      Quaternion getCurrentOrientation(int index)
       {
          return forcePointControllers.get(index).getCurrentOrientation();
       }
 
-      public Vector3D getCurrentForce(int index)
+      Vector3D getCurrentForce(int index)
       {
          return forcePointControllers.get(index).getCurrentForce();
       }
 
-      public Vector3D getCurrentTorque(int index)
+      Vector3D getCurrentTorque(int index)
       {
          return forcePointControllers.get(index).getCurrentTorque();
       }
