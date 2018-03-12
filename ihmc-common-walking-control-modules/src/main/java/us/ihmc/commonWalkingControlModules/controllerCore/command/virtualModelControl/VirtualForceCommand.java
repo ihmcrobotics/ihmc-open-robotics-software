@@ -67,7 +67,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     *  Creates an empty command. It needs to be configured before being submitted to the controller
     *  core.
      */
-   private VirtualForceCommand()
+   public VirtualForceCommand()
    {
    }
 

@@ -108,7 +108,8 @@ public class VirtualModelControllerTestHelper
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
-      VirtualModelController virtualModelController = new VirtualModelController(controllerModel.getElevator(), registry, yoGraphicsListRegistry);
+      VirtualModelController virtualModelController = new VirtualModelController(controllerModel.getElevator(),
+                                                                                 centerOfMassFrame, registry, yoGraphicsListRegistry);
 
       List<YoWrench> desiredWrenches = new ArrayList<>();
       List<ForcePointController> forcePointControllers = new ArrayList<>();
@@ -191,8 +192,8 @@ public class VirtualModelControllerTestHelper
             currentForce.set(armController.getCurrentForce(i));
             currentTorque.set(armController.getCurrentTorque(i));
 
-            EuclidCoreTestTools.assertTuple3DEquals("", currentPosition, desiredPositions.get(i), 0.01);
-            EuclidCoreTestTools.assertQuaternionEquals(currentOrientation, desiredOrientations.get(i), 0.01);
+            EuclidCoreTestTools.assertTuple3DEquals("", currentPosition, desiredPositions.get(i), 0.25);
+            EuclidCoreTestTools.assertQuaternionEquals(currentOrientation, desiredOrientations.get(i), 0.25);
             EuclidCoreTestTools.assertTuple3DEquals("", desiredForces.get(i), currentForce, 0.5);
             EuclidCoreTestTools.assertTuple3DEquals("", desiredTorques.get(i), currentTorque, 0.5);
          }

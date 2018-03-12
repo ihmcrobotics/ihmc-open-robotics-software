@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommandOld;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -102,7 +102,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
-   private final VirtualWrenchCommandOld virtualModelControlOutput = new VirtualWrenchCommandOld();
+   private final VirtualWrenchCommand virtualModelControlOutput = new VirtualWrenchCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPIDSE3Gains gains;
@@ -631,7 +631,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    }
 
    @Override
-   public VirtualWrenchCommandOld getVirtualModelControlOutput()
+   public VirtualWrenchCommand getVirtualModelControlOutput()
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
