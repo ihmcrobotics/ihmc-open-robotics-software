@@ -17,7 +17,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -45,7 +44,6 @@ public class NewVirtualModelControlOptimizationControlModule
    private final NewVirtualModelControlSolution virtualModelControlSolution = new NewVirtualModelControlSolution();
 
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
-   private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
 
    private final YoDouble rhoMin = new YoDouble("rhoMinGCF", registry);
 
@@ -60,6 +58,7 @@ public class NewVirtualModelControlOptimizationControlModule
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
    private final DenseMatrix64F fullMomentumObjective = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
+   private final DenseMatrix64F totalWrench = new DenseMatrix64F(SpatialForceVector.SIZE, 1);
 
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentum = new FrameVector3D();
@@ -68,7 +67,6 @@ public class NewVirtualModelControlOptimizationControlModule
    public NewVirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       this.wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
-      this.contactablePlaneBodies = toolbox.getContactablePlaneBodies();
       this.centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
@@ -86,8 +84,7 @@ public class NewVirtualModelControlOptimizationControlModule
       qpSolver = new NewGroundContactForceQPSolver(activeSetQPSolver, rhoSize, hasFloatingBase, registry);
       qpSolver.setMinRho(optimizationSettings.getRhoMin());
 
-      double gravityZ = toolbox.getGravityZ();
-      externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
+      externalWrenchHandler = new ExternalWrenchHandler(toolbox.getGravityZ(), centerOfMassFrame, toolbox.getTotalRobotMass(), toolbox.getContactablePlaneBodies());
 
       parentRegistry.addChild(registry);
    }
@@ -98,14 +95,8 @@ public class NewVirtualModelControlOptimizationControlModule
       externalWrenchHandler.reset();
    }
 
-   private final DenseMatrix64F contactWrench = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final DenseMatrix64F totalWrench = new DenseMatrix64F(Wrench.SIZE, 1);
-   private final DenseMatrix64F tmpWrench = new DenseMatrix64F(Wrench.SIZE, 1);
-
    public NewVirtualModelControlSolution compute() throws NewVirtualModelControlModuleException
    {
-      DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
-
       setupWrenchesEquilibriumConstraint();
 
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
@@ -144,36 +135,19 @@ public class NewVirtualModelControlOptimizationControlModule
          noConvergenceException = e;
       }
 
+      // get the rho solution. Note, if the solver fails, this returns the last success.
       DenseMatrix64F rhoSolution = qpSolver.getRhos();
 
+      // compute ground reaction wrenches from the rho solution
       Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
-      for (int i = 0; i < contactablePlaneBodies.size(); i++)
-      {
-         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
-         Wrench solutionWrench = groundReactionWrenches.get(rigidBody);
-
-         if (groundReactionWrenches.containsKey(rigidBody))
-            groundReactionWrenches.get(rigidBody).set(solutionWrench);
-         else
-            groundReactionWrenches.put(rigidBody, solutionWrench);
-      }
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
       // get all forces for all contactable bodies
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
 
-      // record the momentum rate solution coming from the contact forces, minus gravity fixme we don't currently include external forces
-      contactWrench.zero();
-      for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
-      {
-         externalWrenchSolution.get(rigidBody).changeFrame(centerOfMassFrame);
-         externalWrenchSolution.get(rigidBody).getMatrix(tmpWrench);
-         CommonOps.add(contactWrench, tmpWrench, contactWrench);
-         externalWrenchSolution.get(rigidBody).changeFrame(rigidBody.getBodyFixedFrame());
-      }
-      CommonOps.add(contactWrench, gravityWrench, totalWrench);
-      centroidalMomentumRateSolution.set(centerOfMassFrame, totalWrench);
+      // record the momentum rate solution coming from the sum of forces
+      computeCentroidalMomentumRateSolution(rhoSolution);
 
       virtualModelControlSolution.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
       virtualModelControlSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
@@ -249,6 +223,19 @@ public class NewVirtualModelControlOptimizationControlModule
       DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
       DenseMatrix64F rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
       qpSolver.setupWrenchesEquilibriumConstraint(identityMatrix, rhoJacobian, additionalExternalWrench, gravityWrench);
+   }
+
+   private void computeCentroidalMomentumRateSolution(DenseMatrix64F rhoSolution)
+   {
+      DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
+      DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
+      DenseMatrix64F rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
+
+      CommonOps.mult(rhoJacobian, rhoSolution, totalWrench);
+      CommonOps.addEquals(totalWrench, additionalExternalWrench);
+      CommonOps.addEquals(totalWrench, gravityWrench);
+
+      centroidalMomentumRateSolution.set(centerOfMassFrame, totalWrench);
    }
 
    private void setupRhoTasks()
