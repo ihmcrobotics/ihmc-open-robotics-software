@@ -44,12 +44,11 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 26.7)
    @Test(timeout = 150000)
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushLeftEarlySwing();
+      super.testPushLeftEarlySwing(700.0);
    }
 
    // Moved one of the old push recovery tests to fast so it is checked from time to time.
@@ -77,12 +76,11 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       super.testPushRightLateSwing();
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 44.5)
    @Test(timeout = 150000)
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushRightThenLeftMidSwing();
+      super.testPushRightThenLeftMidSwing(800.0);
    }
 
    @Override
