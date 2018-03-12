@@ -38,6 +38,9 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    private final YoDouble comPositionEstimateX;
    private final YoDouble comPositionEstimateY;
    private final YoDouble comPositionEstimateZ;
+   private final YoDouble comPositionEstimateYaw;
+   private final YoDouble comPositionEstimatePitch;
+   private final YoDouble comPositionEstimateRoll;
 
    @SuppressWarnings("unchecked")
    public QuadrupedForceTestYoVariables(SimulationConstructionSet scs)
@@ -69,6 +72,10 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       timedStepGoalPositionX = (YoDouble) scs.getVariable("timedStepGoalPositionX");
       timedStepGoalPositionY = (YoDouble) scs.getVariable("timedStepGoalPositionY");
       timedStepGoalPositionZ = (YoDouble) scs.getVariable("timedStepGoalPositionZ");
+
+      comPositionEstimateYaw = (YoDouble) scs.getVariable("comPositionEstimateYaw");
+      comPositionEstimatePitch = (YoDouble) scs.getVariable("comPositionEstimatePitch");
+      comPositionEstimateRoll = (YoDouble) scs.getVariable("comPositionEstimateRoll");
    }
 
    public YoEnum<QuadrupedForceControllerRequestedEvent> getUserTrigger()
@@ -174,5 +181,20 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    public YoDouble getTimedStepGoalPositionZ()
    {
       return timedStepGoalPositionZ;
+   }
+
+   public YoDouble getComPositionEstimateYaw()
+   {
+      return comPositionEstimateYaw;
+   }
+
+   public YoDouble getComPositionEstimatePitch()
+   {
+      return comPositionEstimatePitch;
+   }
+
+   public YoDouble getComPositionEstimateRoll()
+   {
+      return comPositionEstimateRoll;
    }
 }

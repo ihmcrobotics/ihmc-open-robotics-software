@@ -21,6 +21,8 @@ import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
 
+import static junit.framework.TestCase.assertTrue;
+
 public abstract class QuadrupedForceBasedStandControllerTest implements QuadrupedMultiRobotTestInterface
 {
    private GoalOrientedTestConductor conductor;
@@ -217,56 +219,39 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      double stanceHeight = variables.getStanceHeight().getDoubleValue();
-      
-      variables.getYoComPositionInputZ().set(stanceHeight + 0.05);
-      variables.getYoComPositionInputX().set(0.05);
-      variables.getYoComPositionInputY().set(-0.05);
-      variables.getYoBodyOrientationInputYaw().set(0.05);
-      variables.getYoBodyOrientationInputPitch().set(0.05);
-      variables.getYoBodyOrientationInputRoll().set(0.05);
+      double initialComZ = variables.getComPositionEstimateZ().getDoubleValue() - variables.getGroundPlanePointZ().getDoubleValue();
+
+      double yawAndPitchShift = Math.toRadians(12.0);
+      double rollShift = Math.toRadians(7.5);
+      double orientationDelta = Math.toRadians(1.0);
+
+      double translationShift = 0.05;
+      double translationDelta = 0.01;
+
+      testMovingCoM(translationShift, -translationShift, initialComZ + translationShift, yawAndPitchShift, yawAndPitchShift, rollShift, translationDelta, orientationDelta);
+      testMovingCoM(-translationShift, -translationShift, initialComZ, yawAndPitchShift, - yawAndPitchShift, rollShift, translationDelta, orientationDelta);
+      testMovingCoM(-translationShift,  translationShift, initialComZ - translationShift, - yawAndPitchShift, - yawAndPitchShift, - rollShift, translationDelta, orientationDelta);
+      testMovingCoM(translationShift, translationShift, initialComZ - 2.0 * translationShift, - yawAndPitchShift, -yawAndPitchShift, -rollShift, translationDelta, orientationDelta);
+      testMovingCoM(0.0, 0.0, initialComZ, 0.0, 0.0, 0.0, translationDelta, orientationDelta);
+   }
+
+   private void testMovingCoM(double comPositionX, double comPositionY, double comPositionZ, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll, double translationDelta, double orientationDelta)
+   {
+      variables.getYoComPositionInputX().set(comPositionX);
+      variables.getYoComPositionInputY().set(comPositionY);
+      variables.getYoComPositionInputZ().set(comPositionZ);
+      variables.getYoBodyOrientationInputYaw().set(bodyOrientationYaw);
+      variables.getYoBodyOrientationInputPitch().set(bodyOrientationPitch);
+      variables.getYoBodyOrientationInputRoll().set(bodyOrientationRoll);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      variables.getYoComPositionInputZ().set(stanceHeight + 0.0);
-      variables.getYoComPositionInputX().set(-0.05);
-      variables.getYoComPositionInputY().set(-0.05);
-      variables.getYoBodyOrientationInputYaw().set(0.05);
-      variables.getYoBodyOrientationInputPitch().set(-0.05);
-      variables.getYoBodyOrientationInputRoll().set(0.05);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
-      conductor.simulate();
-      
-      variables.getYoComPositionInputZ().set(stanceHeight - 0.05);
-      variables.getYoComPositionInputX().set(-0.05);
-      variables.getYoComPositionInputY().set(0.05);
-      variables.getYoBodyOrientationInputYaw().set(-0.05);
-      variables.getYoBodyOrientationInputPitch().set(-0.05);
-      variables.getYoBodyOrientationInputRoll().set(0.05);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
-      conductor.simulate();
-      
-      variables.getYoComPositionInputZ().set(stanceHeight - 0.1);
-      variables.getYoComPositionInputX().set(0.05);
-      variables.getYoComPositionInputY().set(0.05);
-      variables.getYoBodyOrientationInputYaw().set(-0.05);
-      variables.getYoBodyOrientationInputPitch().set(-0.05);
-      variables.getYoBodyOrientationInputRoll().set(-0.05);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
-      conductor.simulate();
-      
-      variables.getYoComPositionInputZ().set(stanceHeight);
-      variables.getYoComPositionInputX().set(0.0);
-      variables.getYoComPositionInputY().set(0.0);
-      variables.getYoBodyOrientationInputYaw().set(0.0);
-      variables.getYoBodyOrientationInputPitch().set(0.0);
-      variables.getYoBodyOrientationInputRoll().set(0.0);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
-      conductor.simulate();
+
+      assertTrue(Math.abs(variables.getComPositionEstimateX().getDoubleValue() - comPositionX) < translationDelta);
+      assertTrue(Math.abs(variables.getComPositionEstimateY().getDoubleValue() - comPositionY) < translationDelta);
+      assertTrue(Math.abs(variables.getComPositionEstimateZ().getDoubleValue() - comPositionZ) < translationDelta);
+      assertTrue(Math.abs(variables.getComPositionEstimateYaw().getDoubleValue() - bodyOrientationYaw) < orientationDelta);
+      assertTrue(Math.abs(variables.getComPositionEstimatePitch().getDoubleValue() - bodyOrientationPitch) < orientationDelta);
+      assertTrue(Math.abs(variables.getComPositionEstimateRoll().getDoubleValue() - bodyOrientationRoll) < orientationDelta);
    }
 }
