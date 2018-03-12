@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -27,7 +28,7 @@ public class NewGroundContactForceQPSolver
    private final YoFrameVector wrenchEquilibriumTorqueError;
 
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
-   private final ActiveSetQPSolver qpSolver;
+   private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -46,8 +47,11 @@ public class NewGroundContactForceQPSolver
    private final DenseMatrix64F solverInput_lb_previous;
    private final DenseMatrix64F solverInput_ub_previous;
 
+   private final DenseMatrix64F solverInput_activeIndices;
+
    private final DenseMatrix64F solverOutput_rhos;
 
+   private final YoInteger numberOfActiveVariables = new YoInteger("numberOfActiveVariables", registry);
    private final YoInteger numberOfIterations = new YoInteger("numberOfIterations", registry);
    private final YoInteger numberOfEqualityConstraints = new YoInteger("numberOfEqualityConstraints", registry);
    private final YoInteger numberOfInequalityConstraints = new YoInteger("numberOfInequalityConstraints", registry);
@@ -66,7 +70,8 @@ public class NewGroundContactForceQPSolver
    private boolean hasWrenchesEquilibriumConstraintBeenSetup = false;
 
 
-   public NewGroundContactForceQPSolver(ActiveSetQPSolver qpSolver, int rhoSize, boolean hasFloatingBase, YoVariableRegistry parentRegistry)
+   public NewGroundContactForceQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int rhoSize, boolean hasFloatingBase,
+                                        YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.rhoSize = rhoSize;
@@ -92,6 +97,9 @@ public class NewGroundContactForceQPSolver
 
       CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
+
+      solverInput_activeIndices = new DenseMatrix64F(problemSize, 1);
+      CommonOps.fill(solverInput_activeIndices, 1.0);
 
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
@@ -308,8 +316,11 @@ public class NewGroundContactForceQPSolver
 
       qpSolver.clear();
 
+      numberOfActiveVariables.set((int) CommonOps.elementSum(solverInput_activeIndices));
+
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
+      qpSolver.setActiveVariables(solverInput_activeIndices);
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
@@ -442,5 +453,11 @@ public class NewGroundContactForceQPSolver
    public void setMaxRho(DenseMatrix64F rhoMax)
    {
       CommonOps.insert(rhoMax, solverInput_ub, 0, 0);
+   }
+
+
+   public void setActiveRhos(DenseMatrix64F activeRhoMatrix)
+   {
+      CommonOps.insert(activeRhoMatrix, solverInput_activeIndices, momentumSize, 0);
    }
 }
