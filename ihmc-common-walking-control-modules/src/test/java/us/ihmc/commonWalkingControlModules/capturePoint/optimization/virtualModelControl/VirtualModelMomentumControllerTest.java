@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelContr
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.PlanarRobotArm;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.PlanarForkedRobotArm;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.ForkedRobotArm;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -28,6 +29,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.tools.MemoryTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,14 +48,22 @@ public class VirtualModelMomentumControllerTest
    public void setupSimulation()
    {
       random = new Random(1000L);
+
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
 
    @After
    public void destroySimulation()
    {
-      random = null;
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         ThreadTools.sleepForever();
+      }
 
+      random = null;
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -238,6 +248,7 @@ public class VirtualModelMomentumControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredForce, desiredTorque);
 
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+      selectionMatrix.setSelectionFrame(robotLeg.getReferenceFrames().getCenterOfMassFrame());
       selectionMatrix.clearSelection();
       selectionMatrix.selectAngularY(true);
 

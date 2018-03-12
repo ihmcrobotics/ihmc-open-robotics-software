@@ -97,12 +97,10 @@ public class VirtualModelMomentumController
       commandToAdd.getDesiredEffort(tempFullObjective);
 
       tempTaskObjective.reshape(taskSize, 1);
-      tempReducedJacobian.reshape(taskSize, numberOfDoFs);
-      CommonOps.mult(tempSelectionMatrix, tempFullJacobian, tempReducedJacobian);
       CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
       // Add these forces to the effort matrix t = J' w
-      CommonOps.multAddTransA(tempReducedJacobian, tempTaskObjective, fullEffortMatrix);
+      CommonOps.multAddTransA(tempFullJacobian, tempTaskObjective, fullEffortMatrix);
 
       return true;
    }

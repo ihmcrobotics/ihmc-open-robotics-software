@@ -721,7 +721,7 @@ public class VirtualModelControllerTestHelper
       @Override
       public RigidBody getRootBody()
       {
-         return null;
+         return getElevator();
       }
 
       @Override
@@ -1004,7 +1004,7 @@ public class VirtualModelControllerTestHelper
       @Override
       public RigidBody getRootBody()
       {
-         return null;
+         return getElevator();
       }
 
       @Override
@@ -1339,7 +1339,7 @@ public class VirtualModelControllerTestHelper
       @Override
       public RigidBody getRootBody()
       {
-         return null;
+         return getElevator();
       }
 
       @Override
@@ -1663,7 +1663,7 @@ public class VirtualModelControllerTestHelper
       @Override
       public RigidBody getRootBody()
       {
-         return null;
+         return getElevator();
       }
 
       @Override
