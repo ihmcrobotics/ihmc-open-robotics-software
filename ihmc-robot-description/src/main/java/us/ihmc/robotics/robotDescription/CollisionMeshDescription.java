@@ -4,7 +4,8 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.LineSegment3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
@@ -12,13 +13,13 @@ import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 public class CollisionMeshDescription implements CollisionMaskHolder
 {
    private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
-   private final ArrayList<ConvexShapeDescription> convexShapeDescriptions = new ArrayList<>();
+   private final ArrayList<ConvexShapeDescriptionReadOnly> convexShapeDescriptions = new ArrayList<>();
    private boolean isGround = false;
    private int collisionGroup = 0x00;
    private int collisionMask = 0x00;
 
    private int estimatedNumberOfContactPoints = 24;
-   
+
    public void setEstimatedNumberOfContactPoints(int estimatedNumberOfContactPoints)
    {
       this.estimatedNumberOfContactPoints = estimatedNumberOfContactPoints;
@@ -29,7 +30,7 @@ public class CollisionMeshDescription implements CollisionMaskHolder
       return estimatedNumberOfContactPoints;
    }
 
-   public void addConvexShape(ConvexShapeDescription convexShapeDescription)
+   public void addConvexShape(ConvexShapeDescriptionReadOnly convexShapeDescription)
    {
       convexShapeDescriptions.add(convexShapeDescription);
    }
@@ -92,14 +93,14 @@ public class CollisionMeshDescription implements CollisionMaskHolder
       convexShapeDescriptions.add(polytopeReadOnly);
    }
 
-   public void getConvexShapeDescriptions(ArrayList<ConvexShapeDescription> convexShapeDescriptionsToPack)
+   public void getConvexShapeDescriptions(ArrayList<ConvexShapeDescriptionReadOnly> convexShapeDescriptionsToPack)
    {
       convexShapeDescriptionsToPack.addAll(convexShapeDescriptions);
    }
 
    public boolean getIsGround()
    {
-     return isGround;
+      return isGround;
    }
 
    @Override
@@ -140,6 +141,11 @@ public class CollisionMeshDescription implements CollisionMaskHolder
    {
       transformGenerator.translate(translationVector);
    }
+   
+   public void transform(RigidBodyTransform transform)
+   {
+      transformGenerator.setTransform(transform);
+   }
 
    public void identity()
    {
@@ -151,7 +157,7 @@ public class CollisionMeshDescription implements CollisionMaskHolder
       transformGenerator.rotateEuler(eulerAngles);
    }
 
-   public void rotate(RotationMatrix rotation)
+   public void rotate(RotationMatrixReadOnly rotation)
    {
       transformGenerator.rotate(rotation);
    }

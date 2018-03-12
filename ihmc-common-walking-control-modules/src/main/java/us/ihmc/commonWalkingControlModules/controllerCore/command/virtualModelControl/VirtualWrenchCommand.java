@@ -8,11 +8,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 
-public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenchCommand>
+public class VirtualWrenchCommand implements VirtualModelControlCommand<VirtualWrenchCommand>
 {
    private RigidBody controlledBody;
-   private String rigidBodyName;
-   private Wrench virtualWrenchAppliedByRigidBody = new Wrench();
+   private final Wrench virtualWrenchAppliedByRigidBody = new Wrench();
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
 
    public VirtualWrenchCommand()
@@ -22,7 +21,6 @@ public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenc
    public void setRigidBody(RigidBody controlledBody)
    {
       this.controlledBody = controlledBody;
-      rigidBodyName = controlledBody.getName();
    }
 
    public void set(RigidBody controlledBody, Wrench virtualWrench)
@@ -43,11 +41,6 @@ public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenc
       return controlledBody;
    }
 
-   public String getControlledBodyName()
-   {
-      return rigidBodyName;
-   }
-
    public Wrench getVirtualWrench()
    {
       return virtualWrenchAppliedByRigidBody;
@@ -62,7 +55,6 @@ public class VirtualWrenchCommand implements InverseDynamicsCommand<VirtualWrenc
    public void set(VirtualWrenchCommand other)
    {
       controlledBody = other.controlledBody;
-      rigidBodyName = other.rigidBodyName;
       virtualWrenchAppliedByRigidBody.set(other.virtualWrenchAppliedByRigidBody);
       selectionMatrix.set(other.selectionMatrix);
    }

@@ -1,7 +1,7 @@
 package us.ihmc.parameterTuner.guiElements;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -11,8 +11,8 @@ public class GuiRegistry extends GuiElement
    private final List<GuiRegistry> registries = new ArrayList<>();
    private final List<GuiParameter> parameters = new ArrayList<>();
 
-   private final Map<String, GuiRegistry> registryMap = new HashMap<>();
-   private final Map<String, GuiParameter> parameterMap = new HashMap<>();
+   private final Map<String, GuiRegistry> registryMap = new LinkedHashMap<>();
+   private final Map<String, GuiParameter> parameterMap = new LinkedHashMap<>();
 
    public GuiRegistry(String name, GuiRegistry parent)
    {

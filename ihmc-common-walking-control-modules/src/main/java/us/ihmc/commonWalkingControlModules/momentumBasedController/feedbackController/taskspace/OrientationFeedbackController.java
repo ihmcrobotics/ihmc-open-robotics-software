@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -87,6 +88,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
+   private final VirtualWrenchCommand virtualModelControlOutput = new VirtualWrenchCommand();
 
    private final YoPID3DGains gains;
    private final Matrix3D tempGainMatrix = new Matrix3D();
@@ -447,8 +449,10 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    }
 
    @Override
-   public SpatialAccelerationCommand getVirtualModelControlOutput()
+   public VirtualWrenchCommand getVirtualModelControlOutput()
    {
-      return getInverseDynamicsOutput();
+      if (!isEnabled())
+         throw new RuntimeException("This controller is disabled.");
+      return virtualModelControlOutput;
    }
 }

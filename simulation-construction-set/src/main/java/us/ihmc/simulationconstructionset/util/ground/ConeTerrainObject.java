@@ -8,7 +8,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 
-
 public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    private final double xMin, xMax, yMin, yMax;
@@ -16,9 +15,8 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
    private final double height;
 
    private final BoundingBox3D boundingBox;
-   
-   private Graphics3DObject linkGraphics;
 
+   private Graphics3DObject linkGraphics;
 
    public ConeTerrainObject(double xMiddle, double yMiddle, double bottomRadius, double topRadius, double height, AppearanceDefinition appearance)
    {
@@ -37,10 +35,10 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
       linkGraphics = new Graphics3DObject();
       linkGraphics.translate(xMiddle, yMiddle, 0.0);
       linkGraphics.addGenTruncatedCone(height, bottomRadius, bottomRadius, topRadius, topRadius, appearance);
-      
+
       Point3D minPoint = new Point3D(xMin, yMin, Double.NEGATIVE_INFINITY);
       Point3D maxPoint = new Point3D(xMax, yMax, height);
-      
+
       boundingBox = new BoundingBox3D(minPoint, maxPoint);
    }
 
@@ -62,7 +60,7 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
       surfaceNormalAt(x, y, z, normalToPack);
       return heightAt;
    }
-   
+
    @Override
    public double heightAt(double x, double y, double z)
    {
@@ -86,33 +84,31 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
       normal.setZ(1.0);
    }
 
-
    public void closestIntersectionTo(double x, double y, double z, Point3D intersection)
    {
-      intersection.setX(x);    // Go Straight Up for now...
+      intersection.setX(x); // Go Straight Up for now...
       intersection.setY(y);
       intersection.setZ(heightAt(x, y, z));
    }
 
-
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersection, Vector3D normal)
    {
-      intersection.setX(x);    // Go Straight Up for now...
+      intersection.setX(x); // Go Straight Up for now...
       intersection.setY(y);
       intersection.setZ(heightAt(x, y, z));
 
       surfaceNormalAt(x, y, z, normal);
    }
-   
+
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
-      intersectionToPack.setX(x);    // Go Straight Up for now...
+      intersectionToPack.setX(x); // Go Straight Up for now...
       intersectionToPack.setY(y);
       intersectionToPack.setZ(heightAt(x, y, z));
 
       surfaceNormalAt(x, y, z, normalToPack);
-      
+
       return (z < intersectionToPack.getZ());
    }
 
@@ -125,9 +121,7 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
          return false;
 
       return true;
-
    }
-
 
    public double getXMin()
    {
@@ -154,11 +148,10 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
    {
       return boundingBox;
    }
-   
+
    @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;
    }
-
 }
