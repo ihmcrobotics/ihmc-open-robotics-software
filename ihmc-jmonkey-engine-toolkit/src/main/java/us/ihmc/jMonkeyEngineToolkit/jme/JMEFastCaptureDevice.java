@@ -177,6 +177,11 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    public synchronized void reshape(ViewPort vp, int w, int h)
    {
 
+      if(w == 0 || h == 0)
+      {
+         return;
+      }
+      
       width = w;
       height = h;
 
@@ -388,7 +393,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
          else if (captureDepthMap)
          {
             convertRGBD((float)rgbdStreamer.getNearClip(), (float)rgbdStreamer.getFarClip());
-            rgbdStreamer.updateRBGD(bufferedImage, points, colors, timeStamp, position, orientation);
+            rgbdStreamer.updateRBGD(bufferedImage, points, colors, timeStamp, position, orientation, fov);
          }
 
          if (CAPTURE_IMMEDIATLY_AFTER_PREVIOUS_VIDEOFRAME)
