@@ -69,6 +69,9 @@ public class NewGroundContactForceQPSolver
    private final boolean hasFloatingBase;
    private boolean hasWrenchesEquilibriumConstraintBeenSetup = false;
 
+   private boolean resetActiveSet = false;
+   private boolean useWarmStart = false;
+   private int maxNumberOfIterations = 100;
 
    public NewGroundContactForceQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int rhoSize, boolean hasFloatingBase,
                                         YoVariableRegistry parentRegistry)
@@ -130,6 +133,28 @@ public class NewGroundContactForceQPSolver
    public void setRhoRegularizationWeight(DenseMatrix64F weight)
    {
       CommonOps.insert(weight, regularizationMatrix, 0, 0);
+   }
+
+   public void setUseWarmStart(boolean useWarmStart)
+   {
+      this.useWarmStart = useWarmStart;
+   }
+
+   public void setMaxNumberOfIterations(int maxNumberOfIterations)
+   {
+      this.maxNumberOfIterations = maxNumberOfIterations;
+   }
+
+   public void notifyResetActiveSet()
+   {
+      this.resetActiveSet = true;
+   }
+
+   private boolean pollResetActiveSet()
+   {
+      boolean ret = resetActiveSet;
+      resetActiveSet = false;
+      return ret;
    }
 
    public void reset()
@@ -316,6 +341,11 @@ public class NewGroundContactForceQPSolver
 
       qpSolver.clear();
 
+      qpSolver.setUseWarmStart(useWarmStart);
+      qpSolver.setMaxNumberOfIterations(maxNumberOfIterations);
+      if (useWarmStart && pollResetActiveSet())
+         qpSolver.resetActiveConstraints();
+
       numberOfActiveVariables.set((int) CommonOps.elementSum(solverInput_activeIndices));
 
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
@@ -331,7 +361,9 @@ public class NewGroundContactForceQPSolver
       hasWrenchesEquilibriumConstraintBeenSetup = false;
 
       if (MatrixTools.containsNaN(solverOutput_rhos))
+      {
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
+      }
 
       firstCall.set(false);
 
