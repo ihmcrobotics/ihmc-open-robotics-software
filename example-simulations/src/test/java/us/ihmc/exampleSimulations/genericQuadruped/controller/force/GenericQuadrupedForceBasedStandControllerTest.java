@@ -8,6 +8,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedSquaredUpInitialPosition;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceBasedStandControllerTest;
 
@@ -17,7 +18,10 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    @Override
    public QuadrupedTestFactory createQuadrupedTestFactory()
    {
-      return new GenericQuadrupedTestFactory();
+      GenericQuadrupedTestFactory testFactory = new GenericQuadrupedTestFactory();
+      testFactory.setInitialPosition(new GenericQuadrupedSquaredUpInitialPosition());
+
+      return testFactory;
    }
 
    @Override
