@@ -70,7 +70,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       surfaceNormalAt(x, y, heightAt, normalToPack);
       return heightAt;
    }
-   
+
    @Override
    public double heightAt(double x, double y, double z)
    {
@@ -139,22 +139,22 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
 
    public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersection, Vector3D normal)
    {
-      intersection.setX(x);    // Go Straight Up for now...
+      intersection.setX(x); // Go Straight Up for now...
       intersection.setY(y);
       intersection.setZ(heightAt(x, y, z));
 
       surfaceNormalAt(x, y, z, normal);
    }
-   
+
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
-      intersectionToPack.setX(x);    // Go Straight Up for now...
+      intersectionToPack.setX(x); // Go Straight Up for now...
       intersectionToPack.setY(y);
       intersectionToPack.setZ(heightAt(x, y, z));
 
       surfaceNormalAt(x, y, z, normalToPack);
-      
+
       return (z < intersectionToPack.getZ());
    }
 

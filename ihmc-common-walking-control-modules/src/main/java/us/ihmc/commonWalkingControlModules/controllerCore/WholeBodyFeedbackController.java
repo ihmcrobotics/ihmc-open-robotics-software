@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.CenterOfMassFeedbackController;
@@ -31,7 +32,7 @@ public class WholeBodyFeedbackController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final InverseDynamicsCommandList inverseDynamicsOutput = new InverseDynamicsCommandList();
    private final InverseKinematicsCommandList inverseKinematicsOutput = new InverseKinematicsCommandList();
-   private final InverseDynamicsCommandList virtualModelControlOutput = new InverseDynamicsCommandList();
+   private final VirtualModelControlCommandList virtualModelControlOutput = new VirtualModelControlCommandList();
 
    private final List<FeedbackControllerInterface> allControllers = new ArrayList<>();
 
@@ -338,7 +339,7 @@ public class WholeBodyFeedbackController
       return inverseKinematicsOutput;
    }
 
-   public InverseDynamicsCommandList getVirtualModelControlOutput()
+   public VirtualModelControlCommandList getVirtualModelControlOutput()
    {
       return virtualModelControlOutput;
    }

@@ -1,10 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
 
-public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWrenchCommand>
+public class ExternalWrenchCommand implements InverseDynamicsCommand<ExternalWrenchCommand>, VirtualModelControlCommand<ExternalWrenchCommand>
 {
    private RigidBody rigidBody;
    private String rigidBodyName;
