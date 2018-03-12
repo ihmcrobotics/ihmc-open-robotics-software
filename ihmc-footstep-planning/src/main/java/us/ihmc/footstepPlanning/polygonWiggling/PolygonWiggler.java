@@ -282,21 +282,20 @@ public class PolygonWiggler
       A.reshape(constraints, 2);
       b.reshape(constraints, 1);
 
-      Vector2D tempVector = new Vector2D();
-
       for (int i = 0; i < constraints; i++)
       {
          Point2DReadOnly firstPoint = polygon.getVertex(i);
          Point2DReadOnly secondPoint = polygon.getNextVertex(i);
 
-         tempVector.set(secondPoint);
-         tempVector.sub(firstPoint);
+         double x = secondPoint.getX() - firstPoint.getX();
+         double y = secondPoint.getY() - firstPoint.getY();
+         double norm = Math.sqrt(x * x + y * y);
+         x = x / norm;
+         y = y / norm;
 
-         tempVector.normalize();
-
-         A.set(i, 0, -tempVector.getY());
-         A.set(i, 1, tempVector.getX());
-         b.set(i, -deltaInside + firstPoint.getY() * (tempVector.getX()) - firstPoint.getX() * (tempVector.getY()));
+         A.set(i, 0, -y);
+         A.set(i, 1, x);
+         b.set(i, -deltaInside + firstPoint.getY() * x - firstPoint.getX() * y);
 
          //         A.set(i, 0, firstPoint.y - secondPoint.y);
          //         A.set(i, 1, -firstPoint.x + secondPoint.x);

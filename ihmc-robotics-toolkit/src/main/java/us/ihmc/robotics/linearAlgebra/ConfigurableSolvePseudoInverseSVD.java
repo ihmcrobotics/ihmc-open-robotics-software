@@ -1,5 +1,6 @@
 package us.ihmc.robotics.linearAlgebra;
 
+import org.ejml.UtilEjml;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
@@ -42,6 +43,14 @@ public class ConfigurableSolvePseudoInverseSVD implements LinearSolver<DenseMatr
    {
       svd = DecompositionFactory.svd(maxRows, maxCols, true, true, true);
       this.singularValueLimit = singularValueLimit;
+   }
+
+   /**
+    * Will target matrices around size 100.
+    */
+   public ConfigurableSolvePseudoInverseSVD()
+   {
+      this(100, 100, 100.0 * UtilEjml.EPS);
    }
 
    private final DenseMatrix64F V = new DenseMatrix64F(1, 1);
