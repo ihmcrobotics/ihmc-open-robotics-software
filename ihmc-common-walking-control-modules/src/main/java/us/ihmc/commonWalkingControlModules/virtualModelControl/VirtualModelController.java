@@ -10,13 +10,14 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommandOld;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -43,13 +44,24 @@ public class VirtualModelController
    private final DenseMatrix64F fullObjectiveWrench = new DenseMatrix64F(0, 0, true); // make it row major
    private final DenseMatrix64F fullEffortMatrix = new DenseMatrix64F(1, 1);
 
+   private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", ReferenceFrame.getWorldFrame());
+   private final Wrench tempWrench = new Wrench();
+   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
+
    private final WrenchVisualizer gravityWrenchVisualizer;
    private final Map<RigidBody, Wrench> gravityWrenchMap = new HashMap<>();
+
+   private final ReferenceFrame centerOfMassFrame;
+
    private List<RigidBody> allBodies = new ArrayList<>();
 
-   public VirtualModelController(RigidBody defaultRootBody, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public VirtualModelController(RigidBody defaultRootBody, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.defaultRootBody = defaultRootBody;
+      this.centerOfMassFrame = centerOfMassFrame;
+
+      for (InverseDynamicsJoint joint : ScrewTools.computeSubtreeJoints(defaultRootBody))
+         jointTorques.put(joint, new MutableDouble());
 
       if (DISPLAY_GRAVITY_WRENCHES)
       {
@@ -108,10 +120,11 @@ public class VirtualModelController
       submitControlledBodyVirtualWrench(controlledBody, wrench, CommonOps.identity(Wrench.SIZE, Wrench.SIZE));
    }
 
-   public void submitControlledBodyVirtualWrench(VirtualWrenchCommandOld virtualWrenchCommand)
+   public void submitControlledBodyVirtualWrench(VirtualWrenchCommand virtualWrenchCommand)
    {
-      submitControlledBodyVirtualWrench(virtualWrenchCommand.getEndEffector(), virtualWrenchCommand.getVirtualWrench(),
-                                        virtualWrenchCommand.getSelectionMatrix());
+      virtualWrenchCommand.getDesiredWrench(controlFrame, tempWrench);
+      virtualWrenchCommand.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
+      submitControlledBodyVirtualWrench(virtualWrenchCommand.getEndEffector(), tempWrench, tempSelectionMatrix);
    }
 
    public void submitControlledBodyVirtualWrench(RigidBody controlledBody, Wrench wrench, DenseMatrix64F selectionMatrix)
@@ -123,13 +136,11 @@ public class VirtualModelController
    public void reset()
    {
       vmcDataHandler.reset();
-      jointTorques.clear();
    }
 
    public void clear()
    {
       vmcDataHandler.clear();
-      jointTorques.clear();
    }
 
    private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
