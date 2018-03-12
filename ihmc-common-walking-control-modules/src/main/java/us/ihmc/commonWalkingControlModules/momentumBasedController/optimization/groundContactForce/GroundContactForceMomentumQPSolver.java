@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -16,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class NewGroundContactForceQPSolver
+public class GroundContactForceMomentumQPSolver
 {
    private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
 
@@ -73,8 +72,8 @@ public class NewGroundContactForceQPSolver
    private boolean useWarmStart = false;
    private int maxNumberOfIterations = 100;
 
-   public NewGroundContactForceQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int rhoSize, boolean hasFloatingBase,
-                                        YoVariableRegistry parentRegistry)
+   public GroundContactForceMomentumQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int rhoSize, boolean hasFloatingBase,
+                                             YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.rhoSize = rhoSize;
