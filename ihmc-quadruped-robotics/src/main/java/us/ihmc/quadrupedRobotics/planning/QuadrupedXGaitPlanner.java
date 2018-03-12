@@ -43,7 +43,7 @@ public class QuadrupedXGaitPlanner
    }
 
    public void computeInitialPlan(List<? extends QuadrupedTimedStep> plannedSteps, Vector3D planarVelocity, RobotQuadrant initialStepQuadrant,
-         FramePoint3D supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettings xGaitSettings)
+         FramePoint3D supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       // initialize nominal support rectangle
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -109,7 +109,7 @@ public class QuadrupedXGaitPlanner
    }
 
    public void computeOnlinePlan(List<? extends QuadrupedTimedStep> plannedSteps, EndDependentList<? extends QuadrupedTimedStep> latestSteps,
-         Vector3D planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
+         Vector3D planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       // initialize latest step
       QuadrupedTimedStep latestStep;
@@ -235,7 +235,7 @@ public class QuadrupedXGaitPlanner
    }
 
    private void computeStepTimeInterval(QuadrupedTimedStep thisStep, QuadrupedTimedStep pastStepOnSameEnd, QuadrupedTimedStep pastStepOnOppositeEnd,
-         QuadrupedXGaitSettings xGaitSettings)
+         QuadrupedXGaitSettingsReadOnly xGaitSettings)
    {
       RobotEnd thisStepEnd = thisStep.getRobotQuadrant().getEnd();
       RobotSide thisStepSide = thisStep.getRobotQuadrant().getSide();

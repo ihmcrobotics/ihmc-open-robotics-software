@@ -45,9 +45,9 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
    }
 
-   private static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
+   public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.05));
       conductor.simulate();
 
       variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING);
@@ -60,7 +60,7 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
    }
 
-   private static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables)
+   public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables)
    {
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
       conductor.simulate();

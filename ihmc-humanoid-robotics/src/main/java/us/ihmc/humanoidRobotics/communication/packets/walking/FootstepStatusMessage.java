@@ -29,16 +29,16 @@ public class FootstepStatusMessage extends SettablePacket<FootstepStatusMessage>
    public byte robotSide;
    @RosExportedField(documentation = "desiredFootPositionInWorld gives the position of the desired position sent to the controller as opposed\n"
          + "to where the foot actually landed")
-   public Point3D desiredFootPositionInWorld;
+   public Point3D desiredFootPositionInWorld = new Point3D();
    @RosExportedField(documentation = "desiredFootOrientationInWorld gives the desired orientation of the foot sent to the controller as opposed to\n"
          + "the orientation where the foot actually is")
-   public Quaternion desiredFootOrientationInWorld;
+   public Quaternion desiredFootOrientationInWorld = new Quaternion();
    @RosExportedField(documentation = "actualFootPositionInWorld gives the position of where the foot actually landed as opposed\n"
          + "to the desired position sent to the controller")
-   public Point3D actualFootPositionInWorld;
+   public Point3D actualFootPositionInWorld = new Point3D();
    @RosExportedField(documentation = "actualFootOrientationInWorld gives the orientation the foot is actually in as opposed to\n"
          + "the desired orientation sent to the controller")
-   public Quaternion actualFootOrientationInWorld;
+   public Quaternion actualFootOrientationInWorld = new Quaternion();
 
    public FootstepStatusMessage()
    {
@@ -51,11 +51,6 @@ public class FootstepStatusMessage extends SettablePacket<FootstepStatusMessage>
       footstepIndex = other.footstepIndex;
       robotSide = other.robotSide;
 
-      if (desiredFootPositionInWorld == null)
-         desiredFootPositionInWorld = new Point3D();
-      if (desiredFootOrientationInWorld == null)
-         desiredFootOrientationInWorld = new Quaternion();
-
       if (other.desiredFootPositionInWorld == null)
          desiredFootPositionInWorld.setToNaN();
       else
@@ -65,11 +60,6 @@ public class FootstepStatusMessage extends SettablePacket<FootstepStatusMessage>
          desiredFootOrientationInWorld.setToNaN();
       else
          desiredFootOrientationInWorld.set(other.desiredFootOrientationInWorld);
-
-      if (actualFootPositionInWorld == null)
-         actualFootPositionInWorld = new Point3D();
-      if (actualFootOrientationInWorld == null)
-         actualFootOrientationInWorld = new Quaternion();
 
       if (other.actualFootPositionInWorld == null)
          actualFootPositionInWorld.setToNaN();

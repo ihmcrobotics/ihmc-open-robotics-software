@@ -20,6 +20,7 @@ import us.ihmc.quadrupedRobotics.input.mode.QuadrupedStepTeleopMode;
 import us.ihmc.quadrupedRobotics.input.mode.QuadrupedTeleopMode;
 import us.ihmc.quadrupedRobotics.input.mode.QuadrupedXGaitTeleopMode;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
@@ -57,7 +58,8 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
    private QuadrupedTeleopMode activeTeleopMode;
 
    public QuadrupedBodyTeleopNode(String host, NetworkPorts port, NetClassList netClassList, Joystick device,
-         FullQuadrupedRobotModel fullRobotModel, QuadrupedPhysicalProperties physicalProperties) throws IOException
+                                  FullQuadrupedRobotModel fullRobotModel, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+                                  QuadrupedPhysicalProperties physicalProperties) throws IOException
    {
       this.device = device;
 
@@ -69,8 +71,8 @@ public class QuadrupedBodyTeleopNode implements JoystickEventListener
 
       this.referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
       this.taskSpaceEstimator = new QuadrupedTaskSpaceEstimator(fullRobotModel, referenceFrames, registry, null);
-      this.xGaitTeleopMode = new QuadrupedXGaitTeleopMode(packetCommunicator, referenceFrames, registry);
-      this.stepTeleopMode = new QuadrupedStepTeleopMode(packetCommunicator, referenceFrames, registry);
+      this.xGaitTeleopMode = new QuadrupedXGaitTeleopMode(packetCommunicator, physicalProperties, defaultXGaitSettings, referenceFrames, registry);
+      this.stepTeleopMode = new QuadrupedStepTeleopMode(packetCommunicator, physicalProperties, defaultXGaitSettings, referenceFrames, registry);
 
       // Set the default teleop mode.
       this.activeTeleopMode = xGaitTeleopMode;
