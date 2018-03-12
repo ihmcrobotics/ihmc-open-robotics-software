@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
@@ -80,7 +81,7 @@ public class NewVirtualModelControlOptimizationControlModule
 
       boolean hasFloatingBase = toolbox.getRootJoint() != null;
       rhoMin.set(optimizationSettings.getRhoMin());
-      ActiveSetQPSolver activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
+      ActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
       qpSolver = new NewGroundContactForceQPSolver(activeSetQPSolver, rhoSize, hasFloatingBase, registry);
       qpSolver.setMinRho(optimizationSettings.getRhoMin());
 
@@ -106,6 +107,7 @@ public class NewVirtualModelControlOptimizationControlModule
 
       qpSolver.setMinRho(rhoMin.getDoubleValue());
       qpSolver.setMaxRho(wrenchMatrixCalculator.getRhoMaxMatrix());
+      qpSolver.setActiveRhos(wrenchMatrixCalculator.getActiveRhoMatrix());
 
       setupWrenchesEquilibriumConstraint();
 
