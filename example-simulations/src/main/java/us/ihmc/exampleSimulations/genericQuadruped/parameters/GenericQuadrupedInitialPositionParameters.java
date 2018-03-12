@@ -1,23 +1,11 @@
 package us.ihmc.exampleSimulations.genericQuadruped.parameters;
 
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 
-public class GenericQuadrupedSimulationInitialPositionParameters implements QuadrupedSimulationInitialPositionParameters
+public abstract class GenericQuadrupedInitialPositionParameters implements QuadrupedSimulationInitialPositionParameters
 {
-   private static final Point3D INITIAL_BODY_POSITION = new Point3D(0.0, 0.0, 0.32);
-   private static final double HIP_ROLL_ANGLE = 0.6;
-   private static final double HIP_PITCH_ANGLE = 1.2;
-   private static final double KNEE_PITCH_ANGLE = -2.1;
-
-    private static final boolean INVERT_REAR_LEGS = true;
-   
-   @Override
-   public Point3D getInitialBodyPosition()
-   {
-      return INITIAL_BODY_POSITION;
-   }
+   private static final boolean INVERT_REAR_LEGS = true;
 
    @Override
    public double getInitialJointPosition(QuadrupedJointName joint)
@@ -32,24 +20,28 @@ public class GenericQuadrupedSimulationInitialPositionParameters implements Quad
       {
       case FRONT_LEFT_HIP_ROLL:
       case HIND_LEFT_HIP_ROLL:
-         return HIP_ROLL_ANGLE;
+         return getHipRollAngle();
       case FRONT_RIGHT_HIP_ROLL:
       case HIND_RIGHT_HIP_ROLL:
-         return -HIP_ROLL_ANGLE;
+         return - getHipRollAngle();
       case FRONT_LEFT_HIP_PITCH:
       case FRONT_RIGHT_HIP_PITCH:
-         return HIP_PITCH_ANGLE;
+         return getHipPitchAngle();
       case HIND_LEFT_HIP_PITCH:
       case HIND_RIGHT_HIP_PITCH:
-         return directionalMultiplier * HIP_PITCH_ANGLE;
+         return directionalMultiplier * getHipPitchAngle();
       case FRONT_LEFT_KNEE_PITCH:
       case FRONT_RIGHT_KNEE_PITCH:
-         return KNEE_PITCH_ANGLE;
+         return getKneePitchAngle();
       case HIND_LEFT_KNEE_PITCH:
       case HIND_RIGHT_KNEE_PITCH:
-         return directionalMultiplier * KNEE_PITCH_ANGLE;
+         return directionalMultiplier * getKneePitchAngle();
       }
 
       throw new RuntimeException(joint + " not defined!");
    }
+
+   abstract double getHipRollAngle();
+   abstract double getHipPitchAngle();
+   abstract double getKneePitchAngle();
 }
