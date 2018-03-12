@@ -11,6 +11,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.simulationconstructionset.IMUMount;
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
@@ -51,8 +52,13 @@ public class StateEstimatorSensorDefinitionsFromRobotFactory
       LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions = new LinkedHashMap<WrenchCalculatorInterface, ForceSensorDefinition>();
       for (WrenchCalculatorInterface groundContactPointBasedWrenchCalculator : groundContactPointBasedWrenchCalculators)
       {
-         OneDegreeOfFreedomJoint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
-         OneDoFJoint sensorParentJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(forceTorqueSensorJoint);
+         Joint forceTorqueSensorJoint = groundContactPointBasedWrenchCalculator.getJoint();
+         OneDoFJoint sensorParentJoint;
+         if (forceTorqueSensorJoint instanceof OneDegreeOfFreedomJoint)
+            sensorParentJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint((OneDegreeOfFreedomJoint) forceTorqueSensorJoint);
+         else
+            throw new RuntimeException("Force sensor is only supported for OneDegreeOfFreedomJoint.");
+
          RigidBodyTransform transformFromSensorToParentJoint = new RigidBodyTransform();
          groundContactPointBasedWrenchCalculator.getTransformToParentJoint(transformFromSensorToParentJoint);
          ForceSensorDefinition sensorDefinition = new ForceSensorDefinition(groundContactPointBasedWrenchCalculator.getName(), sensorParentJoint.getSuccessor(), transformFromSensorToParentJoint);
