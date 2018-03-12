@@ -104,6 +104,7 @@ public class JointIndexHandler
    public void compactBlockToFullBlockIgnoreUnindexedJoints(List<? extends InverseDynamicsJoint> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
    {
       fullMatrix.zero();
+      fullMatrix.reshape(compactMatrix.getNumRows(), fullMatrix.getNumCols());
 
       for (int index = 0; index < joints.size(); index++)
       {
@@ -127,6 +128,7 @@ public class JointIndexHandler
    public void compactBlockToFullBlockIgnoreUnindexedJoints(InverseDynamicsJoint[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
    {
       fullMatrix.zero();
+      fullMatrix.reshape(compactMatrix.getNumRows(), fullMatrix.getNumCols());
 
       for (int index = 0; index < joints.length; index++)
       {
