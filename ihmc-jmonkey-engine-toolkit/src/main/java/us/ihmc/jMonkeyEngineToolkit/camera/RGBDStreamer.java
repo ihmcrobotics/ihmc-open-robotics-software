@@ -25,8 +25,9 @@ public interface RGBDStreamer
     * @param timeStamp
     * @param cameraPosition
     * @param cameraOrientation
+    * @param fov TODO
     */
-   public void updateRBGD(BufferedImage image, Point3D32[] coordinates, int[] colors, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation);
+   public void updateRBGD(BufferedImage image, Point3D32[] coordinates, int[] colors, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, double fov);
 
    /**
     * Function to check if a new frame should be captured and provided to the RGBD streamer
