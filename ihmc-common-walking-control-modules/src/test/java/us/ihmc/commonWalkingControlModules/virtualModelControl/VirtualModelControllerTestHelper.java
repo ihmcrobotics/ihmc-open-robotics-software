@@ -197,6 +197,9 @@ public class VirtualModelControllerTestHelper
             EuclidCoreTestTools.assertTuple3DEquals("", desiredTorques.get(i), currentTorque, 0.5);
          }
       }
+
+      scs.closeAndDispose();
+      blockingSimulationRunner = null;
    }
 
    public static RobotLegs createRobotLeg(double gravity)
