@@ -42,6 +42,9 @@ public class NewVirtualModelControlOptimizationControlModule
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger("hasNotConvergedCounts", registry);
 
+   private final YoBoolean useWarmStart = new YoBoolean("useWarmStartInSolver", registry);
+   private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterationsInSolver", registry);
+
    private final NewVirtualModelControlSolution virtualModelControlSolution = new NewVirtualModelControlSolution();
 
    private final WrenchMatrixCalculator wrenchMatrixCalculator;
@@ -84,8 +87,13 @@ public class NewVirtualModelControlOptimizationControlModule
       ActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
       qpSolver = new NewGroundContactForceQPSolver(activeSetQPSolver, rhoSize, hasFloatingBase, registry);
       qpSolver.setMinRho(optimizationSettings.getRhoMin());
+      qpSolver.setUseWarmStart(optimizationSettings.useWarmStartInSolver());
+      qpSolver.setMaxNumberOfIterations(optimizationSettings.getMaxNumberOfSolverIterations());
 
       externalWrenchHandler = new ExternalWrenchHandler(toolbox.getGravityZ(), centerOfMassFrame, toolbox.getTotalRobotMass(), toolbox.getContactablePlaneBodies());
+
+      useWarmStart.set(optimizationSettings.useWarmStartInSolver());
+      maximumNumberOfIterations.set(optimizationSettings.getMaxNumberOfSolverIterations());
 
       parentRegistry.addChild(registry);
    }
@@ -111,7 +119,12 @@ public class NewVirtualModelControlOptimizationControlModule
 
       setupWrenchesEquilibriumConstraint();
 
-      // todo add rho warm start
+      qpSolver.setMaxNumberOfIterations(maximumNumberOfIterations.getIntegerValue());
+      if (useWarmStart.getBooleanValue() && wrenchMatrixCalculator.hasContactStateChanged())
+      {
+         qpSolver.setUseWarmStart(useWarmStart.getBooleanValue());
+         qpSolver.notifyResetActiveSet();
+      }
 
       NoConvergenceException noConvergenceException = null;
 
