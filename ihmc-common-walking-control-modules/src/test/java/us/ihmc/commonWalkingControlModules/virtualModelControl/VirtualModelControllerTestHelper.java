@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 
@@ -2647,11 +2646,13 @@ public class VirtualModelControllerTestHelper
          }
          virtualModelController.compute(virtualModelControlSolution);
 
-         Map<InverseDynamicsJoint, MutableDouble> jointTorques = virtualModelControlSolution.getJointTorques();
-         for (OneDoFJoint joint : controlledJoints)
+         DenseMatrix64F jointTorques = virtualModelControlSolution.getJointTorques();
+         for (int i = 0; i < controlledJoints.length; i++)
          {
-            yoJointTorques.get(joint).set(jointTorques.get(joint).doubleValue());
-            joint.setTau(jointTorques.get(joint).doubleValue());
+            OneDoFJoint joint = controlledJoints[i];
+            double tau = jointTorques.get(i, 0);
+            yoJointTorques.get(joint).set(tau);
+            joint.setTau(tau);
          }
 
          // write to scs

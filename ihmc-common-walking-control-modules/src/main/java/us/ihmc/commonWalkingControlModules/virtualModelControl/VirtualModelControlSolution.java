@@ -1,39 +1,18 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
+import org.ejml.data.DenseMatrix64F;
+import us.ihmc.robotics.screwTheory.*;
+
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
-import org.ejml.data.DenseMatrix64F;
-
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.Wrench;
-
 public class VirtualModelControlSolution
 {
-   private InverseDynamicsJoint[] jointsToCompute;
-   private Map<InverseDynamicsJoint, MutableDouble> jointTorques;
+   private DenseMatrix64F jointTorques;
+
    private SpatialForceVector centroidalMomentumRateSolution;
-   private DenseMatrix64F centroidalMomentumSelectionMatrix;
    private Map<RigidBody, Wrench> externalWrenchSolution;
    private List<RigidBody> rigidBodiesWithExternalWrench;
-   private List<RigidBody> bodiesInContact;
-
-   public VirtualModelControlSolution()
-   {
-   }
-
-   public void setJointsToCompute(InverseDynamicsJoint[] jointsToCompute)
-   {
-      this.jointsToCompute = jointsToCompute;
-   }
-
-   public void setJointTorques(Map<InverseDynamicsJoint, MutableDouble> jointTorques)
-   {
-      this.jointTorques = jointTorques;
-   }
 
    public void setCentroidalMomentumRateSolution(SpatialForceVector centroidalMomentumRateSolution)
    {
@@ -46,16 +25,6 @@ public class VirtualModelControlSolution
       this.externalWrenchSolution = externalWrenchSolution;
    }
 
-   public void setBodiesInContact(List<RigidBody> bodiesInContact)
-   {
-      this.bodiesInContact = bodiesInContact;
-   }
-
-   public void setCentroidalMomentumSelectionMatrix(DenseMatrix64F selectionMatrix)
-   {
-      this.centroidalMomentumSelectionMatrix = selectionMatrix;
-   }
-
    public List<RigidBody> getRigidBodiesWithExternalWrench()
    {
       return rigidBodiesWithExternalWrench;
@@ -66,28 +35,18 @@ public class VirtualModelControlSolution
       return externalWrenchSolution;
    }
 
-   public List<RigidBody> getBodiesInContact()
-   {
-      return bodiesInContact;
-   }
-
-   public InverseDynamicsJoint[] getJointsToCompute()
-   {
-      return jointsToCompute;
-   }
-
-   public Map<InverseDynamicsJoint, MutableDouble> getJointTorques()
-   {
-      return jointTorques;
-   }
-
    public SpatialForceVector getCentroidalMomentumRateSolution()
    {
       return centroidalMomentumRateSolution;
    }
 
-   public DenseMatrix64F getCentroidalMomentumSelectionMatrix()
+   public void setJointTorques(DenseMatrix64F jointTorques)
    {
-      return centroidalMomentumSelectionMatrix;
+      this.jointTorques = jointTorques;
+   }
+
+   public DenseMatrix64F getJointTorques()
+   {
+      return jointTorques;
    }
 }

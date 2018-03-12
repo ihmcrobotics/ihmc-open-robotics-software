@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.virtualModelControl;
+package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -7,13 +7,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
+import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 
 import java.util.List;
 
-public class NewVirtualModelController
+public class VirtualModelMomentumController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -30,7 +31,7 @@ public class NewVirtualModelController
 
    private final DenseMatrix64F fullEffortMatrix;
 
-   public NewVirtualModelController(JointIndexHandler jointIndexHandler)
+   public VirtualModelMomentumController(JointIndexHandler jointIndexHandler)
    {
       this.jointIndexHandler = jointIndexHandler;
 
@@ -43,7 +44,7 @@ public class NewVirtualModelController
    }
 
    /**
-    * Adds a {@link VirtualEffortCommand} to the {@link NewVirtualModelController}.
+    * Adds a {@link VirtualEffortCommand} to the {@link VirtualModelMomentumController}.
     * <p>
     * The idea is to add the data from the virtual effort command so that the virtual model
     * controller exerts the desired forces based on the equation:<br>
@@ -126,7 +127,7 @@ public class NewVirtualModelController
    }
 
    /**
-    * Adds a {@link Wrench} to the {@link NewVirtualModelController}.
+    * Adds a {@link Wrench} to the {@link VirtualModelMomentumController}.
     * <p>
     * The idea is to add the data from the contact force optimization module so that
     * the virtual model controller exerts the desired forces based on the equation:<br>
@@ -180,7 +181,7 @@ public class NewVirtualModelController
 
 
    /**
-    * Adds a {@link Wrench} to the {@link NewVirtualModelController}.
+    * Adds a {@link Wrench} to the {@link VirtualModelMomentumController}.
     * <p>
     * The idea is to add the data from the contact force optimization module so that
     * the virtual model controller exerts the desired forces based on the equation:<br>
@@ -214,7 +215,7 @@ public class NewVirtualModelController
       return true;
    }
 
-   public void populateTorqueSolution(NewVirtualModelControlSolution solutionToPack)
+   public void populateTorqueSolution(VirtualModelControlSolution solutionToPack)
    {
       solutionToPack.setJointTorques(fullEffortMatrix);
    }
