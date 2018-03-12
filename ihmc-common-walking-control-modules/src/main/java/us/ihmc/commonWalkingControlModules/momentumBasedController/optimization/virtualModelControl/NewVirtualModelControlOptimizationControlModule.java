@@ -108,14 +108,30 @@ public class NewVirtualModelControlOptimizationControlModule
 
       setupWrenchesEquilibriumConstraint();
 
+      qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
+
+      if (VISUALIZE_RHO_BASIS_VECTORS)
+         basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
+
+      if (SETUP_RHO_TASKS)
+         setupRhoTasks();
+
+      qpSolver.setMinRho(rhoMin.getDoubleValue());
+
+
+      // todo add rho max
+      // todo add rho warm start
+
+
       NoConvergenceException noConvergenceException = null;
-      Map<RigidBody, Wrench> groundReactionWrenches = null;
+
       try
       {
-         groundReactionWrenches = computeInternal();
+         qpSolver.solve();
       }
       catch (NoConvergenceException e)
       {
+
          if (!hasNotConvergedInPast.getBooleanValue())
          {
             e.printStackTrace();
@@ -128,6 +144,19 @@ public class NewVirtualModelControlOptimizationControlModule
          noConvergenceException = e;
       }
 
+      DenseMatrix64F rhoSolution = qpSolver.getRhos();
+
+      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
+      for (int i = 0; i < contactablePlaneBodies.size(); i++)
+      {
+         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
+         Wrench solutionWrench = groundReactionWrenches.get(rigidBody);
+
+         if (groundReactionWrenches.containsKey(rigidBody))
+            groundReactionWrenches.get(rigidBody).set(solutionWrench);
+         else
+            groundReactionWrenches.put(rigidBody, solutionWrench);
+      }
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
 
       // get all forces for all contactable bodies
@@ -157,64 +186,6 @@ public class NewVirtualModelControlOptimizationControlModule
       return virtualModelControlSolution;
    }
 
-   public Map<RigidBody, Wrench> computeInternal() throws NoConvergenceException
-   {
-      setupWrenchesEquilibriumConstraint();
-
-      qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
-
-      if (VISUALIZE_RHO_BASIS_VECTORS)
-         basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
-
-      if (SETUP_RHO_TASKS)
-         setupRhoTasks();
-
-      qpSolver.setMinRho(rhoMin.getDoubleValue());
-      // todo add rho max
-      // todo add rho warm start
-
-      // todo setup equilibrium constraint if it has not been already
-
-      NoConvergenceException noConvergenceException = null;
-
-      try
-      {
-         qpSolver.solve();
-      }
-      catch (NoConvergenceException e)
-      {
-
-         if (!hasNotConvergedInPast.getBooleanValue())
-         {
-            e.printStackTrace();
-            PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
-         }
-
-         hasNotConvergedInPast.set(true);
-         hasNotConvergedCounts.increment();
-
-         noConvergenceException = e;
-      }
-
-      DenseMatrix64F rhoSolution = qpSolver.getRhos();
-
-      if (noConvergenceException != null)
-         throw noConvergenceException;
-
-      Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
-      for (int i = 0; i < contactablePlaneBodies.size(); i++)
-      {
-         RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
-         Wrench solutionWrench = groundReactionWrenches.get(rigidBody);
-
-         if (groundReactionWrenches.containsKey(rigidBody))
-            groundReactionWrenches.get(rigidBody).set(solutionWrench);
-         else
-            groundReactionWrenches.put(rigidBody, solutionWrench);
-      }
-
-      return groundReactionWrenches;
-   }
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
