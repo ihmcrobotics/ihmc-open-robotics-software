@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactW
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.NewVirtualModelControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.NewVirtualModelControlOptimizationControlModule;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.NewVirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.NewVirtualModelController;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
@@ -92,6 +91,9 @@ public class NewWholeBodyVirtualModelControlSolver
       controlRootBody = toolbox.getVirtualModelControlMainBody();
       virtualModelController = new NewVirtualModelController(toolbox.getJointIndexHandler());
 
+      yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
+      yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
+
       yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
       yoAchievedMomentumRateAngular = toolbox.getYoAchievedMomentumRateAngular();
 
@@ -116,9 +118,6 @@ public class NewWholeBodyVirtualModelControlSolver
       }
 
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
-
-      yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
-      yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
 
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
@@ -178,8 +177,7 @@ public class NewWholeBodyVirtualModelControlSolver
       {
          RigidBody rigidBody = rigidBodiesWithExternalWrench.get(bodyIndex);
          externalWrenchSolution.get(rigidBody).negate();
-         virtualModelController.addExternalWrench(controlRootBody, rigidBody, externalWrenchSolution.get(rigidBody),
-                                                  virtualModelControlSolution.getCentroidalMomentumSelectionMatrix());
+         virtualModelController.addExternalWrench(controlRootBody, rigidBody, externalWrenchSolution.get(rigidBody));
       }
       planeContactWrenchProcessor.compute(externalWrenchSolution);
 
@@ -232,6 +230,8 @@ public class NewWholeBodyVirtualModelControlSolver
 
    public void submitVirtualModelControlCommandList(VirtualModelControlCommandList virtualModelControlCommandList)
    {
+      // todo zero the momentum command
+
       while (virtualModelControlCommandList.getNumberOfCommands() > 0)
       {
          VirtualModelControlCommand<?> command = virtualModelControlCommandList.pollCommand();
@@ -268,6 +268,7 @@ public class NewWholeBodyVirtualModelControlSolver
       }
    }
 
+   // FIXME this should add to the current momentum rate
    private void recordMomentumRate(MomentumRateCommand command)
    {
       DenseMatrix64F momentumRate = command.getMomentumRate();

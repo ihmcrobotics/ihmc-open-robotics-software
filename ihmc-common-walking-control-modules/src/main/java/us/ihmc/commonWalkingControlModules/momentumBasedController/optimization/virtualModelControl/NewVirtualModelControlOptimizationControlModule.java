@@ -6,10 +6,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ExternalWrenchHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.GroundContactForceOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.NewGroundContactForceOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.NewVirtualModelControlSolution;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,7 +20,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +35,6 @@ public class NewVirtualModelControlOptimizationControlModule
    private final ExternalWrenchHandler externalWrenchHandler;
    private final SpatialForceVector centroidalMomentumRateSolution = new SpatialForceVector();
 
-   private final DenseMatrix64F momentumSelectionMatrix = new DenseMatrix64F(0, 0);
-   private final SelectionMatrix6D centroidalMomentumSelectionMatrix = new SelectionMatrix6D();
-
-   private final InverseDynamicsJoint[] jointsToOptimizeFor;
-
    private final YoFrameVector achievedLinearMomentumRate;
    private final YoFrameVector achievedAngularMomentumRate;
    private final Map<RigidBody, YoWrench> contactWrenchSolutions = new HashMap<>();
@@ -55,7 +47,6 @@ public class NewVirtualModelControlOptimizationControlModule
 
    public NewVirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
-      jointsToOptimizeFor = toolbox.getJointIndexHandler().getIndexedJoints();
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
@@ -159,10 +150,8 @@ public class NewVirtualModelControlOptimizationControlModule
          }
       }
 
-      virtualModelControlSolution.setJointsToCompute(jointsToOptimizeFor);
       virtualModelControlSolution.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
       virtualModelControlSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
-      virtualModelControlSolution.setCentroidalMomentumSelectionMatrix(centroidalMomentumSelectionMatrix);
 
       if (noConvergenceException != null)
       {
@@ -175,8 +164,6 @@ public class NewVirtualModelControlOptimizationControlModule
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
       groundContactForceOptimization.submitMomentumRateCommand(command);
-      command.getSelectionMatrix(centroidalMomentumSelectionMatrix);
-      command.getSelectionMatrix(centerOfMassFrame, momentumSelectionMatrix);
    }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)

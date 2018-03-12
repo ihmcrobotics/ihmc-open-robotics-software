@@ -8,11 +8,9 @@ import java.util.Map;
 
 public class NewVirtualModelControlSolution
 {
-   private InverseDynamicsJoint[] jointsToCompute;
    private DenseMatrix64F jointTorques;
 
    private SpatialForceVector centroidalMomentumRateSolution;
-   private SelectionMatrix6D centroidalMomentumSelectionMatrix;
    private Map<RigidBody, Wrench> externalWrenchSolution;
    private List<RigidBody> rigidBodiesWithExternalWrench;
 
@@ -25,11 +23,6 @@ public class NewVirtualModelControlSolution
    {
       this.rigidBodiesWithExternalWrench = rigidBodiesWithExternalWrench;
       this.externalWrenchSolution = externalWrenchSolution;
-   }
-
-   public void setCentroidalMomentumSelectionMatrix(SelectionMatrix6D selectionMatrix)
-   {
-      this.centroidalMomentumSelectionMatrix = selectionMatrix;
    }
 
    public List<RigidBody> getRigidBodiesWithExternalWrench()
@@ -47,24 +40,9 @@ public class NewVirtualModelControlSolution
       return centroidalMomentumRateSolution;
    }
 
-   public SelectionMatrix6D getCentroidalMomentumSelectionMatrix()
-   {
-      return centroidalMomentumSelectionMatrix;
-   }
-
-   public void setJointsToCompute(InverseDynamicsJoint[] jointsToCompute)
-   {
-      this.jointsToCompute = jointsToCompute;
-   }
-
    public void setJointTorques(DenseMatrix64F jointTorques)
    {
       this.jointTorques = jointTorques;
-   }
-
-   public InverseDynamicsJoint[] getJointsToCompute()
-   {
-      return jointsToCompute;
    }
 
    public DenseMatrix64F getJointTorques()
