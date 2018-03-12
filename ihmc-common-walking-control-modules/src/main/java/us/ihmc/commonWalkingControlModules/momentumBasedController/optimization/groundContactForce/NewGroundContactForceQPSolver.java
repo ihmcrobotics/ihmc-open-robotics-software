@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -22,11 +23,17 @@ public class NewGroundContactForceQPSolver
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 0.5, registry);
 
+   private final YoFrameVector wrenchEquilibriumForceError;
+   private final YoFrameVector wrenchEquilibriumTorqueError;
+
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
    private final ActiveSetQPSolver qpSolver;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
+
+   private final DenseMatrix64F solverInput_H_previous;
+   private final DenseMatrix64F solverInput_f_previous;
 
    private final DenseMatrix64F solverInput_Aeq;
    private final DenseMatrix64F solverInput_beq;
@@ -35,6 +42,9 @@ public class NewGroundContactForceQPSolver
 
    private final DenseMatrix64F solverInput_lb;
    private final DenseMatrix64F solverInput_ub;
+
+   private final DenseMatrix64F solverInput_lb_previous;
+   private final DenseMatrix64F solverInput_ub_previous;
 
    private final DenseMatrix64F solverOutput_rhos;
 
@@ -66,6 +76,9 @@ public class NewGroundContactForceQPSolver
       solverInput_H = new DenseMatrix64F(rhoSize, rhoSize);
       solverInput_f = new DenseMatrix64F(rhoSize, 1);
 
+      solverInput_H_previous = new DenseMatrix64F(problemSize, problemSize);
+      solverInput_f_previous = new DenseMatrix64F(problemSize, 1);
+
       solverInput_Aeq = new DenseMatrix64F(0, rhoSize);
       solverInput_beq = new DenseMatrix64F(0, 1);
       solverInput_Ain = new DenseMatrix64F(0, rhoSize);
@@ -73,6 +86,9 @@ public class NewGroundContactForceQPSolver
 
       solverInput_lb = new DenseMatrix64F(rhoSize, 1);
       solverInput_ub = new DenseMatrix64F(rhoSize, 1);
+
+      solverInput_lb_previous = new DenseMatrix64F(problemSize, 1);
+      solverInput_ub_previous = new DenseMatrix64F(problemSize, 1);
 
       CommonOps.fill(solverInput_lb, Double.NEGATIVE_INFINITY);
       CommonOps.fill(solverInput_ub, Double.POSITIVE_INFINITY);
@@ -88,6 +104,17 @@ public class NewGroundContactForceQPSolver
       double defaultRhoRegularization = 0.00001;
       for (int i = 0; i < rhoSize; i++)
          regularizationMatrix.set(i, i, defaultRhoRegularization);
+
+      if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
+      {
+         wrenchEquilibriumForceError = new YoFrameVector("wrenchEquilibriumForceError", null, registry);
+         wrenchEquilibriumTorqueError = new YoFrameVector("wrenchEquilibriumTorqueError", null, registry);
+      }
+      else
+      {
+         wrenchEquilibriumForceError = null;
+         wrenchEquilibriumTorqueError = null;
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -295,13 +322,34 @@ public class NewGroundContactForceQPSolver
       if (MatrixTools.containsNaN(solverOutput_rhos))
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
 
-
       firstCall.set(false);
+
+      if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
+      {
+         if (hasFloatingBase)
+         {
+            CommonOps.mult(tempWrenchConstraint_J, solverOutput_rhos, tempWrenchConstraint_LHS);
+            int index = 0;
+            wrenchEquilibriumTorqueError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+            wrenchEquilibriumTorqueError.setY(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+            wrenchEquilibriumTorqueError.setZ(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+            wrenchEquilibriumForceError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+            wrenchEquilibriumForceError.setY(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+            wrenchEquilibriumForceError.setZ(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
+         }
+      }
+
+      solverInput_H_previous.set(solverInput_H);
+      solverInput_f_previous.set(solverInput_f);
+
+      solverInput_lb_previous.set(solverInput_lb);
+      solverInput_ub_previous.set(solverInput_ub);
    }
 
    private final DenseMatrix64F tempWrenchConstraint_H = new DenseMatrix64F(200, 200);
    private final DenseMatrix64F tempWrenchConstraint_J = new DenseMatrix64F(Wrench.SIZE, 200);
    private final DenseMatrix64F tempWrenchConstraint_f = new DenseMatrix64F(Wrench.SIZE, 200);
+   private final DenseMatrix64F tempWrenchConstraint_LHS = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F tempWrenchConstraint_RHS = new DenseMatrix64F(Wrench.SIZE, 1);
 
    /**
@@ -309,13 +357,11 @@ public class NewGroundContactForceQPSolver
     * solution is dynamically feasible:
     * <p>
     * <li>hDot = Q * &rho; + &sum;W<sub>user</sub> + W<sub>gravity</sub>
-    * <li>-A * qDDot - ADot * qDot = - Q * &rho; - &sum;W<sub>user</sub> - W<sub>gravity</sub>
-    * <li>-A * qDDot + Q * &rho; = ADot * qDot - &sum;W<sub>user</sub> - W<sub>gravity</sub>
-    * <li>[-A Q] * [qDDot<sup>T</sup> &rho;<sup>T</sup>]<sup>T</sup> = ADot * qDot -
-    * &sum;W<sub>user</sub> - W<sub>gravity</sub>
+    * <li>-hDot = - Q * &rho; - &sum;W<sub>user</sub> - W<sub>gravity</sub>
+    * <li>[-I Q] * [hDot<sup>T</sup> &rho;<sup>T</sup>]<sup>T</sup> = -&sum;W<sub>user</sub> - W<sub>gravity</sub>
     * </p>
     *
-    * @param momentumJacobian refers to hdot in the equation.
+    * @param momentumJacobian refers to I in the equation.
     * @param rhoJacobian refers to Q in the equation. Q&rho; represents external wrench to be
     *           optimized for.
     * @param additionalExternalWrench refers to &sum;W<sub>user</sub> in the equation. These are
