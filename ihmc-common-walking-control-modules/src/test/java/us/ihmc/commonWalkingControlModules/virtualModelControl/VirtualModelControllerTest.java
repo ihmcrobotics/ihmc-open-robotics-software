@@ -2,10 +2,8 @@ package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.After;
@@ -575,12 +573,7 @@ public class VirtualModelControllerTest
       desiredWrench.changeFrame(pelvis.getBodyFixedFrame());
 
       // compute end effector force from torques
-      Map<InverseDynamicsJoint, MutableDouble> jointTorques = virtualModelControlSolution.getJointTorques();
-      DenseMatrix64F jointEffortMatrix = new DenseMatrix64F(controlledJoints.length, 1);
-      for (int i = 0; i < controlledJoints.length; i++)
-      {
-         jointEffortMatrix.set(i, 0, jointTorques.get(controlledJoints[i]).doubleValue());
-      }
+      DenseMatrix64F jointEffortMatrix = virtualModelControlSolution.getJointTorques();
 
       DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
       CommonOps.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
@@ -791,12 +784,7 @@ public class VirtualModelControllerTest
       virtualModelController.compute(virtualModelControlSolution);
 
       // compute end effector force from torques
-      Map<InverseDynamicsJoint, MutableDouble> jointTorques = virtualModelControlSolution.getJointTorques();
-      DenseMatrix64F jointEffortMatrix = new DenseMatrix64F(controlledJoints.length, 1);
-      for (int i = 0; i < controlledJoints.length; i++)
-      {
-         jointEffortMatrix.set(i, 0, jointTorques.get(controlledJoints[i]).doubleValue());
-      }
+      DenseMatrix64F jointEffortMatrix = virtualModelControlSolution.getJointTorques();
 
       DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
       CommonOps.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);

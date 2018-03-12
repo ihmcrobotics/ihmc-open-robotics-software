@@ -287,6 +287,6 @@ public class VirtualModelController
          gravityWrenchVisualizer.visualize(gravityWrenchMap);
       }
 
-      virtualModelControlSolutionToPack.setJointTorques(jointTorques);
+      virtualModelControlSolutionToPack.setJointTorques(fullEffortMatrix);
    }
 }
