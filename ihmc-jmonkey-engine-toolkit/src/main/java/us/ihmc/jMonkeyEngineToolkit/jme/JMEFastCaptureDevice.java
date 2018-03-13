@@ -65,8 +65,6 @@ import javax.imageio.ImageIO;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
-import com.jme3.math.Matrix4f;
-import com.jme3.math.Vector3f;
 import com.jme3.post.SceneProcessor;
 import com.jme3.profile.AppProfiler;
 import com.jme3.renderer.Camera;
@@ -80,15 +78,13 @@ import com.jme3.util.BufferUtils;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.RGBDStreamer;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
+import us.ihmc.tools.image.DepthImage;
 
 /**
  * Transfer data from GPU to CPU quickly by using two Pixel Buffer Objects (PBO's).
@@ -120,10 +116,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    private ViewPort viewport;
 
    private BufferedImage bufferedImage;
-
-   private Point3D32[] points;
-   private int[] colors;
-
+   private DepthImage depthImage;
+   
    private ByteBuffer systemRam;
    private byte[] cpuArray;
 
@@ -185,29 +179,39 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       width = w;
       height = h;
 
-      bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
       
       if (rgbdStreamer != null)
       {
          dataSize = w * h * 8;
-         points = new Point3D32[w * h];
-         colors = new int[w * h];
-         for (int i = 0; i < w * h; i++)
-         {
-            points[i] = new Point3D32();
-         }
-
+         depthImage = new DepthImage(w, h);
+         bufferedImage = null;
          captureDepthMap = true;
+         
+         
+         // Check if camera is setup correctly
+         
+         if(Math.abs(viewport.getCamera().getViewPortLeft()) > 1e-7f ||
+               Math.abs(viewport.getCamera().getViewPortRight() - 1.0f) > 1e-7f ||
+               Math.abs(viewport.getCamera().getViewPortTop() - 1.0f) > 1e-7f || 
+               Math.abs(viewport.getCamera().getViewPortBottom()) > 1e-7f)
+         {
+            throw new RuntimeException("Camera viewport not setup correctly for depth image capture.");
+         }
+               
+         if(Math.abs(viewport.getCamera().getFrustumTop() + viewport.getCamera().getFrustumBottom()) > 1e-7 ||
+               Math.abs(viewport.getCamera().getFrustumLeft() + viewport.getCamera().getFrustumRight()) > 1e-7)
+         {
+            throw new RuntimeException("Camera frustum not symetrical, required for depth image capture");
+         }
 
       }
       else
       {
          dataSize = w * h * 4;
-
+         bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+         depthImage = null;
          captureDepthMap = false;
 
-         points = null;
-         colors = null;
       }
 
       // Create PBO buffer in the system memory to store data from vramToSys in
@@ -393,7 +397,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
          else if (captureDepthMap)
          {
             convertRGBD((float)rgbdStreamer.getNearClip(), (float)rgbdStreamer.getFarClip());
-            rgbdStreamer.updateRBGD(bufferedImage, points, colors, timeStamp, position, orientation, fov);
+            rgbdStreamer.updateRBGD(depthImage, timeStamp, position, orientation, fov);
          }
 
          if (CAPTURE_IMMEDIATLY_AFTER_PREVIOUS_VIDEOFRAME)
@@ -429,26 +433,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
          }
       }
    }
-
-   private void getWorldCoordinates(Matrix4f inverseMat, float x, float y, float projectionZPos, Vector3f store)
-   {
-
-      float viewPortLeft = viewport.getCamera().getViewPortLeft();
-      float viewPortRight = viewport.getCamera().getViewPortRight();
-      float viewPortTop = viewport.getCamera().getViewPortTop();
-      float viewPortBottom = viewport.getCamera().getViewPortBottom();
-
-      float width = viewport.getCamera().getWidth();
-      float height = viewport.getCamera().getHeight();
-
-      store.set((x / width - viewPortLeft) / (viewPortRight - viewPortLeft) * 2 - 1, (y / height - viewPortBottom) / (viewPortTop - viewPortBottom) * 2 - 1,
-                projectionZPos * 2 - 1);
-
-      float w = inverseMat.multProj(store, store);
-      store.multLocal(1f / w);
-
-   }
-
+   
    public void convertScreenShot()
    {
       if (alreadyClosing)
@@ -483,77 +468,54 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
    }
 
+   // Formulate derived from perspective transformation on https://en.wikipedia.org/wiki/Z-buffering
+   public float getDepth(float zDepth) {
+      float far = viewport.getCamera().getFrustumFar();
+      float near = viewport.getCamera().getFrustumNear();
+      return 2f * near * far / (far + near - zDepth * (far - near));
+   }
+   
    public void convertRGBD(float nearClip, float farClip)
    {
       if (alreadyClosing)
          return;
       
-      WritableRaster wr = bufferedImage.getRaster();
-      DataBufferByte db = (DataBufferByte) wr.getDataBuffer();
-      byte[] imageArray = db.getData();
 
       ByteBuffer imageBuffer = ByteBuffer.wrap(cpuArray);
       imageBuffer.order(ByteOrder.nativeOrder());
       imageBuffer.position(width * height * 4);
       FloatBuffer depthBuffer = imageBuffer.asFloatBuffer();
 
-      Matrix4f inverseMat = new Matrix4f(viewport.getCamera().getViewProjectionMatrix());
-      inverseMat.invertLocal();
-
-      Vector3f store = new Vector3f();
+     
+      float m00 = viewport.getCamera().getFrustumRight() - viewport.getCamera().getFrustumLeft()  / (2f * viewport.getCamera().getFrustumNear());
+      float m11 = viewport.getCamera().getFrustumTop() - viewport.getCamera().getFrustumBottom() / (2f * viewport.getCamera().getFrustumNear());
       
+      depthImage.setTransform2D(m00, m11);
       
-      float nearDepth, farDepth;
-      if(nearClip > 0)
-      {
-         nearDepth = viewport.getCamera().getViewToProjectionZ(nearClip);
-      }
-      else 
-      {
-         nearDepth = 0;
-      }
-      
-      if(farClip < Float.POSITIVE_INFINITY)
-      {
-         farDepth = viewport.getCamera().getViewToProjectionZ(farClip);
-      }
-      else
-      {
-         farDepth = 1.0f;
-      }
-      
-
       for (int y = 0; y < height; y++)
       {
          for (int x = 0; x < width; x++)
          {
             int upperHalfPtrAlpha = (y * width + x) * 4;
-            int lowerHalfPtr = ((height - y - 1) * width + x) * 3;
 
             byte b1 = cpuArray[upperHalfPtrAlpha + 0];
             byte g1 = cpuArray[upperHalfPtrAlpha + 1];
             byte r1 = cpuArray[upperHalfPtrAlpha + 2];
-            byte a1 = cpuArray[upperHalfPtrAlpha + 3];
 
             
-            float depth = depthBuffer.get();
-            if(depth >= nearDepth && depth <= farDepth)
+            float rawDepth = depthBuffer.get();
+            float depth = getDepth(rawDepth);
+            if(depth < nearClip)
             {
-               getWorldCoordinates(inverseMat, x, y, depth, store);
-
-               JMEGeometryUtils.transformFromJMECoordinatesToZup(store);
-               JMEDataTypeUtils.packJMEVector3fInVecMathTuple3d(store, points[y * width + x]);
-               colors[y * width + x] = (a1 << 24) + (r1 << 16) + (g1 << 8) + b1;
+               depth = Float.NEGATIVE_INFINITY;
             }
-            else
+            else if (depth > farClip)
             {
-               points[y * width + x].setToNaN();
-               colors[y * width + x] = 0;
+               depth = Float.POSITIVE_INFINITY;
             }
             
-            imageArray[lowerHalfPtr + 0] = b1;
-            imageArray[lowerHalfPtr + 1] = g1;
-            imageArray[lowerHalfPtr + 2] = r1;
+            depthImage.setPoint(x, y, r1, g1, b1, depth);
+            
          }
       }
    }
@@ -681,8 +643,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
 
       cameraStreamer = null;
       rgbdStreamer = null;
-      points = null;
-      colors = null;
+      depthImage = null;
    }
 
    @Override

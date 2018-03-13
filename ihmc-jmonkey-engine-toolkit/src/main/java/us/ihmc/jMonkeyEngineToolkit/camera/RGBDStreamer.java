@@ -1,10 +1,8 @@
 package us.ihmc.jMonkeyEngineToolkit.camera;
 
-import java.awt.image.BufferedImage;
-
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.tools.image.DepthImage;
 
 public interface RGBDStreamer
 {
@@ -27,7 +25,7 @@ public interface RGBDStreamer
     * @param cameraOrientation
     * @param fov TODO
     */
-   public void updateRBGD(BufferedImage image, Point3D32[] coordinates, int[] colors, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, double fov);
+   public void updateRBGD(DepthImage depthImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, double fov);
 
    /**
     * Function to check if a new frame should be captured and provided to the RGBD streamer
