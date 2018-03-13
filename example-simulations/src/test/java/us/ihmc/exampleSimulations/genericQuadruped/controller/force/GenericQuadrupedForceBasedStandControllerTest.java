@@ -8,6 +8,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDefaultInitialPosition;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedSquaredUpInitialPosition;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceBasedStandControllerTest;
@@ -24,12 +25,16 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
       return testFactory;
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.0)
    @Test(timeout = 200000)
    public void testStandingUpAndAdjustingCoM() throws IOException
    {
-      super.testStandingUpAndAdjustingCoM();
+      double translationShift = 0.03;
+      double translationDelta = 0.01;
+      double orientationShift = Math.toRadians(5.0);
+      double orientationDelta = Math.toRadians(1.0);
+
+      super.testStandingUpAndAdjustingCoM(translationShift, translationDelta, orientationShift, orientationDelta);
    }
 
    @Override
