@@ -64,7 +64,6 @@ public class SwingState extends AbstractUnconstrainedState
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
    private final MultipleWaypointsBlendedPoseTrajectoryGenerator blendedSwingTrajectory;
    private final SoftTouchdownPoseTrajectoryGenerator touchdownTrajectory;
-   private final BlendedPoseTrajectoryGenerator blendedTouchdownTrajectory;
    private double swingTrajectoryBlendDuration = 0.0;
 
    private final CurrentRigidBodyStateProvider currentStateProvider;
@@ -244,7 +243,6 @@ public class SwingState extends AbstractUnconstrainedState
       MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", Footstep.maxNumberOfSwingWaypoints + 2, registry);
       blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix + "Swing", swingTrajectory, worldFrame, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
-      blendedTouchdownTrajectory = new BlendedPoseTrajectoryGenerator(namePrefix + "Touchdown", touchdownTrajectory, worldFrame, registry);
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
@@ -375,7 +373,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       PoseTrajectoryGenerator activeTrajectory;
       if (time > swingDuration.getDoubleValue())
-         activeTrajectory = blendedTouchdownTrajectory;
+         activeTrajectory = touchdownTrajectory;
       else
          activeTrajectory = blendedSwingTrajectory;
 
@@ -572,11 +570,13 @@ public class SwingState extends AbstractUnconstrainedState
       }
       if (footstepWasAdjusted.getBooleanValue())
       {
+         touchdownTrajectory.setLinearTrajectory(swingDuration, rateLimitedAdjustedPose.getPosition(), finalLinearVelocity, yoTouchdownAcceleration);
+         touchdownTrajectory.setOrientation(rateLimitedAdjustedPose.getOrientation());
+
          blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
-         blendedTouchdownTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
       }
       blendedSwingTrajectory.initialize();
-      blendedTouchdownTrajectory.initialize();
+      touchdownTrajectory.initialize();
    }
 
    private void modifyFinalOrientationForTouchdown(FrameQuaternion finalOrientationToPack)
