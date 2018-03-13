@@ -107,7 +107,7 @@ public class GroundContactForceOptimizationControlModule
          setupRhoTasks();
 
       qpSolver.setMinRho(rhoMin.getDoubleValue());
-      qpSolver.addMomentumTask(momentumJacobian, momentumObjective, momentumWeight);
+      qpSolver.addMotionTask(momentumJacobian, momentumObjective, momentumWeight);
 
       NoConvergenceException noConvergenceException = null;
 

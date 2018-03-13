@@ -1,12 +1,9 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -52,7 +49,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
    private final JointDesiredOutputList jointDesiredOutputList;
 
    private final VirtualModelControlCommandList virtualModelControlCommandList = new VirtualModelControlCommandList();
-   private final QuadrantDependentList<VirtualWrenchCommand> virtualWrenchCommands = new QuadrantDependentList<>();
+   private final QuadrantDependentList<VirtualForceCommand> virtualForceCommands = new QuadrantDependentList<>();
 
    public QuadrupedForceBasedFreezeController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
                                               YoVariableRegistry parentRegistry)
@@ -78,10 +75,9 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         VirtualWrenchCommand command = new VirtualWrenchCommand();
-         command.getSelectionMatrix().set(linearSelectionMatrix);
-         command.setRigidBody(fullRobotModel.getFoot(robotQuadrant));
-         virtualWrenchCommands.set(robotQuadrant, command);
+         VirtualForceCommand command = new VirtualForceCommand();
+         command.set(fullRobotModel.getBody(), fullRobotModel.getFoot(robotQuadrant));
+         virtualForceCommands.set(robotQuadrant, command);
       }
 
       parentRegistry.addChild(registry);
@@ -128,8 +124,9 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       virtualModelControlCommandList.clear();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         convertToVirtualWrenchCommand(taskSpaceControllerCommands.getSoleForce(robotQuadrant), virtualWrenchCommands.get(robotQuadrant));
-         virtualModelControlCommandList.addCommand(virtualWrenchCommands.get(robotQuadrant));
+         FrameVector3D soleForce = taskSpaceControllerCommands.getSoleForce(robotQuadrant);
+         virtualForceCommands.get(robotQuadrant).setLinearForce(soleForce.getReferenceFrame(), soleForce);
+         virtualModelControlCommandList.addCommand(virtualForceCommands.get(robotQuadrant));
       }
 
       return null;
@@ -150,11 +147,5 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
                jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint).setControlMode(JointDesiredControlMode.POSITION);
          }
       }
-   }
-
-   private void convertToVirtualWrenchCommand(FrameVector3D soleForce, VirtualWrenchCommand virtualWrenchCommand)
-   {
-      virtualWrenchCommand.getVirtualWrench().setToZero(ReferenceFrame.getWorldFrame());
-      virtualWrenchCommand.getVirtualWrench().setLinearPart(soleForce);
    }
 }
