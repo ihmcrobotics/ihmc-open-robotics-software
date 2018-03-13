@@ -299,6 +299,7 @@ public class WholeBodyInverseDynamicsSolver
       }
    }
 
+   // FIXME this assumes there is only one momentum rate command
    private void recordMomentumRate(MomentumRateCommand command)
    {
       DenseMatrix64F momentumRate = command.getMomentumRate();

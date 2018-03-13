@@ -8,6 +8,7 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -15,12 +16,14 @@ import us.ihmc.robotics.screwTheory.Wrench;
 
 public class VirtualModelControlDataHandler
 {
-   public final List<RigidBody> controlledBodies = new ArrayList<RigidBody>();
+   public final List<RigidBody> controlledBodies = new ArrayList<>();
    private final Map<RigidBody, List<OneDoFJoint[]>> jointChainsForControl = new LinkedHashMap<>();
    private final List<OneDoFJoint> controlledJoints = new ArrayList <>();
    public int numberOfControlledJoints = 0;
 
    private final Map<RigidBody, Wrench> desiredWrenches = new LinkedHashMap<>();
+   private final Map<RigidBody, FrameVector3D> desiredForces = new LinkedHashMap<>();
+   private final Map<RigidBody, FrameVector3D> desiredTorques = new LinkedHashMap<>();
    private final Map<RigidBody, DenseMatrix64F> desiredSelectionMatrices = new LinkedHashMap<>();
 
    public VirtualModelControlDataHandler()
@@ -29,6 +32,8 @@ public class VirtualModelControlDataHandler
 
    public void clear()
    {
+      desiredForces.clear();
+      desiredTorques.clear();
       desiredWrenches.clear();
       desiredSelectionMatrices.clear();
    }
@@ -47,7 +52,7 @@ public class VirtualModelControlDataHandler
       if (!controlledBodies.contains(bodyForControl))
       {
          controlledBodies.add(bodyForControl);
-         jointChainsForControl.put(bodyForControl, new ArrayList<OneDoFJoint[]>());
+         jointChainsForControl.put(bodyForControl, new ArrayList<>());
       }
       else
       {
@@ -89,8 +94,6 @@ public class VirtualModelControlDataHandler
    {
       if (hasBody(controlledBody))
       {
-         if (desiredWrenches.get(controlledBody) != null)
-            PrintTools.warn(this, "Class already contains wrench for body " + controlledBody.getName() + ". It is being overwritten.");
          desiredWrenches.put(controlledBody, desiredWrench);
       }
    }
@@ -143,11 +146,6 @@ public class VirtualModelControlDataHandler
    public List<RigidBody> getControlledBodies()
    {
       return controlledBodies;
-   }
-
-   public List<OneDoFJoint[]> getJointChainsForControl(RigidBody controlledBody)
-   {
-      return jointChainsForControl.get(controlledBody);
    }
 
    public OneDoFJoint[] getJointsForControl(RigidBody controlledBody, int chainID)
