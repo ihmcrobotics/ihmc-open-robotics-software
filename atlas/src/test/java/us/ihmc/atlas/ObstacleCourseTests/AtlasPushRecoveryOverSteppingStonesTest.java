@@ -3,14 +3,12 @@ package us.ihmc.atlas.ObstacleCourseTests;
 import org.junit.Test;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasContinuousCMPPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarPushRecoveryOverSteppingStonesTest;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -62,7 +60,26 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
                      }
                   };
                }
+
+               @Override
+               public ToeOffParameters getToeOffParameters()
+               {
+                  return new AtlasToeOffParameters(getJointMap())
+                  {
+                     @Override
+                     public double getICPPercentOfStanceForDSToeOff()
+                     {
+                        return 0.1;
+                     }
+
+                     public double getAnkleLowerLimitToTriggerToeOff()
+                     {
+                        return -0.9;
+                     }
+                  };
+               }
             };
+
 
          }
       };
