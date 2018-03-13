@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,6 +24,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class QuadrupedSwingState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean createSwingTrajectoryGraphics = false;
 
    private final RobotQuadrant robotQuadrant;
    private final ThreeDoFSwingFootTrajectory swingTrajectory;
@@ -44,7 +46,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final ReferenceFrame soleFrame;
 
    // graphics
-   private static final int numberOfPointsToVisualize = 16;
+   private static final int pointsPerSecondOfSwingTime = 70;
    private static final AppearanceDefinition visualizationAppearance = YoAppearance.Blue();
    private final FramePoint3D swingPositionForVisualization = new FramePoint3D();
    private final BagOfBalls stepSequenceVisualization;
@@ -69,8 +71,15 @@ public class QuadrupedSwingState extends QuadrupedFootState
                                                           QuadrupedFootControlModuleParameters.getDefaultTouchdownTriggerWindow());
 
       // graphics
-      String prefix = robotQuadrant.getPascalCaseName() + "SwingTrajectory";
-      stepSequenceVisualization = new BagOfBalls(numberOfPointsToVisualize, 0.015, prefix, visualizationAppearance, registry, graphicsListRegistry);
+      if(createSwingTrajectoryGraphics)
+      {
+         String prefix = robotQuadrant.getPascalCaseName() + "SwingTrajectory";
+         stepSequenceVisualization = new BagOfBalls(pointsPerSecondOfSwingTime, 0.005, prefix, visualizationAppearance, registry, graphicsListRegistry);
+      }
+      else
+      {
+         stepSequenceVisualization = null;
+      }
    }
 
    @Override
@@ -87,11 +96,10 @@ public class QuadrupedSwingState extends QuadrupedFootState
       goalPosition.changeFrame(worldFrame);
       goalPosition.add(0.0, 0.0, parameters.getStepGoalOffsetZParameter());
 
-      goalPosition.setX(initialPosition.getX());
-      goalPosition.setY(initialPosition.getY());
-
       swingTrajectory.initializeTrajectory(initialPosition, goalPosition, groundClearance, timeInterval);
-      updateGraphics(timeInterval);
+
+      if(createSwingTrajectoryGraphics)
+         updateGraphics(timeInterval.getStartTime(), timeInterval.getEndTime());
 
       // initialize contact state and feedback gains
       solePositionController.reset();
@@ -101,14 +109,15 @@ public class QuadrupedSwingState extends QuadrupedFootState
       touchdownTrigger.set(false);
    }
 
-   private void updateGraphics(TimeInterval timeInterval)
+   private void updateGraphics(double startTime, double endTime)
    {
       stepSequenceVisualization.reset();
-      double swingDuration = timeInterval.getDuration();
+      double swingDuration = endTime - startTime;
+      int numberOfPoints = MathTools.clamp((int) (pointsPerSecondOfSwingTime * swingDuration), 2, pointsPerSecondOfSwingTime);
 
-      for (int i = 0; i < numberOfPointsToVisualize; i++)
+      for (int i = 0; i < numberOfPoints; i++)
       {
-         double t = timeInterval.getStartTime() + (i + 1) * swingDuration / numberOfPointsToVisualize;
+         double t = startTime + (i + 1) * swingDuration / numberOfPoints;
          swingTrajectory.computeTrajectory(t);
          swingTrajectory.getPosition(swingPositionForVisualization);
          stepSequenceVisualization.setBall(swingPositionForVisualization);
@@ -158,6 +167,9 @@ public class QuadrupedSwingState extends QuadrupedFootState
          soleForceCommand.changeFrame(worldFrame);
       }
 
+      if(createSwingTrajectoryGraphics)
+         updateGraphics(currentTime, currentStepCommand.getTimeInterval().getEndTime());
+
       // Trigger support phase.
       if (currentTime >= touchDownTime)
       {
@@ -176,6 +188,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
    {
       soleForceCommand.setToZero();
       stepCommandIsValid.set(false);
-      stepSequenceVisualization.hideAll();
+
+      if(createSwingTrajectoryGraphics)
+         stepSequenceVisualization.hideAll();
    }
 }
