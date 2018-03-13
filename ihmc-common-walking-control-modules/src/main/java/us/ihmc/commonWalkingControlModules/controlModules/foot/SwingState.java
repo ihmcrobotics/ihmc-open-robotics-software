@@ -31,6 +31,7 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.BlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -63,6 +64,7 @@ public class SwingState extends AbstractUnconstrainedState
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
    private final MultipleWaypointsBlendedPoseTrajectoryGenerator blendedSwingTrajectory;
    private final SoftTouchdownPoseTrajectoryGenerator touchdownTrajectory;
+   private final BlendedPoseTrajectoryGenerator blendedTouchdownTrajectory;
    private double swingTrajectoryBlendDuration = 0.0;
 
    private final CurrentRigidBodyStateProvider currentStateProvider;
@@ -242,6 +244,7 @@ public class SwingState extends AbstractUnconstrainedState
       MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix + "Swing", Footstep.maxNumberOfSwingWaypoints + 2, registry);
       blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix + "Swing", swingTrajectory, worldFrame, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
+      blendedTouchdownTrajectory = new BlendedPoseTrajectoryGenerator(namePrefix + "Touchdown", touchdownTrajectory, worldFrame, registry);
       currentStateProvider = new CurrentRigidBodyStateProvider(soleFrame);
 
       activeTrajectoryType = new YoEnum<>(namePrefix + TrajectoryType.class.getSimpleName(), registry, TrajectoryType.class);
@@ -372,7 +375,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       PoseTrajectoryGenerator activeTrajectory;
       if (time > swingDuration.getDoubleValue())
-         activeTrajectory = touchdownTrajectory;
+         activeTrajectory = blendedTouchdownTrajectory;
       else
          activeTrajectory = blendedSwingTrajectory;
 
@@ -387,7 +390,7 @@ public class SwingState extends AbstractUnconstrainedState
       if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryOptimizer.doOptimizationUpdate()) // haven't finished original planning
          fillAndInitializeTrajectories(false);
       else if (replanTrajectory.getBooleanValue()) // need to update the beginning and end blending
-         fillAndInitializeBlendedTrajectory();
+         fillAndInitializeBlendedTrajectories();
       replanTrajectory.set(false);
 
       activeTrajectory.compute(time);
@@ -554,14 +557,11 @@ public class SwingState extends AbstractUnconstrainedState
       // TODO: revisit the touchdown velocity and accelerations
       touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, yoTouchdownAcceleration);
       touchdownTrajectory.setOrientation(finalOrientation);
-      touchdownTrajectory.initialize();
 
-      blendedSwingTrajectory.initializeTrajectory();
-
-      fillAndInitializeBlendedTrajectory();
+      fillAndInitializeBlendedTrajectories();
    }
 
-   private void fillAndInitializeBlendedTrajectory()
+   private void fillAndInitializeBlendedTrajectories()
    {
       double swingDuration = this.swingDuration.getDoubleValue();
       blendedSwingTrajectory.clear();
@@ -573,8 +573,10 @@ public class SwingState extends AbstractUnconstrainedState
       if (footstepWasAdjusted.getBooleanValue())
       {
          blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
+         blendedTouchdownTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
       }
       blendedSwingTrajectory.initialize();
+      blendedTouchdownTrajectory.initialize();
    }
 
    private void modifyFinalOrientationForTouchdown(FrameQuaternion finalOrientationToPack)
