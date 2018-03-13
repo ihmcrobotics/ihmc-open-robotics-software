@@ -29,7 +29,7 @@ public class GenericQuadrupedForceBasedStandControllerTest extends QuadrupedForc
    @Test(timeout = 200000)
    public void testStandingUpAndAdjustingCoM() throws IOException
    {
-      double translationShift = 0.03;
+      double translationShift = 0.00;
       double translationDelta = 0.01;
       double orientationShift = Math.toRadians(5.0);
       double orientationDelta = Math.toRadians(1.0);
