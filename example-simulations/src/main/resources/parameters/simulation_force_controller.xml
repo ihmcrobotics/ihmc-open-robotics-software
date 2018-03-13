@@ -112,14 +112,14 @@
                             <parameter name="maximumFeedbackRate_DcmPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
                         </registry>
                         <parameter name="comPositionGravityCompensation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-                        <parameter name="kpX_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="3500.0"/>
-                        <parameter name="kpY_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="3500.0"/>
+                        <parameter name="kpX_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kpY_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="kpZ_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="5000.0"/>
-                        <parameter name="zetaX_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
-                        <parameter name="zetaY_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+                        <parameter name="zetaX_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="zetaY_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="zetaZ_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="5.303300858899107"/>
-                        <parameter name="kiX_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
-                        <parameter name="kiY_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
+                        <parameter name="kiX_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <parameter name="kiY_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="kiZ_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="1000.0"/>
                         <parameter name="maxIntegralError_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                         <parameter name="maxDerivativeError_comPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
