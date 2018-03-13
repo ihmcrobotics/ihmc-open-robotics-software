@@ -48,6 +48,13 @@ public class DepthImage
 
    }
 
+   /**
+    * Convert from x,y originating top left to internal representation of BufferedImage
+    * 
+    * @param x
+    * @param y
+    * @return index for internal data storage
+    */
    private int getDataIndex(int x, int y)
    {
       return ((height - y - 1) * width + x);
