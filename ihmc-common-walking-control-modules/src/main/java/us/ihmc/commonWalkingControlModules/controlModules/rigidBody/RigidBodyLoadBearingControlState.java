@@ -21,8 +21,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -308,6 +308,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    public void doTransitionOutOfAction()
    {
       hideGraphics();
+      hybridModeActive.set(false);
    }
 
    @Override
@@ -362,11 +363,5 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       // this control mode does not support command queuing
       return 0.0;
-   }
-
-   @Override
-   public void clear()
-   {
-      hybridModeActive.set(false);
    }
 }

@@ -168,9 +168,4 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    {
       return getFeedbackControlCommand();
    }
-
-   @Override
-   public void clear()
-   {
-   }
 }
