@@ -88,7 +88,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       pusher = new PushRobotTestConductor(conductor.getScs(), jointToPushOn);
 
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+      QuadrupedTestBehaviors.standUp(conductor, variables);
       
       pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 30.0, 1.0);
       
@@ -96,28 +96,28 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3D(-1.0, -1.0, 0.0), 50.0, 0.25);
+      pusher.applyForce(new Vector3D(-1.0, -1.0, 0.0), 50.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.25));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3D(1.0, -1.0, 0.0), 50.0, 0.25);
+      pusher.applyForce(new Vector3D(1.0, -1.0, 0.0), 50.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.25));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3D(1.0, 1.0, 0.0), 50.0, 0.25);
+      pusher.applyForce(new Vector3D(1.0, 1.0, 0.0), 50.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.25));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3D(-1.0, 1.0, 0.0), 50.0, 0.25);
+      pusher.applyForce(new Vector3D(-1.0, 1.0, 0.0), 50.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.25));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
       pusher.applyForce(new Vector3D(0.0, 0.0, 1.0), 50.0, 1.0);
@@ -132,7 +132,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      pusher.applyForce(new Vector3D(0.0, 0.0, 1.0), 200.0, 0.5);
+      pusher.applyForce(new Vector3D(0.0, 0.0, 1.0), 200.0, 1.0);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
@@ -172,7 +172,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
       
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+      QuadrupedTestBehaviors.standUp(conductor, variables);
       
       pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 30.0, 1.0);
       
@@ -205,7 +205,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.simulate();
    }
    
-   public void testStandingUpAndAdjustingCoM() throws IOException
+   public void testStandingUpAndAdjustingCoM(double translationShift, double translationDelta, double orientationShift, double orientationDelta) throws IOException
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
@@ -219,19 +219,11 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
       
-      double initialComZ = variables.getComPositionEstimateZ().getDoubleValue() - variables.getGroundPlanePointZ().getDoubleValue();
-
-      double yawAndPitchShift = Math.toRadians(12.0);
-      double rollShift = Math.toRadians(7.5);
-      double orientationDelta = Math.toRadians(1.0);
-
-      double translationShift = 0.05;
-      double translationDelta = 0.01;
-
-      testMovingCoM(translationShift, -translationShift, initialComZ + translationShift, yawAndPitchShift, yawAndPitchShift, rollShift, translationDelta, orientationDelta);
-      testMovingCoM(-translationShift, -translationShift, initialComZ, yawAndPitchShift, - yawAndPitchShift, rollShift, translationDelta, orientationDelta);
-      testMovingCoM(-translationShift,  translationShift, initialComZ - translationShift, - yawAndPitchShift, - yawAndPitchShift, - rollShift, translationDelta, orientationDelta);
-      testMovingCoM(translationShift, translationShift, initialComZ - 2.0 * translationShift, - yawAndPitchShift, -yawAndPitchShift, -rollShift, translationDelta, orientationDelta);
+      double initialComZ = variables.getComPositionEstimateZ().getDoubleValue();
+      testMovingCoM(translationShift, -translationShift, initialComZ + translationShift, orientationShift, orientationShift, orientationShift, translationDelta, orientationDelta);
+      testMovingCoM(-translationShift, -translationShift, initialComZ, orientationShift, - orientationShift, orientationShift, translationDelta, orientationDelta);
+      testMovingCoM(-translationShift,  translationShift, initialComZ - translationShift, - orientationShift, - orientationShift, - orientationShift, translationDelta, orientationDelta);
+      testMovingCoM(translationShift, translationShift, initialComZ + translationShift, - orientationShift, -orientationShift, -orientationShift, translationDelta, orientationDelta);
       testMovingCoM(0.0, 0.0, initialComZ, 0.0, 0.0, 0.0, translationDelta, orientationDelta);
    }
 
@@ -247,9 +239,9 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
 
-      assertTrue(Math.abs(variables.getComPositionEstimateX().getDoubleValue() - comPositionX) < translationDelta);
-      assertTrue(Math.abs(variables.getComPositionEstimateY().getDoubleValue() - comPositionY) < translationDelta);
-      assertTrue(Math.abs(variables.getComPositionEstimateZ().getDoubleValue() - comPositionZ) < translationDelta);
+      assertTrue(Math.abs(variables.getComPositionEstimateX().getDoubleValue() - variables.getComPositionSetpointX().getDoubleValue()) < translationDelta);
+      assertTrue(Math.abs(variables.getComPositionEstimateY().getDoubleValue() - variables.getComPositionSetpointY().getDoubleValue()) < translationDelta);
+      assertTrue(Math.abs(variables.getComPositionEstimateZ().getDoubleValue() - variables.getComPositionSetpointZ().getDoubleValue()) < translationDelta);
       assertTrue(Math.abs(variables.getComPositionEstimateYaw().getDoubleValue() - bodyOrientationYaw) < orientationDelta);
       assertTrue(Math.abs(variables.getComPositionEstimatePitch().getDoubleValue() - bodyOrientationPitch) < orientationDelta);
       assertTrue(Math.abs(variables.getComPositionEstimateRoll().getDoubleValue() - bodyOrientationRoll) < orientationDelta);

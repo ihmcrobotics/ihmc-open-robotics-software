@@ -10,6 +10,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationFactory;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
@@ -106,6 +107,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
       simulationFactory.setXGaitSettings(xGaitSettings);
+      simulationFactory.setInitialForceControlState(QuadrupedForceControllerEnum.FREEZE);
 
       if (groundContactModelType.hasValue())
       {
