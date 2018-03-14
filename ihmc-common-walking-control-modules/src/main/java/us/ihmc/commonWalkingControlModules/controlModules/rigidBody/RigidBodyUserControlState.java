@@ -160,11 +160,4 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       // this control mode does not support command queuing
       return 0.0;
    }
-
-   @Override
-   public void clear()
-   {
-
-   }
-
 }
