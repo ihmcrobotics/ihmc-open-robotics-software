@@ -386,6 +386,8 @@ public class QuadrupedSimulationFactory
       int simulationTicksPerControllerTick = (int) Math.round(controlDT.get() / simulationDT.get());
       sdfRobot.get().setController(simulationController, simulationTicksPerControllerTick);
       sdfRobot.get().setPositionInWorld(initialPositionParameters.get().getInitialBodyPosition());
+      sdfRobot.get().setOrientation(initialPositionParameters.get().getInitialBodyOrientation());
+
       for (QuadrupedJointName quadrupedJointName : modelFactory.get().getQuadrupedJointNames())
       {
          OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = sdfRobot.get().getOneDegreeOfFreedomJoint(modelFactory.get().getSDFNameForJointName(quadrupedJointName));
