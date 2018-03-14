@@ -89,6 +89,17 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       angularVelocity.setToNaN();
       torque.setToNaN();
       rateOfChangeOfTorque.setToNaN();
+
+      forceConstraintType.setToNull();
+      torqueConstraintType.setToNull();
+
+      positionWeight.setToNaN();
+      linearVelocityWeight.setToNaN();
+      forceWeight.setToNaN();
+
+      orientationWeight.setToNaN();
+      angularVelocityWeight.setToNaN();
+      torqueWeight.setToNaN();
    }
 
    public void setTime(double time)
@@ -96,10 +107,46 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.time = time;
    }
 
-   public void setForce(FrameVector3D force)
+   public void setForceAsHardConstraint(FrameVector3D force)
+   {
+      setForceValue(force);
+      this.forceConstraintType.set(EffortConstraintType.EQUALITY, EffortConstraintType.EQUALITY, EffortConstraintType.EQUALITY);
+      this.forceWeight.setToNaN();
+   }
+
+   public void setForceAsObjective(FrameVector3D force, FrameVector3D forceWeight)
+   {
+      setForceValue(force);
+      this.forceConstraintType.set(EffortConstraintType.OBJECTIVE, EffortConstraintType.OBJECTIVE, EffortConstraintType.OBJECTIVE);
+      this.forceWeight.setIncludingFrame(forceWeight);
+      this.forceWeight.changeFrame(referenceFrame);
+   }
+
+   public void setForce(FrameVector3D force, VectorEnum<EffortConstraintType> constraintType, FrameVector3D forceWeight)
+   {
+      setForceValue(force);
+      this.forceConstraintType.set(constraintType);
+      this.forceWeight.setIncludingFrame(forceWeight);
+      this.forceWeight.changeFrame(referenceFrame);
+   }
+
+   private void setForceValue(FrameVector3D force)
    {
       this.force.setIncludingFrame(force);
       this.force.changeFrame(referenceFrame);
+   }
+
+   public void setForceZ(ReferenceFrame frame, double fZ, double weight)
+   {
+      force.changeFrame(frame);
+      force.setZ(fZ);
+      force.changeFrame(referenceFrame);
+
+      forceConstraintType.setZ(EffortConstraintType.OBJECTIVE);
+
+      forceWeight.changeFrame(frame);
+      forceWeight.setZ(weight);
+      forceWeight.changeFrame(referenceFrame);
    }
 
    public void setRateOfChangeOfForce(FrameVector3D dForce)
@@ -120,28 +167,40 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.rateOfChangeOfTorque.changeFrame(referenceFrame);
    }
 
-   public void setPositionObjective(FramePoint3D desiredPosition)
+   public void setPositionObjective(FramePoint3D desiredPosition, FrameVector3D positionWeight)
    {
       this.position.setIncludingFrame(desiredPosition);
       this.position.changeFrame(referenceFrame);
+
+      this.positionWeight.setIncludingFrame(positionWeight);
+      this.positionWeight.changeFrame(referenceFrame);
    }
 
-   public void setOrientationObjective(FrameQuaternion desiredOrienation)
+   public void setOrientationObjective(FrameQuaternion desiredOrienation, FrameVector3D orientationWeight)
    {
       this.orientation.setIncludingFrame(desiredOrienation);
       this.orientation.changeFrame(referenceFrame);
+
+      this.orientationWeight.setIncludingFrame(orientationWeight);
+      this.orientationWeight.changeFrame(referenceFrame);
    }
 
-   public void setLinearVeclocityObjective(FrameVector3D desiredLinearVelocity)
+   public void setLinearVeclocityObjective(FrameVector3D desiredLinearVelocity, FrameVector3D linearVelocityWeight)
    {
       this.linearVelocity.setIncludingFrame(desiredLinearVelocity);
       this.linearVelocity.changeFrame(referenceFrame);
+
+      this.linearVelocityWeight.setIncludingFrame(linearVelocityWeight);
+      this.linearVelocityWeight.changeFrame(referenceFrame);
    }
 
-   public void setAngularVelocity(FrameVector3D desiredAngularVelocity)
+   public void setAngularVelocity(FrameVector3D desiredAngularVelocity, FrameVector3D angularVelocityWeight)
    {
       this.angularVelocity.setIncludingFrame(desiredAngularVelocity);
       this.angularVelocity.changeFrame(referenceFrame);
+
+      this.angularVelocityWeight.setIncludingFrame(angularVelocityWeight);
+      this.angularVelocityWeight.changeFrame(referenceFrame);
    }
 
    public double getTime()
@@ -180,5 +239,32 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       torqueWeight.changeFrame(desiredFrame);
 
       referenceFrame = desiredFrame;
+   }
+
+   public void set(CentroidalMotionNode other)
+   {
+      this.referenceFrame = other.referenceFrame;
+      this.time = other.time;
+      
+      this.position.setIncludingFrame(other.position);
+      this.linearVelocity.setIncludingFrame(other.linearVelocity);
+      this.force.setIncludingFrame(other.force);
+      this.rateOfChangeOfForce.setIncludingFrame(other.rateOfChangeOfForce);
+
+      this.orientation.setIncludingFrame(other.orientation);
+      this.angularVelocity.setIncludingFrame(other.angularVelocity);
+      this.torque.setIncludingFrame(other.torque);
+      this.rateOfChangeOfTorque.setIncludingFrame(other.rateOfChangeOfTorque);
+
+      this.forceConstraintType.set(other.forceConstraintType);
+      this.torqueConstraintType.set(other.torqueConstraintType);
+
+      this.positionWeight.setIncludingFrame(other.positionWeight);
+      this.linearVelocityWeight.setIncludingFrame(other.linearVelocityWeight);
+      this.forceWeight.setIncludingFrame(other.forceWeight);
+
+      this.orientationWeight.setIncludingFrame(other.orientationWeight);
+      this.angularVelocityWeight.setIncludingFrame(other.angularVelocityWeight);
+      this.torqueWeight.setIncludingFrame(other.torqueWeight);
    }
 }

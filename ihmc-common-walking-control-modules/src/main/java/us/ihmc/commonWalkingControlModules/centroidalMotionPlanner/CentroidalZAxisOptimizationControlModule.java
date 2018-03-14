@@ -17,22 +17,15 @@ public class CentroidalZAxisOptimizationControlModule
 
    // Planner parameters
    private final double mass;
-   private final double Izz;
-   private final double deltaTMin;
-
-   // Runtime variables for optimization
-   private int numberOfNodes;
 
    // Variables to store results for runtime
    public Trajectory heightTrajectory;
    public Trajectory linearVelocityProfile;
    public Trajectory forceProfile;
 
-   public CentroidalZAxisOptimizationControlModule(double robotMass, double Izz, double deltaTMin)
+   public CentroidalZAxisOptimizationControlModule(double robotMass)
    {
       this.mass = robotMass;
-      this.Izz = Izz;
-      this.deltaTMin = deltaTMin;
 
       intializeTrajectoriesForStoringOptimizationResults();
       reset();
