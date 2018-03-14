@@ -502,6 +502,7 @@ public class SwingState extends AbstractFootControlState
          footstepWasAdjusted = true;
       }
 
+
       if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryOptimizer.doOptimizationUpdate()) // haven't finished original planning
          fillAndInitializeTrajectories(false);
       else if (replanTrajectory.getBooleanValue()) // need to update the beginning and end blending
@@ -673,6 +674,7 @@ public class SwingState extends AbstractFootControlState
       touchdownTrajectory.setLinearTrajectory(swingDuration, finalPosition, finalLinearVelocity, yoTouchdownAcceleration);
       touchdownTrajectory.setOrientation(finalOrientation);
 
+      blendedSwingTrajectory.initializeTrajectory();
       fillAndInitializeBlendedTrajectories();
    }
 
