@@ -191,10 +191,9 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       ArrayList<CameraSensorDescription> cameraSensorDescriptions = jointDescription.getCameraSensors();
       for (CameraSensorDescription cameraSensorDescription : cameraSensorDescriptions)
       {
-         CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(), this);
+         CameraMount cameraMount = new CameraMount(cameraSensorDescription.getName(), cameraSensorDescription.getTransformToJoint(), cameraSensorDescription.getFieldOfView(), cameraSensorDescription.getClipNear(), cameraSensorDescription.getClipFar(), this);
          cameraMount.setImageWidth(cameraSensorDescription.getImageWidth());
          cameraMount.setImageHeight(cameraSensorDescription.getImageHeight());
-         cameraMount.setFieldOfView(cameraSensorDescription.getFieldOfView());
 
          joint.addCameraMount(cameraMount);
 

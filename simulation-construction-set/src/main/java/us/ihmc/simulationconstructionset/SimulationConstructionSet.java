@@ -32,6 +32,7 @@ import javax.swing.JTextField;
 
 import com.jme3.renderer.Camera;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Shape3D;
@@ -95,6 +96,7 @@ import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFra
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.image.DepthImageCallback;
 import us.ihmc.tools.image.ImageCallback;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferCommandsExecutor;
@@ -4526,6 +4528,50 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (myGUI != null)
       {
          myGUI.startStreamingVideoData(cameraConfiguration, width, height, imageCallback, timestampProvider, framesPerSecond);
+      }
+   }
+   
+   /**
+    * Start streaming depth data (X,Y,Z coordinates) and images to DepthImageCallback. 
+    * 
+    * @param cameraConfiguration Camera configuration
+    * @param width Width of the sensor in pixels
+    * @param height Height of the sensor in pixels
+    * @param nearClip Minimum distance for 3D points, in meters. Set to 0 to disable near clipping. Note: the 3D renderer might clip internally as well
+    * @param farClip Maximum distance for 3D points, in meters. Set to Double.POSITIVE_INFINITY to disable far clipping. Note: the 3D renderer might clip internally as well
+    * @param imageCallback Callback for depth and image data
+    * @param timestampProvider Provider for the current timestamp to mark the image with
+    * @param framesPerSecond Number of frames per second to try to capture. This is in real-world seconds, not simulation seconds(!). 
+    */
+   public void startStreamingDepthData(CameraConfiguration cameraConfiguration, int width, int height, double nearClip, double farClip, DepthImageCallback imageCallback,
+                                       TimestampProvider timestampProvider, int framesPerSecond)
+
+   {
+      if(myGUI != null)
+      {
+         myGUI.startStreamingDepthData(cameraConfiguration, width, height, nearClip, farClip, imageCallback, timestampProvider, framesPerSecond);
+      }
+   }
+   
+   /**
+    * Start streaming depth data (X,Y,Z coordinates) and images to DepthImageCallback. 
+    * 
+    * @param cameraConfiguration Camera configuration
+    * @param width Width of the sensor in pixels
+    * @param height Height of the sensor in pixels
+    * @param nearClip Minimum distance for 3D points, in meters. Set to 0 to disable near clipping. Note: the 3D renderer might clip internally as well
+    * @param farClip Maximum distance for 3D points, in meters. Set to Double.POSITIVE_INFINITY to disable far clipping. Note: the 3D renderer might clip internally as well
+    * @param imageCallback Callback for depth and image data
+    * @param framesPerSecond Number of frames per second to try to capture. This is in real-world seconds, not simulation seconds(!). 
+    */
+   public void startStreamingDepthData(CameraConfiguration cameraConfiguration, int width, int height, double nearClip, double farClip, DepthImageCallback imageCallback,
+                                       int framesPerSecond)
+   
+   {
+      if(myGUI != null)
+      {
+         TimestampProvider timestampProvider = () -> Conversions.secondsToNanoseconds(getTime());
+         myGUI.startStreamingDepthData(cameraConfiguration, width, height, nearClip, farClip, imageCallback, timestampProvider, framesPerSecond);
       }
    }
 
