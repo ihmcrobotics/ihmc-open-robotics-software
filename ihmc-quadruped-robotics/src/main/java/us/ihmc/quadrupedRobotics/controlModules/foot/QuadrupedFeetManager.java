@@ -1,5 +1,9 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
@@ -13,17 +17,16 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbo
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
-import us.ihmc.quadrupedRobotics.planning.*;
+import us.ihmc.quadrupedRobotics.planning.ContactState;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-
 public class QuadrupedFeetManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -75,7 +78,7 @@ public class QuadrupedFeetManager
       return supportPolygon;
    }
 
-   public void attachStateChangedListener(FiniteStateMachineStateChangedListener stateChangedListener)
+   public void attachStateChangedListener(StateChangedListener<QuadrupedFootStates> stateChangedListener)
    {
       for (RobotQuadrant quadrant : RobotQuadrant.values)
          footControlModules.get(quadrant).attachStateChangedListener(stateChangedListener);

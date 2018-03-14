@@ -70,7 +70,7 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
    }
 
    @Override
-   public QuadrupedFootControlModule.FootEvent process()
+   public void doAction(double timeInState)
    {
       solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
       solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
@@ -89,7 +89,11 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
       solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, soleLinearVelocityEstimate);
 
       super.doControl();
+   }
 
+   @Override
+   public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
+   {
       return null;
    }
 
