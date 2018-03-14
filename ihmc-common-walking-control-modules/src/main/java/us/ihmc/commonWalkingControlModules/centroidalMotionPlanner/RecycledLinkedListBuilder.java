@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
 import java.lang.reflect.Array;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 
 /**
@@ -45,22 +44,22 @@ public class RecycledLinkedListBuilder<T>
    private RecycledLinkedListEntry<T>[] freeEntries;
 
    private static final int DEFAULT_INITIAL_CAPACITY = 1;
-   
+
    public RecycledLinkedListBuilder(GenericTypeBuilder<T> builder)
    {
       this(DEFAULT_INITIAL_CAPACITY, builder);
    }
-   
+
    public RecycledLinkedListBuilder(Class<T> clazz)
    {
       this(DEFAULT_INITIAL_CAPACITY, clazz);
    }
-   
+
    public RecycledLinkedListBuilder(int initialCapacity, Class<T> clazz)
    {
       this(initialCapacity, GenericTypeBuilder.createBuilderWithEmptyConstructor(clazz));
    }
-   
+
    public RecycledLinkedListBuilder(int initialCapacity, GenericTypeBuilder<T> builder)
    {
       firstElement = null;
@@ -93,7 +92,7 @@ public class RecycledLinkedListBuilder<T>
 
    public RecycledLinkedListEntry<T> getOrCreateLastEntry()
    {
-      if(lastElement != null)
+      if (lastElement != null)
          return lastElement;
       else
          return getOrCreateFirstEntry();
@@ -111,7 +110,7 @@ public class RecycledLinkedListBuilder<T>
       newEntry.next = entry.next;
 
       entry.next = newEntry;
-      if(newEntry.next != null)
+      if (newEntry.next != null)
          newEntry.next.previous = newEntry;
       else
          lastElement = newEntry;
@@ -126,7 +125,7 @@ public class RecycledLinkedListBuilder<T>
       newEntry.next = entry;
 
       entry.previous = newEntry;
-      if(newEntry.previous != null)
+      if (newEntry.previous != null)
          newEntry.previous.next = newEntry;
       else
          firstElement = newEntry;
@@ -136,18 +135,22 @@ public class RecycledLinkedListBuilder<T>
 
    public void remove(RecycledLinkedListEntry<T> entryToRemove)
    {
-      if(entryToRemove != lastElement)
+      if (entryToRemove != lastElement)
          entryToRemove.next.previous = entryToRemove.previous;
       else
          lastElement = entryToRemove.previous;
-      entryToRemove.previous.next = entryToRemove.next;
-      
+
+      if (entryToRemove != firstElement)
+         entryToRemove.previous.next = entryToRemove.next;
+      else
+         firstElement = entryToRemove.next;
+
       entryToRemove.next = null;
       entryToRemove.previous = null;
       size--;
       storeFreeEntry(entryToRemove);
    }
-   
+
    public int getSize()
    {
       return size;
@@ -161,6 +164,7 @@ public class RecycledLinkedListBuilder<T>
          // Store references to the existing free entries
          for (int i = 0; i < freeEntrySize; i++)
             newFreeEnteriesArray[i] = freeEntries[i];
+         freeEntries = newFreeEnteriesArray;
       }
       freeEntries[freeEntrySize++] = entryToStore;
    }
@@ -173,7 +177,7 @@ public class RecycledLinkedListBuilder<T>
       freeEntries[freeEntrySize] = null;
       return freeEntry;
    }
-   
+
    private void populateFreeEntries()
    {
       for (int i = 0; i < freeEntries.length; i++)

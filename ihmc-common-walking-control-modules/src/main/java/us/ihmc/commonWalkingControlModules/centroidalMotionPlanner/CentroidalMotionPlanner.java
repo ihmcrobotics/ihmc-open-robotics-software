@@ -8,8 +8,6 @@ public class CentroidalMotionPlanner
    private final double Izz;
    private final double deltaTMin;
 
-   //RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
-
    public CentroidalMotionPlanner(double mass, double nominalIxx, double nominalIyy, double nominalIzz, double deltaTMin)
    {
       this.mass = mass;
