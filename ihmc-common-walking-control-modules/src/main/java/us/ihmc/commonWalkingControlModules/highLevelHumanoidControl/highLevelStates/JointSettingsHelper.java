@@ -38,10 +38,23 @@ public class JointSettingsHelper
 
    private final JointLoadStatusProvider jointLoadStatusProvider;
 
-   public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJoint[] joints, JointLoadStatusProvider jointLoadStatusProvider,
-                              HighLevelControllerName state, YoVariableRegistry parentRegistry)
+
+   public JointSettingsHelper(HighLevelControllerParameters parameters, OneDoFJoint[] joints, HighLevelControllerState jointLoadStatusProvider,
+                              HighLevelControllerName stateEnum, YoVariableRegistry parentRegistry)
    {
-      String stateName = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, state.toString());
+      this(JointSettingConfiguration.extract(parameters, stateEnum), joints, jointLoadStatusProvider,
+           CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, stateEnum.toString()), parentRegistry);
+   }
+
+   public JointSettingsHelper(JointSettingConfiguration configuration, List<OneDoFJoint> joints, JointLoadStatusProvider jointLoadStatusProvider,
+                              String stateName, YoVariableRegistry parentRegistry)
+   {
+      this(configuration, joints.toArray(new OneDoFJoint[joints.size()]), jointLoadStatusProvider, stateName, parentRegistry);
+   }
+
+   public JointSettingsHelper(JointSettingConfiguration configuration, OneDoFJoint[] joints, JointLoadStatusProvider jointLoadStatusProvider, String stateName,
+                              YoVariableRegistry parentRegistry)
+   {
       registry = new YoVariableRegistry(stateName + "JointSettings");
       parentRegistry.addChild(registry);
 
@@ -52,17 +65,17 @@ public class JointSettingsHelper
       // TODO: this is not state dependent
       // For now we can not load different parameters from a parameter class for different states.
       Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMapNoLoad = new HashMap<>();
-      ParameterTools.extractAccelerationIntegrationParameterMap("NoLoad", parameters.getJointAccelerationIntegrationParameters(),
+      ParameterTools.extractAccelerationIntegrationParameterMap("NoLoad", configuration.getJointAccelerationIntegrationParameters(),
                                                                 parameterJointNameMapNoLoad, registry);
       Map<String, JointAccelerationIntegrationParametersReadOnly> parameterJointNameMapLoaded = new HashMap<>();
-      ParameterTools.extractAccelerationIntegrationParameterMap("Loaded", parameters.getJointAccelerationIntegrationParametersUnderLoad(),
+      ParameterTools.extractAccelerationIntegrationParameterMap("Loaded", configuration.getJointAccelerationIntegrationParametersUnderLoad(),
                                                                 parameterJointNameMapLoaded, registry);
 
       // TODO: these use the same default values
       Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMapNoLoad = new HashMap<>();
-      ParameterTools.extractJointBehaviorMap("NoLoad", parameters.getDesiredJointBehaviors(state), jointBehaviorMapNoLoad, registry);
+      ParameterTools.extractJointBehaviorMap("NoLoad", configuration.getDesiredJointBehaviors(), jointBehaviorMapNoLoad, registry);
       Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMapLoaded = new HashMap<>();
-      ParameterTools.extractJointBehaviorMap("Loaded", parameters.getDesiredJointBehaviorsUnderLoad(state), jointBehaviorMapLoaded, registry);
+      ParameterTools.extractJointBehaviorMap("Loaded", configuration.getDesiredJointBehaviorsUnderLoad(), jointBehaviorMapLoaded, registry);
 
       jointNames = new String[joints.length];
       jointsLoaded = new YoBoolean[joints.length];
@@ -102,13 +115,13 @@ public class JointSettingsHelper
 
       if (!jointsWithoutParameters.isEmpty())
       {
-         PrintTools.warn("In State " + state.toString() + "\n"
+         PrintTools.warn("In State " + stateName + "\n"
                + "Got joints without acceleration integration parameters.\n"
                + "Will use default values for: " + jointsWithoutParameters);
       }
       if (!jointsWithoutBehaviors.isEmpty())
       {
-         throw new RuntimeException("In State " + state.toString() + "\n"
+         throw new RuntimeException("In State " + stateName + "\n"
                + "Must define joint behaviors for: " + jointsWithoutBehaviors);
       }
    }
