@@ -12,7 +12,12 @@ import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.force.states.*;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedDoNothingController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFallController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedJointInitializationController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController;
+import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedSteppingState;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
@@ -20,18 +25,17 @@ import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachine;
 import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineBuilder;
 import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineState;
-import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal finite state machine.
@@ -82,8 +86,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       // Initialize output processor
       StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment, registry);
-      FiniteStateMachineStateChangedListener stateChangedListener = stateChangeSmootherComponent.createFiniteStateMachineStateChangedListener();
-      controlManagerFactory.getOrCreateFeetManager().attachStateChangedListener(stateChangedListener);
+      controlManagerFactory.getOrCreateFeetManager().attachStateChangedListener(stateChangeSmootherComponent.createFiniteStateMachineStateChangedListener());
       OutputProcessorBuilder outputProcessorBuilder = new OutputProcessorBuilder(runtimeEnvironment.getFullRobotModel());
       outputProcessorBuilder.addComponent(stateChangeSmootherComponent);
       outputProcessor = outputProcessorBuilder.build();

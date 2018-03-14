@@ -82,7 +82,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
    }
 
    @Override
-   public QuadrupedFootControlModule.FootEvent process()
+   public void doAction(double timeInState)
    {
       double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
 
@@ -99,8 +99,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
          virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
 
          super.doControl();
-
-         return QuadrupedFootControlModule.FootEvent.TIMEOUT;
       }
       else
       {
@@ -116,9 +114,14 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
 
          if (waypointCallback != null)
             waypointCallback.isDoneMoving(false);
-
-         return null;
       }
+   }
+
+   @Override
+   public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
+   {
+      double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
+      return currentTrajectoryTime > quadrupedSoleWaypointList.getFinalTime() ? QuadrupedFootControlModule.FootEvent.TIMEOUT : null;
    }
 
    @Override
