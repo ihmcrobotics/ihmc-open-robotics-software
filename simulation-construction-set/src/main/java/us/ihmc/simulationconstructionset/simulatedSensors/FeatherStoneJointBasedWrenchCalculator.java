@@ -6,19 +6,19 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.JointWrenchSensor;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorInterface
 {
    private final String forceSensorName;
-   private final OneDegreeOfFreedomJoint forceTorqueSensorJoint;
+   private final Joint forceTorqueSensorJoint;
    private boolean doWrenchCorruption = false;
 
    private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F corruptionMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
 
-   public FeatherStoneJointBasedWrenchCalculator(String forceSensorName, OneDegreeOfFreedomJoint forceTorqueSensorJoint)
+   public FeatherStoneJointBasedWrenchCalculator(String forceSensorName, Joint forceTorqueSensorJoint)
    {
       this.forceSensorName = forceSensorName;
       this.forceTorqueSensorJoint = forceTorqueSensorJoint;
@@ -61,7 +61,7 @@ public class FeatherStoneJointBasedWrenchCalculator implements WrenchCalculatorI
    }
 
    @Override
-   public OneDegreeOfFreedomJoint getJoint()
+   public Joint getJoint()
    {
       return forceTorqueSensorJoint;
    }
