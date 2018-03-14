@@ -104,7 +104,7 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
       viewPort.setClearFlags(true, true, true);
       viewPort.setBackgroundColor(JMEDataTypeUtils.colorToColorRGBA(backgroundColor));
       viewPort.addProcessor(this);
-      screenShotHelper = new JMEFastCaptureDevice(viewPort);
+      screenShotHelper = new JMEFastCaptureDevice(viewPort, jmeRenderer);
       stateManager.attach(screenShotHelper);
 
       if (addExtraVisuals)
