@@ -6,12 +6,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionControllerSetpoints;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -33,15 +30,13 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
 
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
-   public QuadrupedHoldPositionState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, QuadrupedSolePositionController solePositionController,
-                                     YoVariableRegistry registry)
+   public QuadrupedHoldPositionState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,
+                                     QuadrupedSolePositionController solePositionController, YoVariableRegistry registry)
    {
       super("holdPosition", robotQuadrant, controllerToolbox, solePositionController, registry);
       this.robotQuadrant = robotQuadrant;
       this.controllerToolbox = controllerToolbox;
 
-      FullQuadrupedRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      RigidBody footBody = fullRobotModel.getFoot(robotQuadrant);
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
       parameters = controllerToolbox.getFootControlModuleParameters();
@@ -78,6 +73,8 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
       solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
       solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
       solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, soleLinearVelocityEstimate);
+
+      virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
 
       double currentTime = timestamp.getDoubleValue();
       if (useSoleForceFeedForwardParameter.getValue())

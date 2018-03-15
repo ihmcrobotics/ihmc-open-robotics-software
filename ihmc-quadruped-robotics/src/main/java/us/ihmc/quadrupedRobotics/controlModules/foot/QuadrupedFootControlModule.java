@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -51,10 +52,9 @@ public class QuadrupedFootControlModule
       // position controller
       solePositionController = new QuadrupedSolePositionController(robotQuadrant, controllerToolbox, registry);
 
-      ReferenceFrame soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
       YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotQuadrant);
       // state machine
-      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, soleFrame, planeContactState, stepCommandIsValid,
+      QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, planeContactState, stepCommandIsValid,
                                                                      controllerToolbox.getRuntimeEnvironment().getRobotTimestamp(), currentStepCommand);
       QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, solePositionController, stepCommandIsValid, currentStepCommand, graphicsListRegistry, registry);
       moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, controllerToolbox, solePositionController, registry);
@@ -198,6 +198,11 @@ public class QuadrupedFootControlModule
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return footStateMachine.getCurrentState().getInverseDynamicsCommand();
+   }
+
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return footStateMachine.getCurrentState().getVirtualModelControlCommand();
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()

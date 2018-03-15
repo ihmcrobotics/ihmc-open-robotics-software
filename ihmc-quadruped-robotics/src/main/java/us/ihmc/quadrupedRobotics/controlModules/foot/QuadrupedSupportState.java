@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
@@ -10,14 +11,11 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.lang.ref.Reference;
-
 public class QuadrupedSupportState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final RobotQuadrant robotQuadrant;
-   private final ReferenceFrame soleFrame;
    private final YoPlaneContactState contactState;
 
    private final YoBoolean stepCommandIsValid;
@@ -26,12 +24,10 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
    private final FrameVector3D footNormalContactVector = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
 
-
-   public QuadrupedSupportState(RobotQuadrant robotQuadrant, ReferenceFrame soleFrame, YoPlaneContactState contactState,
-                                YoBoolean stepCommandIsValid, YoDouble timestamp, YoQuadrupedTimedStep stepCommand)
+   public QuadrupedSupportState(RobotQuadrant robotQuadrant, YoPlaneContactState contactState, YoBoolean stepCommandIsValid, YoDouble timestamp,
+                                YoQuadrupedTimedStep stepCommand)
    {
       this.robotQuadrant = robotQuadrant;
-      this.soleFrame = soleFrame;
       this.contactState = contactState;
       this.stepCommandIsValid = stepCommandIsValid;
       this.timestamp = timestamp;
@@ -69,6 +65,12 @@ public class QuadrupedSupportState extends QuadrupedFootState
 
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return null;
+   }
+
+   @Override
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
       return null;
    }

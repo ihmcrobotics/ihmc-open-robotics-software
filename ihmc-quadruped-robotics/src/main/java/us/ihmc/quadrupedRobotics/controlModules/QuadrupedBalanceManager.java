@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.Axis;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
@@ -261,6 +262,11 @@ public class QuadrupedBalanceManager
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return momentumRateCommand;
+   }
+
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
       return momentumRateCommand;
    }

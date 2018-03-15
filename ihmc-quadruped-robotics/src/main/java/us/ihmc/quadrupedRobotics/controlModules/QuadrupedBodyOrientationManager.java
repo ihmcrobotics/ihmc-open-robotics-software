@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,15 +13,13 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbo
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedBodyOrientationController;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
-import us.ihmc.robotics.referenceFrames.OrientationFrame;
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedBodyOrientationManager
@@ -34,7 +32,6 @@ public class QuadrupedBodyOrientationManager
    private final YoPID3DGains gains;
 
    private final ParameterizedPID3DGains bodyOrientationGainsParameter;
-   private final RigidBody body;
 
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -48,8 +45,6 @@ public class QuadrupedBodyOrientationManager
    private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
 
    private final MomentumRateCommand angularMomentumCommand = new MomentumRateCommand();
-   private final Wrench wrenchCommand;
-   private final VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
 
    private final YoFrameVector bodyAngularWeight = new YoFrameVector("bodyAngularWeight", worldFrame, registry);
 
@@ -75,9 +70,6 @@ public class QuadrupedBodyOrientationManager
       FullQuadrupedRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       orientationFeedbackControlCommand.set(fullRobotModel.getElevator(), fullRobotModel.getBody());
       bodyAngularWeight.set(5.0, 5.0, 5.0);
-
-      body = fullRobotModel.getBody();
-      wrenchCommand = new Wrench(body.getBodyFixedFrame(), worldFrame);
 
       parentRegistry.addChild(registry);
    }
@@ -116,10 +108,6 @@ public class QuadrupedBodyOrientationManager
       angularMomentumRateToPack.changeFrame(worldFrame);
       angularMomentumCommand.setAngularMomentumRate(angularMomentumRateToPack);
       angularMomentumCommand.setAngularWeights(bodyAngularWeight);
-
-      wrenchCommand.setAngularPart(angularMomentumRateToPack);
-      wrenchCommand.negate();
-      virtualWrenchCommand.set(body, wrenchCommand);
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
@@ -134,6 +122,11 @@ public class QuadrupedBodyOrientationManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return null;
+      return angularMomentumCommand;
+   }
+
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return angularMomentumCommand;
    }
 }

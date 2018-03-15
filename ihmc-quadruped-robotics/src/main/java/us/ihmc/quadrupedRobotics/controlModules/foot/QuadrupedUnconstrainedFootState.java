@@ -2,15 +2,14 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionControllerSetpoints;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -27,10 +26,7 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
 
    protected final FrameVector3D desiredLinearAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-   private final RigidBody footBody;
-   private final Wrench wrenchCommand;
-
-   private final VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
+   protected final VirtualForceCommand virtualForceCommand = new VirtualForceCommand();
    //private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
 
 
@@ -42,10 +38,6 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
       this.solePositionController = solePositionController;
       solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
-      FullQuadrupedRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      footBody = fullRobotModel.getFoot(robotQuadrant);
-      ReferenceFrame soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
-
       /*
       ReferenceFrame gainsFrame = controllerToolbox.getReferenceFrames().getBodyZUpFrame();
       FramePose3D controlFramePose = new FramePose3D(soleFrame);
@@ -56,7 +48,6 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
       */
 
-      wrenchCommand = new Wrench(footBody.getBodyFixedFrame(), worldFrame);
 
       /*
       currentLinearWeight = new YoFrameVector(namePrefix + "CurrentLinearWeight", worldFrame, registry);
@@ -71,15 +62,19 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
       spatialFeedbackControlCommand.setLinearWeightsForSolver(currentLinearWeight);
       spatialFeedbackControlCommand.setPositionGains(solePositionController.getGains());
       */
-
-      wrenchCommand.setLinearPart(soleForceCommand);
-      virtualWrenchCommand.set(footBody, wrenchCommand);
    }
 
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return virtualWrenchCommand;
+      return null;
+   }
+
+
+   @Override
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return virtualForceCommand;
    }
 
    @Override

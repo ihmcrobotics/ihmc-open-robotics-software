@@ -290,7 +290,7 @@ public class QuadrupedSteppingState implements QuadrupedController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotQuadrant));
-         controllerCoreCommand.addVirtualModelControlCommand(feetManager.getInverseDynamicsCommand(robotQuadrant));
+         controllerCoreCommand.addVirtualModelControlCommand(feetManager.getVirtualModelControlCommand(robotQuadrant));
 
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotQuadrant);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
@@ -300,11 +300,11 @@ public class QuadrupedSteppingState implements QuadrupedController
       }
 
       controllerCoreCommand.addFeedbackControlCommand(bodyOrientationManager.getFeedbackControlCommand());
-      controllerCoreCommand.addVirtualModelControlCommand(bodyOrientationManager.getInverseDynamicsCommand());
+      controllerCoreCommand.addVirtualModelControlCommand(bodyOrientationManager.getVirtualModelControlCommand());
 
       controllerCoreCommand.addVirtualModelControlCommand(controlledBodiesCommand);
 
-      controllerCoreCommand.addVirtualModelControlCommand(balanceManager.getInverseDynamicsCommand());
+      controllerCoreCommand.addVirtualModelControlCommand(balanceManager.getVirtualModelControlCommand());
    }
 
    @Override
