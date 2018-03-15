@@ -9,13 +9,20 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class CentroidalMotionPlannerTest
 {
+   private static final CentroidalMotionPlannerParameters parameters = new CentroidalMotionPlannerParameters();
+   static
+   {
+      parameters.setRobotMass(18.0);
+      parameters.setDeltaTMin(0.001);
+   }
+
    @Test
    public void testConstructor()
    {
-      CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(18.0, 0.56, 0.78, 0.12, 0.001);
+      CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters);
       assertTrue(motionPlanner != null);
    }
-   
+
    @Test
    public void testNodeEntrySubmission()
    {
@@ -29,11 +36,11 @@ public class CentroidalMotionPlannerTest
       node3.setTime(0.5);
       node3.setForceAsHardConstraint(new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.NaN, Double.NaN, 0.0));
 
-      CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(18.0, 0.56, 0.78, 0.12, 0.001);
+      CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters);
       motionPlanner.sumbitNode(node1);
       motionPlanner.sumbitNode(node2);
       motionPlanner.sumbitNode(node3);
-      
+
       RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = motionPlanner.getNodeList();
       assertTrue(nodeList.getSize() == 3);
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> node = nodeList.getFirstEntry();

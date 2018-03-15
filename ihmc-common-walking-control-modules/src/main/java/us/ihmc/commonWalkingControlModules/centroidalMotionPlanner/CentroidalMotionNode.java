@@ -39,7 +39,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    private final FrameVector3D positionWeight;
    private final FrameVector3D linearVelocityWeight;
    private final FrameVector3D forceWeight;
-   private final FrameVector3D rateChangeForceWeight;
+   private final FrameVector3D rateChangeOfForceWeight;
    private final FrameVector3D orientationWeight;
    private final FrameVector3D angularVelocityWeight;
    private final FrameVector3D torqueWeight;
@@ -70,7 +70,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       positionWeight = new FrameVector3D(referenceFrame);
       linearVelocityWeight = new FrameVector3D(referenceFrame);
       forceWeight = new FrameVector3D(referenceFrame);
-      rateChangeForceWeight = new FrameVector3D(referenceFrame);
+      rateChangeOfForceWeight = new FrameVector3D(referenceFrame);
 
       orientationWeight = new FrameVector3D(referenceFrame);
       angularVelocityWeight = new FrameVector3D(referenceFrame);
@@ -99,7 +99,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       positionWeight.setToNaN();
       linearVelocityWeight.setToNaN();
       forceWeight.setToNaN();
-      rateChangeForceWeight.setToNaN();
+      rateChangeOfForceWeight.setToNaN();
 
       orientationWeight.setToNaN();
       angularVelocityWeight.setToNaN();
@@ -158,8 +158,8 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.rateOfChangeOfForce.setIncludingFrame(dForce);
       this.rateOfChangeOfForce.changeFrame(referenceFrame);
       this.rateChangeForceConstraintType.set(constraintType);
-      this.rateChangeForceWeight.setIncludingFrame(dForceWeight);
-      this.rateChangeForceWeight.changeFrame(referenceFrame);
+      this.rateChangeOfForceWeight.setIncludingFrame(dForceWeight);
+      this.rateChangeOfForceWeight.changeFrame(referenceFrame);
    }
 
    public void setRateOfChangeOfForceAsHardConstraint(FrameVector3D dForce)
@@ -167,7 +167,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.rateOfChangeOfForce.setIncludingFrame(dForce);
       this.rateOfChangeOfForce.changeFrame(referenceFrame);
       this.rateChangeForceConstraintType.setXYZ(EffortConstraintType.EQUALITY);
-      this.rateChangeForceWeight.setToNaN();
+      this.rateChangeOfForceWeight.setToNaN();
    }
 
    public void setRateOfChangeOfForceAsObjective(FrameVector3D dForce, FrameVector3D dForceWeight)
@@ -175,8 +175,8 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.rateOfChangeOfForce.setIncludingFrame(dForce);
       this.changeReferenceFrame(referenceFrame);
       this.rateChangeForceConstraintType.setXYZ(EffortConstraintType.OBJECTIVE);
-      this.rateChangeForceWeight.setIncludingFrame(dForceWeight);
-      this.rateChangeForceWeight.changeFrame(referenceFrame);
+      this.rateChangeOfForceWeight.setIncludingFrame(dForceWeight);
+      this.rateChangeOfForceWeight.changeFrame(referenceFrame);
    }
 
    public void setTorque(FrameVector3D torque)
@@ -335,5 +335,15 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public double getRateChangeOfForceValue(Axis axis)
    {
       return rateOfChangeOfForce.getElement(axis.ordinal());
+   }
+
+   public double getForceWeight(Axis axis)
+   {
+      return forceWeight.getElement(axis.ordinal());
+   }
+   
+   public double getRateChangeOfForceWeight(Axis axis)
+   {
+      return rateChangeOfForceWeight.getElement(axis.ordinal());
    }
 }

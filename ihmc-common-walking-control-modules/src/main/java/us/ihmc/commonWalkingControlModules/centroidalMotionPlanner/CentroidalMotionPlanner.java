@@ -19,14 +19,14 @@ public class CentroidalMotionPlanner
    private final OptimizationControlModuleHelper helper;
    private final CentroidalZAxisOptimizationControlModule heightControlModule;
 
-   public CentroidalMotionPlanner(double robotMass, double nominalIxx, double nominalIyy, double nominalIzz, double deltaTMin)
+   public CentroidalMotionPlanner(CentroidalMotionPlannerParameters parameters)
    {
-      this.robotMass = robotMass;
-      this.Ixx = nominalIxx;
-      this.Iyy = nominalIyy;
-      this.Izz = nominalIzz;
-      this.deltaTMin = deltaTMin;
-      this.helper = new OptimizationControlModuleHelper(0.0, 0.0, -9.81, robotMass);
+      this.robotMass = parameters.getRobotMass();
+      this.Ixx = parameters.getNominalIxx();
+      this.Iyy = parameters.getNominalIyy();
+      this.Izz = parameters.getNominalIzz();
+      this.deltaTMin = parameters.getDeltaTMin();
+      this.helper = new OptimizationControlModuleHelper(parameters);
       heightControlModule = new CentroidalZAxisOptimizationControlModule(robotMass, helper);
    }
 
