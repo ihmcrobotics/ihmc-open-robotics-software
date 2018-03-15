@@ -48,7 +48,7 @@ public class StateMachineExampleOneTest
       factory.addTimeBasedTransition(ExampleStateName.StateTwo, ExampleStateName.Stopped, 1.0);
 
       StateMachine<ExampleStateName, State> stateMachine = factory.build(ExampleStateName.Starting);
-      stateMachine.reset();
+      stateMachine.resetToInitialState();
 
       // Some simple tests. Just tick through and make sure we are in the correct state at the correct time:
       do
@@ -137,7 +137,7 @@ public class StateMachineExampleOneTest
       assertEquals(stateTwo, stateMachine.getState(ExampleStateName.StateTwo));
       assertEquals(stoppedState, stateMachine.getState(ExampleStateName.Stopped));
 
-      stateMachine.reset();
+      stateMachine.resetToInitialState();
       assertEquals(ExampleStateName.Starting, stateMachine.getCurrentStateKey());
 
       assertEquals(startingState, stateMachine.getState(ExampleStateName.Starting));

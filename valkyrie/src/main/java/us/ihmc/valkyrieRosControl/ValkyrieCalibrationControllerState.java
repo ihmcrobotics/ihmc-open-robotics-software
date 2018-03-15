@@ -109,7 +109,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    @Override
    public void onEntry()
    {
-      stateMachine.reset();
+      stateMachine.resetToInitialState();
    }
 
    @Override

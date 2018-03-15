@@ -748,7 +748,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
-      stateMachine.reset();
+      stateMachine.resetToInitialState();
    }
 
    @Override

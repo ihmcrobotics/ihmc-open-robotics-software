@@ -453,7 +453,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       // Need to reset it so the planner will be initialized even when restarting the walking controller.
       hasICPPlannerBeenInitializedAtStart.set(false);
-      stateMachine.reset();
+      stateMachine.resetToInitialState();
 
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }

@@ -245,7 +245,7 @@ public class FootControlModule
 
    public void initialize()
    {
-      stateMachine.reset();
+      stateMachine.resetToInitialState();
    }
 
    public void doControl()

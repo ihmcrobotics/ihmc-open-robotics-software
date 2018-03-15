@@ -2177,7 +2177,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 //      setFeedForwardToActuals();
       updateEstimates();
       updateFeedForwardModelAndFrames();
-      walkingStateMachine.reset();
+      walkingStateMachine.resetToInitialState();
    }
 
    @Override
