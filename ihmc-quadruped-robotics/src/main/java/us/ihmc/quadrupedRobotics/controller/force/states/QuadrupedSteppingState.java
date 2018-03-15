@@ -72,7 +72,6 @@ public class QuadrupedSteppingState implements QuadrupedController
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
-   private final ControlledBodiesCommand controlledBodiesCommand;
    private final WholeBodyControllerCore controllerCore;
 
    public QuadrupedSteppingState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
@@ -132,8 +131,6 @@ public class QuadrupedSteppingState implements QuadrupedController
       }
 
       this.quadrupedSteppingStatePacket = new QuadrupedSteppingStatePacket();
-
-      controlledBodiesCommand = registerControlledBodies();
 
       this.stateMachine = buildStateMachine(runtimeEnvironment);
       this.stepTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "stepTrigger", registry, QuadrupedSteppingRequestedEvent.class);
@@ -221,19 +218,6 @@ public class QuadrupedSteppingState implements QuadrupedController
       return builder.build(QuadrupedSteppingStateEnum.STAND);
    }
 
-   public ControlledBodiesCommand registerControlledBodies()
-   {
-      FullQuadrupedRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      ControlledBodiesCommand command = new ControlledBodiesCommand();
-      command.addBodyToControl(fullRobotModel.getFoot(RobotQuadrant.FRONT_RIGHT));
-      command.addBodyToControl(fullRobotModel.getFoot(RobotQuadrant.FRONT_LEFT));
-      command.addBodyToControl(fullRobotModel.getFoot(RobotQuadrant.HIND_RIGHT));
-      command.addBodyToControl(fullRobotModel.getFoot(RobotQuadrant.HIND_LEFT));
-      command.addBodyToControl(fullRobotModel.getBody());
-
-      return command;
-   }
-
    @Override
    public void onEntry()
    {
@@ -301,8 +285,6 @@ public class QuadrupedSteppingState implements QuadrupedController
 
       controllerCoreCommand.addFeedbackControlCommand(bodyOrientationManager.getFeedbackControlCommand());
       controllerCoreCommand.addVirtualModelControlCommand(bodyOrientationManager.getVirtualModelControlCommand());
-
-      controllerCoreCommand.addVirtualModelControlCommand(controlledBodiesCommand);
 
       controllerCoreCommand.addVirtualModelControlCommand(balanceManager.getVirtualModelControlCommand());
    }
