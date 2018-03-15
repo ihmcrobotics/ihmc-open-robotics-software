@@ -169,8 +169,8 @@ public class StateMachine<K extends Enum<K>, S extends State>
    /**
     * Calls {@link State#doAction(double)} on the active state.
     * <p>
-    * Always prefer using this method rather than calling independently {@link #doControl()} and
-    * {@link #doTransitions()}.
+    * Always prefer using {@link #doControlAndTransition()} rather than calling independently
+    * {@link #doControl()} and {@link #doTransitions()}.
     * </p>
     * <p>
     * On the very first call, the method ensures that {@link #reset()} has been called at least once.
@@ -192,8 +192,8 @@ public class StateMachine<K extends Enum<K>, S extends State>
    /**
     * Runs through the {@link StateTransition}s and performs requested transitions, if any.
     * <p>
-    * Always prefer using this method rather than calling independently {@link #doControl()} and
-    * {@link #doTransitions()}.
+    * Always prefer using {@link #doControlAndTransition()} rather than calling independently
+    * {@link #doControl()} and {@link #doTransitions()}.
     * </p>
     * 
     * @return whether the active state is changing.
