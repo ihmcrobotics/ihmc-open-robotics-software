@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -21,7 +22,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -30,6 +30,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -45,8 +47,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private static final boolean USE_UNREACHABLE_FOOTSTEP_CORRECTION_ON_POSITION = true; // When false, the module will correct only the velocity and acceleration of the CoM height.
    private static final boolean USE_COLLAPSE_AVOIDANCE = false; // Try to avoid the knee from collapsing by limiting how low the CoM can be
 
-   private final boolean useSingularityAvoidanceInSwing;
-   private final boolean useSingularityAvoidanceInSupport;
+   private final BooleanParameter useSingularityAvoidanceInSwing;
+   private final BooleanParameter useSingularityAvoidanceInSupport;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame endEffectorFrame;
@@ -64,7 +66,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final YoDouble alphaUnreachableFootstep;
 
    private final YoDouble maximumLegLength;
-   private final YoDouble minimumLegLength;
+   private final DoubleParameter minimumLegLength;
 
    private final YoDouble percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance;
    private final YoDouble hipFlexionAngleThresholdToEnableSwingHipLimitAvoidance;
@@ -166,8 +168,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       maximumLegLength = new YoDouble(namePrefix + "MaxLegLength", registry);
       maximumLegLength.set(walkingControllerParameters.getMaximumLegLengthForSingularityAvoidance());
 
-      minimumLegLength = new YoDouble(namePrefix + "MinLegLength", registry);
-      minimumLegLength.set(walkingControllerParameters.getSwingTrajectoryParameters().getMinMechanicalLegLength());
+      minimumLegLength = new DoubleParameter(namePrefix + "MinLegLength", registry, walkingControllerParameters.getSwingTrajectoryParameters().getMinMechanicalLegLength());
 
       controlDT = controllerToolbox.getControlDT();
       yoTime = controllerToolbox.getYoTime();
@@ -216,8 +217,6 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       maxPercentOfLegLengthForSingularityAvoidanceInSupport.set(0.98);
       percentOfLegLengthThresholdForCollapseAvoidance.set(0.83);
       minPercentOfLegLengthForCollapseAvoidance.set(0.76);//walkingControllerParameters.getMinLegLengthBeforeCollapsingSingleSupport() / maximumLegLength.getDoubleValue());
-      minMechanicalPercentOfLegLength.set(minimumLegLength.getDoubleValue() / maximumLegLength.getDoubleValue());
-      percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.set(0.07 + minMechanicalPercentOfLegLength.getDoubleValue());
       footLoadThresholdToEnableCollapseAvoidance.set(0.62); // 0.65
       footLoadThresholdToDisableCollapseAvoidance.set(0.59); // 0.62
       timeDelayToDisableCollapseAvoidance.set(0.5);
@@ -225,8 +224,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       timeSwitchCollapseAvoidance.set(yoTime.getDoubleValue());
 
       SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
-      useSingularityAvoidanceInSwing = swingTrajectoryParameters.useSingularityAvoidanceInSwing();
-      useSingularityAvoidanceInSupport = swingTrajectoryParameters.useSingularityAvoidanceInSupport();
+      useSingularityAvoidanceInSwing = new BooleanParameter(namePrefix + "UseSingularityAvoidanceInSwing", registry, swingTrajectoryParameters.useSingularityAvoidanceInSwing());
+      useSingularityAvoidanceInSupport = new BooleanParameter(namePrefix + "UseSingularityAvoidanceInSupport", registry, swingTrajectoryParameters.useSingularityAvoidanceInSupport());
 
       double deltaAwayFromLimit = Math.toRadians(20.0);
       if (hipPitchJoint.getJointAxis().getY() > 0.0)
@@ -463,7 +462,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       if (USE_KNEE_MECHANICAL_LIMIT_AVOIDANCE_SWING)
          correctSwingFootTrajectoryForMechanicalLimitAvoidance(desiredFootPositionToCorrect, desiredFootLinearVelocityToCorrect,
                desiredFootLinearAccelerationToCorrect);
-      if (useSingularityAvoidanceInSwing)
+      if (useSingularityAvoidanceInSwing.getValue())
          correctSwingFootTrajectoryForSingularityAvoidance(desiredFootPositionToCorrect, desiredFootLinearVelocityToCorrect,
                desiredFootLinearAccelerationToCorrect);
    }
@@ -471,6 +470,9 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private void correctSwingFootTrajectoryForMechanicalLimitAvoidance(FramePoint3D desiredFootPositionToCorrect, FrameVector3D desiredFootLinearVelocityToCorrect,
          FrameVector3D desiredFootLinearAccelerationToCorrect)
    {
+      minMechanicalPercentOfLegLength.set(minimumLegLength.getValue() / maximumLegLength.getDoubleValue());
+      percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.set(0.07 + minMechanicalPercentOfLegLength.getDoubleValue());
+
       if (desiredPercentOfLegLength.getDoubleValue() > percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue())
          return;
 
@@ -490,7 +492,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       //      double desiredOrMinLegLength = - Math.max(desiredLegLength.getDoubleValue(), minimumLegLength.getDoubleValue());
       double correctedDesiredPositionZ = ((1.0 - alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue()) * desiredLegLength.getDoubleValue()
             + alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue() * currentLegLength.getDoubleValue());
-      correctedDesiredPositionZ = -Math.max(correctedDesiredPositionZ, minimumLegLength.getDoubleValue());
+      correctedDesiredPositionZ = -Math.max(correctedDesiredPositionZ, minimumLegLength.getValue());
       //      unachievedSwingTranslation.setIncludingFrame(desiredFootPosition.getReferenceFrame(), 0.0, 0.0, desiredFootPosition.getZ() - correctedDesiredPositionZ);
       //      unachievedSwingTranslation.changeFrame(worldFrame);
       //      yoUnachievedSwingTranslation.set(unachievedSwingTranslation.getZ());
@@ -673,7 +675,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
          double zCurrent, ReferenceFrame pelvisZUpFrame, ConstraintType constraintType)
    {
-      if (!useSingularityAvoidanceInSupport)
+      if (!useSingularityAvoidanceInSupport.getValue())
       {
          alphaSupportSingularityAvoidance.set(0.0);
          isSupportSingularityAvoidanceUsed.set(false);
