@@ -121,7 +121,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
    }
 
    /**
-    * Resets this state machine.
+    * Resets this state machine back to its initial state.
     * <p>
     * The active state is exited immediately, calling first {@link State#onExit()}, and enters the
     * initial state of this state machine, i.e. the state mapped to the key
@@ -131,7 +131,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * 
     * @throws RuntimeException if there is no state mapped to {@link #getInitialStateKey()}.
     */
-   public void reset()
+   public void resetToInitialState()
    {
       performTransition(initialStateKey);
    }
@@ -181,7 +181,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
    public void doControl()
    {
       if (currentStateKey.getEnumValue() == null)
-         reset();
+         resetToInitialState();
 
       S currentState = getState(currentStateKey.getEnumValue());
       assertStateNotNull(currentStateKey.getEnumValue(), currentState);

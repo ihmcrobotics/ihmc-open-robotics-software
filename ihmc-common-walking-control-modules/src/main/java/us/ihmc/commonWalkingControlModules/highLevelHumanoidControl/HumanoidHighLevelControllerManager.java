@@ -125,7 +125,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
    public void initialize()
    {
       controllerToolbox.initialize();
-      stateMachine.reset();
+      stateMachine.resetToInitialState();
    }
 
    @Override

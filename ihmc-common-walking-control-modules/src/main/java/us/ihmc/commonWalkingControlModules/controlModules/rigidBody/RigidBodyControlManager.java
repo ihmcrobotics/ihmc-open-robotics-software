@@ -172,7 +172,7 @@ public class RigidBodyControlManager
 
    public void initialize()
    {
-      stateMachine.reset();
+      stateMachine.resetToInitialState();
       goToHomeFromCurrent(INITIAL_GO_HOME_TIME);
    }
 
