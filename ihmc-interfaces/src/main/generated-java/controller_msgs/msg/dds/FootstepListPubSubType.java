@@ -29,7 +29,7 @@ public class FootstepListPubSubType implements us.ihmc.pubsub.TopicDataType<cont
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.FootstepPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -55,9 +55,9 @@ public class FootstepListPubSubType implements us.ihmc.pubsub.TopicDataType<cont
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getFootsteps().size(); ++a)
+      for (int i0 = 0; i0 < data.getFootsteps().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.FootstepPubSubType.getCdrSerializedSize(data.getFootsteps().get(a), current_alignment);
+         current_alignment += controller_msgs.msg.dds.FootstepPubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);
       }
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -72,32 +72,32 @@ public class FootstepListPubSubType implements us.ihmc.pubsub.TopicDataType<cont
    public static void write(controller_msgs.msg.dds.FootstepList data, us.ihmc.idl.CDR cdr)
    {
 
-      cdr.write_type_12(data.getUnique_id());
+      cdr.write_type_12(data.getUniqueId());
 
       if (data.getFootsteps().size() <= 100)
          cdr.write_type_e(data.getFootsteps());
       else
          throw new RuntimeException("footsteps field exceeds the maximum length");
 
-      cdr.write_type_9(data.getExecuting_timing());
+      cdr.write_type_9(data.getExecutingTiming());
 
-      cdr.write_type_6(data.getDefault_swing_duration());
+      cdr.write_type_6(data.getDefaultSwingDuration());
 
-      cdr.write_type_6(data.getFinal_transfer_duration());
+      cdr.write_type_6(data.getFinalTransferDuration());
    }
 
    public static void read(controller_msgs.msg.dds.FootstepList data, us.ihmc.idl.CDR cdr)
    {
 
-      data.setUnique_id(cdr.read_type_12());
+      data.setUniqueId(cdr.read_type_12());
 
       cdr.read_type_e(data.getFootsteps());
 
-      data.setExecuting_timing(cdr.read_type_9());
+      data.setExecutingTiming(cdr.read_type_9());
 
-      data.setDefault_swing_duration(cdr.read_type_6());
+      data.setDefaultSwingDuration(cdr.read_type_6());
 
-      data.setFinal_transfer_duration(cdr.read_type_6());
+      data.setFinalTransferDuration(cdr.read_type_6());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepList src, controller_msgs.msg.dds.FootstepList dest)
@@ -124,29 +124,29 @@ public class FootstepListPubSubType implements us.ihmc.pubsub.TopicDataType<cont
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepList data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_12("unique_id", data.getUnique_id());
+      ser.write_type_12("unique_id", data.getUniqueId());
 
       ser.write_type_e("footsteps", data.getFootsteps());
 
-      ser.write_type_9("executing_timing", data.getExecuting_timing());
+      ser.write_type_9("executing_timing", data.getExecutingTiming());
 
-      ser.write_type_6("default_swing_duration", data.getDefault_swing_duration());
+      ser.write_type_6("default_swing_duration", data.getDefaultSwingDuration());
 
-      ser.write_type_6("final_transfer_duration", data.getFinal_transfer_duration());
+      ser.write_type_6("final_transfer_duration", data.getFinalTransferDuration());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepList data)
    {
-      data.setUnique_id(ser.read_type_12("unique_id"));
+      data.setUniqueId(ser.read_type_12("unique_id"));
 
       ser.read_type_e("footsteps", data.getFootsteps());
 
-      data.setExecuting_timing(ser.read_type_9("executing_timing"));
+      data.setExecutingTiming(ser.read_type_9("executing_timing"));
 
-      data.setDefault_swing_duration(ser.read_type_6("default_swing_duration"));
+      data.setDefaultSwingDuration(ser.read_type_6("default_swing_duration"));
 
-      data.setFinal_transfer_duration(ser.read_type_6("final_transfer_duration"));
+      data.setFinalTransferDuration(ser.read_type_6("final_transfer_duration"));
    }
 
    @Override

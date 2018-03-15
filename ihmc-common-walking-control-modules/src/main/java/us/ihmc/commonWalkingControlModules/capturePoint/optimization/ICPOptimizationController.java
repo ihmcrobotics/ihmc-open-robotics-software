@@ -39,6 +39,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private static final boolean DEBUG = false;
    private static final boolean COMPUTE_COST_TO_GO = false;
 
+   private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
+
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -144,8 +146,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("icpQPSolverTimer", 0.5, registry);
    private final ExecutionTimer controllerTimer = new ExecutionTimer("icpControllerTimer", 0.5, registry);
 
-   private final boolean useFootstepRate;
-   private final boolean useFeedbackRate;
+   private final YoBoolean useFootstepRate = new YoBoolean(yoNamePrefix + "UseFootstepRate", registry);
+   private final YoBoolean useFeedbackRate = new YoBoolean(yoNamePrefix + "UseFeedbackRate", registry);
 
    private boolean localUseStepAdjustment;
 
@@ -189,8 +191,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       dynamicsObjectiveDoubleSupportWeightModifier = icpOptimizationParameters.getDynamicsObjectiveDoubleSupportWeightModifier();
 
-      useFootstepRate = icpOptimizationParameters.useFootstepRate();
-      useFeedbackRate = icpOptimizationParameters.useFeedbackRate();
+      useFootstepRate.set(icpOptimizationParameters.useFootstepRate());
+      useFeedbackRate.set(icpOptimizationParameters.useFeedbackRate());
 
       allowStepAdjustment.set(icpOptimizationParameters.allowStepAdjustment());
       useCMPFeedback.set(icpOptimizationParameters.useCMPFeedback());
@@ -432,7 +434,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       this.initialTime.set(initialTime);
 
-      if (useFootstepRate)
+      if (useFootstepRate.getBooleanValue())
       {
          upcomingFootsteps.get(0).getPosition(tempPoint3d);
 
@@ -591,7 +593,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getDoubleValue());
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getDoubleValue());
 
-      if (useFeedbackRate)
+      if (useFeedbackRate.getBooleanValue())
          solver.setFeedbackRateWeight(copFeedbackRateWeight.getDoubleValue() / controlDT);
    }
 
@@ -610,7 +612,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          ReferenceFrame soleFrame = contactableFeet.get(supportSide.getEnumValue()).getSoleFrame();
          helper.transformToWorldFrame(footstepWeights, forwardFootstepWeight.getDoubleValue(), lateralFootstepWeight.getDoubleValue(), soleFrame);
 
-         double recursionTime = timeRemainingInState.getDoubleValue() + transferDurationSplitFraction.getDoubleValue() * nextTransferDuration.getDoubleValue();
+         double recursionTime = Math.max(timeRemainingInState.getDoubleValue(), 0.0) + transferDurationSplitFraction.getDoubleValue() * nextTransferDuration.getDoubleValue();
          double recursionMultiplier = Math.exp(-omega0 * recursionTime);
          this.footstepMultiplier.set(recursionMultiplier);
 
@@ -626,7 +628,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          solver.setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights.getX(), footstepWeights.getY(), footstepAdjustmentSafetyFactor.getDoubleValue(), projectedTempPoint3d);
       }
 
-      if (useFootstepRate)
+      if (useFootstepRate.getBooleanValue())
          solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDT);
    }
 
@@ -694,11 +696,15 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       computeICPIntegralTerm();
 
       feedbackCoP.add(yoPerfectCoP, feedbackCoPDelta);
-      feedbackCMP.add(feedbackCoP, feedbackCMPDelta);
+      feedbackCMP.add(feedbackCoP, perfectCMPOffset);
+      feedbackCMP.add(feedbackCMPDelta);
       feedbackCMP.add(feedbackCMPIntegral);
 
       if (limitReachabilityFromAdjustment.getBooleanValue() && localUseStepAdjustment && includeFootsteps)
          updateReachabilityRegionFromAdjustment();
+
+      if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)
+         upcomingFootstepLocation.set(footstepSolution);
    }
 
    private void updateReachabilityRegionFromAdjustment()

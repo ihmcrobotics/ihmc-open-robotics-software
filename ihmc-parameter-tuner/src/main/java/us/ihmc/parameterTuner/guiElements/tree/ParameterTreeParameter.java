@@ -1,10 +1,11 @@
 package us.ihmc.parameterTuner.guiElements.tree;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tooltip;
@@ -12,17 +13,21 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
+import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
 
 public class ParameterTreeParameter implements ParameterTreeValue
 {
    private final GuiParameter parameter;
+   private final Node treeTuner;
+
    private ParameterNode node;
 
-   public ParameterTreeParameter(GuiParameter parameter)
+   public ParameterTreeParameter(GuiParameter parameter, Node treeTuner)
    {
       this.parameter = parameter;
+      this.treeTuner = treeTuner;
    }
 
    @Override
@@ -47,7 +52,7 @@ public class ParameterTreeParameter implements ParameterTreeValue
    {
       if (node == null)
       {
-         node = new ParameterNode(parameter);
+         node = new ParameterNode(parameter, treeTuner);
       }
       return node;
    }
@@ -55,35 +60,41 @@ public class ParameterTreeParameter implements ParameterTreeValue
    private class ParameterNode extends HBox
    {
       private final Text name = new Text();
-      private final Label value = new Label();
 
       private final ContextMenu contextMenu = new ContextMenu();
       private final MenuItem discard = new MenuItem("Discard");
       private final MenuItem markModified = new MenuItem("Mark as Modified");
       private final MenuItem copyName = new MenuItem("Copy Name");
+      private final MenuItem copyNamespace = new MenuItem("Copy Namespace");
       private final Clipboard clipboard = Clipboard.getSystemClipboard();
       private final ClipboardContent content = new ClipboardContent();
 
-      public ParameterNode(GuiParameter parameter)
+      public ParameterNode(GuiParameter parameter, Node treeTuner)
       {
          // Creating this using fxml causes crazy slow down since it is done a lot.
-         value.setPrefWidth(80.0);
          setSpacing(10.0);
          setAlignment(Pos.CENTER_LEFT);
-         getChildren().add(value);
+         getChildren().add(treeTuner);
          getChildren().add(name);
-         value.setId("parameter-value-in-tree-view");
 
          // Setup context menu for copying name to system clipboard.
-         content.putString(parameter.getName());
          contextMenu.getItems().add(copyName);
+         copyName.setOnAction((event) -> {
+            content.putString(parameter.getName());
+            clipboard.setContent(content);
+         });
+         contextMenu.getItems().add(copyNamespace);
+         copyNamespace.setOnAction((event) -> {
+            String[] splitNamespace = StringUtils.split(parameter.getUniqueName(), GuiElement.SEPERATOR);
+            content.putString(splitNamespace[splitNamespace.length - 2]);
+            clipboard.setContent(content);
+         });
          contextMenu.getItems().add(new SeparatorMenuItem());
-         copyName.setOnAction((event) -> clipboard.setContent(content));
 
          // Setup context menu for discarding changes.
          discard.setDisable(true);
          contextMenu.getItems().add(discard);
-         setOnContextMenuRequested((event) -> contextMenu.show(value, event.getScreenX(), event.getScreenY()));
+         setOnContextMenuRequested((event) -> contextMenu.show(name, event.getScreenX(), event.getScreenY()));
          discard.setOnAction(event -> parameter.reset());
 
          // Setup context menu for marking a parameter as modified.
@@ -95,15 +106,11 @@ public class ParameterTreeParameter implements ParameterTreeValue
 
          parameter.addChangedListener(p -> Platform.runLater(() -> {
             updateStyle(parameter);
-            value.setText(parameter.getCurrentValue());
          }));
 
          name.setText(parameter.getName());
-         value.setText(parameter.getCurrentValue());
 
-         Tooltip tooltip = new Tooltip();
-         tooltip.setText(parameter.getCurrentDescription());
-         parameter.addChangedListener(p -> tooltip.setText(parameter.getCurrentDescription()));
+         Tooltip tooltip = new Tooltip(StringUtils.replaceAll(parameter.getUniqueName(), GuiElement.SEPERATOR, "\n"));
          Tooltip.install(this, tooltip);
       }
 

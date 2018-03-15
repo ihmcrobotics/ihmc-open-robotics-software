@@ -6,14 +6,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotics.robotSide.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
@@ -29,7 +26,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 
    private final YoFramePoint2d yoResolvedCoP;
 
-   public KinematicsBasedFootSwitch(String footName, SideDependentList<? extends ContactablePlaneBody> bipedFeet, double switchZThreshold, double totalRobotWeight, RobotSide side, YoVariableRegistry parentRegistry)
+   public KinematicsBasedFootSwitch(String footName, SegmentDependentList<RobotSide, ? extends ContactablePlaneBody> bipedFeet, double switchZThreshold,
+                                    double totalRobotWeight, RobotSide side, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(footName + getClass().getSimpleName());
       foot = bipedFeet.get(side);
@@ -57,7 +55,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
     * @param quadrant the foot in question
     * @param parentRegistry
     */
-   public KinematicsBasedFootSwitch(String footName, QuadrantDependentList<? extends ContactablePlaneBody> quadrupedFeet, double switchZThreshold, double totalRobotWeight, RobotQuadrant quadrant, YoVariableRegistry parentRegistry)
+   public KinematicsBasedFootSwitch(String footName, QuadrantDependentList<? extends ContactablePlaneBody> quadrupedFeet, double switchZThreshold,
+                                    double totalRobotWeight, RobotQuadrant quadrant, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(footName + getClass().getSimpleName());
       foot = quadrupedFeet.get(quadrant);

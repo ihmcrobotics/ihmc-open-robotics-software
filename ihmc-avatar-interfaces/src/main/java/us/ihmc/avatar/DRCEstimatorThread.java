@@ -1,6 +1,7 @@
 package us.ihmc.avatar;
 
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -20,6 +21,7 @@ import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.*;
@@ -51,6 +53,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoLong;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
@@ -94,9 +97,11 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 
    private final JointDesiredOutputWriter outputWriter;
 
-   public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, RobotContactPointParameters contactPointParameters, WholeBodyControllerParameters wholeBodyControllerParameters,
-         StateEstimatorParameters stateEstimatorParameters, SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
-         PeriodicThreadScheduler poseCommunicatorScheduler, HumanoidGlobalDataProducer dataProducer, JointDesiredOutputWriter outputWriter, RobotVisualizer robotVisualizer, double gravity)
+   public DRCEstimatorThread(DRCRobotSensorInformation sensorInformation, RobotContactPointParameters<RobotSide> contactPointParameters,
+                             WholeBodyControllerParameters wholeBodyControllerParameters, StateEstimatorParameters stateEstimatorParameters,
+                             SensorReaderFactory sensorReaderFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
+                             PeriodicThreadScheduler poseCommunicatorScheduler, HumanoidGlobalDataProducer dataProducer, JointDesiredOutputWriter outputWriter,
+                             RobotVisualizer robotVisualizer, double gravity)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.robotVisualizer = robotVisualizer;
@@ -131,10 +136,19 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       if (sensorReaderFactory.useStateEstimator())
       {
          KinematicsBasedStateEstimatorFactory estimatorFactory = new KinematicsBasedStateEstimatorFactory();
+         ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
+         ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
+         ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
+
+         ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+         contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+         contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+         for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
+            contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i), additionalContactTransforms.get(i));
 
          estimatorFactory.setEstimatorFullRobotModel(estimatorFullRobotModel).setSensorInformation(sensorInformation)
                          .setSensorOutputMapReadOnly(sensorOutputMapReadOnly).setGravity(gravity).setStateEstimatorParameters(stateEstimatorParameters)
-                         .setContactableBodiesFactory(contactPointParameters.getContactableBodiesFactory())
+                         .setContactableBodiesFactory(contactableBodiesFactory)
                          .setEstimatorForceSensorDataHolderToUpdate(forceSensorDataHolderForEstimator)
                          .setEstimatorCenterOfMassDataHolderToUpdate(centerOfMassDataHolderForEstimator).setContactSensorHolder(contactSensorHolder)
                          .setCenterOfPressureDataHolderFromController(centerOfPressureDataHolderFromController)

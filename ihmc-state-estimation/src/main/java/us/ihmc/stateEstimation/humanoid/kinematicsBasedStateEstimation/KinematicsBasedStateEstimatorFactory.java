@@ -5,11 +5,13 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFoo
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchAndContactSensorFusedFootSwitch;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -39,7 +41,7 @@ public class KinematicsBasedStateEstimatorFactory
    private RequiredFactoryField<Double> gravityField = new RequiredFactoryField<>("gravityField");
    private RequiredFactoryField<StateEstimatorParameters> stateEstimatorParametersField = new RequiredFactoryField<>("stateEstimatorParametersField");
 
-   private RequiredFactoryField<ContactableBodiesFactory> contactableBodiesFactoryField = new RequiredFactoryField<>("contactableBodiesFactoryField");
+   private RequiredFactoryField<ContactableBodiesFactory<RobotSide>> contactableBodiesFactoryField = new RequiredFactoryField<>("contactableBodiesFactoryField");
    private RequiredFactoryField<ForceSensorDataHolder> estimatorForceSensorDataHolderToUpdateField = new RequiredFactoryField<>("estimatorForceSensorDataHolderToUpdateField");
 
    private RequiredFactoryField<CenterOfMassDataHolder> estimatorCenterOfMassDataHolderToUpdateField = new RequiredFactoryField<>("estimatorCenterOfMassDataHolderToUpdateField");
@@ -125,9 +127,10 @@ public class KinematicsBasedStateEstimatorFactory
       FullInverseDynamicsStructure fullInverseDynamicsStructure = createFullInverseDynamicsStructure(fullRobotModel);
 
       HumanoidReferenceFrames estimatorReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      ContactableBodiesFactory contactableBodiesFactory = contactableBodiesFactoryField.get();
-      SideDependentList<? extends ContactablePlaneBody> bipedFeet = contactableBodiesFactory
-            .createFootContactableBodies(fullRobotModel, estimatorReferenceFrames);
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = contactableBodiesFactoryField.get();
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(estimatorReferenceFrames);
+      SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
 
       double gravity = gravityField.get();
       double gravityMagnitude = Math.abs(gravity);

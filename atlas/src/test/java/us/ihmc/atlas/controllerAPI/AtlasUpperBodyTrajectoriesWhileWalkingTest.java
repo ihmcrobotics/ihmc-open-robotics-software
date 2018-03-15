@@ -28,6 +28,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -216,9 +217,14 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       ManualDesiredVelocityControlModule desiredVelocityControlModule = new ManualDesiredVelocityControlModule(
             desiredHeadingControlModule.getDesiredHeadingFrame(), registry);
 
-      RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
-      ContactableBodiesFactory contactableBodiesFactory = contactPointParameters.getContactableBodiesFactory();
-      SideDependentList<ContactableFoot> bipedFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setFullRobotModel(fullRobotModel);
+      contactableBodiesFactory.setReferenceFrames(referenceFrames);
+      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
+      contactableBodiesFactory.disposeFactory();
 
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(referenceFrames.getPelvisZUpFrame(),
             bipedFeet, desiredHeadingControlModule, desiredVelocityControlModule, registry);

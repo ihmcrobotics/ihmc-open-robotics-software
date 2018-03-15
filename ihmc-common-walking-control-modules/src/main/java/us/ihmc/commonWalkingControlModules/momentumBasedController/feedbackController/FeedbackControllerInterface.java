@@ -2,26 +2,27 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 
 public interface FeedbackControllerInterface
 {
-   public abstract void initialize();
+   void initialize();
 
-   public abstract void setEnabled(boolean isEnabled);
+   void setEnabled(boolean isEnabled);
 
-   public abstract void computeInverseDynamics();
+   void computeInverseDynamics();
 
-   public abstract void computeInverseKinematics();
+   void computeInverseKinematics();
 
-   public abstract void computeVirtualModelControl();
+   void computeVirtualModelControl();
 
-   public abstract void computeAchievedAcceleration();
+   void computeAchievedAcceleration();
 
-   public abstract boolean isEnabled();
+   boolean isEnabled();
 
-   public abstract InverseDynamicsCommand<?> getInverseDynamicsOutput();
+   InverseDynamicsCommand<?> getInverseDynamicsOutput();
 
-   public abstract InverseKinematicsCommand<?> getInverseKinematicsOutput();
+   InverseKinematicsCommand<?> getInverseKinematicsOutput();
 
-   public abstract InverseDynamicsCommand<?> getVirtualModelControlOutput();
+   VirtualModelControlCommand<?> getVirtualModelControlOutput();
 }

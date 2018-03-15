@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -15,7 +16,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInterface
 {
    private final InverseDynamicsCommandDataCopier inverseDynamicsCommandDataCopier = new InverseDynamicsCommandDataCopier();
-   private final InverseDynamicsCommandDataCopier virtualModelControlCommandDataCopier = new InverseDynamicsCommandDataCopier();
+   private final VirtualModelControlCommandDataCopier virtualModelControlCommandDataCopier = new VirtualModelControlCommandDataCopier();
    private final FeedbackControlCommandDataCopier feedbackControlCommandDataCopier = new FeedbackControlCommandDataCopier();
    private final InverseKinematicsCommandDataCopier inverseKinematicsCommandDataCopier = new InverseKinematicsCommandDataCopier();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
@@ -60,9 +61,9 @@ public class ControllerCoreCommandDataCopier implements ControllerCoreCommandInt
    }
 
    @Override
-   public InverseDynamicsCommandList getVirtualModelControlCommandList()
+   public VirtualModelControlCommandList getVirtualModelControlCommandList()
    {
-      return virtualModelControlCommandDataCopier.getInverseDynamicsCommandList();
+      return virtualModelControlCommandDataCopier.getVirtualModelControlCommandList();
    }
 
    @Override

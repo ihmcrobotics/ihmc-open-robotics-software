@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -8,11 +9,12 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbo
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedBodyOrientationController;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedBodyOrientationManager
@@ -24,11 +26,7 @@ public class QuadrupedBodyOrientationManager
    private final QuadrupedBodyOrientationController controller;
    private final YoPID3DGains gains;
 
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleArrayParameter bodyOrientationProportionalGainsParameter = parameterFactory.createDoubleArray("bodyOrientationProportionalGains", 5000, 5000, 5000);
-   private final DoubleArrayParameter bodyOrientationDerivativeGainsParameter = parameterFactory.createDoubleArray("bodyOrientationDerivativeGains", 750, 750, 750);
-   private final DoubleArrayParameter bodyOrientationIntegralGainsParameter = parameterFactory.createDoubleArray("bodyOrientationIntegralGains", 0, 0, 0);
-   private final DoubleParameter bodyOrientationMaxIntegralErrorParameter = parameterFactory.createDouble("bodyOrientationMaxIntegralError", 0);
+   private final ParameterizedPID3DGains bodyOrientationGainsParameter;
 
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -44,6 +42,12 @@ public class QuadrupedBodyOrientationManager
       this.controllerToolbox = controllerToolbox;
       this.postureProvider = postureProvider;
 
+      DefaultPID3DGains bodyOrientationDefaultGains = new DefaultPID3DGains();
+      bodyOrientationDefaultGains.setProportionalGains(5000.0, 5000.0, 5000.0);
+      bodyOrientationDefaultGains.setDerivativeGains(750.0, 750.0, 750.0);
+      bodyOrientationDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
+      bodyOrientationGainsParameter = new ParameterizedPID3DGains("_bodyOrientation", GainCoupling.NONE, false, bodyOrientationDefaultGains, registry);
+
       controller = new QuadrupedBodyOrientationController(controllerToolbox, registry);
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
       gains = controller.getGains();
@@ -54,13 +58,6 @@ public class QuadrupedBodyOrientationManager
       parentRegistry.addChild(registry);
    }
 
-   private void updateGains()
-   {
-      gains.setProportionalGains(bodyOrientationProportionalGainsParameter.get());
-      gains.setIntegralGains(bodyOrientationIntegralGainsParameter.get(), bodyOrientationMaxIntegralErrorParameter.get());
-      gains.setDerivativeGains(bodyOrientationDerivativeGainsParameter.get());
-   }
-
    public void initialize(FrameQuaternionReadOnly bodyOrientationEstimate)
    {
       setpoints.initialize(bodyOrientationEstimate);
@@ -69,7 +66,7 @@ public class QuadrupedBodyOrientationManager
 
    public void compute(FrameVector3D angularMomentumRateToPack, FrameQuaternionReadOnly bodyOrientationDesired)
    {
-      updateGains();
+      gains.set(bodyOrientationGainsParameter);
 
       bodyOrientationReference.setIncludingFrame(bodyOrientationDesired);
       bodyOrientationReference.changeFrame(bodyOrientationReferenceFrame.getParent());

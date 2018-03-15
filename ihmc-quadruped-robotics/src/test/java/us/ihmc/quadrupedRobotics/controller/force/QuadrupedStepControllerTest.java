@@ -16,7 +16,6 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -35,7 +34,6 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
       
       try
       {
-         ParameterRegistry.destroyAndRecreateInstance();
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
@@ -71,7 +69,7 @@ public abstract class QuadrupedStepControllerTest implements QuadrupedMultiRobot
       variables.getTimedStepGroundClearance().set(0.15);
       variables.getTimedStepDuration().set(0.6);
       variables.getTimedStepGoalPositionX().set(commandedStepPositionX);
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
+      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_STEP);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 3.0));
       conductor.simulate();

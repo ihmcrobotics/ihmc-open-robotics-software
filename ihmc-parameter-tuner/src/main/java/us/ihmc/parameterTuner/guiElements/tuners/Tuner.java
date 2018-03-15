@@ -1,51 +1,36 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
-import java.io.IOException;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Button;
+import org.apache.commons.lang3.StringUtils;
+
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.javaFXToolkit.TextFormatterTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
+import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
 public class Tuner extends VBox
 {
    private static final int MAX_DESCRIPTION_CHARACTERS = 255;
 
-   private static final String FXML_PATH = "tuner.fxml";
-
-   @FXML
    private Label name;
-
-   @FXML
    private TextField description;
-
-   @FXML
-   private Button remove;
+   private InputNode inputNode;
 
    public Tuner(GuiParameter parameter)
    {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
-      loader.setRoot(this);
-      loader.setController(this);
-      try
-      {
-         loader.load();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-
-      setId("tuner-window");
-      name.setId("parameter-name-in-tuner");
+      setupNode();
 
       name.setText(parameter.getName());
       description.setText(parameter.getCurrentDescription());
@@ -60,24 +45,74 @@ public class Tuner extends VBox
       switch (parameter.getType())
       {
       case "DoubleParameter":
-         getChildren().add(new DoubleTuner(parameter));
+         DoubleTuner doubleTuner = new DoubleTuner(parameter);
+         getChildren().add(doubleTuner);
+         inputNode = doubleTuner;
          break;
       case "IntegerParameter":
-         getChildren().add(new IntegerTuner(parameter));
+         IntegerTuner integerTuner = new IntegerTuner(parameter);
+         getChildren().add(integerTuner);
+         inputNode = integerTuner;
          break;
       case "BooleanParameter":
-         getChildren().add(new BooleanTuner(parameter));
+         BooleanTuner booleanTuner = new BooleanTuner(parameter);
+         getChildren().add(booleanTuner);
+         inputNode = booleanTuner;
          break;
       case "EnumParameter":
-         getChildren().add(new EnumTuner(parameter));
+         EnumTuner enumTuner = new EnumTuner(parameter);
+         getChildren().add(enumTuner);
+         inputNode = enumTuner;
          break;
       default:
          PrintTools.info("Implement me.");
       }
+
+      Tooltip tooltip = new Tooltip(StringUtils.replaceAll(parameter.getUniqueName(), GuiElement.SEPERATOR, "\n"));
+      Tooltip.install(name, tooltip);
+      ContextMenu contextMenu = new ContextMenu();
+      name.setContextMenu(contextMenu);
    }
 
-   public void setCloseHandler(EventHandler<ActionEvent> closeHandler)
+   public ContextMenu getContextMenu()
    {
-      remove.setOnAction(closeHandler);
+      return name.getContextMenu();
    }
+
+   private void setupNode()
+   {
+      setSpacing(10.0);
+
+      name = new Label();
+      description = new TextField();
+      HBox.setHgrow(this, Priority.ALWAYS);
+      HBox.setHgrow(name, Priority.ALWAYS);
+      HBox.setHgrow(description, Priority.ALWAYS);
+
+      HBox parameterInfoBox = new HBox();
+      parameterInfoBox.setSpacing(10.0);
+      parameterInfoBox.setAlignment(Pos.CENTER_LEFT);
+      parameterInfoBox.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
+      parameterInfoBox.getChildren().add(name);
+      HBox.setHgrow(parameterInfoBox, Priority.ALWAYS);
+      getChildren().add(parameterInfoBox);
+
+      HBox parameterDescriptionBox = new HBox();
+      parameterDescriptionBox.setSpacing(10.0);
+      parameterDescriptionBox.setAlignment(Pos.CENTER_LEFT);
+      parameterDescriptionBox.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
+      parameterDescriptionBox.getChildren().add(new Text("Description"));
+      parameterDescriptionBox.getChildren().add(description);
+      HBox.setHgrow(parameterDescriptionBox, Priority.ALWAYS);
+      getChildren().add(parameterDescriptionBox);
+
+      setId("tuner-window");
+      name.setId("parameter-name-in-tuner");
+   }
+
+   public Node getSimpleInputNode()
+   {
+      return inputNode.getSimpleInputNode(100.0, 20.0);
+   }
+
 }

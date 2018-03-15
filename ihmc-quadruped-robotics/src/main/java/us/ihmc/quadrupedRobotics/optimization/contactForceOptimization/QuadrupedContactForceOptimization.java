@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -21,7 +22,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 public class QuadrupedContactForceOptimization
 {
    private final ReferenceFrame comFrame;
-   private final QuadrantDependentList<ReferenceFrame> soleFrame;
+   private final QuadrantDependentList<MovingReferenceFrame> soleFrame;
    private final ReferenceFrame worldFrame;
    private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
 

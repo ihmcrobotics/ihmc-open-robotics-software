@@ -1,12 +1,9 @@
 package controller_msgs.msg.dds;
 
-/**
- * Definition of the class "Footstep" defined in Footstep_.idl.
- *
- * This file was automatically generated from Footstep_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit Footstep_.idl instead.
- */
-public class Footstep
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
+public class Footstep implements Settable<Footstep>, EpsilonComparable<Footstep>
 {
    private long unique_id_;
    private byte robot_side_;
@@ -23,6 +20,7 @@ public class Footstep
 
    public Footstep()
    {
+
       location_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       predicted_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>(100, us.ihmc.euclid.tuple3D.Point3D.class,
@@ -36,38 +34,49 @@ public class Footstep
                                                                                                                  new controller_msgs.msg.dds.TaskspaceTrajectoryStampedPubSubType());
    }
 
+   public Footstep(Footstep other)
+   {
+      set(other);
+   }
+
    public void set(Footstep other)
    {
       unique_id_ = other.unique_id_;
+
       robot_side_ = other.robot_side_;
+
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.location_, location_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
       predicted_contact_points_2d_.set(other.predicted_contact_points_2d_);
       trajectory_type_ = other.trajectory_type_;
+
       swing_height_ = other.swing_height_;
+
       position_waypoints_.set(other.position_waypoints_);
       swing_trajectory_.set(other.swing_trajectory_);
       swing_trajectory_blend_duration_ = other.swing_trajectory_blend_duration_;
+
       swing_duration_ = other.swing_duration_;
+
       transfer_duration_ = other.transfer_duration_;
    }
 
-   public long getUnique_id()
+   public long getUniqueId()
    {
       return unique_id_;
    }
 
-   public void setUnique_id(long unique_id)
+   public void setUniqueId(long unique_id)
    {
       unique_id_ = unique_id;
    }
 
-   public byte getRobot_side()
+   public byte getRobotSide()
    {
       return robot_side_;
    }
 
-   public void setRobot_side(byte robot_side)
+   public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
@@ -82,73 +91,150 @@ public class Footstep
       return orientation_;
    }
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> getPredicted_contact_points_2d()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> getPredictedContactPoints2d()
    {
       return predicted_contact_points_2d_;
    }
 
-   public byte getTrajectory_type()
+   public byte getTrajectoryType()
    {
       return trajectory_type_;
    }
 
-   public void setTrajectory_type(byte trajectory_type)
+   public void setTrajectoryType(byte trajectory_type)
    {
       trajectory_type_ = trajectory_type;
    }
 
-   public double getSwing_height()
+   public double getSwingHeight()
    {
       return swing_height_;
    }
 
-   public void setSwing_height(double swing_height)
+   public void setSwingHeight(double swing_height)
    {
       swing_height_ = swing_height;
    }
 
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> getPosition_waypoints()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> getPositionWaypoints()
    {
       return position_waypoints_;
    }
 
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TaskspaceTrajectoryStamped> getSwing_trajectory()
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TaskspaceTrajectoryStamped> getSwingTrajectory()
    {
       return swing_trajectory_;
    }
 
-   public double getSwing_trajectory_blend_duration()
+   public double getSwingTrajectoryBlendDuration()
    {
       return swing_trajectory_blend_duration_;
    }
 
-   public void setSwing_trajectory_blend_duration(double swing_trajectory_blend_duration)
+   public void setSwingTrajectoryBlendDuration(double swing_trajectory_blend_duration)
    {
       swing_trajectory_blend_duration_ = swing_trajectory_blend_duration;
    }
 
-   public double getSwing_duration()
+   public double getSwingDuration()
    {
       return swing_duration_;
    }
 
-   public void setSwing_duration(double swing_duration)
+   public void setSwingDuration(double swing_duration)
    {
       swing_duration_ = swing_duration;
    }
 
-   public double getTransfer_duration()
+   public double getTransferDuration()
    {
       return transfer_duration_;
    }
 
-   public void setTransfer_duration(double transfer_duration)
+   public void setTransferDuration(double transfer_duration)
    {
       transfer_duration_ = transfer_duration;
    }
 
    @Override
-   public boolean equals(java.lang.Object other)
+   public boolean epsilonEquals(Footstep other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.unique_id_, other.unique_id_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
+         return false;
+
+      if (!this.location_.epsilonEquals(other.location_, epsilon))
+         return false;
+
+      if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
+         return false;
+
+      if (this.predicted_contact_points_2d_.size() == other.predicted_contact_points_2d_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.predicted_contact_points_2d_.size(); i++)
+         {
+            if (!this.predicted_contact_points_2d_.get(i).epsilonEquals(other.predicted_contact_points_2d_.get(i), epsilon))
+               return false;
+         }
+      }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_type_, other.trajectory_type_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_height_, other.swing_height_, epsilon))
+         return false;
+
+      if (this.position_waypoints_.size() == other.position_waypoints_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.position_waypoints_.size(); i++)
+         {
+            if (!this.position_waypoints_.get(i).epsilonEquals(other.position_waypoints_.get(i), epsilon))
+               return false;
+         }
+      }
+
+      if (this.swing_trajectory_.size() == other.swing_trajectory_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.swing_trajectory_.size(); i++)
+         {
+            if (!this.swing_trajectory_.get(i).epsilonEquals(other.swing_trajectory_.get(i), epsilon))
+               return false;
+         }
+      }
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_trajectory_blend_duration_, other.swing_trajectory_blend_duration_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_duration_, other.swing_duration_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_duration_, other.transfer_duration_, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
    {
       if (other == null)
          return false;
@@ -156,34 +242,46 @@ public class Footstep
          return true;
       if (!(other instanceof Footstep))
          return false;
+
       Footstep otherMyClass = (Footstep) other;
-      boolean returnedValue = true;
 
-      returnedValue &= this.unique_id_ == otherMyClass.unique_id_;
+      if (this.unique_id_ != otherMyClass.unique_id_)
+         return false;
 
-      returnedValue &= this.robot_side_ == otherMyClass.robot_side_;
+      if (this.robot_side_ != otherMyClass.robot_side_)
+         return false;
 
-      returnedValue &= this.location_.equals(otherMyClass.location_);
+      if (!this.location_.equals(otherMyClass.location_))
+         return false;
 
-      returnedValue &= this.orientation_.equals(otherMyClass.orientation_);
+      if (!this.orientation_.equals(otherMyClass.orientation_))
+         return false;
 
-      returnedValue &= this.predicted_contact_points_2d_.equals(otherMyClass.predicted_contact_points_2d_);
+      if (!this.predicted_contact_points_2d_.equals(otherMyClass.predicted_contact_points_2d_))
+         return false;
 
-      returnedValue &= this.trajectory_type_ == otherMyClass.trajectory_type_;
+      if (this.trajectory_type_ != otherMyClass.trajectory_type_)
+         return false;
 
-      returnedValue &= this.swing_height_ == otherMyClass.swing_height_;
+      if (this.swing_height_ != otherMyClass.swing_height_)
+         return false;
 
-      returnedValue &= this.position_waypoints_.equals(otherMyClass.position_waypoints_);
+      if (!this.position_waypoints_.equals(otherMyClass.position_waypoints_))
+         return false;
 
-      returnedValue &= this.swing_trajectory_.equals(otherMyClass.swing_trajectory_);
+      if (!this.swing_trajectory_.equals(otherMyClass.swing_trajectory_))
+         return false;
 
-      returnedValue &= this.swing_trajectory_blend_duration_ == otherMyClass.swing_trajectory_blend_duration_;
+      if (this.swing_trajectory_blend_duration_ != otherMyClass.swing_trajectory_blend_duration_)
+         return false;
 
-      returnedValue &= this.swing_duration_ == otherMyClass.swing_duration_;
+      if (this.swing_duration_ != otherMyClass.swing_duration_)
+         return false;
 
-      returnedValue &= this.transfer_duration_ == otherMyClass.transfer_duration_;
+      if (this.transfer_duration_ != otherMyClass.transfer_duration_)
+         return false;
 
-      return returnedValue;
+      return true;
    }
 
    @Override

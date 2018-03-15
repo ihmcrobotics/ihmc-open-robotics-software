@@ -1,0 +1,47 @@
+#ifndef __controller_msgs__msg__WalkToGoalBehaviorPacket__idl__
+#define __controller_msgs__msg__WalkToGoalBehaviorPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet WALK_TO_GOAL_ACTION_FIND_PATH =
+      0;
+
+      const octet WALK_TO_GOAL_ACTION_EXECUTE =
+      1;
+
+      const octet WALK_TO_GOAL_ACTION_EXECUTE_UNKNOWN =
+      2;
+
+      const octet WALK_TO_GOAL_ACTION_STOP =
+      3;
+
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+
+      /**
+       * This message is part of the IHMC humanoid behavior module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::WalkToGoalBehaviorPacket_")
+      struct WalkToGoalBehaviorPacket
+      {
+        @defaultValue(value=255)
+        octet walk_to_goal_action;
+        double x_goal;
+        double y_goal;
+        double theta_goal;
+        @defaultValue(value=255)
+        octet goal_robot_side;
+      };
+    };
+  };
+};
+
+#endif

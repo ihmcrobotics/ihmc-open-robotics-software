@@ -1,9 +1,12 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.IntegerParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
+import us.ihmc.euclid.Axis;
+import us.ihmc.robotics.controllers.pidGains.GainCoupling;
+import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedFootControlModuleParameters
@@ -11,22 +14,22 @@ public class QuadrupedFootControlModuleParameters
    // final registry
    private final YoVariableRegistry finalRegistry = new YoVariableRegistry("QuadrupedFootControlModule");
 
-   // final parameters
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(QuadrupedFootControlModule.class, finalRegistry);
-   private final DoubleArrayParameter solePositionProportionalGainsParameter = parameterFactory
-         .createDoubleArray("solePositionProportionalGains", 10000, 10000, 5000);
-   private final DoubleArrayParameter solePositionDerivativeGainsParameter = parameterFactory.createDoubleArray("solePositionDerivativeGains", 200, 200, 200);
-   private final DoubleArrayParameter solePositionIntegralGainsParameter = parameterFactory.createDoubleArray("solePositionIntegralGains", 0, 0, 0);
-   private final DoubleParameter solePositionMaxIntegralErrorParameter = parameterFactory.createDouble("solePositionMaxIntegralError", 0);
-   private final DoubleParameter touchdownPressureLimitParameter = parameterFactory.createDouble("touchdownPressureLimit", 50);
-   private final IntegerParameter touchdownTriggerWindowParameter = parameterFactory.createInteger("touchdownTriggerWindow", 1);
-   private final DoubleParameter minimumStepAdjustmentTimeParameter = parameterFactory.createDouble("minimumStepAdjustmentTime", 0.1);
-   private final DoubleParameter stepGoalOffsetZParameter = parameterFactory.createDouble("stepGoalOffsetZ", 0.0);
+   private static final int defaultTouchdownTriggerWindow = 1;
 
-   
+   // final parameters
+   private final ParameterizedPID3DGains solePositionGains;
+   private final DoubleParameter touchdownPressureLimitParameter = new DoubleParameter("touchdownPressureLimit", finalRegistry, 50);
+   private final IntegerParameter touchdownTriggerWindowParameter = new IntegerParameter("touchdownTriggerWindow", finalRegistry, defaultTouchdownTriggerWindow);
+   private final DoubleParameter minimumStepAdjustmentTimeParameter = new DoubleParameter("minimumStepAdjustmentTime", finalRegistry, 0.1);
+   private final DoubleParameter stepGoalOffsetZParameter = new DoubleParameter("stepGoalOffsetZ", finalRegistry, 0.0);
+
    public QuadrupedFootControlModuleParameters()
    {
-      
+      DefaultPID3DGains solePositionDefaultGains = new DefaultPID3DGains();
+      solePositionDefaultGains.setProportionalGains(10000.0, 10000.0, 5000.0);
+      solePositionDefaultGains.setDerivativeGains(200.0, 200.0, 200.0);
+      solePositionDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
+      solePositionGains = new ParameterizedPID3DGains("_solePosition", GainCoupling.NONE, false, solePositionDefaultGains, finalRegistry);
    }
    
    
@@ -35,55 +38,37 @@ public class QuadrupedFootControlModuleParameters
       return finalRegistry;
    }
 
-
-
-   public double[] getSolePositionProportionalGainsParameter()
+   public PID3DGainsReadOnly getSolePositionGains()
    {
-      return solePositionProportionalGainsParameter.get();
+      return solePositionGains;
    }
-
-
-   public double[] getSolePositionDerivativeGainsParameter()
-   {
-      return solePositionDerivativeGainsParameter.get();
-   }
-
-
-   public double[] getSolePositionIntegralGainsParameter()
-   {
-      return solePositionIntegralGainsParameter.get();
-   }
-
-
-   public double getSolePositionMaxIntegralErrorParameter()
-   {
-      return solePositionMaxIntegralErrorParameter.get();
-   }
-
 
    public double getTouchdownPressureLimitParameter()
    {
-      return touchdownPressureLimitParameter.get();
+      return touchdownPressureLimitParameter.getValue();
    }
 
 
    public int getTouchdownTriggerWindowParameter()
    {
-      return touchdownTriggerWindowParameter.get();
+      return touchdownTriggerWindowParameter.getValue();
    }
 
 
    public double getMinimumStepAdjustmentTimeParameter()
    {
-      return minimumStepAdjustmentTimeParameter.get();
+      return minimumStepAdjustmentTimeParameter.getValue();
    }
 
 
    public double getStepGoalOffsetZParameter()
    {
-      return stepGoalOffsetZParameter.get();
+      return stepGoalOffsetZParameter.getValue();
    }
-   
-   
-   
+
+
+   public static int getDefaultTouchdownTriggerWindow()
+   {
+      return defaultTouchdownTriggerWindow;
+   }
 }

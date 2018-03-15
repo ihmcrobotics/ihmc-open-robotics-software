@@ -12,16 +12,16 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class ListOfPointsContactableFoot extends ListOfPointsContactablePlaneBody implements ContactableFoot
 {
-   private final FramePoint2D toeOffContactPoint = new FramePoint2D();
-   private final FrameLineSegment2D toeOffContactLine = new FrameLineSegment2D();
+   private final FramePoint2D toeOffContactPoint;
+   private final FrameLineSegment2D toeOffContactLine;
 
    public ListOfPointsContactableFoot(RigidBody rigidBody, ReferenceFrame soleFrame, List<Point2D> contactPointsInSoleFrame, Point2D toeOffContactPointInSoleFrame,
          LineSegment2D toeOffContactLineInSoleFrame)
    {
       super(rigidBody, soleFrame, contactPointsInSoleFrame);
 
-      this.toeOffContactPoint.setIncludingFrame(soleFrame, toeOffContactPointInSoleFrame);
-      this.toeOffContactLine.setIncludingFrame(soleFrame, toeOffContactLineInSoleFrame);
+      this.toeOffContactPoint = new FramePoint2D(soleFrame, toeOffContactPointInSoleFrame);
+      this.toeOffContactLine = new FrameLineSegment2D(soleFrame, toeOffContactLineInSoleFrame);
    }
 
    @Override

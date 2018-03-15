@@ -22,6 +22,9 @@ public class DivergentComponentOfMotionEstimator
 
    private final YoFramePoint yoDcmPositionEstimate = new YoFramePoint("dcmPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint yoIcpPositionEstimate = new YoFramePoint("icpPositionEstimate", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+
+   private final FramePoint3D tempPoint = new FramePoint3D();
 
    public DivergentComponentOfMotionEstimator(ReferenceFrame comZUpFrame, LinearInvertedPendulumModel lipModel, YoVariableRegistry parentRegistry,
                                               YoGraphicsListRegistry graphicsListRegistry)
@@ -46,7 +49,7 @@ public class DivergentComponentOfMotionEstimator
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("icpPositionEstimate" + suffix , yoIcpPositionEstimate, 0.01, Blue(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition yoIcpPositionEstimateViz = new YoGraphicPosition("Capture Point" + suffix , yoIcpPositionEstimate, 0.01, Blue(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
       yoGraphicsList.add(yoIcpPositionEstimateViz);
       artifactList.add(yoIcpPositionEstimateViz.createArtifact());
@@ -59,20 +62,31 @@ public class DivergentComponentOfMotionEstimator
       return lipModel;
    }
 
-   public void compute(FramePoint3D dcmPositionEstimate, FrameVector3D comVelocityEstimate)
+
+   public void compute(FrameVector3D comVelocityEstimate)
    {
-      ReferenceFrame dcmPositionEstimateFrame = dcmPositionEstimate.getReferenceFrame();
+      compute(tempPoint, comVelocityEstimate);
+   }
+   public void compute(FramePoint3D dcmPositionEstimateToPack, FrameVector3D comVelocityEstimate)
+   {
+      ReferenceFrame dcmPositionEstimateFrame = dcmPositionEstimateToPack.getReferenceFrame();
       ReferenceFrame comVelocityEstimateFrame = comVelocityEstimate.getReferenceFrame();
-      dcmPositionEstimate.changeFrame(comZUpFrame);
+      dcmPositionEstimateToPack.changeFrame(comZUpFrame);
       comVelocityEstimate.changeFrame(comZUpFrame);
 
-      dcmPositionEstimate.set(comVelocityEstimate);
-      dcmPositionEstimate.scale(1.0 / lipModel.getNaturalFrequency());
-      yoDcmPositionEstimate.setAndMatchFrame(dcmPositionEstimate);
+      dcmPositionEstimateToPack.set(comVelocityEstimate);
+      dcmPositionEstimateToPack.scale(1.0 / lipModel.getNaturalFrequency());
+      yoDcmPositionEstimate.setAndMatchFrame(dcmPositionEstimateToPack);
       yoIcpPositionEstimate.set(yoDcmPositionEstimate);
       yoIcpPositionEstimate.add(0, 0, -lipModel.getComHeight());
+      centerOfMass.setFromReferenceFrame(comZUpFrame);
 
-      dcmPositionEstimate.changeFrame(dcmPositionEstimateFrame);
+      dcmPositionEstimateToPack.changeFrame(dcmPositionEstimateFrame);
       comVelocityEstimate.changeFrame(comVelocityEstimateFrame);
+   }
+
+   public void getDCMPositionEstimate(FramePoint3D dcmPositionEstimateToPack)
+   {
+      dcmPositionEstimateToPack.setIncludingFrame(yoDcmPositionEstimate);
    }
 }

@@ -20,7 +20,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -100,7 +100,7 @@ public class KinematicToolboxDiagnosticEnvironment
       {
 
          @Override
-         public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+         public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
          {
             return null;
          }
@@ -167,7 +167,7 @@ public class KinematicToolboxDiagnosticEnvironment
          }
 
          @Override
-         public AuxiliaryRobotData getAuxiliaryRobotData()
+         public AtlasAuxiliaryRobotData getAuxiliaryRobotData()
          {
             return null;
          }

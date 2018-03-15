@@ -1,6 +1,6 @@
 package us.ihmc.atlas.packets;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 
@@ -16,7 +16,6 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -66,9 +65,7 @@ public class AtlasRobotConfigurationDataTest
          forceSensorDefinitions[i] = new ForceSensorDefinition("wim", body2, new RigidBodyTransform());
       }
 
-      AtlasAuxiliaryRobotData auxiliaryRobotData = new AtlasAuxiliaryRobotData();
-
-      RobotConfigurationData data = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, auxiliaryRobotData, imuSensorDefinitions);
+      RobotConfigurationData data = RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuSensorDefinitions);
       kryo.writeClassAndObject(output, data);
       output.flush();
 

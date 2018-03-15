@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
@@ -148,7 +148,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
       step.increment();
    }
 
-   @Override public AuxiliaryRobotData newAuxiliaryRobotDataInstance()
+   @Override public AtlasAuxiliaryRobotData newAuxiliaryRobotDataInstance()
    {
       return null;
    }

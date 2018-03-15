@@ -12,7 +12,7 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.SLOW, IntegrationCategory.VIDEO})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 {
    @Override
@@ -27,12 +27,11 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 26.7)
    @Test(timeout = 200000)
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushLeftEarlySwing();
+      super.testPushLeftEarlySwing(700.0);
    }
 
    @Override
@@ -59,12 +58,11 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       super.testPushRightLateSwing();
    }
 
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 44.5)
    @Test(timeout = 200000)
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
-      super.testPushRightThenLeftMidSwing();
+      super.testPushRightThenLeftMidSwing(700.0);
    }
 
    @Override

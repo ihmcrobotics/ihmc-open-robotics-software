@@ -118,8 +118,13 @@ public abstract class PacketValidityChecker
             return errorMessage;
          }
 
-         double lastTime = 0.0;
-         for (int waypointIdx = 0; waypointIdx < swingTrajectory.length; waypointIdx++)
+         double lastTime = swingTrajectory[0].getTime();
+         if (lastTime < 0.0)
+         {
+            String errorMessage = messageClassName + "'s swing trajectory can not start at time below zero.";
+            return errorMessage;
+         }
+         for (int waypointIdx = 1; waypointIdx < swingTrajectory.length; waypointIdx++)
          {
             double waypointTime = swingTrajectory[waypointIdx].getTime();
             if (waypointTime <= lastTime)
@@ -130,7 +135,7 @@ public abstract class PacketValidityChecker
             lastTime = waypointTime;
          }
 
-         if (message.getSwingDuration() > 0.0 && lastTime >= message.getSwingDuration())
+         if (message.getSwingDuration() > 0.0 && lastTime > message.getSwingDuration())
          {
             String errorMessage = messageClassName + "'s swing trajectory has waypoints with time larger then the swing time.";
             return errorMessage;

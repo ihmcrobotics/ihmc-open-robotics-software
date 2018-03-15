@@ -300,7 +300,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(drcSimulationTestHelper.getControllerFullRobotModel());
       referenceFrames.updateFrames();
-      SideDependentList<ArrayList<Point2D>> footContactPoints = robotModel.getContactPointParameters().getFootContactPoints();
+      SideDependentList<ArrayList<Point2D>> footContactPoints = new SideDependentList<>(robotModel.getContactPointParameters().getFootContactPoints());
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
       for (RobotSide robotSide : RobotSide.values)

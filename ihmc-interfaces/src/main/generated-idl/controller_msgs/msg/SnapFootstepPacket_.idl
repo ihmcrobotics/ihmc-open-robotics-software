@@ -1,0 +1,26 @@
+#ifndef __controller_msgs__msg__SnapFootstepPacket__idl__
+#define __controller_msgs__msg__SnapFootstepPacket__idl__
+
+#include "controller_msgs/msg/./FootstepDataMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Old message, needs to be tested and cleaned up.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::SnapFootstepPacket_")
+      struct SnapFootstepPacket
+      {
+        sequence<controller_msgs::msg::dds::FootstepDataMessage> footstep_data;
+        sequence<long> footstep_order;
+        sequence<octet> flag;
+      };
+    };
+  };
+};
+
+#endif

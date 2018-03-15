@@ -1,0 +1,23 @@
+// generated from rosidl_generator_dds_idl/resource/msg.idl.em
+
+#ifndef __controller_msgs__msg__SetDoubleArrayParameter__idl__
+#define __controller_msgs__msg__SetDoubleArrayParameter__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::SetDoubleArrayParameter_")
+      struct SetDoubleArrayParameter
+      {
+        string parameter_name;
+        sequence<double> parameter_value;
+      };  // struct SetDoubleArrayParameter
+    };  // module dds_
+  };  // module msg
+};  // module controller_msgs
+
+#endif  // __controller_msgs__msg__SetDoubleArrayParameter__idl__

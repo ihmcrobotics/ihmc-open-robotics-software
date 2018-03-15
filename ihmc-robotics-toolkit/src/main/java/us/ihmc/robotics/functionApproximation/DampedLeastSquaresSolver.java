@@ -1,12 +1,12 @@
 package us.ihmc.robotics.functionApproximation;
 
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.Matrix;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
-import org.ejml.ops.SpecializedOps;
+
+import us.ihmc.robotics.linearAlgebra.ConfigurableSolvePseudoInverseSVD;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 
 public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
@@ -29,7 +29,7 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
       this.tempMatrix2 = new DenseMatrix64F(matrixSize, 1);
 //      this.linearSolver = LinearSolverFactory.linear(matrixSize);
       this.linearSolver = LinearSolverFactory.symmPosDef(matrixSize);
-      this.linearSolverAlpha0 = LinearSolverFactory.pseudoInverse(true);
+      this.linearSolverAlpha0 = new ConfigurableSolvePseudoInverseSVD();
       this.alpha = alpha;       
    }
 

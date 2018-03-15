@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -17,9 +19,8 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 public class StateChangeSmootherComponent implements OutputProcessorComponent
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final DoubleParameter slopTimeParameter = parameterFactory.createDouble("stateChangeSmootherSlopTime", 0.0);
-   private final DoubleParameter slopBreakFrequencyParameter = parameterFactory.createDouble("stateChangeSmootherSlopBreakFrequency", 1000.0);
+   private final DoubleParameter slopTimeParameter = new DoubleParameter("stateChangeSmootherSlopTime", registry, 0.0);
+   private final DoubleParameter slopBreakFrequencyParameter = new DoubleParameter("stateChangeSmootherSlopBreakFrequency", registry, 1000.0);
 
    private final ArrayList<OneDoFJoint> allJoints = new ArrayList<>();
    private final LinkedHashMap<OneDoFJoint, AlphaFilteredYoVariable> jointTorquesSmoothedAtStateChange = new LinkedHashMap<>();
@@ -29,11 +30,13 @@ public class StateChangeSmootherComponent implements OutputProcessorComponent
    private final YoDouble timeAtHighLevelControllerStateChange = new YoDouble("timeAtControllerStateChange", registry);
    private final double controlDT;
    private final YoDouble controlTimestamp;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
-   public StateChangeSmootherComponent(double controlDT, YoDouble controlTimestamp, YoVariableRegistry parentRegistry)
+   public StateChangeSmootherComponent(QuadrupedRuntimeEnvironment runtimeEnvironment, YoVariableRegistry parentRegistry)
    {
-      this.controlDT = controlDT;
-      this.controlTimestamp = controlTimestamp;
+      this.controlDT = runtimeEnvironment.getControlDT();
+      this.controlTimestamp = runtimeEnvironment.getRobotTimestamp();
+      this.jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
 
       alphaJointTorqueForStateChanges.set(0.0);
       timeAtHighLevelControllerStateChange.set(Double.NEGATIVE_INFINITY);
@@ -78,9 +81,9 @@ public class StateChangeSmootherComponent implements OutputProcessorComponent
       double currentTime = controlTimestamp.getDoubleValue();
       double deltaTime = Math.max(currentTime - timeAtHighLevelControllerStateChange.getDoubleValue(), 0.0);
 
-      if (deltaTime < slopTimeParameter.get())
+      if (deltaTime < slopTimeParameter.getValue())
       {
-         double breakFrequencyInHz = slopBreakFrequencyParameter.get() * (deltaTime / slopTimeParameter.get());
+         double breakFrequencyInHz = slopBreakFrequencyParameter.getValue() * (deltaTime / slopTimeParameter.getValue());
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequencyInHz, controlDT);
          alphaJointTorqueForStateChanges.set(alpha);
       }
@@ -92,10 +95,11 @@ public class StateChangeSmootherComponent implements OutputProcessorComponent
       for (int i = 0; i < allJoints.size(); i++)
       {
          OneDoFJoint oneDoFJoint = allJoints.get(i);
-         double tau = oneDoFJoint.getTau();
+         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(oneDoFJoint);
+         double tau = jointDesiredOutput.getDesiredTorque();
          AlphaFilteredYoVariable smoothedJointTorque = jointTorquesSmoothedAtStateChange.get(oneDoFJoint);
          smoothedJointTorque.update(tau);
-         oneDoFJoint.setTau(smoothedJointTorque.getDoubleValue());
+         jointDesiredOutput.setDesiredTorque(smoothedJointTorque.getDoubleValue());
       }
    }
 

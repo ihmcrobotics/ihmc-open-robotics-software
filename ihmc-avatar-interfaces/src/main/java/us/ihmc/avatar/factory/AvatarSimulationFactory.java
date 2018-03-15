@@ -170,7 +170,8 @@ public class AvatarSimulationFactory
       if (doSmoothJointTorquesAtControllerStateChanges.get())
       {
          DRCOutputProcessorWithStateChangeSmoother drcOutputWriterWithStateChangeSmoother = new DRCOutputProcessorWithStateChangeSmoother(simulationOutputProcessor);
-         highLevelHumanoidControllerFactory.get().attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
+         highLevelHumanoidControllerFactory.get()
+                                           .attachControllerStateChangedListener(drcOutputWriterWithStateChangeSmoother.createControllerStateChangedListener());
 
          simulationOutputProcessor = drcOutputWriterWithStateChangeSmoother;
       }
@@ -178,15 +179,15 @@ public class AvatarSimulationFactory
       if (doSlowIntegrationForTorqueOffset.get())
       {
          DRCOutputProcessorWithTorqueOffsets outputWriterWithTorqueOffsets = new DRCOutputProcessorWithTorqueOffsets(simulationOutputProcessor,
-                                                                                                               robotModel.get().getControllerDT());
+                                                                                                                     robotModel.get().getControllerDT());
          simulationOutputProcessor = outputWriterWithTorqueOffsets;
       }
    }
 
    private void setupStateEstimationThread()
    {
-      stateEstimationThread = new DRCEstimatorThread(robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(),
-                                                     robotModel.get(), robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
+      stateEstimationThread = new DRCEstimatorThread(robotModel.get().getSensorInformation(), robotModel.get().getContactPointParameters(), robotModel.get(),
+                                                     robotModel.get().getStateEstimatorParameters(), sensorReaderFactory, threadDataSynchronizer,
                                                      new PeriodicNonRealtimeThreadScheduler("DRCSimGazeboYoVariableServer"), humanoidGlobalDataProducer.get(),
                                                      simulationOutputWriter, yoVariableServer, gravity.get());
 
@@ -315,7 +316,8 @@ public class AvatarSimulationFactory
             JointLowLevelJointControlSimulator positionControlSimulator = new JointLowLevelJointControlSimulator(simulatedJoint, controllerJoint,
                                                                                                                  controllerDesiredOutput, isUpperBodyJoint,
                                                                                                                  isBackJoint, false,
-                                                                                                                 controllerFullRobotModel.getTotalMass(), robotModel.get().getSimulateDT());
+                                                                                                                 controllerFullRobotModel.getTotalMass(),
+                                                                                                                 robotModel.get().getSimulateDT());
             humanoidFloatingRootJointRobot.setController(positionControlSimulator);
          }
       }
@@ -363,7 +365,7 @@ public class AvatarSimulationFactory
    private void initializeSimulationConstructionSet()
    {
       simulationConstructionSet.setParameterRootPath(threadedRobotController.getYoVariableRegistry());
-      
+
       humanoidFloatingRootJointRobot.setDynamicIntegrationMethod(scsInitialSetup.get().getDynamicIntegrationMethod());
       scsInitialSetup.get().initializeSimulation(simulationConstructionSet);
 

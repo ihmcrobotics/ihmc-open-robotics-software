@@ -1,0 +1,32 @@
+#ifndef __controller_msgs__msg__IntrinsicParametersMessage__idl__
+#define __controller_msgs__msg__IntrinsicParametersMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is used to provides additional properties for cameras.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::IntrinsicParametersMessage_")
+      struct IntrinsicParametersMessage
+      {
+        long width;
+        long height;
+        double fx;
+        double fy;
+        double skew;
+        double cx;
+        double cy;
+        sequence<double> radial;
+        double t1;
+        double t2;
+      };
+    };
+  };
+};
+
+#endif

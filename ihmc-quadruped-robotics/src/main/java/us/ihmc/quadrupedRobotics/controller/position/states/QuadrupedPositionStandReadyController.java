@@ -5,6 +5,9 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 
 /**
  * A controller that does nothing, but signifies that the robot is ready to transition to
@@ -12,10 +15,12 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 public class QuadrupedPositionStandReadyController implements QuadrupedController
 {
    private final FullRobotModel fullRobotModel;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
    public QuadrupedPositionStandReadyController(QuadrupedRuntimeEnvironment environment)
    {
       this.fullRobotModel = environment.getFullRobotModel();
+      this.jointDesiredOutputList = environment.getJointDesiredOutputList();
    }
 
    @Override
@@ -23,8 +28,9 @@ public class QuadrupedPositionStandReadyController implements QuadrupedControlle
    {
       for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
-         joint.setUnderPositionControl(true);
-         joint.setqDesired(joint.getQ());
+         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+         jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
+         jointDesiredOutput.setDesiredPosition(joint.getQ());
       }
    }
 

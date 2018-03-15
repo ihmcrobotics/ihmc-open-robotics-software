@@ -5,9 +5,8 @@ import us.ihmc.commonWalkingControlModules.touchdownDetector.ForceBasedTouchDown
 import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -30,13 +29,7 @@ public class QuadrupedFootSwitchFactory
    // Private fields
    protected final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedFootSwitchManagerRegistry");
 
-   private final ParameterFactory parameterFactory = ParameterFactory.createWithRegistry(getClass(), registry);
-   private final QuadrantDependentList<DoubleParameter> jointTorqueTouchdownThresholds = new QuadrantDependentList<>(
-         parameterFactory.createDouble("frontLeftJointTorqueTouchdownThreshold", 5.0),
-         parameterFactory.createDouble("frontRightJointTorqueTouchdownThreshold", 5.0),
-         parameterFactory.createDouble("hindLeftJointTorqueTouchdownThreshold", -5.0),
-         parameterFactory.createDouble("hindRightJointTorqueTouchdownThreshold", -5.0)
-   );
+   private final QuadrantDependentList<Double> defaultJointTorqueTouchdownThresholds = new QuadrantDependentList<>(5.0, 5.0, -5.0, -5.0);
 
    protected void setupTouchdownBasedFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches, double totalRobotWeight)
    {
@@ -48,7 +41,7 @@ public class QuadrupedFootSwitchFactory
 
          JointTorqueBasedTouchdownDetector jointTorqueBasedTouchdownDetector;
          jointTorqueBasedTouchdownDetector = new JointTorqueBasedTouchdownDetector(fullRobotModel.get().getOneDoFJointByName(robotQuadrant.toString().toLowerCase() + "_knee_pitch"), registry);
-         jointTorqueBasedTouchdownDetector.setTorqueThreshold(jointTorqueTouchdownThresholds.get(robotQuadrant).get());
+         jointTorqueBasedTouchdownDetector.setTorqueThreshold(defaultJointTorqueTouchdownThresholds.get(robotQuadrant));
          touchdownDetectorBasedFootSwitch.addTouchdownDetector(jointTorqueBasedTouchdownDetector);
          
          ForceBasedTouchDownDetection forceBasedTouchDownDetection = new ForceBasedTouchDownDetection(fullRobotModel.get(), robotQuadrant, footContactableBodies.get().get(robotQuadrant).getSoleFrame(), registry);

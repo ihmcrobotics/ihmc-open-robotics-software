@@ -1,40 +1,24 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
-import java.io.IOException;
-
 import gnu.trove.map.TObjectIntMap;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
-public class EnumTuner extends HBox
+public class EnumTuner extends HBox implements InputNode
 {
-   private static final String FXML_PATH = "enum_tuner.fxml";
-
-   @FXML
-   private StackPane tuningPane;
-
    public EnumTuner(GuiParameter parameter)
    {
-      FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
-      loader.setRoot(this);
-      loader.setController(this);
-      try
-      {
-         loader.load();
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
+      setupNode();
 
       TObjectIntMap<String> valueOptions = parameter.getValueOptions();
       if (valueOptions == null)
@@ -45,12 +29,24 @@ public class EnumTuner extends HBox
       {
          createChoiceBox(parameter, valueOptions);
       }
-
    }
 
+   private void setupNode()
+   {
+      setSpacing(10.0);
+      setAlignment(Pos.CENTER_LEFT);
+      setMaxHeight(Double.NEGATIVE_INFINITY);
+      setMaxWidth(Double.NEGATIVE_INFINITY);
+      setPrefWidth(800.0);
+      setPadding(new Insets(0.0, 5.0, 5.0, 5.0));
+      getChildren().add(new Text("Value"));
+   }
+
+   private TextField enumString;
    private void createTextField(GuiParameter parameter)
    {
-      TextField enumString = new TextField();
+      enumString = new TextField();
+
       enumString.setText(parameter.getCurrentValue());
       ParameterTuningTools.addThreadSafeListeners(enumString, () -> parameter.setValue(enumString.getText()));
 
@@ -59,12 +55,14 @@ public class EnumTuner extends HBox
          enumString.setText(parameter.getCurrentValue());
       });
 
-      tuningPane.getChildren().add(enumString);
+      getChildren().add(enumString);
    }
 
+   private ChoiceBox<String> choiceBox;
    private void createChoiceBox(GuiParameter parameter, TObjectIntMap<String> valueOptions)
    {
-      ChoiceBox<String> choiceBox = new ChoiceBox<>();
+      choiceBox = new ChoiceBox<>();
+
       ObservableList<String> items = choiceBox.getItems();
       valueOptions.forEachKey(option -> {
          items.add(option);
@@ -81,7 +79,7 @@ public class EnumTuner extends HBox
          setChoiceBoxValue(parameter, choiceBox);
       });
 
-      tuningPane.getChildren().add(choiceBox);
+      getChildren().add(choiceBox);
    }
 
    private void setChoiceBoxValue(GuiParameter parameter, ChoiceBox<String> choiceBox)
@@ -94,5 +92,27 @@ public class EnumTuner extends HBox
          items.add(newValue);
       }
       choiceBox.getSelectionModel().select(newValue);
+   }
+
+   @Override
+   public Node getSimpleInputNode(double width, double height)
+   {
+      if (choiceBox != null)
+      {
+         ChoiceBox<String> duplicate = new ChoiceBox<>(choiceBox.getItems());
+         duplicate.setPrefHeight(height);
+         duplicate.setPrefWidth(width);
+         duplicate.setSelectionModel(choiceBox.getSelectionModel());
+         return duplicate;
+      }
+      else
+      {
+         TextField duplicate = new TextField(enumString.getText());
+         duplicate.setPrefHeight(height);
+         duplicate.setPrefWidth(width);
+         enumString.textProperty().addListener((observable, oldValue, newValue) -> duplicate.setText(newValue));
+         duplicate.textProperty().addListener((observable, oldValue, newValue) -> enumString.setText(newValue));
+         return duplicate;
+      }
    }
 }

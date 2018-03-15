@@ -5,14 +5,7 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
@@ -139,6 +132,9 @@ public class WholeBodyInverseKinematicsSolver
             break;
          case PRIVILEGED_CONFIGURATION:
             optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
+            break;
+         case PRIVILEGED_VELOCITY:
+            optimizationControlModule.submitPrivilegedVelocityCommand((PrivilegedVelocityCommand) command);
             break;
          case LIMIT_REDUCTION:
             optimizationControlModule.submitJointLimitReductionCommand((JointLimitReductionCommand) command);

@@ -5,10 +5,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -18,8 +20,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
@@ -29,7 +29,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterface
 {
@@ -72,13 +73,13 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
+   public void testPushLeftEarlySwing(double pushMagnitude) throws SimulationExceededMaximumTimeException
    {
       setupTest();
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double magnitude = 650.0;
+      double magnitude = pushMagnitude;
       double duration = 0.04;
       double percentInSwing = 0.2;
       RobotSide side = RobotSide.LEFT;
@@ -102,13 +103,13 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
    }
 
-   public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
+   public void testPushRightThenLeftMidSwing(double pushMagnitude) throws SimulationExceededMaximumTimeException
    {
       setupTest();
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = 800.0;
+      double magnitude = pushMagnitude;
       double duration = 0.05;
       double percentInSwing = 0.4;
       RobotSide side = RobotSide.RIGHT;
@@ -227,11 +228,11 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
    private void setupTest() throws SimulationExceededMaximumTimeException
    {
+      DRCRobotModel robotModel = getRobotModel();
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setTestEnvironment(flatGround);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, flatGround);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
-      FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       scs.addYoGraphic(pushRobotController.getForceVisualizer());

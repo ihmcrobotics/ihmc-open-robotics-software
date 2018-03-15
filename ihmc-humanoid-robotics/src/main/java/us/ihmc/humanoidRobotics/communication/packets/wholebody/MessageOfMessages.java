@@ -30,7 +30,10 @@ public class MessageOfMessages extends Packet<MessageOfMessages>
       for (Packet<?> packet : messages)
       {
          if (packet instanceof MessageOfMessages)
-            packets.addAll(((MessageOfMessages) packet).getPackets());
+         {
+            for (Packet<?> subPacket : ((MessageOfMessages) packet).getPackets())
+               addPacket(subPacket);
+         }
          else
             packets.add(packet);
       }

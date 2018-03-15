@@ -2,8 +2,11 @@ package us.ihmc.parameterTuner.guiElements.main;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
@@ -49,6 +52,8 @@ public class ParameterSavingNode extends HBox
    public void setActiveFile(File activeFile)
    {
       this.activeFile = activeFile;
+      setDefaultFilePath(activeFile);
+
       if (activeFile != null)
       {
          save.setDisable(false);
@@ -150,6 +155,7 @@ public class ParameterSavingNode extends HBox
 
       List<Registry> xmlRegistries = ParameterTuningTools.buildXMLRegistriesFromGui(registriesAfterMerge);
       ParameterSavingTools.save(activeFile, xmlRegistries);
+      setDefaultFilePath(activeFile);
       informListeners();
    }
 
@@ -158,9 +164,10 @@ public class ParameterSavingNode extends HBox
       FileChooser fileChooser = new FileChooser();
       fileChooser.getExtensionFilters().add(ParameterSavingTools.getExtensionFilter());
       fileChooser.setTitle("Select Parameter File");
-      if (activeFile != null)
+      File defaultFilePath = getDefaultFilePath();
+      if (defaultFilePath != null)
       {
-         fileChooser.setInitialDirectory(activeFile.getParentFile());
+         fileChooser.setInitialDirectory(defaultFilePath);
       }
       File file = fileChooser.showSaveDialog(saveAs.getScene().getWindow());
 
@@ -168,6 +175,39 @@ public class ParameterSavingNode extends HBox
       {
          setActiveFile(file);
          handleSave(event);
+      }
+   }
+
+   /**
+    * Returns the file that was last opened or saved to.
+    *
+    * @return the most-recently-used file.
+    */
+   private File getDefaultFilePath()
+   {
+      Preferences prefs = Preferences.userNodeForPackage(ParameterSavingNode.class);
+      String filePath = prefs.get("filePath", null);
+
+      if (filePath != null && Files.isDirectory(Paths.get(filePath)))
+         return new File(filePath);
+      else
+         return null;
+   }
+
+   /**
+    * Stores the given file's path as the most-recently-used path. The path is persisted across program runs.
+    *
+    * @param file the file
+    */
+   private void setDefaultFilePath(File file)
+   {
+      Preferences prefs = Preferences.userNodeForPackage(ParameterSavingNode.class);
+      if (file != null)
+      {
+         if (!file.isDirectory())
+            file = file.getParentFile();
+
+         prefs.put("filePath", file.getAbsolutePath());
       }
    }
 }

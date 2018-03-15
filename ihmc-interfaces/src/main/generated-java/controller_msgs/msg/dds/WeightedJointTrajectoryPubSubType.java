@@ -28,12 +28,12 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.WeightedJointTrajectoryPointPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -52,14 +52,14 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getJoint_names().size(); ++a)
+      for (int i0 = 0; i0 < data.getJointNames().size(); ++i0)
       {
-         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getJoint_names().get(a).length() + 1;
+         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getJointNames().get(i0).length() + 1;
       }
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getPoints().size(); ++a)
+      for (int i0 = 0; i0 < data.getPoints().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.WeightedJointTrajectoryPointPubSubType.getCdrSerializedSize(data.getPoints().get(a), current_alignment);
+         current_alignment += controller_msgs.msg.dds.WeightedJointTrajectoryPointPubSubType.getCdrSerializedSize(data.getPoints().get(i0), current_alignment);
       }
 
       return current_alignment - initial_alignment;
@@ -70,8 +70,8 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
 
       std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
 
-      if (data.getJoint_names().size() <= 100)
-         cdr.write_type_e(data.getJoint_names());
+      if (data.getJointNames().size() <= 100)
+         cdr.write_type_e(data.getJointNames());
       else
          throw new RuntimeException("joint_names field exceeds the maximum length");
 
@@ -86,7 +86,7 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
 
       std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
 
-      cdr.read_type_e(data.getJoint_names());
+      cdr.read_type_e(data.getJointNames());
 
       cdr.read_type_e(data.getPoints());
    }
@@ -119,7 +119,7 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
    {
       ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
-      ser.write_type_e("joint_names", data.getJoint_names());
+      ser.write_type_e("joint_names", data.getJointNames());
 
       ser.write_type_e("points", data.getPoints());
    }
@@ -129,7 +129,7 @@ public class WeightedJointTrajectoryPubSubType implements us.ihmc.pubsub.TopicDa
    {
       ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
-      ser.read_type_e("joint_names", data.getJoint_names());
+      ser.read_type_e("joint_names", data.getJointNames());
 
       ser.read_type_e("points", data.getPoints());
    }

@@ -1,0 +1,33 @@
+#ifndef __controller_msgs__msg__DesiredAccelerationsMessage__idl__
+#define __controller_msgs__msg__DesiredAccelerationsMessage__idl__
+
+#include "controller_msgs/msg/./QueueableMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * General message that carries desired joint accelerations.
+       * It is used by ArmDesiredAccelerationsMessage, SpineDesiredAccelerationsMessage, NeckDesiredAccelerationsMessage.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::DesiredAccelerationsMessage_")
+      struct DesiredAccelerationsMessage
+      {
+        /**
+         * Specifies the desired joint accelerations.
+         */
+        sequence<double> desired_joint_accelerations;
+        /**
+         * Properties for queueing commands.
+         */
+        controller_msgs::msg::dds::QueueableMessage queueing_properties;
+      };
+    };
+  };
+};
+
+#endif

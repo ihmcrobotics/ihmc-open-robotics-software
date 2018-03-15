@@ -47,7 +47,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
    public void sendMockRobotConfiguration(long totalNsecs)
    {
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
-      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), forceSensorDefinitions, null, imuDefinitions);
+      RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), forceSensorDefinitions, imuDefinitions);
 
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {

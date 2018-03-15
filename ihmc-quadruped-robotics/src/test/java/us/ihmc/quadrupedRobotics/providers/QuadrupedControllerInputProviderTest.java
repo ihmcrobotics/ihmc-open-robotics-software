@@ -18,6 +18,7 @@ import us.ihmc.communication.net.TcpNetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -26,6 +27,10 @@ import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -58,8 +63,13 @@ public class QuadrupedControllerInputProviderTest
       
       YoVariableRegistry registry = new YoVariableRegistry("inputProvider");
       GlobalDataProducer dataProducer = new GlobalDataProducer(mockCommunicator);
-      QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(dataProducer, registry);
+      TestQuadrupedPhysicalProperties physicalProperties = new TestQuadrupedPhysicalProperties();
+      QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(physicalProperties, dataProducer, registry);
       QuadrupedPlanarVelocityInputProvider planarVelocityInputProvider = new QuadrupedPlanarVelocityInputProvider(dataProducer, registry);
+
+      // load default parameters
+      DefaultParameterReader reader = new DefaultParameterReader();
+      reader.readParametersInRegistry(registry);
 
       mockCommunicator.send(comPositionPacket);
       ThreadTools.sleep(3);
@@ -142,7 +152,8 @@ public class QuadrupedControllerInputProviderTest
       Vector3D randomPlanarVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
 
       YoVariableRegistry registry = new YoVariableRegistry("inputProvider");
-      QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(null, registry);
+      TestQuadrupedPhysicalProperties physicalProperties = new TestQuadrupedPhysicalProperties();
+      QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(physicalProperties, null, registry);
       QuadrupedPlanarVelocityInputProvider planarVelocityInputProvider = new QuadrupedPlanarVelocityInputProvider(null, registry);
 
       YoDouble yoComPositionInputX = (YoDouble) registry.getVariable("comPositionInputX");
@@ -333,6 +344,33 @@ public class QuadrupedControllerInputProviderTest
          registerPacketClass(BodyOrientationPacket.class);
          registerPacketClass(BodyAngularRatePacket.class);
          registerPacketClass(PlanarVelocityPacket.class);
+      }
+   }
+
+   private class TestQuadrupedPhysicalProperties implements QuadrupedPhysicalProperties
+   {
+      @Override
+      public Vector3D getOffsetFromJointBeforeFootToSole(RobotQuadrant robotQuadrant)
+      {
+         return null;
+      }
+
+      @Override
+      public ArrayList<Point2D> getFootGroundContactPoints(RobotQuadrant robotQuadrant)
+      {
+         return null;
+      }
+
+      @Override
+      public QuadrantDependentList<ArrayList<Point2D>> getFeetGroundContactPoints()
+      {
+         return null;
+      }
+
+      @Override
+      public double getNominalCoMHeight()
+      {
+         return 0.0;
       }
    }
 }

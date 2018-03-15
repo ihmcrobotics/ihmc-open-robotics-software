@@ -1,7 +1,5 @@
 package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 
-import java.util.ArrayList;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -12,6 +10,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -28,11 +29,13 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
    private final double[] jointAnglesToPack = new double[3];
 
    private YoGraphicReferenceFrame bodyGraphicReferenceFrame, rootJointGraphicReferenceFrame;
+   protected final JointDesiredOutputList jointDesiredOutputList;
 
-   public QuadrupedInverseKinematicsCalculators(QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties,
+   public QuadrupedInverseKinematicsCalculators(QuadrupedModelFactory modelFactory, JointDesiredOutputList jointDesiredOutputList, QuadrupedPhysicalProperties physicalProperties,
          FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this.jointDesiredOutputList = jointDesiredOutputList;
 
       fullRobotModel.updateFrames();
       rootJointFrame = referenceFrames.getRootJointFrame();
@@ -103,7 +106,7 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
       private final QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator closedFormInverseKinematicsCalculator;
 
       private final FullRobotModel fullRobotModel;
-      private final ArrayList<OneDoFJoint> jointsToControl = new ArrayList<OneDoFJoint>();
+      private final OneDoFJoint[] jointsToControl;
       private TranslationReferenceFrame desiredFrame;
 
       private final QuadrupedReferenceFrames referenceFrames;
@@ -113,10 +116,9 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
       {
          this.referenceFrames = referenceFrames;
 
-         OneDoFJoint oneDoFJointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
-
          this.fullRobotModel = fullRobotModel;
-         fullRobotModel.getOneDoFJointsFromRootToHere(oneDoFJointBeforeFoot, jointsToControl);
+         InverseDynamicsJoint[] joints = ScrewTools.createJointPath(fullRobotModel.getRootJoint().getSuccessor(), fullRobotModel.getFoot(robotQuadrant));
+         jointsToControl = ScrewTools.filterJoints(joints, OneDoFJoint.class);
 
          closedFormInverseKinematicsCalculator = QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator.createFromLegAttachmentFrame(robotQuadrant,
                                                                                                                                         modelFactory,
@@ -163,17 +165,17 @@ public class QuadrupedInverseKinematicsCalculators implements QuadrupedLegInvers
 
       public void setLegAnglesInFullRobotModel(double[] jointAnglesToPack)
       {
-         for (int i = 0; i < jointsToControl.size(); i++)
+         for (int i = 0; i < jointsToControl.length; i++)
          {
-            jointsToControl.get(i).setQ(jointAnglesToPack[i]);
+            jointsToControl[i].setQ(jointAnglesToPack[i]);
          }
       }
 
       public void setDesiredLegAnglesInFullRobotModel(double[] jointAnglesToPack)
       {
-         for (int i = 0; i < jointsToControl.size(); i++)
+         for (int i = 0; i < jointsToControl.length; i++)
          {
-            jointsToControl.get(i).setqDesired(jointAnglesToPack[i]);
+            jointDesiredOutputList.getJointDesiredOutput(jointsToControl[i]).setDesiredPosition(jointAnglesToPack[i]);
          }
       }
 

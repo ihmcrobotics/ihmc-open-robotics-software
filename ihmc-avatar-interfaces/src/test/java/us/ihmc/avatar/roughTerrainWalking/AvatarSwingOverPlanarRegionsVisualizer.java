@@ -51,7 +51,7 @@ public class AvatarSwingOverPlanarRegionsVisualizer
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
    public AvatarSwingOverPlanarRegionsVisualizer(SimulationConstructionSet scs, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                 WalkingControllerParameters walkingControllerParameters, RobotContactPointParameters contactPointParameters)
+                                                 WalkingControllerParameters walkingControllerParameters, RobotContactPointParameters<RobotSide> contactPointParameters)
    {
       this.scs = scs;
       this.registry = registry;

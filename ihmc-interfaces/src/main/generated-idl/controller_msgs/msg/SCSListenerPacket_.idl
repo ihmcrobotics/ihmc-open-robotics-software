@@ -1,0 +1,25 @@
+#ifndef __controller_msgs__msg__SCSListenerPacket__idl__
+#define __controller_msgs__msg__SCSListenerPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of IHMC Simulation Construction Set.
+       * Notifies the user when the simulation has stopped.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::SCSListenerPacket_")
+      struct SCSListenerPacket
+      {
+        @defaultValue(value=True)
+        boolean is_stopped;
+      };
+    };
+  };
+};
+
+#endif

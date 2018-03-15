@@ -5,8 +5,9 @@ import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFa
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedSimulationInitialPositionParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDefaultInitialPosition;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationFactory;
@@ -18,10 +19,9 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
-import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
@@ -51,20 +51,21 @@ public class GenericQuadrupedSimulationFactory
       QuadrupedPhysicalProperties physicalProperties = new GenericQuadrupedPhysicalProperties();
       NetClassList netClassList = new GenericQuadrupedNetClassList();
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters();
-      QuadrupedSimulationInitialPositionParameters initialPositionParameters = new GenericQuadrupedSimulationInitialPositionParameters();
+      QuadrupedSimulationInitialPositionParameters initialPositionParameters = new GenericQuadrupedDefaultInitialPosition();
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
-      ParameterRegistry.getInstance().loadFromResources(QuadrupedParameterSet.SIMULATION_IDEAL.getPath());
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters();
       QuadrupedPositionBasedCrawlControllerParameters positionBasedCrawlControllerParameters = new GenericQuadrupedPositionBasedCrawlControllerParameters();
+      GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
 
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
 
       SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
 
+      JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
-      OutputWriter outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel);
+      OutputWriter outputWriter = new PerfectSimulatedOutputWriter(sdfRobot, fullRobotModel, jointDesiredOutputList);
 
       simulationFactory.setControlDT(SIMULATION_DT);
       simulationFactory.setSimulationDT(SIMULATION_DT);
@@ -87,9 +88,11 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setUseStateEstimator(USE_STATE_ESTIMATOR);
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
       simulationFactory.setSensorInformation(sensorInformation);
+      simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
+      simulationFactory.setXGaitSettings(xGaitSettings);
 
       return simulationFactory.createSimulation();
    }

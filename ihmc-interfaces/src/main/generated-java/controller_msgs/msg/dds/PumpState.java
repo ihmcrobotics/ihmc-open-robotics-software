@@ -1,12 +1,9 @@
 package controller_msgs.msg.dds;
 
-/**
- * Definition of the class "PumpState" defined in PumpState_.idl.
- *
- * This file was automatically generated from PumpState_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit PumpState_.idl instead.
- */
-public class PumpState
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
+public class PumpState implements Settable<PumpState>, EpsilonComparable<PumpState>
 {
    private float pump_inlet_pressure_;
    private float pump_supply_pressure_;
@@ -21,89 +18,132 @@ public class PumpState
 
    }
 
+   public PumpState(PumpState other)
+   {
+      set(other);
+   }
+
    public void set(PumpState other)
    {
       pump_inlet_pressure_ = other.pump_inlet_pressure_;
+
       pump_supply_pressure_ = other.pump_supply_pressure_;
+
       air_sump_pressure_ = other.air_sump_pressure_;
+
       pump_supply_temperature_ = other.pump_supply_temperature_;
+
       pump_rpm_ = other.pump_rpm_;
+
       motor_temperature_ = other.motor_temperature_;
+
       motor_driver_temperature_ = other.motor_driver_temperature_;
    }
 
-   public float getPump_inlet_pressure()
+   public float getPumpInletPressure()
    {
       return pump_inlet_pressure_;
    }
 
-   public void setPump_inlet_pressure(float pump_inlet_pressure)
+   public void setPumpInletPressure(float pump_inlet_pressure)
    {
       pump_inlet_pressure_ = pump_inlet_pressure;
    }
 
-   public float getPump_supply_pressure()
+   public float getPumpSupplyPressure()
    {
       return pump_supply_pressure_;
    }
 
-   public void setPump_supply_pressure(float pump_supply_pressure)
+   public void setPumpSupplyPressure(float pump_supply_pressure)
    {
       pump_supply_pressure_ = pump_supply_pressure;
    }
 
-   public float getAir_sump_pressure()
+   public float getAirSumpPressure()
    {
       return air_sump_pressure_;
    }
 
-   public void setAir_sump_pressure(float air_sump_pressure)
+   public void setAirSumpPressure(float air_sump_pressure)
    {
       air_sump_pressure_ = air_sump_pressure;
    }
 
-   public float getPump_supply_temperature()
+   public float getPumpSupplyTemperature()
    {
       return pump_supply_temperature_;
    }
 
-   public void setPump_supply_temperature(float pump_supply_temperature)
+   public void setPumpSupplyTemperature(float pump_supply_temperature)
    {
       pump_supply_temperature_ = pump_supply_temperature;
    }
 
-   public float getPump_rpm()
+   public float getPumpRpm()
    {
       return pump_rpm_;
    }
 
-   public void setPump_rpm(float pump_rpm)
+   public void setPumpRpm(float pump_rpm)
    {
       pump_rpm_ = pump_rpm;
    }
 
-   public float getMotor_temperature()
+   public float getMotorTemperature()
    {
       return motor_temperature_;
    }
 
-   public void setMotor_temperature(float motor_temperature)
+   public void setMotorTemperature(float motor_temperature)
    {
       motor_temperature_ = motor_temperature;
    }
 
-   public float getMotor_driver_temperature()
+   public float getMotorDriverTemperature()
    {
       return motor_driver_temperature_;
    }
 
-   public void setMotor_driver_temperature(float motor_driver_temperature)
+   public void setMotorDriverTemperature(float motor_driver_temperature)
    {
       motor_driver_temperature_ = motor_driver_temperature;
    }
 
    @Override
-   public boolean equals(java.lang.Object other)
+   public boolean epsilonEquals(PumpState other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pump_inlet_pressure_, other.pump_inlet_pressure_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pump_supply_pressure_, other.pump_supply_pressure_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.air_sump_pressure_, other.air_sump_pressure_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pump_supply_temperature_, other.pump_supply_temperature_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pump_rpm_, other.pump_rpm_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.motor_temperature_, other.motor_temperature_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.motor_driver_temperature_, other.motor_driver_temperature_, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
    {
       if (other == null)
          return false;
@@ -111,24 +151,31 @@ public class PumpState
          return true;
       if (!(other instanceof PumpState))
          return false;
+
       PumpState otherMyClass = (PumpState) other;
-      boolean returnedValue = true;
 
-      returnedValue &= this.pump_inlet_pressure_ == otherMyClass.pump_inlet_pressure_;
+      if (this.pump_inlet_pressure_ != otherMyClass.pump_inlet_pressure_)
+         return false;
 
-      returnedValue &= this.pump_supply_pressure_ == otherMyClass.pump_supply_pressure_;
+      if (this.pump_supply_pressure_ != otherMyClass.pump_supply_pressure_)
+         return false;
 
-      returnedValue &= this.air_sump_pressure_ == otherMyClass.air_sump_pressure_;
+      if (this.air_sump_pressure_ != otherMyClass.air_sump_pressure_)
+         return false;
 
-      returnedValue &= this.pump_supply_temperature_ == otherMyClass.pump_supply_temperature_;
+      if (this.pump_supply_temperature_ != otherMyClass.pump_supply_temperature_)
+         return false;
 
-      returnedValue &= this.pump_rpm_ == otherMyClass.pump_rpm_;
+      if (this.pump_rpm_ != otherMyClass.pump_rpm_)
+         return false;
 
-      returnedValue &= this.motor_temperature_ == otherMyClass.motor_temperature_;
+      if (this.motor_temperature_ != otherMyClass.motor_temperature_)
+         return false;
 
-      returnedValue &= this.motor_driver_temperature_ == otherMyClass.motor_driver_temperature_;
+      if (this.motor_driver_temperature_ != otherMyClass.motor_driver_temperature_)
+         return false;
 
-      return returnedValue;
+      return true;
    }
 
    @Override
