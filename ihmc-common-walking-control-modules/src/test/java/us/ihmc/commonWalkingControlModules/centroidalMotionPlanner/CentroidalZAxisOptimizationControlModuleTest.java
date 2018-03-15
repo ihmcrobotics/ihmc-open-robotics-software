@@ -20,11 +20,11 @@ public class CentroidalZAxisOptimizationControlModuleTest
       parameters.setNominalIzz(Izz);
    }
 
-   
    @Test
    public void testGeneratesAPlan()
    {
-      CentroidalZAxisOptimizationControlModule controlModule = new CentroidalZAxisOptimizationControlModule(robotMass, new OptimizationControlModuleHelper(parameters));
+      CentroidalZAxisOptimizationControlModule controlModule = new CentroidalZAxisOptimizationControlModule(robotMass,
+                                                                                                            new OptimizationControlModuleHelper(parameters));
       Trajectory[] trajectoryList = new Trajectory[3];
       trajectoryList[0] = controlModule.getForceProfile();
       trajectoryList[1] = controlModule.getHeightTrajectory();
