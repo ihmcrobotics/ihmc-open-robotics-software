@@ -90,6 +90,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double executionDuration = 0.0;
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
 
       // take care of steps down
       for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
@@ -166,6 +167,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double executionDuration = 0.0;
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
 
       RobotSide robotSide = RobotSide.LEFT;
       // take care of steps down
@@ -237,6 +239,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
+      message.setAreFootstepsAdjustable(true);
+
       RobotSide robotSide = RobotSide.LEFT;
       // take care of steps down
       for (int stepNumber = 0; stepNumber < numberOfStepsDown; stepNumber++)
@@ -307,6 +311,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double executionDuration = 0.0;
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
 
       RobotSide robotSide = RobotSide.LEFT;
       // take care of steps down
@@ -409,6 +414,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double distanceTraveled = 0.5 * starterLength;
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
       RobotSide robotSide = RobotSide.LEFT;
       // take care of random steps
       for (int stepNumber = 0; stepNumber < numberOfSteps; stepNumber++)
@@ -508,6 +514,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double distanceTraveled = 0.5 * starterLength;
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
       RobotSide robotSide = RobotSide.LEFT;
 
       int numberOfSteps = stepLengths.size();

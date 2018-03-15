@@ -533,6 +533,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
    private FootstepDataListMessage createFlatBlocksFootstepDataListMessage(double swingTime, double transferTime)
    {
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
 
       Point3D location = new Point3D(0.3, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
@@ -593,6 +594,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
    private FootstepDataListMessage createFlatBlocksForwardFootstepDataListMessage(double swingTime, double transferTime)
    {
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
       double swingHeight = 0.18;
 
       Point3D location = new Point3D(0.3, 0.15, 0.0);
@@ -647,6 +649,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
    private FootstepDataListMessage createTiltedBlocksFootstepDataListMessage(double swingTime, double transferTime)
    {
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
       Point3D location = new Point3D(3.7, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
 
@@ -750,6 +753,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
    private FootstepDataListMessage createTiltedBlocksForwardFootstepDataListMessage(double swingTime, double transferTime)
    {
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+      message.setAreFootstepsAdjustable(true);
       Point3D location = new Point3D(3.7, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       double swingHeight = 0.2;
