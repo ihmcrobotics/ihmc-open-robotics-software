@@ -43,7 +43,7 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 600000)
    public void testWalkingOverAggressiveRamps() throws IOException
    {
       super.testWalkingOverAggressiveRamps();
