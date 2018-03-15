@@ -35,7 +35,6 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.trajectories.BlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -380,12 +379,12 @@ public class SwingState extends AbstractFootControlState
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
       }
-   
+
       YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
       contactState.notifyContactStateHasChanged();
-   
+
       spatialFeedbackControlCommand.resetSecondaryTaskJointWeightScale();
-   
+
       initializeTrajectory();
    }
 
@@ -413,44 +412,44 @@ public class SwingState extends AbstractFootControlState
    public void doSpecificAction()
    {
       computeAndPackTrajectory();
-   
+
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
       {
          legJointLimitAvoidanceControlModule.correctSwingFootTrajectory(desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
                desiredLinearAcceleration, desiredAngularAcceleration);
       }
-   
+
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
       {
          desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
          desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
-   
+
          legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
-   
+
          desiredPose.setPosition(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
          desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }
-   
+
       if (yoSetDesiredVelocityToZero.getBooleanValue())
       {
          desiredLinearVelocity.setToZero();
       }
-   
+
       if (yoSetDesiredAccelerationToZero.getBooleanValue())
       {
          desiredLinearAcceleration.setToZero();
       }
-   
+
       computeCurrentWeights(nominalAngularWeight, nominalLinearWeight, currentAngularWeight, currentLinearWeight);
-   
+
       spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(currentAngularWeight, currentLinearWeight);
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
       spatialFeedbackControlCommand.setGains(gains);
-   
+
       yoDesiredPosition.setAndMatchFrame(desiredPosition);
       yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
    }
@@ -679,7 +678,7 @@ public class SwingState extends AbstractFootControlState
       }
       if (footstepWasAdjusted.getBooleanValue())
       {
-         touchdownTrajectory.setLinearTrajectory(swingDuration, rateLimitedAdjustedPose.getPosition(), finalLinearVelocity, yoTouchdownAcceleration);
+         touchdownTrajectory.setLinearTrajectory(swingDuration, rateLimitedAdjustedPose.getPosition(), finalLinearVelocity, touchdownAcceleration);
          touchdownTrajectory.setOrientation(rateLimitedAdjustedPose.getOrientation());
 
          blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
@@ -872,7 +871,7 @@ public class SwingState extends AbstractFootControlState
    {
       if (oldBodyFrame == newBodyFrame)
          return;
-   
+
       framePoseToModify.get(oldBodyFrameDesiredTransform);
       newBodyFrame.getTransformToDesiredFrame(transformFromNewBodyFrameToOldBodyFrame, oldBodyFrame);
       newBodyFrameDesiredTransform.set(oldBodyFrameDesiredTransform);
