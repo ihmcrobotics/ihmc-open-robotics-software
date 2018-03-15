@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,12 +70,12 @@ public class ParameterSavingTools
 
    public static List<GuiRegistry> merge(List<GuiRegistry> registriesA, List<GuiRegistry> registriesB)
    {
-      Map<String, GuiRegistry> registryMapA = new HashMap<>();
-      Map<String, GuiRegistry> registryMapB = new HashMap<>();
+      Map<String, GuiRegistry> registryMapA = new LinkedHashMap<>();
+      Map<String, GuiRegistry> registryMapB = new LinkedHashMap<>();
       registriesA.stream().forEach(registryA -> registryMapA.put(registryA.getUniqueName(), registryA));
       registriesB.stream().forEach(registryB -> registryMapB.put(registryB.getUniqueName(), registryB));
 
-      Map<String, GuiRegistry> mergedRegistryMap = new HashMap<>();
+      Map<String, GuiRegistry> mergedRegistryMap = new LinkedHashMap<>();
       mergedRegistryMap.putAll(registryMapA);
       mergedRegistryMap.putAll(registryMapB);
       List<GuiRegistry> mergedRegistries = new ArrayList<>();
@@ -121,7 +121,7 @@ public class ParameterSavingTools
       return merged;
    }
 
-   public static void merge(GuiRegistry registryA, GuiRegistry registryB, GuiRegistry merged)
+   private static void merge(GuiRegistry registryA, GuiRegistry registryB, GuiRegistry merged)
    {
       if (registryA == null && registryB != null)
       {
@@ -144,7 +144,7 @@ public class ParameterSavingTools
 
       Map<String, GuiParameter> parameterMapA = registryA.getParameterMap();
       Map<String, GuiParameter> parameterMapB = registryB.getParameterMap();
-      Map<String, GuiParameter> mergedParameters = new HashMap<>();
+      Map<String, GuiParameter> mergedParameters = new LinkedHashMap<>();
       mergedParameters.putAll(parameterMapA);
       mergedParameters.putAll(parameterMapB);
       mergedParameters.values().forEach(parameter -> {
@@ -154,7 +154,7 @@ public class ParameterSavingTools
 
       Map<String, GuiRegistry> registryMapA = registryA.getRegistryMap();
       Map<String, GuiRegistry> registryMapB = registryB.getRegistryMap();
-      Map<String, GuiRegistry> mergedRegistries = new HashMap<>();
+      Map<String, GuiRegistry> mergedRegistries = new LinkedHashMap<>();
       mergedRegistries.putAll(registryMapA);
       mergedRegistries.putAll(registryMapB);
       mergedRegistries.values().forEach(registry -> {

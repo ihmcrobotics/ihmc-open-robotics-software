@@ -4,11 +4,8 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosBoolPublisher;
 import us.ihmc.utilities.ros.publisher.RosDoublePublisher;
@@ -18,7 +15,7 @@ import us.ihmc.utilities.ros.publisher.RosInt64Publisher;
  *
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<RobotConfigurationData>, Runnable
+public class RosAtlasAuxiliaryRobotDataPublisher implements Runnable
 {
    private final ArrayBlockingQueue<AtlasAuxiliaryRobotData> availableAtlasAuxiliaryData = new ArrayBlockingQueue<>(30);
    private final RosMainNode rosMainNode;
@@ -54,7 +51,7 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
       this.rosMainNode = new RosMainNode(rosuri, nameSpace + getClass().getName());
       initialize(rosMainNode, nameSpace);
    }
-   
+
    private void initialize(RosMainNode rosMainNode, String rosNameSpace)
    {
       setupElectricForearmPublishers(rosNameSpace);
@@ -105,7 +102,8 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
       }
    }
 
-   @Override public void run()
+   @Override
+   public void run()
    {
       while (true)
       {
@@ -119,7 +117,7 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
             // Continue on
             continue;
          }
-         if(rosMainNode.isStarted())
+         if (rosMainNode.isStarted())
          {
             publishElectricForearmData(auxiliaryRobotData);
 
@@ -167,16 +165,11 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements PacketConsumer<Robot
       cycleCountPublisher.publish(auxiliaryRobotData.batteryCycleCount);
    }
 
-   @Override public void receivedPacket(RobotConfigurationData packet)
+   public void receivedPacket(AtlasAuxiliaryRobotData auxiliaryRobotData)
    {
-      AuxiliaryRobotData auxiliaryRobotData = packet.getAuxiliaryRobotData();
-
-      if(auxiliaryRobotData != null && auxiliaryRobotData instanceof AtlasAuxiliaryRobotData)
+      if (!availableAtlasAuxiliaryData.offer(auxiliaryRobotData))
       {
-         if(!availableAtlasAuxiliaryData.offer((AtlasAuxiliaryRobotData) auxiliaryRobotData))
-         {
-            availableAtlasAuxiliaryData.clear();
-         }
+         availableAtlasAuxiliaryData.clear();
       }
    }
 }

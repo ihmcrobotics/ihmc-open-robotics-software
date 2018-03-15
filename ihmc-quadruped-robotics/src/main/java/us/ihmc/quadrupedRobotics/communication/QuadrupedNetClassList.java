@@ -21,21 +21,10 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSoleWaypointPack
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedXGaitSettingsPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
-import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
-import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
-import us.ihmc.robotics.dataStructures.parameter.IntegerParameter;
-import us.ihmc.communication.packets.ParameterListPacket;
-import us.ihmc.communication.packets.RequestParameterListPacket;
-import us.ihmc.communication.packets.SetBooleanParameterPacket;
-import us.ihmc.communication.packets.SetDoubleArrayParameterPacket;
-import us.ihmc.communication.packets.SetDoubleParameterPacket;
-import us.ihmc.communication.packets.SetStringParameterPacket;
-import us.ihmc.robotics.dataStructures.parameter.StringParameter;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
+import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
@@ -82,24 +71,20 @@ public class QuadrupedNetClassList extends IHMCCommunicationKryoNetClassList
       registerPacketField(QuadrupedForceControllerRequestedEvent.class);
 
       registerPacketClass(QuadrupedForceControllerStatePacket.class);
-      registerPacketField(QuadrupedForceControllerState.class);
+      registerPacketField(QuadrupedForceControllerEnum.class);
 
       registerPacketClass(QuadrupedXGaitSettingsPacket.class);
-      registerPacketField(QuadrupedXGaitSettings.class);
+      registerPacketField(QuadrupedXGaitSettingsReadOnly.class);
 
-      registerPacketClass(SetBooleanParameterPacket.class);
       registerPacketField(String.class);
       registerPacketField(boolean.class);
 
-      registerPacketClass(SetDoubleArrayParameterPacket.class);
       registerPacketField(String.class);
       registerPacketField(double[].class);
 
-      registerPacketClass(SetDoubleParameterPacket.class);
       registerPacketField(String.class);
       registerPacketField(double.class);
 
-      registerPacketClass(SetStringParameterPacket.class);
       registerPacketField(String.class);
 
       registerPacketClass(QuadrupedTimedStepPacket.class);
@@ -108,14 +93,6 @@ public class QuadrupedNetClassList extends IHMCCommunicationKryoNetClassList
       registerPacketField(Point3D.class);
       registerPacketField(RobotQuadrant.class);
       registerPacketField(TimeInterval.class);
-
-      registerPacketClass(RequestParameterListPacket.class);
-      registerPacketClass(ParameterListPacket.class);
-      registerPacketField(BooleanParameter.class);
-      registerPacketField(DoubleArrayParameter.class);
-      registerPacketField(DoubleParameter.class);
-      registerPacketField(IntegerParameter.class);
-      registerPacketField(StringParameter.class);
 
       registerPacketClass(QuadrupedSoleWaypointPacket.class);
       registerPacketField(QuadrupedSoleWaypointList.class);

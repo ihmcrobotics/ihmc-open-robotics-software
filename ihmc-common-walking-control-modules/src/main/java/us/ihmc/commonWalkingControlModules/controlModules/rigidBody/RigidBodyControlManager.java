@@ -183,12 +183,6 @@ public class RigidBodyControlManager
          hold();
 
       stateSwitched.set(stateMachine.checkTransitionConditions());
-
-      if (stateSwitched.getBooleanValue())
-      {
-         stateMachine.getPreviousState().clear();
-      }
-
       stateMachine.doAction();
    }
 

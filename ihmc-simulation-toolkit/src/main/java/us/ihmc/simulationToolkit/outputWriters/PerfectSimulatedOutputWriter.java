@@ -9,6 +9,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -19,19 +20,26 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
    protected final FloatingRootJointRobot robot;
    protected ImmutablePair<FloatingJoint, FloatingInverseDynamicsJoint> rootJointPair;
    protected final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJoint>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJoint>>();
+   private final JointDesiredOutputList jointDesiredOutputList;
 
    public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot)
    {
-      this.name = robot.getName() + "SimulatedSensorReader";
-      this.robot = robot;
+      this(robot, null);
    }
 
    public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel)
    {
+      this(robot, fullRobotModel, null);
+   }
+
+   public PerfectSimulatedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, JointDesiredOutputList jointDesiredOutputList)
+   {
       this.name = robot.getName() + "SimulatedSensorReader";
       this.robot = robot;
+      this.jointDesiredOutputList = jointDesiredOutputList;
 
-      setFullRobotModel(fullRobotModel);
+      if (fullRobotModel != null)
+         setFullRobotModel(fullRobotModel);
    }
 
    @Override
@@ -76,7 +84,13 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
          OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
          OneDoFJoint revoluteJoint = jointPair.getRight();
 
-         pinJoint.setTau(revoluteJoint.getTau());
+         double tau;
+         if (jointDesiredOutputList != null)
+            tau = jointDesiredOutputList.getJointDesiredOutput(revoluteJoint).getDesiredTorque();
+         else
+            tau = revoluteJoint.getTau();
+
+         pinJoint.setTau(tau);
       }
    }
 

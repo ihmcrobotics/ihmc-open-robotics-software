@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.mechanics.virtualModelController;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
@@ -15,6 +16,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.kinematics.JointLimit;
@@ -22,11 +26,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.PointJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class QuadrupedVirtualModelController
 {
@@ -35,7 +34,7 @@ public class QuadrupedVirtualModelController
    private final FullQuadrupedRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
-   private final QuadrantDependentList<ReferenceFrame> soleFrame;
+   private final QuadrantDependentList<MovingReferenceFrame> soleFrame;
 
    private final QuadrantDependentList<FrameVector3D> soleVirtualForce;
    private final QuadrantDependentList<FrameVector3D> soleContactForce;
@@ -65,12 +64,16 @@ public class QuadrupedVirtualModelController
    private final QuadrantDependentList<YoGraphicVector[]> yoJointTorqueGraphics;
    private final FrameVector3D jointAxisTempVector = new FrameVector3D();
 
-   public QuadrupedVirtualModelController(FullQuadrupedRobotModel fullRobotModel, QuadrupedReferenceFrames referenceFrames, double controlDT,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   private final JointDesiredOutputList jointDesiredOutputList;
+
+   public QuadrupedVirtualModelController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedReferenceFrames referenceFrames,
+                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      this.fullRobotModel = fullRobotModel;
+      this.fullRobotModel = runtimeEnvironment.getFullRobotModel();
+      this.jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
       legJointNames = fullRobotModel.getRobotSpecificJointNames().getLegJointNames();
       registry = new YoVariableRegistry(getClass().getSimpleName());
+
 
       // initialize reference frames
       this.referenceFrames = referenceFrames;
@@ -119,9 +122,8 @@ public class QuadrupedVirtualModelController
       legEffortVector = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
+         RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
          RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
-         RigidBody foot = jointBeforeFoot.getSuccessor();
          legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
@@ -224,8 +226,9 @@ public class QuadrupedVirtualModelController
          CommonOps.multTransA(jacobianMatrix, virtualForceVector, legEffortVector.get(robotQuadrant));
 
          int index = 0;
-         for (OneDoFJoint joint : legJoints.get(robotQuadrant))
+         for (int i = 0; i < legJoints.get(robotQuadrant).length; i++)
          {
+            OneDoFJoint joint = legJoints.get(robotQuadrant)[i];
             QuadrupedJointName jointName = fullRobotModel.getNameForOneDoFJoint(joint);
             JointLimit jointLimit = fullRobotModel.getJointLimit(jointName);
 
@@ -243,7 +246,7 @@ public class QuadrupedVirtualModelController
             tau = tau - settings.getJointDamping(jointName) * joint.getQd();
 
             // update joint torques in full robot model
-            joint.setTau(tau);
+            jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(tau);
 
             // update joint torque vectors
             jointTorques.get(robotQuadrant)[index].setToZero(joint.getFrameBeforeJoint());

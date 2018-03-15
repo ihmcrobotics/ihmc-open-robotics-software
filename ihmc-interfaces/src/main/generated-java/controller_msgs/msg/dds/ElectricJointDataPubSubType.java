@@ -56,21 +56,21 @@ public class ElectricJointDataPubSubType implements us.ihmc.pubsub.TopicDataType
    public static void write(controller_msgs.msg.dds.ElectricJointData data, us.ihmc.idl.CDR cdr)
    {
 
-      cdr.write_type_7(data.getJoint_enabled());
+      cdr.write_type_7(data.getJointEnabled());
 
-      cdr.write_type_5(data.getJoint_temperature());
+      cdr.write_type_5(data.getJointTemperature());
 
-      cdr.write_type_5(data.getJoint_current());
+      cdr.write_type_5(data.getJointCurrent());
    }
 
    public static void read(controller_msgs.msg.dds.ElectricJointData data, us.ihmc.idl.CDR cdr)
    {
 
-      data.setJoint_enabled(cdr.read_type_7());
+      data.setJointEnabled(cdr.read_type_7());
 
-      data.setJoint_temperature(cdr.read_type_5());
+      data.setJointTemperature(cdr.read_type_5());
 
-      data.setJoint_current(cdr.read_type_5());
+      data.setJointCurrent(cdr.read_type_5());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.ElectricJointData src, controller_msgs.msg.dds.ElectricJointData dest)
@@ -97,21 +97,21 @@ public class ElectricJointDataPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(controller_msgs.msg.dds.ElectricJointData data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_7("joint_enabled", data.getJoint_enabled());
+      ser.write_type_7("joint_enabled", data.getJointEnabled());
 
-      ser.write_type_5("joint_temperature", data.getJoint_temperature());
+      ser.write_type_5("joint_temperature", data.getJointTemperature());
 
-      ser.write_type_5("joint_current", data.getJoint_current());
+      ser.write_type_5("joint_current", data.getJointCurrent());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ElectricJointData data)
    {
-      data.setJoint_enabled(ser.read_type_7("joint_enabled"));
+      data.setJointEnabled(ser.read_type_7("joint_enabled"));
 
-      data.setJoint_temperature(ser.read_type_5("joint_temperature"));
+      data.setJointTemperature(ser.read_type_5("joint_temperature"));
 
-      data.setJoint_current(ser.read_type_5("joint_current"));
+      data.setJointCurrent(ser.read_type_5("joint_current"));
    }
 
    @Override

@@ -1,0 +1,20 @@
+#ifndef __controller_msgs__msg__ManipulationAbortedStatus__idl__
+#define __controller_msgs__msg__ManipulationAbortedStatus__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::ManipulationAbortedStatus_")
+      struct ManipulationAbortedStatus
+      {
+        boolean unused_placeholder_field;
+      };
+    };
+  };
+};
+
+#endif

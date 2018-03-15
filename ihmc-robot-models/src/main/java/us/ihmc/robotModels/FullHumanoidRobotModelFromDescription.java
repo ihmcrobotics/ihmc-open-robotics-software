@@ -14,6 +14,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -35,6 +36,8 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    private RigidBody[] endEffectors = new RigidBody[4];
    private SideDependentList<RigidBody> feet;
    private SideDependentList<RigidBody> hands;
+
+   private RigidBody chest;
 
    private boolean initialized = false;
 
@@ -61,9 +64,16 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
       humanoidJointNameMap = sdfJointNameMap;
 
+      FloatingJointDescription rootJointDescription = (FloatingJointDescription) description.getRootJoints().get(0);
+      if (!rootJointDescription.getName().equals(sdfJointNameMap.getPelvisName()))
+      {
+         throw new RuntimeException("Pelvis joint is assumed to be the root joint");
+      }
+
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBodyTransform soleToAnkleTransform = sdfJointNameMap.getSoleToAnkleFrameTransform(robotSide);
+         RigidBodyTransform soleToAnkleTransform = sdfJointNameMap.getSoleToParentFrameTransform(robotSide);
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          MovingReferenceFrame soleFrame = MovingReferenceFrame.constructFrameFixedInParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
          soleFrames.put(robotSide, soleFrame);
@@ -188,6 +198,21 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    {
       return legJointLists.get(robotSide).get(legJointName);
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public RigidBody getPelvis()
+   {
+      return getRootBody();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public RigidBody getChest()
+   {
+      return chest;
+   }
+
 
    /** {@inheritDoc} */
    @Override
@@ -320,18 +345,18 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       initializeLists();
 
       LinkDescription childLink = joint.getLink();
+      HumanoidJointNameMap humanoidJointNameMap = (HumanoidJointNameMap) sdfJointNameMap;
 
-      if (rigidBody.getName().equals(sdfJointNameMap.getChestName()))
+      if (rigidBody.getName().equals(humanoidJointNameMap.getChestName()))
       {
          chest = rigidBody;
       }
 
-      if (rigidBody.getName().equals(sdfJointNameMap.getHeadName()))
+      if (rigidBody.getName().equals(humanoidJointNameMap.getHeadName()))
       {
          head = rigidBody;
       }
-      HumanoidJointNameMap jointMap = (HumanoidJointNameMap) sdfJointNameMap;
-      ImmutablePair<RobotSide, LimbName> limbSideAndName = jointMap.getLimbName(childLink.getName());
+      ImmutablePair<RobotSide, LimbName> limbSideAndName = humanoidJointNameMap.getLimbName(childLink.getName());
       if (limbSideAndName != null)
       {
          RobotSide limbSide = limbSideAndName.getLeft();
@@ -354,21 +379,21 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
          {
          //TODO: Should armJointLists use legJoingName.first or armJointName.first?? looks backwards
          case ARM:
-            ImmutablePair<RobotSide, ArmJointName> armJointName = jointMap.getArmJointName(joint.getName());
+            ImmutablePair<RobotSide, ArmJointName> armJointName = humanoidJointNameMap.getArmJointName(joint.getName());
             armJointLists.get(armJointName.getLeft()).put(armJointName.getRight(), inverseDynamicsJoint);
             armJointIDsList.get(armJointName.getLeft()).add(inverseDynamicsJoint);
             break;
          case LEG:
-            ImmutablePair<RobotSide, LegJointName> legJointName = jointMap.getLegJointName(joint.getName());
+            ImmutablePair<RobotSide, LegJointName> legJointName = humanoidJointNameMap.getLegJointName(joint.getName());
             legJointLists.get(legJointName.getLeft()).put(legJointName.getRight(), inverseDynamicsJoint);
             legJointIDsList.get(legJointName.getLeft()).add(inverseDynamicsJoint);
             break;
          case NECK:
-            NeckJointName neckJointName = sdfJointNameMap.getNeckJointName(joint.getName());
+            NeckJointName neckJointName = humanoidJointNameMap.getNeckJointName(joint.getName());
             neckJoints.put(neckJointName, inverseDynamicsJoint);
             break;
          case SPINE:
-            SpineJointName spineJointName = sdfJointNameMap.getSpineJointName(joint.getName());
+            SpineJointName spineJointName = humanoidJointNameMap.getSpineJointName(joint.getName());
             spineJoints.put(spineJointName, inverseDynamicsJoint);
             break;
          }
@@ -408,9 +433,9 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       }
    }
 
-   //   public ArrayList<OneDoFJoint> getArmJointIDs(RobotSide side)
-   //   {
-   //      return armJointIDsList.get(side);
-   //   }
-
+   @Override
+   public RobotSide[] getRobotSegments()
+   {
+      return RobotSide.values;
+   }
 }

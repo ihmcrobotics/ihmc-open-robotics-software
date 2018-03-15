@@ -22,6 +22,8 @@ public class ICPOptimizationControllerHelper
    private final RotationMatrix rotation = new RotationMatrix();
    private final RotationMatrix rotationTranspose = new RotationMatrix();
 
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+
    public void transformFromDynamicsFrame(FixedFrameVector2DBasics feedbackGainsToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelGain, double orthogonalGain)
    {
       double epsilonZeroICPVelocity = 1e-5;
@@ -29,9 +31,9 @@ public class ICPOptimizationControllerHelper
       if (desiredICPVelocity.lengthSquared() > MathTools.square(epsilonZeroICPVelocity))
       {
          icpVelocityDirectionFrame.setXAxis(desiredICPVelocity);
-         RigidBodyTransform transform = icpVelocityDirectionFrame.getTransformToWorldFrame();
+         icpVelocityDirectionFrame.getTransformToDesiredFrame(tempTransform, worldFrame);
 
-         transformValues(feedbackGainsToPack, 1.0 + parallelGain, 1.0 + orthogonalGain, transform);
+         transformValues(feedbackGainsToPack, 1.0 + parallelGain, 1.0 + orthogonalGain, tempTransform);
       }
       else
       {
@@ -40,10 +42,10 @@ public class ICPOptimizationControllerHelper
       }
    }
 
-
    public void transformToWorldFrame(FixedFrameVector2DBasics weightsToPack, double xValue, double yValue, ReferenceFrame frame)
    {
-      transformValues(weightsToPack, xValue, yValue, frame.getTransformToWorldFrame());
+      frame.getTransformToDesiredFrame(tempTransform, worldFrame);
+      transformValues(weightsToPack, xValue, yValue, tempTransform);
    }
 
    private void transformValues(FixedFrameVector2DBasics valuesToPack, double xValue, double yValue, RigidBodyTransform transformToDesiredFrame)

@@ -1,33 +1,37 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.Separator;
 import javafx.scene.layout.VBox;
-import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
 public class TuningBoxManager
 {
    private final VBox tuningBox;
+
    private final List<String> parametersBeingTuned = new ArrayList<>();
-   private final Map<String, Tuner> tunerMap = new HashMap<>();
+   private final Map<String, Button> removeButtons = new HashMap<>();
+
+   private Map<String, Tuner> tunerMap;
 
    public TuningBoxManager(VBox tuningBox)
    {
       this.tuningBox = tuningBox;
    }
 
-   public void handleNewParameter(GuiParameter parameter)
+   public void handleNewParameter(String uniqueName)
    {
-      String parameterName = parameter.getName();
-      if (parametersBeingTuned.contains(parameterName))
+      if (parametersBeingTuned.contains(uniqueName))
       {
          Platform.runLater(() -> {
             Alert alert = new Alert(AlertType.INFORMATION);
@@ -39,27 +43,38 @@ public class TuningBoxManager
          return;
       }
 
-      Tuner tuner = tunerMap.get(parameter.getUniqueName());
-      if (tuner == null)
-      {
-         tuner = new Tuner(parameter);
-         tunerMap.put(parameter.getUniqueName(), tuner);
-      }
-      Tuner finalTuner = tuner;
+      Button remove = new Button("Remove");
+      removeButtons.put(uniqueName, remove);
+      remove.setOnAction(event -> {
+         parametersBeingTuned.remove(uniqueName);
+         updateView();
+      });
 
-      parametersBeingTuned.add(parameterName);
-      EventHandler<ActionEvent> closeHandler = event -> {
-         tuningBox.getChildren().remove(finalTuner);
-         parametersBeingTuned.remove(parameterName);
-      };
-      tuner.setCloseHandler(closeHandler);
-      tuningBox.getChildren().add(tuner);
+      parametersBeingTuned.add(uniqueName);
+      updateView();
    }
 
-   public void clearAllParameters()
+   public void setTunerMap(Map<String, Tuner> tunerMap)
+   {
+      this.tunerMap = tunerMap;
+      List<String> invalidParameters = parametersBeingTuned.stream().filter(name -> !tunerMap.containsKey(name)).collect(Collectors.toList());
+      invalidParameters.forEach(name -> parametersBeingTuned.remove(name));
+      updateView();
+   }
+
+   public void updateView()
    {
       tuningBox.getChildren().clear();
-      parametersBeingTuned.clear();
-      tunerMap.clear();
+      parametersBeingTuned.forEach(uniqueName ->
+      {
+         tuningBox.getChildren().add(tunerMap.get(uniqueName));
+         tuningBox.getChildren().add(removeButtons.get(uniqueName));
+         tuningBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
+      });
+   }
+
+   public List<String> getParameterUniqueNames()
+   {
+      return Collections.unmodifiableList(parametersBeingTuned);
    }
 }

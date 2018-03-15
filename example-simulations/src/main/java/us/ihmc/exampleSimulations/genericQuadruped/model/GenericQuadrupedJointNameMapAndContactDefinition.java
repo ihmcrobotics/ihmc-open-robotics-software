@@ -1,10 +1,13 @@
 package us.ihmc.exampleSimulations.genericQuadruped.model;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.Robot;
 
 import java.util.*;
 
@@ -20,8 +23,12 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    private final HashMap<QuadrupedJointName, String> sdfJointNameMap = new HashMap<>();
    private final HashMap<String, JointRole> jointRoles = new HashMap<>();
 
+   private final LinkedHashMap<String, ImmutablePair<RobotQuadrant, LimbName>> limbNames = new LinkedHashMap<>();
+   private final LinkedHashMap<String, ImmutablePair<RobotQuadrant, LegJointName>> legJointNamesMap = new LinkedHashMap<>();
+
    private final List<ImmutablePair<String, Vector3D>> jointNameGroundContactPointMap = new ArrayList<>();
    private final QuadrantDependentList<HashMap<LegJointName, String>> mapFromLegJointNameToJointId = new QuadrantDependentList<>();
+   private final QuadrantDependentList<RigidBodyTransform> soleToParentTransforms = new QuadrantDependentList<>();
 
    public GenericQuadrupedJointNameMapAndContactDefinition(GenericQuadrupedPhysicalProperties physicalProperties)
    {
@@ -31,7 +38,14 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
          {
             QuadrupedJointName quadrupedJointName = QuadrupedJointName.getName(robotQuadrant, legJointName);
             quadrupedJointNameMap.put(quadrupedJointName.getUnderBarName(), quadrupedJointName);
+            legJointNamesMap.put(quadrupedJointName.getUnderBarName(), new ImmutablePair<>(robotQuadrant, legJointName));
          }
+
+         limbNames.put(robotQuadrant.getCamelCaseNameForStartOfExpression() + "Foot", new ImmutablePair<>(robotQuadrant, LimbName.LEG));
+
+         RigidBodyTransform soleToParentTransform = new RigidBodyTransform();
+         soleToParentTransform.setTranslation(physicalProperties.getOffsetFromJointBeforeFootToSole(robotQuadrant));
+         soleToParentTransforms.put(robotQuadrant, soleToParentTransform);
       }
 
       for (Map.Entry<String, QuadrupedJointName> entry : quadrupedJointNameMap.entrySet())
@@ -57,11 +71,11 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
          }
       }
 
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3D>(getJointBeforeFootName(robotQuadrant), physicalProperties.getOffsetFromJointBeforeFootToSole(robotQuadrant)));
+         jointNameGroundContactPointMap.add(new ImmutablePair<>(getJointBeforeFootName(robotQuadrant), physicalProperties.getOffsetFromJointBeforeFootToSole(robotQuadrant)));
          Vector3D shoulderContactOffset = new Vector3D(robotQuadrant.getEnd().negateIfHindEnd(0.08), robotQuadrant.getSide().negateIfRightSide(0.03), 0.02); // // FIXME: 6/2/16
-         jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3D>(getLegJointName(robotQuadrant, LegJointName.HIP_ROLL), shoulderContactOffset));
+         jointNameGroundContactPointMap.add(new ImmutablePair<>(getLegJointName(robotQuadrant, LegJointName.HIP_ROLL), shoulderContactOffset));
       }
 
       jointNamesBeforeFeet[0] = getLegJointName(RobotQuadrant.FRONT_LEFT, LegJointName.KNEE_PITCH);
@@ -73,6 +87,11 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    public Collection<QuadrupedJointName> getQuadrupedJointNames()
    {
       return quadrupedJointNameMap.values();
+   }
+
+   private String getLegJointName(RobotQuadrant robotQuadrant, LegJointName legJointName)
+   {
+      return mapFromLegJointNameToJointId.get(robotQuadrant).get(legJointName);
    }
 
    @Override
@@ -100,21 +119,9 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    }
 
    @Override
-   public String getPelvisName()
-   {
-      return rootJoint;
-   }
-
-   @Override
    public String getUnsanitizedRootJointInSdf()
    {
       return rootJoint;
-   }
-
-   @Override
-   public String getChestName()
-   {
-      return null;
    }
 
    @Override
@@ -178,10 +185,15 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    }
 
    @Override
-   public String getLegJointName(RobotQuadrant robotQuadrant, LegJointName legJointName)
+   public ImmutablePair<RobotQuadrant, LegJointName> getLegJointName(String jointName)
    {
-      HashMap<LegJointName, String> legJointMap = mapFromLegJointNameToJointId.get(robotQuadrant);
-      return legJointMap.get(legJointName);
+      return legJointNamesMap.get(jointName);
+   }
+
+   @Override
+   public ImmutablePair<RobotQuadrant, LimbName> getLimbName(String limbName)
+   {
+      return limbNames.get(limbName);
    }
 
    @Override
@@ -189,6 +201,12 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    {
       HashMap<LegJointName, String> legJointMap = mapFromLegJointNameToJointId.get(robotQuadrant);
       return legJointMap.get(LegJointName.KNEE_PITCH);
+   }
+
+   @Override
+   public RigidBodyTransform getSoleToParentFrameTransform(RobotQuadrant robotSegment)
+   {
+      return soleToParentTransforms.get(robotSegment);
    }
 
    @Override
@@ -204,13 +222,13 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
    }
 
    @Override
-   public Enum<?>[] getRobotSegments()
+   public String getBodyName()
    {
-      return RobotQuadrant.values;
+      return rootJoint;
    }
 
    @Override
-   public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
+   public RobotQuadrant getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {

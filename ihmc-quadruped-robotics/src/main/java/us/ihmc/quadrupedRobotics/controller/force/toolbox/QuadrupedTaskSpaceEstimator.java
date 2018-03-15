@@ -6,16 +6,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
 
 public class QuadrupedTaskSpaceEstimator
 {
@@ -23,7 +20,7 @@ public class QuadrupedTaskSpaceEstimator
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame comFrame;
-   private final QuadrantDependentList<ReferenceFrame> soleFrames;
+   private final QuadrantDependentList<MovingReferenceFrame> soleFrames;
    private final QuadrantDependentList<RigidBody> footRigidBody;
    private final RigidBody pelvisRigidBody;
 
@@ -53,12 +50,11 @@ public class QuadrupedTaskSpaceEstimator
       comFrame = referenceFrames.getCenterOfMassZUpFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       soleFrames = referenceFrames.getFootReferenceFrames();
-      pelvisRigidBody = fullRobotModel.getPelvis();
+      pelvisRigidBody = fullRobotModel.getRootBody();
       footRigidBody = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
-         footRigidBody.set(robotQuadrant, jointBeforeFoot.getSuccessor());
+         footRigidBody.set(robotQuadrant, fullRobotModel.getFoot(robotQuadrant));
       }
 
       // estimates
@@ -74,7 +70,7 @@ public class QuadrupedTaskSpaceEstimator
          yoSoleAngularVelocityEstimate.set(robotQuadrant, new YoFrameVector(prefix + "SoleAngularVelocityEstimate", worldFrame, registry));
          yoSoleLinearVelocityEstimate.set(robotQuadrant, new YoFrameVector(prefix + "SoleLinearVelocityEstimate", worldFrame, registry));
       }
-      yoBodyOrientationEstimate = new YoFrameOrientation("bodyOrientationEstimate", worldFrame, registry);
+      yoBodyOrientationEstimate = new YoFrameOrientation("comPositionEstimate", worldFrame, registry);
       yoBodyPositionEstimate = new YoFramePoint("bodyPositionEstimate", worldFrame, registry);
       yoBodyAngularVelocityEstimate = new YoFrameVector("bodyAngularVelocityEstimate", worldFrame, registry);
       yoBodyLinearVelocityEstimate = new YoFrameVector("bodyLinearVelocityEstimate", worldFrame, registry);

@@ -1,12 +1,9 @@
 package controller_msgs.msg.dds;
 
-/**
- * Definition of the class "SetDoubleArrayParameter" defined in SetDoubleArrayParameter_.idl.
- *
- * This file was automatically generated from SetDoubleArrayParameter_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit SetDoubleArrayParameter_.idl instead.
- */
-public class SetDoubleArrayParameter
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
+public class SetDoubleArrayParameter implements Settable<SetDoubleArrayParameter>, EpsilonComparable<SetDoubleArrayParameter>
 {
    private java.lang.StringBuilder parameter_name_;
    private us.ihmc.idl.IDLSequence.Double parameter_value_;
@@ -14,39 +11,63 @@ public class SetDoubleArrayParameter
    public SetDoubleArrayParameter()
    {
       parameter_name_ = new java.lang.StringBuilder(255);
+
       parameter_value_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
+   }
+
+   public SetDoubleArrayParameter(SetDoubleArrayParameter other)
+   {
+      set(other);
    }
 
    public void set(SetDoubleArrayParameter other)
    {
       parameter_name_.setLength(0);
       parameter_name_.append(other.parameter_name_);
+
       parameter_value_.set(other.parameter_value_);
    }
 
-   public java.lang.String getParameter_nameAsString()
+   public java.lang.String getParameterNameAsString()
    {
-      return getParameter_name().toString();
+      return getParameterName().toString();
    }
 
-   public java.lang.StringBuilder getParameter_name()
+   public java.lang.StringBuilder getParameterName()
    {
       return parameter_name_;
    }
 
-   public void setParameter_name(String parameter_name)
+   public void setParameterName(String parameter_name)
    {
       parameter_name_.setLength(0);
       parameter_name_.append(parameter_name);
    }
 
-   public us.ihmc.idl.IDLSequence.Double getParameter_value()
+   public us.ihmc.idl.IDLSequence.Double getParameterValue()
    {
       return parameter_value_;
    }
 
    @Override
-   public boolean equals(java.lang.Object other)
+   public boolean epsilonEquals(SetDoubleArrayParameter other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parameter_name_, other.parameter_name_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.parameter_value_, other.parameter_value_, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
    {
       if (other == null)
          return false;
@@ -54,14 +75,16 @@ public class SetDoubleArrayParameter
          return true;
       if (!(other instanceof SetDoubleArrayParameter))
          return false;
+
       SetDoubleArrayParameter otherMyClass = (SetDoubleArrayParameter) other;
-      boolean returnedValue = true;
 
-      returnedValue &= us.ihmc.idl.IDLTools.equals(this.parameter_name_, otherMyClass.parameter_name_);
+      if (!us.ihmc.idl.IDLTools.equals(this.parameter_name_, otherMyClass.parameter_name_))
+         return false;
 
-      returnedValue &= this.parameter_value_.equals(otherMyClass.parameter_value_);
+      if (!this.parameter_value_.equals(otherMyClass.parameter_value_))
+         return false;
 
-      return returnedValue;
+      return true;
    }
 
    @Override

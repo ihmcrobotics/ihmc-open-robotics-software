@@ -45,8 +45,8 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
       FrameVector2D copFeedbackExpected = new FrameVector2D();
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -75,8 +75,8 @@ public class ICPOptimizationQPSolverTest
       copFeedbackExpected.set(icpError);
       copFeedbackExpected.scale(3.0);
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP Feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -104,8 +104,8 @@ public class ICPOptimizationQPSolverTest
       copFeedbackExpected.set(icpError);
       copFeedbackExpected.scale(3.0);
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -146,8 +146,8 @@ public class ICPOptimizationQPSolverTest
       copFeedbackExpected.setY(Math.min(copFeedbackExpected.getY(), sideLength));
       copFeedbackExpected.sub(perfectCMP);
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -195,8 +195,8 @@ public class ICPOptimizationQPSolverTest
       // find delta
       copFeedbackExpected.sub(perfectCMP);
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -240,9 +240,9 @@ public class ICPOptimizationQPSolverTest
 
       footstepLocationExpected.set(desiredFootstepLocation);
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
-      Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -285,9 +285,9 @@ public class ICPOptimizationQPSolverTest
       icpError.scale(1.0 / footstepMultiplier);
       footstepLocationExpected.add(icpError);
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
-      Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -331,9 +331,9 @@ public class ICPOptimizationQPSolverTest
       icpError.scale(1.0 / footstepMultiplier);
       footstepLocationExpected.add(icpError);
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
-      Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -401,9 +401,9 @@ public class ICPOptimizationQPSolverTest
       footstepLocationExpected.setX(desiredFootstepLocation.getX() + solution.get(2));
       footstepLocationExpected.setY(desiredFootstepLocation.getY() + solution.get(3));
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
-      Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -472,9 +472,9 @@ public class ICPOptimizationQPSolverTest
       footstepLocationExpected.setX(desiredFootstepLocation.getX() + solution.get(2));
       footstepLocationExpected.setY(desiredFootstepLocation.getY() + solution.get(3));
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
-      Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -526,9 +526,9 @@ public class ICPOptimizationQPSolverTest
 
       footstepLocationExpected.add(desiredFootstepLocation);
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
-      Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
@@ -586,9 +586,9 @@ public class ICPOptimizationQPSolverTest
       // project the footstep into the reachability polygon
       reachabilityPolygon.orthogonalProjection(footstepLocationExpected);
 
-      Assert.assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
-      Assert.assertTrue(footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
+      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
    private FrameConvexPolygon2d createSupportPolygon(double sideLength)
@@ -690,7 +690,7 @@ public class ICPOptimizationQPSolverTest
             exception = e;
          }
 
-         Assert.assertTrue(exception == null);
+         Assert.assertTrue("There should not have been an exception.", exception == null);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 1.0)

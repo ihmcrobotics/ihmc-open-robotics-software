@@ -1,0 +1,36 @@
+// generated from rosidl_generator_dds_idl/resource/msg.idl.em
+
+#ifndef __controller_msgs__msg__Footstep__idl__
+#define __controller_msgs__msg__Footstep__idl__
+
+#include "controller_msgs/msg/./TaskspaceTrajectoryStamped_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::Footstep_")
+      struct Footstep
+      {
+        unsigned long long unique_id;
+        octet robot_side;
+        geometry_msgs::msg::dds::Point location;
+        geometry_msgs::msg::dds::Quaternion orientation;
+        sequence<geometry_msgs::msg::dds::Point> predicted_contact_points_2d;
+        octet trajectory_type;
+        double swing_height;
+        sequence<geometry_msgs::msg::dds::Point> position_waypoints;
+        sequence<controller_msgs::msg::dds::TaskspaceTrajectoryStamped> swing_trajectory;
+        double swing_trajectory_blend_duration;
+        double swing_duration;
+        double transfer_duration;
+      };  // struct Footstep
+    };  // module dds_
+  };  // module msg
+};  // module controller_msgs
+
+#endif  // __controller_msgs__msg__Footstep__idl__

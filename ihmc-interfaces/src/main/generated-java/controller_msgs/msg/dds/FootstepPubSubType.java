@@ -33,7 +33,7 @@ public class FootstepPubSubType implements us.ihmc.pubsub.TopicDataType<controll
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -43,13 +43,13 @@ public class FootstepPubSubType implements us.ihmc.pubsub.TopicDataType<controll
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < 100; ++a)
+      for (int i0 = 0; i0 < 100; ++i0)
       {
          current_alignment += controller_msgs.msg.dds.TaskspaceTrajectoryStampedPubSubType.getMaxCdrSerializedSize(current_alignment);
       }
@@ -79,9 +79,9 @@ public class FootstepPubSubType implements us.ihmc.pubsub.TopicDataType<controll
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLocation(), current_alignment);
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getPredicted_contact_points_2d().size(); ++a)
+      for (int i0 = 0; i0 < data.getPredictedContactPoints2d().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPredicted_contact_points_2d().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPredictedContactPoints2d().get(i0), current_alignment);
       }
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -89,16 +89,16 @@ public class FootstepPubSubType implements us.ihmc.pubsub.TopicDataType<controll
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getPosition_waypoints().size(); ++a)
+      for (int i0 = 0; i0 < data.getPositionWaypoints().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition_waypoints().get(a), current_alignment);
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPositionWaypoints().get(i0), current_alignment);
       }
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int a = 0; a < data.getSwing_trajectory().size(); ++a)
+      for (int i0 = 0; i0 < data.getSwingTrajectory().size(); ++i0)
       {
          current_alignment += controller_msgs.msg.dds.TaskspaceTrajectoryStampedPubSubType
-               .getCdrSerializedSize(data.getSwing_trajectory().get(a), current_alignment);
+               .getCdrSerializedSize(data.getSwingTrajectory().get(i0), current_alignment);
       }
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -113,66 +113,66 @@ public class FootstepPubSubType implements us.ihmc.pubsub.TopicDataType<controll
    public static void write(controller_msgs.msg.dds.Footstep data, us.ihmc.idl.CDR cdr)
    {
 
-      cdr.write_type_12(data.getUnique_id());
+      cdr.write_type_12(data.getUniqueId());
 
-      cdr.write_type_9(data.getRobot_side());
+      cdr.write_type_9(data.getRobotSide());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getLocation(), cdr);
 
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
 
-      if (data.getPredicted_contact_points_2d().size() <= 100)
-         cdr.write_type_e(data.getPredicted_contact_points_2d());
+      if (data.getPredictedContactPoints2d().size() <= 100)
+         cdr.write_type_e(data.getPredictedContactPoints2d());
       else
          throw new RuntimeException("predicted_contact_points_2d field exceeds the maximum length");
 
-      cdr.write_type_9(data.getTrajectory_type());
+      cdr.write_type_9(data.getTrajectoryType());
 
-      cdr.write_type_6(data.getSwing_height());
+      cdr.write_type_6(data.getSwingHeight());
 
-      if (data.getPosition_waypoints().size() <= 100)
-         cdr.write_type_e(data.getPosition_waypoints());
+      if (data.getPositionWaypoints().size() <= 100)
+         cdr.write_type_e(data.getPositionWaypoints());
       else
          throw new RuntimeException("position_waypoints field exceeds the maximum length");
 
-      if (data.getSwing_trajectory().size() <= 100)
-         cdr.write_type_e(data.getSwing_trajectory());
+      if (data.getSwingTrajectory().size() <= 100)
+         cdr.write_type_e(data.getSwingTrajectory());
       else
          throw new RuntimeException("swing_trajectory field exceeds the maximum length");
 
-      cdr.write_type_6(data.getSwing_trajectory_blend_duration());
+      cdr.write_type_6(data.getSwingTrajectoryBlendDuration());
 
-      cdr.write_type_6(data.getSwing_duration());
+      cdr.write_type_6(data.getSwingDuration());
 
-      cdr.write_type_6(data.getTransfer_duration());
+      cdr.write_type_6(data.getTransferDuration());
    }
 
    public static void read(controller_msgs.msg.dds.Footstep data, us.ihmc.idl.CDR cdr)
    {
 
-      data.setUnique_id(cdr.read_type_12());
+      data.setUniqueId(cdr.read_type_12());
 
-      data.setRobot_side(cdr.read_type_9());
+      data.setRobotSide(cdr.read_type_9());
 
       geometry_msgs.msg.dds.PointPubSubType.read(data.getLocation(), cdr);
 
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);
 
-      cdr.read_type_e(data.getPredicted_contact_points_2d());
+      cdr.read_type_e(data.getPredictedContactPoints2d());
 
-      data.setTrajectory_type(cdr.read_type_9());
+      data.setTrajectoryType(cdr.read_type_9());
 
-      data.setSwing_height(cdr.read_type_6());
+      data.setSwingHeight(cdr.read_type_6());
 
-      cdr.read_type_e(data.getPosition_waypoints());
+      cdr.read_type_e(data.getPositionWaypoints());
 
-      cdr.read_type_e(data.getSwing_trajectory());
+      cdr.read_type_e(data.getSwingTrajectory());
 
-      data.setSwing_trajectory_blend_duration(cdr.read_type_6());
+      data.setSwingTrajectoryBlendDuration(cdr.read_type_6());
 
-      data.setSwing_duration(cdr.read_type_6());
+      data.setSwingDuration(cdr.read_type_6());
 
-      data.setTransfer_duration(cdr.read_type_6());
+      data.setTransferDuration(cdr.read_type_6());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.Footstep src, controller_msgs.msg.dds.Footstep dest)
@@ -199,57 +199,57 @@ public class FootstepPubSubType implements us.ihmc.pubsub.TopicDataType<controll
    @Override
    public final void serialize(controller_msgs.msg.dds.Footstep data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_12("unique_id", data.getUnique_id());
+      ser.write_type_12("unique_id", data.getUniqueId());
 
-      ser.write_type_9("robot_side", data.getRobot_side());
+      ser.write_type_9("robot_side", data.getRobotSide());
 
       ser.write_type_a("location", new geometry_msgs.msg.dds.PointPubSubType(), data.getLocation());
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.write_type_e("predicted_contact_points_2d", data.getPredicted_contact_points_2d());
+      ser.write_type_e("predicted_contact_points_2d", data.getPredictedContactPoints2d());
 
-      ser.write_type_9("trajectory_type", data.getTrajectory_type());
+      ser.write_type_9("trajectory_type", data.getTrajectoryType());
 
-      ser.write_type_6("swing_height", data.getSwing_height());
+      ser.write_type_6("swing_height", data.getSwingHeight());
 
-      ser.write_type_e("position_waypoints", data.getPosition_waypoints());
+      ser.write_type_e("position_waypoints", data.getPositionWaypoints());
 
-      ser.write_type_e("swing_trajectory", data.getSwing_trajectory());
+      ser.write_type_e("swing_trajectory", data.getSwingTrajectory());
 
-      ser.write_type_6("swing_trajectory_blend_duration", data.getSwing_trajectory_blend_duration());
+      ser.write_type_6("swing_trajectory_blend_duration", data.getSwingTrajectoryBlendDuration());
 
-      ser.write_type_6("swing_duration", data.getSwing_duration());
+      ser.write_type_6("swing_duration", data.getSwingDuration());
 
-      ser.write_type_6("transfer_duration", data.getTransfer_duration());
+      ser.write_type_6("transfer_duration", data.getTransferDuration());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.Footstep data)
    {
-      data.setUnique_id(ser.read_type_12("unique_id"));
+      data.setUniqueId(ser.read_type_12("unique_id"));
 
-      data.setRobot_side(ser.read_type_9("robot_side"));
+      data.setRobotSide(ser.read_type_9("robot_side"));
 
       ser.read_type_a("location", new geometry_msgs.msg.dds.PointPubSubType(), data.getLocation());
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
-      ser.read_type_e("predicted_contact_points_2d", data.getPredicted_contact_points_2d());
+      ser.read_type_e("predicted_contact_points_2d", data.getPredictedContactPoints2d());
 
-      data.setTrajectory_type(ser.read_type_9("trajectory_type"));
+      data.setTrajectoryType(ser.read_type_9("trajectory_type"));
 
-      data.setSwing_height(ser.read_type_6("swing_height"));
+      data.setSwingHeight(ser.read_type_6("swing_height"));
 
-      ser.read_type_e("position_waypoints", data.getPosition_waypoints());
+      ser.read_type_e("position_waypoints", data.getPositionWaypoints());
 
-      ser.read_type_e("swing_trajectory", data.getSwing_trajectory());
+      ser.read_type_e("swing_trajectory", data.getSwingTrajectory());
 
-      data.setSwing_trajectory_blend_duration(ser.read_type_6("swing_trajectory_blend_duration"));
+      data.setSwingTrajectoryBlendDuration(ser.read_type_6("swing_trajectory_blend_duration"));
 
-      data.setSwing_duration(ser.read_type_6("swing_duration"));
+      data.setSwingDuration(ser.read_type_6("swing_duration"));
 
-      data.setTransfer_duration(ser.read_type_6("transfer_duration"));
+      data.setTransferDuration(ser.read_type_6("transfer_duration"));
    }
 
    @Override

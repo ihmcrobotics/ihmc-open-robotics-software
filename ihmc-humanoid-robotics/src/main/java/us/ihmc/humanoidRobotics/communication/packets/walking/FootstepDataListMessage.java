@@ -54,7 +54,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    @RosExportedField(documentation = "If false the controller adjust each footstep height to be at the support sole height.")
    public boolean trustHeightOfFootsteps = true;
    @RosExportedField(documentation = "Contains information on whether the robot can automatically adjust its footsteps to retain balance.")
-   public boolean areFootstepsAdjustable = true;
+   public boolean areFootstepsAdjustable = false;
 
    @RosExportedField(documentation = "If true the controller will adjust upcoming footsteps with the location error of previous steps.")
    public boolean offsetFootstepsWithExecutionError = false;

@@ -3,12 +3,14 @@ package us.ihmc.quadrupedRobotics.controller.positionDevelopment.states;
 import java.awt.Color;
 import java.util.HashMap;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -24,6 +26,8 @@ import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverse
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -74,7 +78,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final StateMachine<COM_ESTIMATE_STATES> stateMachine;
    private final FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerOnTransitionIn;
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
-   private final FullRobotModel fullRobotModel;
+   private final FullQuadrupedRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final OneDoFJoint[] oneDoFJoints;
 
@@ -105,9 +109,12 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private final FramePoint3D desiredFootPosition = new FramePoint3D(worldFrame);
    private final FramePoint3D desiredFootPositionInLegAttachmentFrame = new FramePoint3D();
 
+   private final JointDesiredOutputList jointDesiredOutputList;
+
    public QuadrupedPositionBasedCenterOfMassVerificationController(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedLegInverseKinematicsCalculator quadrupedInverseKinematicsCalulcator, YoVariableRegistry parentRegistry)
    {
       //Set Initial Values
+      this.jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
       this.swingTime.set(2.0);
       this.footZHeightOnPickUp.set(0.04);
       this.footZHeightOnTouchdown.set(0.0);
@@ -168,13 +175,13 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          RobotQuadrant hindSoleQuadrant = RobotQuadrant.getQuadrant(RobotEnd.HIND, robotSide);
          RobotQuadrant frontSoleQuadrantOppositeSide = RobotQuadrant.getQuadrant(RobotEnd.FRONT, robotSide.getOppositeSide());
 
-         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, referenceFrames.getFootFrame(hindSoleQuadrant), referenceFrames.getFootFrame(frontSoleQuadrantOppositeSide));
+         MidFrameZUpFrame midTrotLineZUpFrame = new MidFrameZUpFrame("hind" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Front" + robotSide.getOppositeSide().getCamelCaseNameForMiddleOfExpression() + "MidTrotLineZUpFrame", worldFrame, referenceFrames.getSoleFrame(hindSoleQuadrant), referenceFrames.getSoleFrame(frontSoleQuadrantOppositeSide));
          sideDependentMidTrotLineZUpFrames.put(robotSide, midTrotLineZUpFrame);
       }
 
       //Create State Machine and States
       this.stateMachine = new StateMachine<COM_ESTIMATE_STATES>("centerOfMassVerificationStateMachine", "walkingStateTranistionTime", COM_ESTIMATE_STATES.class, runtimeEnvironment.getRobotTimestamp(), registry);
-      this.filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState(modelFactory);
+      this.filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState();
       MoveCenterOfMassAround moveCenterOfMassAroundState = new MoveCenterOfMassAround();
       MoveFeet pickFeetUp = new MoveFeet("pickFeetUp", footZHeightOnPickUp, trotPairToRaise, COM_ESTIMATE_STATES.PICK_UP_FEET);
       MoveFeet putFeetDown = new MoveFeet("putFeetDown", footZHeightOnTouchdown, trotPairInAir, COM_ESTIMATE_STATES.PUT_DOWN_FEET);
@@ -261,7 +268,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
 
       if (stateMachine.isCurrentState(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS))
       {
-         filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds(oneDoFJoints);
+         filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds();
       }
       return null;
    }
@@ -509,7 +516,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          intialCenterOfMassReferenceFrame.updateTranslation(intialCenterOfMass);
 
          totalMass = fullRobotModel.getTotalMass();
-         bodyMass = fullRobotModel.getPelvis().getInertia().getMass();
+         bodyMass = fullRobotModel.getBody().getInertia().getMass();
 
          for (TrotPair trotPair : TrotPair.values())
          {
@@ -682,32 +689,27 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
    private class FilterDesiredsToMatchCrawlControllerState extends State<COM_ESTIMATE_STATES>
    {
       private final AlphaFilteredYoVariable filterStandPrepDesiredsToWalkingDesireds;
-      private final FullRobotModel initialDesiredsUponEnteringFullRobotModel;
+      private final TDoubleArrayList initialPositions = new TDoubleArrayList();
 
-      public FilterDesiredsToMatchCrawlControllerState(QuadrupedModelFactory modelFactory)
+      public FilterDesiredsToMatchCrawlControllerState()
       {
          super(COM_ESTIMATE_STATES.ALPHA_FILTERING_DESIREDS);
-
-         initialDesiredsUponEnteringFullRobotModel = modelFactory.createFullRobotModel();
 
          double filterStandPrepDesiredsToWalkingDesiredsAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.5, dt);
          filterStandPrepDesiredsToWalkingDesireds = new AlphaFilteredYoVariable("filterStandPrepDesiredsToWalkingDesireds", registry, filterStandPrepDesiredsToWalkingDesiredsAlpha);
       }
 
-      public void filterDesireds(OneDoFJoint[] oneDoFJointsActual)
+      public void filterDesireds()
       {
-         for (int i = 0; i < oneDoFJointsActual.length; i++)
+         for (int i = 0; i < oneDoFJoints.length; i++)
          {
-            OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
-            String jointName = actualOneDoFJoint.getName();
-
-            OneDoFJoint intialOneDoFJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(jointName);
-            //            OneDoFJoint desiredOneDofJoint = finalDesiredsFullRobotModel.getOneDoFJointByName(jointName);
+            OneDoFJoint actualOneDoFJoint = oneDoFJoints[i];
+            JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint);
 
             double alpha = filterStandPrepDesiredsToWalkingDesireds.getDoubleValue();
 
-            double alphaFilteredQ = (1.0 - alpha) * intialOneDoFJoint.getqDesired() + alpha * actualOneDoFJoint.getqDesired();
-            actualOneDoFJoint.setqDesired(alphaFilteredQ);
+            double alphaFilteredQ = (1.0 - alpha) * initialPositions.get(i) + alpha * jointDesiredOutput.getDesiredPosition();
+            jointDesiredOutput.setDesiredPosition(alphaFilteredQ);
          }
       }
 
@@ -728,11 +730,11 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
          filterStandPrepDesiredsToWalkingDesireds.reset();
          filterStandPrepDesiredsToWalkingDesireds.update(0.0);
 
+         initialPositions.clear();
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJoints[i];
-            OneDoFJoint initialOneDofJoint = initialDesiredsUponEnteringFullRobotModel.getOneDoFJointByName(actualOneDoFJoint.getName());
-            initialOneDofJoint.setqDesired(actualOneDoFJoint.getqDesired());
+            initialPositions.add(jointDesiredOutputList.getJointDesiredOutput(actualOneDoFJoint).getDesiredPosition());
          }
       }
 

@@ -354,6 +354,11 @@ public class FullRobotModelTestTools
          return pelvis;
       }
 
+      @Override public RigidBody getRootBody()
+      {
+         return pelvis;
+      }
+
       @Override public RigidBody getChest()
       {
          return chest;
@@ -510,6 +515,12 @@ public class FullRobotModelTestTools
             }
          }
 
+      }
+
+      @Override
+      public RobotSide[] getRobotSegments()
+      {
+         return RobotSide.values;
       }
    }
 }

@@ -21,7 +21,7 @@ public class QuadrupedSoleForceEstimator
    private final FullQuadrupedRobotModel fullRobotModel;
    private final QuadrupedReferenceFrames referenceFrames;
    private final ReferenceFrame worldFrame;
-   private final QuadrantDependentList<ReferenceFrame> soleFrame;
+   private final QuadrantDependentList<MovingReferenceFrame> soleFrame;
 
    private final QuadrantDependentList<FrameVector3D> soleVirtualForce;
    private final QuadrantDependentList<FrameVector3D> soleContactForce;
@@ -82,9 +82,8 @@ public class QuadrupedSoleForceEstimator
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         OneDoFJoint jointBeforeFoot = fullRobotModel.getOneDoFJointBeforeFoot(robotQuadrant);
          RigidBody body = fullRobotModel.getRootJoint().getSuccessor();
-         RigidBody foot = jointBeforeFoot.getSuccessor();
+         RigidBody foot = fullRobotModel.getFoot(robotQuadrant);
          legJoints.set(robotQuadrant, ScrewTools.filterJoints(ScrewTools.createJointPath(body, foot), OneDoFJoint.class));
          footJacobian.set(robotQuadrant, new GeometricJacobian(legJoints.get(robotQuadrant), body.getBodyFixedFrame()));
          soleJacobian.set(robotQuadrant, new PointJacobian());
@@ -95,7 +94,7 @@ public class QuadrupedSoleForceEstimator
          jacobianMatrixTransposePseudoInverse.set(robotQuadrant, new DenseMatrix64F(jacobianRows, jacobianCols));
          soleForceMatrix.set(robotQuadrant, new DenseMatrix64F(3, 1));
          jointTorqueVector.set(robotQuadrant, new DenseMatrix64F(legJoints.get(robotQuadrant).length, 1));
-         fullRobotModel.getLegOneDoFJoints(robotQuadrant).get(0).getTau();
+         fullRobotModel.getLegJointsList(robotQuadrant).get(0).getTau();
       }
       parentRegistry.addChild(registry);
       this.reset();

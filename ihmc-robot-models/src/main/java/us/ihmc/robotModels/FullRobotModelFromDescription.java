@@ -49,13 +49,12 @@ public class FullRobotModelFromDescription implements FullRobotModel
    protected final EnumMap<SpineJointName, OneDoFJoint> spineJoints = new EnumMap<>(SpineJointName.class);
    protected final String[] sensorLinksToTrack;
 //   protected final SDFLinkHolder rootLink;
-   protected RigidBody chest;
    protected RigidBody head;
 
-   private final RigidBody pelvis;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RigidBody elevator;
-   private final SixDoFJoint rootJoint;
+   protected final SixDoFJoint rootJoint;
+   private final RigidBody rootLink;
    private final LinkedHashMap<String, OneDoFJoint> oneDoFJoints = new LinkedHashMap<String, OneDoFJoint>();
    private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
@@ -74,7 +73,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    {
       this(modelToCopy.description, modelToCopy.sdfJointNameMap, modelToCopy.sensorLinksToTrack);
    }
-   
+
    public FullRobotModelFromDescription(RobotDescription description, JointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
    {
       this(description, sdfJointNameMap, sensorLinksToTrack, false);
@@ -101,28 +100,24 @@ public class FullRobotModelFromDescription implements FullRobotModel
        */
       elevator = new RigidBody("elevator", worldFrame);
       rootJoint = new SixDoFJoint(rootJointDescription.getName(), elevator);
-      if (!rootJointDescription.getName().equals(sdfJointNameMap.getPelvisName()))
-      {
-         throw new RuntimeException("Pelvis joint is assumed to be the root joint");
-      }
 
       //      System.out.println("Adding rigid body " + rootLink.getName() + "; Mass: " + rootLink.getMass() + "; ixx: " + rootLink.getInertia().m00 + "; iyy: " + rootLink.getInertia().m11
       //            + "; izz: " + rootLink.getInertia().m22 + "; COM Offset: " + rootLink.getCoMOffset());
       LinkDescription rootLinkDescription = rootJointDescription.getLink();
-      pelvis = ScrewTools.addRigidBody(rootJointDescription.getName(), rootJoint, rootLinkDescription.getMomentOfInertiaCopy(), rootLinkDescription.getMass(), rootLinkDescription.getCenterOfMassOffset());
+      rootLink = ScrewTools.addRigidBody(rootJointDescription.getName(), rootJoint, rootLinkDescription.getMomentOfInertiaCopy(), rootLinkDescription.getMass(), rootLinkDescription.getCenterOfMassOffset());
 
       checkLinkIsNeededForSensor(rootJoint, rootJointDescription);
       addSensorDefinitions(rootJoint, rootJointDescription);
 
-      if (pelvis.getName().equals(sdfJointNameMap.getHeadName()))
+      if (rootLink.getName().equals(sdfJointNameMap.getHeadName()))
       {
-         head = pelvis;
+         head = rootLink;
       }
 
       totalMass = rootJointDescription.getLink().getMass();
       for (JointDescription jointDescription : rootJointDescription.getChildrenJoints())
       {
-         addJointsRecursively((OneDoFJointDescription) jointDescription, pelvis);
+         addJointsRecursively((OneDoFJointDescription) jointDescription, rootLink);
       }
    }
 
@@ -227,16 +222,9 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    /** {@inheritDoc} */
    @Override
-   public RigidBody getPelvis()
+   public RigidBody getRootBody()
    {
-      return pelvis;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public RigidBody getChest()
-   {
-      return chest;
+      return rootLink;
    }
 
    /** {@inheritDoc} */
@@ -448,11 +436,6 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    protected void mapRigidBody(JointDescription joint, OneDoFJoint inverseDynamicsJoint, RigidBody rigidBody)
    {
-      if (rigidBody.getName().equals(sdfJointNameMap.getChestName()))
-      {
-         chest = rigidBody;
-      }
-
       if (rigidBody.getName().equals(sdfJointNameMap.getHeadName()))
       {
          head = rigidBody;

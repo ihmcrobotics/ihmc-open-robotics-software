@@ -72,37 +72,37 @@ public class PumpStatePubSubType implements us.ihmc.pubsub.TopicDataType<control
    public static void write(controller_msgs.msg.dds.PumpState data, us.ihmc.idl.CDR cdr)
    {
 
-      cdr.write_type_5(data.getPump_inlet_pressure());
+      cdr.write_type_5(data.getPumpInletPressure());
 
-      cdr.write_type_5(data.getPump_supply_pressure());
+      cdr.write_type_5(data.getPumpSupplyPressure());
 
-      cdr.write_type_5(data.getAir_sump_pressure());
+      cdr.write_type_5(data.getAirSumpPressure());
 
-      cdr.write_type_5(data.getPump_supply_temperature());
+      cdr.write_type_5(data.getPumpSupplyTemperature());
 
-      cdr.write_type_5(data.getPump_rpm());
+      cdr.write_type_5(data.getPumpRpm());
 
-      cdr.write_type_5(data.getMotor_temperature());
+      cdr.write_type_5(data.getMotorTemperature());
 
-      cdr.write_type_5(data.getMotor_driver_temperature());
+      cdr.write_type_5(data.getMotorDriverTemperature());
    }
 
    public static void read(controller_msgs.msg.dds.PumpState data, us.ihmc.idl.CDR cdr)
    {
 
-      data.setPump_inlet_pressure(cdr.read_type_5());
+      data.setPumpInletPressure(cdr.read_type_5());
 
-      data.setPump_supply_pressure(cdr.read_type_5());
+      data.setPumpSupplyPressure(cdr.read_type_5());
 
-      data.setAir_sump_pressure(cdr.read_type_5());
+      data.setAirSumpPressure(cdr.read_type_5());
 
-      data.setPump_supply_temperature(cdr.read_type_5());
+      data.setPumpSupplyTemperature(cdr.read_type_5());
 
-      data.setPump_rpm(cdr.read_type_5());
+      data.setPumpRpm(cdr.read_type_5());
 
-      data.setMotor_temperature(cdr.read_type_5());
+      data.setMotorTemperature(cdr.read_type_5());
 
-      data.setMotor_driver_temperature(cdr.read_type_5());
+      data.setMotorDriverTemperature(cdr.read_type_5());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.PumpState src, controller_msgs.msg.dds.PumpState dest)
@@ -129,37 +129,37 @@ public class PumpStatePubSubType implements us.ihmc.pubsub.TopicDataType<control
    @Override
    public final void serialize(controller_msgs.msg.dds.PumpState data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_5("pump_inlet_pressure", data.getPump_inlet_pressure());
+      ser.write_type_5("pump_inlet_pressure", data.getPumpInletPressure());
 
-      ser.write_type_5("pump_supply_pressure", data.getPump_supply_pressure());
+      ser.write_type_5("pump_supply_pressure", data.getPumpSupplyPressure());
 
-      ser.write_type_5("air_sump_pressure", data.getAir_sump_pressure());
+      ser.write_type_5("air_sump_pressure", data.getAirSumpPressure());
 
-      ser.write_type_5("pump_supply_temperature", data.getPump_supply_temperature());
+      ser.write_type_5("pump_supply_temperature", data.getPumpSupplyTemperature());
 
-      ser.write_type_5("pump_rpm", data.getPump_rpm());
+      ser.write_type_5("pump_rpm", data.getPumpRpm());
 
-      ser.write_type_5("motor_temperature", data.getMotor_temperature());
+      ser.write_type_5("motor_temperature", data.getMotorTemperature());
 
-      ser.write_type_5("motor_driver_temperature", data.getMotor_driver_temperature());
+      ser.write_type_5("motor_driver_temperature", data.getMotorDriverTemperature());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PumpState data)
    {
-      data.setPump_inlet_pressure(ser.read_type_5("pump_inlet_pressure"));
+      data.setPumpInletPressure(ser.read_type_5("pump_inlet_pressure"));
 
-      data.setPump_supply_pressure(ser.read_type_5("pump_supply_pressure"));
+      data.setPumpSupplyPressure(ser.read_type_5("pump_supply_pressure"));
 
-      data.setAir_sump_pressure(ser.read_type_5("air_sump_pressure"));
+      data.setAirSumpPressure(ser.read_type_5("air_sump_pressure"));
 
-      data.setPump_supply_temperature(ser.read_type_5("pump_supply_temperature"));
+      data.setPumpSupplyTemperature(ser.read_type_5("pump_supply_temperature"));
 
-      data.setPump_rpm(ser.read_type_5("pump_rpm"));
+      data.setPumpRpm(ser.read_type_5("pump_rpm"));
 
-      data.setMotor_temperature(ser.read_type_5("motor_temperature"));
+      data.setMotorTemperature(ser.read_type_5("motor_temperature"));
 
-      data.setMotor_driver_temperature(ser.read_type_5("motor_driver_temperature"));
+      data.setMotorDriverTemperature(ser.read_type_5("motor_driver_temperature"));
    }
 
    @Override

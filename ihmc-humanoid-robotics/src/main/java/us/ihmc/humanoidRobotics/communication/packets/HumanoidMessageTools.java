@@ -1015,7 +1015,7 @@ public class HumanoidMessageTools
    {
       MessageOfMessages message = new MessageOfMessages();
       message.packets.clear();
-      message.packets.addAll(messages);
+      message.addPacket(messages.toArray(new Packet[0]));
       return message;
    }
 

@@ -1,0 +1,27 @@
+// generated from rosidl_generator_dds_idl/resource/msg.idl.em
+
+#ifndef __controller_msgs__msg__TaskspaceTrajectoryStamped__idl__
+#define __controller_msgs__msg__TaskspaceTrajectoryStamped__idl__
+
+#include "builtin_interfaces/msg/./Duration_.idl"
+#include "geometry_msgs/msg/./PoseStamped_.idl"
+#include "std_msgs/msg/./Header_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::TaskspaceTrajectoryStamped_")
+      struct TaskspaceTrajectoryStamped
+      {
+        std_msgs::msg::dds::Header header;
+        sequence<geometry_msgs::msg::dds::PoseStamped> trajectory_points_stamped;
+        builtin_interfaces::msg::dds::Duration time_from_start;
+      };  // struct TaskspaceTrajectoryStamped
+    };  // module dds_
+  };  // module msg
+};  // module controller_msgs
+
+#endif  // __controller_msgs__msg__TaskspaceTrajectoryStamped__idl__

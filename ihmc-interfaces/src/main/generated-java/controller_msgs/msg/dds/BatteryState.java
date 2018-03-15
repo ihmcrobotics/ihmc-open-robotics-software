@@ -1,12 +1,9 @@
 package controller_msgs.msg.dds;
 
-/**
- * Definition of the class "BatteryState" defined in BatteryState_.idl.
- *
- * This file was automatically generated from BatteryState_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit BatteryState_.idl instead.
- */
-public class BatteryState
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
+public class BatteryState implements Settable<BatteryState>, EpsilonComparable<BatteryState>
 {
    private boolean battery_charging_;
    private float battery_voltage_;
@@ -21,89 +18,132 @@ public class BatteryState
 
    }
 
+   public BatteryState(BatteryState other)
+   {
+      set(other);
+   }
+
    public void set(BatteryState other)
    {
       battery_charging_ = other.battery_charging_;
+
       battery_voltage_ = other.battery_voltage_;
+
       battery_current_ = other.battery_current_;
+
       remaining_battery_time_ = other.remaining_battery_time_;
+
       remaining_amp_hours_ = other.remaining_amp_hours_;
+
       remaining_charge_percentage_ = other.remaining_charge_percentage_;
+
       battery_cycle_count_ = other.battery_cycle_count_;
    }
 
-   public boolean getBattery_charging()
+   public boolean getBatteryCharging()
    {
       return battery_charging_;
    }
 
-   public void setBattery_charging(boolean battery_charging)
+   public void setBatteryCharging(boolean battery_charging)
    {
       battery_charging_ = battery_charging;
    }
 
-   public float getBattery_voltage()
+   public float getBatteryVoltage()
    {
       return battery_voltage_;
    }
 
-   public void setBattery_voltage(float battery_voltage)
+   public void setBatteryVoltage(float battery_voltage)
    {
       battery_voltage_ = battery_voltage;
    }
 
-   public float getBattery_current()
+   public float getBatteryCurrent()
    {
       return battery_current_;
    }
 
-   public void setBattery_current(float battery_current)
+   public void setBatteryCurrent(float battery_current)
    {
       battery_current_ = battery_current;
    }
 
-   public float getRemaining_battery_time()
+   public float getRemainingBatteryTime()
    {
       return remaining_battery_time_;
    }
 
-   public void setRemaining_battery_time(float remaining_battery_time)
+   public void setRemainingBatteryTime(float remaining_battery_time)
    {
       remaining_battery_time_ = remaining_battery_time;
    }
 
-   public float getRemaining_amp_hours()
+   public float getRemainingAmpHours()
    {
       return remaining_amp_hours_;
    }
 
-   public void setRemaining_amp_hours(float remaining_amp_hours)
+   public void setRemainingAmpHours(float remaining_amp_hours)
    {
       remaining_amp_hours_ = remaining_amp_hours;
    }
 
-   public float getRemaining_charge_percentage()
+   public float getRemainingChargePercentage()
    {
       return remaining_charge_percentage_;
    }
 
-   public void setRemaining_charge_percentage(float remaining_charge_percentage)
+   public void setRemainingChargePercentage(float remaining_charge_percentage)
    {
       remaining_charge_percentage_ = remaining_charge_percentage;
    }
 
-   public long getBattery_cycle_count()
+   public long getBatteryCycleCount()
    {
       return battery_cycle_count_;
    }
 
-   public void setBattery_cycle_count(long battery_cycle_count)
+   public void setBatteryCycleCount(long battery_cycle_count)
    {
       battery_cycle_count_ = battery_cycle_count;
    }
 
    @Override
-   public boolean equals(java.lang.Object other)
+   public boolean epsilonEquals(BatteryState other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.battery_charging_, other.battery_charging_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.battery_voltage_, other.battery_voltage_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.battery_current_, other.battery_current_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.remaining_battery_time_, other.remaining_battery_time_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.remaining_amp_hours_, other.remaining_amp_hours_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.remaining_charge_percentage_, other.remaining_charge_percentage_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.battery_cycle_count_, other.battery_cycle_count_, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
    {
       if (other == null)
          return false;
@@ -111,24 +151,31 @@ public class BatteryState
          return true;
       if (!(other instanceof BatteryState))
          return false;
+
       BatteryState otherMyClass = (BatteryState) other;
-      boolean returnedValue = true;
 
-      returnedValue &= this.battery_charging_ == otherMyClass.battery_charging_;
+      if (this.battery_charging_ != otherMyClass.battery_charging_)
+         return false;
 
-      returnedValue &= this.battery_voltage_ == otherMyClass.battery_voltage_;
+      if (this.battery_voltage_ != otherMyClass.battery_voltage_)
+         return false;
 
-      returnedValue &= this.battery_current_ == otherMyClass.battery_current_;
+      if (this.battery_current_ != otherMyClass.battery_current_)
+         return false;
 
-      returnedValue &= this.remaining_battery_time_ == otherMyClass.remaining_battery_time_;
+      if (this.remaining_battery_time_ != otherMyClass.remaining_battery_time_)
+         return false;
 
-      returnedValue &= this.remaining_amp_hours_ == otherMyClass.remaining_amp_hours_;
+      if (this.remaining_amp_hours_ != otherMyClass.remaining_amp_hours_)
+         return false;
 
-      returnedValue &= this.remaining_charge_percentage_ == otherMyClass.remaining_charge_percentage_;
+      if (this.remaining_charge_percentage_ != otherMyClass.remaining_charge_percentage_)
+         return false;
 
-      returnedValue &= this.battery_cycle_count_ == otherMyClass.battery_cycle_count_;
+      if (this.battery_cycle_count_ != otherMyClass.battery_cycle_count_)
+         return false;
 
-      return returnedValue;
+      return true;
    }
 
    @Override

@@ -1,0 +1,4 @@
+
+float32[] ranges
+int32 sensor_id
+LidarScanParametersMessage lidar_scan_parameters

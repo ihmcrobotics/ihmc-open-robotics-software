@@ -49,8 +49,8 @@ public class RawImuDataPubSubType implements us.ihmc.pubsub.TopicDataType<contro
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getImu_rates(), current_alignment);
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getImu_deltas(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getImuRates(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getImuDeltas(), current_alignment);
 
       return current_alignment - initial_alignment;
    }
@@ -60,11 +60,11 @@ public class RawImuDataPubSubType implements us.ihmc.pubsub.TopicDataType<contro
 
       cdr.write_type_11(data.getTimestamp());
 
-      cdr.write_type_11(data.getPacket_count());
+      cdr.write_type_11(data.getPacketCount());
 
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getImu_rates(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getImuRates(), cdr);
 
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getImu_deltas(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getImuDeltas(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.RawImuData data, us.ihmc.idl.CDR cdr)
@@ -72,11 +72,11 @@ public class RawImuDataPubSubType implements us.ihmc.pubsub.TopicDataType<contro
 
       data.setTimestamp(cdr.read_type_11());
 
-      data.setPacket_count(cdr.read_type_11());
+      data.setPacketCount(cdr.read_type_11());
 
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getImu_rates(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getImuRates(), cdr);
 
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getImu_deltas(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getImuDeltas(), cdr);
    }
 
    public static void staticCopy(controller_msgs.msg.dds.RawImuData src, controller_msgs.msg.dds.RawImuData dest)
@@ -105,11 +105,11 @@ public class RawImuDataPubSubType implements us.ihmc.pubsub.TopicDataType<contro
    {
       ser.write_type_11("timestamp", data.getTimestamp());
 
-      ser.write_type_11("packet_count", data.getPacket_count());
+      ser.write_type_11("packet_count", data.getPacketCount());
 
-      ser.write_type_a("imu_rates", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getImu_rates());
+      ser.write_type_a("imu_rates", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getImuRates());
 
-      ser.write_type_a("imu_deltas", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getImu_deltas());
+      ser.write_type_a("imu_deltas", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getImuDeltas());
    }
 
    @Override
@@ -117,11 +117,11 @@ public class RawImuDataPubSubType implements us.ihmc.pubsub.TopicDataType<contro
    {
       data.setTimestamp(ser.read_type_11("timestamp"));
 
-      data.setPacket_count(ser.read_type_11("packet_count"));
+      data.setPacketCount(ser.read_type_11("packet_count"));
 
-      ser.read_type_a("imu_rates", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getImu_rates());
+      ser.read_type_a("imu_rates", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getImuRates());
 
-      ser.read_type_a("imu_deltas", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getImu_deltas());
+      ser.read_type_a("imu_deltas", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getImuDeltas());
    }
 
    @Override

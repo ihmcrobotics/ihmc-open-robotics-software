@@ -1,0 +1,23 @@
+// generated from rosidl_generator_dds_idl/resource/msg.idl.em
+
+#ifndef __controller_msgs__msg__SetStringParameter__idl__
+#define __controller_msgs__msg__SetStringParameter__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::SetStringParameter_")
+      struct SetStringParameter
+      {
+        string parameter_name;
+        string parameter_value;
+      };  // struct SetStringParameter
+    };  // module dds_
+  };  // module msg
+};  // module controller_msgs
+
+#endif  // __controller_msgs__msg__SetStringParameter__idl__

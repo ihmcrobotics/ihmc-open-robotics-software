@@ -1,0 +1,54 @@
+#ifndef __controller_msgs__msg__BDIBehaviorStatusPacket__idl__
+#define __controller_msgs__msg__BDIBehaviorStatusPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet NONE =
+      0;
+
+      const octet FREEZE =
+      1;
+
+      const octet STAND_PREP =
+      2;
+
+      const octet STAND =
+      3;
+
+      const octet WALK =
+      4;
+
+      const octet STEP =
+      5;
+
+      const octet MANIPULATE =
+      6;
+
+      const octet USER =
+      7;
+
+      const octet CALIBRATE =
+      8;
+
+      const octet SOFT_STOP =
+      9;
+
+
+      /**
+       * Atlas specific message.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::BDIBehaviorStatusPacket_")
+      struct BDIBehaviorStatusPacket
+      {
+        @defaultValue(value=255)
+        octet current_bdi_robot_behavior;
+      };
+    };
+  };
+};
+
+#endif

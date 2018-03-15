@@ -42,7 +42,7 @@ public class SetBooleanParameterPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParameter_name().length() + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParameterName().length() + 1;
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -52,20 +52,20 @@ public class SetBooleanParameterPubSubType implements us.ihmc.pubsub.TopicDataTy
    public static void write(controller_msgs.msg.dds.SetBooleanParameter data, us.ihmc.idl.CDR cdr)
    {
 
-      if (data.getParameter_name().length() <= 255)
-         cdr.write_type_d(data.getParameter_name());
+      if (data.getParameterName().length() <= 255)
+         cdr.write_type_d(data.getParameterName());
       else
          throw new RuntimeException("parameter_name field exceeds the maximum length");
 
-      cdr.write_type_7(data.getParameter_value());
+      cdr.write_type_7(data.getParameterValue());
    }
 
    public static void read(controller_msgs.msg.dds.SetBooleanParameter data, us.ihmc.idl.CDR cdr)
    {
 
-      cdr.read_type_d(data.getParameter_name());
+      cdr.read_type_d(data.getParameterName());
 
-      data.setParameter_value(cdr.read_type_7());
+      data.setParameterValue(cdr.read_type_7());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.SetBooleanParameter src, controller_msgs.msg.dds.SetBooleanParameter dest)
@@ -93,17 +93,17 @@ public class SetBooleanParameterPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(controller_msgs.msg.dds.SetBooleanParameter data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_d("parameter_name", data.getParameter_name());
+      ser.write_type_d("parameter_name", data.getParameterName());
 
-      ser.write_type_7("parameter_value", data.getParameter_value());
+      ser.write_type_7("parameter_value", data.getParameterValue());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SetBooleanParameter data)
    {
-      ser.read_type_d("parameter_name", data.getParameter_name());
+      ser.read_type_d("parameter_name", data.getParameterName());
 
-      data.setParameter_value(ser.read_type_7("parameter_value"));
+      data.setParameterValue(ser.read_type_7("parameter_value"));
    }
 
    @Override

@@ -1,0 +1,56 @@
+// generated from rosidl_generator_dds_idl/resource/msg.idl.em
+
+#ifndef __controller_msgs__msg__RobotConfigurationData__idl__
+#define __controller_msgs__msg__RobotConfigurationData__idl__
+
+#include "geometry_msgs/msg/./Quaternion_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+#include "geometry_msgs/msg/./Wrench_.idl"
+#include "sensor_msgs/msg/./Imu_.idl"
+#include "std_msgs/msg/./Header_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const long RobotConfigurationData__STANDING =
+      3;
+
+      const long RobotConfigurationData__IN_MOTION =
+      4;
+
+
+      @TypeCode(type="controller_msgs::msg::dds_::RobotConfigurationData_")
+      struct RobotConfigurationData
+      {
+        std_msgs::msg::dds::Header header;
+        /**
+         * debug
+         */
+        long long dropped_messages;
+        long long sensor_head_pps_timestamp;
+        long joint_name_hash;
+        sequence<float, 50> joint_angles;
+        sequence<float, 50> joint_velocities;
+        sequence<float, 50> joint_torques;
+        sequence<geometry_msgs::msg::dds::Wrench, 50> force_sensor_data;
+        sequence<sensor_msgs::msg::dds::Imu, 5> imu_sensor_data;
+        geometry_msgs::msg::dds::Vector3 root_translation;
+        geometry_msgs::msg::dds::Quaternion root_orientation;
+        geometry_msgs::msg::dds::Vector3 pelvis_linear_velocity;
+        geometry_msgs::msg::dds::Vector3 pelvis_angular_velocity;
+        geometry_msgs::msg::dds::Vector3 pelvis_linear_acceleration;
+        long robot_motion_status;
+        /**
+         * For verifying the robot is receiving your commands
+         */
+        long last_received_packet_type_id;
+        long long last_received_packet_unique_id;
+        long long last_received_packet_robot_timestamp;
+      };  // struct RobotConfigurationData
+    };  // module dds_
+  };  // module msg
+};  // module controller_msgs
+
+#endif  // __controller_msgs__msg__RobotConfigurationData__idl__

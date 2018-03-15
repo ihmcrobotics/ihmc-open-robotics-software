@@ -1,4 +1,0 @@
-int64 timestamp
-int64 packet_count
-geometry_msgs/Vector3 imu_rates
-geometry_msgs/Vector3 imu_deltas

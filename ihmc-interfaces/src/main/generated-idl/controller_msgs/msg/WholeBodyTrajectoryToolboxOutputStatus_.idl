@@ -1,0 +1,27 @@
+#ifndef __controller_msgs__msg__WholeBodyTrajectoryToolboxOutputStatus__idl__
+#define __controller_msgs__msg__WholeBodyTrajectoryToolboxOutputStatus__idl__
+
+#include "controller_msgs/msg/./KinematicsToolboxOutputStatus_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * General purpose message normally used to report the solution of a whole-body trajectory planner.
+       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::WholeBodyTrajectoryToolboxOutputStatus_")
+      struct WholeBodyTrajectoryToolboxOutputStatus
+      {
+        long planning_result;
+        sequence<double, 50> trajectory_times;
+        sequence<controller_msgs::msg::dds::KinematicsToolboxOutputStatus, 50> robot_configurations;
+      };
+    };
+  };
+};
+
+#endif

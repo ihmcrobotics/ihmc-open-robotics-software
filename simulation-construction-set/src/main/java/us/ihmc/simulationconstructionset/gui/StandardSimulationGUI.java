@@ -69,6 +69,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraTrackingAndDollyPositionHolder;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.OffscreenBufferDepthImageServer;
 import us.ihmc.jMonkeyEngineToolkit.camera.OffscreenBufferVideoServer;
 import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
@@ -121,6 +122,7 @@ import us.ihmc.simulationconstructionset.util.SimpleFileReader;
 import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.image.DepthImageCallback;
 import us.ihmc.tools.image.ImageCallback;
 import us.ihmc.tools.io.xml.XMLReaderUtility;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -3327,6 +3329,17 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       new OffscreenBufferVideoServer(graphics3dAdapter, cameraMountList, cameraConfiguration, cameraTrackingAndDollyPositionHolder, width, height,
             imageCallback, timestampProvider, framesPerSecond);
 
+   }
+
+   public void startStreamingDepthData(CameraConfiguration cameraConfiguration, int width, int height, double nearClip, double farClip, DepthImageCallback imageCallback,
+                                       TimestampProvider timestampProvider, int framesPerSecond)
+   {
+      CameraTrackingAndDollyPositionHolder cameraTrackingAndDollyPositionHolder = new CameraTrackAndDollyYoVariablesHolder(yoVariableHolder);
+      
+      
+      new OffscreenBufferDepthImageServer(graphics3dAdapter, cameraMountList, cameraConfiguration, cameraTrackingAndDollyPositionHolder, width, height,
+                                     nearClip, farClip, imageCallback, timestampProvider, framesPerSecond);
+      
    }
 
    public Graphics3DAdapter getGraphics3dAdapter()

@@ -6,8 +6,6 @@
 /target
 /pit-reports
 /install
-/src/main/rosidl/common_interfaces
-/src/main/rosidl/rcl_interfaces
 
 # Top level directories in sub-projects
 **/classes

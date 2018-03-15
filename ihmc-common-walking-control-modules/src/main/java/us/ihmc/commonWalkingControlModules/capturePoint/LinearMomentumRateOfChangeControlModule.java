@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.MathTools;
@@ -26,6 +24,8 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 public abstract class LinearMomentumRateOfChangeControlModule
 {
@@ -66,21 +66,22 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2D perfectCoP = new FramePoint2D();
    protected final FramePoint2D desiredCMP = new FramePoint2D();
 
-   protected final CMPProjector cmpProjector; //TODO: Not used in this class, push down (?)
    protected final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
    protected final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
 
    private boolean controlHeightWithMomentum;
 
-   protected final YoFramePoint2d yoUnprojectedDesiredCMP; // TODO: Not used in this class, push down (?)
    private final YoFrameConvexPolygon2d yoSafeAreaPolygon;
    private final YoFrameConvexPolygon2d yoProjectionPolygon;
+
+   protected final YoFramePoint2d yoUnprojectedDesiredCMP;
+   protected final CMPProjector cmpProjector;
 
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
    private double desiredCoMHeightAcceleration = 0.0;
 
    public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, double totalMass,
-                                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
+                                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2dProjection)
    {
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -89,10 +90,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
-      if (use2DProjection)
-         cmpProjector = new SmartCMPProjector(yoGraphicsListRegistry, registry);
-      else
-         cmpProjector = new SmartCMPPlanarProjector(registry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
@@ -104,7 +101,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
 
       minimizeAngularMomentumRateZ = new YoBoolean(namePrefix + "MinimizeAngularMomentumRateZ", registry);
 
-      yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", worldFrame, registry);
       yoSafeAreaPolygon = new YoFrameConvexPolygon2d("yoSafeAreaPolygon", worldFrame, 10, registry);
       yoProjectionPolygon = new YoFrameConvexPolygon2d("yoProjectionPolygon", worldFrame, 10, registry);
 
@@ -119,6 +115,15 @@ public abstract class LinearMomentumRateOfChangeControlModule
       linearXYAndAngularZSelectionMatrix.selectAngularZ(true);
 
       momentumRateCommand.setWeights(0.0, 0.0, 0.0, linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
+
+      perfectCoP.setToNaN();
+
+      yoUnprojectedDesiredCMP = new YoFramePoint2d("unprojectedDesiredCMP", ReferenceFrame.getWorldFrame(), registry);
+
+      if (use2dProjection)
+         cmpProjector = new SmartCMPProjector(yoGraphicsListRegistry, registry);
+      else
+         cmpProjector = new SmartCMPPlanarProjector(registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -136,8 +141,6 @@ public abstract class LinearMomentumRateOfChangeControlModule
          //         yoGraphicsListRegistry.registerArtifact(graphicListName, yoProjectionArea);
       }
       yoUnprojectedDesiredCMP.setToNaN();
-
-      perfectCoP.setToNaN();
 
       parentRegistry.addChild(registry);
    }

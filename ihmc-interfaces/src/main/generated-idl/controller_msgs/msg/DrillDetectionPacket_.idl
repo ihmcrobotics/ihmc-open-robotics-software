@@ -1,0 +1,20 @@
+#ifndef __controller_msgs__msg__DrillDetectionPacket__idl__
+#define __controller_msgs__msg__DrillDetectionPacket__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="controller_msgs::msg::dds_::DrillDetectionPacket_")
+      struct DrillDetectionPacket
+      {
+        boolean is_drill_on;
+      };
+    };
+  };
+};
+
+#endif

@@ -341,6 +341,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    public void doTransitionOutOfAction()
    {
       hideGraphics();
+      clear();
    }
 
    public void holdCurrent()
@@ -892,7 +893,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return false;
    }
 
-   @Override
    public void clear()
    {
       orientationTrajectoryGenerator.clear();

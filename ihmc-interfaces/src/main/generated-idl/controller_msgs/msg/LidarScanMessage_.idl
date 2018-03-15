@@ -1,0 +1,28 @@
+#ifndef __controller_msgs__msg__LidarScanMessage__idl__
+#define __controller_msgs__msg__LidarScanMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message should disappear to be replaced by ROS equivalent.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::LidarScanMessage_")
+      struct LidarScanMessage
+      {
+        long long robot_timestamp;
+        geometry_msgs::msg::dds::Point lidar_position;
+        geometry_msgs::msg::dds::Quaternion lidar_orientation;
+        sequence<float> scan;
+      };
+    };
+  };
+};
+
+#endif

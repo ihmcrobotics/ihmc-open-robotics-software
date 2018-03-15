@@ -1,0 +1,26 @@
+#ifndef __controller_msgs__msg__RequestLidarScanMessage__idl__
+#define __controller_msgs__msg__RequestLidarScanMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message used to request a new LIDAR scan, and also enable some filters.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::RequestLidarScanMessage_")
+      struct RequestLidarScanMessage
+      {
+        @defaultValue(value=True)
+        boolean remove_shadows;
+        @defaultValue(value=True)
+        boolean remove_self_collisions;
+      };
+    };
+  };
+};
+
+#endif

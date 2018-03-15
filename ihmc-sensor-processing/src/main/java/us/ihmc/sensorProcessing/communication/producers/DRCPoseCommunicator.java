@@ -19,6 +19,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -60,6 +61,7 @@ public class DRCPoseCommunicator implements RawOutputWriter
    private final SideDependentList<ForceSensorDistalMassCompensator> wristForceSensorDistalMassCompensators = new SideDependentList<ForceSensorDistalMassCompensator>();
 
    private final ConcurrentRingBuffer<RobotConfigurationData> robotConfigurationDataRingBuffer;
+   private final ConcurrentRingBuffer<AtlasAuxiliaryRobotData> atlasAuxiliaryRobotDataRingBuffer;
 
    public DRCPoseCommunicator(FullRobotModel estimatorModel, JointConfigurationGatherer jointConfigurationGathererAndProducer,
                               AuxiliaryRobotDataProvider auxiliaryRobotDataProvider, GlobalDataProducer dataProducer,
@@ -101,10 +103,11 @@ public class DRCPoseCommunicator implements RawOutputWriter
       }
       ForceSensorDefinition[] forceSensorDefinitions = jointConfigurationGathererAndProducer.getForceSensorDefinitions();
       OneDoFJoint[] joints = jointConfigurationGathererAndProducer.getJoints();
-      robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<RobotConfigurationData>(new RobotConfigurationDataBuilder(joints, forceSensorDefinitions,
-                                                                                                                            imuDefinitions,
-                                                                                                                            auxiliaryRobotDataProvider),
-                                                                                          16);
+      robotConfigurationDataRingBuffer = new ConcurrentRingBuffer<>(new RobotConfigurationDataBuilder(joints, forceSensorDefinitions, imuDefinitions), 16);
+      if (auxiliaryRobotDataProvider == null)
+         atlasAuxiliaryRobotDataRingBuffer = null;
+      else
+         atlasAuxiliaryRobotDataRingBuffer = new ConcurrentRingBuffer<>(auxiliaryRobotDataProvider::newAuxiliaryRobotDataInstance, 16);
       startWriterThread();
    }
 
@@ -151,6 +154,16 @@ public class DRCPoseCommunicator implements RawOutputWriter
                   }
                   robotConfigurationDataRingBuffer.flush();
                }
+
+               if (atlasAuxiliaryRobotDataRingBuffer != null && atlasAuxiliaryRobotDataRingBuffer.poll())
+               {
+                  AtlasAuxiliaryRobotData auxData;
+                  while ((auxData = atlasAuxiliaryRobotDataRingBuffer.read()) != null)
+                  {
+                     dataProducer.skipQueueAndSend(auxData);
+                  }
+                  atlasAuxiliaryRobotDataRingBuffer.flush();
+               }
             }
             catch (Throwable throwable)
             {
@@ -191,51 +204,61 @@ public class DRCPoseCommunicator implements RawOutputWriter
    public void write()
    {
 
-      RobotConfigurationData state = robotConfigurationDataRingBuffer.next();
-      if (state == null)
+      RobotConfigurationData configData = robotConfigurationDataRingBuffer.next();
+      if (configData != null)
       {
-         return;
-      }
+         long timestamp = sensorTimestampHolder.getVisionSensorTimestamp();
+         long pps = sensorTimestampHolder.getSensorHeadPPSTimestamp();
+         jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, pps, configData);
 
-      long timestamp = sensorTimestampHolder.getVisionSensorTimestamp();
-      long pps = sensorTimestampHolder.getSensorHeadPPSTimestamp();
-      jointConfigurationGathererAndProducer.packEstimatorJoints(timestamp, pps, state);
-
-      if (sensorRawOutputMapReadOnly != null)
-      {
-         List<? extends IMUSensorReadOnly> imuRawOutputs = sensorRawOutputMapReadOnly.getIMURawOutputs();
-         for (int sensorNumber = 0; sensorNumber < imuRawOutputs.size(); sensorNumber++)
+         if (sensorRawOutputMapReadOnly != null)
          {
-            IMUSensorReadOnly imuSensor = imuRawOutputs.get(sensorNumber);
-            IMUPacket imuPacketToPack = state.getImuPacketForSensor(sensorNumber);
+            List<? extends IMUSensorReadOnly> imuRawOutputs = sensorRawOutputMapReadOnly.getIMURawOutputs();
+            for (int sensorNumber = 0; sensorNumber < imuRawOutputs.size(); sensorNumber++)
+            {
+               IMUSensorReadOnly imuSensor = imuRawOutputs.get(sensorNumber);
+               IMUPacket imuPacketToPack = configData.getImuPacketForSensor(sensorNumber);
 
-            imuSensor.getLinearAccelerationMeasurement(imuLinearAccelerations[sensorNumber]);
-            imuSensor.getOrientationMeasurement(imuOrientationsAsMatrix[sensorNumber]);
-            imuOrientations[sensorNumber].set(imuOrientationsAsMatrix[sensorNumber]);
-            imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocities[sensorNumber]);
+               imuSensor.getLinearAccelerationMeasurement(imuLinearAccelerations[sensorNumber]);
+               imuSensor.getOrientationMeasurement(imuOrientationsAsMatrix[sensorNumber]);
+               imuOrientations[sensorNumber].set(imuOrientationsAsMatrix[sensorNumber]);
+               imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocities[sensorNumber]);
 
-            imuPacketToPack.set(imuLinearAccelerations[sensorNumber], imuOrientations[sensorNumber], rawImuAngularVelocities[sensorNumber]);
+               imuPacketToPack.set(imuLinearAccelerations[sensorNumber], imuOrientations[sensorNumber], rawImuAngularVelocities[sensorNumber]);
+            }
          }
-         state.setAuxiliaryRobotData(sensorRawOutputMapReadOnly.getAuxiliaryRobotData());
+
+         configData.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus().toByte());
+
+         LastPacket lastPacket = dataProducer.getLastPacket();
+         if (lastPacket != null)
+         {
+            configData.setLastReceivedPacketTypeID(netClassList.getID(lastPacket.getPacket()));
+            configData.setLastReceivedPacketUniqueId(lastPacket.getUniqueId());
+            configData.setLastReceivedPacketRobotTimestamp(lastPacket.getReceivedTimestamp());
+         }
+         else
+         {
+            configData.setLastReceivedPacketTypeID(-1);
+            configData.setLastReceivedPacketUniqueId(-1);
+            configData.setLastReceivedPacketRobotTimestamp(-1);
+         }
+
+         robotConfigurationDataRingBuffer.commit();
       }
 
-      state.setRobotMotionStatus(robotMotionStatusFromController.getCurrentRobotMotionStatus().toByte());
-
-      LastPacket lastPacket = dataProducer.getLastPacket();
-      if (lastPacket != null)
+      if (atlasAuxiliaryRobotDataRingBuffer != null)
       {
-         state.setLastReceivedPacketTypeID(netClassList.getID(lastPacket.getPacket()));
-         state.setLastReceivedPacketUniqueId(lastPacket.getUniqueId());
-         state.setLastReceivedPacketRobotTimestamp(lastPacket.getReceivedTimestamp());
-      }
-      else
-      {
-         state.setLastReceivedPacketTypeID(-1);
-         state.setLastReceivedPacketUniqueId(-1);
-         state.setLastReceivedPacketRobotTimestamp(-1);
-      }
+         AtlasAuxiliaryRobotData auxData = atlasAuxiliaryRobotDataRingBuffer.next();
 
-      robotConfigurationDataRingBuffer.commit();
+         if (auxData != null)
+         {
+            if (sensorRawOutputMapReadOnly != null)
+               auxData.set(sensorRawOutputMapReadOnly.getAuxiliaryRobotData());
+
+            robotConfigurationDataRingBuffer.commit();
+         }
+      }
    }
 
    public static class RobotConfigurationDataBuilder implements us.ihmc.concurrent.Builder<RobotConfigurationData>
@@ -243,30 +266,19 @@ public class DRCPoseCommunicator implements RawOutputWriter
       private final OneDoFJoint[] joints;
       private final ForceSensorDefinition[] forceSensorDefinitions;
       private final IMUDefinition[] imuDefinitions;
-      private final AuxiliaryRobotDataProvider auxiliaryRobotDataProvider;
 
-      public RobotConfigurationDataBuilder(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions,
-                                           AuxiliaryRobotDataProvider auxiliaryRobotDataProvider)
+      public RobotConfigurationDataBuilder(OneDoFJoint[] joints, ForceSensorDefinition[] forceSensorDefinitions, IMUDefinition[] imuDefinitions)
       {
          this.joints = joints;
          this.forceSensorDefinitions = forceSensorDefinitions;
          this.imuDefinitions = imuDefinitions;
-         this.auxiliaryRobotDataProvider = auxiliaryRobotDataProvider;
       }
 
       @Override
       public RobotConfigurationData newInstance()
       {
-         if (auxiliaryRobotDataProvider != null)
-         {
-            return RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, auxiliaryRobotDataProvider.newAuxiliaryRobotDataInstance(), imuDefinitions);
-         }
-         else
-         {
-            return RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, null, imuDefinitions);
-         }
+         return RobotConfigurationDataFactory.create(joints, forceSensorDefinitions, imuDefinitions);
       }
-
    }
 
    public void stop()
