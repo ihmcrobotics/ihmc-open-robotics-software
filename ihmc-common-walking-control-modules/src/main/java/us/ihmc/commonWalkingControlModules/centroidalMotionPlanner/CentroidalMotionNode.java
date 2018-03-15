@@ -312,7 +312,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       return forceConstraintType.getElement(axis);
    }
 
-   public EffortConstraintType getRateChangeForceConstraintType(Axis axis)
+   public EffortConstraintType getForceRateConstraintType(Axis axis)
    {
       return rateChangeForceConstraintType.getElement(axis);
    }
@@ -332,7 +332,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       return force.getElement(axis.ordinal());
    }
 
-   public double getRateChangeOfForceValue(Axis axis)
+   public double getForceRateValue(Axis axis)
    {
       return rateOfChangeOfForce.getElement(axis.ordinal());
    }
@@ -342,7 +342,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       return forceWeight.getElement(axis.ordinal());
    }
    
-   public double getRateChangeOfForceWeight(Axis axis)
+   public double getForceRateWeight(Axis axis)
    {
       return rateChangeOfForceWeight.getElement(axis.ordinal());
    }

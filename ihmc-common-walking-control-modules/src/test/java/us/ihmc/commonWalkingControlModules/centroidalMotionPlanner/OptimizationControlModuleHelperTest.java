@@ -122,7 +122,7 @@ public class OptimizationControlModuleHelperTest
       assertEquals(0.0, forceZBias.get(0, 0), epsilon);
       assertEquals(0.0, forceZBias.get(1, 0), epsilon);
       assertEquals(0.0, forceZBias.get(2, 0), epsilon);
-      DenseMatrix64F rateChangeOfForceZBias = helper.getRateChangeOfForceBiasMatrix(Axis.Z);
+      DenseMatrix64F rateChangeOfForceZBias = helper.getForceRateBiasMatrix(Axis.Z);
       assertEquals(0.0, rateChangeOfForceZBias.get(0, 0), epsilon);
       assertEquals(0.0, rateChangeOfForceZBias.get(1, 0), epsilon);
       assertEquals(0.0, rateChangeOfForceZBias.get(2, 0), epsilon);
@@ -176,7 +176,7 @@ public class OptimizationControlModuleHelperTest
       assertEquals(0.0, forceZBias.get(0, 0), epsilon);
       assertEquals(0.0, forceZBias.get(1, 0), epsilon);
       assertEquals(0.0, forceZBias.get(2, 0), epsilon);
-      DenseMatrix64F rateChangeOfForceZBias = helper.getRateChangeOfForceBiasMatrix(Axis.Z);
+      DenseMatrix64F rateChangeOfForceZBias = helper.getForceRateBiasMatrix(Axis.Z);
       assertEquals(0.0, rateChangeOfForceZBias.get(0, 0), epsilon);
       assertEquals(0.0, rateChangeOfForceZBias.get(1, 0), epsilon);
       assertEquals(0.0, rateChangeOfForceZBias.get(2, 0), epsilon);
@@ -231,7 +231,7 @@ public class OptimizationControlModuleHelperTest
       assertEquals(forceZValue, forceZBias.get(0, 0), epsilon);
       assertEquals(forceZValue, forceZBias.get(1, 0), epsilon);
       assertEquals(forceZValue, forceZBias.get(2, 0), epsilon);
-      DenseMatrix64F rateChangeOfForceZBias = helper.getRateChangeOfForceBiasMatrix(Axis.Z);
+      DenseMatrix64F rateChangeOfForceZBias = helper.getForceRateBiasMatrix(Axis.Z);
       assertEquals(0.0, rateChangeOfForceZBias.get(0, 0), epsilon);
       assertEquals(0.0, rateChangeOfForceZBias.get(1, 0), epsilon);
       assertEquals(0.0, rateChangeOfForceZBias.get(2, 0), epsilon);
