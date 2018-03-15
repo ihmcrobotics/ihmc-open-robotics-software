@@ -191,7 +191,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       String currentIndexName = prefix + "CurrentWaypointIndex";
       String swingStateNamespace = sidePrefix + FootControlModule.class.getSimpleName();
-      String typeName = sidePrefix + "Foot" + TrajectoryType.class.getSimpleName();
+      String typeName = sidePrefix + "FootSwing" + TrajectoryType.class.getSimpleName();
 
       @SuppressWarnings("unchecked")
       YoEnum<TrajectoryType> currentTrajectoryType = (YoEnum<TrajectoryType>) scs.getVariable(swingStateNamespace, typeName);
