@@ -95,6 +95,11 @@ public class VectorEnum<F> implements Settable<VectorEnum<F>>, Clearable
       setZ(zVal);
    }
 
+   public void setXYZ(F val)
+   {
+      set(val, val, val);
+   }
+
    public void setElement(Axis axis, F elementVal)
    {
       switch (axis)

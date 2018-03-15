@@ -16,7 +16,9 @@ public class CentroidalZAxisOptimizationControlModuleTest
    @Test
    public void testGeneratesAPlan()
    {
-      CentroidalZAxisOptimizationControlModule controlModule = new CentroidalZAxisOptimizationControlModule(robotMass);
+      CentroidalZAxisOptimizationControlModule controlModule = new CentroidalZAxisOptimizationControlModule(robotMass,
+                                                                                                            new OptimizationControlModuleHelper(0.0, 0.0, -9.81,
+                                                                                                                                                18.0));
       Trajectory[] trajectoryList = new Trajectory[3];
       trajectoryList[0] = controlModule.getForceProfile();
       trajectoryList[1] = controlModule.getHeightTrajectory();

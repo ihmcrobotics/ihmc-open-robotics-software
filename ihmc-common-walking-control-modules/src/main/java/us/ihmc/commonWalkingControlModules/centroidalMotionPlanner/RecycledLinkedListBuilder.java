@@ -36,8 +36,8 @@ public class RecycledLinkedListBuilder<T>
       }
    }
 
-   private RecycledLinkedListEntry<T> firstElement;
-   private RecycledLinkedListEntry<T> lastElement;
+   private RecycledLinkedListEntry<T> firstEntry;
+   private RecycledLinkedListEntry<T> lastEntry;
    private final GenericTypeBuilder<T> builder;
    private int size;
    private int freeEntrySize;
@@ -62,8 +62,8 @@ public class RecycledLinkedListBuilder<T>
 
    public RecycledLinkedListBuilder(int initialCapacity, GenericTypeBuilder<T> builder)
    {
-      firstElement = null;
-      lastElement = null;
+      firstEntry = null;
+      lastEntry = null;
       this.builder = builder;
       freeEntries = createEntryArray(initialCapacity);
       populateFreeEntries();
@@ -78,29 +78,29 @@ public class RecycledLinkedListBuilder<T>
 
    public RecycledLinkedListEntry<T> getFirstEntry()
    {
-      return firstElement;
+      return firstEntry;
    }
 
    public RecycledLinkedListEntry<T> getOrCreateFirstEntry()
    {
-      if (firstElement != null)
-         return firstElement;
-      firstElement = getFreeEntry();
+      if (firstEntry != null)
+         return firstEntry;
+      firstEntry = getFreeEntry();
       size++;
-      return lastElement = firstElement;
+      return lastEntry = firstEntry;
    }
 
    public RecycledLinkedListEntry<T> getOrCreateLastEntry()
    {
-      if (lastElement != null)
-         return lastElement;
+      if (lastEntry != null)
+         return lastEntry;
       else
          return getOrCreateFirstEntry();
    }
 
    public RecycledLinkedListEntry<T> getLastEntry()
    {
-      return lastElement;
+      return lastEntry;
    }
 
    public RecycledLinkedListEntry<T> insertAfter(RecycledLinkedListEntry<T> entry)
@@ -113,7 +113,7 @@ public class RecycledLinkedListBuilder<T>
       if (newEntry.next != null)
          newEntry.next.previous = newEntry;
       else
-         lastElement = newEntry;
+         lastEntry = newEntry;
       size++;
       return newEntry;
    }
@@ -128,22 +128,38 @@ public class RecycledLinkedListBuilder<T>
       if (newEntry.previous != null)
          newEntry.previous.next = newEntry;
       else
-         firstElement = newEntry;
+         firstEntry = newEntry;
       size++;
       return newEntry;
    }
 
+   public RecycledLinkedListEntry<T> insertAtEnd()
+   {
+      if(lastEntry != null)
+         return insertAfter(lastEntry);
+      else 
+         return getOrCreateLastEntry();
+   }
+
+   public RecycledLinkedListEntry<T> insertAtBeginning()
+   {
+      if(firstEntry != null)
+         return insertBefore(firstEntry);
+      else 
+         return getOrCreateFirstEntry();
+   }
+
    public void remove(RecycledLinkedListEntry<T> entryToRemove)
    {
-      if (entryToRemove != lastElement)
+      if (entryToRemove != lastEntry)
          entryToRemove.next.previous = entryToRemove.previous;
       else
-         lastElement = entryToRemove.previous;
+         lastEntry = entryToRemove.previous;
 
-      if (entryToRemove != firstElement)
+      if (entryToRemove != firstEntry)
          entryToRemove.previous.next = entryToRemove.next;
       else
-         firstElement = entryToRemove.next;
+         firstEntry = entryToRemove.next;
 
       entryToRemove.next = null;
       entryToRemove.previous = null;

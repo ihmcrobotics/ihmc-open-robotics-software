@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -25,24 +26,25 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    private double time;
    private ReferenceFrame referenceFrame;
 
-   private FrameVector3D force;
-   private FrameVector3D rateOfChangeOfForce;
-   private FramePoint3D position;
-   private FrameVector3D linearVelocity;
+   private final FrameVector3D force;
+   private final FrameVector3D rateOfChangeOfForce;
+   private final FramePoint3D position;
+   private final FrameVector3D linearVelocity;
 
-   private FrameVector3D torque;
-   private FrameVector3D rateOfChangeOfTorque;
-   private FrameQuaternion orientation;
-   private FrameVector3D angularVelocity;
+   private final FrameVector3D torque;
+   private final FrameVector3D rateOfChangeOfTorque;
+   private final FrameQuaternion orientation;
+   private final FrameVector3D angularVelocity;
 
-   private FrameVector3D positionWeight;
-   private FrameVector3D linearVelocityWeight;
-   private FrameVector3D forceWeight;
-   private FrameVector3D orientationWeight;
-   private FrameVector3D angularVelocityWeight;
-   private FrameVector3D torqueWeight;
-   private VectorEnum<EffortConstraintType> forceConstraintType = new VectorEnum<>();
-   private VectorEnum<EffortConstraintType> torqueConstraintType = new VectorEnum<>();
+   private final FrameVector3D positionWeight;
+   private final FrameVector3D linearVelocityWeight;
+   private final FrameVector3D forceWeight;
+   private final FrameVector3D rateChangeForceWeight;
+   private final FrameVector3D orientationWeight;
+   private final FrameVector3D angularVelocityWeight;
+   private final FrameVector3D torqueWeight;
+   private final VectorEnum<EffortConstraintType> forceConstraintType = new VectorEnum<>();
+   private final VectorEnum<EffortConstraintType> rateChangeForceConstraintType = new VectorEnum<>();
 
    /**
     * Default constructor. Initialized all variables to NaN so that they form part of the optimization
@@ -68,10 +70,11 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       positionWeight = new FrameVector3D(referenceFrame);
       linearVelocityWeight = new FrameVector3D(referenceFrame);
       forceWeight = new FrameVector3D(referenceFrame);
+      rateChangeForceWeight = new FrameVector3D(referenceFrame);
 
       orientationWeight = new FrameVector3D(referenceFrame);
       angularVelocityWeight = new FrameVector3D(referenceFrame);
-      torque = new FrameVector3D(referenceFrame);
+      torqueWeight = new FrameVector3D(referenceFrame);
 
       reset();
    }
@@ -91,11 +94,12 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       rateOfChangeOfTorque.setToNaN();
 
       forceConstraintType.setToNull();
-      torqueConstraintType.setToNull();
+      rateChangeForceConstraintType.setToNull();
 
       positionWeight.setToNaN();
       linearVelocityWeight.setToNaN();
       forceWeight.setToNaN();
+      rateChangeForceWeight.setToNaN();
 
       orientationWeight.setToNaN();
       angularVelocityWeight.setToNaN();
@@ -110,14 +114,14 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public void setForceAsHardConstraint(FrameVector3D force)
    {
       setForceValue(force);
-      this.forceConstraintType.set(EffortConstraintType.EQUALITY, EffortConstraintType.EQUALITY, EffortConstraintType.EQUALITY);
+      this.forceConstraintType.setXYZ(EffortConstraintType.EQUALITY);
       this.forceWeight.setToNaN();
    }
 
    public void setForceAsObjective(FrameVector3D force, FrameVector3D forceWeight)
    {
       setForceValue(force);
-      this.forceConstraintType.set(EffortConstraintType.OBJECTIVE, EffortConstraintType.OBJECTIVE, EffortConstraintType.OBJECTIVE);
+      this.forceConstraintType.setXYZ(EffortConstraintType.OBJECTIVE);
       this.forceWeight.setIncludingFrame(forceWeight);
       this.forceWeight.changeFrame(referenceFrame);
    }
@@ -149,10 +153,30 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       forceWeight.changeFrame(referenceFrame);
    }
 
-   public void setRateOfChangeOfForce(FrameVector3D dForce)
+   public void setRateOfChangeOfForce(FrameVector3D dForce, VectorEnum<EffortConstraintType> constraintType, FrameVector3D dForceWeight)
    {
       this.rateOfChangeOfForce.setIncludingFrame(dForce);
       this.rateOfChangeOfForce.changeFrame(referenceFrame);
+      this.rateChangeForceConstraintType.set(constraintType);
+      this.rateChangeForceWeight.setIncludingFrame(dForceWeight);
+      this.rateChangeForceWeight.changeFrame(referenceFrame);
+   }
+
+   public void setRateOfChangeOfForceAsHardConstraint(FrameVector3D dForce)
+   {
+      this.rateOfChangeOfForce.setIncludingFrame(dForce);
+      this.rateOfChangeOfForce.changeFrame(referenceFrame);
+      this.rateChangeForceConstraintType.setXYZ(EffortConstraintType.EQUALITY);
+      this.rateChangeForceWeight.setToNaN();
+   }
+
+   public void setRateOfChangeOfForceAsObjective(FrameVector3D dForce, FrameVector3D dForceWeight)
+   {
+      this.rateOfChangeOfForce.setIncludingFrame(dForce);
+      this.changeReferenceFrame(referenceFrame);
+      this.rateChangeForceConstraintType.setXYZ(EffortConstraintType.OBJECTIVE);
+      this.rateChangeForceWeight.setIncludingFrame(dForceWeight);
+      this.rateChangeForceWeight.changeFrame(referenceFrame);
    }
 
    public void setTorque(FrameVector3D torque)
@@ -208,7 +232,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       return time;
    }
 
-   public void getDesiredPosition(FramePoint3D positionToPack)
+   public void getPosition(FramePoint3D positionToPack)
    {
       positionToPack.setIncludingFrame(position);
    }
@@ -245,7 +269,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    {
       this.referenceFrame = other.referenceFrame;
       this.time = other.time;
-      
+
       this.position.setIncludingFrame(other.position);
       this.linearVelocity.setIncludingFrame(other.linearVelocity);
       this.force.setIncludingFrame(other.force);
@@ -257,7 +281,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.rateOfChangeOfTorque.setIncludingFrame(other.rateOfChangeOfTorque);
 
       this.forceConstraintType.set(other.forceConstraintType);
-      this.torqueConstraintType.set(other.torqueConstraintType);
+      this.rateChangeForceConstraintType.set(other.rateChangeForceConstraintType);
 
       this.positionWeight.setIncludingFrame(other.positionWeight);
       this.linearVelocityWeight.setIncludingFrame(other.linearVelocityWeight);
@@ -266,5 +290,50 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.orientationWeight.setIncludingFrame(other.orientationWeight);
       this.angularVelocityWeight.setIncludingFrame(other.angularVelocityWeight);
       this.torqueWeight.setIncludingFrame(other.torqueWeight);
+   }
+
+   public EffortConstraintType getXForceConstraintType()
+   {
+      return forceConstraintType.getX();
+   }
+
+   public EffortConstraintType getYForceConstraintType()
+   {
+      return forceConstraintType.getY();
+   }
+
+   public EffortConstraintType getZForceConstraintType()
+   {
+      return forceConstraintType.getZ();
+   }
+
+   public EffortConstraintType getForceConstraintType(Axis axis)
+   {
+      return forceConstraintType.getElement(axis);
+   }
+
+   public EffortConstraintType getRateChangeForceConstraintType(Axis axis)
+   {
+      return rateChangeForceConstraintType.getElement(axis);
+   }
+
+   public double getPosition(Axis axis)
+   {
+      return position.getElement(axis.ordinal());
+   }
+
+   public double getLinearVelocity(Axis axis)
+   {
+      return linearVelocity.getElement(axis.ordinal());
+   }
+
+   public double getForceValue(Axis axis)
+   {
+      return force.getElement(axis.ordinal());
+   }
+
+   public double getRateChangeOfForceValue(Axis axis)
+   {
+      return rateOfChangeOfForce.getElement(axis.ordinal());
    }
 }
