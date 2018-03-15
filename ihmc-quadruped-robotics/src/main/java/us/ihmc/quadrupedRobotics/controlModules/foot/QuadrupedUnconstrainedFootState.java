@@ -38,6 +38,9 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
       this.solePositionController = solePositionController;
       solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
+      FullQuadrupedRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      virtualForceCommand.set(fullRobotModel.getBody(), fullRobotModel.getFoot(robotQuadrant));
+
       /*
       ReferenceFrame gainsFrame = controllerToolbox.getReferenceFrames().getBodyZUpFrame();
       FramePose3D controlFramePose = new FramePose3D(soleFrame);
