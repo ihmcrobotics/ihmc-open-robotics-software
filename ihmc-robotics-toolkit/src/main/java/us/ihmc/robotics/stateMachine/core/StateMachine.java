@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.robotics.stateMachine.extra.EventState;
-import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
