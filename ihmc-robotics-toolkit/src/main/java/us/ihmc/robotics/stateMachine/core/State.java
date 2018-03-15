@@ -1,7 +1,5 @@
 package us.ihmc.robotics.stateMachine.core;
 
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-
 /**
  * This interface gathers the backbone of a state that can be used to create a {@link StateMachine}.
  * <p>
