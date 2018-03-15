@@ -553,13 +553,7 @@ public class DynamicsMatrixCalculatorTest
          return nContactableBodies;
       }
 
-      /** @inheritDoc */
       @Override
-      public int getRhoSize()
-      {
-         return nContactableBodies * nContactPointsPerContactableBody * nBasisVectorsPerContactPoint;
-      }
-
       public boolean getDeactivateRhoWhenNotInContact()
       {
          return false;
