@@ -1,7 +1,6 @@
 package us.ihmc.jMonkeyEngineToolkit.jme;
 
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -38,9 +37,9 @@ public class JMEGraphics3DNode extends Node implements JMEUpdatable, CloseableAn
    private JMEGraphicsObject graphics;
    private Node graphicsObjectNode;
    private AssetManager assetManager;
-   private SimpleApplication application;
+   private Application application;
    
-   public JMEGraphics3DNode(Graphics3DNode graphics3dNode, AssetManager assetManager, SimpleApplication application, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
+   public JMEGraphics3DNode(Graphics3DNode graphics3dNode, AssetManager assetManager, Application application, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {  
       super(graphics3dNode.getName());
       this.graphics3dNode = graphics3dNode;
