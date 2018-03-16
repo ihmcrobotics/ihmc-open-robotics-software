@@ -666,7 +666,7 @@ public class IndividualRobotiqHandController implements RobotController
    @Override
    public void doControl()
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
       computeDesiredJointAngles();
    }
    

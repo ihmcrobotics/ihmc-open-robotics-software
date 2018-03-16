@@ -79,7 +79,7 @@ public class StateMachineExampleOneTest
 
          boolean wontTransition = stateMachine.getTimeInCurrentState() < 1.0;
 
-         stateMachine.doControlAndTransition();
+         stateMachine.doActionAndTransition();
          time.set(time.getValue() + 0.01);
 
          double timeInCurrentState = stateMachine.getTimeInCurrentState();
@@ -164,7 +164,7 @@ public class StateMachineExampleOneTest
       assertFalse(currentState.didAction);
       assertFalse(currentState.didTransitionOutOfAction);
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
       time.set(time.getValue() + 0.01);
 
       assertTrue(currentState.didTransitionIntoAction);
@@ -177,7 +177,7 @@ public class StateMachineExampleOneTest
       assertEquals(ExampleStateName.Starting, stateMachine.getCurrentStateKey());
       currentState.isDone = true;
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       assertEquals(ExampleStateName.StateOne, stateMachine.getCurrentStateKey());
 
@@ -208,7 +208,7 @@ public class StateMachineExampleOneTest
 
       currentState.isDone = true;
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       assertEquals(ExampleStateName.StateTwo, stateMachine.getCurrentStateKey());
 
@@ -234,7 +234,7 @@ public class StateMachineExampleOneTest
       assertFalse(currentState.didAction);
       assertFalse(currentState.didTransitionOutOfAction);
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
       time.set(time.getValue() + 0.01);
 
       assertEquals(stateTwo, stateMachine.getCurrentState());
@@ -251,7 +251,7 @@ public class StateMachineExampleOneTest
 
       currentState.isDone = true;
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       assertEquals(ExampleStateName.Stopped, stateMachine.getCurrentStateKey());
 
@@ -274,7 +274,7 @@ public class StateMachineExampleOneTest
       assertFalse(currentState.didAction);
       assertFalse(currentState.didTransitionOutOfAction);
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
       time.set(time.getValue() + 0.01);
 
       assertTrue(currentState.didTransitionIntoAction);

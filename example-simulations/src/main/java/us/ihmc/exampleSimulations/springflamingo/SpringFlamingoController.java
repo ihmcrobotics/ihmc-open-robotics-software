@@ -518,7 +518,7 @@ public class SpringFlamingoController implements RobotController
 
       // Actions in Each State
       for (RobotSide robotSide : RobotSide.values())
-         stateMachines.get(robotSide).doControl();
+         stateMachines.get(robotSide).doAction();
 
       for (RobotSide robotSide : RobotSide.values())
       {

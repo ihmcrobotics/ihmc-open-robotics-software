@@ -301,7 +301,7 @@ public class LegConfigurationControlModule
       else
          desiredAngle.set(desiredAngleWhenStraight.getDoubleValue());
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       double kneePitchPrivilegedConfigurationWeight;
       if (legControlWeight.getEnumValue() == LegControlWeight.LOW)

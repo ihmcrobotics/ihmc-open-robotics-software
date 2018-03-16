@@ -263,7 +263,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    {
       callUpdatables();
 
-      stateMachine.doControl();
+      stateMachine.doAction();
       updateDiagnosticsWhenHangingHelpers();
       updatePDControllers();
       if (updateFootForceSensorOffsets.getBooleanValue())

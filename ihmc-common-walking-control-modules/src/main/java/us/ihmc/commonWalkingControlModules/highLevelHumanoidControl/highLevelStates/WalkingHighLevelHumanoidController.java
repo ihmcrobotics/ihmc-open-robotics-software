@@ -527,7 +527,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (planarRegionsListHandler.hasNewPlanarRegions())
          balanceManager.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       currentState = stateMachine.getCurrentState();
 

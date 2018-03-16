@@ -320,7 +320,7 @@ public class PeterPlanarWalkerController implements RobotController
       //      }
 
       filteredDesiredVelocity.update();
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
    }
 

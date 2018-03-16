@@ -89,7 +89,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
    }
 
    @Override

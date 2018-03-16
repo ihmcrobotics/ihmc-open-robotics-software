@@ -78,7 +78,7 @@ public class PelvisOrientationManager
 
    public void compute()
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
    }
 
    public void initialize()

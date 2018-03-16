@@ -724,7 +724,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       updateGraphics();
       pollDataProviders();
       checkForReversedVelocity();
-      walkingStateMachine.doControlAndTransition();
+      walkingStateMachine.doActionAndTransition();
       updateDesiredCoMTrajectory();
       updateDesiredHeight();
       updateDesiredYaw();

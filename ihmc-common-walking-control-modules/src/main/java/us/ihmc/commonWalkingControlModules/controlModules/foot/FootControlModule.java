@@ -273,7 +273,7 @@ public class FootControlModule
          footControlHelper.getPartialFootholdControlModule().reset();
       
 
-      stateMachine.doControl();
+      stateMachine.doAction();
 
       if (ankleControlModule != null)
       {

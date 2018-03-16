@@ -24,7 +24,7 @@ public class BehaviorStateMachine<E extends Enum<E>>
 
    public void doControlAndTransitions()
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
    }
 
    public void pause()

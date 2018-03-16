@@ -301,7 +301,7 @@ public class ValkyrieFingerSetController implements RobotController
    @Override
    public void doControl()
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       for (ValkyrieHandJointName jointEnum : controlledJoints)
       {

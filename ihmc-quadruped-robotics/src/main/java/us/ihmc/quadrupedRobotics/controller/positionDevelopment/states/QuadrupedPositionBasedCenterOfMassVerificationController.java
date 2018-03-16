@@ -260,7 +260,7 @@ public class QuadrupedPositionBasedCenterOfMassVerificationController implements
       referenceFrames.updateFrames();
       updateFeetLocations();
       updateGraphics();
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
       updateDesiredHeight();
       updateDesiredCoMPose();
       updateDesiredFootPositionsBasedOnDesiredCenterOfMass();

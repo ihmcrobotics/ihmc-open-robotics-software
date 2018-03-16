@@ -133,7 +133,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    @Override
    public void doControl()
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
    }
 
    @Override

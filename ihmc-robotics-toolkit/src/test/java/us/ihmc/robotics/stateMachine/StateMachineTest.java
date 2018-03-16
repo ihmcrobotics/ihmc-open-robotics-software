@@ -56,7 +56,7 @@ public class StateMachineTest
 
       do
       {
-         stateMachine.doControlAndTransition();
+         stateMachine.doActionAndTransition();
          time.add(0.01);
       }
       while (!stateMachine.getCurrentStateKey().equals(States.values()[States.values().length - 1]));

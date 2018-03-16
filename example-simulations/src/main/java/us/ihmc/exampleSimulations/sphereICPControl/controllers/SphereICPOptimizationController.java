@@ -162,7 +162,7 @@ public class SphereICPOptimizationController implements GenericSphereController
    @Override
    public void doControl()
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       heightController.doControl();
 
