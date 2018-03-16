@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -291,9 +291,9 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
          String prefix = fullRobotModel.getFoot(robotSide).getName();
          @SuppressWarnings("unchecked")
          final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(prefix + "FootControlModule", prefix
-               + "State");
+               + "CurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingCurrentState");
 
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
@@ -349,7 +349,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
@@ -367,7 +367,7 @@ public abstract class DRCHumanoidBehaviorICPFaultDetectionTest implements MultiR
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          if (side == RobotSide.LEFT)
          {

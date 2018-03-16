@@ -13,7 +13,6 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -198,7 +197,7 @@ public class StateMachineExampleOneTest
       //      assertEquals(currentState.getPreviousState(), startingState); TODO fixme?
 
       assertTrue(currentState.didTransitionIntoAction);
-      assertFalse(currentState.didAction);
+      assertTrue(currentState.didAction);
       assertFalse(currentState.didTransitionOutOfAction);
 
       assertEquals(startingState.getStateEnum(), listener.oldState);
@@ -231,7 +230,7 @@ public class StateMachineExampleOneTest
       assertEquals(currentStateEnum, ExampleStateName.StateTwo);
 
       assertTrue(currentState.didTransitionIntoAction);
-      assertFalse(currentState.didAction);
+      assertTrue(currentState.didAction);
       assertFalse(currentState.didTransitionOutOfAction);
 
       stateMachine.doActionAndTransition();
@@ -271,7 +270,7 @@ public class StateMachineExampleOneTest
       assertEquals(currentStateEnum, ExampleStateName.Stopped);
 
       assertTrue(currentState.didTransitionIntoAction);
-      assertFalse(currentState.didAction);
+      assertTrue(currentState.didAction);
       assertFalse(currentState.didTransitionOutOfAction);
 
       stateMachine.doActionAndTransition();

@@ -56,7 +56,7 @@ public class PelvisOrientationManager
    private StateMachine<PelvisOrientationControlMode, PelvisOrientationControlState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
    {
       StateMachineFactory<PelvisOrientationControlMode, PelvisOrientationControlState> factory = new StateMachineFactory<>(PelvisOrientationControlMode.class);
-      factory.setNamePrefix(namePrefix + "State").setRegistry(registry).buildYoClock(timeProvider);
+      factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(timeProvider);
       
       factory.addState(PelvisOrientationControlMode.WALKING_CONTROLLER, walkingManager);
       factory.addState(PelvisOrientationControlMode.USER, userManager);

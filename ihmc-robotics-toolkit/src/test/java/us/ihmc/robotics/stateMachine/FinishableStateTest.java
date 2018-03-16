@@ -49,7 +49,7 @@ public class FinishableStateTest
 
       assertTrue(stateOne.didTransitionOutOfAction);
       assertTrue(stateTwo.inState);
-      assertFalse(stateTwo.didAction);
+      assertTrue(stateTwo.didAction);
       assertFalse(stateTwo.didTransitionOutOfAction);
       assertEquals(stateMachine.getCurrentState(), stateTwo);
 
@@ -58,7 +58,7 @@ public class FinishableStateTest
 
       assertTrue(stateTwo.didTransitionOutOfAction);
       assertTrue(stateThree.inState);
-      assertFalse(stateThree.didAction);
+      assertTrue(stateThree.didAction);
       assertFalse(stateThree.didTransitionOutOfAction);
       assertEquals(stateMachine.getCurrentState(), stateThree);
 
