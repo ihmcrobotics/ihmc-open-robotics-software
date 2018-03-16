@@ -8,5 +8,15 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
  */
 public enum EffortVariableConstraintType
 {
-   OBJECTIVE, CONSTRAINT;
+   /**
+    * The desired value of the force / force rate variable is included as
+    * part of the objective function. This option should be accompanied by a weight.
+    * If no weight is specified then the variable is optimized through a regularization weight
+    */
+   OBJECTIVE,
+   /**
+    * The desired value of the force / force rate variable is included in the biases and is not part of the
+    * optimization
+    */
+   EQUALITY;
 }

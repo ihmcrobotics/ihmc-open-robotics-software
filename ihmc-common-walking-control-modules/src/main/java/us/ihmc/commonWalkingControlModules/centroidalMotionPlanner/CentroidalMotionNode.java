@@ -131,7 +131,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public void setForceConstraint(FrameVector3D force)
    {
       setForceValue(force);
-      this.forceConstraintType.setXYZ(EffortVariableConstraintType.CONSTRAINT);
+      this.forceConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
       this.forceWeight.setToNaN();
    }
 
@@ -183,7 +183,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    {
       this.forceRate.setIncludingFrame(dForce);
       this.forceRate.changeFrame(referenceFrame);
-      this.forceRateConstraintType.setXYZ(EffortVariableConstraintType.CONSTRAINT);
+      this.forceRateConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
       this.forceRateWeight.setToNaN();
    }
 
@@ -209,7 +209,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    {
       this.torque.setIncludingFrame(torque);
       this.torque.changeFrame(referenceFrame);
-      this.torqueConstraintType.setXYZ(DependentVariableConstraintType.CONSTRAINT);
+      this.torqueConstraintType.setXYZ(DependentVariableConstraintType.EQUALITY);
       this.torqueWeight.setToNaN();
    }
 
@@ -235,7 +235,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    {
       this.position.setIncludingFrame(desiredPosition);
       this.position.changeFrame(referenceFrame);
-      this.positionConstraintType.setXYZ(DependentVariableConstraintType.CONSTRAINT);
+      this.positionConstraintType.setXYZ(DependentVariableConstraintType.EQUALITY);
       this.positionWeight.setToNaN();
    }
 
@@ -261,7 +261,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    {
       this.orientation.setIncludingFrame(desiredOrienation);
       this.orientation.changeFrame(referenceFrame);
-      this.orientationConstraintType.setXYZ(DependentVariableConstraintType.CONSTRAINT);
+      this.orientationConstraintType.setXYZ(DependentVariableConstraintType.EQUALITY);
       this.orientationWeight.setToNaN();
    }
 
@@ -287,7 +287,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    {
       this.linearVelocity.setIncludingFrame(desiredLinearVelocity);
       this.linearVelocity.changeFrame(referenceFrame);
-      this.linearVelocityConstraintType.setXYZ(DependentVariableConstraintType.CONSTRAINT);
+      this.linearVelocityConstraintType.setXYZ(DependentVariableConstraintType.EQUALITY);
       this.linearVelocityWeight.setToNaN();
    }
 
@@ -314,7 +314,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    {
       this.angularVelocity.setIncludingFrame(desiredAngularVelocity);
       this.angularVelocity.changeFrame(referenceFrame);
-      this.angularVelocityConstraintType.setXYZ(DependentVariableConstraintType.CONSTRAINT);
+      this.angularVelocityConstraintType.setXYZ(DependentVariableConstraintType.EQUALITY);
       this.angularVelocityWeight.setToNaN();
    }
 
@@ -450,6 +450,51 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public DependentVariableConstraintType getLinearVelocityConstraintType(Axis axis)
    {
       return linearVelocityConstraintType.getElement(axis);
+   }
+
+   public double getOrientationValue(Axis axis)
+   {
+      return orientation.getElement(axis.ordinal());
+   }
+
+   public double getOrientationWeight(Axis axis)
+   {
+      return orientationWeight.getElement(axis.ordinal());
+   }
+
+   public DependentVariableConstraintType getOrientationConstraintType(Axis axis)
+   {
+      return orientationConstraintType.getElement(axis);
+   }
+
+   public double getAngularVelocityValue(Axis axis)
+   {
+      return angularVelocity.getElement(axis.ordinal());
+   }
+
+   public double getAngularVelocityWeight(Axis axis)
+   {
+      return angularVelocityWeight.getElement(axis.ordinal());
+   }
+
+   public DependentVariableConstraintType getAngularVelocityConstraintType(Axis axis)
+   {
+      return angularVelocityConstraintType.getElement(axis);
+   }
+
+   public double getTorqueValue(Axis axis)
+   {
+      return torque.getElement(axis.ordinal());
+   }
+
+   public double getTorqueWeight(Axis axis)
+   {
+      return torqueWeight.getElement(axis.ordinal());
+   }
+
+   public DependentVariableConstraintType getTorqueConstraintType(Axis axis)
+   {
+      return torqueConstraintType.getElement(axis);
    }
 
    public double getForce(Axis axis)

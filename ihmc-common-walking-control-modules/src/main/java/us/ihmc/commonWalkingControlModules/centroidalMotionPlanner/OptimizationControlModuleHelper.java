@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.RecycledLinkedListBuilder.RecycledLinkedListEntry;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis;
 
 public class OptimizationControlModuleHelper
@@ -26,11 +25,17 @@ public class OptimizationControlModuleHelper
 
    private final DenseMatrix64F[] decisionVariableWeightMatrix = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] decisionVariableDesiredValueMatrix = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] H = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] f = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] Aeq = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] beq = new DenseMatrix64F[numberOfAxis];
+
    private final double forceRegularizationWeight;
    private final double forceRateRegularizationWeight;
 
    private int numberOfNodes;
    private final int[] numberOfDecisionVariables = new int[numberOfAxis];
+
    private final double[] gravity = new double[numberOfAxis];
    private final double robotMass;
    private RecycledLinkedListBuilder<CentroidalMotionNode> nodeList;
@@ -50,6 +55,10 @@ public class OptimizationControlModuleHelper
          forceRateBias[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
          decisionVariableWeightMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, defaultNumberOfNodes * 2);
          decisionVariableDesiredValueMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, 1);
+         H[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, defaultNumberOfNodes * 2);
+         f[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, 1);
+         Aeq[i] = new DenseMatrix64F(defaultNumberOfNodes * 5, defaultNumberOfNodes * 2);
+         beq[i] = new DenseMatrix64F(defaultNumberOfNodes * 5, 1);
       }
       this.forceRegularizationWeight = parameters.getdForceRegularizationWeight();
       this.forceRateRegularizationWeight = parameters.getdForceRegularizationWeight();
@@ -87,6 +96,10 @@ public class OptimizationControlModuleHelper
          forceRateBias[i].reshape(numberOfNodes, 1);
          decisionVariableWeightMatrix[i].reshape(numberOfDecisionVariables[i], numberOfDecisionVariables[i]);
          decisionVariableDesiredValueMatrix[i].reshape(numberOfDecisionVariables[i], 1);
+         H[i].reshape(numberOfDecisionVariables[i], numberOfDecisionVariables[i]);
+         f[i].reshape(numberOfDecisionVariables[i], 1);
+         Aeq[i].reshape(0, numberOfDecisionVariables[i]);
+         beq[i].reshape(0, 1);
       }
    }
 
@@ -102,6 +115,19 @@ public class OptimizationControlModuleHelper
          forceBias[i].zero();
          forceRateCoefficientMatrix[i].zero();
          forceRateBias[i].zero();
+         decisionVariableWeightMatrix[i].zero();
+         decisionVariableDesiredValueMatrix[i].zero();
+      }
+   }
+
+   private void setOptimizationMatricesToZero()
+   {
+      for (int i = 0; i < numberOfAxis; i++)
+      {
+         H[i].zero();
+         f[i].zero();
+         Aeq[i].zero();
+         beq[i].zero();
       }
    }
 
@@ -121,17 +147,41 @@ public class OptimizationControlModuleHelper
       deltaT.reshape(numberOfNodes - 1, 1);
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry = nodeList.getFirstEntry();
       CentroidalMotionNode node = entry.element;
+      double previousNodeTime = node.getTime();
       for (Axis axis : Axis.values)
-         numberOfDecisionVariables[axis.ordinal()] = getNumberOfDecisionVariables(node, axis);
-
-      for (int i = 0; entry.getNext() != null; i++, entry = entry.getNext())
       {
-         CentroidalMotionNode nextNode = entry.getNext().element;
-         CentroidalMotionNode currentNode = entry.element;
-         deltaT.set(i, 0, nextNode.getTime() - currentNode.getTime());
-         for (Axis axis : Axis.values)
-            numberOfDecisionVariables[axis.ordinal()] += getNumberOfDecisionVariables(nextNode, axis);
+         numberOfDecisionVariables[axis.ordinal()] = getNumberOfDecisionVariables(node, axis);
       }
+
+      entry = entry.getNext();
+      for (int i = 0; entry != null; i++, entry = entry.getNext())
+      {
+         node = entry.element;
+         double nodeTime = node.getTime();
+         deltaT.set(i, 0, nodeTime - previousNodeTime);
+         previousNodeTime = nodeTime;
+         for (Axis axis : Axis.values)
+         {
+            int axisOrdinal = axis.ordinal();
+            numberOfDecisionVariables[axisOrdinal] += getNumberOfDecisionVariables(node, axis);
+         }
+      }
+   }
+
+   private int getNumberOfEqualityConstraints(CentroidalMotionNode node, Axis axis)
+   {
+      int numberOfEqualityConstraints = 0;
+      if (node.getPositionConstraintType(axis) == DependentVariableConstraintType.EQUALITY)
+         numberOfEqualityConstraints++;
+      if (node.getLinearVelocityConstraintType(axis) == DependentVariableConstraintType.EQUALITY)
+         numberOfEqualityConstraints++;
+      //      if (node.getOrientationConstraintType(axis) == DependentVariableConstraintType.EQUALITY)
+      //         numberOfEqualityConstraints++;
+      //      if (node.getAngularVelocityConstraintType(axis) == DependentVariableConstraintType.EQUALITY)
+      //         numberOfEqualityConstraints++;
+      //      if (node.getTorqueConstraintType(axis) == DependentVariableConstraintType.EQUALITY)
+      //         numberOfEqualityConstraints++;
+      return numberOfEqualityConstraints;
    }
 
    private int getNumberOfDecisionVariables(CentroidalMotionNode node, Axis axis)
@@ -204,6 +254,11 @@ public class OptimizationControlModuleHelper
                                                       axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix, forceRateValue,
                                                       forceRateConstraintType, forceRateWeight, forceRateRegularizationWeight,
                                                       velocityCoefficientForInitialForceRate, positionCoefficientForInitialForceRate);
+         processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
+                           node.getPositionWeight(axis), node.getPositionWeight(axis));
+         processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
+                           node.getLinearVelocityWeight(axis), node.getLinearVelocityWeight(axis));
+
       }
 
       rowIndex++;
@@ -261,6 +316,11 @@ public class OptimizationControlModuleHelper
             replaceInitialConditionPlaceholderAndAddConstantBias(rowIndex, axisPositionBiasMatrix, 0.5 * deltaTim1 * deltaTim1 * gravity[axisOrdinal]);
             addVelocityContributionToPosition(rowIndex, axisPositionCoefficientMatrix, axisVelocityCoefficientMatrix, deltaTim1);
             addVelocityContributionToPosition(rowIndex, axisPositionBiasMatrix, axisVelocityBiasMatrix, deltaTim1);
+
+            processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
+                              node.getPositionWeight(axis), node.getPositionWeight(axis));
+            processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
+                              node.getLinearVelocityWeight(axis), node.getLinearVelocityWeight(axis));
          }
       }
 
@@ -305,7 +365,78 @@ public class OptimizationControlModuleHelper
          replaceInitialConditionPlaceholderAndAddConstantBias(rowIndex, axisPositionBiasMatrix, 0.5 * deltaTF * deltaTF * gravity[axisOrdinal]);
          addVelocityContributionToPosition(rowIndex, axisPositionCoefficientMatrix, axisVelocityCoefficientMatrix, deltaTF);
          addVelocityContributionToPosition(rowIndex, axisPositionBiasMatrix, axisVelocityBiasMatrix, deltaTF);
+
+         processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
+                           node.getPositionWeight(axis), node.getPositionWeight(axis));
+         processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
+                           node.getLinearVelocityWeight(axis), node.getLinearVelocityWeight(axis));
+
       }
+   }
+
+   private void processConstraint(int axisOrdinal, int rowIndex, DependentVariableConstraintType constraintType, DenseMatrix64F coefficientMatrix,
+                                  DenseMatrix64F biasMatrix, double desiredValue, double weight)
+   {
+      double jacobianObjective = 0.0;
+      switch (constraintType)
+      {
+      case IGNORE:
+         return;
+      case OBJECTIVE:
+         jacobianObjective = processDependentVariableConstraintToJacobianForm(rowIndex, coefficientMatrix, biasMatrix, desiredValue, tempJ);
+         addObjectiveCost(axisOrdinal, tempJ, weight, jacobianObjective);
+         return;
+      case EQUALITY:
+         jacobianObjective = processDependentVariableConstraintToJacobianForm(rowIndex, coefficientMatrix, biasMatrix, desiredValue, tempJ);
+         addEqualityConstraint(axisOrdinal, tempJ, jacobianObjective);
+         return;
+      default:
+         throw new RuntimeException("Unhandled dependent variable constraint");
+      }
+
+   }
+
+   private final DenseMatrix64F tempJ = new DenseMatrix64F(0, 1);
+
+   private double processDependentVariableConstraintToJacobianForm(int coefficientMatrixRowIndex, DenseMatrix64F coefficientMatrix, DenseMatrix64F biasMatrix,
+                                                                   double desiredValue, DenseMatrix64F jacobianToStore)
+   {
+      CommonOps.extractRow(coefficientMatrix, coefficientMatrixRowIndex, jacobianToStore);
+      double bias = biasMatrix.get(coefficientMatrixRowIndex, 0);
+      return desiredValue - bias;
+   }
+
+   private void addEqualityConstraint(int axisOrdinal, DenseMatrix64F jacobian, double desiredValue)
+   {
+      DenseMatrix64F axisAeq = Aeq[axisOrdinal];
+      DenseMatrix64F axisBeq = beq[axisOrdinal];
+      int equalityConstraintIndex = axisAeq.getNumRows();
+      int constraintSize = jacobian.getNumRows();
+      int equalityConstraintSize = equalityConstraintIndex + constraintSize;
+      axisAeq.reshape(equalityConstraintSize, numberOfDecisionVariables[axisOrdinal]);
+      axisBeq.reshape(equalityConstraintSize, 1);
+      CommonOps.insert(jacobian, axisAeq, equalityConstraintIndex, 0);
+      axisBeq.set(equalityConstraintSize, 0, desiredValue);
+   }
+
+   private final DenseMatrix64F tempH = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F tempJtW = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F tempf = new DenseMatrix64F(0, 1);
+
+   private void addObjectiveCost(int axisOrdinal, DenseMatrix64F jacobian, double weight, double desiredValue)
+   {
+      DenseMatrix64F axisH = H[axisOrdinal];
+      DenseMatrix64F axisf = f[axisOrdinal];
+
+      tempJtW.set(jacobian);
+      CommonOps.scale(Math.sqrt(weight), tempJtW);
+      CommonOps.multInner(tempJtW, tempH);
+      CommonOps.addEquals(axisH, tempH);
+
+      CommonOps.transpose(jacobian, tempf);
+      CommonOps.scale(-weight * desiredValue, tempf);
+
+      CommonOps.addEquals(axisf, tempf);
    }
 
    private void setFinalMatrixCoefficientsFromNodeQuantity(int rowIndex, int axisOrdinal, DenseMatrix64F axisVelocityCoefficientMatrix,
@@ -329,7 +460,7 @@ public class OptimizationControlModuleHelper
             axisDecisionVariableCoefficientMatrix.set(rowIndex, decisionVariableIndex[axisOrdinal], 1.0);
             decisionVariableIndex[axisOrdinal]++;
             break;
-         case CONSTRAINT:
+         case EQUALITY:
             axisDecisionVariableBias.set(rowIndex, 0, decisionVariableValue);
             axisVelocityBias += decisionVariableValue * velocityCoefficient;
             axisPositionBias += decisionVariableValue * positionCoefficient;
@@ -364,7 +495,7 @@ public class OptimizationControlModuleHelper
                                                           positionCoefficient);
             decisionVariableIndex[axisOrdinal]++;
             break;
-         case CONSTRAINT:
+         case EQUALITY:
             axisDecisionVariableBias.set(rowIndex, 0, decisionVariableValue);
             axisVelocityBias += decisionVariableValue * velocityCoefficient;
             axisPositionBias += decisionVariableValue * positionCoefficient;
@@ -404,7 +535,7 @@ public class OptimizationControlModuleHelper
                                                        positionCoefficientInitial);
          decisionVariableIndex[axisOrdinal]++;
          break;
-      case CONSTRAINT:
+      case EQUALITY:
          axisDecisionVariableBias.set(rowIndex, 0, decisionVariableValue);
          axisVelocityBias1 += decisionVariableValue * velocityCoefficientFinal;
          axisVelocityBias2 += decisionVariableValue * velocityCoefficientInitial;

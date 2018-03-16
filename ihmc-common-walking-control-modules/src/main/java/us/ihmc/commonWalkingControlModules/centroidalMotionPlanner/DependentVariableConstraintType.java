@@ -12,13 +12,12 @@ public enum DependentVariableConstraintType
    /**
     * The desired value of the dependent variable is included as 
     * part of the objective function. This option should be accompanied by a weight.
-    * An objective with no weight defaults to {@code DependentVariableConstraintType.IGNORE}
     */
    OBJECTIVE,
    /**
     * The desired value of the dependent variable is set a hard constraint that must be satisfied
     */
-   CONSTRAINT,
+   EQUALITY,
    /**
     * The dependent variable is ignored during the motion planning optimization. Constraints on the 
     * variable's range are still imposed
