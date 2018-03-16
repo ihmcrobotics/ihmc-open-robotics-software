@@ -178,7 +178,7 @@ public class XTouchCompactTransmitter implements SliderBoardTransmitterInterface
                try
                {
                   boolean buttonValue = midiControl.var.getValueAsDouble() > 0.5;
-                  System.out.println("Setting " + midiControl.var + " to " + buttonValue);
+                  printIfDebug("Setting " + midiControl.var + " to " + buttonValue);
                   shortMesssage.setMessage(144, 0, midiControl.mapping - 127, buttonValue ? 127 : 0);
                   midiOut.send(shortMesssage, -1);
                }
