@@ -95,7 +95,7 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
    public static RigidBodyControlMode findControllerState(String bodyName, SimulationConstructionSet scs)
    {
       String headOrientatManagerName = bodyName + "Manager";
-      String headControlStateName = headOrientatManagerName + "State";
+      String headControlStateName = headOrientatManagerName + "CurrentState";
       return ((YoEnum<RigidBodyControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
    }
 

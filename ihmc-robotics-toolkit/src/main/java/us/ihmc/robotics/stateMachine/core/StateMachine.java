@@ -152,21 +152,22 @@ public class StateMachine<K extends Enum<K>, S extends State>
    }
 
    /**
-    * Calls {@link State#doAction(double)} on the active state and performs requested transitions.
+    * Processes requested transition, if any, and then calls {@link State#doAction(double)} on the
+    * active state.
     * <p>
     * Always prefer using this method rather than calling independently {@link #doAction()} and
     * {@link #doTransitions()}.
     * </p>
     * <p>
-    * On the very first call, the method ensures that {@link #resetToInitialState()} has been called at least once.
-    * This ensures that the state machine starts with the initial state, i.e. the state mapped to the
-    * key {@link #getInitialStateKey()}, as the active state.
+    * On the very first call, the method ensures that {@link #resetToInitialState()} has been called at
+    * least once. This ensures that the state machine starts with the initial state, i.e. the state
+    * mapped to the key {@link #getInitialStateKey()}, as the active state.
     * </p>
     */
    public void doActionAndTransition()
    {
-      doAction();
       doTransitions();
+      doAction();
    }
 
    /**
@@ -176,9 +177,9 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * {@link #doAction()} and {@link #doTransitions()}.
     * </p>
     * <p>
-    * On the very first call, the method ensures that {@link #resetToInitialState()} has been called at least once.
-    * This ensures that the state machine starts with the initial state, i.e. the state mapped to the
-    * key {@link #getInitialStateKey()}, as the active state.
+    * On the very first call, the method ensures that {@link #resetToInitialState()} has been called at
+    * least once. This ensures that the state machine starts with the initial state, i.e. the state
+    * mapped to the key {@link #getInitialStateKey()}, as the active state.
     * </p>
     */
    public void doAction()

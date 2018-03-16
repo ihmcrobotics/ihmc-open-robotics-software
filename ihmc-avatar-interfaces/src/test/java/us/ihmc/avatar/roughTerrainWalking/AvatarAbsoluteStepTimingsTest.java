@@ -306,7 +306,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    @SuppressWarnings("unchecked")
    private static WalkingStateEnum getWalkingState(SimulationConstructionSet scs)
    {
-      return (WalkingStateEnum) getYoVariable(scs, "WalkingState", WalkingHighLevelHumanoidController.class.getSimpleName(), YoEnum.class).getEnumValue();
+      return (WalkingStateEnum) getYoVariable(scs, "WalkingCurrentState", WalkingHighLevelHumanoidController.class.getSimpleName(), YoEnum.class).getEnumValue();
    }
 
    private static <T extends YoVariable<T>> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)
