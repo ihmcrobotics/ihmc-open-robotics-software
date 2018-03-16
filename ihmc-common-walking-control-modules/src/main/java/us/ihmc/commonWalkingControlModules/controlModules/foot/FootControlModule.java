@@ -165,7 +165,7 @@ public class FootControlModule
    private StateMachine<ConstraintType, AbstractFootControlState> setupStateMachine(String namePrefix)
    {
       StateMachineFactory<ConstraintType, AbstractFootControlState> factory = new StateMachineFactory<>(ConstraintType.class);
-      factory.setNamePrefix(namePrefix + "State").setRegistry(registry).buildYoClock(footControlHelper.getHighLevelHumanoidControllerToolbox().getYoTime());
+      factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(footControlHelper.getHighLevelHumanoidControllerToolbox().getYoTime());
       factory.addState(ConstraintType.TOES, onToesState);
       factory.addState(ConstraintType.FULL, supportState);
       factory.addState(ConstraintType.SWING, swingState);

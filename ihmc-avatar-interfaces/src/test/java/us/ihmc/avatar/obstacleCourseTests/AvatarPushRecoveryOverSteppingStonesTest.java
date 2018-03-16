@@ -29,7 +29,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -338,7 +338,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          return footConstraintType.getEnumValue() == FootControlModule.ConstraintType.SWING;
       }
@@ -357,7 +357,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          if (side == RobotSide.LEFT)
          {

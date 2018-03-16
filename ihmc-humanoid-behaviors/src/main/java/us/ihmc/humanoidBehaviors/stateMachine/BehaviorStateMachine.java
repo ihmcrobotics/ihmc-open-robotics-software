@@ -17,6 +17,11 @@ public class BehaviorStateMachine<E extends Enum<E>>
       stateMachine.resetToInitialState();
    }
 
+   public void resetCurrentState()
+   {
+      stateMachine.resetCurrentState();
+   }
+
    public void doControlAndTransitions()
    {
       stateMachine.doControlAndTransition();

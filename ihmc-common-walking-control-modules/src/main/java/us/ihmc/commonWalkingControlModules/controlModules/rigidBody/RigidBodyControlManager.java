@@ -114,7 +114,7 @@ public class RigidBodyControlManager
    private StateMachine<RigidBodyControlMode, RigidBodyControlState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
    {
       StateMachineFactory<RigidBodyControlMode, RigidBodyControlState> factory = new StateMachineFactory<>(RigidBodyControlMode.class);
-      factory.setNamePrefix(namePrefix + "State").setRegistry(registry).buildYoClock(timeProvider);
+      factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(timeProvider);
 
       factory.addState(RigidBodyControlMode.JOINTSPACE, jointspaceControlState);
       factory.addState(RigidBodyControlMode.TASKSPACE, taskspaceControlState);
