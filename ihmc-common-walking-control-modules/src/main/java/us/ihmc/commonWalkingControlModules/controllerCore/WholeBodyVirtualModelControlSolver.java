@@ -35,8 +35,6 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class WholeBodyVirtualModelControlSolver
 {
-   private static final boolean USE_LIMITED_JOINT_TORQUES = true;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final VirtualModelControlOptimizationControlModule optimizationControlModule;
@@ -64,7 +62,6 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector yoDesiredMomentumRateAngular;
    private final YoFrameVector yoAchievedMomentumRateAngular;
    private final FrameVector3D achievedMomentumRateLinear = new FrameVector3D();
-   private final Map<OneDoFJoint, RateLimitedYoVariable> jointTorqueSolutions = new HashMap<>();
 
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector3D residualRootJointForce = new FrameVector3D();
@@ -74,8 +71,6 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector yoResidualRootJointTorque;
 
    private final JointIndexHandler jointIndexHandler;
-
-   private boolean firstTick = true;
 
    public WholeBodyVirtualModelControlSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -93,31 +88,11 @@ public class WholeBodyVirtualModelControlSolver
 
       yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
       yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
-
       yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
       yoAchievedMomentumRateAngular = toolbox.getYoAchievedMomentumRateAngular();
 
-      if (toolbox.getControlledBodies() != null)
-      {
-         List<RigidBody> controlledBodies = Arrays.asList(toolbox.getControlledBodies());
-         wrenchVisualizer = new WrenchVisualizer("VMCDesiredExternalWrench", controlledBodies, 1.0, toolbox.getYoGraphicsListRegistry(), registry,
-                                                 YoAppearance.Red(), YoAppearance.Blue());
-      }
-      else
-      {
-         wrenchVisualizer = null;
-      }
-
-      if (USE_LIMITED_JOINT_TORQUES)
-      {
-         for (OneDoFJoint joint : controlledOneDoFJoints)
-         {
-            RateLimitedYoVariable jointTorqueSolution = new RateLimitedYoVariable("limited_tau_vmc_" + joint.getName(), registry, 10.0, toolbox.getControlDT());
-            jointTorqueSolutions.put(joint, jointTorqueSolution);
-         }
-      }
-
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
+      wrenchVisualizer = toolbox.getWrenchVisualizer();
 
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
@@ -129,7 +104,6 @@ public class WholeBodyVirtualModelControlSolver
    {
       optimizationControlModule.initialize();
       virtualModelController.reset();
-      firstTick = true;
    }
 
    public void clear()
@@ -145,7 +119,6 @@ public class WholeBodyVirtualModelControlSolver
       optimizationControlModule.initialize();
       virtualModelController.reset();
       planeContactWrenchProcessor.initialize();
-      firstTick = true;
    }
 
    public void compute()
@@ -169,8 +142,9 @@ public class WholeBodyVirtualModelControlSolver
       SpatialForceVector centroidalMomentumRateSolution = virtualModelControlSolution.getCentroidalMomentumRateSolution();
 
       yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
-      yoAchievedMomentumRateAngular.set(centroidalMomentumRateSolution.getAngularPart());
       achievedMomentumRateLinear.setIncludingFrame(yoAchievedMomentumRateLinear);
+
+      yoAchievedMomentumRateAngular.set(centroidalMomentumRateSolution.getAngularPart());
 
       // submit forces for contact forces
       for (int bodyIndex = 0; bodyIndex < rigidBodiesWithExternalWrench.size(); bodyIndex++)
@@ -179,52 +153,44 @@ public class WholeBodyVirtualModelControlSolver
          externalWrenchSolution.get(rigidBody).negate();
          virtualModelController.addExternalWrench(controlRootBody, rigidBody, externalWrenchSolution.get(rigidBody));
       }
-      planeContactWrenchProcessor.compute(externalWrenchSolution);
 
       virtualModelController.populateTorqueSolution(virtualModelControlSolution);
       DenseMatrix64F jointTorquesSolution = virtualModelControlSolution.getJointTorques();
 
-      for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
+      for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
+         RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
          externalWrenchSolution.get(rigidBody).changeBodyFrameAttachedToSameBody(rigidBody.getBodyFixedFrame());
          externalWrenchSolution.get(rigidBody).negate();
       }
 
-      if (wrenchVisualizer != null)
-         wrenchVisualizer.visualize(externalWrenchSolution);
-
       updateLowLevelData(jointTorquesSolution);
 
-      rootJoint.getWrench(residualRootJointWrench);
-      residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
-      residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
-      yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
-      yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+      if (rootJoint != null)
+      {
+         rootJoint.getWrench(residualRootJointWrench);
+         residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
+         residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
+         yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
+         yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+      }
+
+      planeContactWrenchProcessor.compute(externalWrenchSolution);
+      wrenchVisualizer.visualize(externalWrenchSolution);
+
    }
 
    private void updateLowLevelData(DenseMatrix64F jointTorquesSolution)
    {
-      rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
+      if (rootJoint != null)
+         rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
 
       for (OneDoFJoint joint : controlledOneDoFJoints)
       {
          int[] jointIndices = jointIndexHandler.getJointIndices(joint);
 
          for (int jointIndex : jointIndices)
-         {
-            if (USE_LIMITED_JOINT_TORQUES)
-            {
-               if (firstTick)
-                  jointTorqueSolutions.get(joint).set(jointTorquesSolution.get(jointIndex));
-               else
-                  jointTorqueSolutions.get(joint).update(jointTorquesSolution.get(jointIndex));
-               lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorqueSolutions.get(jointIndex).getDoubleValue());
-            }
-            else
-            {
-               lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(jointIndex));
-            }
-         }
+            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(jointIndex));
       }
    }
 
