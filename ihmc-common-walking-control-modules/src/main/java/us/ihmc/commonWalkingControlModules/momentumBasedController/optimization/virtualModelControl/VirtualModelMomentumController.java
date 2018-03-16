@@ -91,9 +91,8 @@ public class VirtualModelMomentumController
        * where w is the M-by-1 end-effector desired effort vector.
        * @formatter:on
        */
-      commandToAdd.getDesiredEffort(tempFullObjective);
-
       tempTaskObjective.reshape(taskSize, 1);
+      commandToAdd.getDesiredEffort(tempFullObjective);
       CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
       // Add these forces to the effort matrix t = J' w
@@ -146,6 +145,9 @@ public class VirtualModelMomentumController
     */
    public boolean addExternalWrench(RigidBody base, RigidBody endEffector, Wrench wrench, SelectionMatrix6D selectionMatrix)
    {
+      if (wrench.getLinearPart().length() < 1e-5 && wrench.getAngularPart().length() < 1e-5)
+         return false;
+
       // Gets the M-by-6 selection matrix S.
       selectionMatrix.getCompactSelectionMatrixInFrame(wrench.getExpressedInFrame(), tempSelectionMatrix);
 
@@ -175,6 +177,7 @@ public class VirtualModelMomentumController
        * where w is the M-by-1 end-effector desired effort vector.
        * @formatter:on
        */
+      tempTaskObjective.reshape(taskSize, 1);
       wrench.getMatrix(tempFullObjective);
       CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 

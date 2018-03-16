@@ -52,7 +52,7 @@ public class WholeBodyVirtualModelControlSolver
    private final RigidBody controlRootBody;
 
    private final Wrench tempExternalWrench = new Wrench();
-   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F();
+   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(0, 0);
 
    private final YoFrameVector yoDesiredMomentumRateLinear;
    private final YoFrameVector yoAchievedMomentumRateLinear;
@@ -179,7 +179,7 @@ public class WholeBodyVirtualModelControlSolver
       if (rootJoint != null)
          rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
 
-      for (OneDoFJoint joint : controlledOneDoFJoints)
+      for (OneDoFJoint joint : jointIndexHandler.getIndexedOneDoFJoints())
       {
          int[] jointIndices = jointIndexHandler.getJointIndices(joint);
 
