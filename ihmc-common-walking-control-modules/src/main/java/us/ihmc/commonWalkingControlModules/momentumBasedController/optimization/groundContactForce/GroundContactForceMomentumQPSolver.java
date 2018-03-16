@@ -13,6 +13,7 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class GroundContactForceMomentumQPSolver
@@ -48,6 +49,8 @@ public class GroundContactForceMomentumQPSolver
 
    private final DenseMatrix64F solverInput_activeIndices;
 
+   private final DenseMatrix64F solverOutput;
+   private final DenseMatrix64F solverOutput_momentumRate;
    private final DenseMatrix64F solverOutput_rhos;
 
    private final YoInteger numberOfActiveVariables = new YoInteger("numberOfActiveVariables", registry);
@@ -55,6 +58,8 @@ public class GroundContactForceMomentumQPSolver
    private final YoInteger numberOfEqualityConstraints = new YoInteger("numberOfEqualityConstraints", registry);
    private final YoInteger numberOfInequalityConstraints = new YoInteger("numberOfInequalityConstraints", registry);
    private final YoInteger numberOfConstraints = new YoInteger("numberOfConstraints", registry);
+   private final YoDouble momentumRateRegularization = new YoDouble("momentumRateRegularization", registry);
+   private final YoDouble momentumAccelerationRegularization = new YoDouble("momentumAccelerationRegularization", registry);
    private final DenseMatrix64F regularizationMatrix;
 
    private final DenseMatrix64F tempJtW;
@@ -82,19 +87,19 @@ public class GroundContactForceMomentumQPSolver
       this.problemSize = momentumSize + rhoSize;
       this.hasFloatingBase = hasFloatingBase;
 
-      solverInput_H = new DenseMatrix64F(rhoSize, rhoSize);
-      solverInput_f = new DenseMatrix64F(rhoSize, 1);
+      solverInput_H = new DenseMatrix64F(problemSize, problemSize);
+      solverInput_f = new DenseMatrix64F(problemSize, 1);
 
       solverInput_H_previous = new DenseMatrix64F(problemSize, problemSize);
       solverInput_f_previous = new DenseMatrix64F(problemSize, 1);
 
-      solverInput_Aeq = new DenseMatrix64F(0, rhoSize);
+      solverInput_Aeq = new DenseMatrix64F(0, problemSize);
       solverInput_beq = new DenseMatrix64F(0, 1);
-      solverInput_Ain = new DenseMatrix64F(0, rhoSize);
+      solverInput_Ain = new DenseMatrix64F(0, problemSize);
       solverInput_bin = new DenseMatrix64F(0, 1);
 
-      solverInput_lb = new DenseMatrix64F(rhoSize, 1);
-      solverInput_ub = new DenseMatrix64F(rhoSize, 1);
+      solverInput_lb = new DenseMatrix64F(problemSize, 1);
+      solverInput_ub = new DenseMatrix64F(problemSize, 1);
 
       solverInput_lb_previous = new DenseMatrix64F(problemSize, 1);
       solverInput_ub_previous = new DenseMatrix64F(problemSize, 1);
@@ -105,6 +110,8 @@ public class GroundContactForceMomentumQPSolver
       solverInput_activeIndices = new DenseMatrix64F(problemSize, 1);
       CommonOps.fill(solverInput_activeIndices, 1.0);
 
+      solverOutput = new DenseMatrix64F(problemSize, 1);
+      solverOutput_momentumRate = new DenseMatrix64F(momentumSize, 1);
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
       tempJtW = new DenseMatrix64F(rhoSize, rhoSize);
@@ -113,10 +120,14 @@ public class GroundContactForceMomentumQPSolver
       tempRhoTask_H = new DenseMatrix64F(rhoSize, rhoSize);
       tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
 
-      regularizationMatrix = new DenseMatrix64F(rhoSize, rhoSize);
+      regularizationMatrix = new DenseMatrix64F(problemSize, problemSize);
 
+      momentumRateRegularization.set(0.005);
+      momentumAccelerationRegularization.set(0.1);
       double defaultRhoRegularization = 0.00001;
-      for (int i = 0; i < rhoSize; i++)
+      for (int i = 0; i < momentumSize; i++)
+         regularizationMatrix.set(i, i, momentumRateRegularization.getDoubleValue());
+      for (int i = rhoSize; i < problemSize; i++)
          regularizationMatrix.set(i, i, defaultRhoRegularization);
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
@@ -131,6 +142,16 @@ public class GroundContactForceMomentumQPSolver
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setMomentumRateRegularization(double weight)
+   {
+      momentumRateRegularization.set(weight);
+   }
+
+   public void setMomentumAccelerationRegularization(double weight)
+   {
+      momentumAccelerationRegularization.set(weight);
    }
 
    public void setRhoRegularizationWeight(DenseMatrix64F weight)
@@ -162,17 +183,32 @@ public class GroundContactForceMomentumQPSolver
 
    public void reset()
    {
+      for (int i = 0; i < momentumSize; i++)
+         regularizationMatrix.set(i, i, momentumRateRegularization.getDoubleValue());
+
       solverInput_H.zero();
 
       solverInput_f.zero();
 
       solverInput_Aeq.reshape(0, rhoSize);
       solverInput_beq.reshape(0, 1);
+
+      if (!firstCall.getBooleanValue())
+         addMomentumAccelerationRegularization();
    }
 
    public void addRegularization()
    {
       CommonOps.addEquals(solverInput_H, regularizationMatrix);
+   }
+
+   public void addMomentumAccelerationRegularization()
+   {
+      for (int i = 0; i < momentumSize; i++)
+      {
+         solverInput_H.add(i, i, momentumAccelerationRegularization.getDoubleValue());
+         solverInput_f.add(i, 0, -momentumAccelerationRegularization.getDoubleValue() * solverOutput_momentumRate.get(i, 0));
+      }
    }
 
    public void addMomentumInput(MotionQPInput input)
@@ -357,7 +393,7 @@ public class GroundContactForceMomentumQPSolver
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
-      numberOfIterations.set(qpSolver.solve(solverOutput_rhos));
+      numberOfIterations.set(qpSolver.solve(solverOutput));
 
       qpSolverTimer.stopMeasurement();
 
@@ -368,13 +404,16 @@ public class GroundContactForceMomentumQPSolver
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
       }
 
+      CommonOps.extract(solverOutput, 0, momentumSize, 0, 1, solverOutput_momentumRate, 0, 0);
+      CommonOps.extract(solverOutput, momentumSize, problemSize, 0, 1, solverOutput_rhos, 0, 0);
+
       firstCall.set(false);
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
          if (hasFloatingBase)
          {
-            CommonOps.mult(tempWrenchConstraint_J, solverOutput_rhos, tempWrenchConstraint_LHS);
+            CommonOps.mult(tempWrenchConstraint_J, solverOutput, tempWrenchConstraint_LHS);
             int index = 0;
             wrenchEquilibriumTorqueError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
             wrenchEquilibriumTorqueError.setY(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
@@ -461,6 +500,11 @@ public class GroundContactForceMomentumQPSolver
       }
 
       hasWrenchesEquilibriumConstraintBeenSetup = true;
+   }
+
+   public DenseMatrix64F getMomentumRate()
+   {
+      return solverOutput_momentumRate;
    }
 
    public DenseMatrix64F getRhos()

@@ -146,6 +146,7 @@ public class VirtualModelControlOptimizationControlModule
          noConvergenceException = e;
       }
 
+      DenseMatrix64F momentumRateSolution = qpSolver.getMomentumRate();
       DenseMatrix64F rhoSolution = qpSolver.getRhos();
 
       Map<RigidBody, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
@@ -155,8 +156,8 @@ public class VirtualModelControlOptimizationControlModule
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
 
-      virtualModelControlSolution.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
       virtualModelControlSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
+      virtualModelControlSolution.setExternalWrenchSolution(rigidBodiesWithExternalWrench, externalWrenchSolution);
 
       if (noConvergenceException != null)
       {
