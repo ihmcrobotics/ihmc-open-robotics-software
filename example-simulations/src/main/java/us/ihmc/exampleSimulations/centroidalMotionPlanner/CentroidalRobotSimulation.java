@@ -13,7 +13,6 @@ public class CentroidalRobotSimulation
    
    public static void main(String args[])
    {
-      System.out.println(bufferSize);
       CentroidalRobotSimulation sim = new CentroidalRobotSimulation();
       sim.runSimulation();
    }
@@ -26,7 +25,7 @@ public class CentroidalRobotSimulation
       SimulationConstructionSet scs = new SimulationConstructionSet(scsRobot, parameters);
       scs.setPlaybackRealTimeRate(0.025);
       scs.startOnAThread();
-      BlockingSimulationRunner runner = new BlockingSimulationRunner(scs, 100.0);
+      BlockingSimulationRunner runner = new BlockingSimulationRunner(scs, 10.0);
       try
       {
          runner.simulateAndBlockAndCatchExceptions(10.0);

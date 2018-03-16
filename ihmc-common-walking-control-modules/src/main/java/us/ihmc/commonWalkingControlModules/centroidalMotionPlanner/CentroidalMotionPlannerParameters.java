@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
+
 public class CentroidalMotionPlannerParameters
 {
-   private double gravityX;
-   private double gravityY;
-   private double gravityZ;
+   private Vector3D gravity = new Vector3D();
    private double robotMass;
    private double forceRegulizationWeight;
    private double dForceRegularizationWeight;
@@ -55,32 +55,32 @@ public class CentroidalMotionPlannerParameters
 
    public double getGravityX()
    {
-      return gravityX;
+      return gravity.getX();
    }
 
    public void setGravityX(double gravityX)
    {
-      this.gravityX = gravityX;
+      this.gravity.setX(gravityX);
    }
 
    public double getGravityY()
    {
-      return gravityY;
+      return gravity.getY();
    }
 
    public void setGravityY(double gravityY)
    {
-      this.gravityY = gravityY;
+      this.gravity.setY(gravityY);
    }
 
    public double getGravityZ()
    {
-      return gravityZ;
+      return gravity.getZ();
    }
 
    public void setGravityZ(double gravityZ)
    {
-      this.gravityZ = gravityZ;
+      this.gravity.setZ(gravityZ);
    }
 
    public double getRobotMass()
@@ -111,5 +111,15 @@ public class CentroidalMotionPlannerParameters
    public void setdForceRegularizationWeight(double dForceRegularizationWeight)
    {
       this.dForceRegularizationWeight = dForceRegularizationWeight;
+   }
+
+   public void setGravity(Vector3D gravity)
+   {
+      this.gravity.set(gravity);
+   }
+   
+   public void getGravity(Vector3D gravityToPack)
+   {
+      gravityToPack.set(this.gravity);
    }
 }
