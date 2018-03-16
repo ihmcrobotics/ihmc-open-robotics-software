@@ -151,7 +151,7 @@ public class SphereICPController implements GenericSphereController
    @Override
    public void doControl()
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       heightController.doControl();
 

@@ -377,8 +377,8 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
    {
       defaultActionsIntoStates();
 
-      leftStateMachine.doControl();
-      rightStateMachine.doControl();
+      leftStateMachine.doAction();
+      rightStateMachine.doAction();
 
       leftStateMachine.doTransitions();
       rightStateMachine.doTransitions();

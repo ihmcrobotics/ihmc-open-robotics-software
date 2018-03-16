@@ -122,7 +122,7 @@ public class CenterOfMassHeightManager
 
    public void compute()
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
    }
 
    /**

@@ -141,7 +141,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
       highLevelControllerTimer.startMeasurement();
       controllerToolbox.update();
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
       highLevelControllerTimer.stopMeasurement();
 
       copyJointDesiredsToJoints();

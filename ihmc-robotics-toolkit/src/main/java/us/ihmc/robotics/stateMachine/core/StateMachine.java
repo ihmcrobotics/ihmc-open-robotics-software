@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.robotics.stateMachine.extra.EventState;
+import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -60,8 +63,8 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * </p>
     * 
     * @param initialStateKey the key for the initial state. The state machine will transition into the
-    *           initial state at the first call of {@link #doControl()} or when calling
-    *           {@link #reset()}.
+    *           initial state at the first call of {@link #doAction()} or when calling
+    *           {@link #resetToInitialState()}.
     * @param states the map of the states composing this state machine associated with their keys.
     * @param stateTransitions the map of the state transitions associated with the state keys.
     * @param stateChangedListeners the list of listeners to be called when the active state changes.
@@ -151,34 +154,34 @@ public class StateMachine<K extends Enum<K>, S extends State>
    /**
     * Calls {@link State#doAction(double)} on the active state and performs requested transitions.
     * <p>
-    * Always prefer using this method rather than calling independently {@link #doControl()} and
+    * Always prefer using this method rather than calling independently {@link #doAction()} and
     * {@link #doTransitions()}.
     * </p>
     * <p>
-    * On the very first call, the method ensures that {@link #reset()} has been called at least once.
+    * On the very first call, the method ensures that {@link #resetToInitialState()} has been called at least once.
     * This ensures that the state machine starts with the initial state, i.e. the state mapped to the
     * key {@link #getInitialStateKey()}, as the active state.
     * </p>
     */
-   public void doControlAndTransition()
+   public void doActionAndTransition()
    {
-      doControl();
+      doAction();
       doTransitions();
    }
 
    /**
     * Calls {@link State#doAction(double)} on the active state.
     * <p>
-    * Always prefer using {@link #doControlAndTransition()} rather than calling independently
-    * {@link #doControl()} and {@link #doTransitions()}.
+    * Always prefer using {@link #doActionAndTransition()} rather than calling independently
+    * {@link #doAction()} and {@link #doTransitions()}.
     * </p>
     * <p>
-    * On the very first call, the method ensures that {@link #reset()} has been called at least once.
+    * On the very first call, the method ensures that {@link #resetToInitialState()} has been called at least once.
     * This ensures that the state machine starts with the initial state, i.e. the state mapped to the
     * key {@link #getInitialStateKey()}, as the active state.
     * </p>
     */
-   public void doControl()
+   public void doAction()
    {
       if (currentStateKey.getEnumValue() == null)
          resetToInitialState();
@@ -192,8 +195,8 @@ public class StateMachine<K extends Enum<K>, S extends State>
    /**
     * Runs through the {@link StateTransition}s and performs requested transitions, if any.
     * <p>
-    * Always prefer using {@link #doControlAndTransition()} rather than calling independently
-    * {@link #doControl()} and {@link #doTransitions()}.
+    * Always prefer using {@link #doActionAndTransition()} rather than calling independently
+    * {@link #doAction()} and {@link #doTransitions()}.
     * </p>
     * 
     * @return whether the active state is changing.
@@ -320,8 +323,8 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * Gets the active state.
     * 
     * @return the current state.
-    * @throws RuntimeException if calling this method before either {@link #reset()} or
-    *            {@link #doControl()} was called at least once.
+    * @throws RuntimeException if calling this method before either {@link #resetToInitialState()} or
+    *            {@link #doAction()} was called at least once.
     */
    public S getCurrentState()
    {

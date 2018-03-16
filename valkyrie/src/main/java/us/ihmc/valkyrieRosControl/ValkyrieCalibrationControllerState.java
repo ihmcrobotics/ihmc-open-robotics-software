@@ -115,7 +115,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
    }
 
    @Override

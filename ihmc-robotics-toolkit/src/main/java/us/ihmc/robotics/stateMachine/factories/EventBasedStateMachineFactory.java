@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateMachineClock;
@@ -38,7 +39,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  * <p>
  * Aside the fact that transitions are triggered via events, the state machine works the way as a
  * state machine created using {@link StateMachineFactory}. The user will have to call
- * {@link StateMachine#doControlAndTransition()} on a regular basis to run the active state and
+ * {@link StateMachine#doActionAndTransition()} on a regular basis to run the active state and
  * perform transitions.
  * </p>
  * <p>

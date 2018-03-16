@@ -704,7 +704,7 @@ public class SkippyController implements RobotController
     */
    private void jumpControl()
    {
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
       balanceControl();
    }
 

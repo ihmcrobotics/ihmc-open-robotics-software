@@ -595,8 +595,8 @@ public class SpringFlamingoFastWalkingController implements RobotController
 
       // Actions in Each State
 
-      leftStateMachine.doControl();
-      rightStateMachine.doControl();
+      leftStateMachine.doAction();
+      rightStateMachine.doAction();
 
       // Communication between legs for now...
 

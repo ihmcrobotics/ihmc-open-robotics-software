@@ -31,21 +31,21 @@ public class FinishableStateTest
       factory.setRegistry(new YoVariableRegistry("dummy"));
       StateMachine<StateEnum, ExampleFinishableState> stateMachine = factory.build(StateEnum.ONE);
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       // Run through some tests:
       assertTrue(stateOne.inState);
       assertTrue(stateOne.didAction);
       assertFalse(stateOne.didTransitionOutOfAction);
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       assertEquals(stateMachine.getCurrentState(), stateOne);
       assertTrue(stateOne.didAction);
       assertFalse(stateOne.didTransitionOutOfAction);
 
       stateOne.setIsDone(true);
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       assertTrue(stateOne.didTransitionOutOfAction);
       assertTrue(stateTwo.inState);
@@ -54,7 +54,7 @@ public class FinishableStateTest
       assertEquals(stateMachine.getCurrentState(), stateTwo);
 
       stateTwo.setIsDone(true);
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
 
       assertTrue(stateTwo.didTransitionOutOfAction);
       assertTrue(stateThree.inState);
@@ -62,14 +62,14 @@ public class FinishableStateTest
       assertFalse(stateThree.didTransitionOutOfAction);
       assertEquals(stateMachine.getCurrentState(), stateThree);
 
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
       assertTrue(stateThree.inState);
       assertTrue(stateThree.didAction);
       assertFalse(stateThree.didTransitionOutOfAction);
       assertEquals(stateMachine.getCurrentState(), stateThree);
 
       stateThree.setIsDone(true);
-      stateMachine.doControlAndTransition();
+      stateMachine.doActionAndTransition();
       assertTrue(stateThree.didTransitionOutOfAction);
       assertEquals(stateMachine.getCurrentState(), stateOne);
    }

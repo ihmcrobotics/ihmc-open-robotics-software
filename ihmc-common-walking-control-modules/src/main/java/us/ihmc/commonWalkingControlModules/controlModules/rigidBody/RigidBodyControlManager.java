@@ -184,7 +184,7 @@ public class RigidBodyControlManager
          hold();
 
       stateSwitched.set(stateMachine.doTransitions());
-      stateMachine.doControl();
+      stateMachine.doAction();
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
