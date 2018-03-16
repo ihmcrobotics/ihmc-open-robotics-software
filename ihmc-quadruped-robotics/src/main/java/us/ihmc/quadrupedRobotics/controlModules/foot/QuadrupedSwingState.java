@@ -161,12 +161,14 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
       else
       {
          solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant));
-         soleForceCommand.changeFrame(worldFrame);
+         //soleForceCommand.changeFrame(worldFrame);
       }
 
       if(createSwingTrajectoryGraphics)
          updateGraphics(currentTime, currentStepCommand.getTimeInterval().getEndTime());
 
+      //soleForceCommand.negate();
+      soleForceCommand.changeFrame(soleFrame);
       virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
 
       super.doControl();

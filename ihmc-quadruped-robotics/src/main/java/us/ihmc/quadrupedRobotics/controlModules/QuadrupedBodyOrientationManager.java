@@ -69,7 +69,7 @@ public class QuadrupedBodyOrientationManager
 
       FullQuadrupedRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       orientationFeedbackControlCommand.set(fullRobotModel.getElevator(), fullRobotModel.getBody());
-      bodyAngularWeight.set(5.0, 5.0, 5.0);
+      bodyAngularWeight.set(5.0, 5.0, 1.0);
 
       parentRegistry.addChild(registry);
    }

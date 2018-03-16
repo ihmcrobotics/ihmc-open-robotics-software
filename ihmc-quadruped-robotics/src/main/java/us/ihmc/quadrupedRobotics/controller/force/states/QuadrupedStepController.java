@@ -49,7 +49,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    // task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
-   private final QuadrupedTaskSpaceController taskSpaceController;
+   //private final QuadrupedTaskSpaceController taskSpaceController;
 
    // step planner
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -76,7 +76,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       // task space controllers
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
-      taskSpaceController = controllerToolbox.getTaskSpaceController();
+      //taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // step planner
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
@@ -144,13 +144,15 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       feetManager.requestFullContact();
 
       // initialize task space controller
+      /*
       taskSpaceControllerSettings.initialize();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.getContactForceOptimizationSettings().setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
       }
-      taskSpaceController.reset();
+      */
+      //taskSpaceController.reset();
 
       // initialize ground plane
       groundPlaneEstimator.clearContactPoints();
@@ -219,13 +221,15 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
       // update desired contact state and sole forces
       feetManager.compute(taskSpaceControllerCommands.getSoleForce());
+      /*
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setContactState(robotQuadrant, feetManager.getContactState(robotQuadrant));
       }
+      */
 
       // update joint setpoints
-      taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
+      //taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
       // update accumulated step adjustment
       if (onLiftOffTriggered.getBooleanValue())

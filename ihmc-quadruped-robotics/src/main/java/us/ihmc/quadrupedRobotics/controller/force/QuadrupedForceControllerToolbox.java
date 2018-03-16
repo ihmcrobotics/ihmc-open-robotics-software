@@ -60,7 +60,7 @@ public class QuadrupedForceControllerToolbox
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
 
       contactablePlaneBodies = runtimeEnvironment.getContactablePlaneBodies();
-      double coefficientOfFriction = 0.5; // TODO: magic number...
+      double coefficientOfFriction = 0.8; // TODO: magic number...
       QuadrantDependentList<ContactablePlaneBody> contactableFeet = runtimeEnvironment.getContactableFeet();
 
       for (RobotQuadrant robotSide : RobotQuadrant.values)

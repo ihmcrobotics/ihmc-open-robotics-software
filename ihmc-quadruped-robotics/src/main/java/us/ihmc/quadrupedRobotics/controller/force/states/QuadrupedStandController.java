@@ -46,7 +46,7 @@ public class QuadrupedStandController implements QuadrupedController
    // task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
-   private final QuadrupedTaskSpaceController taskSpaceController;
+   //private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -73,7 +73,7 @@ public class QuadrupedStandController implements QuadrupedController
       // task space controllers
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
-      taskSpaceController = controllerToolbox.getTaskSpaceController();
+      //taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
@@ -141,19 +141,21 @@ public class QuadrupedStandController implements QuadrupedController
       groundPlaneEstimator.compute(solePositions);
 
       // initialize feedback controllers
-      balanceManager.initializeForStanding(taskSpaceControllerSettings);
+      balanceManager.initializeForStanding();
       bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
 
       feetManager.requestFullContact();
 
       // initialize task space controller
+      /*
       taskSpaceControllerSettings.initialize();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.getContactForceOptimizationSettings().setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
       }
-      taskSpaceController.reset();
+      */
+      //taskSpaceController.reset();
    }
 
    @Override

@@ -8,19 +8,19 @@ public class GenericQuadrupedControllerCoreOptimizationSettings implements Contr
    private static final double jointAccelerationWeight = 0.005;
    private static final double jointJerkWeight = 0.1;
 
-   private static final double defaultRhoWeight = 5e-3;
+   private static final double defaultRhoWeight = 0.0001;
    private static final double defaultRhoMin = 0.1;
-   private static final double defaultRhoRateDefaultWeight = 1e-5;
-   private static final double defaultRhoRateHighWeight = 3e-3;
+   private static final double defaultRhoRateDefaultWeight = 1e-10;
+   private static final double defaultRhoRateHighWeight = 3e-8;
 
    private final double rhoWeight;
    private final double rhoMin;
    private final double rhoRateDefaultWeight;
    private final double rhoRateHighWeight;
 
-   private static final Vector2D copWeight = new Vector2D(100.0, 200.0);
-   private static final Vector2D copRateDefaultWeight = new Vector2D(20000.0, 20000.0);
-   private static final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
+   private static final Vector2D copWeight = new Vector2D(0.0, 0.0);
+   private static final Vector2D copRateDefaultWeight = new Vector2D(0.0, 0.0);
+   private static final Vector2D copRateHighWeight = new Vector2D(0.0, 0.0);
 
    private final int nBasisVectorsPerContactPoint = 4;
    private final int nContactPointsPerContactableBody = 1;
@@ -33,10 +33,10 @@ public class GenericQuadrupedControllerCoreOptimizationSettings implements Contr
 
    public GenericQuadrupedControllerCoreOptimizationSettings(double totalMass, int numberOfContactableBodies)
    {
-      rhoWeight = defaultRhoWeight * totalMass;
-      rhoMin = defaultRhoMin * totalMass;
-      rhoRateDefaultWeight = defaultRhoRateDefaultWeight * totalMass;
-      rhoRateHighWeight = defaultRhoRateHighWeight * totalMass;
+      rhoWeight = defaultRhoWeight;// * totalMass;
+      rhoMin = defaultRhoMin;// * totalMass;
+      rhoRateDefaultWeight = defaultRhoRateDefaultWeight;// * totalMass;
+      rhoRateHighWeight = defaultRhoRateHighWeight;// * totalMass;
 
       this.nContactableBodies = numberOfContactableBodies;
    }
