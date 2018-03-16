@@ -120,12 +120,12 @@ public class CentroidalZAxisOptimizationControlModule
    {
       numberOfDecisionVariables = 0;
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> node = nodeList.getFirstEntry();
-      if (node.element.getZForceConstraintType() == EffortConstraintType.OBJECTIVE)
+      if (node.element.getZForceConstraintType() == EffortVariableConstraintType.OBJECTIVE)
          numberOfDecisionVariables += 2;
       for (int i = 0; node.getNext() != null; i++)
       {
          CentroidalMotionNode nextNode = node.getNext().element;
-         if (nextNode.getZForceConstraintType() == EffortConstraintType.OBJECTIVE)
+         if (nextNode.getZForceConstraintType() == EffortVariableConstraintType.OBJECTIVE)
             numberOfDecisionVariables += 2;
          node = node.getNext();
       }

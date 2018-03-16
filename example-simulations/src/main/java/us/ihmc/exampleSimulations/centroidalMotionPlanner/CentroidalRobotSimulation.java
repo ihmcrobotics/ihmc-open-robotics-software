@@ -10,13 +10,13 @@ public class CentroidalRobotSimulation
 {
    public static final boolean createGUI = true;
    public static final int bufferSize = 1 << 20;
-   
+
    public static void main(String args[])
    {
       CentroidalRobotSimulation sim = new CentroidalRobotSimulation();
       sim.runSimulation();
    }
-   
+
    public void runSimulation()
    {
       CentroidalDynamicsRobot robot = new CentroidalDynamicsRobot("TestRobot");

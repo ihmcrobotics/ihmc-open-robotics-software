@@ -60,16 +60,16 @@ public class OptimizationControlModuleHelperTest
       CentroidalMotionNode node3 = entry3.element;
 
       node1.setTime(0.0);
-      node1.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 9.81 / 6.0));
-      node1.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node1.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 9.81 / 6.0));
+      node1.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node1.setPositionObjective(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node1.setLinearVeclocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.1), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node1.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.1), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node2.setTime(0.1);
-      node2.setForceAsObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 200.0), new FrameVector3D());
-      node2.setRateOfChangeOfForceAsObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node2.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 200.0), new FrameVector3D());
+      node2.setForceRateObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node3.setTime(0.4);
-      node3.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 9.81 / 6.0));
-      node3.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node3.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 9.81 / 6.0));
+      node3.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
 
       helper.processNodeList(nodeList);
       DenseMatrix64F dTMatrix = helper.getDeltaTMatrix();
@@ -98,16 +98,16 @@ public class OptimizationControlModuleHelperTest
       CentroidalMotionNode node3 = entry3.element;
 
       node1.setTime(0.0);
-      node1.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node1.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node1.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node1.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node1.setPositionObjective(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node1.setLinearVeclocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.1), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node1.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.1), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node2.setTime(0.1);
-      node2.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node2.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node2.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node2.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node3.setTime(0.4);
-      node3.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node3.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node3.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node3.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
 
       helper.processNodeList(nodeList);
       DenseMatrix64F dTMatrix = helper.getDeltaTMatrix();
@@ -152,16 +152,16 @@ public class OptimizationControlModuleHelperTest
       CentroidalMotionNode node3 = entry3.element;
 
       node1.setTime(0.0);
-      node1.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node1.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node1.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node1.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node1.setPositionObjective(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node1.setLinearVeclocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.1), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node1.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.1), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node2.setTime(0.1);
-      node2.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node2.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node2.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node2.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node3.setTime(0.4);
-      node3.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node3.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node3.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node3.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
 
       helper.processNodeList(nodeList);
       DenseMatrix64F dTMatrix = helper.getDeltaTMatrix();
@@ -207,16 +207,16 @@ public class OptimizationControlModuleHelperTest
 
       node1.setTime(0.0);
       double forceZValue = -2.0 * gravityZ;
-      node1.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
-      node1.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node1.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
+      node1.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node1.setPositionObjective(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node1.setLinearVeclocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.1), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node1.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.1), new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node2.setTime(0.1);
-      node2.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
-      node2.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node2.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
+      node2.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
       node3.setTime(0.4);
-      node3.setForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
-      node3.setRateOfChangeOfForceAsHardConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node3.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
+      node3.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
 
       helper.processNodeList(nodeList);
       DenseMatrix64F dTMatrix = helper.getDeltaTMatrix();

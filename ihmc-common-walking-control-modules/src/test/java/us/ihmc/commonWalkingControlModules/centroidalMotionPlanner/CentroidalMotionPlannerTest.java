@@ -28,13 +28,13 @@ public class CentroidalMotionPlannerTest
    {
       CentroidalMotionNode node1 = new CentroidalMotionNode();
       node1.setTime(0.1);
-      node1.setForceAsHardConstraint(new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.NaN, Double.NaN, 100.0));
+      node1.setForceConstraint(new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.NaN, Double.NaN, 100.0));
       CentroidalMotionNode node2 = new CentroidalMotionNode();
       node2.setTime(0.0);
-      node2.setForceAsHardConstraint(new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.NaN, Double.NaN, 123.0));
+      node2.setForceConstraint(new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.NaN, Double.NaN, 123.0));
       CentroidalMotionNode node3 = new CentroidalMotionNode();
       node3.setTime(0.5);
-      node3.setForceAsHardConstraint(new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.NaN, Double.NaN, 0.0));
+      node3.setForceConstraint(new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.NaN, Double.NaN, 0.0));
 
       CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters);
       motionPlanner.sumbitNode(node1);

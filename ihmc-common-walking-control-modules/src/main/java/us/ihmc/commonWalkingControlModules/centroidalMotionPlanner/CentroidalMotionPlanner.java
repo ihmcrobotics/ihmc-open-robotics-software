@@ -96,7 +96,7 @@ public class CentroidalMotionPlanner
       }
    }
    
-   public void mergeNodes(CentroidalMotionNode nodeToKeep, CentroidalMotionNode nodeToDiscard)
+   private void mergeNodes(CentroidalMotionNode nodeToKeep, CentroidalMotionNode nodeToDiscard)
    {
       // TODO implement this
    }
