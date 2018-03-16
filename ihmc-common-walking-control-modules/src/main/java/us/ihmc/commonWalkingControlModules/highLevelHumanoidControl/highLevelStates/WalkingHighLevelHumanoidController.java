@@ -236,7 +236,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private StateMachine<WalkingStateEnum, WalkingState> setupStateMachine()
    {
       StateMachineFactory<WalkingStateEnum, WalkingState> factory = new StateMachineFactory<>(WalkingStateEnum.class);
-      factory.setNamePrefix("walkingState").setRegistry(registry).buildYoClock(yoTime);
+      factory.setNamePrefix("walking").setRegistry(registry).buildYoClock(yoTime);
 
       StandingState standingState = new StandingState(commandInputManager, walkingMessageHandler, controllerToolbox, managerFactory,
                                                       failureDetectionControlModule, walkingControllerParameters, registry);

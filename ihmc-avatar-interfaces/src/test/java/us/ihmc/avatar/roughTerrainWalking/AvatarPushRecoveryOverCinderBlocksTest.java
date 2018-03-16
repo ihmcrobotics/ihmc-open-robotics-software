@@ -1,7 +1,10 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
+import static junit.framework.TestCase.assertTrue;
+
 import org.junit.After;
 import org.junit.Before;
+
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -24,7 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.CinderBlockFieldPlanarRegionEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
@@ -32,8 +35,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import static junit.framework.TestCase.assertTrue;
 
 public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRobotTestInterface
 {
@@ -858,7 +859,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          return footConstraintType.getEnumValue() == FootControlModule.ConstraintType.SWING;
       }
@@ -877,7 +878,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          if (side == RobotSide.LEFT)
          {

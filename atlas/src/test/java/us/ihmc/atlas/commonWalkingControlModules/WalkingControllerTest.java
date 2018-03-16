@@ -501,7 +501,7 @@ public class WalkingControllerTest
          variable = (YoBoolean) registry.getVariable(name);
          variable.set(true);
 
-         name = robotSide.getCamelCaseNameForStartOfExpression() + "FootState";
+         name = robotSide.getCamelCaseNameForStartOfExpression() + "FootCurrentState";
          YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) registry.getVariable(name);
          footStates.put(robotSide, footState);
       }

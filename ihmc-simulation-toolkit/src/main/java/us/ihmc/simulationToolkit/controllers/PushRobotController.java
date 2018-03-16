@@ -11,17 +11,16 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class PushRobotController implements RobotController
 {
@@ -179,7 +178,7 @@ public class PushRobotController implements RobotController
    {
       if (pushCondition != null)
       {
-         if (pushCondition.checkCondition())
+         if (pushCondition.testCondition(yoTime.getDoubleValue()))
          {
             pushTimeSwitch.set(yoTime.getDoubleValue() + pushDelay.getDoubleValue());
             pushCondition = null;

@@ -48,8 +48,8 @@ public class FinishedControllerStateTransitionFactory<E extends Enum<E>> impleme
                                                         YoVariableRegistry parentRegistry)
    {
       if (stateTransition == null)
-      {
-         stateTransition = new StateTransition<>(nextStateEnum, stateMap.get(currentStateEnum)::isDone);
+      { // TODO When the lambda is changed to a method reference, Gradle throws an exception when compiling the code somehow, while Eclipse/IntelliJ are both fine with it...
+         stateTransition = new StateTransition<>(nextStateEnum, timeInState -> stateMap.get(currentStateEnum).isDone(timeInState));
       }
 
       return stateTransition;

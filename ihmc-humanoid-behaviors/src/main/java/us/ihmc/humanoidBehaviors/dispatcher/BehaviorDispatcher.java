@@ -11,7 +11,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -144,9 +143,12 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       if (stateMachine == null)
       {
          stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(stopBehaviorKey));
+         stateMachine.initialize();
       }
-      BehaviorAction currentState = stateMachine.getCurrentBehavior();
-      currentState.doTransitionIntoAction();
+      else
+      {
+         stateMachine.resetCurrentState();
+      }
    }
 
    private void doControl()
