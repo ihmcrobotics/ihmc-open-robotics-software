@@ -54,7 +54,7 @@ public class VirtualModelControlOptimizationControlModule
 
    private final GroundContactForceMomentumQPSolver qpSolver;
 
-   private final MotionQPInput motionQPInput;
+   private final MotionQPInput momentumQPInput;
 
    private final DenseMatrix64F identityMatrix = CommonOps.identity(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
    private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
@@ -74,7 +74,7 @@ public class VirtualModelControlOptimizationControlModule
 
       ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
       int rhoSize = optimizationSettings.getRhoSize();
-      motionQPInput = new MotionQPInput(rhoSize);
+      momentumQPInput = new MotionQPInput(SpatialForceVector.SIZE);
 
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer = new BasisVectorVisualizer("ContactBasisVectors", rhoSize, 1.0, toolbox.getYoGraphicsListRegistry(), registry);
@@ -169,9 +169,9 @@ public class VirtualModelControlOptimizationControlModule
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
-      boolean success = convertMomentumRateCommand(command, motionQPInput);
+      boolean success = convertMomentumRateCommand(command, momentumQPInput);
       if (success)
-         qpSolver.addMomentumInput(motionQPInput);
+         qpSolver.addMomentumInput(momentumQPInput);
    }
 
    public void submitPlaneContactStateCommand(PlaneContactStateCommand command)

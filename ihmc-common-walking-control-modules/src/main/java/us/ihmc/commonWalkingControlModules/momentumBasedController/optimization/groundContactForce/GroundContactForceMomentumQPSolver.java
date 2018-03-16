@@ -58,6 +58,8 @@ public class GroundContactForceMomentumQPSolver
    private final DenseMatrix64F regularizationMatrix;
 
    private final DenseMatrix64F tempJtW;
+   private final DenseMatrix64F tempMomentumTask_H;
+   private final DenseMatrix64F tempMomentumTask_f;
    private final DenseMatrix64F tempRhoTask_H;
    private final DenseMatrix64F tempRhoTask_f;
 
@@ -106,6 +108,8 @@ public class GroundContactForceMomentumQPSolver
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
       tempJtW = new DenseMatrix64F(rhoSize, rhoSize);
+      tempMomentumTask_H = new DenseMatrix64F(momentumSize, momentumSize);
+      tempMomentumTask_f = new DenseMatrix64F(momentumSize, 1);
       tempRhoTask_H = new DenseMatrix64F(rhoSize, rhoSize);
       tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
 
@@ -220,7 +224,7 @@ public class GroundContactForceMomentumQPSolver
       int taskSize = taskJacobian.getNumRows();
 
       // J^T W
-      tempJtW.reshape(rhoSize, taskSize);
+      tempJtW.reshape(momentumSize, taskSize);
       DiagonalMatrixTools.postMultTransA(taskJacobian, taskWeight, tempJtW);
 
       addMomentumTaskInternal(tempJtW, taskJacobian, taskObjective);
@@ -229,23 +233,23 @@ public class GroundContactForceMomentumQPSolver
    private void addMomentumTaskInternal(double weight, DenseMatrix64F taskJt, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       // Compute: H += J^T W J
-      CommonOps.multInner(taskJacobian, tempRhoTask_H);
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, weight);
+      CommonOps.multInner(taskJacobian, tempMomentumTask_H);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMomentumTask_H, 0, 0, momentumSize, momentumSize, weight);
 
       // Compute: f += - J^T W Objective
-      CommonOps.mult(taskJt, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -weight);
+      CommonOps.mult(taskJt, taskObjective, tempMomentumTask_f);
+      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMomentumTask_f, 0, 0, momentumSize, 1, -weight);
    }
 
    private void addMomentumTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       // Compute: H += J^T W J
-      CommonOps.mult(taskJtW, taskJacobian, tempRhoTask_H);
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
+      CommonOps.mult(taskJtW, taskJacobian, tempMomentumTask_H);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMomentumTask_H, 0, 0, momentumSize, momentumSize, 1.0);
 
       // Compute: f += - J^T W Objective
-      CommonOps.mult(taskJtW, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+      CommonOps.mult(taskJtW, taskObjective, tempMomentumTask_f);
+      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMomentumTask_f, 0, 0, momentumSize, 1, -1.0);
    }
 
    public void addMomentumEqualityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
@@ -254,7 +258,7 @@ public class GroundContactForceMomentumQPSolver
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Aeq.reshape(previousSize + taskSize, rhoSize, true);
+      solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
       CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
@@ -277,7 +281,7 @@ public class GroundContactForceMomentumQPSolver
       int previousSize = solverInput_bin.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Ain.reshape(previousSize + taskSize, rhoSize, true);
+      solverInput_Ain.reshape(previousSize + taskSize, problemSize, true);
       solverInput_bin.reshape(previousSize + taskSize, 1, true);
 
       MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, rhoSize, sign);
