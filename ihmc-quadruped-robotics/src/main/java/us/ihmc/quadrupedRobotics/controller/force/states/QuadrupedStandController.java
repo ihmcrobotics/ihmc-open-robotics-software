@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,15 +11,16 @@ import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedStandController implements QuadrupedController
 {
@@ -56,7 +56,8 @@ public class QuadrupedStandController implements QuadrupedController
 
    private final QuadrantDependentList<FramePoint3D> solePositions;
 
-   public QuadrupedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
+   public QuadrupedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
+                                   YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
 
@@ -120,6 +121,8 @@ public class QuadrupedStandController implements QuadrupedController
       // update desired body orientation and angular rate
       desiredBodyOrientation.setToZero(supportFrame);
       bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation);
+
+      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
 
       // update joint setpoints
       //taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);

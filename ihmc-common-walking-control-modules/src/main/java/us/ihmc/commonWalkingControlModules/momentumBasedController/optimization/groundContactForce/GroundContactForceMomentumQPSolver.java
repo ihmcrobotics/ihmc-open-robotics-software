@@ -243,7 +243,7 @@ public class GroundContactForceMomentumQPSolver
       int taskSize = taskJ.getNumRows();
 
       // J^T W
-      tempJtW.reshape(rhoSize, taskSize);
+      tempJtW.reshape(momentumSize, taskSize);
       CommonOps.transpose(taskJ, tempJtW);
 
       addMomentumTaskInternal(taskWeight, tempJtW, taskJ, taskObjective);
@@ -323,7 +323,7 @@ public class GroundContactForceMomentumQPSolver
       solverInput_Ain.reshape(previousSize + taskSize, problemSize, true);
       solverInput_bin.reshape(previousSize + taskSize, 1, true);
 
-      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, rhoSize, sign);
+      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, problemSize, sign);
       MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
@@ -402,7 +402,7 @@ public class GroundContactForceMomentumQPSolver
 
       hasWrenchesEquilibriumConstraintBeenSetup = false;
 
-      if (MatrixTools.containsNaN(solverOutput_rhos))
+      if (MatrixTools.containsNaN(solverOutput))
       {
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
       }
@@ -517,24 +517,24 @@ public class GroundContactForceMomentumQPSolver
 
    public void setMinRho(double rhoMin)
    {
-      for (int i = 0; i < rhoSize; i++)
+      for (int i = momentumSize; i < problemSize; i++)
          solverInput_lb.set(i, 0, rhoMin);
    }
 
    public void setMinRho(DenseMatrix64F rhoMin)
    {
-      CommonOps.insert(rhoMin, solverInput_lb, 0, 0);
+      CommonOps.insert(rhoMin, solverInput_lb, momentumSize, 0);
    }
 
    public void setMaxRho(double rhoMax)
    {
-      for (int i = 0; i < rhoSize; i++)
+      for (int i = momentumSize; i < problemSize; i++)
          solverInput_ub.set(i, 0, rhoMax);
    }
 
    public void setMaxRho(DenseMatrix64F rhoMax)
    {
-      CommonOps.insert(rhoMax, solverInput_ub, 0, 0);
+      CommonOps.insert(rhoMax, solverInput_ub, momentumSize, 0);
    }
 
 
