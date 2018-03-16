@@ -190,8 +190,11 @@ public class GroundContactForceMomentumQPSolver
 
       solverInput_f.zero();
 
-      solverInput_Aeq.reshape(0, rhoSize);
+      solverInput_Aeq.reshape(0, problemSize);
       solverInput_beq.reshape(0, 1);
+
+      solverInput_Ain.reshape(0, problemSize);
+      solverInput_bin.reshape(0, 1);
 
       if (!firstCall.getBooleanValue())
          addMomentumAccelerationRegularization();
