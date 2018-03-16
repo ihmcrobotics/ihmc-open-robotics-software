@@ -46,8 +46,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
    private Devices preferedDevice = Devices.VIRTUAL;
    private int preferdDeviceNumber = -1;
 
-   private static final boolean DEBUG = true;
-   private static final boolean DEBUG_CLOSE_AND_DISPOSE = true;
+   private static final boolean DEBUG = false;
 
    private MidiDevice inDevice = null;
    private Receiver midiOut = null;

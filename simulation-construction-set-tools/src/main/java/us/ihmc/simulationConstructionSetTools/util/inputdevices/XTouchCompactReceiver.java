@@ -17,7 +17,7 @@ public class XTouchCompactReceiver implements Receiver
    protected Hashtable<Integer, MidiControl> controlsHashTable;
    protected ArrayList<MidiSliderBoard.SliderListener> internalListeners;
    private ArrayList<VariableChangedListener> variableChangedListeners;
-   private boolean debug = true;
+   private boolean debug = false;
    private MidiSliderBoard board;
 
    public XTouchCompactReceiver(Hashtable<Integer, MidiControl> controlsHashTable, ArrayList<MidiSliderBoard.SliderListener> internalListeners,
