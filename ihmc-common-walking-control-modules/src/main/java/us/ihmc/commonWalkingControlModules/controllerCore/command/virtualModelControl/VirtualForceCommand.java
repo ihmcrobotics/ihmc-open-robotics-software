@@ -277,7 +277,8 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    public void getDesiredLinearForce(DenseMatrix64F desiredLinearForceToPack)
    {
       desiredLinearForceToPack.reshape(6, 1);
-      desiredLinearForce.get(0, desiredLinearForceToPack);
+      desiredLinearForceToPack.zero();
+      desiredLinearForce.get(3, desiredLinearForceToPack);
    }
 
    /**
@@ -353,6 +354,9 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    @Override
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
+      selectionMatrixToPack.reshape(3, 6);
+      selectionMatrixToPack.zero();
+
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, 0, 3, selectionMatrixToPack);
    }
 

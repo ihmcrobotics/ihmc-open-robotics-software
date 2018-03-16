@@ -276,6 +276,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    public void getDesiredAngularTorque(DenseMatrix64F desiredAngularTorqueToPack)
    {
       desiredAngularTorqueToPack.reshape(6, 1);
+      desiredAngularTorqueToPack.zero();
       desiredAngularTorque.get(0, desiredAngularTorqueToPack);
    }
 
@@ -352,6 +353,9 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    @Override
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
+      selectionMatrixToPack.reshape(3, 6);
+      selectionMatrixToPack.zero();
+      
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
    }
 
