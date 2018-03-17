@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis;
 
 public class OptimizationControlModuleHelper
@@ -255,9 +256,9 @@ public class OptimizationControlModuleHelper
                                                       forceRateConstraintType, forceRateWeight, forceRateRegularizationWeight,
                                                       velocityCoefficientForInitialForceRate, positionCoefficientForInitialForceRate);
          processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
-                           node.getPositionWeight(axis), node.getPositionWeight(axis));
+                           node.getPosition(axis), node.getPositionWeight(axis));
          processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
-                           node.getLinearVelocityWeight(axis), node.getLinearVelocityWeight(axis));
+                           node.getLinearVelocity(axis), node.getLinearVelocityWeight(axis));
 
       }
 
@@ -318,9 +319,9 @@ public class OptimizationControlModuleHelper
             addVelocityContributionToPosition(rowIndex, axisPositionBiasMatrix, axisVelocityBiasMatrix, deltaTim1);
 
             processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
-                              node.getPositionWeight(axis), node.getPositionWeight(axis));
+                              node.getPosition(axis), node.getPositionWeight(axis));
             processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
-                              node.getLinearVelocityWeight(axis), node.getLinearVelocityWeight(axis));
+                              node.getLinearVelocity(axis), node.getLinearVelocityWeight(axis));
          }
       }
 
@@ -367,13 +368,28 @@ public class OptimizationControlModuleHelper
          addVelocityContributionToPosition(rowIndex, axisPositionBiasMatrix, axisVelocityBiasMatrix, deltaTF);
 
          processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
-                           node.getPositionWeight(axis), node.getPositionWeight(axis));
+                           node.getPosition(axis), node.getPositionWeight(axis));
          processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
-                           node.getLinearVelocityWeight(axis), node.getLinearVelocityWeight(axis));
+                           node.getLinearVelocity(axis), node.getLinearVelocityWeight(axis));
 
+         processForceWeights(axisOrdinal);
       }
    }
 
+   private void processForceWeights(int axisOrdinal)
+   {
+      DenseMatrix64F axisDecisionVariableWeightMatrix = decisionVariableWeightMatrix[axisOrdinal];
+      DenseMatrix64F axisDecisionVariableValueMatrix = decisionVariableDesiredValueMatrix[axisOrdinal];
+      DenseMatrix64F axisH = H[axisOrdinal];
+      DenseMatrix64F axisf = f[axisOrdinal];
+      CommonOps.addEquals(axisH, axisDecisionVariableWeightMatrix);
+      tempJ.set(axisDecisionVariableValueMatrix);
+      tempf.reshape(numberOfDecisionVariables[axisOrdinal], 1);
+      CommonOps.mult(axisDecisionVariableWeightMatrix, tempJ, tempf);
+      CommonOps.scale(-1.0, tempf);
+      CommonOps.addEquals(axisf, tempf);
+   }
+   
    private void processConstraint(int axisOrdinal, int rowIndex, DependentVariableConstraintType constraintType, DenseMatrix64F coefficientMatrix,
                                   DenseMatrix64F biasMatrix, double desiredValue, double weight)
    {
@@ -383,12 +399,12 @@ public class OptimizationControlModuleHelper
       case IGNORE:
          return;
       case OBJECTIVE:
-         jacobianObjective = processDependentVariableConstraintToJacobianForm(rowIndex, coefficientMatrix, biasMatrix, desiredValue, tempJ);
-         addObjectiveCost(axisOrdinal, tempJ, weight, jacobianObjective);
+         jacobianObjective = processDependentVariableConstraintToJacobianForm(rowIndex, coefficientMatrix, biasMatrix, desiredValue, extractedJacobian);
+         addObjectiveCost(axisOrdinal, extractedJacobian, weight, jacobianObjective);
          return;
       case EQUALITY:
-         jacobianObjective = processDependentVariableConstraintToJacobianForm(rowIndex, coefficientMatrix, biasMatrix, desiredValue, tempJ);
-         addEqualityConstraint(axisOrdinal, tempJ, jacobianObjective);
+         jacobianObjective = processDependentVariableConstraintToJacobianForm(rowIndex, coefficientMatrix, biasMatrix, desiredValue, extractedJacobian);
+         addEqualityConstraint(axisOrdinal, extractedJacobian, jacobianObjective);
          return;
       default:
          throw new RuntimeException("Unhandled dependent variable constraint");
@@ -396,12 +412,13 @@ public class OptimizationControlModuleHelper
 
    }
 
-   private final DenseMatrix64F tempJ = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F extractedJacobian = new DenseMatrix64F(0, 1);
 
    private double processDependentVariableConstraintToJacobianForm(int coefficientMatrixRowIndex, DenseMatrix64F coefficientMatrix, DenseMatrix64F biasMatrix,
-                                                                   double desiredValue, DenseMatrix64F jacobianToStore)
+                                                                   double desiredValue, DenseMatrix64F extractedJacobian)
    {
-      CommonOps.extractRow(coefficientMatrix, coefficientMatrixRowIndex, jacobianToStore);
+      extractedJacobian.reshape(1, coefficientMatrix.getNumCols());
+      CommonOps.extractRow(coefficientMatrix, coefficientMatrixRowIndex, extractedJacobian);
       double bias = biasMatrix.get(coefficientMatrixRowIndex, 0);
       return desiredValue - bias;
    }
@@ -416,11 +433,12 @@ public class OptimizationControlModuleHelper
       axisAeq.reshape(equalityConstraintSize, numberOfDecisionVariables[axisOrdinal]);
       axisBeq.reshape(equalityConstraintSize, 1);
       CommonOps.insert(jacobian, axisAeq, equalityConstraintIndex, 0);
-      axisBeq.set(equalityConstraintSize, 0, desiredValue);
+      axisBeq.set(equalityConstraintIndex, 0, desiredValue);
    }
 
    private final DenseMatrix64F tempH = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F tempJtW = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F tempJ = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F tempf = new DenseMatrix64F(0, 1);
 
    private void addObjectiveCost(int axisOrdinal, DenseMatrix64F jacobian, double weight, double desiredValue)
@@ -428,11 +446,15 @@ public class OptimizationControlModuleHelper
       DenseMatrix64F axisH = H[axisOrdinal];
       DenseMatrix64F axisf = f[axisOrdinal];
 
-      tempJtW.set(jacobian);
-      CommonOps.scale(Math.sqrt(weight), tempJtW);
-      CommonOps.multInner(tempJtW, tempH);
+      tempJ.set(jacobian);
+      tempJtW.reshape(jacobian.getNumCols(), jacobian.getNumRows());
+      CommonOps.transpose(jacobian, tempJtW);
+      CommonOps.scale(weight, tempJtW);
+      tempH.reshape(jacobian.getNumCols(), jacobian.getNumCols());
+      CommonOps.mult(tempJtW, tempJ, tempH);
       CommonOps.addEquals(axisH, tempH);
 
+      tempf.reshape(jacobian.getNumCols(), jacobian.getNumRows());
       CommonOps.transpose(jacobian, tempf);
       CommonOps.scale(-weight * desiredValue, tempf);
 
@@ -730,4 +752,25 @@ public class OptimizationControlModuleHelper
    {
       return positionBias[axis.ordinal()];
    }
+
+   public DenseMatrix64F getObjectiveHMatrix(Axis axis)
+   {
+      return H[axis.ordinal()];
+   }
+
+   public DenseMatrix64F getObjectivefMatrix(Axis axis)
+   {
+      return f[axis.ordinal()];
+   }
+
+   public DenseMatrix64F getConstraintAeqMatrix(Axis axis)
+   {
+      return Aeq[axis.ordinal()];
+   }
+
+   public DenseMatrix64F getConstraintbeqMatrix(Axis axis)
+   {
+      return beq[axis.ordinal()];
+   }
+
 }
