@@ -9,6 +9,7 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.Axis;
@@ -248,7 +249,7 @@ public class OptimizationControlModuleHelperTest
       assertEquals(0.75 - 0.5 * 0.1 * 0.1 * gravityZ + 0.1 * 0.1, positionZBias.get(1, 0), epsilon);
       assertEquals(0.75 - 0.5 * 0.4 * 0.4 * gravityZ + 0.1 * 0.4, positionZBias.get(2, 0), epsilon);
    }
-   
+
    @Test
    public void testZOptimization()
    {
@@ -273,13 +274,13 @@ public class OptimizationControlModuleHelperTest
       node2.setTime(0.1);
       node2.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue), new FrameVector3D(worldFrame, 0.0, 0.00, 0.1));
       node2.setForceRateObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.001, 0.001, 0.1));
-      node3.setTime(0.2);
+      node3.setTime(0.8);
       node3.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
       node3.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node3.setPositionObjective(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
-      node3.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
-      //node3.setPositionConstraint(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75));
-      //node3.setLinearVelocityConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      //node3.setPositionObjective(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
+      //node3.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
+      node3.setPositionConstraint(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75));
+      node3.setLinearVelocityConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
 
       helper.processNodeList(nodeList);
       JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();
@@ -293,20 +294,21 @@ public class OptimizationControlModuleHelperTest
       //PrintTools.debug("f: " + f.toString());
       //PrintTools.debug("Aeq: " + Aeq.toString());
       //PrintTools.debug("beq: " + beq.toString());
-      
+
       DenseMatrix64F soln = new DenseMatrix64F(helper.getNumberOfDecisionVariables(Axis.Z), 1);
       try
       {
          qpSolver.solve(soln);
       }
-      catch(Exception e)
+      catch (Exception e)
       {
          assertFalse("Got exception: " + e.getMessage(), true);
       }
       //PrintTools.debug(soln.toString());
       assertTrue("Should have been a finite value: " + soln.get(0, 0), Double.isFinite(soln.get(0, 0)));
       assertTrue("Should have been a finite value: " + soln.get(1, 0), Double.isFinite(soln.get(1, 0)));
+      assertEquals(9.81, soln.get(0, 0), epsilon);
+      assertEquals(0.0, soln.get(1, 0), epsilon);
    }
-   
-   
+
 }
