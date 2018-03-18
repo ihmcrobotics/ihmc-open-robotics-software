@@ -6,9 +6,13 @@ import java.util.Set;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionNode;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionPlanner;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionPlannerParameters;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.ForceTrajectory;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -16,6 +20,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelFromDescription;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
@@ -237,9 +242,8 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
 
       private void setupStateMachine()
       {
-         PrintTools.debug("State machine is setup");
-         GroundState groundState = new GroundState(forcePoint, gravity, robotModel);
-         FlightState flightState = new FlightState(forcePoint, gravity, robotModel);
+         GroundState groundState = new GroundState(forcePoint, gravity, robotModel, motionPlanner, registry);
+         FlightState flightState = new FlightState(forcePoint, gravity, robotModel, motionPlanner, registry);
          GroundToFlightState groundToFlightTransition = new GroundToFlightState(groundState);
          groundState.addStateTransition(CentroidalRobotStateEnum.FLIGHT, groundToFlightTransition);
          FlightToGroundState flightToGroundTransition = new FlightToGroundState(flightState);
@@ -362,14 +366,17 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
 
       protected boolean transitionToNextState = false;
 
-      private final FullRobotModel robotModel;
+      protected final FullRobotModel robotModel;
+      protected final CentroidalMotionPlanner motionPlanner;
 
-      public CentroidalRobotState(CentroidalRobotStateEnum stateEnum, ExternalForcePoint forcePoint, Vector3D gravity, FullRobotModel robotModel)
+      public CentroidalRobotState(CentroidalRobotStateEnum stateEnum, ExternalForcePoint forcePoint, Vector3D gravity, FullRobotModel robotModel,
+                                  CentroidalMotionPlanner motionPlanner)
       {
          super(stateEnum);
          this.forcePoint = forcePoint;
          this.gravity = gravity;
          this.robotModel = robotModel;
+         this.motionPlanner = motionPlanner;
       }
 
       @Override
@@ -396,22 +403,57 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
 
    public class GroundState extends CentroidalRobotState
    {
-      private final CentroidalRobotStateEnum stateEnum;
+      private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      private Vector3D forceToExert = new Vector3D();
-      
-      public GroundState(ExternalForcePoint forcePoint, Vector3D gravity, FullRobotModel robotModel)
+      private final CentroidalRobotStateEnum stateEnum;
+      private final String namePrefix;
+
+      private final FrameVector3D initialForceConstraint = new FrameVector3D();
+      private final FrameVector3D finalForceConstraint = new FrameVector3D();
+      private final FrameVector3D initialForceRateConstraint = new FrameVector3D();
+      private final FrameVector3D finalForceRateConstraint = new FrameVector3D();
+      private final FramePoint3D initialPosition = new FramePoint3D();
+      private final FrameVector3D initialVelocity = new FrameVector3D();
+      private final FramePoint3D finalPosition = new FramePoint3D();
+      private final FrameVector3D finalVelocity = new FrameVector3D();
+      private final double defaultPlanningTime = 0.8;
+      private final FrameVector3D forceWeight = new FrameVector3D(worldFrame, 0.001, 0.001, 0.001);
+      private final FrameVector3D forceRateWeight = new FrameVector3D(worldFrame, 0.1, 0.1, 0.1);
+      private final FrameVector3D positionWeight = new FrameVector3D(worldFrame, 10.0, 10.0, 10.0);
+      private final FrameVector3D linearVelocityWeight = new FrameVector3D(worldFrame, 10.0, 10.0, 10.0);
+
+      private FrameVector3D forceToExert = new FrameVector3D();
+      private ForceTrajectory forceProfile;
+      private final YoDouble trajectoryStartTime;
+      private final YoDouble trajectoryTime;
+
+      private RecyclingArrayList<CentroidalMotionNode> motionPlannerNode = new RecyclingArrayList<>(CentroidalMotionNode.class);
+
+      public GroundState(ExternalForcePoint forcePoint, Vector3D gravity, FullRobotModel robotModel, CentroidalMotionPlanner motionPlanner,
+                         YoVariableRegistry registry)
       {
-         super(CentroidalRobotStateEnum.GROUND, forcePoint, gravity, robotModel);
+         super(CentroidalRobotStateEnum.GROUND, forcePoint, gravity, robotModel, motionPlanner);
+         namePrefix = getClass().getSimpleName();
          this.stateEnum = getStateEnum();
+         this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
+         this.trajectoryStartTime = new YoDouble(namePrefix + "TrajectoryStartTime", registry);
       }
 
       @Override
       public void doAction()
       {
          super.doControl();
-         forceToExert.set(gravity);
-         forceToExert.scale(-robotMass);
+         double time = trajectoryTime.getDoubleValue();
+         if (time >= forceProfile.getFinalTime())
+         {
+            trajectoryStartTime.set(getTimeInCurrentState());
+            trajectoryTime.set(0.0);
+            planMotion();
+            time = 0.0;
+         }
+         forceProfile.update(time, forceToExert);
+         forceToExert.setX(0.0);
+         forceToExert.setY(0.0);
          forcePoint.setForce(forceToExert);
       }
 
@@ -419,12 +461,50 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       public void doTransitionIntoAction()
       {
          super.doTransitionIntoAction();
+         double timeInCurrentState = getTimeInCurrentState();
+         trajectoryStartTime.set(timeInCurrentState);
+         trajectoryTime.set(0.0);
+         planMotion();
       }
 
       @Override
       public void doTransitionOutOfAction()
       {
+      }
 
+      public void planMotion()
+      {
+         motionPlannerNode.clear();
+         CentroidalMotionNode node1 = motionPlannerNode.add();
+         node1.reset();
+         node1.setTime(0.0);
+         node1.setForceConstraint(initialForceConstraint);
+         node1.setForceRateConstraint(initialForceRateConstraint);
+         node1.setPositionConstraint(initialPosition);
+         node1.setLinearVelocityConstraint(initialVelocity);
+
+         CentroidalMotionNode node2 = motionPlannerNode.add();
+         node2.reset();
+         node2.setTime(defaultPlanningTime);
+         node2.setForceConstraint(finalForceConstraint);
+         node2.setForceRateConstraint(finalForceRateConstraint);
+         node2.setPositionConstraint(finalPosition);
+         node2.setLinearVelocityConstraint(finalVelocity);
+
+         CentroidalMotionNode node3 = motionPlannerNode.add();
+         node3.reset();
+         node3.setTime(defaultPlanningTime * 0.5);
+         node3.setForceObjective(initialForceConstraint, forceWeight);
+         node3.setForceRateObjective(finalForceRateConstraint, forceRateWeight);
+         node3.setPositionObjective(finalPosition, positionWeight);
+         node3.setLinearVelocityObjective(finalVelocity, linearVelocityWeight);
+
+         motionPlanner.reset();
+         motionPlanner.submitNode(node1);
+         motionPlanner.submitNode(node2);
+         motionPlanner.submitNode(node3);
+         motionPlanner.compute();
+         forceProfile = motionPlanner.getForceProfile();
       }
 
       public boolean transitionToFlight()
@@ -437,9 +517,10 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
    {
       private final CentroidalRobotStateEnum stateEnum;
 
-      public FlightState(ExternalForcePoint forcePoint, Vector3D gravity, FullRobotModel robotModel)
+      public FlightState(ExternalForcePoint forcePoint, Vector3D gravity, FullRobotModel robotModel, CentroidalMotionPlanner motionPlanner,
+                         YoVariableRegistry registry)
       {
-         super(CentroidalRobotStateEnum.FLIGHT, forcePoint, gravity, robotModel);
+         super(CentroidalRobotStateEnum.FLIGHT, forcePoint, gravity, robotModel, motionPlanner);
          stateEnum = getStateEnum();
       }
 

@@ -37,9 +37,9 @@ public class CentroidalMotionPlannerTest
       node3.setForceConstraint(new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.NaN, Double.NaN, 0.0));
 
       CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters);
-      motionPlanner.sumbitNode(node1);
-      motionPlanner.sumbitNode(node2);
-      motionPlanner.sumbitNode(node3);
+      motionPlanner.submitNode(node1);
+      motionPlanner.submitNode(node2);
+      motionPlanner.submitNode(node3);
 
       RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = motionPlanner.getNodeList();
       assertTrue(nodeList.getSize() == 3);

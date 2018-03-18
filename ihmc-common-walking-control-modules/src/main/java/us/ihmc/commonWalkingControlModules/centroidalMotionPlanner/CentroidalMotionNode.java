@@ -516,4 +516,14 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    {
       return forceRateWeight.getElement(axis.ordinal());
    }
+   
+   public void getForce(FrameVector3D forceToPack)
+   {
+      forceToPack.setIncludingFrame(force);
+   }
+
+   public void getForceRate(FrameVector3D forceRateToPack)
+   {
+      forceRateToPack.setIncludingFrame(forceRate);
+   }
 }

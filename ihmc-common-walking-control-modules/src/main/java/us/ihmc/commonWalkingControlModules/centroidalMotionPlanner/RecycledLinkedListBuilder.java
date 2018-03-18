@@ -76,6 +76,19 @@ public class RecycledLinkedListBuilder<T>
       return (RecycledLinkedListBuilder<T>.RecycledLinkedListEntry<T>[]) Array.newInstance(RecycledLinkedListEntry.class, initialCapacity);
    }
 
+   public void clear()
+   {
+      RecycledLinkedListEntry<T> entry = firstEntry;
+      while(entry != null)
+      {
+         RecycledLinkedListEntry<T> nextEntry = entry.getNext();
+         entry.next = null;
+         entry.previous = null;
+         storeFreeEntry(entry);
+         entry = nextEntry;
+      }
+   }
+   
    public RecycledLinkedListEntry<T> getFirstEntry()
    {
       return firstEntry;

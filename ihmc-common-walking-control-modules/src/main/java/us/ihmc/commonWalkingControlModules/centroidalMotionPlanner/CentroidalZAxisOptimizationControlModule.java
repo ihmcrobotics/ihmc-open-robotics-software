@@ -1,8 +1,15 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
+import us.ihmc.euclid.Axis;
+import us.ihmc.robotics.lists.GenericTypeBuilder;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.Trajectory;
 
 /**
@@ -13,6 +20,8 @@ import us.ihmc.robotics.math.trajectories.Trajectory;
  */
 public class CentroidalZAxisOptimizationControlModule
 {
+   private static final Axis axis = Axis.Z;
+
    // Planner parameters
    private final double mass;
 
@@ -27,122 +36,90 @@ public class CentroidalZAxisOptimizationControlModule
    private final DenseMatrix64F solverInput_bin;
    private final DenseMatrix64F solverInput_Aeq;
    private final DenseMatrix64F solverInput_beq;
-   private int numberOfDecisionVariables;
-   private int numberOfObjectives;
-   private int numberOfEqualityConstraints;
-   private int numberOfInequalityConstraints;
-   private int numberOfNodes;
-   private DenseMatrix64F deltaT;
 
    // Variables to store results for runtime
-   public final Trajectory heightTrajectory;
-   public final Trajectory linearVelocityProfile;
-   public final Trajectory forceProfile;
+   public final List<Trajectory> heightTrajectory;
+   public final List<Trajectory> linearVelocityProfile;
+   public final List<Trajectory> forceProfile;
 
-   public Vector3D gravity;
+   private final JavaQuadProgSolver qpSolver;
+   private final DenseMatrix64F qpSolution;
+   private final DenseMatrix64F nodeForceValues;
 
-   public CentroidalZAxisOptimizationControlModule(double robotMass, OptimizationControlModuleHelper helper)
+   private boolean noConvergenceException;
+
+   public CentroidalZAxisOptimizationControlModule(double robotMass, OptimizationControlModuleHelper helper, CentroidalMotionPlannerParameters parameters)
    {
       this.mass = robotMass;
       this.helper = helper;
+
+      GenericTypeBuilder<Trajectory> positionTrajectoryBuilder = CentroidalMotionPlannerTools.getTrajectoryBuilder(OptimizationControlModuleHelper.positionCoefficients);
+      GenericTypeBuilder<Trajectory> velocityTrajectoryBuilder = CentroidalMotionPlannerTools.getTrajectoryBuilder(OptimizationControlModuleHelper.velocityCoefficients);
+      GenericTypeBuilder<Trajectory> forceTrajectoryBuilder = CentroidalMotionPlannerTools.getTrajectoryBuilder(OptimizationControlModuleHelper.forceCoefficients);
       
       // Initialize the variables to store the optimization results
-      heightTrajectory = new Trajectory(OptimizationControlModuleHelper.positionCoefficients);
-      linearVelocityProfile = new Trajectory(OptimizationControlModuleHelper.velocityCoefficients);
-      forceProfile = new Trajectory(OptimizationControlModuleHelper.forceCoefficients);
+      heightTrajectory = new RecyclingArrayList<>(positionTrajectoryBuilder);
+      linearVelocityProfile = new RecyclingArrayList<>(velocityTrajectoryBuilder);
+      forceProfile = new RecyclingArrayList<>(forceTrajectoryBuilder);
 
       // Initialize the QP matrices
-      solverInput_H = new DenseMatrix64F(OptimizationControlModuleHelper.defaultNumberOfNodes * 2, OptimizationControlModuleHelper.defaultNumberOfNodes * 2);
-      solverInput_f = new DenseMatrix64F(OptimizationControlModuleHelper.defaultNumberOfNodes * 2, 1);
-      solverInput_lb = new DenseMatrix64F(OptimizationControlModuleHelper.defaultNumberOfNodes * 2, 1);
-      solverInput_ub = new DenseMatrix64F(OptimizationControlModuleHelper.defaultNumberOfNodes * 2, 1);
-      solverInput_Aeq = new DenseMatrix64F(OptimizationControlModuleHelper.defaultNumberOfNodes, OptimizationControlModuleHelper.defaultNumberOfNodes * 2);
-      solverInput_beq = new DenseMatrix64F(OptimizationControlModuleHelper.defaultNumberOfNodes, 1);
-      solverInput_Ain = new DenseMatrix64F(OptimizationControlModuleHelper.defaultNumberOfNodes, OptimizationControlModuleHelper.defaultNumberOfNodes * 2);
-      solverInput_bin = new DenseMatrix64F(OptimizationControlModuleHelper.defaultNumberOfNodes, 1);
+      solverInput_H = helper.getObjectiveHMatrix(this.axis);
+      solverInput_f = helper.getObjectivefMatrix(this.axis);
+      solverInput_lb = null;
+      solverInput_ub = null;
+      solverInput_Aeq = helper.getConstraintAeqMatrix(this.axis);
+      solverInput_beq = helper.getConstraintbeqMatrix(this.axis);
+      solverInput_Ain = null;
+      solverInput_bin = null;
+
+      qpSolver = new JavaQuadProgSolver();
+      qpSolver.setConvergenceThreshold(parameters.getOptimizationConvergenceThreshold());
+      qpSolution = new DenseMatrix64F(0, 1);
+      nodeForceValues = new DenseMatrix64F(0, 1);
       reset();
    }
 
    public void reset()
    {
-      numberOfNodes = 0;
-      numberOfDecisionVariables = 0;
-      numberOfObjectives = 0;
-      numberOfEqualityConstraints = 0;
-      numberOfInequalityConstraints = 0;
-
+      qpSolver.clear();
       resetTrajectories();
-      shapeQPMatrices();
    }
 
    private void resetTrajectories()
    {
-      heightTrajectory.reset();
-      linearVelocityProfile.reset();
-      forceProfile.reset();
+      heightTrajectory.clear();;
+      linearVelocityProfile.clear();;
+      forceProfile.clear();
    }
 
-   private void shapeQPMatrices()
+   public void compute()
    {
-      solverInput_H.reshape(numberOfDecisionVariables, numberOfDecisionVariables);
-      solverInput_f.reshape(numberOfDecisionVariables, 1);
-      solverInput_lb.reshape(numberOfDecisionVariables, 1);
-      solverInput_ub.reshape(numberOfDecisionVariables, 1);
-      solverInput_Aeq.reshape(numberOfEqualityConstraints, numberOfDecisionVariables);
-      solverInput_beq.reshape(numberOfEqualityConstraints, 1);
-      solverInput_Ain.reshape(numberOfInequalityConstraints, numberOfDecisionVariables);
-      solverInput_bin.reshape(numberOfInequalityConstraints, 1);
-   }
-
-   public void submitNodeList(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList)
-   {
-      numberOfNodes = nodeList.getSize();
-      if (numberOfNodes < 2)
-         throw new RuntimeException("Cannot create trajectories with just one node");
-      setDeltaT(nodeList);
-      getNumberOfDecisionVariables(nodeList);
-   }
-
-   private void setDeltaT(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList)
-   {
-      deltaT.reshape(numberOfNodes - 1, 1);
-      RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> node = nodeList.getFirstEntry();
-      for (int i = 0; node.getNext() != null; i++)
+      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
+      qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_bin);
+      try
       {
-         CentroidalMotionNode nextNode = node.getNext().element;
-         CentroidalMotionNode currentNode = node.element;
-         deltaT.set(i, 0, nextNode.getTime() - currentNode.getTime());
-         node = node.getNext();
+         qpSolver.solve(qpSolution);
       }
-   }
-
-   private void getNumberOfDecisionVariables(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList)
-   {
-      numberOfDecisionVariables = 0;
-      RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> node = nodeList.getFirstEntry();
-      if (node.element.getZForceConstraintType() == EffortVariableConstraintType.OBJECTIVE)
-         numberOfDecisionVariables += 2;
-      for (int i = 0; node.getNext() != null; i++)
+      catch (RuntimeException exception)
       {
-         CentroidalMotionNode nextNode = node.getNext().element;
-         if (nextNode.getZForceConstraintType() == EffortVariableConstraintType.OBJECTIVE)
-            numberOfDecisionVariables += 2;
-         node = node.getNext();
+         PrintTools.debug("Got runtime exception from QP solver");
       }
+
    }
 
-   public Trajectory getForceProfile()
+   public List<Trajectory> getForceProfile()
    {
       return forceProfile;
    }
 
-   public Trajectory getHeightTrajectory()
+   public List<Trajectory> getHeightTrajectory()
    {
       return heightTrajectory;
    }
 
-   public Trajectory getLinearVelocityProfile()
+   public List<Trajectory> getLinearVelocityProfile()
    {
       return linearVelocityProfile;
    }
+
 }

@@ -122,4 +122,9 @@ public class CentroidalMotionPlannerParameters
    {
       gravityToPack.set(this.gravity);
    }
+
+   public double getOptimizationConvergenceThreshold()
+   {
+      return 0.01;
+   }
 }

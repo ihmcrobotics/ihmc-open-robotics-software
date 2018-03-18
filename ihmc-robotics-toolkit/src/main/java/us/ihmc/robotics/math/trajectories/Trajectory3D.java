@@ -395,7 +395,7 @@ public class Trajectory3D
          getTrajectory(index).setCubic(t0, tFinal, z0.getElement(index), zFinal.getElement(index));
    }
 
-   public void setCubic(double t0, double tFinal, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
+   public void setCubic(double t0, double tFinal, Tuple3DReadOnly z0, Tuple3DReadOnly zd0, Tuple3DReadOnly zFinal, Tuple3DReadOnly zdFinal)
    {
       for (int index = 0; index < 3; index++)
          getTrajectory(index).setCubic(t0, tFinal, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index), zdFinal.getElement(index));

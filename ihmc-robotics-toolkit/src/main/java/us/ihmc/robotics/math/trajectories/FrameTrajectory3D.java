@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 
@@ -136,7 +137,7 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
       super.setCubic(t0, tFinal, z0, zFinal);
    }
 
-   public void setCubic(double t0, double tFinal, FramePoint3DReadOnly z0, FrameVector3DReadOnly zd0, FramePoint3DReadOnly zFinal, FrameVector3DReadOnly zdFinal)
+   public void setCubic(double t0, double tFinal, FrameTuple3DReadOnly z0, FrameTuple3DReadOnly zd0, FrameTuple3DReadOnly zFinal, FrameTuple3DReadOnly zdFinal)
    {
       z0.checkReferenceFrameMatch(referenceFrame);
       zd0.checkReferenceFrameMatch(referenceFrame);
@@ -546,7 +547,7 @@ public class FrameTrajectory3D extends Trajectory3D implements ReferenceFrameHol
       return framePosition;
    }
 
-   public void getFramePosition(FramePoint3D positionToPack)
+   public void getFramePosition(FrameTuple3DBasics positionToPack)
    {
       positionToPack.setIncludingFrame(referenceFrame, getPosition());
    }

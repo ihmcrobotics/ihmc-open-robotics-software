@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import us.ihmc.robotics.math.trajectories.Trajectory;
@@ -24,13 +26,17 @@ public class CentroidalZAxisOptimizationControlModuleTest
    public void testGeneratesAPlan()
    {
       CentroidalZAxisOptimizationControlModule controlModule = new CentroidalZAxisOptimizationControlModule(robotMass,
-                                                                                                            new OptimizationControlModuleHelper(parameters));
-      Trajectory[] trajectoryList = new Trajectory[3];
-      trajectoryList[0] = controlModule.getForceProfile();
-      trajectoryList[1] = controlModule.getHeightTrajectory();
-      trajectoryList[2] = controlModule.getLinearVelocityProfile();
-      for (int i = 0; i < trajectoryList.length; i++)
-         assertTrue(trajectoryList[i].getNumberOfCoefficients() != 0);
+                                                                                                            new OptimizationControlModuleHelper(parameters),
+                                                                                                            parameters);
+      List<Trajectory> forceTrajectory = controlModule.getForceProfile();
+      List<Trajectory> positionTrajectory= controlModule.getHeightTrajectory();
+      List<Trajectory> linearVelocityTrajectory = controlModule.getLinearVelocityProfile();
+      for (int i = 0; i < forceTrajectory.size(); i++)
+         assertTrue(forceTrajectory.get(i).getNumberOfCoefficients() != 0);
+      for (int i = 0; i < positionTrajectory.size(); i++)
+         assertTrue(positionTrajectory.get(i).getNumberOfCoefficients() != 0);
+      for (int i = 0; i < linearVelocityTrajectory.size(); i++)
+         assertTrue(linearVelocityTrajectory.get(i).getNumberOfCoefficients() != 0);
    }
 
    @Test
