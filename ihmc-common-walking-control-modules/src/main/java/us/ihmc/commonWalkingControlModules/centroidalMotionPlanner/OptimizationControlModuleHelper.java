@@ -24,6 +24,9 @@ public class OptimizationControlModuleHelper
    private final DenseMatrix64F[] forceRateCoefficientMatrix = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] forceRateBias = new DenseMatrix64F[numberOfAxis];
 
+   private final DenseMatrix64F[] optimizedForceValues = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] optimizedForceRateValues = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] decisionVariableValues = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] decisionVariableWeightMatrix = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] decisionVariableDesiredValueMatrix = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] H = new DenseMatrix64F[numberOfAxis];
@@ -54,6 +57,7 @@ public class OptimizationControlModuleHelper
          forceBias[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
          forceRateCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes * 2);
          forceRateBias[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
+         decisionVariableValues[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, 1);
          decisionVariableWeightMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, defaultNumberOfNodes * 2);
          decisionVariableDesiredValueMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, 1);
          H[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, defaultNumberOfNodes * 2);
@@ -201,6 +205,7 @@ public class OptimizationControlModuleHelper
       // Determine the position and velocity coefficient matrices given the decision variables
       shapeCoefficientMatrices();
       setCoefficientsToZero();
+      setOptimizationMatricesToZero();
       entry = nodeList.getFirstEntry();
       for (int i = 0; i < numberOfAxis; i++)
       {
@@ -389,7 +394,7 @@ public class OptimizationControlModuleHelper
       CommonOps.scale(-1.0, tempf);
       CommonOps.addEquals(axisf, tempf);
    }
-   
+
    private void processConstraint(int axisOrdinal, int rowIndex, DependentVariableConstraintType constraintType, DenseMatrix64F coefficientMatrix,
                                   DenseMatrix64F biasMatrix, double desiredValue, double weight)
    {
@@ -773,4 +778,30 @@ public class OptimizationControlModuleHelper
       return beq[axis.ordinal()];
    }
 
+   public void setDecisionVariableValues(Axis axis, DenseMatrix64F solutionToSave)
+   {
+      DenseMatrix64F solution = decisionVariableValues[axis.ordinal()];
+      solution.set(solutionToSave);
+   }
+
+   public void processDecisionVariables(Axis axis)
+   {
+      for(int i = 0; i < 3; i++)
+      {
+         CommonOps.mult(forceCoefficientMatrix[i], decisionVariableValues[i], optimizedForceValues[i]);
+         CommonOps.addEquals(optimizedForceValues[i], forceBias[i]);
+         CommonOps.mult(forceRateCoefficientMatrix[i], decisionVariableValues[i], optimizedForceRateValues[i]);
+         CommonOps.addEquals(optimizedForceRateValues[i], forceRateBias[i]);
+      }
+   }
+
+   public DenseMatrix64F[] getOptimizedForceValues()
+   {
+      return optimizedForceValues;
+   }
+
+   public DenseMatrix64F[] getOptimizedForceRateValues()
+   {
+      return optimizedForceRateValues;
+   }
 }

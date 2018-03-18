@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
-import java.util.List;
+import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.RecycledLinkedListBuilder.RecycledLinkedListEntry;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
-import us.ihmc.robotics.math.trajectories.Trajectory;
 
 public class CentroidalMotionPlanner
 {
@@ -26,10 +23,10 @@ public class CentroidalMotionPlanner
    private final OptimizationControlModuleHelper helper;
    private final CentroidalZAxisOptimizationControlModule heightControlModule;
    private final ForceTrajectory forceTrajectory;
-   
+
    private final FrameTrajectory3D tempTrajectory;
-   private final FrameVector3D tempVector1 = new FrameVector3D(), tempVector2 = new FrameVector3D();
-   private final FrameVector3D tempVector3 = new FrameVector3D(), tempVector4 = new FrameVector3D();
+   private final FrameVector3D tempInitialForce = new FrameVector3D(), tempInitialForceRate = new FrameVector3D();
+   private final FrameVector3D tempFinalForce = new FrameVector3D(), tempFinalForceRate = new FrameVector3D();
 
    public CentroidalMotionPlanner(CentroidalMotionPlannerParameters parameters)
    {
@@ -41,11 +38,11 @@ public class CentroidalMotionPlanner
       this.helper = new OptimizationControlModuleHelper(parameters);
       this.heightControlModule = new CentroidalZAxisOptimizationControlModule(robotMass, helper, parameters);
       this.forceTrajectory = new ForceTrajectory(100, OptimizationControlModuleHelper.forceCoefficients);
-      
+
       this.tempTrajectory = new FrameTrajectory3D(OptimizationControlModuleHelper.forceCoefficients, plannerFrame);
       reset();
    }
-   
+
    public void reset()
    {
       nodeList.clear();
@@ -106,12 +103,12 @@ public class CentroidalMotionPlanner
    {
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> node = nodeList.getFirstEntry();
       double nodeTime = node.element.getTime();
-      while(node != null)
+      while (node != null)
       {
          RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> candidateNode = node.getNext();
-         if(candidateNode == null)
+         if (candidateNode == null)
             break;
-         if(nodeTime + timeEpsilon > candidateNode.element.getTime())
+         if (nodeTime + timeEpsilon > candidateNode.element.getTime())
          {
             mergeNodes(node.element, candidateNode.element);
             nodeList.remove(candidateNode);
@@ -120,7 +117,7 @@ public class CentroidalMotionPlanner
             node = node.getNext();
       }
    }
-   
+
    private void mergeNodes(CentroidalMotionNode nodeToKeep, CentroidalMotionNode nodeToDiscard)
    {
       // TODO implement this
@@ -136,22 +133,29 @@ public class CentroidalMotionPlanner
       packForceTrajectory();
       return forceTrajectory;
    }
-   
+
    private void packForceTrajectory()
    {
       forceTrajectory.reset();
+      DenseMatrix64F[] forceValues = helper.getOptimizedForceValues();
+      DenseMatrix64F[] forceRateValues = helper.getOptimizedForceRateValues();
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry = nodeList.getFirstEntry();
-      while(entry.getNext() != null)
+      tempInitialForce.set(plannerFrame, forceValues[0].get(0, 0), forceValues[1].get(0, 0), forceValues[2].get(0, 0));
+      tempInitialForceRate.set(plannerFrame, forceRateValues[0].get(0, 0), forceRateValues[1].get(0, 0), forceRateValues[2].get(0, 0));
+      for(int index = 1; entry.getNext() != null; index++)
       {
          RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> nextEntry = entry.getNext();
          double t0 = entry.element.getTime();
          double tF = nextEntry.element.getTime();
-         entry.element.getForce(tempVector1);
-         entry.element.getForceRate(tempVector1);
-         nextEntry.element.getForce(tempVector2);
-         nextEntry.element.getForceRate(tempVector2);
-         tempTrajectory.setCubic(t0, tF, tempVector1, tempVector2, tempVector3, tempVector4);
+         tempFinalForce.set(plannerFrame, forceValues[0].get(index, 0), forceValues[1].get(index, 0), forceValues[2].get(index, 0));
+         tempFinalForceRate.set(plannerFrame, forceRateValues[0].get(index, 0), forceRateValues[1].get(index, 0), forceRateValues[2].get(index, 0));
+
+         tempTrajectory.setCubic(t0, tF, tempInitialForce, tempInitialForceRate, tempFinalForce, tempFinalForceRate);
          forceTrajectory.set(tempTrajectory);
+
+         tempInitialForce.set(tempFinalForce);
+         tempInitialForceRate.set(tempFinalForceRate);
+         entry = nextEntry;
       }
    }
 }

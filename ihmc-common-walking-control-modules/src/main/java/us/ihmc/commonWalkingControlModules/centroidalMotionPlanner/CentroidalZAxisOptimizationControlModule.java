@@ -104,7 +104,8 @@ public class CentroidalZAxisOptimizationControlModule
       {
          PrintTools.debug("Got runtime exception from QP solver");
       }
-
+      helper.setDecisionVariableValues(axis, qpSolution);
+      helper.processDecisionVariables(axis);
    }
 
    public List<Trajectory> getForceProfile()
