@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
@@ -22,9 +21,6 @@ public class CentroidalZAxisOptimizationControlModule
 {
    private static final Axis axis = Axis.Z;
 
-   // Planner parameters
-   private final double mass;
-
    // Planner runtime variables
    private final OptimizationControlModuleHelper helper;
 
@@ -37,30 +33,12 @@ public class CentroidalZAxisOptimizationControlModule
    private final DenseMatrix64F solverInput_Aeq;
    private final DenseMatrix64F solverInput_beq;
 
-   // Variables to store results for runtime
-   public final List<Trajectory> heightTrajectory;
-   public final List<Trajectory> linearVelocityProfile;
-   public final List<Trajectory> forceProfile;
-
    private final JavaQuadProgSolver qpSolver;
    private final DenseMatrix64F qpSolution;
-   private final DenseMatrix64F nodeForceValues;
 
-   private boolean noConvergenceException;
-
-   public CentroidalZAxisOptimizationControlModule(double robotMass, OptimizationControlModuleHelper helper, CentroidalMotionPlannerParameters parameters)
+   public CentroidalZAxisOptimizationControlModule(OptimizationControlModuleHelper helper, CentroidalMotionPlannerParameters parameters)
    {
-      this.mass = robotMass;
       this.helper = helper;
-
-      GenericTypeBuilder<Trajectory> positionTrajectoryBuilder = CentroidalMotionPlannerTools.getTrajectoryBuilder(OptimizationControlModuleHelper.positionCoefficients);
-      GenericTypeBuilder<Trajectory> velocityTrajectoryBuilder = CentroidalMotionPlannerTools.getTrajectoryBuilder(OptimizationControlModuleHelper.velocityCoefficients);
-      GenericTypeBuilder<Trajectory> forceTrajectoryBuilder = CentroidalMotionPlannerTools.getTrajectoryBuilder(OptimizationControlModuleHelper.forceCoefficients);
-      
-      // Initialize the variables to store the optimization results
-      heightTrajectory = new RecyclingArrayList<>(positionTrajectoryBuilder);
-      linearVelocityProfile = new RecyclingArrayList<>(velocityTrajectoryBuilder);
-      forceProfile = new RecyclingArrayList<>(forceTrajectoryBuilder);
 
       // Initialize the QP matrices
       solverInput_H = helper.getObjectiveHMatrix(this.axis);
@@ -75,27 +53,18 @@ public class CentroidalZAxisOptimizationControlModule
       qpSolver = new JavaQuadProgSolver();
       qpSolver.setConvergenceThreshold(parameters.getOptimizationConvergenceThreshold());
       qpSolution = new DenseMatrix64F(0, 1);
-      nodeForceValues = new DenseMatrix64F(0, 1);
       reset();
    }
 
    public void reset()
    {
       qpSolver.clear();
-      resetTrajectories();
-   }
-
-   private void resetTrajectories()
-   {
-      heightTrajectory.clear();;
-      linearVelocityProfile.clear();;
-      forceProfile.clear();
    }
 
    public void compute()
    {
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
-      qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_bin);
+      qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
       try
       {
          qpSolver.solve(qpSolution);
@@ -105,22 +74,5 @@ public class CentroidalZAxisOptimizationControlModule
          PrintTools.debug("Got runtime exception from QP solver");
       }
       helper.setDecisionVariableValues(axis, qpSolution);
-      helper.processDecisionVariables(axis);
    }
-
-   public List<Trajectory> getForceProfile()
-   {
-      return forceProfile;
-   }
-
-   public List<Trajectory> getHeightTrajectory()
-   {
-      return heightTrajectory;
-   }
-
-   public List<Trajectory> getLinearVelocityProfile()
-   {
-      return linearVelocityProfile;
-   }
-
 }

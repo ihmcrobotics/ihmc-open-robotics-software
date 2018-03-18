@@ -22,6 +22,7 @@ public class CentroidalMotionPlanner
    private final RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
    private final OptimizationControlModuleHelper helper;
    private final CentroidalZAxisOptimizationControlModule heightControlModule;
+   private final CentroidalXYAxisOptimizationControlModule transversePlaneControlModule;
    private final ForceTrajectory forceTrajectory;
 
    private final FrameTrajectory3D tempTrajectory;
@@ -36,7 +37,8 @@ public class CentroidalMotionPlanner
       this.Izz = parameters.getNominalIzz();
       this.deltaTMin = parameters.getDeltaTMin();
       this.helper = new OptimizationControlModuleHelper(parameters);
-      this.heightControlModule = new CentroidalZAxisOptimizationControlModule(robotMass, helper, parameters);
+      this.heightControlModule = new CentroidalZAxisOptimizationControlModule(helper, parameters);
+      this.transversePlaneControlModule = new CentroidalXYAxisOptimizationControlModule(helper, parameters);
       this.forceTrajectory = new ForceTrajectory(100, OptimizationControlModuleHelper.forceCoefficients);
 
       this.tempTrajectory = new FrameTrajectory3D(OptimizationControlModuleHelper.forceCoefficients, plannerFrame);
@@ -48,6 +50,7 @@ public class CentroidalMotionPlanner
       nodeList.clear();
       helper.reset();
       heightControlModule.reset();
+      transversePlaneControlModule.reset();
       forceTrajectory.reset();
    }
 
@@ -88,15 +91,11 @@ public class CentroidalMotionPlanner
 
    public void compute()
    {
-      processNodes();
-      heightControlModule.compute();
-   }
-
-   private void processNodes()
-   {
-      // Add any pre-processing on the nodes here. Typically should be clipping invalid inputs and merging nodes within an epsilon
       mergeNodesWithinEpsilon(deltaTMin);
       helper.processNodeList(nodeList);
+      heightControlModule.compute();
+      transversePlaneControlModule.compute();
+      helper.processDecisionVariables();
    }
 
    private void mergeNodesWithinEpsilon(double timeEpsilon)
@@ -142,7 +141,7 @@ public class CentroidalMotionPlanner
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry = nodeList.getFirstEntry();
       tempInitialForce.set(plannerFrame, forceValues[0].get(0, 0), forceValues[1].get(0, 0), forceValues[2].get(0, 0));
       tempInitialForceRate.set(plannerFrame, forceRateValues[0].get(0, 0), forceRateValues[1].get(0, 0), forceRateValues[2].get(0, 0));
-      for(int index = 1; entry.getNext() != null; index++)
+      for (int index = 1; entry.getNext() != null; index++)
       {
          RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> nextEntry = entry.getNext();
          double t0 = entry.element.getTime();

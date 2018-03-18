@@ -784,9 +784,9 @@ public class OptimizationControlModuleHelper
       solution.set(solutionToSave);
    }
 
-   public void processDecisionVariables(Axis axis)
+   public void processDecisionVariables()
    {
-      for(int i = 0; i < 3; i++)
+      for (int i = 0; i < 3; i++)
       {
          CommonOps.mult(forceCoefficientMatrix[i], decisionVariableValues[i], optimizedForceValues[i]);
          CommonOps.addEquals(optimizedForceValues[i], forceBias[i]);

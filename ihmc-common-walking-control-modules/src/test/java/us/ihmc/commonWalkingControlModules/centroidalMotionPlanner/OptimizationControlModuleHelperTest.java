@@ -251,7 +251,7 @@ public class OptimizationControlModuleHelperTest
    }
 
    @Test
-   public void testZOptimization()
+   public void testOptimization()
    {
       double gravityZ = -9.81d;
       double epsilon = Epsilons.ONE_TEN_MILLIONTH;
@@ -272,7 +272,7 @@ public class OptimizationControlModuleHelperTest
       node1.setPositionObjective(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
       node1.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
       node2.setTime(0.1);
-      node2.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue), new FrameVector3D(worldFrame, 0.0, 0.00, 0.1));
+      node2.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue), new FrameVector3D(worldFrame, 0.1, 0.1, 0.1));
       node2.setForceRateObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.001, 0.001, 0.1));
       node3.setTime(0.8);
       node3.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
@@ -283,19 +283,27 @@ public class OptimizationControlModuleHelperTest
       node3.setLinearVelocityConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
 
       helper.processNodeList(nodeList);
+      testAxisOptimization(epsilon, helper, Axis.X, 0.00, 0.00);
+      testAxisOptimization(epsilon, helper, Axis.Y, 0.00, 0.00);
+      testAxisOptimization(epsilon, helper, Axis.Z, 9.81, 0.00);
+   }
+
+   private void testAxisOptimization(double epsilon, OptimizationControlModuleHelper helper, Axis axisToTest, double expectedForceValue, double expectedForceRateValue)
+   {
+//      PrintTools.debug("Testing axis: " + axisToTest.toString());
       JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();
-      DenseMatrix64F H = helper.getObjectiveHMatrix(Axis.Z);
-      DenseMatrix64F f = helper.getObjectivefMatrix(Axis.Z);
-      DenseMatrix64F Aeq = helper.getConstraintAeqMatrix(Axis.Z);
-      DenseMatrix64F beq = helper.getConstraintbeqMatrix(Axis.Z);
+      DenseMatrix64F H = helper.getObjectiveHMatrix(axisToTest);
+      DenseMatrix64F f = helper.getObjectivefMatrix(axisToTest);
+      DenseMatrix64F Aeq = helper.getConstraintAeqMatrix(axisToTest);
+      DenseMatrix64F beq = helper.getConstraintbeqMatrix(axisToTest);
       qpSolver.setQuadraticCostFunction(H, f, 0.0);
       qpSolver.setLinearEqualityConstraints(Aeq, beq);
-      //PrintTools.debug("H: " + H.toString());
-      //PrintTools.debug("f: " + f.toString());
-      //PrintTools.debug("Aeq: " + Aeq.toString());
-      //PrintTools.debug("beq: " + beq.toString());
+//      PrintTools.debug("H: " + H.toString());
+//      PrintTools.debug("f: " + f.toString());
+//      PrintTools.debug("Aeq: " + Aeq.toString());
+//      PrintTools.debug("beq: " + beq.toString());
 
-      DenseMatrix64F soln = new DenseMatrix64F(helper.getNumberOfDecisionVariables(Axis.Z), 1);
+      DenseMatrix64F soln = new DenseMatrix64F(helper.getNumberOfDecisionVariables(axisToTest), 1);
       try
       {
          qpSolver.solve(soln);
@@ -307,8 +315,8 @@ public class OptimizationControlModuleHelperTest
       //PrintTools.debug(soln.toString());
       assertTrue("Should have been a finite value: " + soln.get(0, 0), Double.isFinite(soln.get(0, 0)));
       assertTrue("Should have been a finite value: " + soln.get(1, 0), Double.isFinite(soln.get(1, 0)));
-      assertEquals(9.81, soln.get(0, 0), epsilon);
-      assertEquals(0.0, soln.get(1, 0), epsilon);
+      assertEquals(expectedForceValue, soln.get(0, 0), epsilon);
+      assertEquals(expectedForceRateValue, soln.get(1, 0), epsilon);
    }
 
 }
