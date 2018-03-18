@@ -5,7 +5,6 @@ import java.util.List;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
@@ -60,19 +59,19 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
       currentSegment.compute(timeInState);
    }
 
-   public void update(double timeInState, FramePoint3D desiredPositionToPack)
+   public void update(double timeInState, FrameTuple3DBasics desiredPositionToPack)
    {
       update(timeInState);
       currentSegment.getFramePosition(desiredPositionToPack);
    }
 
-   public void update(double timeInState, FramePoint3D desiredPositionToPack, FrameVector3D desiredVelocityToPack)
+   public void update(double timeInState, FrameTuple3DBasics desiredPositionToPack, FrameTuple3DBasics desiredVelocityToPack)
    {
       update(timeInState, desiredPositionToPack);
       currentSegment.getFrameVelocity(desiredVelocityToPack);
    }
 
-   public void update(double timeInState, FramePoint3D desiredPositonToPack, FrameVector3D desiredVelocityToPack, FrameVector3D desiredAccelerationToPack)
+   public void update(double timeInState, FrameTuple3DBasics desiredPositonToPack, FrameTuple3DBasics desiredVelocityToPack, FrameTuple3DBasics desiredAccelerationToPack)
    {
       update(timeInState, desiredPositonToPack, desiredVelocityToPack);
       currentSegment.getFrameAcceleration(desiredAccelerationToPack);
