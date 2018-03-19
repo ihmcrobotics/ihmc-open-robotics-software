@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelContr
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -50,7 +51,7 @@ public class WholeBodyVirtualModelControlSolver
    private final RigidBody controlRootBody;
 
    private final Wrench tempExternalWrench = new Wrench();
-   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F();
+   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(0, 0);
 
    private final YoFrameVector yoDesiredMomentumRateLinear;
    private final YoFrameVector yoAchievedMomentumRateLinear;
@@ -289,7 +290,7 @@ public class WholeBodyVirtualModelControlSolver
       return rootJointDesiredConfiguration;
    }
 
-   public FrameVector3D getAchievedMomentumRateLinear()
+   public FrameVector3DReadOnly getAchievedMomentumRateLinear()
    {
       return achievedMomentumRateLinear;
    }
