@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controlModules;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -94,6 +95,11 @@ public class QuadrupedBodyOrientationManager
    }
 
    public OrientationFeedbackControlCommand getFeedbackControlCommand()
+   {
+      return null;
+   }
+
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
       return null;
    }
