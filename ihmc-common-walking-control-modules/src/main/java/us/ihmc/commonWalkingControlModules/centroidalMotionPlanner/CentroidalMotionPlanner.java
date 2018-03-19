@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -63,6 +64,7 @@ public class CentroidalMotionPlanner
       if (!Double.isFinite(nodeTime))
          return false;
 
+      //PrintTools.debug("Adding node: " + nodeList.getSize());
       if (nodeList.getSize() == 0)
          nodeList.getOrCreateFirstEntry().element.set(nodeToAdd);
       else if (nodeList.getFirstEntry().element.getTime() > nodeTime)

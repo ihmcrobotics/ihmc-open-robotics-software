@@ -223,7 +223,7 @@ public class OptimizationControlModuleHelper
             throw new RuntimeException(getClass().getSimpleName() + ": Initial node must have specified velocity for axis " + Axis.values[i].toString());
          velocityBias[i].set(0, 0, v0);
       }
-
+      
       entry = nodeList.getFirstEntry();
       CentroidalMotionNode node = entry.element;
       int rowIndex = 0;
@@ -265,10 +265,10 @@ public class OptimizationControlModuleHelper
                                                       axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix, forceRateValue,
                                                       forceRateConstraintType, forceRateWeight, forceRateRegularizationWeight,
                                                       velocityCoefficientForInitialForceRate, positionCoefficientForInitialForceRate);
-         processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
-                           node.getPosition(axis), node.getPositionWeight(axis));
-         processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
-                           node.getLinearVelocity(axis), node.getLinearVelocityWeight(axis));
+//         processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
+//                           node.getPosition(axis), node.getPositionWeight(axis));
+//         processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
+//                           node.getLinearVelocity(axis), node.getLinearVelocityWeight(axis));
 
       }
 
@@ -785,6 +785,7 @@ public class OptimizationControlModuleHelper
 
    public void setDecisionVariableValues(Axis axis, DenseMatrix64F solutionToSave)
    {
+//      PrintTools.debug("Axis: " +axis.toString() + " Solution: " + solutionToSave.toString());
       DenseMatrix64F solution = decisionVariableValues[axis.ordinal()];
       solution.set(solutionToSave);
    }
@@ -810,5 +811,10 @@ public class OptimizationControlModuleHelper
    public DenseMatrix64F[] getOptimizedForceRateValues()
    {
       return optimizedForceRateValues;
+   }
+
+   public int getNumberOfNodes()
+   {
+      return numberOfNodes;
    }
 }

@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMot
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionPlanner;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionPlannerParameters;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.ForceTrajectory;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -414,13 +415,17 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       private final FrameVector3D finalForceRateConstraint = new FrameVector3D();
       private final FramePoint3D initialPosition = new FramePoint3D();
       private final FrameVector3D initialVelocity = new FrameVector3D();
+      private final FramePoint3D intermediatePosition = new FramePoint3D();
+      private final FrameVector3D intermediateVelocity = new FrameVector3D();
       private final FramePoint3D finalPosition = new FramePoint3D();
       private final FrameVector3D finalVelocity = new FrameVector3D();
-      private final double defaultPlanningTime = 0.8;
-      private final FrameVector3D forceWeight = new FrameVector3D(worldFrame, 0.001, 0.001, 0.001);
-      private final FrameVector3D forceRateWeight = new FrameVector3D(worldFrame, 0.1, 0.1, 0.1);
-      private final FrameVector3D positionWeight = new FrameVector3D(worldFrame, 10.0, 10.0, 10.0);
-      private final FrameVector3D linearVelocityWeight = new FrameVector3D(worldFrame, 10.0, 10.0, 10.0);
+      private final double defaultPlanningTime = 4.0;
+      private final FrameVector3D forceWeight = new FrameVector3D(worldFrame, 0.01, 0.01, 0.01);
+      private final FrameVector3D forceRateWeight = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
+      private final FrameVector3D positionWeight = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
+      private final FrameVector3D linearVelocityWeight = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
+      private final FrameVector3D intermediatePositionWeight = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
+      private final FrameVector3D intermediateLinearVelocityWeight = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
 
       private FrameVector3D forceToExert = new FrameVector3D();
       private ForceTrajectory forceProfile;
@@ -443,7 +448,8 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       public void doAction()
       {
          super.doControl();
-         double time = trajectoryTime.getDoubleValue();
+         double time = getTimeInCurrentState() - trajectoryStartTime.getDoubleValue();
+         trajectoryTime.set(time);
          if (time >= forceProfile.getFinalTime())
          {
             trajectoryStartTime.set(getTimeInCurrentState());
@@ -454,6 +460,8 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          forceProfile.update(time, forceToExert);
          forceToExert.setX(0.0);
          forceToExert.setY(0.0);
+         if (forceToExert.containsNaN())
+            forceToExert.setZ(0.0);
          forcePoint.setForce(forceToExert);
       }
 
@@ -474,6 +482,20 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
 
       public void planMotion()
       {
+         PrintTools.debug("Replanning");
+         initialForceConstraint.set(worldFrame, 0.0, 0.0, -robotMass * gravity.getZ());
+         initialForceRateConstraint.set(worldFrame, 0.0, 0.0, 0.0);
+         finalForceConstraint.set(worldFrame, 0.0, 0.0, -robotMass * gravity.getZ());
+         finalForceRateConstraint.set(worldFrame, 0.0, 0.0, 0.0);
+
+         initialPosition.set(worldFrame, position);
+         intermediatePosition.set(worldFrame, 0.0, 0.0, 0.05);
+         finalPosition.set(worldFrame, 0.0, 0.0, 0.05);
+         
+         initialVelocity.set(worldFrame, linearVelocity);
+         intermediateVelocity.set(worldFrame, 0.0, 0.0, 0.0);
+         finalVelocity.set(worldFrame, 0.0, 0.0, 0.0);
+
          motionPlannerNode.clear();
          CentroidalMotionNode node1 = motionPlannerNode.add();
          node1.reset();
@@ -493,16 +515,21 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
 
          CentroidalMotionNode node3 = motionPlannerNode.add();
          node3.reset();
-         node3.setTime(defaultPlanningTime * 0.5);
+         node3.setTime(defaultPlanningTime * 0.33);
          node3.setForceObjective(initialForceConstraint, forceWeight);
-         node3.setForceRateObjective(finalForceRateConstraint, forceRateWeight);
-         node3.setPositionObjective(finalPosition, positionWeight);
-         node3.setLinearVelocityObjective(finalVelocity, linearVelocityWeight);
+         node3.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+
+         CentroidalMotionNode node4 = motionPlannerNode.add();
+         node4.reset();
+         node4.setTime(defaultPlanningTime * 0.66);
+         node4.setForceObjective(finalForceConstraint, forceWeight);
+         node4.setForceRateObjective(finalForceRateConstraint, forceRateWeight);
 
          motionPlanner.reset();
          motionPlanner.submitNode(node1);
          motionPlanner.submitNode(node2);
          motionPlanner.submitNode(node3);
+         motionPlanner.submitNode(node4);
          motionPlanner.compute();
          forceProfile = motionPlanner.getForceProfile();
       }

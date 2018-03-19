@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.centroidalMotionPlanner;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -23,12 +24,13 @@ public class CentroidalRobotSimulation
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(createGUI, bufferSize);
       Robot scsRobot = robot.getSCSRobot();
       SimulationConstructionSet scs = new SimulationConstructionSet(scsRobot, parameters);
-      scs.setPlaybackRealTimeRate(0.025);
+      scs.setPlaybackRealTimeRate(1.0);
       scs.startOnAThread();
-      BlockingSimulationRunner runner = new BlockingSimulationRunner(scs, 10.0);
+      BlockingSimulationRunner runner = new BlockingSimulationRunner(scs, 4.0);
       try
       {
-         runner.simulateAndBlockAndCatchExceptions(10.0);
+         runner.simulateAndBlockAndCatchExceptions(4.0);
+         ThreadTools.sleepForever();
       }
       catch (SimulationExceededMaximumTimeException e)
       {

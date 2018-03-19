@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
 import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
@@ -30,6 +31,12 @@ public class CentroidalZAxisOptimizationControlModule
 
    private final JavaQuadProgSolver qpSolver;
    private final DenseMatrix64F qpSolution;
+   private double minForce;
+   private double maxForce;
+   private double minForceRate;
+   private double maxForceRate;
+
+   private DenseMatrix64F tempMatrixForComputation = new DenseMatrix64F(0, 1);
 
    public CentroidalZAxisOptimizationControlModule(OptimizationControlModuleHelper helper, CentroidalMotionPlannerParameters parameters)
    {
@@ -38,16 +45,20 @@ public class CentroidalZAxisOptimizationControlModule
       // Initialize the QP matrices
       solverInput_H = helper.getObjectiveHMatrix(this.axis);
       solverInput_f = helper.getObjectivefMatrix(this.axis);
-      solverInput_lb = null;
-      solverInput_ub = null;
+      solverInput_lb = new DenseMatrix64F(0, 1);
+      solverInput_ub = new DenseMatrix64F(0, 1);
       solverInput_Aeq = helper.getConstraintAeqMatrix(this.axis);
       solverInput_beq = helper.getConstraintbeqMatrix(this.axis);
-      solverInput_Ain = null;
-      solverInput_bin = null;
+      solverInput_Ain = new DenseMatrix64F(0, 1);
+      solverInput_bin = new DenseMatrix64F(0, 1);
 
       qpSolver = new JavaQuadProgSolver();
       //qpSolver.setConvergenceThreshold(parameters.getOptimizationConvergenceThreshold());
       qpSolution = new DenseMatrix64F(0, 1);
+      minForce = -0.1;
+      maxForce = parameters.getRobotMass() * parameters.getGravityZ() * -2.0;
+      minForceRate = -0.2;
+      maxForceRate = 0.2;
       reset();
    }
 
@@ -58,9 +69,13 @@ public class CentroidalZAxisOptimizationControlModule
 
    public void compute()
    {
+      processQPInputs();
+      qpSolution.reshape(helper.getNumberOfDecisionVariables(axis), 1);
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
-      qpSolution.reshape(helper.getNumberOfDecisionVariables(axis), 1);
+      //qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      qpSolver.setLowerBounds(solverInput_lb);
+      qpSolver.setUpperBounds(solverInput_ub);
       try
       {
          qpSolver.solve(qpSolution);
@@ -70,5 +85,21 @@ public class CentroidalZAxisOptimizationControlModule
          PrintTools.debug("Got runtime exception from QP solver");
       }
       helper.setDecisionVariableValues(axis, qpSolution);
+   }
+
+   private void processQPInputs()
+   {
+      int numberOfNodes = helper.getNumberOfNodes();
+      int numberOfDecisionVariables = helper.getNumberOfDecisionVariables(axis);
+      solverInput_lb.reshape(numberOfDecisionVariables, 1);
+      solverInput_ub.reshape(numberOfDecisionVariables, 1);
+      solverInput_lb.set(0, 0, minForce);
+      solverInput_lb.set(1, 0, minForceRate);
+      solverInput_lb.set(2, 0, minForce);
+      solverInput_lb.set(3, 0, minForceRate);
+      solverInput_ub.set(0, 0, maxForce);
+      solverInput_ub.set(1, 0, maxForceRate);
+      solverInput_ub.set(2, 0, maxForce);
+      solverInput_ub.set(3, 0, maxForceRate);
    }
 }
