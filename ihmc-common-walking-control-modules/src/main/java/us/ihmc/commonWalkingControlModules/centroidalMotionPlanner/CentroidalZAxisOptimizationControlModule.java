@@ -91,6 +91,7 @@ public class CentroidalZAxisOptimizationControlModule
    {
       int numberOfNodes = helper.getNumberOfNodes();
       int numberOfDecisionVariables = helper.getNumberOfDecisionVariables(axis);
+      PrintTools.debug("Number of decision variables: " + numberOfDecisionVariables);
       solverInput_lb.reshape(numberOfDecisionVariables, 1);
       solverInput_ub.reshape(numberOfDecisionVariables, 1);
       solverInput_lb.set(0, 0, minForce);
@@ -99,11 +100,34 @@ public class CentroidalZAxisOptimizationControlModule
       solverInput_lb.set(3, 0, minForceRate);
       solverInput_lb.set(4, 0, minForce);
       solverInput_lb.set(5, 0, minForceRate);
+      solverInput_lb.set(6, 0, minForce);
+      solverInput_lb.set(7, 0, minForceRate);
+      solverInput_lb.set(8, 0, minForceRate);
+      solverInput_lb.set(9, 0, minForce);
+      solverInput_lb.set(10, 0, minForceRate);
+      solverInput_lb.set(11, 0, minForce);
+      solverInput_lb.set(12, 0, minForceRate);
+      solverInput_lb.set(13, 0, minForce);
+      solverInput_lb.set(14, 0, minForceRate);
+      solverInput_lb.set(15, 0, minForce);
+      solverInput_lb.set(16, 0, minForceRate);
+
       solverInput_ub.set(0, 0, maxForce);
       solverInput_ub.set(1, 0, maxForceRate);
       solverInput_ub.set(2, 0, maxForce);
       solverInput_ub.set(3, 0, maxForceRate);
       solverInput_ub.set(4, 0, maxForce);
       solverInput_ub.set(5, 0, maxForceRate);
+      solverInput_ub.set(6, 0, maxForce);
+      solverInput_ub.set(7, 0, maxForceRate);
+      solverInput_ub.set(8, 0, maxForceRate);
+      solverInput_ub.set(9, 0, maxForce);
+      solverInput_ub.set(10, 0, maxForceRate);
+      solverInput_ub.set(11, 0, maxForce);
+      solverInput_ub.set(12, 0, maxForceRate);
+      solverInput_ub.set(13, 0, maxForce);
+      solverInput_ub.set(14, 0, maxForceRate);
+      solverInput_ub.set(15, 0, maxForce);
+      solverInput_ub.set(16, 0, maxForceRate);
    }
 }

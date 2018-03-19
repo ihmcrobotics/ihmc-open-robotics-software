@@ -442,12 +442,14 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
 
       private final CentroidalRobotStateEnum stateEnum;
       private final String namePrefix;
-
+      
+      private final FrameVector3D zeroForceConstraint = new FrameVector3D();
       private final FrameVector3D initialForceConstraint = new FrameVector3D();
       private final FrameVector3D finalForceConstraint = new FrameVector3D();
       private final FrameVector3D initialForceRateConstraint = new FrameVector3D();
       private final FrameVector3D finalForceRateConstraint = new FrameVector3D();
       private final FramePoint3D initialPosition = new FramePoint3D();
+      private final FramePoint3D jumpPosition = new FramePoint3D();
       private final FrameVector3D initialVelocity = new FrameVector3D();
       private final FramePoint3D intermediatePosition = new FramePoint3D();
       private final FrameVector3D intermediateVelocity = new FrameVector3D();
@@ -492,7 +494,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
             time = 0.0;
          }
          forceProfile.update(time, forceToExert);
-         forceToExert.setX(0.0);
+         //forceToExert.setX(0.0);
          forceToExert.setY(0.0);
          if (forceToExert.containsNaN())
             forceToExert.setZ(0.0);
@@ -517,6 +519,8 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       public void planMotion()
       {
          PrintTools.debug("Replanning");
+         jumpPosition.set(worldFrame, 0.0, 0.0, 1.5);
+         zeroForceConstraint.set(worldFrame, 0.0, 0.0, 0.0);
          initialForceConstraint.set(worldFrame, 0.0, 0.0, -robotMass * gravity.getZ());
          initialForceRateConstraint.set(worldFrame, 0.0, 0.0, 0.0);
          finalForceConstraint.set(worldFrame, 0.0, 0.0, -robotMass * gravity.getZ());
@@ -525,54 +529,101 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          initialPosition.set(worldFrame, 0.0, 0.0, 0.0);
          //initialPosition.subZ(robotHeight);
          intermediatePosition.set(worldFrame, 0.0, 0.0, 0.05);
-         finalPosition.set(worldFrame, 0.0, 0.0, 0.0);
+         finalPosition.set(worldFrame, 0.1, 0.0, 0.0);
 
          initialVelocity.set(worldFrame, linearVelocity);
          intermediateVelocity.set(worldFrame, 0.0, 0.0, 0.0);
          finalVelocity.set(worldFrame, 0.0, 0.0, 0.0);
 
          motionPlannerNode.clear();
-         CentroidalMotionNode node1 = motionPlannerNode.add();
-         node1.reset();
-         node1.setTime(0.0);
-         node1.setForceConstraint(initialForceConstraint);
-         node1.setForceRateConstraint(initialForceRateConstraint);
-         node1.setPositionConstraint(initialPosition);
-         node1.setLinearVelocityConstraint(initialVelocity);
-
-         CentroidalMotionNode node2 = motionPlannerNode.add();
-         node2.reset();
-         node2.setTime(defaultPlanningTime);
-         node2.setForceConstraint(finalForceConstraint);
-         node2.setForceRateConstraint(finalForceRateConstraint);
-         node2.setPositionConstraint(finalPosition);
-         node2.setLinearVelocityConstraint(finalVelocity);
-
-         CentroidalMotionNode node3 = motionPlannerNode.add();
-         node3.reset();
-         node3.setTime(defaultPlanningTime * 0.33);
-         node3.setForceObjective(initialForceConstraint, forceWeight);
-         node3.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
-
-         CentroidalMotionNode node4 = motionPlannerNode.add();
-         node4.reset();
-         node4.setTime(defaultPlanningTime * 0.66);
-         node4.setForceObjective(finalForceConstraint, forceWeight);
-         node4.setForceRateObjective(finalForceRateConstraint, forceRateWeight);
-
-         CentroidalMotionNode node5 = motionPlannerNode.add();
-         node5.reset();
-         node5.setTime(defaultPlanningTime * 0.5);
-         node5.setForceObjective(finalForceConstraint, forceWeight);
-         node5.setForceRateObjective(finalForceRateConstraint, forceRateWeight);
-         node5.setPositionObjective(intermediatePosition, positionWeight);
-
          motionPlanner.reset();
-         motionPlanner.submitNode(node1);
-         motionPlanner.submitNode(node2);
-         motionPlanner.submitNode(node3);
-         motionPlanner.submitNode(node4);
-         motionPlanner.submitNode(node5);
+         CentroidalMotionNode node = motionPlannerNode.add();
+         node.reset();
+         node.setTime(0.0);
+         node.setForceConstraint(initialForceConstraint);
+         node.setForceRateConstraint(initialForceRateConstraint);
+         node.setPositionConstraint(initialPosition);
+         node.setLinearVelocityConstraint(initialVelocity);
+         motionPlanner.submitNode(node);
+
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.08);
+         node.setForceObjective(initialForceConstraint, forceWeight);
+         node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         motionPlanner.submitNode(node);
+         
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.16);
+         node.setForceObjective(initialForceConstraint, forceWeight);
+         node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         motionPlanner.submitNode(node);
+
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.24);
+         node.setForceObjective(initialForceConstraint, forceWeight);
+         node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         motionPlanner.submitNode(node);
+
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.32);
+         node.setForceObjective(initialForceConstraint, forceWeight);
+         node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         motionPlanner.submitNode(node);
+
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.45);
+         node.setForceConstraint(zeroForceConstraint);
+         node.setForceRateConstraint(initialForceRateConstraint);
+         node.setPositionConstraint(jumpPosition);
+         motionPlanner.submitNode(node);
+
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.5);
+         node.setForceConstraint(zeroForceConstraint);
+         node.setForceRateObjective(finalForceRateConstraint, forceRateWeight);
+         //node.setPositionObjective(intermediatePosition, positionWeight);
+         motionPlanner.submitNode(node);
+
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.55);
+         node.setForceConstraint(zeroForceConstraint);
+         node.setForceRateConstraint(finalForceRateConstraint);
+         node.setPositionConstraint(jumpPosition);
+         motionPlanner.submitNode(node);
+
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.68);
+         node.setForceObjective(initialForceConstraint, forceWeight);
+         node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         motionPlanner.submitNode(node);
+         
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.76);
+         node.setForceObjective(initialForceConstraint, forceWeight);
+         node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         motionPlanner.submitNode(node);
+
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.84);
+         node.setForceObjective(initialForceConstraint, forceWeight);
+         node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         motionPlanner.submitNode(node);
+
+         node.reset();
+         node.setTime(defaultPlanningTime * 0.92);
+         node.setForceObjective(initialForceConstraint, forceWeight);
+         node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         motionPlanner.submitNode(node);
+
+
+         node.reset();
+         node.setTime(defaultPlanningTime);
+         node.setForceConstraint(finalForceConstraint);
+         node.setForceRateConstraint(finalForceRateConstraint);
+         node.setPositionConstraint(finalPosition);
+         node.setLinearVelocityConstraint(finalVelocity);
+         motionPlanner.submitNode(node);
+
          motionPlanner.compute();
          forceProfile = motionPlanner.getForceProfile();
       }

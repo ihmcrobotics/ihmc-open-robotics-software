@@ -27,7 +27,7 @@ public class CentroidalRobotSimulation
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(createGUI, bufferSize);
       Robot scsRobot = robot.getSCSRobot(graphicsListRegistry);
       SimulationConstructionSet scs = new SimulationConstructionSet(scsRobot, parameters);
-      scs.setPlaybackRealTimeRate(0.025);
+      scs.setPlaybackRealTimeRate(1.0);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCoordinateSystem(0.3);
