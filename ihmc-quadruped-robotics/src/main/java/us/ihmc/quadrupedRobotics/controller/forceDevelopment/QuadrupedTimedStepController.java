@@ -18,11 +18,7 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineState;
 import us.ihmc.quadrupedRobotics.util.*;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
@@ -31,6 +27,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachine;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineBuilder;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineState;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 
 public class QuadrupedTimedStepController
 {

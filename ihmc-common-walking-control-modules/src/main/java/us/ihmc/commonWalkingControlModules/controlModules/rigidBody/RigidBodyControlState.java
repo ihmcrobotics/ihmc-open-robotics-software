@@ -15,12 +15,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.FinishableState;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 
 public abstract class RigidBodyControlState extends FinishableState<RigidBodyControlMode>
 {

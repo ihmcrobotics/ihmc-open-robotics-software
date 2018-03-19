@@ -30,9 +30,9 @@ import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DG
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineState;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachine;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineBuilder;
+import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineState;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
