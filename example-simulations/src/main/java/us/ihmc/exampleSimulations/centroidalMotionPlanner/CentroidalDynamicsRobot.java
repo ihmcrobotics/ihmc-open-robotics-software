@@ -446,20 +446,21 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
 
       private final CentroidalRobotStateEnum stateEnum;
       private final String namePrefix;
-      
+
       private final FrameVector3D zeroForceConstraint = new FrameVector3D();
       private final FrameVector3D initialForceConstraint = new FrameVector3D();
       private final FrameVector3D finalForceConstraint = new FrameVector3D();
       private final FrameVector3D initialForceRateConstraint = new FrameVector3D();
       private final FrameVector3D finalForceRateConstraint = new FrameVector3D();
+      private final FramePoint3D maxPosition = new FramePoint3D();
+      private final FramePoint3D minPosition = new FramePoint3D();
       private final FramePoint3D initialPosition = new FramePoint3D();
-      private final FramePoint3D jumpPosition = new FramePoint3D();
       private final FrameVector3D initialVelocity = new FrameVector3D();
       private final FramePoint3D intermediatePosition = new FramePoint3D();
       private final FrameVector3D intermediateVelocity = new FrameVector3D();
       private final FramePoint3D finalPosition = new FramePoint3D();
       private final FrameVector3D finalVelocity = new FrameVector3D();
-      private final double defaultPlanningTime = 4.0;
+      private final double defaultPlanningTime = 2.0;
       private final FrameVector3D forceWeight = new FrameVector3D(worldFrame, 0.00001, 0.00001, 0.00001);
       private final FrameVector3D forceRateWeight = new FrameVector3D(worldFrame, 0.001, 0.001, 0.001);
       private final FrameVector3D positionWeight = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
@@ -523,8 +524,9 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       public void planMotion()
       {
          PrintTools.debug("Replanning");
-         jumpPosition.set(worldFrame, 0.0, 0.0, 1.5);
          zeroForceConstraint.set(worldFrame, 0.0, 0.0, 0.0);
+         minPosition.set(worldFrame, -0.1, -0.1, -0.75);
+         maxPosition.set(worldFrame, 0.1, 0.1, 0.10);
          initialForceConstraint.set(worldFrame, 0.0, 0.0, -robotMass * gravity.getZ());
          initialForceRateConstraint.set(worldFrame, 0.0, 0.0, 0.0);
          finalForceConstraint.set(worldFrame, 0.0, 0.0, -robotMass * gravity.getZ());
@@ -554,31 +556,35 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          node.setTime(defaultPlanningTime * 0.08);
          node.setForceObjective(initialForceConstraint, forceWeight);
          node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
-         
+
          node.reset();
          node.setTime(defaultPlanningTime * 0.16);
          node.setForceObjective(initialForceConstraint, forceWeight);
          node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
 
          node.reset();
          node.setTime(defaultPlanningTime * 0.24);
          node.setForceObjective(initialForceConstraint, forceWeight);
          node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
 
          node.reset();
          node.setTime(defaultPlanningTime * 0.32);
          node.setForceObjective(initialForceConstraint, forceWeight);
          node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
 
          node.reset();
          node.setTime(defaultPlanningTime * 0.45);
          node.setForceConstraint(zeroForceConstraint);
          node.setForceRateConstraint(initialForceRateConstraint);
-         node.setPositionConstraint(jumpPosition);
+         node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
 
          node.reset();
@@ -592,33 +598,36 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          node.setTime(defaultPlanningTime * 0.55);
          node.setForceConstraint(zeroForceConstraint);
          node.setForceRateConstraint(finalForceRateConstraint);
-         node.setPositionConstraint(jumpPosition);
+         node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
 
          node.reset();
          node.setTime(defaultPlanningTime * 0.68);
          node.setForceObjective(initialForceConstraint, forceWeight);
          node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
-         
+
          node.reset();
          node.setTime(defaultPlanningTime * 0.76);
          node.setForceObjective(initialForceConstraint, forceWeight);
          node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
 
          node.reset();
          node.setTime(defaultPlanningTime * 0.84);
          node.setForceObjective(initialForceConstraint, forceWeight);
          node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
 
          node.reset();
          node.setTime(defaultPlanningTime * 0.92);
          node.setForceObjective(initialForceConstraint, forceWeight);
          node.setForceRateObjective(initialForceRateConstraint, forceRateWeight);
+         node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
-
 
          node.reset();
          node.setTime(defaultPlanningTime);

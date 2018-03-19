@@ -97,24 +97,24 @@ public class CentroidalXYAxisOptimizationControlModule
       Axis yAxis = Axis.Y;
       numberOfXAxisDecisionVariables = helper.getNumberOfDecisionVariables(xAxis);
       numberOfYAxisDecisionVariables = helper.getNumberOfDecisionVariables(yAxis);
-      int numberOFDecisionVariables = numberOfXAxisDecisionVariables + numberOfYAxisDecisionVariables;
+      int numberOfDecisionVariables = numberOfXAxisDecisionVariables + numberOfYAxisDecisionVariables;
       DenseMatrix64F xAxisHMatrix = helper.getObjectiveHMatrix(xAxis);
       DenseMatrix64F yAxisHMatrix = helper.getObjectiveHMatrix(yAxis);
       solverInput_H.zero();
-      solverInput_H.reshape(numberOFDecisionVariables, numberOFDecisionVariables);
+      solverInput_H.reshape(numberOfDecisionVariables, numberOfDecisionVariables);
       CommonOps.insert(xAxisHMatrix, solverInput_H, 0, 0);
       CommonOps.insert(yAxisHMatrix, solverInput_H, numberOfXAxisDecisionVariables, numberOfXAxisDecisionVariables);
 
       DenseMatrix64F xAxisFMatrix = helper.getObjectivefMatrix(xAxis);
       DenseMatrix64F yAxisFMatrix = helper.getObjectivefMatrix(yAxis);
-      solverInput_f.reshape(numberOFDecisionVariables, 1);
+      solverInput_f.reshape(numberOfDecisionVariables, 1);
       CommonOps.insert(xAxisFMatrix, solverInput_f, 0, 0);
       CommonOps.insert(yAxisFMatrix, solverInput_f, numberOfXAxisDecisionVariables, 0);
 
       DenseMatrix64F xAxisAeqMatrix = helper.getConstraintAeqMatrix(xAxis);
       DenseMatrix64F yAxisAeqMatrix = helper.getConstraintAeqMatrix(yAxis);
       int numberOfEqualityConstraints = xAxisAeqMatrix.getNumRows() + yAxisAeqMatrix.getNumRows();
-      solverInput_Aeq.reshape(numberOfEqualityConstraints, numberOFDecisionVariables);
+      solverInput_Aeq.reshape(numberOfEqualityConstraints, numberOfDecisionVariables);
       solverInput_Aeq.zero();
       CommonOps.insert(xAxisAeqMatrix, solverInput_Aeq, 0, 0);
       CommonOps.insert(yAxisAeqMatrix, solverInput_Aeq, xAxisAeqMatrix.getNumRows(), numberOfXAxisDecisionVariables);
@@ -125,13 +125,24 @@ public class CentroidalXYAxisOptimizationControlModule
       CommonOps.insert(xAxisbeqMatrix, solverInput_beq, 0, 0);
       CommonOps.insert(yAxisbeqMatrix, solverInput_beq, xAxisAeqMatrix.getNumRows(), 0);
 
-      solverInput_Ain.reshape(0, numberOFDecisionVariables);
-      solverInput_bin.reshape(0, 1);
+      DenseMatrix64F xAxisAin = helper.getConstraintAinMatrix(xAxis);
+      DenseMatrix64F xAxisbin = helper.getConstraintbinMatrix(xAxis);
+      DenseMatrix64F yAxisAin = helper.getConstraintAinMatrix(yAxis);
+      DenseMatrix64F yAxisbin = helper.getConstraintbinMatrix(yAxis);
+      int numberOfXAxisInequalities = xAxisAin.getNumRows();
+      int numberOfYAxisInequalities = yAxisAin.getNumRows();
+      int numberOfInequalityConstraints = numberOfXAxisInequalities + numberOfYAxisInequalities;
+      solverInput_Ain.reshape(numberOfInequalityConstraints, numberOfDecisionVariables);
+      solverInput_bin.reshape(numberOfInequalityConstraints, 1);
+      CommonOps.insert(xAxisAin, solverInput_Ain, 0, 0);
+      CommonOps.insert(yAxisAin, solverInput_Ain, numberOfXAxisInequalities, numberOfXAxisDecisionVariables);
+      CommonOps.insert(xAxisbin, solverInput_bin, 0, 0);
+      CommonOps.insert(yAxisbin, solverInput_bin, numberOfXAxisInequalities, 0);
 
-      solverInput_lb.reshape(numberOFDecisionVariables, 1);
+      solverInput_lb.reshape(numberOfDecisionVariables, 1);
       CommonOps.insert(helper.getDecisionVariableLowerBoundMatrix(xAxis), solverInput_lb, 0, 0);
       CommonOps.insert(helper.getDecisionVariableLowerBoundMatrix(yAxis), solverInput_lb, numberOfXAxisDecisionVariables, 0);
-      solverInput_ub.reshape(numberOFDecisionVariables, 1);
+      solverInput_ub.reshape(numberOfDecisionVariables, 1);
       CommonOps.insert(helper.getDecisionVariableUpperBoundMatrix(xAxis), solverInput_ub, 0, 0);
       CommonOps.insert(helper.getDecisionVariableUpperBoundMatrix(yAxis), solverInput_ub, numberOfXAxisDecisionVariables, 0);
       //setFrictionConeConstraints();

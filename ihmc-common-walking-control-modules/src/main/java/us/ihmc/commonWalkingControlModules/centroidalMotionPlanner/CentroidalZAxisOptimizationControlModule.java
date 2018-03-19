@@ -72,7 +72,7 @@ public class CentroidalZAxisOptimizationControlModule
       qpSolution.reshape(helper.getNumberOfDecisionVariables(axis), 1);
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
-      //qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLowerBounds(solverInput_lb);
       qpSolver.setUpperBounds(solverInput_ub);
       try
@@ -92,5 +92,9 @@ public class CentroidalZAxisOptimizationControlModule
       DenseMatrix64F lowerBoundConstraints = helper.getDecisionVariableLowerBoundMatrix(axis);
       solverInput_lb.set(lowerBoundConstraints);
       solverInput_ub.set(upperBoundConstraints);
+      DenseMatrix64F helperInequalitiesAin = helper.getConstraintAinMatrix(axis);
+      DenseMatrix64F helperInequalitiesbin = helper.getConstraintbinMatrix(axis);
+      solverInput_Ain.set(helperInequalitiesAin);
+      solverInput_bin.set(helperInequalitiesbin);
    }
 }
