@@ -32,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -322,12 +323,12 @@ public class WholeBodyInverseDynamicsSolver
       return planeContactWrenchProcessor.getDesiredCenterOfPressureDataHolder();
    }
 
-   public FrameVector3D getAchievedMomentumRateLinear()
+   public FrameVector3DReadOnly getAchievedMomentumRateLinear()
    {
       return achievedMomentumRateLinear;
    }
 
-   public FrameVector3D getAchievedMomentumRateAngular()
+   public FrameVector3DReadOnly getAchievedMomentumRateAngular()
    {
       return achievedMomentumRateAngular;
    }
