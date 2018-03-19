@@ -91,9 +91,8 @@ public class VirtualModelMomentumController
        * where w is the M-by-1 end-effector desired effort vector.
        * @formatter:on
        */
-      commandToAdd.getDesiredEffort(tempFullObjective);
-
       tempTaskObjective.reshape(taskSize, 1);
+      commandToAdd.getDesiredEffort(tempFullObjective);
       CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
       // Add these forces to the effort matrix t = J' w
@@ -187,7 +186,6 @@ public class VirtualModelMomentumController
 
       return true;
    }
-
 
    /**
     * Adds a {@link Wrench} to the {@link VirtualModelMomentumController}.
