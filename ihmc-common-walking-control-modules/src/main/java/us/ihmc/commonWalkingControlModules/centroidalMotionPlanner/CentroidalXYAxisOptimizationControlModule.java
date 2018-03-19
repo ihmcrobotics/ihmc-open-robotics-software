@@ -79,11 +79,11 @@ public class CentroidalXYAxisOptimizationControlModule
    private void submitQPSolution()
    {
       axisQPSolution.reshape(numberOfXAxisDecisionVariables, 1);
-      CommonOps.extract(qpSolution, 0, 0, numberOfXAxisDecisionVariables, 1, axisQPSolution, 0, 0);
+      CommonOps.extract(qpSolution, 0, numberOfXAxisDecisionVariables, 0, 1, axisQPSolution, 0, 0);
       helper.setDecisionVariableValues(Axis.X, axisQPSolution);
 
       axisQPSolution.reshape(numberOfYAxisDecisionVariables, 1);
-      CommonOps.extract(qpSolution, numberOfXAxisDecisionVariables, 0, numberOfXAxisDecisionVariables + numberOfYAxisDecisionVariables, 1, axisQPSolution, 0, 0);
+      CommonOps.extract(qpSolution, numberOfXAxisDecisionVariables, numberOfXAxisDecisionVariables + numberOfYAxisDecisionVariables, 0, 1, axisQPSolution, 0, 0);
       helper.setDecisionVariableValues(Axis.Y, axisQPSolution);
 
    }
@@ -111,7 +111,7 @@ public class CentroidalXYAxisOptimizationControlModule
       DenseMatrix64F xAxisAeqMatrix = helper.getConstraintAeqMatrix(xAxis);
       DenseMatrix64F yAxisAeqMatrix = helper.getConstraintAeqMatrix(yAxis);
       int numberOfEqualityConstraints = xAxisAeqMatrix.getNumRows() + yAxisAeqMatrix.getNumRows();
-      solverInput_Aeq.reshape(numberOFDecisionVariables, numberOfEqualityConstraints);
+      solverInput_Aeq.reshape(numberOfEqualityConstraints, numberOFDecisionVariables);
       solverInput_Aeq.zero();
       CommonOps.insert(xAxisAeqMatrix, solverInput_Aeq, 0, 0);
       CommonOps.insert(yAxisAeqMatrix, solverInput_Aeq, xAxisAeqMatrix.getNumRows(), numberOfXAxisDecisionVariables);
@@ -123,7 +123,7 @@ public class CentroidalXYAxisOptimizationControlModule
       CommonOps.insert(yAxisbeqMatrix, solverInput_beq, xAxisAeqMatrix.getNumRows(), 0);
       
       solverInput_Ain.reshape(0, numberOFDecisionVariables);
-      solverInput_bin.reshape(0, 0);
+      solverInput_bin.reshape(0, 1);
       //setFrictionConeConstraints();
       //setTorqueConstraints();
   }

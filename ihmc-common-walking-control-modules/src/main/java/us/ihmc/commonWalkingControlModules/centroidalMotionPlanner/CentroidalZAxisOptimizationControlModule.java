@@ -1,15 +1,10 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
-import java.util.List;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.Axis;
-import us.ihmc.robotics.lists.GenericTypeBuilder;
-import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.Trajectory;
 
 /**
  * Optimized linear motion along the Z axis to obtain a feasible CoM height trajectory
@@ -19,7 +14,7 @@ import us.ihmc.robotics.math.trajectories.Trajectory;
  */
 public class CentroidalZAxisOptimizationControlModule
 {
-   private static final Axis axis = Axis.Z;
+   private final Axis axis = Axis.Z;
 
    // Planner runtime variables
    private final OptimizationControlModuleHelper helper;
@@ -51,7 +46,7 @@ public class CentroidalZAxisOptimizationControlModule
       solverInput_bin = null;
 
       qpSolver = new JavaQuadProgSolver();
-      qpSolver.setConvergenceThreshold(parameters.getOptimizationConvergenceThreshold());
+      //qpSolver.setConvergenceThreshold(parameters.getOptimizationConvergenceThreshold());
       qpSolution = new DenseMatrix64F(0, 1);
       reset();
    }
@@ -65,6 +60,7 @@ public class CentroidalZAxisOptimizationControlModule
    {
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
+      qpSolution.reshape(helper.getNumberOfDecisionVariables(axis), 1);
       try
       {
          qpSolver.solve(qpSolution);

@@ -64,6 +64,8 @@ public class OptimizationControlModuleHelper
          f[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, 1);
          Aeq[i] = new DenseMatrix64F(defaultNumberOfNodes * 5, defaultNumberOfNodes * 2);
          beq[i] = new DenseMatrix64F(defaultNumberOfNodes * 5, 1);
+         optimizedForceValues[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
+         optimizedForceRateValues[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
       }
       this.forceRegularizationWeight = parameters.getdForceRegularizationWeight();
       this.forceRateRegularizationWeight = parameters.getdForceRegularizationWeight();
@@ -99,12 +101,15 @@ public class OptimizationControlModuleHelper
          forceBias[i].reshape(numberOfNodes, 1);
          forceRateCoefficientMatrix[i].reshape(numberOfNodes, numberOfDecisionVariables[i]);
          forceRateBias[i].reshape(numberOfNodes, 1);
+         decisionVariableValues[i].reshape(0, 1);
          decisionVariableWeightMatrix[i].reshape(numberOfDecisionVariables[i], numberOfDecisionVariables[i]);
          decisionVariableDesiredValueMatrix[i].reshape(numberOfDecisionVariables[i], 1);
          H[i].reshape(numberOfDecisionVariables[i], numberOfDecisionVariables[i]);
          f[i].reshape(numberOfDecisionVariables[i], 1);
          Aeq[i].reshape(0, numberOfDecisionVariables[i]);
          beq[i].reshape(0, 1);
+         optimizedForceValues[i].reshape(0, 1);
+         optimizedForceRateValues[i].reshape(0, 1);
       }
    }
 
@@ -788,8 +793,10 @@ public class OptimizationControlModuleHelper
    {
       for (int i = 0; i < 3; i++)
       {
+         optimizedForceValues[i].reshape(numberOfNodes, 1);
          CommonOps.mult(forceCoefficientMatrix[i], decisionVariableValues[i], optimizedForceValues[i]);
          CommonOps.addEquals(optimizedForceValues[i], forceBias[i]);
+         optimizedForceRateValues[i].reshape(numberOfNodes, 1);
          CommonOps.mult(forceRateCoefficientMatrix[i], decisionVariableValues[i], optimizedForceRateValues[i]);
          CommonOps.addEquals(optimizedForceRateValues[i], forceRateBias[i]);
       }

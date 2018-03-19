@@ -277,10 +277,10 @@ public class OptimizationControlModuleHelperTest
       node3.setTime(0.8);
       node3.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
       node3.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      //node3.setPositionObjective(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
-      //node3.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
-      node3.setPositionConstraint(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75));
-      node3.setLinearVelocityConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node3.setPositionObjective(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
+      node3.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
+      //node3.setPositionConstraint(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75));
+      //node3.setLinearVelocityConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
 
       helper.processNodeList(nodeList);
       testAxisOptimization(epsilon, helper, Axis.X, 0.00, 0.00);
