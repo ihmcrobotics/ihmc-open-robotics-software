@@ -250,6 +250,13 @@ public class QuadrupedSteppingState implements QuadrupedController
          runtimeEnvironment.getGlobalDataProducer().queueDataToSend(quadrupedSteppingStatePacket);
       }
 
+      submitControllerCoreCommands();
+
+      controllerCoreTimer.startMeasurement();
+      //controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+      //controllerCore.compute();
+      controllerCoreTimer.stopMeasurement();
+
       return null;
    }
 
