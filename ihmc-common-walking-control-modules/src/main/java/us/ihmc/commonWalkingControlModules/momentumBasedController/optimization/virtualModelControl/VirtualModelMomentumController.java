@@ -23,7 +23,6 @@ public class VirtualModelMomentumController
    private final JointIndexHandler jointIndexHandler;
 
    private final DenseMatrix64F tempFullJacobian;
-   private final DenseMatrix64F tempReducedJacobian;
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(Wrench.SIZE, 12);
    private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(Wrench.SIZE, Wrench.SIZE);
 
@@ -32,16 +31,14 @@ public class VirtualModelMomentumController
 
    private final DenseMatrix64F fullEffortMatrix;
 
-   private final int numberOfDoFs;
+   private final SelectionMatrix6D defaultSelectionMatrix = new SelectionMatrix6D();
 
    public VirtualModelMomentumController(JointIndexHandler jointIndexHandler)
    {
       this.jointIndexHandler = jointIndexHandler;
-      numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
 
       fullEffortMatrix = new DenseMatrix64F(jointIndexHandler.getNumberOfDoFs(), 1);
       tempFullJacobian = new DenseMatrix64F(Wrench.SIZE, jointIndexHandler.getNumberOfDoFs());
-      tempReducedJacobian = new DenseMatrix64F(Wrench.SIZE, jointIndexHandler.getNumberOfDoFs());
    }
 
    public void reset()
@@ -94,9 +91,8 @@ public class VirtualModelMomentumController
        * where w is the M-by-1 end-effector desired effort vector.
        * @formatter:on
        */
-      commandToAdd.getDesiredEffort(tempFullObjective);
-
       tempTaskObjective.reshape(taskSize, 1);
+      commandToAdd.getDesiredEffort(tempFullObjective);
       CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
       // Add these forces to the effort matrix t = J' w
@@ -149,6 +145,9 @@ public class VirtualModelMomentumController
     */
    public boolean addExternalWrench(RigidBody base, RigidBody endEffector, Wrench wrench, SelectionMatrix6D selectionMatrix)
    {
+      if (wrench.getLinearPart().length() < 1e-5 && wrench.getAngularPart().length() < 1e-5)
+         return false;
+
       // Gets the M-by-6 selection matrix S.
       selectionMatrix.getCompactSelectionMatrixInFrame(wrench.getExpressedInFrame(), tempSelectionMatrix);
 
@@ -178,6 +177,7 @@ public class VirtualModelMomentumController
        * where w is the M-by-1 end-effector desired effort vector.
        * @formatter:on
        */
+      tempTaskObjective.reshape(taskSize, 1);
       wrench.getMatrix(tempFullObjective);
       CommonOps.mult(tempSelectionMatrix, tempFullObjective, tempTaskObjective);
 
@@ -186,7 +186,6 @@ public class VirtualModelMomentumController
 
       return true;
    }
-
 
    /**
     * Adds a {@link Wrench} to the {@link VirtualModelMomentumController}.
@@ -203,24 +202,7 @@ public class VirtualModelMomentumController
     */
    public boolean addExternalWrench(RigidBody base, RigidBody endEffector, Wrench wrench)
    {
-      jacobianCalculator.clear();
-      jacobianCalculator.setKinematicChain(base, endEffector);
-      jacobianCalculator.setJacobianFrame(wrench.getExpressedInFrame());
-      jacobianCalculator.computeJacobianMatrix();
-
-      // Compute the M-by-N task Jacobian: J = S * J
-      // Step 1, let's get the 'small' Jacobian matrix, j.
-      // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain, which is way smaller than the number of robot DoFs.
-      jacobianCalculator.getJacobianMatrix(tempTaskJacobian);
-
-      // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
-      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, tempFullJacobian);
-
-      // Add these forces to the effort matrix t = J' w
-      CommonOps.multAddTransA(tempFullJacobian, tempTaskObjective, fullEffortMatrix);
-
-      return true;
+      return addExternalWrench(base, endEffector, wrench, defaultSelectionMatrix);
    }
 
    public void populateTorqueSolution(VirtualModelControlSolution solutionToPack)
