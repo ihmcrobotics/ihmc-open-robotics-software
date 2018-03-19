@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -172,5 +173,18 @@ public class QuadrupedFootControlModule
       ReferenceFrame originalFrame = soleForceCommandToPack.getReferenceFrame();
       soleForceCommandToPack.setIncludingFrame(footStateMachine.getCurrentState().getSoleForceCommand());
       soleForceCommandToPack.changeFrame(originalFrame);
+   }
+
+   public FeedbackControlCommandList createFeedbackControlTemplate()
+   {
+      FeedbackControlCommandList ret = new FeedbackControlCommandList();
+      for (QuadrupedFootStates state : QuadrupedFootStates.values)
+      {
+         QuadrupedFootState footState = footStateMachine.getState(state);
+         if (footState != null && footState.getFeedbackControlCommand() != null)
+            ret.addCommand(footState.getFeedbackControlCommand());
+      }
+
+      return ret;
    }
 }

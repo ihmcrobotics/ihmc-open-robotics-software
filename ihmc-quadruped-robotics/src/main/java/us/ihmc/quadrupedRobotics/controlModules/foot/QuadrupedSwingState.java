@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -190,5 +191,11 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
 
       if(createSwingTrajectoryGraphics)
          stepSequenceVisualization.hideAll();
+   }
+
+   @Override
+   public SpatialFeedbackControlCommand getFeedbackControlCommand()
+   {
+      return null;
    }
 }
