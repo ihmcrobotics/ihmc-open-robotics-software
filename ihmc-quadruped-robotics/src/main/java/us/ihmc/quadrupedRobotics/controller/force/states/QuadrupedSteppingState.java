@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
@@ -59,6 +60,10 @@ public class QuadrupedSteppingState implements QuadrupedController
       this.controllerToolbox = controllerToolbox;
       this.controlManagerFactory = controlManagerFactory;
 
+      controlManagerFactory.getOrCreateBalanceManager();
+      controlManagerFactory.getOrCreateFeetManager();
+      controlManagerFactory.getOrCreateBodyOrientationManager();
+
       FullQuadrupedRobotModel fullRobotModel = runtimeEnvironment.getFullRobotModel();
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
                                                                                        fullRobotModel.getRootJoint(), fullRobotModel.getControllableOneDoFJoints(),
@@ -66,6 +71,7 @@ public class QuadrupedSteppingState implements QuadrupedController
                                                                                        runtimeEnvironment.getControllerCoreOptimizationSettings(),
                                                                                        runtimeEnvironment.getGraphicsListRegistry(), registry);
       controlCoreToolbox.setupForVirtualModelControlSolver(fullRobotModel.getBody(), controllerToolbox.getContactablePlaneBodies());
+      FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
 
       // Initialize input providers.
       xGaitSettingsProvider = new YoQuadrupedXGaitSettings(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
