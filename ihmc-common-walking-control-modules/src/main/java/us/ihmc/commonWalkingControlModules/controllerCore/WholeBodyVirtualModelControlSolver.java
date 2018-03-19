@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -26,7 +25,6 @@ import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +117,9 @@ public class WholeBodyVirtualModelControlSolver
    {
       optimizationControlModule.initialize();
       virtualModelController.reset();
+
+      yoDesiredMomentumRateLinear.setToZero();
+      yoDesiredMomentumRateAngular.setToZero();
       firstTick = true;
    }
 
@@ -220,8 +221,6 @@ public class WholeBodyVirtualModelControlSolver
 
    public void submitVirtualModelControlCommandList(VirtualModelControlCommandList virtualModelControlCommandList)
    {
-      // todo zero the momentum command
-
       while (virtualModelControlCommandList.getNumberOfCommands() > 0)
       {
          VirtualModelControlCommand<?> command = virtualModelControlCommandList.pollCommand();
@@ -258,12 +257,11 @@ public class WholeBodyVirtualModelControlSolver
       }
    }
 
-   // FIXME this should add to the current momentum rate
    private void recordMomentumRate(MomentumRateCommand command)
    {
       DenseMatrix64F momentumRate = command.getMomentumRate();
-      MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
-      MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
+      MatrixTools.extractAddFixedFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
+      MatrixTools.extractAddFixedFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
    }
 
    private void handleVirtualWrenchCommand(VirtualWrenchCommand commandToSubmit)
