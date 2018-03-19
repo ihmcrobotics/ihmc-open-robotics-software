@@ -123,7 +123,7 @@ public class YoVariableExplorerTabbedPane extends JPanel implements RegistrySele
       this.add(onlyParameters, BorderLayout.NORTH);
       this.add(tabPane, BorderLayout.CENTER);
 
-      tabPane.setMinimumSize(new Dimension(246, 100));
+      tabPane.setMinimumSize(new Dimension(400, 100));
       
       createAndStartPeriodicUIUpdateThread();
    }
