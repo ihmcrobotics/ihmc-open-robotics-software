@@ -420,8 +420,8 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       private final FramePoint3D finalPosition = new FramePoint3D();
       private final FrameVector3D finalVelocity = new FrameVector3D();
       private final double defaultPlanningTime = 4.0;
-      private final FrameVector3D forceWeight = new FrameVector3D(worldFrame, 0.01, 0.01, 0.01);
-      private final FrameVector3D forceRateWeight = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
+      private final FrameVector3D forceWeight = new FrameVector3D(worldFrame, 0.00001, 0.00001, 0.00001);
+      private final FrameVector3D forceRateWeight = new FrameVector3D(worldFrame, 0.001, 0.001, 0.001);
       private final FrameVector3D positionWeight = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
       private final FrameVector3D linearVelocityWeight = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
       private final FrameVector3D intermediatePositionWeight = new FrameVector3D(worldFrame, 1.0, 1.0, 1.0);
@@ -488,9 +488,10 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          finalForceConstraint.set(worldFrame, 0.0, 0.0, -robotMass * gravity.getZ());
          finalForceRateConstraint.set(worldFrame, 0.0, 0.0, 0.0);
 
-         initialPosition.set(worldFrame, position);
+         initialPosition.set(worldFrame, 0.0, 0.0, 0.0);
+         //initialPosition.subZ(robotHeight);
          intermediatePosition.set(worldFrame, 0.0, 0.0, 0.05);
-         finalPosition.set(worldFrame, 0.0, 0.0, 0.05);
+         finalPosition.set(worldFrame, 0.0, 0.0, 0.0);
          
          initialVelocity.set(worldFrame, linearVelocity);
          intermediateVelocity.set(worldFrame, 0.0, 0.0, 0.0);
@@ -525,11 +526,19 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          node4.setForceObjective(finalForceConstraint, forceWeight);
          node4.setForceRateObjective(finalForceRateConstraint, forceRateWeight);
 
+         CentroidalMotionNode node5 = motionPlannerNode.add();
+         node5.reset();
+         node5.setTime(defaultPlanningTime * 0.5);
+         node5.setForceObjective(finalForceConstraint, forceWeight);
+         node5.setForceRateObjective(finalForceRateConstraint, forceRateWeight);
+         node5.setPositionObjective(intermediatePosition, positionWeight);
+         
          motionPlanner.reset();
          motionPlanner.submitNode(node1);
          motionPlanner.submitNode(node2);
          motionPlanner.submitNode(node3);
          motionPlanner.submitNode(node4);
+         motionPlanner.submitNode(node5);
          motionPlanner.compute();
          forceProfile = motionPlanner.getForceProfile();
       }

@@ -97,9 +97,13 @@ public class CentroidalZAxisOptimizationControlModule
       solverInput_lb.set(1, 0, minForceRate);
       solverInput_lb.set(2, 0, minForce);
       solverInput_lb.set(3, 0, minForceRate);
+      solverInput_lb.set(4, 0, minForce);
+      solverInput_lb.set(5, 0, minForceRate);
       solverInput_ub.set(0, 0, maxForce);
       solverInput_ub.set(1, 0, maxForceRate);
       solverInput_ub.set(2, 0, maxForce);
       solverInput_ub.set(3, 0, maxForceRate);
+      solverInput_ub.set(4, 0, maxForce);
+      solverInput_ub.set(5, 0, maxForceRate);
    }
 }
