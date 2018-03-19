@@ -64,7 +64,6 @@ public class CentroidalMotionPlanner
       if (!Double.isFinite(nodeTime))
          return false;
 
-      //PrintTools.debug("Adding node: " + nodeList.getSize());
       if (nodeList.getSize() == 0)
          nodeList.getOrCreateFirstEntry().element.set(nodeToAdd);
       else if (nodeList.getFirstEntry().element.getTime() > nodeTime)

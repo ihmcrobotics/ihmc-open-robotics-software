@@ -5,6 +5,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class OptimizationControlModuleHelper
 {
@@ -33,6 +34,10 @@ public class OptimizationControlModuleHelper
    private final DenseMatrix64F[] f = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] Aeq = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] beq = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] decisionVariableUpperBoundMatrix = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] decisionVariableLowerBoundMatrix = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] Ain = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] bin = new DenseMatrix64F[numberOfAxis];
 
    private final double forceRegularizationWeight;
    private final double forceRateRegularizationWeight;
@@ -40,8 +45,13 @@ public class OptimizationControlModuleHelper
    private int numberOfNodes;
    private final int[] numberOfDecisionVariables = new int[numberOfAxis];
 
-   private final double[] gravity = new double[numberOfAxis];
+   private final Vector3D gravity = new Vector3D();
    private final double robotMass;
+   private final Vector3D maxForce = new Vector3D();
+   private final Vector3D minForce = new Vector3D();
+   private final Vector3D maxForceRate = new Vector3D();
+   private final Vector3D minForceRate = new Vector3D();
+
    private RecycledLinkedListBuilder<CentroidalMotionNode> nodeList;
 
    public OptimizationControlModuleHelper(CentroidalMotionPlannerParameters parameters)
@@ -49,29 +59,36 @@ public class OptimizationControlModuleHelper
       this.robotMass = parameters.getRobotMass();
       for (int i = 0; i < numberOfAxis; i++)
       {
-         positionCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes * 2);
+         int defaultNumberOfDecisionVariables = defaultNumberOfNodes * 2;
+         positionCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
          positionBias[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
-         velocityCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes * 2);
+         velocityCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
          velocityBias[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
-         forceCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes * 2);
+         forceCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
          forceBias[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
-         forceRateCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes * 2);
+         forceRateCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
          forceRateBias[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
-         decisionVariableValues[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, 1);
-         decisionVariableWeightMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, defaultNumberOfNodes * 2);
-         decisionVariableDesiredValueMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, 1);
-         H[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, defaultNumberOfNodes * 2);
-         f[i] = new DenseMatrix64F(defaultNumberOfNodes * 2, 1);
-         Aeq[i] = new DenseMatrix64F(defaultNumberOfNodes * 5, defaultNumberOfNodes * 2);
-         beq[i] = new DenseMatrix64F(defaultNumberOfNodes * 5, 1);
          optimizedForceValues[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
          optimizedForceRateValues[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
+         decisionVariableValues[i] = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
+         decisionVariableWeightMatrix[i] = new DenseMatrix64F(defaultNumberOfDecisionVariables, defaultNumberOfDecisionVariables);
+         decisionVariableDesiredValueMatrix[i] = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
+         H[i] = new DenseMatrix64F(defaultNumberOfDecisionVariables, defaultNumberOfDecisionVariables);
+         f[i] = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
+         Aeq[i] = new DenseMatrix64F(defaultNumberOfNodes * 5, defaultNumberOfDecisionVariables);
+         beq[i] = new DenseMatrix64F(defaultNumberOfNodes * 5, 1);
+         decisionVariableLowerBoundMatrix[i] = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
+         decisionVariableUpperBoundMatrix[i] = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
+         Ain[i] = new DenseMatrix64F(defaultNumberOfNodes * 6, defaultNumberOfDecisionVariables);
+         bin[i] = new DenseMatrix64F(defaultNumberOfNodes * 6, defaultNumberOfDecisionVariables);
       }
       this.forceRegularizationWeight = parameters.getdForceRegularizationWeight();
       this.forceRateRegularizationWeight = parameters.getdForceRegularizationWeight();
-      gravity[0] = parameters.getGravityX();
-      gravity[1] = parameters.getGravityY();
-      gravity[2] = parameters.getGravityZ();
+      parameters.getGravity(this.gravity);
+      parameters.getMaxForce(this.maxForce);
+      parameters.getMinForce(this.minForce);
+      parameters.getMaxForceRate(this.maxForceRate);
+      parameters.getMinForceRate(this.minForceRate);
       reset();
    }
 
@@ -101,6 +118,8 @@ public class OptimizationControlModuleHelper
          forceBias[i].reshape(numberOfNodes, 1);
          forceRateCoefficientMatrix[i].reshape(numberOfNodes, numberOfDecisionVariables[i]);
          forceRateBias[i].reshape(numberOfNodes, 1);
+         optimizedForceValues[i].reshape(0, 1);
+         optimizedForceRateValues[i].reshape(0, 1);
          decisionVariableValues[i].reshape(0, 1);
          decisionVariableWeightMatrix[i].reshape(numberOfDecisionVariables[i], numberOfDecisionVariables[i]);
          decisionVariableDesiredValueMatrix[i].reshape(numberOfDecisionVariables[i], 1);
@@ -108,8 +127,10 @@ public class OptimizationControlModuleHelper
          f[i].reshape(numberOfDecisionVariables[i], 1);
          Aeq[i].reshape(0, numberOfDecisionVariables[i]);
          beq[i].reshape(0, 1);
-         optimizedForceValues[i].reshape(0, 1);
-         optimizedForceRateValues[i].reshape(0, 1);
+         decisionVariableLowerBoundMatrix[i].reshape(numberOfDecisionVariables[i], 1);
+         decisionVariableUpperBoundMatrix[i].reshape(numberOfDecisionVariables[i], 1);
+         Ain[i].reshape(0, numberOfDecisionVariables[i]);
+         bin[i].reshape(0, numberOfDecisionVariables[i]);
       }
    }
 
@@ -138,6 +159,10 @@ public class OptimizationControlModuleHelper
          f[i].zero();
          Aeq[i].zero();
          beq[i].zero();
+         decisionVariableUpperBoundMatrix[i].zero();
+         decisionVariableLowerBoundMatrix[i].zero();
+         Ain[i].zero();
+         bin[i].zero();
       }
    }
 
@@ -223,7 +248,7 @@ public class OptimizationControlModuleHelper
             throw new RuntimeException(getClass().getSimpleName() + ": Initial node must have specified velocity for axis " + Axis.values[i].toString());
          velocityBias[i].set(0, 0, v0);
       }
-      
+
       entry = nodeList.getFirstEntry();
       CentroidalMotionNode node = entry.element;
       int rowIndex = 0;
@@ -242,6 +267,8 @@ public class OptimizationControlModuleHelper
          DenseMatrix64F axisForceRateBias = forceRateBias[axisOrdinal];
          DenseMatrix64F axisDecisionVariableWeightMatrix = decisionVariableWeightMatrix[axisOrdinal];
          DenseMatrix64F axisDecisionVariableDesiredValueMatrix = decisionVariableDesiredValueMatrix[axisOrdinal];
+         DenseMatrix64F axisDecisionVariableUpperBoundMatrix = decisionVariableUpperBoundMatrix[axisOrdinal];
+         DenseMatrix64F axisDecisionVariableLowerBoundMatrix = decisionVariableLowerBoundMatrix[axisOrdinal];
 
          double forceValue = node.getForce(axis);
          EffortVariableConstraintType forceConstraintType = node.getForceConstraintType(axis);
@@ -251,9 +278,10 @@ public class OptimizationControlModuleHelper
 
          setInitialMatrixCoefficientsFromNodeQuantity(rowIndex, axisOrdinal, axisPositionCoefficientMatrix, axisPositionBiasMatrix,
                                                       axisVelocityCoefficientMatrix, axisVelocityBiasMatrix, axisForceCoefficientMatrix, axisForceBias,
-                                                      axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix, forceValue, forceConstraintType,
-                                                      forceWeight, forceRegularizationWeight, velocityCoefficientForInitialForce,
-                                                      positionCoefficientForInitialForce);
+                                                      axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix,
+                                                      axisDecisionVariableUpperBoundMatrix, axisDecisionVariableLowerBoundMatrix, forceValue,
+                                                      maxForce.getElement(axisOrdinal), minForce.getElement(axisOrdinal), forceConstraintType, forceWeight,
+                                                      forceRegularizationWeight, velocityCoefficientForInitialForce, positionCoefficientForInitialForce);
          double forceRateValue = node.getForceRate(axis);
          EffortVariableConstraintType forceRateConstraintType = node.getForceRateConstraintType(axis);
          double forceRateWeight = node.getForceRateWeight(axis);
@@ -262,13 +290,15 @@ public class OptimizationControlModuleHelper
 
          setInitialMatrixCoefficientsFromNodeQuantity(rowIndex, axisOrdinal, axisPositionCoefficientMatrix, axisPositionBiasMatrix,
                                                       axisVelocityCoefficientMatrix, axisVelocityBiasMatrix, axisForceRateCoefficientMatrix, axisForceRateBias,
-                                                      axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix, forceRateValue,
-                                                      forceRateConstraintType, forceRateWeight, forceRateRegularizationWeight,
-                                                      velocityCoefficientForInitialForceRate, positionCoefficientForInitialForceRate);
-//         processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
-//                           node.getPosition(axis), node.getPositionWeight(axis));
-//         processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
-//                           node.getLinearVelocity(axis), node.getLinearVelocityWeight(axis));
+                                                      axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix,
+                                                      axisDecisionVariableUpperBoundMatrix, axisDecisionVariableLowerBoundMatrix, forceRateValue,
+                                                      maxForceRate.getElement(axisOrdinal), minForceRate.getElement(axisOrdinal), forceRateConstraintType,
+                                                      forceRateWeight, forceRateRegularizationWeight, velocityCoefficientForInitialForceRate,
+                                                      positionCoefficientForInitialForceRate);
+         //         processConstraint(axisOrdinal, rowIndex, node.getPositionConstraintType(axis), axisPositionCoefficientMatrix, axisPositionBiasMatrix,
+         //                           node.getPosition(axis), node.getPositionWeight(axis));
+         //         processConstraint(axisOrdinal, rowIndex, node.getLinearVelocityConstraintType(axis), axisVelocityCoefficientMatrix, axisVelocityBiasMatrix,
+         //                           node.getLinearVelocity(axis), node.getLinearVelocityWeight(axis));
 
       }
 
@@ -291,6 +321,8 @@ public class OptimizationControlModuleHelper
             DenseMatrix64F axisForceRateBias = forceRateBias[axisOrdinal];
             DenseMatrix64F axisDecisionVariableWeightMatrix = decisionVariableWeightMatrix[axisOrdinal];
             DenseMatrix64F axisDecisionVariableDesiredValueMatrix = decisionVariableDesiredValueMatrix[axisOrdinal];
+            DenseMatrix64F axisDecisionVariableUpperBoundMatrix = decisionVariableUpperBoundMatrix[axisOrdinal];
+            DenseMatrix64F axisDecisionVariableLowerBoundMatrix = decisionVariableLowerBoundMatrix[axisOrdinal];
 
             double forceValue = node.getForce(axis);
             EffortVariableConstraintType forceConstraintType = node.getForceConstraintType(axis);
@@ -302,8 +334,10 @@ public class OptimizationControlModuleHelper
 
             setInitialFinalMatrixCoefficientsFromNodeQuanitity(rowIndex, axisOrdinal, axisPositionCoefficientMatrix, axisPositionBiasMatrix,
                                                                axisVelocityCoefficientMatrix, axisVelocityBiasMatrix, axisForceCoefficientMatrix, axisForceBias,
-                                                               axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix, forceValue,
-                                                               forceConstraintType, forceWeight, forceRegularizationWeight, velocityCoefficientForFinalForce,
+                                                               axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix,
+                                                               axisDecisionVariableUpperBoundMatrix, axisDecisionVariableLowerBoundMatrix, forceValue,
+                                                               maxForce.getElement(axisOrdinal), minForce.getElement(axisOrdinal), forceConstraintType,
+                                                               forceWeight, forceRegularizationWeight, velocityCoefficientForFinalForce,
                                                                velocityCoefficientForInitialForce, positionCoefficientForFinalForce,
                                                                positionCoefficientForInitialForce);
 
@@ -318,13 +352,16 @@ public class OptimizationControlModuleHelper
             setInitialFinalMatrixCoefficientsFromNodeQuanitity(rowIndex, axisOrdinal, axisPositionCoefficientMatrix, axisPositionBiasMatrix,
                                                                axisVelocityCoefficientMatrix, axisVelocityBiasMatrix, axisForceRateCoefficientMatrix,
                                                                axisForceRateBias, axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix,
-                                                               dForceValue, dForceConstraintType, dForceWeight, forceRateRegularizationWeight,
-                                                               velocityCoefficientForFinalForceRate, velocityCoefficientForInitialForceRate,
-                                                               positionCoefficientForFinalForceRate, positionCoefficientForInitialForceRate);
+                                                               axisDecisionVariableUpperBoundMatrix, axisDecisionVariableLowerBoundMatrix, dForceValue,
+                                                               maxForceRate.getElement(axisOrdinal), minForceRate.getElement(axisOrdinal), dForceConstraintType,
+                                                               dForceWeight, forceRateRegularizationWeight, velocityCoefficientForFinalForceRate,
+                                                               velocityCoefficientForInitialForceRate, positionCoefficientForFinalForceRate,
+                                                               positionCoefficientForInitialForceRate);
             replaceInitialConditionPlaceholder(rowIndex, axisVelocityCoefficientMatrix);
-            replaceInitialConditionPlaceholderAndAddConstantBias(rowIndex, axisVelocityBiasMatrix, deltaTim1 * gravity[axisOrdinal]);
+            replaceInitialConditionPlaceholderAndAddConstantBias(rowIndex, axisVelocityBiasMatrix, deltaTim1 * gravity.getElement(axisOrdinal));
             replaceInitialConditionPlaceholder(rowIndex, axisPositionCoefficientMatrix);
-            replaceInitialConditionPlaceholderAndAddConstantBias(rowIndex, axisPositionBiasMatrix, 0.5 * deltaTim1 * deltaTim1 * gravity[axisOrdinal]);
+            replaceInitialConditionPlaceholderAndAddConstantBias(rowIndex, axisPositionBiasMatrix,
+                                                                 0.5 * deltaTim1 * deltaTim1 * gravity.getElement(axisOrdinal));
             addVelocityContributionToPosition(rowIndex, axisPositionCoefficientMatrix, axisVelocityCoefficientMatrix, deltaTim1);
             addVelocityContributionToPosition(rowIndex, axisPositionBiasMatrix, axisVelocityBiasMatrix, deltaTim1);
 
@@ -350,6 +387,8 @@ public class OptimizationControlModuleHelper
          DenseMatrix64F axisForceRateBias = forceRateBias[axisOrdinal];
          DenseMatrix64F axisDecisionVariableWeightMatrix = decisionVariableWeightMatrix[axisOrdinal];
          DenseMatrix64F axisDecisionVariableDesiredValueMatrix = decisionVariableDesiredValueMatrix[axisOrdinal];
+         DenseMatrix64F axisDecisionVariableUpperBoundMatrix = decisionVariableUpperBoundMatrix[axisOrdinal];
+         DenseMatrix64F axisDecisionVariableLowerBoundMatrix = decisionVariableLowerBoundMatrix[axisOrdinal];
 
          double forceValue = node.getForce(axis);
          EffortVariableConstraintType forceConstraintType = node.getForceConstraintType(axis);
@@ -358,8 +397,10 @@ public class OptimizationControlModuleHelper
          double positionCoefficientForFinalForce = getPositionCoefficientForFinalForce(deltaTF);
          setFinalMatrixCoefficientsFromNodeQuantity(rowIndex, axisOrdinal, axisVelocityCoefficientMatrix, axisVelocityBiasMatrix, axisPositionCoefficientMatrix,
                                                     axisPositionBiasMatrix, axisForceCoefficientMatrix, axisForceBias, axisDecisionVariableWeightMatrix,
-                                                    axisDecisionVariableDesiredValueMatrix, forceValue, forceConstraintType, forceWeight,
-                                                    forceRegularizationWeight, velocityCoefficientForFinalForce, positionCoefficientForFinalForce);
+                                                    axisDecisionVariableDesiredValueMatrix, axisDecisionVariableUpperBoundMatrix,
+                                                    axisDecisionVariableLowerBoundMatrix, forceValue, maxForce.getElement(axisOrdinal),
+                                                    minForce.getElement(axisOrdinal), forceConstraintType, forceWeight, forceRegularizationWeight,
+                                                    velocityCoefficientForFinalForce, positionCoefficientForFinalForce);
 
          double dForceValue = node.getForceRate(axis);
          EffortVariableConstraintType forceRateConstraintType = node.getForceRateConstraintType(axis);
@@ -368,12 +409,14 @@ public class OptimizationControlModuleHelper
          double positionCoefficientForFinalForceRate = getPositionCoefficientForFinalForceRate(deltaTF);
          setFinalMatrixCoefficientsFromNodeQuantity(rowIndex, axisOrdinal, axisVelocityCoefficientMatrix, axisVelocityBiasMatrix, axisPositionCoefficientMatrix,
                                                     axisPositionBiasMatrix, axisForceRateCoefficientMatrix, axisForceRateBias, axisDecisionVariableWeightMatrix,
-                                                    axisDecisionVariableDesiredValueMatrix, dForceValue, forceRateConstraintType, dForceWeight,
-                                                    forceRateRegularizationWeight, velocityCoefficientForFinalForceRate, positionCoefficientForFinalForceRate);
+                                                    axisDecisionVariableDesiredValueMatrix, axisDecisionVariableUpperBoundMatrix,
+                                                    axisDecisionVariableLowerBoundMatrix, dForceValue, maxForceRate.getElement(axisOrdinal),
+                                                    minForceRate.getElement(axisOrdinal), forceRateConstraintType, dForceWeight, forceRateRegularizationWeight,
+                                                    velocityCoefficientForFinalForceRate, positionCoefficientForFinalForceRate);
          replaceInitialConditionPlaceholder(rowIndex, axisVelocityCoefficientMatrix);
-         replaceInitialConditionPlaceholderAndAddConstantBias(rowIndex, axisVelocityBiasMatrix, deltaTF * gravity[axisOrdinal]);
+         replaceInitialConditionPlaceholderAndAddConstantBias(rowIndex, axisVelocityBiasMatrix, deltaTF * gravity.getElement(axisOrdinal));
          replaceInitialConditionPlaceholder(rowIndex, axisPositionCoefficientMatrix);
-         replaceInitialConditionPlaceholderAndAddConstantBias(rowIndex, axisPositionBiasMatrix, 0.5 * deltaTF * deltaTF * gravity[axisOrdinal]);
+         replaceInitialConditionPlaceholderAndAddConstantBias(rowIndex, axisPositionBiasMatrix, 0.5 * deltaTF * deltaTF * gravity.getElement(axisOrdinal));
          addVelocityContributionToPosition(rowIndex, axisPositionCoefficientMatrix, axisVelocityCoefficientMatrix, deltaTF);
          addVelocityContributionToPosition(rowIndex, axisPositionBiasMatrix, axisVelocityBiasMatrix, deltaTF);
 
@@ -475,7 +518,10 @@ public class OptimizationControlModuleHelper
                                                            DenseMatrix64F axisVelocityBiasMatrix, DenseMatrix64F axisPositionCoefficientMatrix,
                                                            DenseMatrix64F axisPositionBiasMatrix, DenseMatrix64F axisDecisionVariableCoefficientMatrix,
                                                            DenseMatrix64F axisDecisionVariableBias, DenseMatrix64F axisDecisionVariableWeightMatrix,
-                                                           DenseMatrix64F axisDecisionVariableDesiredValueMatrix, double decisionVariableValue,
+                                                           DenseMatrix64F axisDecisionVariableDesiredValueMatrix,
+                                                           DenseMatrix64F axisDecisionVariableUpperBoundMatrix,
+                                                           DenseMatrix64F axisDecisionVariableLowerBoundMatrix, double decisionVariableValue,
+                                                           double decisionVariableUpperBound, double decisionVariableLowerBound,
                                                            EffortVariableConstraintType decisionVariableConstraintType, double decisionVariableWeight,
                                                            double decisionVariableRegularizationWeight, double velocityCoefficient, double positionCoefficient)
    {
@@ -485,8 +531,10 @@ public class OptimizationControlModuleHelper
          switch (decisionVariableConstraintType)
          {
          case OBJECTIVE:
-            processDecisionVariableWeighingMatrix(decisionVariableIndex[axisOrdinal], axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix,
-                                                  decisionVariableValue, decisionVariableWeight, decisionVariableRegularizationWeight);
+            processDecisionVariableMatrices(decisionVariableIndex[axisOrdinal], axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix,
+                                            axisDecisionVariableUpperBoundMatrix, axisDecisionVariableLowerBoundMatrix, decisionVariableValue,
+                                            decisionVariableUpperBound, decisionVariableLowerBound, decisionVariableWeight,
+                                            decisionVariableRegularizationWeight);
             processCoefficientMatricesForFinalObjective(rowIndex, decisionVariableIndex[axisOrdinal], axisPositionCoefficientMatrix,
                                                         axisVelocityCoefficientMatrix, velocityCoefficient, positionCoefficient);
             axisDecisionVariableCoefficientMatrix.set(rowIndex, decisionVariableIndex[axisOrdinal], 1.0);
@@ -509,7 +557,10 @@ public class OptimizationControlModuleHelper
                                                              DenseMatrix64F axisPositionBiasMatrix, DenseMatrix64F axisVelocityCoefficientMatrix,
                                                              DenseMatrix64F axisVelocityBiasMatrix, DenseMatrix64F axisDecisionVariableCoefficientMatrix,
                                                              DenseMatrix64F axisDecisionVariableBias, DenseMatrix64F axisDecisionVariableWeightMatrix,
-                                                             DenseMatrix64F axisDecisionVariableDesiredValueMatrix, double decisionVariableValue,
+                                                             DenseMatrix64F axisDecisionVariableDesiredValueMatrix,
+                                                             DenseMatrix64F axisDecisionVariableUpperBoundMatrix,
+                                                             DenseMatrix64F axisDecisionVariableLowerBoundMatrix, double decisionVariableValue,
+                                                             double decisionVariableLowerBound, double decisionVariableUpperBound,
                                                              EffortVariableConstraintType decisionVariableConstraintType, double decisionVariableWeight,
                                                              double decisionVariableRegularizationWeight, double velocityCoefficient,
                                                              double positionCoefficient)
@@ -520,8 +571,10 @@ public class OptimizationControlModuleHelper
          switch (decisionVariableConstraintType)
          {
          case OBJECTIVE:
-            processDecisionVariableWeighingMatrix(decisionVariableIndex[axisOrdinal], axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix,
-                                                  decisionVariableValue, decisionVariableWeight, decisionVariableRegularizationWeight);
+            processDecisionVariableMatrices(decisionVariableIndex[axisOrdinal], axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix,
+                                            axisDecisionVariableUpperBoundMatrix, axisDecisionVariableLowerBoundMatrix, decisionVariableValue,
+                                            decisionVariableUpperBound, decisionVariableLowerBound, decisionVariableWeight,
+                                            decisionVariableRegularizationWeight);
             processCoefficientMatricesForInitialObjective(rowIndex, decisionVariableIndex[axisOrdinal], axisPositionCoefficientMatrix,
                                                           axisVelocityCoefficientMatrix, axisDecisionVariableCoefficientMatrix, velocityCoefficient,
                                                           positionCoefficient);
@@ -544,7 +597,10 @@ public class OptimizationControlModuleHelper
                                                                    DenseMatrix64F axisPositionBiasMatrix, DenseMatrix64F axisVelocityCoefficientMatrix,
                                                                    DenseMatrix64F axisVelocityBiasMatrix, DenseMatrix64F axisDecisionVariableCoefficientMatrix,
                                                                    DenseMatrix64F axisDecisionVariableBias, DenseMatrix64F axisDecisionVariableWeightMatrix,
-                                                                   DenseMatrix64F axisDecisionVariableDesiredValueMatrix, double decisionVariableValue,
+                                                                   DenseMatrix64F axisDecisionVariableDesiredValueMatrix,
+                                                                   DenseMatrix64F axisDecisionVariableUpperBoundMatrix,
+                                                                   DenseMatrix64F axisDecisionVariableLowerBoundMatrix, double decisionVariableValue,
+                                                                   double decisionVariableUpperBound, double decisionVariableLowerBound,
                                                                    EffortVariableConstraintType decisionVariableConstraintType, double decisionVariableWeight,
                                                                    double decisionVariableRegularizationWeight, double velocityCoefficientFinal,
                                                                    double velocityCoefficientInitial, double positionCoefficientFinal,
@@ -558,8 +614,9 @@ public class OptimizationControlModuleHelper
       switch (decisionVariableConstraintType)
       {
       case OBJECTIVE:
-         processDecisionVariableWeighingMatrix(decisionVariableIndex[axisOrdinal], axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix,
-                                               decisionVariableValue, decisionVariableWeight, decisionVariableRegularizationWeight);
+         processDecisionVariableMatrices(decisionVariableIndex[axisOrdinal], axisDecisionVariableWeightMatrix, axisDecisionVariableDesiredValueMatrix,
+                                         axisDecisionVariableUpperBoundMatrix, axisDecisionVariableLowerBoundMatrix, decisionVariableValue,
+                                         decisionVariableUpperBound, decisionVariableLowerBound, decisionVariableWeight, decisionVariableRegularizationWeight);
          processCoefficientMatricesForFinalObjective(rowIndex, decisionVariableIndex[axisOrdinal], axisPositionCoefficientMatrix, axisVelocityCoefficientMatrix,
                                                      velocityCoefficientFinal, positionCoefficientFinal);
          processCoefficientMatricesForInitialObjective(rowIndex, decisionVariableIndex[axisOrdinal], axisPositionCoefficientMatrix,
@@ -681,8 +738,10 @@ public class OptimizationControlModuleHelper
       return -2.0 / (60.0 * robotMass);
    }
 
-   private void processDecisionVariableWeighingMatrix(int decisionVariableIndex, DenseMatrix64F axisDecisionVariableWeightMatrix,
-                                                      DenseMatrix64F axisDecisionVariableDesiredValueMatrix, double value, double weight, double defaultWeight)
+   private void processDecisionVariableMatrices(int decisionVariableIndex, DenseMatrix64F axisDecisionVariableWeightMatrix,
+                                                DenseMatrix64F axisDecisionVariableDesiredValueMatrix, DenseMatrix64F axisDecisionVariableUpperBoundMatrix,
+                                                DenseMatrix64F axisDecisionVariableLowerBoundMatrix, double value, double upperBound, double lowerBound,
+                                                double weight, double defaultWeight)
    {
       if (Double.isFinite(weight))
       {
@@ -694,6 +753,8 @@ public class OptimizationControlModuleHelper
          axisDecisionVariableWeightMatrix.set(decisionVariableIndex, decisionVariableIndex, defaultWeight);
          axisDecisionVariableDesiredValueMatrix.set(decisionVariableIndex, 0, 0.0);
       }
+      axisDecisionVariableUpperBoundMatrix.set(decisionVariableIndex, 0, upperBound);
+      axisDecisionVariableLowerBoundMatrix.set(decisionVariableIndex, 0, lowerBound);
    }
 
    private void addVelocityContributionToPosition(int rowIndex, DenseMatrix64F positionMatrix, DenseMatrix64F velocityMatrix, double deltaT)
@@ -785,7 +846,7 @@ public class OptimizationControlModuleHelper
 
    public void setDecisionVariableValues(Axis axis, DenseMatrix64F solutionToSave)
    {
-//      PrintTools.debug("Axis: " +axis.toString() + " Solution: " + solutionToSave.toString());
+      //      PrintTools.debug("Axis: " +axis.toString() + " Solution: " + solutionToSave.toString());
       DenseMatrix64F solution = decisionVariableValues[axis.ordinal()];
       solution.set(solutionToSave);
    }
@@ -816,5 +877,15 @@ public class OptimizationControlModuleHelper
    public int getNumberOfNodes()
    {
       return numberOfNodes;
+   }
+
+   public DenseMatrix64F getDecisionVariableUpperBoundMatrix(Axis axis)
+   {
+      return decisionVariableUpperBoundMatrix[axis.ordinal()];
+   }
+
+   public DenseMatrix64F getDecisionVariableLowerBoundMatrix(Axis axis)
+   {
+      return decisionVariableLowerBoundMatrix[axis.ordinal()];
    }
 }

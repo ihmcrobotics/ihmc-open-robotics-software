@@ -65,6 +65,8 @@ public class CentroidalXYAxisOptimizationControlModule
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      qpSolver.setLowerBounds(solverInput_lb);
+      qpSolver.setUpperBounds(solverInput_ub);
       try
       {
          qpSolver.solve(qpSolution);
@@ -83,11 +85,12 @@ public class CentroidalXYAxisOptimizationControlModule
       helper.setDecisionVariableValues(Axis.X, axisQPSolution);
 
       axisQPSolution.reshape(numberOfYAxisDecisionVariables, 1);
-      CommonOps.extract(qpSolution, numberOfXAxisDecisionVariables, numberOfXAxisDecisionVariables + numberOfYAxisDecisionVariables, 0, 1, axisQPSolution, 0, 0);
+      CommonOps.extract(qpSolution, numberOfXAxisDecisionVariables, numberOfXAxisDecisionVariables + numberOfYAxisDecisionVariables, 0, 1, axisQPSolution, 0,
+                        0);
       helper.setDecisionVariableValues(Axis.Y, axisQPSolution);
 
    }
-   
+
    private void setQPInputMatrices()
    {
       Axis xAxis = Axis.X;
@@ -107,7 +110,7 @@ public class CentroidalXYAxisOptimizationControlModule
       solverInput_f.reshape(numberOFDecisionVariables, 1);
       CommonOps.insert(xAxisFMatrix, solverInput_f, 0, 0);
       CommonOps.insert(yAxisFMatrix, solverInput_f, numberOfXAxisDecisionVariables, 0);
-      
+
       DenseMatrix64F xAxisAeqMatrix = helper.getConstraintAeqMatrix(xAxis);
       DenseMatrix64F yAxisAeqMatrix = helper.getConstraintAeqMatrix(yAxis);
       int numberOfEqualityConstraints = xAxisAeqMatrix.getNumRows() + yAxisAeqMatrix.getNumRows();
@@ -115,16 +118,23 @@ public class CentroidalXYAxisOptimizationControlModule
       solverInput_Aeq.zero();
       CommonOps.insert(xAxisAeqMatrix, solverInput_Aeq, 0, 0);
       CommonOps.insert(yAxisAeqMatrix, solverInput_Aeq, xAxisAeqMatrix.getNumRows(), numberOfXAxisDecisionVariables);
-      
+
       DenseMatrix64F xAxisbeqMatrix = helper.getConstraintbeqMatrix(xAxis);
       DenseMatrix64F yAxisbeqMatrix = helper.getConstraintbeqMatrix(yAxis);
       solverInput_beq.reshape(numberOfEqualityConstraints, 1);
       CommonOps.insert(xAxisbeqMatrix, solverInput_beq, 0, 0);
       CommonOps.insert(yAxisbeqMatrix, solverInput_beq, xAxisAeqMatrix.getNumRows(), 0);
-      
+
       solverInput_Ain.reshape(0, numberOFDecisionVariables);
       solverInput_bin.reshape(0, 1);
+
+      solverInput_lb.reshape(numberOFDecisionVariables, 1);
+      CommonOps.insert(helper.getDecisionVariableLowerBoundMatrix(xAxis), solverInput_lb, 0, 0);
+      CommonOps.insert(helper.getDecisionVariableLowerBoundMatrix(yAxis), solverInput_lb, numberOfXAxisDecisionVariables, 0);
+      solverInput_ub.reshape(numberOFDecisionVariables, 1);
+      CommonOps.insert(helper.getDecisionVariableUpperBoundMatrix(xAxis), solverInput_ub, 0, 0);
+      CommonOps.insert(helper.getDecisionVariableUpperBoundMatrix(yAxis), solverInput_ub, numberOfXAxisDecisionVariables, 0);
       //setFrictionConeConstraints();
       //setTorqueConstraints();
-  }
+   }
 }

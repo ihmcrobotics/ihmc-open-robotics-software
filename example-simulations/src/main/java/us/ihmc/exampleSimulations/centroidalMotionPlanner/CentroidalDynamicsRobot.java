@@ -245,6 +245,10 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          parameters.setNominalIxx(Ixx);
          parameters.setNominalIyy(Iyy);
          parameters.setNominalIzz(Izz);
+         parameters.setMaxForce(new Vector3D(100.0, 100.0, 2.0 * robotMass * 9.81));
+         parameters.setMinForce(new Vector3D(-100.0, -100.0, 0.0));
+         parameters.setMaxForceRate(new Vector3D(0.2, 0.2, 0.2));
+         parameters.setMinForceRate(new Vector3D(-0.2, -0.2, -0.2));
          this.stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "TimeInState", CentroidalRobotStateEnum.class, yoTime, registry);
          if (graphicsListRegistry != null)
             createExternalForcePointGraphic(graphicsListRegistry, forcePoint);
@@ -529,7 +533,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          initialPosition.set(worldFrame, 0.0, 0.0, 0.0);
          //initialPosition.subZ(robotHeight);
          intermediatePosition.set(worldFrame, 0.0, 0.0, 0.05);
-         finalPosition.set(worldFrame, 0.1, 0.0, 0.0);
+         finalPosition.set(worldFrame, 0.0, 0.0, 0.0);
 
          initialVelocity.set(worldFrame, linearVelocity);
          intermediateVelocity.set(worldFrame, 0.0, 0.0, 0.0);
