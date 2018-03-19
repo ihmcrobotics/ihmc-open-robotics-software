@@ -2,35 +2,43 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.AdjustFootstepMessage;
+import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.DesiredAccelerationsMessage;
+import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import controller_msgs.msg.dds.FootLoadBearingMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
+import controller_msgs.msg.dds.NeckTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
+import controller_msgs.msg.dds.SpineTrajectoryMessage;
+import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -71,11 +79,11 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if (message.getPredictedContactPoint2Ds() != null)
+      if (message.getPredictedContactPoints2d() != null)
       {
-         for (int arrayListIndex = 0; arrayListIndex < message.getPredictedContactPoint2Ds().size(); arrayListIndex++)
+         for (int arrayListIndex = 0; arrayListIndex < message.getPredictedContactPoints2d().size(); arrayListIndex++)
          {
-            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getPredictedContactPoint2Ds().get(arrayListIndex));
+            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getPredictedContactPoints2d().get(arrayListIndex));
 
             if (packetFieldErrorType != null)
             {
@@ -181,7 +189,7 @@ public abstract class PacketValidityChecker
    {
       ObjectErrorType packetFieldErrorType;
 
-      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.defaultSwingDuration);
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getDefaultSwingDuration());
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -189,7 +197,7 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.defaultTransferDuration);
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getDefaultTransferDuration());
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -250,11 +258,11 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if (message.getPredictedContactPoints() != null)
+      if (message.getPredictedContactPoints2d() != null)
       {
-         for (int arrayListIndex = 0; arrayListIndex < message.getPredictedContactPoints().size(); arrayListIndex++)
+         for (int arrayListIndex = 0; arrayListIndex < message.getPredictedContactPoints2d().size(); arrayListIndex++)
          {
-            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getPredictedContactPoints().get(arrayListIndex));
+            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getPredictedContactPoints2d().get(arrayListIndex));
 
             if (packetFieldErrorType != null)
             {
@@ -313,7 +321,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(message);
       if (errorMessage == null)
-         errorMessage = validateSE3TrajectoryMessage(message.se3Trajectory);
+         errorMessage = validateSE3TrajectoryMessage(message.getSe3Trajectory());
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
@@ -337,7 +345,7 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.robotSide));
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.getRobotSide()));
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -352,7 +360,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(message);
       if (errorMessage == null)
-         errorMessage = validateSO3TrajectoryMessage(message.so3Trajectory);
+         errorMessage = validateSO3TrajectoryMessage(message.getSo3Trajectory());
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
@@ -363,7 +371,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(message);
       if (errorMessage == null)
-         errorMessage = validateSO3TrajectoryMessage(message.so3Trajectory);
+         errorMessage = validateSO3TrajectoryMessage(message.getSo3Trajectory());
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
@@ -398,14 +406,14 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
-      if (message.jointTrajectoryMessages == null)
+      if (message.getJointTrajectoryMessages() == null)
       {
          String messageClassName = message.getClass().getSimpleName();
          errorMessage = messageClassName + "'s trajectory points are empty.";
          return errorMessage;
       }
 
-      int numberOfJoints = message.jointTrajectoryMessages.size();
+      int numberOfJoints = message.getJointTrajectoryMessages().size();
       if (numberOfJoints == 0)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -449,16 +457,16 @@ public abstract class PacketValidityChecker
 
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
 
-      if (message.taskspaceTrajectoryPoints.size() == 0)
+      if (message.getTaskspaceTrajectoryPoints().size() == 0)
       {
          String messageClassName = message.getClass().getSimpleName();
          errorMessage = "Received " + messageClassName + " with no waypoint.";
          return errorMessage;
       }
 
-      for (int i = 0; i < message.taskspaceTrajectoryPoints.size(); i++)
+      for (int i = 0; i < message.getTaskspaceTrajectoryPoints().size(); i++)
       {
-         SE3TrajectoryPointMessage waypoint = message.taskspaceTrajectoryPoints.get(i);
+         SE3TrajectoryPointMessage waypoint = message.getTaskspaceTrajectoryPoints().get(i);
          errorMessage = validateSE3TrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
          {
@@ -469,7 +477,7 @@ public abstract class PacketValidityChecker
          previousTrajectoryPoint = waypoint;
       }
 
-      if (message.getUseCustomControlFrame() && message.controlFramePose == null)
+      if (message.getUseCustomControlFrame() && message.getControlFramePose() == null)
       {
          String messageClassName = message.getClass().getSimpleName();
          return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
@@ -486,7 +494,7 @@ public abstract class PacketValidityChecker
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
-      if (message.taskspaceTrajectoryPoints.size() == 0)
+      if (message.getTaskspaceTrajectoryPoints().size() == 0)
       {
          String messageClassName = message.getClass().getSimpleName();
          errorMessage = "Received " + messageClassName + " with no waypoint.";
@@ -503,9 +511,9 @@ public abstract class PacketValidityChecker
          return message.getClass().getSimpleName() + " Trajectory Reference Frame Id Not Set";
       }
 
-      for (int i = 0; i < message.taskspaceTrajectoryPoints.size(); i++)
+      for (int i = 0; i < message.getTaskspaceTrajectoryPoints().size(); i++)
       {
-         SO3TrajectoryPointMessage waypoint = message.taskspaceTrajectoryPoints.get(i);
+         SO3TrajectoryPointMessage waypoint = message.getTaskspaceTrajectoryPoints().get(i);
          errorMessage = validateSO3TrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
          {
@@ -516,7 +524,7 @@ public abstract class PacketValidityChecker
          previousTrajectoryPoint = waypoint;
       }
 
-      if (message.getUseCustomControlFrame() && message.controlFramePose == null)
+      if (message.getUseCustomControlFrame() && message.getControlFramePose() == null)
       {
          String messageClassName = message.getClass().getSimpleName();
          return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
@@ -529,7 +537,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(message);
       if (errorMessage == null)
-         errorMessage = validateSO3TrajectoryMessage(message.so3Trajectory);
+         errorMessage = validateSO3TrajectoryMessage(message.getSo3Trajectory());
       if (errorMessage != null)
          return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
@@ -540,7 +548,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(message);
       if (errorMessage == null)
-         errorMessage = validateSE3TrajectoryMessage(message.se3Trajectory);
+         errorMessage = validateSE3TrajectoryMessage(message.getSe3Trajectory());
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
@@ -551,7 +559,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(message);
       if (errorMessage == null)
-         errorMessage = validateSE3TrajectoryMessage(message.se3Trajectory);
+         errorMessage = validateSE3TrajectoryMessage(message.getSe3Trajectory());
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
@@ -625,16 +633,16 @@ public abstract class PacketValidityChecker
 
       EuclideanTrajectoryPointMessage previousTrajectoryPoint = null;
 
-      if (message.getEuclideanTrajectory().taskspaceTrajectoryPoints.isEmpty())
+      if (message.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().isEmpty())
       {
          String messageClassName = message.getClass().getSimpleName();
          errorMessage = "Received " + messageClassName + " with no waypoint.";
          return errorMessage;
       }
 
-      for (int i = 0; i < message.getEuclideanTrajectory().taskspaceTrajectoryPoints.size(); i++)
+      for (int i = 0; i < message.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().size(); i++)
       {
-         EuclideanTrajectoryPointMessage waypoint = message.getEuclideanTrajectory().taskspaceTrajectoryPoints.get(i);
+         EuclideanTrajectoryPointMessage waypoint = message.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().get(i);
          errorMessage = validateEuclideanTrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
          {
@@ -656,7 +664,7 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
-      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.robotSide));
+      ObjectErrorType packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.getRobotSide()));
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -695,61 +703,61 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return errorMessage;
 
-      if (!message.leftHandTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      if (!message.getLeftHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
       {
-         if ((errorMessage = validateHandTrajectoryMessage(message.leftHandTrajectoryMessage)) != null)
+         if ((errorMessage = validateHandTrajectoryMessage(message.getLeftHandTrajectoryMessage())) != null)
             return errorMessage;
-         else if (RobotSide.fromByte(message.leftHandTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
+         else if (RobotSide.fromByte(message.getLeftHandTrajectoryMessage().getRobotSide()) != RobotSide.LEFT)
             return "The robotSide of leftHandTrajectoryMessage field is inconsistent with its name.";
       }
-      if (!message.leftHandTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      if (!message.getLeftHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
       {
-         if ((errorMessage = validateHandTrajectoryMessage(message.rightHandTrajectoryMessage)) != null)
+         if ((errorMessage = validateHandTrajectoryMessage(message.getRightHandTrajectoryMessage())) != null)
             return errorMessage;
-         else if (RobotSide.fromByte(message.rightHandTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
+         else if (RobotSide.fromByte(message.getRightHandTrajectoryMessage().getRobotSide()) != RobotSide.RIGHT)
             return "The robotSide of rightHandTrajectoryMessage field is inconsistent with its name.";
       }
-      if (!message.leftArmTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.isEmpty())
+      if (!message.getLeftArmTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
       {
-         if ((errorMessage = validateArmTrajectoryMessage(message.leftArmTrajectoryMessage)) != null)
+         if ((errorMessage = validateArmTrajectoryMessage(message.getLeftArmTrajectoryMessage())) != null)
             return errorMessage;
-         else if (RobotSide.fromByte(message.leftArmTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
+         else if (RobotSide.fromByte(message.getLeftArmTrajectoryMessage().getRobotSide()) != RobotSide.LEFT)
             return "The robotSide of leftArmTrajectoryMessage field is inconsistent with its name.";
       }
-      if (!message.rightArmTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.isEmpty())
+      if (!message.getRightArmTrajectoryMessage().getJointspaceTrajectory().getJointTrajectoryMessages().isEmpty())
       {
-         if ((errorMessage = validateArmTrajectoryMessage(message.rightArmTrajectoryMessage)) != null)
+         if ((errorMessage = validateArmTrajectoryMessage(message.getRightArmTrajectoryMessage())) != null)
             return errorMessage;
-         else if (RobotSide.fromByte(message.rightArmTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
+         else if (RobotSide.fromByte(message.getRightArmTrajectoryMessage().getRobotSide()) != RobotSide.RIGHT)
             return "The robotSide of rightArmTrajectoryMessage field is inconsistent with its name.";
       }
-      if (!message.chestTrajectoryMessage.so3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      if (!message.getChestTrajectoryMessage().getSo3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
       {
-         if ((errorMessage = validateChestTrajectoryMessage(message.chestTrajectoryMessage)) != null)
+         if ((errorMessage = validateChestTrajectoryMessage(message.getChestTrajectoryMessage())) != null)
             return errorMessage;
       }
-      if (!message.pelvisTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      if (!message.getPelvisTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
       {
-         if ((errorMessage = validatePelvisTrajectoryMessage(message.pelvisTrajectoryMessage)) != null)
+         if ((errorMessage = validatePelvisTrajectoryMessage(message.getPelvisTrajectoryMessage())) != null)
             return errorMessage;
       }
-      if (!message.headTrajectoryMessage.so3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      if (!message.getHeadTrajectoryMessage().getSo3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
       {
-         if ((errorMessage = validateHeadTrajectoryMessage(message.headTrajectoryMessage)) != null)
+         if ((errorMessage = validateHeadTrajectoryMessage(message.getHeadTrajectoryMessage())) != null)
             return errorMessage;
       }
-      if (!message.leftFootTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      if (!message.getLeftFootTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
       {
-         if ((errorMessage = validateFootTrajectoryMessage(message.leftFootTrajectoryMessage)) != null)
+         if ((errorMessage = validateFootTrajectoryMessage(message.getLeftFootTrajectoryMessage())) != null)
             return errorMessage;
-         else if (RobotSide.fromByte(message.leftFootTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
+         else if (RobotSide.fromByte(message.getLeftFootTrajectoryMessage().getRobotSide()) != RobotSide.LEFT)
             return "The robotSide of leftFootTrajectoryMessage field is inconsistent with its name.";
       }
-      if (!message.rightFootTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
+      if (!message.getRightFootTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
       {
-         if ((errorMessage = validateFootTrajectoryMessage(message.rightFootTrajectoryMessage)) != null)
+         if ((errorMessage = validateFootTrajectoryMessage(message.getRightFootTrajectoryMessage())) != null)
             return errorMessage;
-         else if (RobotSide.fromByte(message.rightFootTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
+         else if (RobotSide.fromByte(message.getRightFootTrajectoryMessage().getRobotSide()) != RobotSide.RIGHT)
             return "The robotSide of rightFootTrajectoryMessage field is inconsistent with its name.";
       }
 
@@ -765,19 +773,19 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.position);
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getPosition());
       if (errorType != null)
          return "SE3 waypoint position field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateQuat4d(se3TrajectoryPoint.orientation);
+      errorType = ObjectValidityChecker.validateQuat4d(se3TrajectoryPoint.getOrientation());
       if (errorType != null)
          return "SE3 waypoint orientation field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.linearVelocity);
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getLinearVelocity());
       if (errorType != null)
          return "SE3 waypoint linear velocity field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.angularVelocity);
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getAngularVelocity());
       if (errorType != null)
          return "SE3 waypoint angular velocity field " + errorType.getMessage();
       ;
@@ -802,11 +810,11 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.position);
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getPosition());
       if (errorType != null)
          return "SE3 waypoint position field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.linearVelocity);
+      errorType = ObjectValidityChecker.validateTuple3d(se3TrajectoryPoint.getLinearVelocity());
       if (errorType != null)
          return "SE3 waypoint linear velocity field " + errorType.getMessage();
 
@@ -830,11 +838,11 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateQuat4d(so3TrajectoryPoint.orientation);
+      errorType = ObjectValidityChecker.validateQuat4d(so3TrajectoryPoint.getOrientation());
       if (errorType != null)
          return "SO3 waypoint orientation field " + errorType.getMessage();
 
-      errorType = ObjectValidityChecker.validateTuple3d(so3TrajectoryPoint.angularVelocity);
+      errorType = ObjectValidityChecker.validateTuple3d(so3TrajectoryPoint.getAngularVelocity());
       if (errorType != null)
          return "SO3 waypoint angular velocity field " + errorType.getMessage();
 
@@ -887,21 +895,21 @@ public abstract class PacketValidityChecker
 
       TrajectoryPoint1DMessage previousTrajectoryPoint = null;
 
-      if (message.trajectoryPoints.size() == 0)
+      if (message.getTrajectoryPoints().size() == 0)
          return "The joint trajectory message has no waypoint.";
 
-      for (int i = 0; i < message.trajectoryPoints.size(); i++)
+      for (int i = 0; i < message.getTrajectoryPoints().size(); i++)
       {
-         TrajectoryPoint1DMessage waypoint = message.trajectoryPoints.get(i);
+         TrajectoryPoint1DMessage waypoint = message.getTrajectoryPoints().get(i);
          errorMessage = validateTrajectoryPoint1DMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
             return "The " + i + "th " + errorMessage;
          previousTrajectoryPoint = waypoint;
       }
 
-      for (int waypointIndex = 0; waypointIndex < message.trajectoryPoints.size(); waypointIndex++)
+      for (int waypointIndex = 0; waypointIndex < message.getTrajectoryPoints().size(); waypointIndex++)
       {
-         TrajectoryPoint1DMessage waypoint = message.trajectoryPoints.get(waypointIndex);
+         TrajectoryPoint1DMessage waypoint = message.getTrajectoryPoints().get(waypointIndex);
          double waypointPosition = waypoint.getPosition();
 
          if (Math.abs(waypointPosition) > Math.PI)

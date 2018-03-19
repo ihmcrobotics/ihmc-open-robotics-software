@@ -13,6 +13,10 @@ import java.util.function.Consumer;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import controller_msgs.msg.dds.BoundingBoxesPacket;
+import controller_msgs.msg.dds.HeatMapPacket;
+import controller_msgs.msg.dds.ObjectDetectorResultPacket;
+import controller_msgs.msg.dds.VideoPacket;
 import georegression.geometry.ConvertRotation3D_F64;
 import georegression.geometry.GeometryMath_F64;
 import georegression.struct.EulerType;
@@ -23,9 +27,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.BoundingBoxesPacket;
-import us.ihmc.communication.packets.HeatMapPacket;
-import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -39,7 +40,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
@@ -237,14 +237,14 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
 //         }
 //         BoundingBoxesPacket boundingBoxesPacket = new BoundingBoxesPacket(packedBoxes, names);
 
-         BoundingBoxesPacket boundingBoxes = result.boundingBoxes;
-         HeatMapPacket heatMap = result.heatMap;
+         BoundingBoxesPacket boundingBoxes = result.getBoundingBoxes();
+         HeatMapPacket heatMap = result.getHeatMap();
          DetectionVisualizationPackets coactiveVisualizationPackets = new DetectionVisualizationPackets(boundingBoxes, heatMap);
          detectionResultListeners.forEach(consumer -> consumer.accept(coactiveVisualizationPackets));
 
-         if (boundingBoxes.labels.size() > 0)
+         if (boundingBoxes.getLabels().size() > 0)
          {
-            Rectangle rectangle = new Rectangle(boundingBoxes.boundingBoxXCoordinates.get(0), boundingBoxes.boundingBoxYCoordinates.get(0), boundingBoxes.boundingBoxWidths.get(0), boundingBoxes.boundingBoxHeights.get(0));
+            Rectangle rectangle = new Rectangle(boundingBoxes.getBoundingBoxesXCoordinates().get(0), boundingBoxes.getBoundingBoxesYCoordinates().get(0), boundingBoxes.getBoundingBoxesWidths().get(0), boundingBoxes.getBoundingBoxesHeights().get(0));
             double knownWidth = expectedObjectSize.getDoubleValue();
             Point2D_F64 topLeft = new Point2D_F64(rectangle.x, rectangle.y);
             Point2D_F64 bottomRight = new Point2D_F64(rectangle.x + rectangle.width, rectangle.y + rectangle.height);

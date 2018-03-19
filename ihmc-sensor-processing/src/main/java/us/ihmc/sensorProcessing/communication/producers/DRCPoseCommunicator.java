@@ -3,8 +3,10 @@ package us.ihmc.sensorProcessing.communication.producers;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
+import controller_msgs.msg.dds.IMUPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -19,8 +21,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -213,22 +213,22 @@ public class DRCPoseCommunicator implements RawOutputWriter
 
          if (sensorRawOutputMapReadOnly != null)
          {
-            configData.imuSensorData.clear();
+            configData.getImuSensorData().clear();
 
             List<? extends IMUSensorReadOnly> imuRawOutputs = sensorRawOutputMapReadOnly.getIMURawOutputs();
             for (int sensorNumber = 0; sensorNumber < imuRawOutputs.size(); sensorNumber++)
             {
                IMUSensorReadOnly imuSensor = imuRawOutputs.get(sensorNumber);
-               IMUPacket imuPacketToPack = configData.imuSensorData.add();
+               IMUPacket imuPacketToPack = configData.getImuSensorData().add();
 
                imuSensor.getLinearAccelerationMeasurement(imuLinearAccelerations[sensorNumber]);
                imuSensor.getOrientationMeasurement(imuOrientationsAsMatrix[sensorNumber]);
                imuOrientations[sensorNumber].set(imuOrientationsAsMatrix[sensorNumber]);
                imuSensor.getAngularVelocityMeasurement(rawImuAngularVelocities[sensorNumber]);
 
-               imuPacketToPack.linearAcceleration.set(imuLinearAccelerations[sensorNumber]);
-               imuPacketToPack.orientation.set(imuOrientations[sensorNumber]);
-               imuPacketToPack.angularVelocity.set(rawImuAngularVelocities[sensorNumber]);
+               imuPacketToPack.getLinearAcceleration().set(imuLinearAccelerations[sensorNumber]);
+               imuPacketToPack.getOrientation().set(imuOrientations[sensorNumber]);
+               imuPacketToPack.getAngularVelocity().set(rawImuAngularVelocities[sensorNumber]);
             }
          }
 
@@ -237,13 +237,13 @@ public class DRCPoseCommunicator implements RawOutputWriter
          LastPacket lastPacket = dataProducer.getLastPacket();
          if (lastPacket != null)
          {
-            configData.setLastReceivedPacketTypeID(netClassList.getID(lastPacket.getPacket()));
+            configData.setLastReceivedPacketTypeId(netClassList.getID(lastPacket.getPacket()));
             configData.setLastReceivedPacketUniqueId(lastPacket.getUniqueId());
             configData.setLastReceivedPacketRobotTimestamp(lastPacket.getReceivedTimestamp());
          }
          else
          {
-            configData.setLastReceivedPacketTypeID(-1);
+            configData.setLastReceivedPacketTypeId(-1);
             configData.setLastReceivedPacketUniqueId(-1);
             configData.setLastReceivedPacketRobotTimestamp(-1);
          }

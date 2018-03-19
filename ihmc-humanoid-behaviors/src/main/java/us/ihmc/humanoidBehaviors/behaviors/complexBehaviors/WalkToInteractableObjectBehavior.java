@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import com.jme3.math.Quaternion;
 
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;

@@ -11,6 +11,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.QueueableMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.NetClassList;
@@ -20,7 +26,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -33,12 +38,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -404,7 +404,7 @@ public class DesiredFootstepTest
 
       for (Footstep footstep : footsteps)
       {
-         footstepsData.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(footstep));
+         footstepsData.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(footstep));
       }
 
       return footstepsData;
@@ -437,8 +437,8 @@ public class DesiredFootstepTest
       @Override
       public void receivedPacket(FootstepDataListMessage packet)
       {
-         boolean adjustable = packet.areFootstepsAdjustable;
-         List<FootstepDataMessage> footstepDataList = packet.footstepDataList;
+         boolean adjustable = packet.getAreFootstepsAdjustable();
+         List<FootstepDataMessage> footstepDataList = packet.getFootstepDataList();
          for (int i = 0; i < footstepDataList.size(); i++)
          {
             FootstepDataMessage footstepData = footstepDataList.get(i);

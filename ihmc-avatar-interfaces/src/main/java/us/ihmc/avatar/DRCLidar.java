@@ -3,11 +3,11 @@ package us.ihmc.avatar;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.jMonkeyEngineToolkit.GPULidar;
 import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;

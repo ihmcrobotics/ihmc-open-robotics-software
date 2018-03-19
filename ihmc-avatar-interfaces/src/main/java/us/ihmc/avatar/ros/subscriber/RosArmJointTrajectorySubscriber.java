@@ -2,13 +2,13 @@ package us.ihmc.avatar.ros.subscriber;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import trajectory_msgs.JointTrajectory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -59,7 +59,7 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
       int numberOfWaypoints = rosMessage.getPoints().size();
       
       ArmTrajectoryMessage ihmcMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
-      RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = ihmcMessage.jointspaceTrajectory.jointTrajectoryMessages;
+      RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = ihmcMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
       for (int i = 0; i < numberOfJoints; i++)
          jointTrajectoryMessages.add();
 
@@ -80,7 +80,7 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
          
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
-            jointTrajectoryMessages.get(jointIndex).trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(time, positions[jointIndex], velocities[jointIndex]));
+            jointTrajectoryMessages.get(jointIndex).getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(time, positions[jointIndex], velocities[jointIndex]));
          }
       }
       

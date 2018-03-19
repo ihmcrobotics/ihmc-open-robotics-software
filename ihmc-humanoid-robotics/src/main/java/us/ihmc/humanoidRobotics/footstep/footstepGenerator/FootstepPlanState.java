@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlanState implements Comparable<FootstepPlanState>
@@ -34,12 +34,12 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
 
    public FootstepPlanState(double x, double y, double theta, RobotSide side)
    {
-      footstepData.location = new Point3D(x, y, 0);
+      footstepData.getLocation().set(new Point3D(x, y, 0));
       
       Quaternion orientation = new Quaternion();
       orientation.setToYawQuaternion(theta);
-      footstepData.setOrientation(orientation);
-      footstepData.robotSide = side.toByte();
+      footstepData.getOrientation().set(orientation);
+      footstepData.setRobotSide(side.toByte());
       this.theta = theta;
    }
 
@@ -49,17 +49,17 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
       this.terrainType = copy.terrainType;
    }
 
-   public void setHeight(double z) { this.footstepData.location.setZ(z);}
+   public void setHeight(double z) { this.footstepData.getLocation().setZ(z);}
 
-   public Point3D getPosition() { return footstepData.location;}
+   public Point3D getPosition() { return footstepData.getLocation();}
 
    public boolean equals(Object o)
    {
       FootstepPlanState other = (FootstepPlanState) o;
-      boolean goodMatch = ((discretize(footstepData.location.getX(), distanceResolution) == discretize(other.footstepData.location.getX(), distanceResolution))
-            && (discretize(footstepData.location.getY(), distanceResolution) == discretize(other.footstepData.location.getY(), distanceResolution))
+      boolean goodMatch = ((discretize(footstepData.getLocation().getX(), distanceResolution) == discretize(other.footstepData.getLocation().getX(), distanceResolution))
+            && (discretize(footstepData.getLocation().getY(), distanceResolution) == discretize(other.footstepData.getLocation().getY(), distanceResolution))
             && (discretize(theta, thetaResolution) == discretize(other.theta, thetaResolution))
-            && (footstepData.robotSide == other.footstepData.robotSide));
+            && (footstepData.getRobotSide() == other.footstepData.getRobotSide()));
       if (goodMatch)
       {
          return true;
@@ -80,48 +80,48 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
 
    public double distance(FootstepPlanState other)
    {
-      return footstepData.location.distance(other.footstepData.location);
+      return footstepData.getLocation().distance(other.footstepData.getLocation());
    }
 
    public double horizonalDistance(FootstepPlanState other)
    {
-      return Math.sqrt(Math.pow(footstepData.location.getX() - other.footstepData.location.getX(), 2) + Math.pow(footstepData.location.getY() - other.footstepData.location.getY(), 2));
+      return Math.sqrt(Math.pow(footstepData.getLocation().getX() - other.footstepData.getLocation().getX(), 2) + Math.pow(footstepData.getLocation().getY() - other.footstepData.getLocation().getY(), 2));
    }
 
 
    public Point3D getPoint3d()
    {
-      return footstepData.location;
+      return footstepData.getLocation();
    }
 
    public RobotSide getRobotSide()
    {
-      return RobotSide.fromByte(footstepData.robotSide);
+      return RobotSide.fromByte(footstepData.getRobotSide());
    }
 
    @Override
    public int compareTo(FootstepPlanState s)
    {
       if (this.equals(s)) return 0;
-      if (this.footstepData.location.getX() < s.footstepData.location.getX())
+      if (this.footstepData.getLocation().getX() < s.footstepData.getLocation().getX())
          return -1;
-      if (this.footstepData.location.getX() > s.footstepData.location.getX())
+      if (this.footstepData.getLocation().getX() > s.footstepData.getLocation().getX())
          return 1;
-      if (this.footstepData.location.getY() < s.footstepData.location.getY())
+      if (this.footstepData.getLocation().getY() < s.footstepData.getLocation().getY())
          return -1;
-      if (this.footstepData.location.getY() > s.footstepData.location.getY())
+      if (this.footstepData.getLocation().getY() > s.footstepData.getLocation().getY())
          return 1;
-      if (this.footstepData.location.getZ() < s.footstepData.location.getZ())
+      if (this.footstepData.getLocation().getZ() < s.footstepData.getLocation().getZ())
          return -1;
-      if (this.footstepData.location.getZ() > s.footstepData.location.getZ())
+      if (this.footstepData.getLocation().getZ() > s.footstepData.getLocation().getZ())
          return 1;
       if (this.theta < s.theta)
          return -1;
       if (this.theta > s.theta)
          return 1;
-      if (this.footstepData.robotSide < s.footstepData.robotSide)
+      if (this.footstepData.getRobotSide() < s.footstepData.getRobotSide())
          return -1;
-      if (this.footstepData.robotSide > s.footstepData.robotSide)
+      if (this.footstepData.getRobotSide() > s.footstepData.getRobotSide())
          return 1;
       return 0;
    }
@@ -129,7 +129,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    @Override
    public int hashCode()
    {
-      return (int) (discretize(footstepData.location.getX(), distanceResolution) + 3424.0 * discretize(footstepData.location.getY(), distanceResolution) + 16353.0 * discretize(theta, thetaResolution) + 72432.0 * RobotSide.fromByte(footstepData.robotSide).ordinal());
+      return (int) (discretize(footstepData.getLocation().getX(), distanceResolution) + 3424.0 * discretize(footstepData.getLocation().getY(), distanceResolution) + 16353.0 * discretize(theta, thetaResolution) + 72432.0 * RobotSide.fromByte(footstepData.getRobotSide()).ordinal());
    }
 
    private double discretize(double value, double interval)
@@ -140,7 +140,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    public String getID()
    {
       String id = "";
-      id = RobotSide.fromByte(footstepData.robotSide).getSideNameFirstLetter() + "_" + discretize(footstepData.location.getX(), distanceResolution) + "_" + discretize(footstepData.location.getY(), distanceResolution) + "_" + discretize(theta, thetaResolution);
+      id = RobotSide.fromByte(footstepData.getRobotSide()).getSideNameFirstLetter() + "_" + discretize(footstepData.getLocation().getX(), distanceResolution) + "_" + discretize(footstepData.getLocation().getY(), distanceResolution) + "_" + discretize(theta, thetaResolution);
       return id;
    }
 }

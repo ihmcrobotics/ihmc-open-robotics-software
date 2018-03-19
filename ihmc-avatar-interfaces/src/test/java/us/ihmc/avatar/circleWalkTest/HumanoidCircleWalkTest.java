@@ -9,6 +9,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -20,10 +24,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -154,11 +154,11 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
          for (int trajectoryPointIndex = 0; trajectoryPointIndex < getArmTrajectoryPoints(); trajectoryPointIndex++)
          {
 
-            leftJointTrajectory.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage((double) (2 * trajectoryPointIndex + 1), getRandomValidJointAngle(RobotSide.LEFT, armJoint[armJointIndex], fullRobotModel), (double) 0));
-            rightJointTrajectory.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage((double) (2 * trajectoryPointIndex + 1), getRandomValidJointAngle(RobotSide.RIGHT, armJoint[armJointIndex], fullRobotModel), (double) 0));
+            leftJointTrajectory.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage((double) (2 * trajectoryPointIndex + 1), getRandomValidJointAngle(RobotSide.LEFT, armJoint[armJointIndex], fullRobotModel), (double) 0));
+            rightJointTrajectory.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage((double) (2 * trajectoryPointIndex + 1), getRandomValidJointAngle(RobotSide.RIGHT, armJoint[armJointIndex], fullRobotModel), (double) 0));
          }
-         leftHandMessage.getJointspaceTrajectory().jointTrajectoryMessages.add().set(leftJointTrajectory);
-         rightHandMessage.getJointspaceTrajectory().jointTrajectoryMessages.add().set(rightJointTrajectory);
+         leftHandMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(leftJointTrajectory);
+         rightHandMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(rightJointTrajectory);
          leftArmTrajectory.add(leftJointTrajectory);
          rightArmTrajectory.add(rightJointTrajectory);
       }
@@ -190,7 +190,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       drcSimulationTestHelper.send(rightHandMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       drcSimulationTestHelper.send(footMessage);
-      int numberOfFootsteps = footMessage.footstepDataList.size();
+      int numberOfFootsteps = footMessage.getFootstepDataList().size();
       double defaultSwingTime = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       double defaultTransferTime = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
 
@@ -214,10 +214,10 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
    private void addFootstep(Point3D stepLocation, Quaternion orient, RobotSide robotSide, FootstepDataListMessage message)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.setLocation(stepLocation);
-      footstepData.setOrientation(orient);
+      footstepData.getLocation().set(stepLocation);
+      footstepData.getOrientation().set(orient);
       footstepData.setRobotSide(robotSide.toByte());
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
    }
 
    private void setupCameraBackView()
@@ -303,11 +303,11 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
          double[] expectedJointPos = new double[2 * getArmDoF()];
          for (int i = 0; i < expectedJointPos.length / 2; i++)
          {
-            expectedJointPos[i] = leftArmMessages.get(i).trajectoryPoints.get(armJointCheckPointIndex).getPosition();
+            expectedJointPos[i] = leftArmMessages.get(i).getTrajectoryPoints().get(armJointCheckPointIndex).getPosition();
          }
          for (int i = 0; i < expectedJointPos.length / 2; i++)
          {
-            expectedJointPos[i + expectedJointPos.length / 2] = rightArmMessages.get(i).trajectoryPoints.get(armJointCheckPointIndex).getPosition();
+            expectedJointPos[i + expectedJointPos.length / 2] = rightArmMessages.get(i).getTrajectoryPoints().get(armJointCheckPointIndex).getPosition();
          }
          return expectedJointPos;
       }

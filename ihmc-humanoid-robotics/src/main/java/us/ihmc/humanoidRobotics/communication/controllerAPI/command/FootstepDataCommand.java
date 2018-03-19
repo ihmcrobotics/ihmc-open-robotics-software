@@ -2,6 +2,8 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -10,8 +12,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -95,12 +95,12 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
             FrameSE3TrajectoryPoint point = swingTrajectory.add();
             point.setToZero(trajectoryFrame);
             SE3TrajectoryPointMessage trajectoryPoint = messageSwingTrajectory.get(i);
-            point.set(trajectoryPoint.time, trajectoryPoint.position, trajectoryPoint.orientation, trajectoryPoint.linearVelocity,
-                      trajectoryPoint.angularVelocity);
+            point.set(trajectoryPoint.getTime(), trajectoryPoint.getPosition(), trajectoryPoint.getOrientation(), trajectoryPoint.getLinearVelocity(),
+                      trajectoryPoint.getAngularVelocity());
          }
       }
 
-      List<Point3D> originalPredictedContactPoints = message.getPredictedContactPoint2Ds();
+      List<Point3D> originalPredictedContactPoints = message.getPredictedContactPoints2d();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
       {
@@ -108,11 +108,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
             predictedContactPoints.add().set(originalPredictedContactPoints.get(i));
       }
 
-      swingDuration = message.swingDuration;
-      touchdownDuration = message.touchdownDuration;
-      transferDuration = message.transferDuration;
+      swingDuration = message.getSwingDuration();
+      touchdownDuration = message.getTouchdownDuration();
+      transferDuration = message.getTransferDuration();
 
-      this.executionDelayTime = message.executionDelayTime;
+      this.executionDelayTime = message.getExecutionDelayTime();
    }
 
    @Override

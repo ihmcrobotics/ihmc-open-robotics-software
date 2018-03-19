@@ -2,13 +2,13 @@ package us.ihmc.robotEnvironmentAwareness.simulation;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -147,10 +147,10 @@ public class SimpleLidarRobotController implements RobotController
          }
 
          LidarScanMessage lidarScanMessage = new LidarScanMessage();
-         lidarScanMessage.robotTimestamp = -1L;
-         lidarScanMessage.lidarPosition = lidarPosition;
-         lidarScanMessage.lidarOrientation = lidarOrientation;
-         MessageTools.copyData(newScan, lidarScanMessage.scan);
+         lidarScanMessage.setRobotTimestamp(-1L);
+         lidarScanMessage.getLidarPosition().set(lidarPosition);
+         lidarScanMessage.getLidarOrientation().set(lidarOrientation);
+         MessageTools.copyData(newScan, lidarScanMessage.getScan());
          executorService.execute(() -> packetCommunicator.send(lidarScanMessage));
       }
 

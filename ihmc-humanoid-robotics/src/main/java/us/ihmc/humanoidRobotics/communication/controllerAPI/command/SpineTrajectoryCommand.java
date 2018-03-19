@@ -2,9 +2,10 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
-import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
 
 import java.util.Random;
+
+import controller_msgs.msg.dds.SpineTrajectoryMessage;
 
 public class SpineTrajectoryCommand implements Command<SpineTrajectoryCommand, SpineTrajectoryMessage>, EpsilonComparable<SpineTrajectoryCommand>
 {
@@ -35,7 +36,7 @@ public class SpineTrajectoryCommand implements Command<SpineTrajectoryCommand, S
    @Override
    public void set(SpineTrajectoryMessage message)
    {
-      jointspaceTrajectory.set(message.jointspaceTrajectory);
+      jointspaceTrajectory.set(message.getJointspaceTrajectory());
    }
 
    public JointspaceTrajectoryCommand getJointspaceTrajectory()

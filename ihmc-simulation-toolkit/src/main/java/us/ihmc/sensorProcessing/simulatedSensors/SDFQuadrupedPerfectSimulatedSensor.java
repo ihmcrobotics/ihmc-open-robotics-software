@@ -2,21 +2,21 @@ package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
-import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.quadrupedRobotics.estimator.sensorProcessing.sensorProcessors.FootSwitchOutputReadOnly;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ContactBasedFootSwitch;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
+import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorRawOutputMapReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedContactBasedFootSwitch;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSensorReader implements FootSwitchOutputReadOnly, SensorReader
 {

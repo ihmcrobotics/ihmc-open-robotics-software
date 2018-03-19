@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.PlanarRegionMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.Polygon2DMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -29,10 +32,10 @@ public class PlanarRegionMessageConverter
 
       PlanarRegionMessage planarRegionMessage = new PlanarRegionMessage();
       planarRegionMessage.setRegionId(regionId);
-      planarRegionMessage.regionOrigin = regionOrigin;
-      planarRegionMessage.regionNormal = regionNormal;
+      planarRegionMessage.getRegionOrigin().set(regionOrigin);
+      planarRegionMessage.getRegionNormal().set(regionNormal);
 
-      Polygon2DMessage concaveHullMessage = planarRegionMessage.concaveHull;
+      Polygon2DMessage concaveHullMessage = planarRegionMessage.getConcaveHull();
 
       for (int vertexIndex = 0; vertexIndex < planarRegion.getConcaveHullSize(); vertexIndex++)
       {
@@ -42,7 +45,7 @@ public class PlanarRegionMessageConverter
       for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
       {
          ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
-         Polygon2DMessage convexPolygonMessage = planarRegionMessage.convexPolygons.add();
+         Polygon2DMessage convexPolygonMessage = planarRegionMessage.getConvexPolygons().add();
 
          for (int vertexIndex = 0; vertexIndex < convexPolygon.getNumberOfVertices(); vertexIndex++)
          {

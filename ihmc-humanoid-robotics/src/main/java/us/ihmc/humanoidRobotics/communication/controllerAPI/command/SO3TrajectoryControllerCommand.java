@@ -3,6 +3,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
+import controller_msgs.msg.dds.FrameInformation;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -11,10 +14,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -101,16 +101,16 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       clear(dataFrame);
       set(message);
 
-      ReferenceFrame selectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.selectionMatrix.getSelectionFrameId());
+      ReferenceFrame selectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrame(selectionFrame);
-      ReferenceFrame weightSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.weightMatrix.getWeightFrameId());
+      ReferenceFrame weightSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrame(weightSelectionFrame);
    }
 
    @Override
    public void set(SO3TrajectoryMessage message)
    {
-      HumanoidMessageTools.checkIfDataFrameIdsMatch(message.frameInformation, trajectoryPointList.getReferenceFrame());
+      HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
 
       List<SO3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
@@ -118,16 +118,16 @@ public final class SO3TrajectoryControllerCommand extends QueueableCommand<SO3Tr
       for (int i = 0; i < numberOfPoints; i++)
       {
          SO3TrajectoryPointMessage so3TrajectoryPointMessage = trajectoryPointMessages.get(i);
-         trajectoryPointList.addTrajectoryPoint(so3TrajectoryPointMessage.time, so3TrajectoryPointMessage.orientation,
-                                                so3TrajectoryPointMessage.angularVelocity);
+         trajectoryPointList.addTrajectoryPoint(so3TrajectoryPointMessage.getTime(), so3TrajectoryPointMessage.getOrientation(),
+                                                so3TrajectoryPointMessage.getAngularVelocity());
       }
       setQueueableCommandVariables(message.getQueueingProperties());
       selectionMatrix.resetSelection();
-      selectionMatrix.setAxisSelection(message.selectionMatrix.xSelected, message.selectionMatrix.ySelected, message.selectionMatrix.zSelected);
+      selectionMatrix.setAxisSelection(message.getSelectionMatrix().getXSelected(), message.getSelectionMatrix().getYSelected(), message.getSelectionMatrix().getZSelected());
       weightMatrix.clear();
-      weightMatrix.setWeights(message.weightMatrix.xWeight, message.weightMatrix.yWeight, message.weightMatrix.zWeight);
+      weightMatrix.setWeights(message.getWeightMatrix().getXWeight(), message.getWeightMatrix().getYWeight(), message.getWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
-      message.controlFramePose.get(controlFramePoseInBodyFrame);
+      message.getControlFramePose().get(controlFramePoseInBodyFrame);
    }
 
    /**

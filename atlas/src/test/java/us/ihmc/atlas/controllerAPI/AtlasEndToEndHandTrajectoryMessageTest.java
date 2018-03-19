@@ -4,6 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
@@ -21,8 +23,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -144,8 +144,8 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       SE3TrajectoryMessage se3Trajectory = handTrajectoryMessage.getSe3Trajectory();
       se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chest.getBodyFixedFrame()));
       se3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-      se3Trajectory.taskspaceTrajectoryPoints.add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D()));
-      se3Trajectory.taskspaceTrajectoryPoints.add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D()));
+      se3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D()));
+      se3Trajectory.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D()));
 
       drcSimulationTestHelper.send(handTrajectoryMessage);
 

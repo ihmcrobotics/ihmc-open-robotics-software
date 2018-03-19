@@ -9,6 +9,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.PlanarRegionMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -18,10 +23,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PlanarRegionMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -32,8 +34,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -214,7 +214,7 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       {
          FramePoint3D placeToStep = new FramePoint3D(ReferenceFrame.getWorldFrame(), locations.get(i));
          FootstepDataMessage data = createFootstepDataMessage(robotSides[i], placeToStep, orientations.get(i));
-         message.footstepDataList.add().set(data);
+         message.getFootstepDataList().add().set(data);
       }
 
       return message;
@@ -266,8 +266,8 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
       placeToStepInWorld.changeFrame(ReferenceFrame.getWorldFrame());
 
-      footstepData.setLocation(placeToStepInWorld);
-      footstepData.setOrientation(orientation);
+      footstepData.getLocation().set(placeToStepInWorld);
+      footstepData.getOrientation().set(orientation);
       footstepData.setRobotSide(robotSide.toByte());
 
       return footstepData;

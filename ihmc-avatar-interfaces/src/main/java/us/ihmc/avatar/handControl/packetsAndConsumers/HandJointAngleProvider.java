@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -94,6 +94,6 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
    {
 
       if (handModel != null)
-         packets.get(RobotSide.fromByte(object.robotSide)).set(object);
+         packets.get(RobotSide.fromByte(object.getRobotSide())).set(object);
    }
 }

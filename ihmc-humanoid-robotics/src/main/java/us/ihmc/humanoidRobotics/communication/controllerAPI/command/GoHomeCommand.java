@@ -4,9 +4,9 @@ import java.util.EnumMap;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import controller_msgs.msg.dds.GoHomeMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -76,7 +76,7 @@ public class GoHomeCommand implements Command<GoHomeCommand, GoHomeMessage>
    public void set(GoHomeMessage message)
    {
       clear();
-      executionDelayTime = message.executionDelayTime;
+      executionDelayTime = message.getExecutionDelayTime();
       trajectoryTime = message.getTrajectoryTime();
 
       HumanoidBodyPart bodyPart = HumanoidBodyPart.fromByte(message.getHumanoidBodyPart());

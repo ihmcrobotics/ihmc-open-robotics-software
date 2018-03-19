@@ -3,11 +3,11 @@ package us.ihmc.valkyrie.fingers;
 import java.util.EnumMap;
 import java.util.concurrent.TimeUnit;
 
+import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -76,13 +76,13 @@ public class ValkyrieHandStateCommunicator implements RobotController
          HandJointAnglePacket packet = buffer.next();
          if (packet != null)
          {
-            packet.robotSide = robotSide.toByte();
-            packet.jointAngles.reset();
+            packet.setRobotSide(robotSide.toByte());
+            packet.getJointAngles().reset();
 
             for (ValkyrieHandJointName jointEnum : ValkyrieHandJointName.values)
             {
                double q = handJoints.get(robotSide).get(jointEnum).getQ();
-               packet.jointAngles.add(q);
+               packet.getJointAngles().add(q);
             }
             buffer.commit();
          }

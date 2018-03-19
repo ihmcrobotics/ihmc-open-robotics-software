@@ -2,14 +2,14 @@ package us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI;
 
 import java.util.Map;
 
+import controller_msgs.msg.dds.SelectionMatrix3DMessage;
+import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -82,21 +82,21 @@ public class WaypointBasedTrajectoryCommand
       else
          endEffector = rigidBodyNamedBasedHashMap.get(endEffectorNameBasedHashCode);
 
-      for (int i = 0; i < message.waypoints.size(); i++)
+      for (int i = 0; i < message.getWaypoints().size(); i++)
       {
-         waypointTimes.add(message.waypointTimes.get(i));
-         waypoints.add().set(message.waypoints.get(i));
+         waypointTimes.add(message.getWaypointTimes().get(i));
+         waypoints.add().set(message.getWaypoints().get(i));
       }
 
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
-      controlFramePose.setIncludingFrame(referenceFrame, message.controlFramePositionInEndEffector, message.controlFrameOrientationInEndEffector);
+      controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
       selectionMatrix.resetSelection();
       SelectionMatrix3DMessage angularSelection = message.getAngularSelectionMatrix();
       SelectionMatrix3DMessage linearSelection = message.getLinearSelectionMatrix();
-      selectionMatrix.setAngularAxisSelection(angularSelection.xSelected, angularSelection.ySelected, angularSelection.zSelected);
-      selectionMatrix.setLinearAxisSelection(linearSelection.xSelected, linearSelection.ySelected, linearSelection.zSelected);
+      selectionMatrix.setAngularAxisSelection(angularSelection.getXSelected(), angularSelection.getYSelected(), angularSelection.getZSelected());
+      selectionMatrix.setLinearAxisSelection(linearSelection.getXSelected(), linearSelection.getYSelected(), linearSelection.getZSelected());
       
-      weight = message.weight;
+      weight = message.getWeight();
    }
 
    public RigidBody getEndEffector()

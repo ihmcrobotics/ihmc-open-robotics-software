@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
-import us.ihmc.communication.packets.ExecutionMode;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -11,8 +12,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.YoStopwatch;
@@ -81,7 +80,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
       stepPose.get(location, orientation);
 
       FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation);
-      footsteps.footstepDataList.add().set(footstepData);
+      footsteps.getFootstepDataList().add().set(footstepData);
 
       sendPacket(footsteps);
       timer.reset();

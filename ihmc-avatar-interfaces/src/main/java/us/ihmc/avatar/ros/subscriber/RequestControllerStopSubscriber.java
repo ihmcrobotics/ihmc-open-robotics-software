@@ -1,10 +1,10 @@
 package us.ihmc.avatar.ros.subscriber;
 
+import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
 import std_msgs.Empty;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorCommandPacket;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 
