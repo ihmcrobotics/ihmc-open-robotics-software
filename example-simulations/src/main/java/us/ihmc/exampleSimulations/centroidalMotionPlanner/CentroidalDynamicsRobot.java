@@ -46,8 +46,10 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class CentroidalDynamicsRobot implements FullRobotModelFactory
 {
@@ -105,26 +107,15 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
    {
       scsRobot = new RobotFromDescription(getRobotDescription());
       ExternalForcePoint forcePoint = createExternalForcePointForControl(scsRobot);
-      if (graphicsListRegistry != null)
-         createExternalForcePointGraphic(graphicsListRegistry, forcePoint);
       rootJoint = (FloatingJoint) scsRobot.getRootJoints().get(0);
       rootJoint.addExternalForcePoint(forcePoint);
       scsRobot.getGravity(tempVector);
       FullRobotModel controllerFullRobotModel = createFullRobotModel();
       scsRobot.setController(new CentroidalRobotEstimator(rootJoint, controllerFullRobotModel));
-      scsRobot.setController(new CentroidalRobotController(forcePoint, tempVector, controllerFullRobotModel, scsRobot.getYoTime()));
+      scsRobot.setController(new CentroidalRobotController(forcePoint, tempVector, controllerFullRobotModel, scsRobot.getYoTime(), graphicsListRegistry));
       CentroidalRobotInitialSetup initialSetup = new CentroidalRobotInitialSetup();
       initialSetup.initializeRobot(scsRobot);
       return;
-   }
-
-   private void createExternalForcePointGraphic(YoGraphicsListRegistry graphicsListRegistry, ExternalForcePoint externalForcePoint)
-   {
-      YoFrameVector yoForceVector = externalForcePoint.getYoForce();
-      YoFramePoint yoForcePoint = externalForcePoint.getYoPosition();
-      YoGraphicVector forceVisualization = new YoGraphicVector(robotName + "ForceVisualization", yoForcePoint, yoForceVector, 0.005,
-                                                               new YoAppearanceRGBColor(Color.RED, 0.0), true);
-      graphicsListRegistry.registerYoGraphic(robotName, forceVisualization);
    }
 
    private ExternalForcePoint createExternalForcePointForControl(Robot robot)
@@ -241,7 +232,8 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       private final FullRobotModel robotModel;
       private final GenericStateMachine<CentroidalRobotStateEnum, CentroidalRobotState> stateMachine;
 
-      public CentroidalRobotController(ExternalForcePoint forcePoint, Vector3D gravity, FullRobotModel controllerFullRobotModel, YoDouble yoTime)
+      public CentroidalRobotController(ExternalForcePoint forcePoint, Vector3D gravity, FullRobotModel controllerFullRobotModel, YoDouble yoTime,
+                                       YoGraphicsListRegistry graphicsListRegistry)
       {
          this.gravity = gravity;
          this.forcePoint = forcePoint;
@@ -254,6 +246,8 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          parameters.setNominalIyy(Iyy);
          parameters.setNominalIzz(Izz);
          this.stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "TimeInState", CentroidalRobotStateEnum.class, yoTime, registry);
+         if (graphicsListRegistry != null)
+            createExternalForcePointGraphic(graphicsListRegistry, forcePoint);
       }
 
       @Override
@@ -274,6 +268,24 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          stateMachine.addState(groundState);
          stateMachine.addState(flightState);
          stateMachine.setCurrentState(CentroidalRobotStateEnum.GROUND);
+      }
+
+      private void createExternalForcePointGraphic(YoGraphicsListRegistry graphicsListRegistry, ExternalForcePoint externalForcePoint)
+      {
+         YoFrameVector yoForceVector = externalForcePoint.getYoForce();
+         YoFramePoint yoForcePoint = externalForcePoint.getYoPosition();
+         YoFramePoint yoGroundPoint = new YoFramePoint(robotName + "ProjectedFocePoint", yoForcePoint.getReferenceFrame(), registry);
+         yoForcePoint.attachVariableChangedListener(new VariableChangedListener()
+         {
+            @Override
+            public void notifyOfVariableChange(YoVariable<?> v)
+            {
+               yoGroundPoint.set(yoForcePoint.getX(), yoForcePoint.getY(), 0.0);
+            }
+         });
+         YoGraphicVector forceVisualization = new YoGraphicVector(robotName + "ForceVisualization", yoGroundPoint, yoForceVector, 0.005,
+                                                                  new YoAppearanceRGBColor(Color.RED, 0.0), true);
+         graphicsListRegistry.registerYoGraphic(robotName, forceVisualization);
       }
 
       @Override
