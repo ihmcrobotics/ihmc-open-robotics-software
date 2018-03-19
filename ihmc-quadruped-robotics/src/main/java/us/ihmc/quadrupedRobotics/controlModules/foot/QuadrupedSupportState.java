@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import afu.org.checkerframework.checker.oigj.qual.O;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -47,6 +48,12 @@ public class QuadrupedSupportState extends QuadrupedFootState
    @Override
    public void onExit()
    {
+   }
+
+   @Override
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return null;
    }
 
    @Override
