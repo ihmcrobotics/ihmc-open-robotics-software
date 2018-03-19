@@ -10,6 +10,9 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -334,7 +337,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FramePoint3D desiredPosition, FrameVector3D desiredLinearVelocity, FrameVector3D feedForwardLinearAcceleration)
+   public void set(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity, FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       desiredPosition.checkReferenceFrameMatch(worldFrame);
       desiredLinearVelocity.checkReferenceFrameMatch(worldFrame);
@@ -388,7 +391,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
     */
-   public void set(FrameQuaternion desiredOrientation, FrameVector3D desiredAngularVelocity, FrameVector3D feedForwardAngularAcceleration)
+   public void set(FrameQuaternionReadOnly desiredOrientation, FrameVector3DReadOnly desiredAngularVelocity, FrameVector3DReadOnly feedForwardAngularAcceleration)
    {
       desiredOrientation.checkReferenceFrameMatch(worldFrame);
       desiredAngularVelocity.checkReferenceFrameMatch(worldFrame);
@@ -647,6 +650,36 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setWeightsForSolver(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
       spatialAccelerationCommand.setWeights(angular, linear);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each individual linear degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    *
+    * @param linear the weights to use for the linear part of this command. Not modified.
+    */
+   public void setLinearWeightsForSolver(Vector3DReadOnly linear)
+   {
+      spatialAccelerationCommand.setLinearWeights(linear);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each individual angular degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    *
+    * @param angular the weights to use for the linear part of this command. Not modified.
+    */
+   public void setAngularWeightsForSolver(Vector3DReadOnly angular)
+   {
+      spatialAccelerationCommand.setAngularWeights(angular);
    }
 
    public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameQuaternion desiredOrientationToPack)

@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories;
 
+import afu.org.checkerframework.checker.oigj.qual.O;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -19,8 +20,11 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
+   private final PoseTrajectoryGenerator trajectory;
+
    public BlendedPoseTrajectoryGenerator(String prefix, PoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoVariableRegistry parentRegistry)
    {
+      this.trajectory = trajectory;
       this.blendedPositionTrajectory = new BlendedPositionTrajectoryGenerator(prefix + "Position", trajectory, trajectoryFrame, parentRegistry);
       this.blendedOrientationTrajectory = new BlendedOrientationTrajectoryGenerator(prefix + "Orientation", trajectory, trajectoryFrame, parentRegistry);
    }
@@ -70,6 +74,12 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       blendedPositionTrajectory.blendFinalConstraint(finalPose.getPosition(), tempVelocity, finalTime, blendDuration);
       blendedOrientationTrajectory.blendFinalConstraint(finalPose.getOrientation(), tempAngularVelocity, finalTime, blendDuration);
    }
+
+   public void initializeTrajectory()
+   {
+      trajectory.initialize();
+   }
+
 
    @Override
    public void getPose(FramePose3D framePoseToPack)

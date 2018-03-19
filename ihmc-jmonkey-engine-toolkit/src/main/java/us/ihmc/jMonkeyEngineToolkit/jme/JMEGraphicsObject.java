@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import com.jme3.app.Application;
-import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.Quaternion;
@@ -40,6 +39,7 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstructio
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DInstructionExecutor;
 import us.ihmc.graphicsDescription.instructions.HemiEllipsoidGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.PolygonGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.PrimitiveGraphics3DInstruction;
@@ -54,7 +54,6 @@ import us.ihmc.graphicsDescription.instructions.listeners.ScaleChangedListener;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DInstructionExecutor;
 import us.ihmc.jMonkeyEngineToolkit.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.tralala.ShapeUtilities;
@@ -74,7 +73,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 
    private static final boolean DEBUG = false;
 
-   public JMEGraphicsObject(SimpleApplication application, AssetManager jmeAssetLocator, Graphics3DObject graphics3dObject)
+   public JMEGraphicsObject(Application application, AssetManager jmeAssetLocator, Graphics3DObject graphics3dObject)
    {
       this.application = application;
       this.assetManager = jmeAssetLocator;

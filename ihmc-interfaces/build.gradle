@@ -12,11 +12,13 @@ buildscript {
 //      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.2"
 //      classpath "us.ihmc:ihmc-pub-sub-generator:0.3.7"
       classpath "org.ajoberstar:grgit:2.1.0"
+      classpath "com.bmuschko:gradle-docker-plugin:3.2.5"
    }
 }
 
 apply plugin: "us.ihmc.ihmc-build"
 apply plugin: "org.ajoberstar.grgit"
+apply plugin: "com.bmuschko.docker-remote-api"
 
 ihmc {
    loadProductProperties("../product.properties")
@@ -25,6 +27,7 @@ ihmc {
    resourceDirectory("main", "messages")
    resourceDirectory("main", "generated-idl")
    javaDirectory("main", "generated-java")
+   resourceDirectory("generator", "docker")
    configurePublications()
 }
 
@@ -47,6 +50,11 @@ testDependencies {
 generatorDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
    compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.3.7"
+}
+
+task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
+   inputDir = file("src/generator/docker")
+   tag = "ihmc/ros1-bridge-build"
 }
 
 //task unzipInterfaceDependencies() {

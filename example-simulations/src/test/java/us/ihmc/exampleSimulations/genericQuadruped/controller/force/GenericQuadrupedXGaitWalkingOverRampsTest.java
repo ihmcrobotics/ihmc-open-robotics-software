@@ -5,6 +5,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDefaultInitialPosition;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedXGaitWalkingOverRampsTest;
 
@@ -19,12 +20,11 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
       return new GenericQuadrupedTestFactory();
    }
    
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 600000)
    public void testWalkingDownSlope() throws IOException
    {
-      super.testWalkingDownSlope();
+      super.testWalkingDownSlope(new GenericQuadrupedDefaultInitialPosition());
    }
    
    @Override
@@ -35,19 +35,17 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
       super.testWalkingOverShallowRamps();
    }
    
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 100.0)
    @Test(timeout = 300000)
    public void testWalkingUpSlope() throws IOException
    {
-      super.testWalkingUpSlope();
+      super.testWalkingUpSlope(new GenericQuadrupedDefaultInitialPosition());
    }
    
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 600000)
    public void testWalkingOverAggressiveRamps() throws IOException
    {
-      super.testWalkingUpSlope();
+      super.testWalkingOverAggressiveRamps();
    }
 }
