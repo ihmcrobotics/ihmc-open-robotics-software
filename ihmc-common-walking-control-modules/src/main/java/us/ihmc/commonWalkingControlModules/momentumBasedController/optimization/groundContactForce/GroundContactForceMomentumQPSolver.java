@@ -48,6 +48,8 @@ public class GroundContactForceMomentumQPSolver
 
    private final DenseMatrix64F solverInput_activeIndices;
 
+   private final DenseMatrix64F solverOutput;
+   private final DenseMatrix64F solverOutput_momentumRate;
    private final DenseMatrix64F solverOutput_rhos;
 
    private final YoInteger numberOfActiveVariables = new YoInteger("numberOfActiveVariables", registry);
@@ -58,6 +60,8 @@ public class GroundContactForceMomentumQPSolver
    private final DenseMatrix64F regularizationMatrix;
 
    private final DenseMatrix64F tempJtW;
+   private final DenseMatrix64F tempMomentumTask_H;
+   private final DenseMatrix64F tempMomentumTask_f;
    private final DenseMatrix64F tempRhoTask_H;
    private final DenseMatrix64F tempRhoTask_f;
 
@@ -80,19 +84,19 @@ public class GroundContactForceMomentumQPSolver
       this.problemSize = momentumSize + rhoSize;
       this.hasFloatingBase = hasFloatingBase;
 
-      solverInput_H = new DenseMatrix64F(rhoSize, rhoSize);
-      solverInput_f = new DenseMatrix64F(rhoSize, 1);
+      solverInput_H = new DenseMatrix64F(problemSize, problemSize);
+      solverInput_f = new DenseMatrix64F(problemSize, 1);
 
       solverInput_H_previous = new DenseMatrix64F(problemSize, problemSize);
       solverInput_f_previous = new DenseMatrix64F(problemSize, 1);
 
-      solverInput_Aeq = new DenseMatrix64F(0, rhoSize);
+      solverInput_Aeq = new DenseMatrix64F(0, problemSize);
       solverInput_beq = new DenseMatrix64F(0, 1);
-      solverInput_Ain = new DenseMatrix64F(0, rhoSize);
+      solverInput_Ain = new DenseMatrix64F(0, problemSize);
       solverInput_bin = new DenseMatrix64F(0, 1);
 
-      solverInput_lb = new DenseMatrix64F(rhoSize, 1);
-      solverInput_ub = new DenseMatrix64F(rhoSize, 1);
+      solverInput_lb = new DenseMatrix64F(problemSize, 1);
+      solverInput_ub = new DenseMatrix64F(problemSize, 1);
 
       solverInput_lb_previous = new DenseMatrix64F(problemSize, 1);
       solverInput_ub_previous = new DenseMatrix64F(problemSize, 1);
@@ -103,16 +107,20 @@ public class GroundContactForceMomentumQPSolver
       solverInput_activeIndices = new DenseMatrix64F(problemSize, 1);
       CommonOps.fill(solverInput_activeIndices, 1.0);
 
+      solverOutput = new DenseMatrix64F(problemSize, 1);
+      solverOutput_momentumRate = new DenseMatrix64F(momentumSize, 1);
       solverOutput_rhos = new DenseMatrix64F(rhoSize, 1);
 
-      tempJtW = new DenseMatrix64F(rhoSize, rhoSize);
+      tempJtW = new DenseMatrix64F(problemSize, problemSize);
+      tempMomentumTask_H = new DenseMatrix64F(momentumSize, momentumSize);
+      tempMomentumTask_f = new DenseMatrix64F(momentumSize, 1);
       tempRhoTask_H = new DenseMatrix64F(rhoSize, rhoSize);
       tempRhoTask_f = new DenseMatrix64F(rhoSize, 1);
 
-      regularizationMatrix = new DenseMatrix64F(rhoSize, rhoSize);
+      regularizationMatrix = new DenseMatrix64F(problemSize, problemSize);
 
       double defaultRhoRegularization = 0.00001;
-      for (int i = 0; i < rhoSize; i++)
+      for (int i = rhoSize; i < problemSize; i++)
          regularizationMatrix.set(i, i, defaultRhoRegularization);
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
@@ -162,8 +170,11 @@ public class GroundContactForceMomentumQPSolver
 
       solverInput_f.zero();
 
-      solverInput_Aeq.reshape(0, rhoSize);
+      solverInput_Aeq.reshape(0, problemSize);
       solverInput_beq.reshape(0, 1);
+
+      solverInput_Ain.reshape(0, problemSize);
+      solverInput_bin.reshape(0, 1);
    }
 
    public void addRegularization()
@@ -200,7 +211,7 @@ public class GroundContactForceMomentumQPSolver
       int taskSize = taskJ.getNumRows();
 
       // J^T W
-      tempJtW.reshape(rhoSize, taskSize);
+      tempJtW.reshape(momentumSize, taskSize);
       CommonOps.transpose(taskJ, tempJtW);
 
       addMomentumTaskInternal(taskWeight, tempJtW, taskJ, taskObjective);
@@ -220,7 +231,7 @@ public class GroundContactForceMomentumQPSolver
       int taskSize = taskJacobian.getNumRows();
 
       // J^T W
-      tempJtW.reshape(rhoSize, taskSize);
+      tempJtW.reshape(momentumSize, taskSize);
       DiagonalMatrixTools.postMultTransA(taskJacobian, taskWeight, tempJtW);
 
       addMomentumTaskInternal(tempJtW, taskJacobian, taskObjective);
@@ -229,23 +240,23 @@ public class GroundContactForceMomentumQPSolver
    private void addMomentumTaskInternal(double weight, DenseMatrix64F taskJt, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       // Compute: H += J^T W J
-      CommonOps.multInner(taskJacobian, tempRhoTask_H);
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, weight);
+      CommonOps.multInner(taskJacobian, tempMomentumTask_H);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMomentumTask_H, 0, 0, momentumSize, momentumSize, weight);
 
       // Compute: f += - J^T W Objective
-      CommonOps.mult(taskJt, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -weight);
+      CommonOps.mult(taskJt, taskObjective, tempMomentumTask_f);
+      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMomentumTask_f, 0, 0, momentumSize, 1, -weight);
    }
 
    private void addMomentumTaskInternal(DenseMatrix64F taskJtW, DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
    {
       // Compute: H += J^T W J
-      CommonOps.mult(taskJtW, taskJacobian, tempRhoTask_H);
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempRhoTask_H, 0, 0, rhoSize, rhoSize, 1.0);
+      CommonOps.mult(taskJtW, taskJacobian, tempMomentumTask_H);
+      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, tempMomentumTask_H, 0, 0, momentumSize, momentumSize, 1.0);
 
       // Compute: f += - J^T W Objective
-      CommonOps.mult(taskJtW, taskObjective, tempRhoTask_f);
-      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
+      CommonOps.mult(taskJtW, taskObjective, tempMomentumTask_f);
+      MatrixTools.addMatrixBlock(solverInput_f, 0, 0, tempMomentumTask_f, 0, 0, momentumSize, 1, -1.0);
    }
 
    public void addMomentumEqualityConstraint(DenseMatrix64F taskJacobian, DenseMatrix64F taskObjective)
@@ -254,7 +265,7 @@ public class GroundContactForceMomentumQPSolver
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Aeq.reshape(previousSize + taskSize, rhoSize, true);
+      solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
       solverInput_beq.reshape(previousSize + taskSize, 1, true);
 
       CommonOps.insert(taskJacobian, solverInput_Aeq, previousSize, 0);
@@ -277,10 +288,10 @@ public class GroundContactForceMomentumQPSolver
       int previousSize = solverInput_bin.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Ain.reshape(previousSize + taskSize, rhoSize, true);
+      solverInput_Ain.reshape(previousSize + taskSize, problemSize, true);
       solverInput_bin.reshape(previousSize + taskSize, 1, true);
 
-      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, rhoSize, sign);
+      MatrixTools.setMatrixBlock(solverInput_Ain, previousSize, 0, taskJacobian, 0, 0, taskSize, problemSize, sign);
       MatrixTools.setMatrixBlock(solverInput_bin, previousSize, 0, taskObjective, 0, 0, taskSize, 1, sign);
    }
 
@@ -353,16 +364,19 @@ public class GroundContactForceMomentumQPSolver
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
-      numberOfIterations.set(qpSolver.solve(solverOutput_rhos));
+      numberOfIterations.set(qpSolver.solve(solverOutput));
 
       qpSolverTimer.stopMeasurement();
 
       hasWrenchesEquilibriumConstraintBeenSetup = false;
 
-      if (MatrixTools.containsNaN(solverOutput_rhos))
+      if (MatrixTools.containsNaN(solverOutput))
       {
          throw new NoConvergenceException(numberOfIterations.getIntegerValue());
       }
+
+      CommonOps.extract(solverOutput, 0, momentumSize, 0, 1, solverOutput_momentumRate, 0, 0);
+      CommonOps.extract(solverOutput, momentumSize, problemSize, 0, 1, solverOutput_rhos, 0, 0);
 
       firstCall.set(false);
 
@@ -370,7 +384,7 @@ public class GroundContactForceMomentumQPSolver
       {
          if (hasFloatingBase)
          {
-            CommonOps.mult(tempWrenchConstraint_J, solverOutput_rhos, tempWrenchConstraint_LHS);
+            CommonOps.mult(tempWrenchConstraint_J, solverOutput, tempWrenchConstraint_LHS);
             int index = 0;
             wrenchEquilibriumTorqueError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
             wrenchEquilibriumTorqueError.setY(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
@@ -459,6 +473,11 @@ public class GroundContactForceMomentumQPSolver
       hasWrenchesEquilibriumConstraintBeenSetup = true;
    }
 
+   public DenseMatrix64F getMomentumRate()
+   {
+      return solverOutput_momentumRate;
+   }
+
    public DenseMatrix64F getRhos()
    {
       return solverOutput_rhos;
@@ -466,24 +485,24 @@ public class GroundContactForceMomentumQPSolver
 
    public void setMinRho(double rhoMin)
    {
-      for (int i = 0; i < rhoSize; i++)
+      for (int i = momentumSize; i < problemSize; i++)
          solverInput_lb.set(i, 0, rhoMin);
    }
 
    public void setMinRho(DenseMatrix64F rhoMin)
    {
-      CommonOps.insert(rhoMin, solverInput_lb, 0, 0);
+      CommonOps.insert(rhoMin, solverInput_lb, momentumSize, 0);
    }
 
    public void setMaxRho(double rhoMax)
    {
-      for (int i = 0; i < rhoSize; i++)
+      for (int i = momentumSize; i < problemSize; i++)
          solverInput_ub.set(i, 0, rhoMax);
    }
 
    public void setMaxRho(DenseMatrix64F rhoMax)
    {
-      CommonOps.insert(rhoMax, solverInput_ub, 0, 0);
+      CommonOps.insert(rhoMax, solverInput_ub, momentumSize, 0);
    }
 
 
