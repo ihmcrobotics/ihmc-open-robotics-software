@@ -50,7 +50,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     * control frame.
     * </p>
     */
-   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
 
    /**
     * The base is the rigid-body located right before the first joint to be used for controlling the
@@ -206,7 +206,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.resetSelection();
    }
 
    /**
@@ -223,7 +223,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    public void setSelectionMatrixToIdentity(SelectionMatrix3D linearSelectionMatrix)
    {
       selectionMatrix.clearSelection();
-      selectionMatrix.setLinearPart(linearSelectionMatrix);
+      selectionMatrix.set(linearSelectionMatrix);
    }
 
    /**
@@ -240,7 +240,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     *
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
     */
-   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       this.selectionMatrix.set(selectionMatrix);
    }
@@ -277,7 +277,8 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    public void getDesiredLinearForce(DenseMatrix64F desiredLinearForceToPack)
    {
       desiredLinearForceToPack.reshape(6, 1);
-      desiredLinearForce.get(0, desiredLinearForceToPack);
+      desiredLinearForceToPack.zero();
+      desiredLinearForce.get(3, desiredLinearForceToPack);
    }
 
    /**
@@ -353,7 +354,10 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
    @Override
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
+      selectionMatrixToPack.reshape(3, 6);
+      selectionMatrixToPack.zero();
+
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, 0, 3, selectionMatrixToPack);
    }
 
    /**
@@ -364,7 +368,8 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     */
    public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
-      selectionMatrixToPack.set(selectionMatrix);
+      selectionMatrixToPack.clearSelection();
+      selectionMatrixToPack.setLinearPart(selectionMatrix);
    }
 
    /** {@inheritDoc} */
