@@ -64,6 +64,7 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
 
       bodyAngularWeight.set(5.0, 5.0, 1.0);
+      angularMomentumCommand.setSelectionMatrixForAngularControl();
 
       parentRegistry.addChild(registry);
    }
