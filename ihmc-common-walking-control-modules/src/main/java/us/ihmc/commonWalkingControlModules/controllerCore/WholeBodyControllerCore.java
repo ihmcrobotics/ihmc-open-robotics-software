@@ -270,7 +270,7 @@ public class WholeBodyControllerCore
       yoLowLevelOneDoFJointDesiredDataHolder.completeWith(virtualModelControlOutput);
       if (yoRootJointDesiredConfigurationData != null)
          yoRootJointDesiredConfigurationData.completeWith(virtualModelControlOutputForRootJoint);
-      controllerCoreOutput.setAndMatchFrameLinearMomentumRate(inverseDynamicsSolver.getAchievedMomentumRateLinear());
+      controllerCoreOutput.setAndMatchFrameLinearMomentumRate(virtualModelControlSolver.getAchievedMomentumRateLinear());
    }
 
    private void doNothing()
