@@ -272,6 +272,9 @@ public class QuadrupedSteppingState implements QuadrupedController
       }
 
       controllerCoreCommand.addFeedbackControlCommand(bodyOrientationManager.getFeedbackControlCommand());
+      controllerCoreCommand.addVirtualModelControlCommand(bodyOrientationManager.getVirtualModelControlCommand());
+
+      controllerCoreCommand.addVirtualModelControlCommand(balanceManager.getVirtualModelControlCommand());
    }
 
    @Override

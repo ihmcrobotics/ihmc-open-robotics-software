@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -239,5 +240,10 @@ public class QuadrupedBalanceManager
    public FrameVector3DReadOnly getAccumulatedStepAdjustment()
    {
       return accumulatedStepAdjustment;
+   }
+
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return null;
    }
 }
