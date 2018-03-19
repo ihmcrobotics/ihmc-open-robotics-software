@@ -31,5 +31,5 @@ public interface EventState extends State
     * @return the event to be processed by the state machine, or {@code null} if no event is to be
     *         fired.
     */
-   Object fireEvent(double timeInState);
+   Enum<?> fireEvent(double timeInState);
 }
