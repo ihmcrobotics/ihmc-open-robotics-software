@@ -303,8 +303,8 @@ public class WholeBodyInverseDynamicsSolver
    private void recordMomentumRate(MomentumRateCommand command)
    {
       DenseMatrix64F momentumRate = command.getMomentumRate();
-      MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
-      MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
+      MatrixTools.extractFixedFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
+      MatrixTools.extractFixedFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
    }
 
    public LowLevelOneDoFJointDesiredDataHolder getOutput()
