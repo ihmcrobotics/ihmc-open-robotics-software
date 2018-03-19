@@ -146,6 +146,9 @@ public class VirtualModelMomentumController
     */
    public boolean addExternalWrench(RigidBody base, RigidBody endEffector, Wrench wrench, SelectionMatrix6D selectionMatrix)
    {
+      if (wrench.getLinearPart().length() < 1e-5 && wrench.getAngularPart().length() < 1e-5)
+         return false;
+
       // Gets the M-by-6 selection matrix S.
       selectionMatrix.getCompactSelectionMatrixInFrame(wrench.getExpressedInFrame(), tempSelectionMatrix);
 
