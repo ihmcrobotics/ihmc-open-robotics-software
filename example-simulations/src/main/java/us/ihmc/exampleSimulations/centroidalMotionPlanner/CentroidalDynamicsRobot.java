@@ -18,10 +18,14 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelFromDescription;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
@@ -86,14 +90,23 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
    public Robot getSCSRobot()
    {
       if (scsRobot == null)
-         createSCSRobot();
+         createSCSRobot(null);
       return scsRobot;
    }
 
-   private void createSCSRobot()
+   public Robot getSCSRobot(YoGraphicsListRegistry graphicsListRegistry)
+   {
+      if (scsRobot == null)
+         createSCSRobot(graphicsListRegistry);
+      return scsRobot;
+   }
+
+   private void createSCSRobot(YoGraphicsListRegistry graphicsListRegistry)
    {
       scsRobot = new RobotFromDescription(getRobotDescription());
       ExternalForcePoint forcePoint = createExternalForcePointForControl(scsRobot);
+      if (graphicsListRegistry != null)
+         createExternalForcePointGraphic(graphicsListRegistry, forcePoint);
       rootJoint = (FloatingJoint) scsRobot.getRootJoints().get(0);
       rootJoint.addExternalForcePoint(forcePoint);
       scsRobot.getGravity(tempVector);
@@ -103,6 +116,15 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       CentroidalRobotInitialSetup initialSetup = new CentroidalRobotInitialSetup();
       initialSetup.initializeRobot(scsRobot);
       return;
+   }
+
+   private void createExternalForcePointGraphic(YoGraphicsListRegistry graphicsListRegistry, ExternalForcePoint externalForcePoint)
+   {
+      YoFrameVector yoForceVector = externalForcePoint.getYoForce();
+      YoFramePoint yoForcePoint = externalForcePoint.getYoPosition();
+      YoGraphicVector forceVisualization = new YoGraphicVector(robotName + "ForceVisualization", yoForcePoint, yoForceVector, 0.005,
+                                                               new YoAppearanceRGBColor(Color.RED, 0.0), true);
+      graphicsListRegistry.registerYoGraphic(robotName, forceVisualization);
    }
 
    private ExternalForcePoint createExternalForcePointForControl(Robot robot)
@@ -492,7 +514,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          //initialPosition.subZ(robotHeight);
          intermediatePosition.set(worldFrame, 0.0, 0.0, 0.05);
          finalPosition.set(worldFrame, 0.0, 0.0, 0.0);
-         
+
          initialVelocity.set(worldFrame, linearVelocity);
          intermediateVelocity.set(worldFrame, 0.0, 0.0, 0.0);
          finalVelocity.set(worldFrame, 0.0, 0.0, 0.0);
@@ -532,7 +554,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          node5.setForceObjective(finalForceConstraint, forceWeight);
          node5.setForceRateObjective(finalForceRateConstraint, forceRateWeight);
          node5.setPositionObjective(intermediatePosition, positionWeight);
-         
+
          motionPlanner.reset();
          motionPlanner.submitNode(node1);
          motionPlanner.submitNode(node2);
@@ -737,7 +759,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          FloatingJointDescription rootJoint = new FloatingJointDescription(namePrefix + "RootJoint");
          LinkDescription rootLink = new LinkDescription(namePrefix + "RootLink");
          LinkGraphicsDescription rootLinkGraphics = new LinkGraphicsDescription();
-         rootLinkGraphics.addEllipsoid(xRadius, yRadius, zRadius, new YoAppearanceRGBColor(Color.BLUE, 0.0));
+         rootLinkGraphics.addEllipsoid(xRadius, yRadius, zRadius, new YoAppearanceRGBColor(Color.BLUE, 0.5));
          rootLink.setLinkGraphics(rootLinkGraphics);
          rootLink.setMass(robotMass);
          rootLink.setMomentOfInertia(momentOfInertia);
