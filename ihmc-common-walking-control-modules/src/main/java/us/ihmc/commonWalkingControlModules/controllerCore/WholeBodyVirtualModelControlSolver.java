@@ -12,20 +12,18 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactW
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
-import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelMomentumController;
+import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,8 +31,6 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class WholeBodyVirtualModelControlSolver
 {
-   private static final boolean USE_LIMITED_JOINT_TORQUES = true;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final VirtualModelControlOptimizationControlModule optimizationControlModule;
@@ -51,7 +47,6 @@ public class WholeBodyVirtualModelControlSolver
 
    private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
 
-   private final OneDoFJoint[] controlledOneDoFJoints;
    private final RigidBody controlRootBody;
 
    private final Wrench tempExternalWrench = new Wrench();
@@ -79,7 +74,7 @@ public class WholeBodyVirtualModelControlSolver
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
       jointIndexHandler = toolbox.getJointIndexHandler();
-      controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      OneDoFJoint[] controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, JointDesiredControlMode.EFFORT);
 
@@ -149,32 +144,36 @@ public class WholeBodyVirtualModelControlSolver
          externalWrenchSolution.get(rigidBody).negate();
          virtualModelController.addExternalWrench(controlRootBody, rigidBody, externalWrenchSolution.get(rigidBody));
       }
-      planeContactWrenchProcessor.compute(externalWrenchSolution);
 
       virtualModelController.populateTorqueSolution(virtualModelControlSolution);
       DenseMatrix64F jointTorquesSolution = virtualModelControlSolution.getJointTorques();
 
-      for (RigidBody rigidBody : rigidBodiesWithExternalWrench)
+      for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
+         RigidBody rigidBody = rigidBodiesWithExternalWrench.get(i);
          externalWrenchSolution.get(rigidBody).changeBodyFrameAttachedToSameBody(rigidBody.getBodyFixedFrame());
          externalWrenchSolution.get(rigidBody).negate();
       }
 
-      if (wrenchVisualizer != null)
-         wrenchVisualizer.visualize(externalWrenchSolution);
-
       updateLowLevelData(jointTorquesSolution);
 
-      rootJoint.getWrench(residualRootJointWrench);
-      residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
-      residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
-      yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
-      yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+      if (rootJoint != null)
+      {
+         rootJoint.getWrench(residualRootJointWrench);
+         residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
+         residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
+         yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
+         yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+      }
+
+      planeContactWrenchProcessor.compute(externalWrenchSolution);
+      wrenchVisualizer.visualize(externalWrenchSolution);
    }
 
    private void updateLowLevelData(DenseMatrix64F jointTorquesSolution)
    {
-      rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
+      if (rootJoint != null)
+         rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
 
       for (OneDoFJoint joint : jointIndexHandler.getIndexedOneDoFJoints())
       {
