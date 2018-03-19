@@ -652,6 +652,36 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       spatialAccelerationCommand.setWeights(angular, linear);
    }
 
+   /**
+    * Sets the weights to use in the optimization problem for each individual linear degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    *
+    * @param linear the weights to use for the linear part of this command. Not modified.
+    */
+   public void setLinearWeightsForSolver(Vector3DReadOnly linear)
+   {
+      spatialAccelerationCommand.setLinearWeights(linear);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each individual angular degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    *
+    * @param angular the weights to use for the linear part of this command. Not modified.
+    */
+   public void setAngularWeightsForSolver(Vector3DReadOnly angular)
+   {
+      spatialAccelerationCommand.setAngularWeights(angular);
+   }
+
    public void getIncludingFrame(FramePoint3D desiredPositionToPack, FrameQuaternion desiredOrientationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
