@@ -18,7 +18,7 @@ public interface EventTrigger
    /**
     * Call this method to fire events at a state machine to trigger its state transitions.
     * 
-    * @param event the even to be fired.
+    * @param event the event to be fired.
     */
    <E extends Enum<E>> void fireEvent(E event);
 }
