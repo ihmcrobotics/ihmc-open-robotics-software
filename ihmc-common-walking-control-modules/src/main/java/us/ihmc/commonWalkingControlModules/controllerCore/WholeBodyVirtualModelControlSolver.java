@@ -97,17 +97,6 @@ public class WholeBodyVirtualModelControlSolver
       yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
       yoAchievedMomentumRateAngular = toolbox.getYoAchievedMomentumRateAngular();
 
-      if (toolbox.getControlledBodies() != null)
-      {
-         List<RigidBody> controlledBodies = Arrays.asList(toolbox.getControlledBodies());
-         wrenchVisualizer = new WrenchVisualizer("VMCDesiredExternalWrench", controlledBodies, 1.0, toolbox.getYoGraphicsListRegistry(), registry,
-                                                 YoAppearance.Red(), YoAppearance.Blue());
-      }
-      else
-      {
-         wrenchVisualizer = null;
-      }
-
       if (USE_LIMITED_JOINT_TORQUES)
       {
          for (OneDoFJoint joint : controlledOneDoFJoints)
@@ -118,6 +107,7 @@ public class WholeBodyVirtualModelControlSolver
       }
 
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
+      wrenchVisualizer = toolbox.getWrenchVisualizer();
 
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
