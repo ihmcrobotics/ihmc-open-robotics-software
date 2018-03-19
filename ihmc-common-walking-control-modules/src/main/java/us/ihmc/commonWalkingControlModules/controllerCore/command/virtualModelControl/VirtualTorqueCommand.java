@@ -50,7 +50,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     * control frame.
     * </p>
     */
-   private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
+   private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
 
    /**
     * The base is the rigid-body located right before the first joint to be used for controlling the
@@ -206,7 +206,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.setToAngularSelectionOnly();
+      selectionMatrix.resetSelection();
    }
 
    /**
@@ -222,8 +222,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     */
    public void setSelectionMatrixToIdentity(SelectionMatrix3D angularSelectionMatrix)
    {
-      selectionMatrix.clearSelection();
-      selectionMatrix.setAngularPart(angularSelectionMatrix);
+      selectionMatrix.set(angularSelectionMatrix);
    }
 
    /**
@@ -240,7 +239,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     *
     * @param selectionMatrix the selection matrix to copy data from. Not modified.
     */
-   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix)
+   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
    {
       this.selectionMatrix.set(selectionMatrix);
    }
@@ -277,6 +276,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    public void getDesiredAngularTorque(DenseMatrix64F desiredAngularTorqueToPack)
    {
       desiredAngularTorqueToPack.reshape(6, 1);
+      desiredAngularTorqueToPack.zero();
       desiredAngularTorque.get(0, desiredAngularTorqueToPack);
    }
 
@@ -353,7 +353,9 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    @Override
    public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
    {
-      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
+      selectionMatrixToPack.reshape(3, 6);
+      selectionMatrixToPack.zero();
+      selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
    }
 
    /**
@@ -364,7 +366,8 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     */
    public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
    {
-      selectionMatrixToPack.set(selectionMatrix);
+      selectionMatrixToPack.clearSelection();
+      selectionMatrixToPack.setAngularPart(selectionMatrix);
    }
 
    /** {@inheritDoc} */
