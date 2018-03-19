@@ -87,6 +87,9 @@ public class RecycledLinkedListBuilder<T>
          storeFreeEntry(entry);
          entry = nextEntry;
       }
+      this.firstEntry = null;
+      this.lastEntry = null;
+      this.size = 0;
    }
    
    public RecycledLinkedListEntry<T> getFirstEntry()
