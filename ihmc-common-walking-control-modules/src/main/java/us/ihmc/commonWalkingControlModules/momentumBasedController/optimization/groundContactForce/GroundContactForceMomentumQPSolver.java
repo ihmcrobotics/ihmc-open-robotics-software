@@ -13,6 +13,7 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class GroundContactForceMomentumQPSolver
@@ -57,6 +58,8 @@ public class GroundContactForceMomentumQPSolver
    private final YoInteger numberOfEqualityConstraints = new YoInteger("numberOfEqualityConstraints", registry);
    private final YoInteger numberOfInequalityConstraints = new YoInteger("numberOfInequalityConstraints", registry);
    private final YoInteger numberOfConstraints = new YoInteger("numberOfConstraints", registry);
+   private final YoDouble momentumRateRegularization = new YoDouble("momentumRateRegularization", registry);
+   private final YoDouble momentumAccelerationRegularization = new YoDouble("momentumAccelerationRegularization", registry);
    private final DenseMatrix64F regularizationMatrix;
 
    private final DenseMatrix64F tempJtW;
@@ -119,7 +122,11 @@ public class GroundContactForceMomentumQPSolver
 
       regularizationMatrix = new DenseMatrix64F(problemSize, problemSize);
 
+      momentumRateRegularization.set(0.00001);
+      momentumAccelerationRegularization.set(0.0001);
       double defaultRhoRegularization = 0.00001;
+      for (int i = 0; i < momentumSize; i++)
+         regularizationMatrix.set(i, i, momentumRateRegularization.getDoubleValue());
       for (int i = rhoSize; i < problemSize; i++)
          regularizationMatrix.set(i, i, defaultRhoRegularization);
 
@@ -135,6 +142,16 @@ public class GroundContactForceMomentumQPSolver
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void setMomentumRateRegularization(double weight)
+   {
+      momentumRateRegularization.set(weight);
+   }
+
+   public void setMomentumAccelerationRegularization(double weight)
+   {
+      momentumAccelerationRegularization.set(weight);
    }
 
    public void setRhoRegularizationWeight(DenseMatrix64F weight)
@@ -166,6 +183,9 @@ public class GroundContactForceMomentumQPSolver
 
    public void reset()
    {
+      for (int i = 0; i < momentumSize; i++)
+         regularizationMatrix.set(i, i, momentumRateRegularization.getDoubleValue());
+
       solverInput_H.zero();
 
       solverInput_f.zero();
@@ -175,6 +195,9 @@ public class GroundContactForceMomentumQPSolver
 
       solverInput_Ain.reshape(0, problemSize);
       solverInput_bin.reshape(0, 1);
+
+      if (!firstCall.getBooleanValue())
+         addMomentumAccelerationRegularization();
    }
 
    public void addRegularization()
@@ -182,6 +205,14 @@ public class GroundContactForceMomentumQPSolver
       CommonOps.addEquals(solverInput_H, regularizationMatrix);
    }
 
+   public void addMomentumAccelerationRegularization()
+   {
+      for (int i = 0; i < momentumSize; i++)
+      {
+         solverInput_H.add(i, i, momentumAccelerationRegularization.getDoubleValue());
+         solverInput_f.add(i, 0, -momentumAccelerationRegularization.getDoubleValue() * solverOutput_momentumRate.get(i, 0));
+      }
+   }
    public void addMomentumInput(MotionQPInput input)
    {
       switch (input.getConstraintType())
