@@ -93,7 +93,7 @@ public class WholeBodyControllerCore
       if (inverseKinematicsSolver != null)
          inverseKinematicsSolver.reset();
       if (virtualModelControlSolver != null)
-         virtualModelControlSolver.reset();
+         virtualModelControlSolver.initialize();
       yoLowLevelOneDoFJointDesiredDataHolder.clear();
    }
 
@@ -264,12 +264,13 @@ public class WholeBodyControllerCore
       numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
       virtualModelControlSolver.submitVirtualModelControlCommandList(feedbackControllerOutput);
       virtualModelControlSolver.compute();
-      feedbackController.computeAchievedAccelerations(); // FIXME
+      feedbackController.computeAchievedAccelerations();
       LowLevelOneDoFJointDesiredDataHolder virtualModelControlOutput = virtualModelControlSolver.getOutput();
       RootJointDesiredConfigurationDataReadOnly virtualModelControlOutputForRootJoint = virtualModelControlSolver.getOutputForRootJoint();
       yoLowLevelOneDoFJointDesiredDataHolder.completeWith(virtualModelControlOutput);
       if (yoRootJointDesiredConfigurationData != null)
          yoRootJointDesiredConfigurationData.completeWith(virtualModelControlOutputForRootJoint);
+      controllerCoreOutput.setAndMatchFrameLinearMomentumRate(inverseDynamicsSolver.getAchievedMomentumRateLinear());
    }
 
    private void doNothing()

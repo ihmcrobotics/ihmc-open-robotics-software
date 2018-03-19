@@ -288,4 +288,9 @@ public class WholeBodyVirtualModelControlSolver
    {
       return rootJointDesiredConfiguration;
    }
+
+   public FrameVector3D getAchievedMomentumRateLinear()
+   {
+      return achievedMomentumRateLinear;
+   }
 }
