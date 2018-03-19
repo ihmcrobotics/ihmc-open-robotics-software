@@ -117,7 +117,7 @@ public class WholeBodyControllerCore
          break;
       case VIRTUAL_MODEL:
          if (virtualModelControlSolver != null)
-            virtualModelControlSolver.clear();
+            virtualModelControlSolver.reset();
          else
             throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + "is not handled.");
          break;

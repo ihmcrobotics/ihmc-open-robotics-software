@@ -62,7 +62,6 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector yoDesiredMomentumRateAngular;
    private final YoFrameVector yoAchievedMomentumRateAngular;
    private final FrameVector3D achievedMomentumRateLinear = new FrameVector3D();
-   private final Map<OneDoFJoint, RateLimitedYoVariable> jointTorqueSolutions = new HashMap<>();
 
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector3D residualRootJointForce = new FrameVector3D();
@@ -72,8 +71,6 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector yoResidualRootJointTorque;
 
    private final JointIndexHandler jointIndexHandler;
-
-   private boolean firstTick = true;
 
    public WholeBodyVirtualModelControlSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -91,18 +88,8 @@ public class WholeBodyVirtualModelControlSolver
 
       yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
       yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
-
       yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
       yoAchievedMomentumRateAngular = toolbox.getYoAchievedMomentumRateAngular();
-
-      if (USE_LIMITED_JOINT_TORQUES)
-      {
-         for (OneDoFJoint joint : controlledOneDoFJoints)
-         {
-            RateLimitedYoVariable jointTorqueSolution = new RateLimitedYoVariable("limited_tau_vmc_" + joint.getName(), registry, 10.0, toolbox.getControlDT());
-            jointTorqueSolutions.put(joint, jointTorqueSolution);
-         }
-      }
 
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
       wrenchVisualizer = toolbox.getWrenchVisualizer();
@@ -120,13 +107,6 @@ public class WholeBodyVirtualModelControlSolver
 
       yoDesiredMomentumRateLinear.setToZero();
       yoDesiredMomentumRateAngular.setToZero();
-      firstTick = true;
-   }
-
-   public void clear()
-   {
-      optimizationControlModule.initialize();
-      virtualModelController.reset();
    }
 
    public void initialize()
@@ -136,7 +116,6 @@ public class WholeBodyVirtualModelControlSolver
       optimizationControlModule.initialize();
       virtualModelController.reset();
       planeContactWrenchProcessor.initialize();
-      firstTick = true;
    }
 
    public void compute()
@@ -197,24 +176,14 @@ public class WholeBodyVirtualModelControlSolver
    {
       rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
 
-      for (OneDoFJoint joint : controlledOneDoFJoints)
+      for (OneDoFJoint joint : jointIndexHandler.getIndexedOneDoFJoints())
       {
          int[] jointIndices = jointIndexHandler.getJointIndices(joint);
 
          for (int jointIndex : jointIndices)
          {
-            if (USE_LIMITED_JOINT_TORQUES)
-            {
-               if (firstTick)
-                  jointTorqueSolutions.get(joint).set(jointTorquesSolution.get(jointIndex));
-               else
-                  jointTorqueSolutions.get(joint).update(jointTorquesSolution.get(jointIndex));
-               lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorqueSolutions.get(jointIndex).getDoubleValue());
-            }
-            else
-            {
-               lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(jointIndex));
-            }
+
+            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, jointTorquesSolution.get(jointIndex));
          }
       }
    }
