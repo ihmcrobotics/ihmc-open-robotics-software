@@ -2,6 +2,9 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -10,8 +13,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 
 public class FootstepDataMessageConverter
@@ -51,7 +52,7 @@ public class FootstepDataMessageConverter
             HumanoidMessageTools.packPredictedContactPoints(contactPoints, footstepData);
          }
 
-         footstepDataListMessage.footstepDataList.add().set(footstepData);
+         footstepDataListMessage.getFootstepDataList().add().set(footstepData);
       }
 
       return footstepDataListMessage;
@@ -84,7 +85,7 @@ public class FootstepDataMessageConverter
             HumanoidMessageTools.packPredictedContactPoints(contactPoints, footstepData);
          }
 
-         footstepDataListMessage.footstepDataList.add().set(footstepData);
+         footstepDataListMessage.getFootstepDataList().add().set(footstepData);
       }
    }
 }

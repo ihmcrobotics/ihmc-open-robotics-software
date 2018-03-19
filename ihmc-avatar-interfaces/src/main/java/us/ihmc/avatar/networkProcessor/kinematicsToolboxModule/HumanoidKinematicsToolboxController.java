@@ -8,6 +8,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -17,14 +19,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.HumanoidKinematicsToolboxConfigurationMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
@@ -331,9 +331,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
       if (isLeftFootInSupport)
-         capturabilityBasedStatus.leftFootSupportPolygon2D.add();
+         capturabilityBasedStatus.getLeftFootSupportPolygon2d().add();
       if (isRightFootInSupport)
-         capturabilityBasedStatus.rightFootSupportPolygon2D.add();
+         capturabilityBasedStatus.getRightFootSupportPolygon2d().add();
       updateCapturabilityBasedStatus(capturabilityBasedStatus);
    }
 

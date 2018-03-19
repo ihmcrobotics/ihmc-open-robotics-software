@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
@@ -13,7 +14,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.InsufficientDataException;
@@ -121,12 +121,12 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       FramePoint3D position = new FramePoint3D();
       FrameQuaternion orientation = new FrameQuaternion();
       footstep.getPose(position, orientation);
-      originalFootstep.setLocation(position);
-      originalFootstep.setOrientation(orientation);
+      originalFootstep.getLocation().set(position);
+      originalFootstep.getOrientation().set(orientation);
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoint2Ds().size() > 0){
+      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints2d().size() > 0){
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
       footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(originalFootstep));
@@ -147,7 +147,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
       if (footstepFound != Footstep.FootstepType.BAD_FOOTSTEP)
       {
-         if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoint2Ds().size() > 0){
+         if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints2d().size() > 0){
             throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
          }
          return footstepFound;
@@ -207,7 +207,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
             if (footstepFound!= Footstep.FootstepType.BAD_FOOTSTEP)
             {
-               if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoint2Ds() != null){
+               if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints2d() != null){
                   throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
                }
                return footstepFound;
@@ -216,8 +216,8 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       }
 
 
-      footstep.location = originalFootstepFound.location;
-      footstep.setOrientation(originalFootstepFound.getOrientation());
+      footstep.getLocation().set(originalFootstepFound.getLocation());
+      footstep.getOrientation().set(originalFootstepFound.getOrientation());
       return Footstep.FootstepType.BAD_FOOTSTEP;
    }
 }

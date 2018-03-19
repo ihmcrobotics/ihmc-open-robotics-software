@@ -2,10 +2,10 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import java.util.Map;
 
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.SelectionMatrix3DMessage;
+import controller_msgs.msg.dds.WeightMatrix3DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
-import us.ihmc.communication.packets.SelectionMatrix3DMessage;
-import us.ihmc.communication.packets.WeightMatrix3DMessage;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
@@ -62,20 +62,20 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
          endEffector = null;
       else
          endEffector = rigidBodyNamedBasedHashMap.get(endEffectorNameBasedHashCode);
-      desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.desiredPositionInWorld, message.desiredOrientationInWorld);
+      desiredPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld(), message.getDesiredOrientationInWorld());
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
-      controlFramePose.setIncludingFrame(referenceFrame, message.controlFramePositionInEndEffector, message.controlFrameOrientationInEndEffector);
+      controlFramePose.setIncludingFrame(referenceFrame, message.getControlFramePositionInEndEffector(), message.getControlFrameOrientationInEndEffector());
       weightMatrix.clear();
       WeightMatrix3DMessage angularWeight = message.getAngularWeightMatrix();
       WeightMatrix3DMessage linearWeight = message.getLinearWeightMatrix();
-      weightMatrix.setAngularWeights(angularWeight.xWeight, angularWeight.yWeight, angularWeight.zWeight);
-      weightMatrix.setLinearWeights(linearWeight.xWeight, linearWeight.yWeight, linearWeight.zWeight);
+      weightMatrix.setAngularWeights(angularWeight.getXWeight(), angularWeight.getYWeight(), angularWeight.getZWeight());
+      weightMatrix.setLinearWeights(linearWeight.getXWeight(), linearWeight.getYWeight(), linearWeight.getZWeight());
 
       selectionMatrix.clearSelectionFrame();
       SelectionMatrix3DMessage angularSelection = message.getAngularSelectionMatrix();
       SelectionMatrix3DMessage linearSelection = message.getLinearSelectionMatrix();
-      selectionMatrix.setAngularAxisSelection(angularSelection.xSelected, angularSelection.ySelected, angularSelection.zSelected);
-      selectionMatrix.setLinearAxisSelection(linearSelection.xSelected, linearSelection.ySelected, linearSelection.zSelected);
+      selectionMatrix.setAngularAxisSelection(angularSelection.getXSelected(), angularSelection.getYSelected(), angularSelection.getZSelected());
+      selectionMatrix.setLinearAxisSelection(linearSelection.getXSelected(), linearSelection.getYSelected(), linearSelection.getZSelected());
 
       if (referenceFrameResolver != null)
       {

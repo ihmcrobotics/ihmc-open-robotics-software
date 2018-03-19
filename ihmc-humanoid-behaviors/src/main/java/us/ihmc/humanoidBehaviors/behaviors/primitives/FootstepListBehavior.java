@@ -3,6 +3,10 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -15,11 +19,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -82,7 +82,7 @@ public class FootstepListBehavior extends AbstractBehavior
 
          RobotSide footstepSide = footstep.getRobotSide();
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstepSide, position, orientation);
-         footstepDataList.footstepDataList.add().set(footstepData);
+         footstepDataList.getFootstepDataList().add().set(footstepData);
       }
       set(footstepDataList);
    }

@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
@@ -22,7 +23,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStep;
@@ -387,12 +387,12 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
 
-      for(int i =0;i<footsteps.footstepDataList.size();i++)
+      for(int i =0;i<footsteps.getFootstepDataList().size();i++)
       {
          Graphics3DObject singleStep = new Graphics3DObject();
 
-         singleStep.translate(footsteps.footstepDataList.get(i).location);
-         if(footsteps.footstepDataList.get(i).robotSide == RobotSide.RIGHT.toByte())
+         singleStep.translate(footsteps.getFootstepDataList().get(i).getLocation());
+         if(footsteps.getFootstepDataList().get(i).getRobotSide() == RobotSide.RIGHT.toByte())
          {
             singleStep.addSphere(0.05, YoAppearance.Blue());
          }

@@ -5,15 +5,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -83,14 +83,14 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
    private void computeForwardFootstepList()
    {
-      forwardFootstepList.footstepDataList.clear();
+      forwardFootstepList.getFootstepDataList().clear();
 
       RobotSide swingSide = initialSwingSide.getEnumValue();
 
       for (int i = 0; i < numberOfStepsToTake.getIntegerValue(); i++)
       {
          FootstepDataMessage footstepDataMessage = constructFootstepDataMessage(midFootZUpFrame, footstepLength.getDoubleValue() * (i + 1), 0.5 * swingSide.negateIfRightSide(footstepWidth.getDoubleValue()), swingSide);
-         forwardFootstepList.footstepDataList.add().set(footstepDataMessage);
+         forwardFootstepList.getFootstepDataList().add().set(footstepDataMessage);
 
          swingSide = swingSide.getOppositeSide();
       }
@@ -101,7 +101,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
    private void computeBackwardFootstepList()
    {
-      backwardFootstepList.footstepDataList.clear();
+      backwardFootstepList.getFootstepDataList().clear();
 
       ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<>();
       List<FootstepDataMessage> dataList = forwardFootstepList.getFootstepDataList();
@@ -118,7 +118,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
       FootstepDataMessage initialStanceFoot = constructFootstepDataMessage(soleFrames.get(initialStanceSide), 0.0, 0.0,
                                                                            initialStanceSide);
       footstepDataList.add(initialStanceFoot);
-      MessageTools.copyData(footstepDataList, backwardFootstepList.footstepDataList);
+      MessageTools.copyData(footstepDataList, backwardFootstepList.getFootstepDataList());
 
       backwardFootstepList.setDefaultSwingDuration(swingTime.getDoubleValue());
       backwardFootstepList.setDefaultTransferDuration(transferTime.getDoubleValue());
@@ -133,8 +133,8 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
       footstepPose.setPosition(xOffset, yOffset, 0.0);
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      footstepDataMessage.setLocation(footstepPose.getPosition());
-      footstepDataMessage.setOrientation(footstepPose.getOrientation());
+      footstepDataMessage.getLocation().set(footstepPose.getPosition());
+      footstepDataMessage.getOrientation().set(footstepPose.getOrientation());
       footstepDataMessage.setRobotSide(side.toByte());
 
       return footstepDataMessage;
@@ -149,7 +149,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
       }
 
       FootstepStatusMessage footstepStatus = this.footstepStatusMessage.getAndSet(null);
-      if(footstepStatus != null && footstepStatus.footstepStatus == FootstepStatus.COMPLETED.toByte())
+      if(footstepStatus != null && footstepStatus.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
       {
          stepsAlongPath.increment();
       }

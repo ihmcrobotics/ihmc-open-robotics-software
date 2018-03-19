@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

@@ -7,6 +7,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import controller_msgs.msg.dds.HandJointAnglePacket;
+import controller_msgs.msg.dds.PointCloudWorldPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -16,13 +20,10 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.SpatialVectorMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 public class AtlasNoSimPacketBlaster implements Runnable
@@ -117,20 +117,20 @@ public class AtlasNoSimPacketBlaster implements Runnable
       {
          float min = (float) jointLowerLimits[i];
          float max = (float) jointUpperLimits[i];
-         robotConfigurationData.jointAngles.add(min + random.nextFloat() * (max - min));
+         robotConfigurationData.getJointAngles().add(min + random.nextFloat() * (max - min));
       }
 
       //      robotConfigurationData.setRootTranslation(RandomTools.generateRandomVector(random, random.nextDouble() * 1000.0));
-      robotConfigurationData.setRootTranslation(new Vector3D(random.nextDouble(), random.nextDouble(), 1.0 * random.nextDouble()));
+      robotConfigurationData.getRootTranslation().set(new Vector3D(random.nextDouble(), random.nextDouble(), 1.0 * random.nextDouble()));
       //      robotConfigurationData.setRootTranslation(new Vector3d(0.0, 0.0, 1.0));
-      robotConfigurationData.setRootOrientation(RandomGeometry.nextQuaternion(random));
+      robotConfigurationData.getRootOrientation().set(RandomGeometry.nextQuaternion(random));
 
       for (int sensorNumber = 0; sensorNumber < forceSensorDefinitions.length; sensorNumber++)
       {
          //         robotConfigurationData.momentAndForceDataAllForceSensors[sensorNumber].set(new DenseMatrix64F(Wrench.SIZE, 1));
-         SpatialVectorMessage wrench = robotConfigurationData.momentAndForceDataAllForceSensors.add();
-         wrench.angularPart.set(EuclidCoreRandomTools.nextVector3D(random, -momentFixedPointMax, momentFixedPointMax));
-         wrench.linearPart.set(EuclidCoreRandomTools.nextVector3D(random, -forceFixedPointMax, forceFixedPointMax));
+         SpatialVectorMessage wrench = robotConfigurationData.getForceSensorData().add();
+         wrench.getAngularPart().set(EuclidCoreRandomTools.nextVector3D(random, -momentFixedPointMax, momentFixedPointMax));
+         wrench.getLinearPart().set(EuclidCoreRandomTools.nextVector3D(random, -forceFixedPointMax, forceFixedPointMax));
       }
 
       PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();

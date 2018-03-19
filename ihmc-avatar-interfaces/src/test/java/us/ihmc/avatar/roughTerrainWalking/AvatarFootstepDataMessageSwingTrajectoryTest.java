@@ -6,6 +6,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -14,6 +18,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionTiming;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -24,15 +31,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.communication.packets.ExecutionTiming;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
@@ -43,7 +42,8 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements MultiRobotTestInterface
 {
@@ -140,9 +140,9 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
          SE3TrajectoryPointMessage waypoint = new SE3TrajectoryPointMessage();
          waypoint.setTime(percentInSwing * swingTime);
-         waypoint.setPosition(waypointPosition);
-         waypoint.setLinearVelocity(waypointLinearVelocity);
-         waypoint.setOrientation(waypointOrientation);
+         waypoint.getPosition().set(waypointPosition);
+         waypoint.getLinearVelocity().set(waypointLinearVelocity);
+         waypoint.getOrientation().set(waypointOrientation);
 
          Graphics3DObject sphere = new Graphics3DObject();
          sphere.translate(waypointPosition);
@@ -154,11 +154,11 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
 
       footPosition.changeFrame(worldFrame);
       footOrientation.changeFrame(worldFrame);
-      footstep.setLocation(footPosition);
-      footstep.setOrientation(footOrientation);
-      MessageTools.copyData(waypoints, footstep.swingTrajectory);
+      footstep.getLocation().set(footPosition);
+      footstep.getOrientation().set(footOrientation);
+      MessageTools.copyData(waypoints, footstep.getSwingTrajectory());
 
-      footstepDataList.footstepDataList.add().set(footstep);
+      footstepDataList.getFootstepDataList().add().set(footstep);
       drcSimulationTestHelper.send(footstepDataList);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + getRobotModel().getControllerDT() * 4.0));
 
@@ -179,16 +179,16 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
          String linearVelocityPrefix = YoFrameVariableNameTools.createName(prefix, "linearVelocity", "");
          Tuple3DBasics desiredLinearVelocity = EndToEndHandTrajectoryMessageTest.findTuple3d(linearNamespace, linearVelocityPrefix, suffix, scs);
 
-         EuclidCoreTestTools.assertTuple3DEquals("Position", waypoint.position, desiredPosition, 1.0E-10, format);
-         EuclidCoreTestTools.assertTuple3DEquals("Linear Velocity", waypoint.linearVelocity, desiredLinearVelocity, 1.0E-10, format);
+         EuclidCoreTestTools.assertTuple3DEquals("Position", waypoint.getPosition(), desiredPosition, 1.0E-10, format);
+         EuclidCoreTestTools.assertTuple3DEquals("Linear Velocity", waypoint.getLinearVelocity(), desiredLinearVelocity, 1.0E-10, format);
 
          String orientationPrefix = YoFrameVariableNameTools.createName(prefix, "orientation", "");
          Quaternion desiredOrientation = EndToEndHandTrajectoryMessageTest.findQuat4d(angularNamespace, orientationPrefix, suffix, scs);
          String angularVelocityPrefix = YoFrameVariableNameTools.createName(prefix, "angularVelocity", "");
          Tuple3DBasics desiredAngularVelocity = EndToEndHandTrajectoryMessageTest.findTuple3d(angularNamespace, angularVelocityPrefix, suffix, scs);
 
-         EuclidCoreTestTools.assertTuple4DEquals("Orientation", waypoint.orientation, desiredOrientation, 1.0E-10, format);
-         EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.angularVelocity, desiredAngularVelocity, 1.0E-10, format);
+         EuclidCoreTestTools.assertTuple4DEquals("Orientation", waypoint.getOrientation(), desiredOrientation, 1.0E-10, format);
+         EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", waypoint.getAngularVelocity(), desiredAngularVelocity, 1.0E-10, format);
       }
 
       String currentIndexName = prefix + "CurrentWaypointIndex";

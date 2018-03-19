@@ -12,6 +12,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WalkToGoalBehaviorPacket;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.PrintTools;
@@ -32,14 +34,12 @@ import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkToGoalWithPlanni
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalAction;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;

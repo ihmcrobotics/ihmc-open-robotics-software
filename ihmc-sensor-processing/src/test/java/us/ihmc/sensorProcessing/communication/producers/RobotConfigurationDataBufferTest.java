@@ -7,13 +7,13 @@ import static org.junit.Assert.fail;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 public abstract class RobotConfigurationDataBufferTest
@@ -34,8 +34,8 @@ public abstract class RobotConfigurationDataBufferTest
       for (int i = 0; i < RobotConfigurationDataBuffer.BUFFER_SIZE * 2; i++)
       {
          RobotConfigurationData test = RobotConfigurationDataFactory.create(setterJoints, forceSensorDefinitions, imuDefinitions);
-         test.timestamp = i * 10;
-         test.jointAngles.add(i * 10);
+         test.setTimestamp(i * 10);
+         test.getJointAngles().add(i * 10);
          buffer.receivedPacket(test);
       }
 
@@ -82,7 +82,7 @@ public abstract class RobotConfigurationDataBufferTest
          {
             ThreadTools.sleep(100);
             RobotConfigurationData data = new RobotConfigurationData();
-            data.timestamp = i * (TEST_COUNT * 10) + i;
+            data.setTimestamp(i * (TEST_COUNT * 10) + i);
             robotConfigurationDataBuffer.receivedPacket(data);
          }
 
@@ -96,7 +96,7 @@ public abstract class RobotConfigurationDataBufferTest
          }
          assertEquals(1, countdownB.getCount());
          RobotConfigurationData data = new RobotConfigurationData();
-         data.timestamp = TEST_COUNT * (TEST_COUNT * 10);
+         data.setTimestamp(TEST_COUNT * (TEST_COUNT * 10));
          robotConfigurationDataBuffer.receivedPacket(data);
 
          try

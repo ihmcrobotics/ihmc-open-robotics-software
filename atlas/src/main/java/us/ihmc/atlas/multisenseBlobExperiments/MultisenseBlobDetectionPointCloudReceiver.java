@@ -1,11 +1,11 @@
 package us.ihmc.atlas.multisenseBlobExperiments;
 
+import controller_msgs.msg.dds.PointCloudWorldPacket;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 
 public class MultisenseBlobDetectionPointCloudReceiver extends RosPointCloudSubscriber

@@ -2,10 +2,10 @@ package us.ihmc.utilities.ros.publisher;
 
 import org.ros.message.Time;
 
+import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import std_msgs.Header;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public class RosLidarPublisher extends RosTopicPublisher<sensor_msgs.LaserScan>

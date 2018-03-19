@@ -1,10 +1,10 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HandDesiredConfigurationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandDesiredConfigurationTask extends BehaviorAction

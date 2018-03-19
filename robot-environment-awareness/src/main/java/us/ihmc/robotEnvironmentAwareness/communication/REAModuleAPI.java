@@ -1,7 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
-import us.ihmc.communication.packets.LidarScanMessage;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.API;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.Category;

@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
@@ -23,7 +24,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.HeadTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -179,7 +179,7 @@ public abstract class DRCHeadTrajectoryBehaviorTest implements MultiRobotTestInt
       }
 
       FramePose3D desiredHeadPose = new FramePose3D();
-      desiredHeadPose.set(initialHeadPose.getPosition(), headTrajectoryMessage.getSo3Trajectory().taskspaceTrajectoryPoints.getLast().orientation);
+      desiredHeadPose.set(initialHeadPose.getPosition(), headTrajectoryMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getOrientation());
       assertPosesAreWithinThresholds(desiredHeadPose, finalHeadPose);
       assertTrue(headTrajectoryBehavior.isDone());
    }

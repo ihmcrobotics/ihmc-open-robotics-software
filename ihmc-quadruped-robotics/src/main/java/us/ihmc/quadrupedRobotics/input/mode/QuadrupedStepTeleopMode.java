@@ -1,9 +1,20 @@
 package us.ihmc.quadrupedRobotics.input.mode;
 
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.RobotConfigurationData;
 import net.java.games.input.Event;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.quadrupedRobotics.communication.packets.*;
+import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerStatePacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingStatePacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
@@ -11,24 +22,14 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEsti
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
 {
@@ -79,7 +80,7 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
 
       packetCommunicator.attachListener(QuadrupedForceControllerStatePacket.class, forceControlStatePacket::set);
       packetCommunicator.attachListener(QuadrupedSteppingStatePacket.class, steppingStatePacket::set);
-      packetCommunicator.attachListener(RobotConfigurationData.class, packet -> timestampNanos.set(packet.timestamp));
+      packetCommunicator.attachListener(RobotConfigurationData.class, packet -> timestampNanos.set(packet.getTimestamp()));
 
       parentRegistry.addChild(registry);
    }

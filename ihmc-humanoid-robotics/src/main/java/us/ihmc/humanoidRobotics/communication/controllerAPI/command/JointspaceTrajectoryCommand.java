@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 

@@ -2,10 +2,10 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import java.lang.reflect.Field;
 
+import controller_msgs.msg.dds.AdjustFootstepMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.idl.PreallocatedList;
 
 /**
@@ -93,23 +93,21 @@ public final class MessageTransformer
 
    private static void transform(AdjustFootstepMessage message, RigidBodyTransform rigidBodyTransformToApply)
    {
-      if (message.location != null)
-         message.location.applyTransform(rigidBodyTransformToApply);
-      if (message.orientation != null)
-         message.orientation.applyTransform(rigidBodyTransformToApply);
+      message.getLocation().applyTransform(rigidBodyTransformToApply);
+      message.getOrientation().applyTransform(rigidBodyTransformToApply);
    }
 
    private static void transform(FootstepDataMessage message, RigidBodyTransform rigidBodyTransformToApply)
    {
-      if (message.location != null)
-         message.location.applyTransform(rigidBodyTransformToApply);
-      if (message.orientation != null)
-         message.orientation.applyTransform(rigidBodyTransformToApply);
+      if (message.getLocation() != null)
+         message.getLocation().applyTransform(rigidBodyTransformToApply);
+      if (message.getOrientation() != null)
+         message.getOrientation().applyTransform(rigidBodyTransformToApply);
 
-      if (message.customPositionWaypoints != null)
+      if (message.getCustomPositionWaypoints() != null)
       {
-         for (int i = 0; i < message.customPositionWaypoints.size(); i++)
-            message.customPositionWaypoints.get(i).applyTransform(rigidBodyTransformToApply);
+         for (int i = 0; i < message.getCustomPositionWaypoints().size(); i++)
+            message.getCustomPositionWaypoints().get(i).applyTransform(rigidBodyTransformToApply);
       }
    }
 

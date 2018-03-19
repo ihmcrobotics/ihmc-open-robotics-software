@@ -6,6 +6,9 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import controller_msgs.msg.dds.LocalizationPacket;
+import controller_msgs.msg.dds.PelvisPoseErrorPacket;
+import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -18,9 +21,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;

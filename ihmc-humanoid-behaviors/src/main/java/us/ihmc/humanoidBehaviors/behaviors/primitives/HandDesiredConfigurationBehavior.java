@@ -1,12 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;

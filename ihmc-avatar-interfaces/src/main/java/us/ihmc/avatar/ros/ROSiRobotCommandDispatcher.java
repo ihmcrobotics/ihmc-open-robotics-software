@@ -7,8 +7,8 @@ import org.ros.node.DefaultNodeMainExecutor;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.utilities.ros.RosTools;
 

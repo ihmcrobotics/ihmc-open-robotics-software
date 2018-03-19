@@ -7,13 +7,13 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.GlobalStatusMessageListener;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;

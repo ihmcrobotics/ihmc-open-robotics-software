@@ -30,6 +30,8 @@ import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 import org.reflections.Reflections;
 
+import controller_msgs.msg.dds.SnapFootstepPacket;
+import controller_msgs.msg.dds.VideoPacket;
 import gnu.trove.list.TByteList;
 import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
@@ -52,12 +54,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.idl.RecyclingArrayListPubSub;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.HEALTH)
 public class PacketCodeQualityTest
@@ -608,9 +607,8 @@ public class PacketCodeQualityTest
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
-      fieldsToIngore.add(VideoPacket.class.getField("data"));
-      fieldsToIngore.add(SnapFootstepPacket.class.getField("flag"));
-      fieldsToIngore.add(AtlasAuxiliaryRobotData.class.getField("electricJointEnabledArray"));
+      fieldsToIngore.add(VideoPacket.class.getField("data_"));
+      fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
@@ -680,9 +678,8 @@ public class PacketCodeQualityTest
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
-      fieldsToIngore.add(VideoPacket.class.getField("data"));
-      fieldsToIngore.add(SnapFootstepPacket.class.getField("flag"));
-      fieldsToIngore.add(AtlasAuxiliaryRobotData.class.getField("electricJointEnabledArray"));
+      fieldsToIngore.add(VideoPacket.class.getField("data_"));
+      fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {

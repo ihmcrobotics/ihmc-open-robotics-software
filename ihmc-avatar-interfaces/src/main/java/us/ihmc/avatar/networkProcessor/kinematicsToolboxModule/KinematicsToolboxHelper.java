@@ -6,6 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
@@ -22,7 +23,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
@@ -33,7 +36,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
@@ -144,9 +146,9 @@ public class KinematicsToolboxHelper
 
       if (desiredRootJoint != null)
       {
-         Vector3D32 translation = robotConfigurationData.getRootTranslation();
+         Vector3D translation = robotConfigurationData.getRootTranslation();
          desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-         Quaternion32 orientation = robotConfigurationData.getRootOrientation();
+         Quaternion orientation = robotConfigurationData.getRootOrientation();
          desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
          

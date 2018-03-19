@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -17,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;

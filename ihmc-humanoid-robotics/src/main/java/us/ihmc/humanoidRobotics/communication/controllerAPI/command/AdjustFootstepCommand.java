@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.AdjustFootstepMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -9,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -46,7 +46,7 @@ public class AdjustFootstepCommand implements Command<AdjustFootstepCommand, Adj
       robotSide = RobotSide.fromByte(message.getRobotSide());
       adjustedPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLocation());
       adjustedOrientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getOrientation());
-      List<Point3D> originalPredictedContactPoints = message.getPredictedContactPoints();
+      List<Point3D> originalPredictedContactPoints = message.getPredictedContactPoints2d();
       predictedContactPoints.clear();
       executionDelayTime = message.getExecutionDelayTime();
       if (originalPredictedContactPoints != null)

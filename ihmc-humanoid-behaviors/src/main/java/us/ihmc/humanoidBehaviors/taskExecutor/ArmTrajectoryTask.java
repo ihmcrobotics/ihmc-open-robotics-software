@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 
 public class ArmTrajectoryTask extends BehaviorAction
 {

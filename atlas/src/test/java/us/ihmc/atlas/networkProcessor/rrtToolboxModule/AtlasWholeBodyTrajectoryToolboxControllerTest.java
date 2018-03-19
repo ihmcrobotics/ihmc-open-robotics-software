@@ -8,6 +8,10 @@ import java.util.List;
 
 import org.junit.Test;
 
+import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
+import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -22,10 +26,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -74,7 +74,7 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
       // WBT toolbox configuration message
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
-      configuration.initialConfiguration = HumanoidMessageTools.createKinematicsToolboxOutputStatus(fullRobotModel);
+      configuration.getInitialConfiguration().set(HumanoidMessageTools.createKinematicsToolboxOutputStatus(fullRobotModel));
       configuration.setMaximumExpansionSize(1000);
 
       // trajectory message, exploration message
@@ -94,8 +94,8 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
       WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
       Pose3D controlFramePose = handControlFrames.get(robotSide);
 
-      trajectory.setControlFramePositionInEndEffector(controlFramePose.getPosition());
-      trajectory.setControlFrameOrientationInEndEffector(controlFramePose.getOrientation());
+      trajectory.getControlFramePositionInEndEffector().set(controlFramePose.getPosition());
+      trajectory.getControlFrameOrientationInEndEffector().set(controlFramePose.getOrientation());
 
       handTrajectories.add(trajectory);
 

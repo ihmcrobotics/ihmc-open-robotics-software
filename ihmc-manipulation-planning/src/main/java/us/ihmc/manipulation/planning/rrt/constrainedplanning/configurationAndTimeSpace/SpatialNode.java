@@ -1,6 +1,6 @@
 package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace;
 
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.robotics.screwTheory.RigidBody;

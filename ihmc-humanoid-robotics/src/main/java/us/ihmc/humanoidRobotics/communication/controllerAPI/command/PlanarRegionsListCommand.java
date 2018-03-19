@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.PlanarRegionMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.PlanarRegionMessage;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
