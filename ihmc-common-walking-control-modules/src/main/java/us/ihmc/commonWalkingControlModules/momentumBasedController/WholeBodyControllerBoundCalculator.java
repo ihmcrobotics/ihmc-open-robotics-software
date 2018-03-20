@@ -7,6 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
@@ -314,7 +315,7 @@ public class WholeBodyControllerBoundCalculator
       qDDotMaxToPack.set(index, 0, filteredUpperLimits.get(joint).getDoubleValue());
    }
 
-   public void enforceJointTorqueLimits(JointDesiredOutputList jointDesiredOutputList)
+   public void enforceJointTorqueLimits(LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList)
    {
       for (OneDoFJoint joint : oneDoFJoints)
       {
@@ -328,7 +329,7 @@ public class WholeBodyControllerBoundCalculator
       }
    }
 
-   public void enforceJointTorqueLimit(OneDoFJoint joint, JointDesiredOutput jointDesiredOutput, JointLimitData jointLimitData)
+   private void enforceJointTorqueLimit(OneDoFJoint joint, JointDesiredOutput jointDesiredOutput, JointLimitData jointLimitData)
    {
       double torque;
       if (!jointDesiredOutput.hasDesiredTorque())
