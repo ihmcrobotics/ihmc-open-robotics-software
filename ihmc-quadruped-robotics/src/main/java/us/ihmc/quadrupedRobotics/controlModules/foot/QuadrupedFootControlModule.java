@@ -93,7 +93,7 @@ public class QuadrupedFootControlModule
       factory.addTransition(QuadrupedFootRequest.REQUEST_HOLD, QuadrupedFootStates.SWING, QuadrupedFootStates.HOLD);
 
       eventTrigger = factory.buildEventTrigger();
-      footStateMachine = factory.build(QuadrupedFootStates.MOVE_VIA_WAYPOINTS);
+      footStateMachine = factory.build(QuadrupedFootStates.HOLD);
 
       parentRegistry.addChild(registry);
    }
@@ -183,7 +183,10 @@ public class QuadrupedFootControlModule
    public void compute()
    {
       // Update foot state machine.
-      footStateMachine.doActionAndTransition();
+      // Note Sylvain 2018/03/23: the controller is sensitive to the call order on the doAction and doTransitions.
+      // Inverting the ordering will break some tests, such as QuadrupedXGaitFlatGroundTrotTest.testTrottingInAForwardLeftCircle().
+      footStateMachine.doAction();
+      footStateMachine.doTransitions();
    }
 
    public void getDesiredSoleForce(FrameVector3D soleForceCommandToPack)

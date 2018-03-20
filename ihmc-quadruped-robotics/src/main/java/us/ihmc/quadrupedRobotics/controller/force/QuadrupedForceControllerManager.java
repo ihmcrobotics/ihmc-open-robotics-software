@@ -261,7 +261,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       final QuadrupedController fallController = new QuadrupedForceBasedFallController(controllerToolbox, controlManagerFactory, registry);
 
       EventBasedStateMachineFactory<QuadrupedForceControllerEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedForceControllerEnum.class);
-      factory.setNamePrefix("forceControllerState").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
+      factory.setNamePrefix("forceController").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
       factory.buildYoEventTrigger("userTrigger", QuadrupedForceControllerRequestedEvent.class);
       trigger = factory.buildEventTrigger();
 

@@ -148,7 +148,7 @@ public class QuadrupedSteppingState implements QuadrupedController
                                                                                                        soleWaypointInputProvider, registry);
 
       EventBasedStateMachineFactory<QuadrupedSteppingStateEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedSteppingStateEnum.class);
-      factory.setNamePrefix("steppingState").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
+      factory.setNamePrefix("stepping").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
       factory.buildYoEventTrigger("stepTrigger", QuadrupedSteppingRequestedEvent.class);
 
       factory.addState(QuadrupedSteppingStateEnum.STAND, standController);
