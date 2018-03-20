@@ -174,7 +174,7 @@ public class InverseKinematicsOptimizationControlModule
       motionQPInputCalculator.updatePrivilegedConfiguration(command);
    }
 
-   public void submitPrivilegedVelocityCommand(PrivilegedVelocityCommand command)
+   public void submitPrivilegedVelocityCommand(PrivilegedJointSpaceCommand command)
    {
       motionQPInputCalculator.submitPrivilegedVelocities(command);
    }
