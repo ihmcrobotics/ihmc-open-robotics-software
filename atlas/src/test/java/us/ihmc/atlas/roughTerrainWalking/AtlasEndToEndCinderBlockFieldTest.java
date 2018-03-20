@@ -26,7 +26,7 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
    @Override
    public double getPelvisOffsetHeight()
    {
-      return 0.08;
+      return 0.0;
    }
 
    @Override
