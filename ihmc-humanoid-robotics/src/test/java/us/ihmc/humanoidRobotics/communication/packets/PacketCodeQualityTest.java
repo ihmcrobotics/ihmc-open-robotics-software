@@ -60,6 +60,48 @@ public class PacketCodeQualityTest
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = Integer.MAX_VALUE)
+   public void testPacketDoNotDeclareTypes()
+   {
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+
+      Set<Class<? extends Packet>> packetTypesWithNestedType = new HashSet<>();
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            Class<?>[] declaredClasses = packetType.getDeclaredClasses();
+            
+            if (declaredClasses.length > 0)
+                  packetTypesWithNestedType.add(packetType);
+         }
+         catch (Exception e)
+         {
+            PrintTools.error("Problem with packet: " + packetType.getSimpleName());
+            e.printStackTrace();
+         }
+      }
+
+      if (verbose)
+      {
+         if (!packetTypesWithNestedType.isEmpty())
+         {
+            System.out.println();
+            System.out.println();
+            PrintTools.error("List of packet with nested type:");
+            packetTypesWithNestedType.forEach(type -> PrintTools.error(type.getSimpleName()));
+         }
+      }
+
+      assertTrue("Packet sub-types should not have nested type.", packetTypesWithNestedType.isEmpty());
+   }
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testPacketsHaveUniqueSimpleNameBasedHashCode()
    { // This test won't fail on Arrays or Lists
       boolean verbose = true;
