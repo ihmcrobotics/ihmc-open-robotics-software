@@ -2,6 +2,9 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 
 import java.util.ArrayList;
 
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -24,8 +27,9 @@ public class QuadrupedForceBasedDoNothingController implements QuadrupedControll
    private final JointDesiredOutputList jointDesiredOutputList;
    private final ArrayList<YoDouble> desiredDoNothingTorques = new ArrayList<>();
    private final ArrayList<OneDoFJoint> legJoints = new ArrayList<>();
+   private final QuadrupedFeetManager feetManager;
 
-   public QuadrupedForceBasedDoNothingController(QuadrupedRuntimeEnvironment environment, YoVariableRegistry parentRegistry)
+   public QuadrupedForceBasedDoNothingController(QuadrupedFeetManager feetManager, QuadrupedRuntimeEnvironment environment, YoVariableRegistry parentRegistry)
    {
       FullQuadrupedRobotModel fullRobotModel = environment.getFullRobotModel();
       this.jointDesiredOutputList = environment.getJointDesiredOutputList();
@@ -39,6 +43,7 @@ public class QuadrupedForceBasedDoNothingController implements QuadrupedControll
          }
       }
 
+      this.feetManager = feetManager;
       parentRegistry.addChild(registry);
    }
 
@@ -52,6 +57,8 @@ public class QuadrupedForceBasedDoNothingController implements QuadrupedControll
          jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
          jointDesiredOutput.setDesiredTorque(0.0);
       }
+
+      feetManager.hideSupportPolygon();
    }
 
    @Override

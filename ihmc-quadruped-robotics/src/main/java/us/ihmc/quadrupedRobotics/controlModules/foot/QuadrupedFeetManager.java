@@ -62,6 +62,11 @@ public class QuadrupedFeetManager
       supportPolygon.setConvexPolygon2d(contactPoints);
    }
 
+   public void hideSupportPolygon()
+   {
+      supportPolygon.hide();
+   }
+
    public YoFrameConvexPolygon2d getSupportPolygon()
    {
       return supportPolygon;

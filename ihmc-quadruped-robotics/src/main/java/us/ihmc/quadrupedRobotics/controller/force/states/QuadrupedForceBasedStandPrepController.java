@@ -158,6 +158,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    public ControllerEvent process()
    {
       controllerToolbox.update();
+      feetManager.updateSupportPolygon();
       feetManager.compute(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
       return isDoneMoving.getBooleanValue() ? ControllerEvent.DONE : null;
