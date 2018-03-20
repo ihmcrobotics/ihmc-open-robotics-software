@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedHoldPositionState extends QuadrupedFootState
+public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
 {
    // YoVariables
    private final YoVariableRegistry registry;
@@ -22,11 +22,6 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
 
    private final BooleanParameter useSoleForceFeedForwardParameter;
    private final DoubleParameter feedForwardRampTimeParameter;
-
-   // Feedback controller
-   private final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
-   private final FrameVector3D initialSoleForces = new FrameVector3D();
-   private final QuadrupedSolePositionController solePositionController;
 
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame soleFrame;
@@ -41,9 +36,10 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
    public QuadrupedHoldPositionState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, QuadrupedSolePositionController solePositionController,
                                      YoVariableRegistry parentRegistry)
    {
+      super(robotQuadrant, controllerToolbox, solePositionController);
+
       this.robotQuadrant = robotQuadrant;
       this.controllerToolbox = controllerToolbox;
-      this.solePositionController = solePositionController;
 
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
@@ -55,8 +51,6 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
 
       useSoleForceFeedForwardParameter = new BooleanParameter("useSoleForceFeedForward", registry, true);
       feedForwardRampTimeParameter = new DoubleParameter("feedForwardRampTime", registry, 2.0);
-
-      solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
       parentRegistry.addChild(registry);
    }
@@ -95,6 +89,8 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
          feedforward.scale(rampMultiplier);
       }
       solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, soleLinearVelocityEstimate);
+
+      super.doControl();
 
       return null;
    }

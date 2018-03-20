@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedSwingState extends QuadrupedFootState
+public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean createSwingTrajectoryGraphics = false;
@@ -38,9 +38,6 @@ public class QuadrupedSwingState extends QuadrupedFootState
    private final YoDouble timestamp;
    private final YoQuadrupedTimedStep currentStepCommand;
 
-   private final QuadrupedSolePositionController solePositionController;
-   private final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
-
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
    private final ReferenceFrame soleFrame;
@@ -54,15 +51,15 @@ public class QuadrupedSwingState extends QuadrupedFootState
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, QuadrupedSolePositionController solePositionController,
                               YoBoolean stepCommandIsValid, YoQuadrupedTimedStep currentStepCommand, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
+      super(robotQuadrant, controllerToolbox, solePositionController);
+
       this.robotQuadrant = robotQuadrant;
       this.controllerToolbox = controllerToolbox;
-      this.solePositionController = solePositionController;
       this.stepCommandIsValid = stepCommandIsValid;
       this.timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.currentStepCommand = currentStepCommand;
 
       this.parameters = controllerToolbox.getFootControlModuleParameters();
-      this.solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotQuadrant);
 
@@ -169,6 +166,8 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
       if(createSwingTrajectoryGraphics)
          updateGraphics(currentTime, currentStepCommand.getTimeInterval().getEndTime());
+
+      super.doControl();
 
       // Trigger support phase.
       if (currentTime >= touchDownTime)
