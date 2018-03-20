@@ -189,6 +189,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
       // update task space estimates
       controllerToolbox.update();
+      feetManager.updateSupportPolygon();
 
       // trigger step events
       feetManager.triggerSteps(stepMessageHandler.getActiveSteps());

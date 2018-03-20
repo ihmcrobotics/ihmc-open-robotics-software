@@ -110,6 +110,7 @@ public class QuadrupedStandController implements QuadrupedController
       updateGains();
 
       controllerToolbox.update();
+      feetManager.updateSupportPolygon();
 
       // update ground plane estimate
       groundPlaneEstimator.compute(solePositions);
