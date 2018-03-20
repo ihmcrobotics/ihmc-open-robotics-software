@@ -9,19 +9,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.communication.packets.DetectedFacesPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.quadrupedRobotics.communication.packets.BodyAngularRatePacket;
-import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerStatePacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedNeckJointPositionPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSoleWaypointPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedXGaitSettingsPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
@@ -75,6 +66,9 @@ public class QuadrupedNetClassList extends IHMCCommunicationKryoNetClassList
 
       registerPacketClass(QuadrupedXGaitSettingsPacket.class);
       registerPacketField(QuadrupedXGaitSettingsReadOnly.class);
+
+      registerPacketClass(QuadrupedSteppingEventPacket.class);
+      registerPacketField(QuadrupedSteppingRequestedEvent.class);
 
       registerPacketField(String.class);
       registerPacketField(boolean.class);

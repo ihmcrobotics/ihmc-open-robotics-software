@@ -6,6 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
@@ -17,7 +18,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 import java.util.ArrayList;
 
-public class GenericQuadrupedNetClassList extends IHMCCommunicationKryoNetClassList
+public class GenericQuadrupedNetClassList extends QuadrupedNetClassList
 {
    public GenericQuadrupedNetClassList()
    {
