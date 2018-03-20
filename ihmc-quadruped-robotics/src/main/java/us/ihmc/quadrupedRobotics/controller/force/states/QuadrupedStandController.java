@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -13,15 +12,14 @@ import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedStandController implements QuadrupedController
 {
@@ -48,7 +46,7 @@ public class QuadrupedStandController implements QuadrupedController
    // task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
-   private final QuadrupedTaskSpaceController taskSpaceController;
+   //private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -75,7 +73,7 @@ public class QuadrupedStandController implements QuadrupedController
       // task space controllers
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
-      taskSpaceController = controllerToolbox.getTaskSpaceController();
+      //taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
@@ -127,8 +125,10 @@ public class QuadrupedStandController implements QuadrupedController
 
       jointSpaceManager.compute();
 
+      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
+
       // update joint setpoints
-      taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
+      //taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
       return null;
    }
@@ -144,12 +144,13 @@ public class QuadrupedStandController implements QuadrupedController
       groundPlaneEstimator.compute(solePositions);
 
       // initialize feedback controllers
-      balanceManager.initializeForStanding(taskSpaceControllerSettings);
+      balanceManager.initializeForStanding();
       bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
 
       feetManager.requestFullContact();
 
       // initialize task space controller
+      /*
       taskSpaceControllerSettings.initialize();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -157,6 +158,7 @@ public class QuadrupedStandController implements QuadrupedController
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
       }
       taskSpaceController.reset();
+      */
    }
 
    @Override

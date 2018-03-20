@@ -256,8 +256,8 @@ public class QuadrupedSteppingState implements QuadrupedController
       submitControllerCoreCommands();
 
       controllerCoreTimer.startMeasurement();
-      //controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      //controllerCore.compute();
+      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+      controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
 
       return null;

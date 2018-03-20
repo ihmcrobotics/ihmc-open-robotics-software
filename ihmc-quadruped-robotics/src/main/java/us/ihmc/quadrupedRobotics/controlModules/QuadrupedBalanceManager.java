@@ -235,7 +235,7 @@ public class QuadrupedBalanceManager
       accumulatedStepAdjustment.setToZero();
    }
 
-   public void initializeForStanding(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   public void initializeForStanding()
    {
       initialize();
       dcmPlanner.initializeForStanding();
