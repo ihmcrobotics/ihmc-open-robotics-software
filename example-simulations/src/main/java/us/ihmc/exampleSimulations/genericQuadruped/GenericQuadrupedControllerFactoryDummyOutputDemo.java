@@ -7,6 +7,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedControllerCoreOptimizationSettings;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -15,15 +16,14 @@ import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.JointsOnlyStateEstimator;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootSwitchFactory;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -47,6 +47,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GenericQuadrupedControllerFactoryDummyOutputDemo
 {
@@ -59,7 +61,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
    private QuadrupedForceControllerManager controllerManager;
    private DRCStateEstimatorInterface simulationStateEstimator;
    private QuadrupedRuntimeEnvironment runtimeEnvironment;
-   
+
    public GenericQuadrupedControllerFactoryDummyOutputDemo() throws IOException
    {
       /*
@@ -68,6 +70,8 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       QuadrupedPhysicalProperties physicalProperties = new GenericQuadrupedPhysicalProperties();
       GenericQuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
+      GenericQuadrupedControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(
+            fullRobotModel.getTotalMass());
 
       /*
        * Create registries for every thread
@@ -79,8 +83,8 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       /*
        * Create packet communicators
        */
-      PacketCommunicator networkProcessorCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, 2097152, 2097152,
-            new QuadrupedNetClassList());
+      PacketCommunicator networkProcessorCommunicator = PacketCommunicator
+            .createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, 2097152, 2097152, new QuadrupedNetClassList());
       QuadrupedGlobalDataProducer dataProducer = new QuadrupedGlobalDataProducer(networkProcessorCommunicator);
 
       /*
@@ -93,16 +97,14 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
        */
       QuadrupedReferenceFrames referenceFrames = new QuadrupedReferenceFrames(fullRobotModel, physicalProperties);
 
-
-      
-
       QuadrupedPhysicalProperties quadrupedPhysicalProperties = new GenericQuadrupedPhysicalProperties();
 
       ContactableBodiesFactory<RobotQuadrant> footContactableBodiesFactory = new ContactableBodiesFactory<>();
       footContactableBodiesFactory.setFullRobotModel(fullRobotModel);
       footContactableBodiesFactory.setFootContactPoints(quadrupedPhysicalProperties.getFeetGroundContactPoints());
       footContactableBodiesFactory.setReferenceFrames(referenceFrames);
-      QuadrantDependentList<ContactablePlaneBody> contactableFeet = new QuadrantDependentList<>(footContactableBodiesFactory.createFootContactablePlaneBodies());
+      QuadrantDependentList<ContactablePlaneBody> contactableFeet = new QuadrantDependentList<>(
+            footContactableBodiesFactory.createFootContactablePlaneBodies());
       footContactableBodiesFactory.disposeFactory();
 
       QuadrupedFootSwitchFactory footSwitchFactory = new QuadrupedFootSwitchFactory();
@@ -113,9 +115,12 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       footSwitchFactory.setFootSwitchType(FootSwitchType.TouchdownBased);
       QuadrantDependentList<FootSwitchInterface> footSwitches = footSwitchFactory.createFootSwitches();
 
-      
+      List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         contactablePlaneBodies.add(contactableFeet.get(robotQuadrant));
+
       SensorOutputMapReadOnly sensorOutputMapReadOnly = createSensorProcessing(fullRobotModel, stateEstimatorParameters, registry);
-      if(USE_KINEMATICS_BASED_STATE_ESTIMATOR)
+      if (USE_KINEMATICS_BASED_STATE_ESTIMATOR)
       {
          GenericQuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
 
@@ -140,44 +145,42 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       }
 
       JointDesiredOutputList jointDesiredOutputList = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
-      YoGraphicsListRegistry ignoredYoGraphicsListRegistry  = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry ignoredYoGraphicsListRegistry = new YoGraphicsListRegistry();
       GenericQuadrupedXGaitSettings xGaitSettings = new GenericQuadrupedXGaitSettings();
 
-      runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, jointDesiredOutputList, registry, yoGraphicsListRegistry,
-                                                           ignoredYoGraphicsListRegistry, dataProducer, contactableFeet, xGaitSettings, footSwitches, GRAVITY);
+      runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, controllerCoreOptimizationSettings, jointDesiredOutputList,
+                                                           registry, yoGraphicsListRegistry, ignoredYoGraphicsListRegistry, dataProducer, contactableFeet,
+                                                           contactablePlaneBodies, xGaitSettings, footSwitches, GRAVITY);
       controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
 
       InputStream resourceAsStream = getClass().getResourceAsStream(modelFactory.getParameterResourceName(QuadrupedControlMode.FORCE));
       ParameterLoaderHelper.loadParameters(this, resourceAsStream, registry);
 
-//      PrintTools.debug(this, "Warming up JIT compiler.");
-//      controllerManager.warmup(2000);  // Compile threshold == 1000
-//      PrintTools.debug(this, "Coffee time.");
-
+      //      PrintTools.debug(this, "Warming up JIT compiler.");
+      //      controllerManager.warmup(2000);  // Compile threshold == 1000
+      //      PrintTools.debug(this, "Coffee time.");
 
    }
 
-   private SensorProcessing createSensorProcessing(FullRobotModel fullRobotModel, SensorProcessingConfiguration sensorProcessingConfiguration, YoVariableRegistry parentRegistry)
-   {      
-      
+   private SensorProcessing createSensorProcessing(FullRobotModel fullRobotModel, SensorProcessingConfiguration sensorProcessingConfiguration,
+                                                   YoVariableRegistry parentRegistry)
+   {
+
       StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
-      for(OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
          stateEstimatorSensorDefinitions.addJointSensorDefinition(joint);
       }
 
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
-      
+
       stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinitions);
 
       return new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, parentRegistry);
    }
-   
-   
+
    public void run()
    {
-      
-      
 
       YoDouble robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       double robotTimeBeforeWarmUp = robotTimestamp.getDoubleValue();
@@ -185,12 +188,11 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       {
          FiniteStateMachineState<ControllerEvent> stateImpl = controllerManager.getState(state);
 
-         
          stateImpl.onEntry();
 
          long min = Long.MAX_VALUE;
          long max = 0;
-         
+
          long startTime = System.nanoTime();
          for (int i = 0; i < TEST_ITERATIONS; i++)
          {
@@ -198,39 +200,38 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
             simulationStateEstimator.doControl();
             robotTimestamp.add(Conversions.millisecondsToSeconds(1));
             stateImpl.process();
-            
+
             long itTime = System.nanoTime() - itStart;
-            
-            if(itTime < min)
+
+            if (itTime < min)
             {
                min = itTime;
             }
-            if(itTime > max)
+            if (itTime > max)
             {
                max = itTime;
             }
          }
          long endTime = System.nanoTime() - startTime;
-         
+
          stateImpl.onExit();
-         
-         
-         System.out.println(state + ": " + Conversions.nanosecondsToSeconds(endTime/TEST_ITERATIONS) + "s/it. Min: " + Conversions.nanosecondsToSeconds(min) + "s ; max: " + Conversions.nanosecondsToSeconds(max) + "s") ;
-         
+
+         System.out.println(
+               state + ": " + Conversions.nanosecondsToSeconds(endTime / TEST_ITERATIONS) + "s/it. Min: " + Conversions.nanosecondsToSeconds(min) + "s ; max: "
+                     + Conversions.nanosecondsToSeconds(max) + "s");
+
       }
       robotTimestamp.set(robotTimeBeforeWarmUp);
-      
-      
+
    }
-   
+
    public static void main(String[] args) throws IOException
    {
       GenericQuadrupedControllerFactoryDummyOutputDemo genericQuadrupedControllerFactoryDummyOutputDemo = new GenericQuadrupedControllerFactoryDummyOutputDemo();
-      
+
       genericQuadrupedControllerFactoryDummyOutputDemo.run();
-      
+
       System.exit(0);
    }
-   
-   
+
 }

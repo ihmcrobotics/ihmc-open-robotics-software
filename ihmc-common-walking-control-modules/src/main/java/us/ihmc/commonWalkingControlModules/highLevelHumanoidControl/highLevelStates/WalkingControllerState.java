@@ -70,8 +70,7 @@ public class WalkingControllerState extends HighLevelControllerState
          toolbox.setupForInverseKinematicsSolver();
       if (setupVirtualModelControlSolver)
       {
-         RigidBody[] controlledBodies = {fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT)};
-         toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, controllerToolbox.getContactablePlaneBodies());
+         toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controllerToolbox.getContactablePlaneBodies());
       }
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledOneDofJoints);

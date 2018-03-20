@@ -1,10 +1,20 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingStatePacket;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
+import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -18,9 +28,13 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachine;
 import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineBuilder;
 import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -50,12 +64,35 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final QuadrupedSteppingStatePacket quadrupedSteppingStatePacket;
    private final AtomicReference<QuadrupedSteppingRequestedEvent> requestedEvent = new AtomicReference<>();
 
+   private final QuadrupedFeetManager feetManager;
+   private final QuadrupedBalanceManager balanceManager;
+   private final QuadrupedBodyOrientationManager bodyOrientationManager;
+
+   private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
+   private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
+   private final WholeBodyControllerCore controllerCore;
+
    public QuadrupedSteppingState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
                                  QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
    {
       this.runtimeEnvironment = runtimeEnvironment;
       this.controllerToolbox = controllerToolbox;
       this.controlManagerFactory = controlManagerFactory;
+
+      balanceManager = controlManagerFactory.getOrCreateBalanceManager();
+      feetManager = controlManagerFactory.getOrCreateFeetManager();
+      bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
+
+      FullQuadrupedRobotModel fullRobotModel = runtimeEnvironment.getFullRobotModel();
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
+                                                                                       fullRobotModel.getRootJoint(),
+                                                                                       fullRobotModel.getControllableOneDoFJoints(),
+                                                                                       controllerToolbox.getReferenceFrames().getCenterOfMassFrame(),
+                                                                                       runtimeEnvironment.getControllerCoreOptimizationSettings(),
+                                                                                       runtimeEnvironment.getGraphicsListRegistry(), registry);
+      controlCoreToolbox.setupForVirtualModelControlSolver(fullRobotModel.getBody(), controllerToolbox.getContactablePlaneBodies());
+      FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
+      controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(), registry);
 
       // Initialize input providers.
       xGaitSettingsProvider = new YoQuadrupedXGaitSettings(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
@@ -72,7 +109,6 @@ public class QuadrupedSteppingState implements QuadrupedController
       stepStreamMultiplexer.addStepStream(QuadrupedSteppingStateEnum.XGAIT, xGaitStepStream);
       stepStreamMultiplexer.addStepStream(QuadrupedSteppingStateEnum.STEP, preplannedStepStream);
       stepStreamMultiplexer.selectStepStream(QuadrupedSteppingStateEnum.XGAIT);
-
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
 
@@ -96,7 +132,8 @@ public class QuadrupedSteppingState implements QuadrupedController
       parentRegistry.addChild(registry);
    }
 
-   private FiniteStateMachine<QuadrupedSteppingStateEnum, ControllerEvent, QuadrupedController> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment)
+   private FiniteStateMachine<QuadrupedSteppingStateEnum, ControllerEvent, QuadrupedController> buildStateMachine(
+         QuadrupedRuntimeEnvironment runtimeEnvironment)
    {
       // Initialize controllers.
       final QuadrupedController standController = new QuadrupedStandController(controllerToolbox, controlManagerFactory, registry);
@@ -104,8 +141,8 @@ public class QuadrupedSteppingState implements QuadrupedController
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(controllerToolbox, controlManagerFactory,
                                                                                                        soleWaypointInputProvider, registry);
 
-      FiniteStateMachineBuilder<QuadrupedSteppingStateEnum, ControllerEvent, QuadrupedController> builder = new FiniteStateMachineBuilder<>(QuadrupedSteppingStateEnum.class,
-                                                                                                                                              ControllerEvent.class, "steppingState", registry);
+      FiniteStateMachineBuilder<QuadrupedSteppingStateEnum, ControllerEvent, QuadrupedController> builder = new FiniteStateMachineBuilder<>(
+            QuadrupedSteppingStateEnum.class, ControllerEvent.class, "steppingState", registry);
 
       builder.addState(QuadrupedSteppingStateEnum.STAND, standController);
       builder.addState(QuadrupedSteppingStateEnum.STEP, stepController);
@@ -117,16 +154,16 @@ public class QuadrupedSteppingState implements QuadrupedController
       builder.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.XGAIT, QuadrupedSteppingStateEnum.STAND);
 
       // Sole Waypoint events
-      builder.addTransition(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT,
-                            QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.SOLE_WAYPOINT);
+      builder.addTransition(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND,
+                            QuadrupedSteppingStateEnum.SOLE_WAYPOINT);
       builder.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND);
       builder.addTransition(ControllerEvent.FAIL, QuadrupedSteppingStateEnum.SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND);
 
       // Manually triggered events to transition to main controllers.
-      builder.addTransition(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_STEP,
-                            QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.STEP);
-      builder.addTransition(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_XGAIT,
-                            QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.XGAIT);
+      builder.addTransition(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND,
+                            QuadrupedSteppingStateEnum.STEP);
+      builder.addTransition(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_XGAIT, QuadrupedSteppingStateEnum.STAND,
+                            QuadrupedSteppingStateEnum.XGAIT);
 
       // Callbacks functions.
       Runnable standToXGaitCallback = new Runnable()
@@ -137,8 +174,8 @@ public class QuadrupedSteppingState implements QuadrupedController
             stepStreamMultiplexer.selectStepStream(QuadrupedSteppingStateEnum.XGAIT);
          }
       };
-      builder.addCallback(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_XGAIT,
-                          QuadrupedSteppingStateEnum.STAND, standToXGaitCallback);
+      builder.addCallback(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_XGAIT, QuadrupedSteppingStateEnum.STAND,
+                          standToXGaitCallback);
 
       Runnable xGaitToStandCallback = new Runnable()
       {
@@ -148,8 +185,8 @@ public class QuadrupedSteppingState implements QuadrupedController
             stepController.halt();
          }
       };
-      builder.addCallback(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_STAND,
-                          QuadrupedSteppingStateEnum.XGAIT, xGaitToStandCallback);
+      builder.addCallback(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.XGAIT,
+                          xGaitToStandCallback);
 
       Runnable standToStepCallback = new Runnable()
       {
@@ -213,8 +250,38 @@ public class QuadrupedSteppingState implements QuadrupedController
          runtimeEnvironment.getGlobalDataProducer().queueDataToSend(quadrupedSteppingStatePacket);
       }
 
+      submitControllerCoreCommands();
+
+      controllerCoreTimer.startMeasurement();
+      //controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+      //controllerCore.compute();
+      controllerCoreTimer.stopMeasurement();
 
       return null;
+   }
+
+   private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
+
+   private void submitControllerCoreCommands()
+   {
+      planeContactStateCommandPool.clear();
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotQuadrant));
+         controllerCoreCommand.addVirtualModelControlCommand(feetManager.getVirtualModelControlCommand(robotQuadrant));
+
+         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotQuadrant);
+         PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
+         contactState.getPlaneContactStateCommand(planeContactStateCommand);
+         //planeContactStateCommand.setUseHighCoPDamping(false);
+         controllerCoreCommand.addVirtualModelControlCommand(planeContactStateCommand);
+      }
+
+      controllerCoreCommand.addFeedbackControlCommand(bodyOrientationManager.getFeedbackControlCommand());
+      controllerCoreCommand.addVirtualModelControlCommand(bodyOrientationManager.getVirtualModelControlCommand());
+
+      controllerCoreCommand.addVirtualModelControlCommand(balanceManager.getVirtualModelControlCommand());
    }
 
    @Override

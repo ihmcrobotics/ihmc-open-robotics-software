@@ -8,17 +8,22 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFootControlModuleParameters;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.util.List;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
@@ -37,8 +42,10 @@ public class QuadrupedForceControllerToolbox
    private final QuadrupedFootControlModuleParameters footControlModuleParameters;
 
    private final QuadrupedTaskSpaceEstimates taskSpaceEstimates = new QuadrupedTaskSpaceEstimates();
+   private final FullQuadrupedRobotModel fullRobotModel;
 
    private final QuadrantDependentList<YoPlaneContactState> footContactStates = new QuadrantDependentList<>();
+   private final List<ContactablePlaneBody> contactablePlaneBodies;
 
    public QuadrupedForceControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
                                           YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -48,6 +55,7 @@ public class QuadrupedForceControllerToolbox
 
       this.runtimeEnvironment = runtimeEnvironment;
 
+      fullRobotModel = runtimeEnvironment.getFullRobotModel();
       footControlModuleParameters = new QuadrupedFootControlModuleParameters();
       registry.addChild(footControlModuleParameters.getYoVariableRegistry());
 
@@ -59,6 +67,21 @@ public class QuadrupedForceControllerToolbox
       dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
       groundPlaneEstimator = new GroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       fallDetector = new QuadrupedFallDetector(taskSpaceEstimator, dcmPositionEstimator, registry);
+
+      contactablePlaneBodies = runtimeEnvironment.getContactablePlaneBodies();
+
+      double coefficientOfFriction = 0.8; // TODO: magic number...
+      QuadrantDependentList<ContactablePlaneBody> contactableFeet = runtimeEnvironment.getContactableFeet();
+
+      for (RobotQuadrant robotSide : RobotQuadrant.values)
+      {
+         ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
+         RigidBody rigidBody = contactableFoot.getRigidBody();
+         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(), rigidBody, contactableFoot.getSoleFrame(),
+                                                                    contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
+
+         footContactStates.put(robotSide, contactState);
+      }
    }
 
    public void update()
@@ -66,6 +89,11 @@ public class QuadrupedForceControllerToolbox
       taskSpaceEstimator.compute(taskSpaceEstimates);
 
       dcmPositionEstimator.compute(taskSpaceEstimates.getComVelocity());
+   }
+
+   public FullQuadrupedRobotModel getFullRobotModel()
+   {
+      return fullRobotModel;
    }
 
    public QuadrupedRuntimeEnvironment getRuntimeEnvironment()
@@ -116,5 +144,15 @@ public class QuadrupedForceControllerToolbox
    public void getDCMPositionEstimate(FramePoint3D dcmPositionEstimateToPack)
    {
       dcmPositionEstimator.getDCMPositionEstimate(dcmPositionEstimateToPack);
+   }
+
+   public YoPlaneContactState getFootContactState(RobotQuadrant robotQuadrant)
+   {
+      return footContactStates.get(robotQuadrant);
+   }
+
+   public List<ContactablePlaneBody> getContactablePlaneBodies()
+   {
+      return contactablePlaneBodies;
    }
 }
