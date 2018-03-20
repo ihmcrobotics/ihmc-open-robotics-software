@@ -10,7 +10,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<PrivilegedAccelerationCommand>, InverseDynamicsCommand<PrivilegedAccelerationCommand>
+public class PrivilegedJointSpaceCommand implements InverseKinematicsCommand<PrivilegedJointSpaceCommand>, InverseDynamicsCommand<PrivilegedJointSpaceCommand>
 {
    /** Initial capacity of the internal memory. */
    private final int initialCapacity = 40;
@@ -21,8 +21,8 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    /** internal memory to save the joints to be controlled. */
    private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
-   /** internal memory to save the desired accelerations in */
-   private final RecyclingArrayList<MutableDouble> privilegedOneDoFJointAccelerations = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
+   /** internal memory to save the desired joint space commands in */
+   private final RecyclingArrayList<MutableDouble> privilegedOneDoFJointCommands = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
 
    /** sets whether or not to utilize the privileged acceleration calculator */
    private boolean enable = false;
@@ -32,7 +32,7 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
    /**
     * Creates an empty command.
     */
-   public PrivilegedAccelerationCommand()
+   public PrivilegedJointSpaceCommand()
    {
       clear();
    }
@@ -45,7 +45,7 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
       enable = false;
       jointNames.clear();
       joints.clear();
-      privilegedOneDoFJointAccelerations.clear();
+      privilegedOneDoFJointCommands.clear();
 
       weights.clear();
    }
@@ -76,7 +76,7 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
       enable();
       joints.add(joint);
       jointNames.add(joint.getName());
-      privilegedOneDoFJointAccelerations.add().setValue(privilegedAcceleration);
+      privilegedOneDoFJointCommands.add().setValue(privilegedAcceleration);
 
       weights.add().setValue(Double.NaN);
    }
@@ -92,7 +92,7 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
    {
       MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       enable();
-      privilegedOneDoFJointAccelerations.get(jointIndex).setValue(privilegedAcceleration);
+      privilegedOneDoFJointCommands.get(jointIndex).setValue(privilegedAcceleration);
    }
 
    /**
@@ -101,7 +101,7 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
     * @param other the other command to copy the data from. Not Modified.
     */
    @Override
-   public void set(PrivilegedAccelerationCommand other)
+   public void set(PrivilegedJointSpaceCommand other)
    {
       clear();
       enable = other.enable;
@@ -111,7 +111,7 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
          OneDoFJoint joint = other.joints.get(i);
          joints.add(joint);
          jointNames.add(other.jointNames.get(i));
-         privilegedOneDoFJointAccelerations.add().setValue(other.privilegedOneDoFJointAccelerations.get(i));
+         privilegedOneDoFJointCommands.add().setValue(other.privilegedOneDoFJointCommands.get(i));
 
          weights.add().setValue(other.weights.get(i));
       }
@@ -148,13 +148,13 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
    }
 
    /**
-    * Returns whether or not there is a new acceleration for all the privileged acceleration to use.
+    * Returns whether or not there is a new command for all the privileged commands to use.
     *
-    * @return if there is a new default acceleration available.
+    * @return if there is a new default command available.
     */
-   public boolean hasNewPrivilegedAcceleration(int jointIndex)
+   public boolean hasNewPrivilegedCommand(int jointIndex)
    {
-      return !Double.isNaN(privilegedOneDoFJointAccelerations.get(jointIndex).doubleValue());
+      return !Double.isNaN(privilegedOneDoFJointCommands.get(jointIndex).doubleValue());
    }
 
    /**
@@ -162,9 +162,9 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
     *
     * @return acceleration.
     */
-   public double getPrivilegedAcceleration(int jointIndex)
+   public double getPrivilegedCommand(int jointIndex)
    {
-      return privilegedOneDoFJointAccelerations.get(jointIndex).doubleValue();
+      return privilegedOneDoFJointCommands.get(jointIndex).doubleValue();
    }
 
    public int getNumberOfJoints()
@@ -180,6 +180,6 @@ public class PrivilegedAccelerationCommand implements InverseKinematicsCommand<P
    @Override
    public ControllerCoreCommandType getCommandType()
    {
-      return ControllerCoreCommandType.PRIVILEGED_ACCELERATION;
+      return ControllerCoreCommandType.PRIVILEGED_JOINTSPACE_COMMAND;
    }
 }
