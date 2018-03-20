@@ -1,17 +1,10 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionControllerSetpoints;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -31,9 +24,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
    private final QuadrupedSoleWaypointList quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
 
    private final QuadrupedFootControlModuleParameters parameters;
-   private final RobotQuadrant robotQuadrant;
-
-   private final QuadrupedForceControllerToolbox controllerToolbox;
 
    private double taskStartTime;
 
@@ -42,8 +32,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
    {
       super(robotQuadrant, controllerToolbox, solePositionController);
 
-      this.robotQuadrant = robotQuadrant;
-      this.controllerToolbox = controllerToolbox;
       this.bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       this.soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
       this.parameters = controllerToolbox.getFootControlModuleParameters();
@@ -84,6 +72,8 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
    @Override
    public void onEntry()
    {
+      super.onEntry();
+
       solePositionController.reset();
       solePositionController.getGains().set(parameters.getSolePositionGains());
       solePositionControllerSetpoints.initialize(soleFrame);

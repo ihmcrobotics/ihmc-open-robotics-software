@@ -18,11 +18,21 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
 
    protected final FrameVector3D desiredLinearAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
+   protected final QuadrupedForceControllerToolbox controllerToolbox;
+   protected final RobotQuadrant robotQuadrant;
+
    public QuadrupedUnconstrainedFootState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,
                                           QuadrupedSolePositionController solePositionController)
    {
+      this.robotQuadrant = robotQuadrant;
       this.solePositionController = solePositionController;
+      this.controllerToolbox = controllerToolbox;
       solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
+   }
+
+   public void onEntry()
+   {
+      controllerToolbox.getFootContactState(robotQuadrant).clear();
    }
 
    public void doControl()
