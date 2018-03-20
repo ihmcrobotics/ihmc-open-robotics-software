@@ -31,19 +31,17 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.transform.QuaternionBasedTransform;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
 
@@ -97,13 +95,12 @@ public class GenericROSTranslationTools
       javaClassToRosMessageTypeMap.put(Point3D.class, "geometry_msgs/Point");
       javaClassToRosMessageTypeMap.put(Point3D32.class, "geometry_msgs/Point");
       javaClassToRosMessageTypeMap.put(Vector3D.class, "geometry_msgs/Vector3");
-      javaClassToRosMessageTypeMap.put(Vector3D32.class, "geometry_msgs/Vector3");
 
-      javaClassToRosMessageTypeMap.put(QuaternionBasedTransform.class, "geometry_msgs/Transform");
+      javaClassToRosMessageTypeMap.put(Pose3D.class, "geometry_msgs/Transform");
 
       // QuaternionBasedTransform <-> Transform
-      customFieldConversions.registerIHMCPacketFieldConverter(QuaternionBasedTransform.class, GenericROSTranslationTools::convertQuaternionBasedTransformToTransform);
-      customFieldConversions.registerROSMessageFieldConverter(Transform.class, GenericROSTranslationTools::convertTransformToQuaternionBasedTransform);
+      customFieldConversions.registerIHMCPacketFieldConverter(Pose3D.class, GenericROSTranslationTools::convertPose3DToTransform);
+      customFieldConversions.registerROSMessageFieldConverter(Transform.class, GenericROSTranslationTools::convertTransformToPose3D);
 
       // Point3D <-> Point
       customFieldConversions.registerIHMCPacketFieldConverter(Point3D.class, GenericROSTranslationTools::convertPoint3D);
@@ -759,28 +756,23 @@ public class GenericROSTranslationTools
       return messageName;
    }
 
-   private static Transform convertQuaternionBasedTransformToTransform(QuaternionBasedTransform quaternionBasedTransform)
+   private static Transform convertPose3DToTransform(Pose3D pose3D)
    {
       Transform message = messageFactory.newFromType("geometry_msgs/Transform");
 
-      if(quaternionBasedTransform == null)
-      {
-         quaternionBasedTransform = new QuaternionBasedTransform((QuaternionReadOnly) null, null);
-      }
-
-      message.setTranslation(convertVector3D(quaternionBasedTransform.getTranslationVector()));
-      message.setRotation(convertTuple4d(quaternionBasedTransform.getQuaternion()));
+      message.setTranslation(convertVector3D(new Vector3D(pose3D.getPosition())));
+      message.setRotation(convertTuple4d(pose3D.getOrientation()));
 
       return message;
    }
 
-   private static QuaternionBasedTransform convertTransformToQuaternionBasedTransform(Transform transform)
+   private static Pose3D convertTransformToPose3D(Transform transform)
    {
-      QuaternionBasedTransform quaternionBasedTransform = new QuaternionBasedTransform();
+      Pose3D pose3D = new Pose3D();
 
-      quaternionBasedTransform.setTranslation(convertVector3(transform.getTranslation()));
-      quaternionBasedTransform.setRotation(new Quaternion(convertQuaternion(transform.getRotation())));
+      pose3D.setPosition(convertVector3(transform.getTranslation()));
+      pose3D.setOrientation(new Quaternion(convertQuaternion(transform.getRotation())));
 
-      return quaternionBasedTransform;
+      return pose3D;
    }
 }

@@ -44,17 +44,17 @@
       </linearWeightMatrix>
       <useCustomControlFrame>false</useCustomControlFrame>
       <controlFramePose>
-        <quaternion>
+        <orientation>
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
           <s>1.0</s>
-        </quaternion>
-        <translationVector>
+        </orientation>
+        <position>
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
-        </translationVector>
+        </position>
       </controlFramePose>
     </euclideanTrajectory>
     <enableUserPelvisControl>false</enableUserPelvisControl>

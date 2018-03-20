@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 
 public class DetectedFacesPacket extends Packet<DetectedFacesPacket>
 {
-   public String[] ids;
+   public StringBuilder[] ids;
    public Point3D[] positions;
 
    public DetectedFacesPacket()
@@ -21,7 +21,7 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket>
       setPacketInformation(other);
    }
 
-   public String[] getIds()
+   public StringBuilder[] getIds()
    {
       return ids;
    }

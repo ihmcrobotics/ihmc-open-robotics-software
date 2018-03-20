@@ -1,7 +1,5 @@
 package us.ihmc.communication.packets;
 
-import us.ihmc.euclid.geometry.BoundingBox3D;
-
 public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlanarRegionsListMessage>
 {
    public static final byte SINGLE_UPDATE = 0;
@@ -10,7 +8,7 @@ public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlana
    public static final byte CLEAR = 3;
 
    public byte planarRegionsRequestType;
-   public BoundingBox3D boundingBoxInWorldForRequest;
+   public BoundingBox3DMessage boundingBoxInWorldForRequest;
 
    public RequestPlanarRegionsListMessage()
    {
@@ -40,7 +38,7 @@ public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlana
       return boundingBoxInWorldForRequest != null;
    }
 
-   public BoundingBox3D getBoundingBoxInWorldForRequest()
+   public BoundingBox3DMessage getBoundingBoxInWorldForRequest()
    {
       return boundingBoxInWorldForRequest;
    }

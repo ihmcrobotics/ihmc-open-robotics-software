@@ -5,7 +5,7 @@ import us.ihmc.communication.packets.Packet;
 public class LocalizationStatusPacket extends Packet<LocalizationStatusPacket>
 {
    public double overlap;
-   public String status;
+   public StringBuilder status = new StringBuilder();
 
    public LocalizationStatusPacket()
    {
@@ -16,7 +16,8 @@ public class LocalizationStatusPacket extends Packet<LocalizationStatusPacket>
    public void set(LocalizationStatusPacket other)
    {
       overlap = other.overlap;
-      status = other.status;
+      status.setLength(0);
+      status.append(other.status);
       setPacketInformation(other);
    }
 
@@ -25,14 +26,14 @@ public class LocalizationStatusPacket extends Packet<LocalizationStatusPacket>
       return overlap;
    }
 
-   public String getStatus()
+   public String getStatusAsString()
    {
-      return status;
+      return status.toString();
    }
 
    @Override
    public boolean epsilonEquals(LocalizationStatusPacket other, double epsilon)
    {
-      return (Math.abs(other.getOverlap() - this.getOverlap()) < epsilon) && (other.getStatus().equals(this.getStatus()));
+      return (Math.abs(other.getOverlap() - this.getOverlap()) < epsilon) && (other.status.equals(this.status));
    }
 }

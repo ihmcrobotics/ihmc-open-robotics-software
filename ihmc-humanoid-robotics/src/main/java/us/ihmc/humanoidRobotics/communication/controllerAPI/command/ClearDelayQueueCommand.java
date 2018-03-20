@@ -2,19 +2,20 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueMessage;
 
 /**
- * This command is used to clear the delay buffers on the controller, 
- * If you sent a command with a delay and now you do not want them executed, use this command to remove them from the queue
+ * This command is used to clear the delay buffers on the controller, If you sent a command with a
+ * delay and now you do not want them executed, use this command to remove them from the queue
  */
 public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, ClearDelayQueueMessage>
 {
    private Class<? extends Command<?, ?>> commandClassToClear;
    private Class<? extends Packet<?>> messageClassToClear;
-   
+
    private boolean clearAllDelayBuffers;
-   
+
    /**
     * empty constructor, required
     */
@@ -24,24 +25,37 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
 
    /**
     * set the class you want to clear
+    * 
     * @param clazz the class you want to clear
     */
-   public ClearDelayQueueCommand(Class<Command<?,?>> clazz)
+   public ClearDelayQueueCommand(Class<Command<?, ?>> clazz)
    {
       this.commandClassToClear = clazz;
    }
 
    /**
     * copy constructor
+    * 
     * @param command the command to copy from
     */
    public ClearDelayQueueCommand(ClearDelayQueueCommand command)
    {
       set(command);
    }
-   
+
    /**
     * set the class you want to clear
+    * 
+    * @param clazz the class you want to clear
+    */
+   public void setMessageClassToClear(Class<? extends Packet<?>> messageClassToClear)
+   {
+      this.messageClassToClear = messageClassToClear;
+   }
+
+   /**
+    * set the class you want to clear
+    * 
     * @param clazz the class you want to clear
     */
    public void setCommandClassToClear(Class<? extends Command<?, ?>> clazz)
@@ -51,6 +65,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
 
    /**
     * get the class to clear
+    * 
     * @param commandClassToClear the class to clear
     */
    public Class<? extends Command<?, ?>> getCommandClassToClear()
@@ -60,33 +75,37 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
 
    /**
     * get the class to clear
+    * 
     * @param commandClassToClear the class to clear
     */
    public Class<? extends Packet<?>> getMessageClassToClear()
    {
       return messageClassToClear;
    }
-   
+
    /**
     * set whether or not you want to clear all the delay buffers
+    * 
     * @param whether or not to clear all the delay buffers
     */
    public void setClearAllDelayBuffers(boolean clearAll)
    {
       this.clearAllDelayBuffers = clearAll;
    }
-   
+
    /**
     * get whether or not to clear all the delay buffers
+    * 
     * @param whether or not to clear all the delay buffers
     */
    public boolean getClearAllDelayBuffers()
    {
       return clearAllDelayBuffers;
    }
-   
+
    /**
     * Set this command to the contents of the other command
+    * 
     * @param other the command to copy
     */
    @Override
@@ -110,13 +129,13 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
 
    /**
     * Set this command to the contents of the message
+    * 
     * @param message the message to copy from
     */
    @Override
    public void set(ClearDelayQueueMessage message)
    {
-      messageClassToClear = message.clazz;
-      clearAllDelayBuffers = message.clearAllDelayBuffers;
+      throw new UnsupportedOperationException("A " + ClearDelayQueueConverter.class.getSimpleName() + " has to be used to convert a " + ClearDelayQueueMessage.class.getSimpleName() + " into a " + getClass().getSimpleName());
    }
 
    @Override
@@ -127,6 +146,7 @@ public class ClearDelayQueueCommand implements Command<ClearDelayQueueCommand, C
 
    /**
     * this command is always valid
+    * 
     * @return
     */
    @Override

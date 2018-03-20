@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.geometry.Pose3D;
 
 public class DetectedObjectPacket extends Packet<DetectedObjectPacket>
 {
-   public RigidBodyTransform pose;
+   public Pose3D pose;
    public int id;
 
    public DetectedObjectPacket()
@@ -15,7 +15,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket>
    @Override
    public void set(DetectedObjectPacket other)
    {
-      pose = new RigidBodyTransform(other.pose);
+      pose = new Pose3D(other.pose);
       id = other.id;
       setPacketInformation(other);
    }

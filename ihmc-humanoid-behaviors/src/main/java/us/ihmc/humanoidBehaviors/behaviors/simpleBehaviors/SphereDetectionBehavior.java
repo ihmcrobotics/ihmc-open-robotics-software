@@ -14,24 +14,24 @@ import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder.Shape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SphereDetectionBehavior extends AbstractBehavior
 {
@@ -106,8 +106,8 @@ public class SphereDetectionBehavior extends AbstractBehavior
       for (Sphere3D_F64 ball : balls)
       {
          id++;
-         RigidBodyTransform t = new RigidBodyTransform();
-         t.setTranslation(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
+         Pose3D t = new Pose3D();
+         t.setPosition(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
          sendPacket(HumanoidMessageTools.createDetectedObjectPacket(t, 4));
       }
 

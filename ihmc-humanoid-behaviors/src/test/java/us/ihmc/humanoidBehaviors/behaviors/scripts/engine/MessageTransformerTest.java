@@ -3,8 +3,12 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.DisableOnDebug;
+import org.junit.rules.Timeout;
 
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -22,7 +26,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajec
 
 public class MessageTransformerTest
 {
-   @Test(timeout = 30000)
+   @Rule
+   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
+
+   @Test(timeout = Integer.MAX_VALUE)
    public void testHandTrajectoryMessage()
    {
       Random random = new Random(6543);
@@ -47,7 +54,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testPelvisHeightTrajectoryMessage()
    {
       Random random = new Random(6543);
@@ -70,7 +77,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testAdjustFootstepMessage()
    {
       Random random = new Random(6543);
@@ -89,7 +96,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testFootstepDataMessage()
    {
       Random random = new Random(6543);
@@ -110,7 +117,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testFootstepDataListMessage()
    {
       Random random = new Random(6543);
@@ -134,7 +141,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testVehiclePosePacket()
    {
       Random random = new Random(6543);
@@ -153,7 +160,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = 30000)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testVideoPacket()
    {
       Random random = new Random(6543);

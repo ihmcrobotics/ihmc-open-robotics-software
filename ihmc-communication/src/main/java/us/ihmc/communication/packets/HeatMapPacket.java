@@ -11,7 +11,7 @@ public class HeatMapPacket extends Packet<HeatMapPacket>
 {
    public float[] data;
    public int width, height;
-   public String name;
+   public StringBuilder name = new StringBuilder();
 
    public HeatMapPacket()
    {
@@ -22,7 +22,7 @@ public class HeatMapPacket extends Packet<HeatMapPacket>
       this.data = Arrays.copyOf(other.data, other.data.length);
       this.width = other.width;
       this.height = other.height;
-      this.name = other.name;
+      this.name.append(other.name);
    }
 
    @Override
@@ -31,7 +31,8 @@ public class HeatMapPacket extends Packet<HeatMapPacket>
       this.data = Arrays.copyOf(other.data, other.data.length);
       this.width = other.width;
       this.height = other.height;
-      this.name = other.name;
+      this.name.setLength(0);
+      this.name.append(other.name);
       setPacketInformation(other);
    }
 

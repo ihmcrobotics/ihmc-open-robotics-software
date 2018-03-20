@@ -22,7 +22,6 @@ public class IHMCCommunicationKryoNetClassListTest
 
       for (Class<?> packetClass : packetClassList)
       {
-         System.out.println("Checking " + packetClass.getSimpleName());
          assertTrue("The class " + packetClass.getSimpleName() + " is not a packet", Packet.class.isAssignableFrom(packetClass));
       }
    }
@@ -33,8 +32,6 @@ public class IHMCCommunicationKryoNetClassListTest
       IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
       ArrayList<Class<?>> packetClassList = netClassList.getPacketClassList();
       Set<Class<?>> packetFieldSet = new HashSet<>(netClassList.getPacketFieldList());
-
-      assertTrue("String is not registered.", packetFieldSet.contains(String.class));
 
       for (Class<?> packetClass : packetClassList)
       {

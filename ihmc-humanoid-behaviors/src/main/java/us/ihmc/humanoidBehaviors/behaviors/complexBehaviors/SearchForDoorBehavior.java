@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
@@ -10,7 +11,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.DoorLocationPack
 
 public class SearchForDoorBehavior extends AbstractBehavior
 {
-   private RigidBodyTransform doorTransformToWorld;
+   private Pose3D doorTransformToWorld;
    private boolean recievedNewDoorLocation = false;
 
    protected final ConcurrentListeningQueue<DoorLocationPacket> doorLocationQueue = new ConcurrentListeningQueue<DoorLocationPacket>(10);
@@ -49,7 +50,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
       recievedNewDoorLocation = false;
    }
 
-   public RigidBodyTransform getLocation()
+   public Pose3D getLocation()
    {
       return doorTransformToWorld;
    }

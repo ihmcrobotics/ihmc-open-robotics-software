@@ -132,8 +132,6 @@ public class FootstepPlanningToolboxOutputStatus extends SettablePacket<Footstep
       footstepDataList.footstepDataList = new ArrayList<>();
       for (FootstepDataMessage footstepData : other.footstepDataList.footstepDataList)
          footstepDataList.footstepDataList.add(new FootstepDataMessage(footstepData));
-      if (other.notes != null)
-         footstepDataList.notes = new String(other.notes);
       footstepDataList.defaultSwingDuration = other.footstepDataList.defaultSwingDuration;
       footstepDataList.defaultTransferDuration = other.footstepDataList.defaultTransferDuration;
       footstepDataList.uniqueId = other.footstepDataList.uniqueId;
