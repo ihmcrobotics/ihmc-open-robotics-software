@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
@@ -11,7 +10,9 @@ import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -52,7 +53,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    // task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
-   private final QuadrupedTaskSpaceController taskSpaceController;
+   //private final QuadrupedTaskSpaceController taskSpaceController;
 
    // step planner
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -80,7 +81,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       // task space controllers
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
-      taskSpaceController = controllerToolbox.getTaskSpaceController();
+      //taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // step planner
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
@@ -148,6 +149,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       feetManager.requestFullContact();
 
       // initialize task space controller
+      /*
       taskSpaceControllerSettings.initialize();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -155,6 +157,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
       }
       taskSpaceController.reset();
+      */
 
       // initialize ground plane
       groundPlaneEstimator.clearContactPoints();
@@ -232,7 +235,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       jointSpaceManager.compute();
 
       // update joint setpoints
-      taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
+      //taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
       // update accumulated step adjustment
       if (onLiftOffTriggered.getBooleanValue())
