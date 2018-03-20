@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.geometry.Pose3D;
 
 public class DoorLocationPacket extends Packet<DoorLocationPacket>
 {
-   public RigidBodyTransform doorTransformToWorld;
+   public Pose3D doorTransformToWorld;
 
    public DoorLocationPacket()
    {
@@ -15,11 +15,11 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket>
    @Override
    public void set(DoorLocationPacket other)
    {
-      doorTransformToWorld = new RigidBodyTransform(other.doorTransformToWorld);
+      doorTransformToWorld = new Pose3D(other.doorTransformToWorld);
       setPacketInformation(other);
    }
 
-   public RigidBodyTransform getValveTransformToWorld()
+   public Pose3D getValveTransformToWorld()
    {
       return doorTransformToWorld;
    }

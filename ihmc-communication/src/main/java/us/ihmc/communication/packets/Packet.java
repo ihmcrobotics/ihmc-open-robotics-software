@@ -27,16 +27,11 @@ public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T
    @RosIgnoredField
    public byte source = (byte) PacketDestination.BROADCAST.ordinal();
 
-   @RosIgnoredField
-   @Optional(value = "scripting")
-   public String notes;
-
    public void setPacketInformation(Packet<?> other)
    {
       uniqueId = other.uniqueId;
       destination = other.destination;
       source = other.source;
-      notes = other.notes;
    }
 
    public void setDestination(PacketDestination destination)
@@ -77,16 +72,6 @@ public abstract class Packet<T extends Packet<T>> implements EpsilonComparable<T
    public boolean isClonable()
    {
       return true;
-   }
-
-   public void setNotes(String notes)
-   {
-      this.notes = notes;
-   }
-
-   public String getNotes()
-   {
-      return notes;
    }
 
    /**

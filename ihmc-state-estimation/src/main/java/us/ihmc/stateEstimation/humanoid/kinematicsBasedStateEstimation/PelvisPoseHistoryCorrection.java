@@ -358,6 +358,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       stateEstimatorPelvisPoseBuffer.put(pelvisPose, timeStamp);
    }
 
+   private final TimeStampedTransform3D timeStampedExternalPose = new TimeStampedTransform3D();
    /**
     * pulls the corrected pose from the buffer, check that the nonprocessed buffer has
     * corresponding pelvis poses and calculates the total error
@@ -365,7 +366,8 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private void processNewPacket()
    {
       StampedPosePacket newPacket = pelvisPoseCorrectionCommunicator.getNewExternalPose();
-      TimeStampedTransform3D timeStampedExternalPose = newPacket.getTransform();
+      timeStampedExternalPose.setTransform3D(newPacket.getPose());
+      timeStampedExternalPose.setTimeStamp(newPacket.getTimeStamp());
 
       if (stateEstimatorPelvisPoseBuffer.isInRange(timeStampedExternalPose.getTimeStamp()))
       {

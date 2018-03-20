@@ -27,12 +27,26 @@ import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 import org.reflections.Reflections;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.Orientation2D;
+import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.Vector2D32;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -42,6 +56,106 @@ public class PacketCodeQualityTest
 {
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
+   public void testPacketsHaveUniqueSimpleNameBasedHashCode()
+   { // This test won't fail on Arrays or Lists
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      TIntObjectHashMap<Class> allPacketSimpleNameBasedHashCode = new TIntObjectHashMap<>();
+      int numberOfCollisions = 0;
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         int simpleNameBasedHashCode = packetType.getSimpleName().hashCode();
+         if (allPacketSimpleNameBasedHashCode.containsKey(simpleNameBasedHashCode))
+         {
+            numberOfCollisions++;
+            if (verbose)
+            {
+               PrintTools.error("Hash-code collision between: " + packetType.getSimpleName() + " and " + allPacketSimpleNameBasedHashCode.get(simpleNameBasedHashCode).getSimpleName());
+            }
+         }
+      }
+
+      assertEquals("Found hash code collisions.", 0, numberOfCollisions);
+   }
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
+   public void testPacketsDeclarePrimitiveOrMessageTypeFields()
+   { // This test won't fail on Arrays or Lists
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      allPacketTypes.removeAll(reaInternalComms);
+      allPacketTypes.remove(LocalVideoPacket.class); // That guy is a packet but does not make it to the network. It will stay on Kryo. 
+
+      Map<Class<? extends Packet>, List<Class>> packetTypesWithIllegalFieldTypes = new HashMap<>();
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            Field[] fields = packetType.getDeclaredFields();
+            for (Field field : fields)
+            {
+               if (Modifier.isStatic(field.getModifiers()))
+                  continue;
+
+               Class<?> typeToCheck = field.getType();
+
+               while (typeToCheck.isArray())
+                  typeToCheck = typeToCheck.getComponentType();
+               if (Packet.class.isAssignableFrom(typeToCheck))
+                  continue;
+               if (isPrimitive(typeToCheck))
+                  continue;
+               if (thirdPartySerializableClasses.contains(typeToCheck))
+                  continue;
+               if (allowedEuclidTypes.contains(typeToCheck))
+                  continue;
+               if (!packetTypesWithIllegalFieldTypes.containsKey(packetType))
+                  packetTypesWithIllegalFieldTypes.put(packetType, new ArrayList<>());
+               packetTypesWithIllegalFieldTypes.get(packetType).add(typeToCheck);
+            }
+         }
+         catch (Exception e)
+         {
+            PrintTools.error("Problem with packet: " + packetType.getSimpleName());
+            e.printStackTrace();
+         }
+      }
+
+      if (verbose)
+      {
+         if (!packetTypesWithIllegalFieldTypes.isEmpty())
+         {
+            System.out.println();
+            System.out.println();
+            PrintTools.error("List of packet with illegal field type:");
+            packetTypesWithIllegalFieldTypes.entrySet().forEach(type -> PrintTools.error(type.getKey().getSimpleName() + ": "
+                  + type.getValue().stream().map(Class::getSimpleName).collect(Collectors.toList())));
+         }
+      }
+
+      assertTrue("Found illegal field types in Packet sub-types.", packetTypesWithIllegalFieldTypes.isEmpty());
+   }
+
+   private static boolean isPrimitive(Class<?> clazz)
+   {
+      if (clazz.isPrimitive())
+         return true;
+      if (clazz.isArray() && clazz.getComponentType().isPrimitive())
+         return true;
+      return false;
+   }
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
@@ -449,9 +563,7 @@ public class PacketCodeQualityTest
 
    private void checkIfAllFieldsArePublic(Class<?> clazz)
    {
-      if (clazz == String.class)
-         return;
-      if (clazz == ArrayList.class)
+      if (thirdPartySerializableClasses.contains(clazz) || allowedEuclidTypes.contains(clazz))
          return;
 
       for (Field field : clazz.getDeclaredFields())
@@ -468,5 +580,39 @@ public class PacketCodeQualityTest
          assertFalse("Class " + clazz.getCanonicalName() + " has final field " + field.getName() + " declared by "
                + field.getDeclaringClass().getCanonicalName(), Modifier.isFinal(field.getModifiers()));
       }
+   }
+
+   @SuppressWarnings("rawtypes")
+   private static final Set<Class<? extends Packet>> reaInternalComms;
+   static
+   {
+      Reflections reflections = new Reflections("us.ihmc.robotEnvironmentAwareness");
+      reaInternalComms = reflections.getSubTypesOf(Packet.class);
+   }
+
+   private static final Set<Class<?>> thirdPartySerializableClasses = new HashSet<>();
+   static
+   {
+      thirdPartySerializableClasses.add(List.class);
+      thirdPartySerializableClasses.add(ArrayList.class);
+      thirdPartySerializableClasses.add(StringBuilder.class);
+   }
+
+   private static final Set<Class<?>> allowedEuclidTypes = new HashSet<>();
+   static
+   {
+      allowedEuclidTypes.add(Point3D32.class);
+      allowedEuclidTypes.add(Vector3D32.class);
+      allowedEuclidTypes.add(Point3D.class);
+      allowedEuclidTypes.add(Vector3D.class);
+      allowedEuclidTypes.add(Point2D32.class);
+      allowedEuclidTypes.add(Vector2D32.class);
+      allowedEuclidTypes.add(Point2D.class);
+      allowedEuclidTypes.add(Vector2D.class);
+      allowedEuclidTypes.add(Quaternion.class);
+      allowedEuclidTypes.add(Quaternion32.class);
+      allowedEuclidTypes.add(Pose2D.class);
+      allowedEuclidTypes.add(Pose3D.class);
+      allowedEuclidTypes.add(Orientation2D.class);
    }
 }

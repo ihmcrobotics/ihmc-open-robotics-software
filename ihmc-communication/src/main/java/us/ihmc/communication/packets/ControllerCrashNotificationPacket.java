@@ -10,7 +10,7 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
    public static final byte ESTIMATOR_RUN = 5;
 
    public byte controllerCrashLocation;
-   public String stacktrace;
+   public StringBuilder stacktrace = new StringBuilder();
    
    public ControllerCrashNotificationPacket()
    {
@@ -21,7 +21,8 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
    public void set(ControllerCrashNotificationPacket other)
    {
       controllerCrashLocation = other.controllerCrashLocation;
-      stacktrace = other.stacktrace;
+      stacktrace.setLength(0);
+      stacktrace.append(other.stacktrace);
       setPacketInformation(other);
    }
 

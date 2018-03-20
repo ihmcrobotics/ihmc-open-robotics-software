@@ -62,9 +62,8 @@ public class CommandInputManager
    /** List of the listeners that should get notified when receiving a new valid command. */
    private final List<HasReceivedInputListener> hasReceivedInputListeners = new ArrayList<>();
    
-   /** command converter, helps converts packets to commands **/
-   private CommandConversionInterface commandConverter = null;
-
+   /** Converters used to perform custom conversion to commands for specific messages. **/
+   private List<CommandConversionInterface> commandConverters = new ArrayList<>();
 
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
@@ -95,8 +94,7 @@ public class CommandInputManager
     */
    public void registerConversionHelper(CommandConversionInterface commandConversionHelper)
    {
-      //update this to be a collection or map when you need more than one CommandConverter
-      this.commandConverter = commandConversionHelper;
+      this.commandConverters.add(commandConversionHelper);
    }
    
    /**
@@ -170,13 +168,10 @@ public class CommandInputManager
          PrintTools.warn(this, printStatementPrefix + "The buffer for the message: " + message.getClass().getSimpleName() + " is full. Message ignored.");
          return;
       }
-      
+
       Class<?> commandClass = nextCommand.getClass();
-      if (commandConverter != null && commandConverter.isConvertible(nextCommand, message))
-      {
-         commandConverter.process(nextCommand, message);
-      }
-      else
+
+      if (!performCustomConversion(message, nextCommand))
       {
          nextCommand.set(message);
       }
@@ -185,6 +180,32 @@ public class CommandInputManager
 
       for (int i = 0; i < hasReceivedInputListeners.size(); i++)
          hasReceivedInputListeners.get(i).hasReceivedInput((Class<? extends Command<?, ?>>) commandClass);
+   }
+
+   /**
+    * Finds the first converter in {@link #commandConverters} that can convert {@code message} into
+    * {@code commandToStoreMessage} and use it to convert the message.
+    * <p>
+    * If no command converter is found, this method does nothing and returns {@code false}.
+    * </p>
+    * 
+    * @param message the message to be converted into a command. Not modified.
+    * @param commandToStoreMessage the command in which the message is converted. Modified.
+    * @return whether the message was converted or not.
+    */
+   private <M extends Packet<M>> boolean performCustomConversion(M message, Command<?, M> commandToStoreMessage)
+   {
+      for (int i = 0; i < commandConverters.size(); i++)
+      {
+         CommandConversionInterface commandConverter = commandConverters.get(i);
+
+         if (commandConverter.isConvertible(commandToStoreMessage, message))
+         {
+            commandConverter.process(commandToStoreMessage, message);
+            return true;
+         }
+      }
+      return false;
    }
 
    /**

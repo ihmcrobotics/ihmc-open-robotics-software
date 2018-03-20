@@ -37,7 +37,18 @@ public class MessageTools
       SimulatedLidarScanPacket message = new SimulatedLidarScanPacket();
       message.ranges = ranges;
       message.sensorId = sensorId;
-      message.params = params;
+      message.params = new LidarScanParametersMessage();
+      message.params.timestamp = params.timestamp;
+      message.params.sweepYawMax = params.sweepYawMax;
+      message.params.sweepYawMin = params.sweepYawMin;
+      message.params.heightPitchMax = params.heightPitchMax;
+      message.params.heightPitchMin = params.heightPitchMin;
+      message.params.timeIncrement = params.timeIncrement;
+      message.params.scanTime = params.scanTime;
+      message.params.minRange = params.minRange;
+      message.params.maxRange = params.maxRange;
+      message.params.pointsPerSweep = params.pointsPerSweep;
+      message.params.scanHeight = params.scanHeight;
       return message;
    }
 
@@ -96,7 +107,9 @@ public class MessageTools
    public static DetectedFacesPacket createDetectedFacesPacket(String[] ids, Point3D[] positions)
    {
       DetectedFacesPacket message = new DetectedFacesPacket();
-      message.ids = ids;
+      message.ids = new StringBuilder[ids.length];
+      for (int i = 0; i < ids.length; i++)
+         message.ids[i].append(ids[i]);
       message.positions = positions;
       return message;
    }
@@ -257,7 +270,9 @@ public class MessageTools
    public static BoundingBoxesPacket createBoundingBoxesPacket(int[] packedBoxes, String[] labels)
    {
       BoundingBoxesPacket message = new BoundingBoxesPacket();
-      message.labels = labels;
+      message.labels = new StringBuilder[labels.length];
+      for (int i = 0; i < labels.length; i++)
+         message.labels[i].append(labels[i]);
       int n = packedBoxes.length / 4;
       message.boundingBoxXCoordinates = new int[n];
       message.boundingBoxYCoordinates = new int[n];
@@ -277,7 +292,7 @@ public class MessageTools
    {
       ControllerCrashNotificationPacket message = new ControllerCrashNotificationPacket();
       message.controllerCrashLocation = location.toByte();
-      message.stacktrace = stackTrace;
+      message.stacktrace.append(stackTrace);
       return message;
    }
 
@@ -302,7 +317,8 @@ public class MessageTools
       return createRequestPlanarRegionsListMessage(requestType, null, null);
    }
 
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType, BoundingBox3D boundingBoxInWorldForRequest)
+   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType,
+                                                                                       BoundingBox3D boundingBoxInWorldForRequest)
    {
       return createRequestPlanarRegionsListMessage(requestType, boundingBoxInWorldForRequest, null);
    }
@@ -312,12 +328,18 @@ public class MessageTools
       return createRequestPlanarRegionsListMessage(requestType, null, destination);
    }
 
-   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType, BoundingBox3D boundingBoxInWorldForRequest,
+   public static RequestPlanarRegionsListMessage createRequestPlanarRegionsListMessage(PlanarRegionsRequestType requestType,
+                                                                                       BoundingBox3D boundingBoxInWorldForRequest,
                                                                                        PacketDestination destination)
    {
       RequestPlanarRegionsListMessage message = new RequestPlanarRegionsListMessage();
       message.planarRegionsRequestType = requestType.toByte();
-      message.boundingBoxInWorldForRequest = boundingBoxInWorldForRequest;
+      message.boundingBoxInWorldForRequest = new BoundingBox3DMessage();
+      if (boundingBoxInWorldForRequest != null)
+      {
+         message.boundingBoxInWorldForRequest.minPoint.set(boundingBoxInWorldForRequest.getMinPoint());
+         message.boundingBoxInWorldForRequest.maxPoint.set(boundingBoxInWorldForRequest.getMaxPoint());
+      }
       if (destination != null)
          message.setDestination(destination);
       return message;
@@ -333,5 +355,11 @@ public class MessageTools
    public static <T extends Enum<T>> T fromByteToEnum(byte value, Class<T> enumType)
    {
       return enumType.getEnumConstants()[(int) value];
+   }
+
+   public static LidarScanParameters toLidarScanParameters(LidarScanParametersMessage message)
+   {
+      return new LidarScanParameters(message.pointsPerSweep, message.scanHeight, message.sweepYawMin, message.sweepYawMax, message.heightPitchMin,
+                                     message.heightPitchMax, message.timeIncrement, message.minRange, message.maxRange, message.scanTime, message.timestamp);
    }
 }

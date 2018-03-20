@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.geometry.Pose3D;
 
 public class ValveLocationPacket extends Packet<ValveLocationPacket>
 {
-   public RigidBodyTransform valveTransformToWorld;
+   public Pose3D valvePoseInWorld;
    public double valveRadius;
    
    
@@ -17,14 +17,14 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket>
    @Override
    public void set(ValveLocationPacket other)
    {
-      valveTransformToWorld = new RigidBodyTransform(other.valveTransformToWorld);
+      valvePoseInWorld = new Pose3D(other.valvePoseInWorld);
       valveRadius = other.valveRadius;
       setPacketInformation(other);
    }
 
-   public RigidBodyTransform getValveTransformToWorld()
+   public Pose3D getValveTransformToWorld()
    {
-      return valveTransformToWorld;
+      return valvePoseInWorld;
    }
 
    public double getValveRadius()
@@ -34,7 +34,7 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket>
    
    public boolean epsilonEquals(ValveLocationPacket turnValvePacket, double epsilon)
    {
-      boolean transformEquals = valveTransformToWorld.epsilonEquals(turnValvePacket.getValveTransformToWorld(), epsilon);
+      boolean transformEquals = valvePoseInWorld.epsilonEquals(turnValvePacket.getValveTransformToWorld(), epsilon);
       boolean radiusEquals = valveRadius == turnValvePacket.getValveRadius();
 
       return transformEquals  && radiusEquals;

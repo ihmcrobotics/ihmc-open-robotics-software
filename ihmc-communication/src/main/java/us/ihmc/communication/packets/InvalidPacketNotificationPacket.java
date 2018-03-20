@@ -2,8 +2,8 @@ package us.ihmc.communication.packets;
 
 public class InvalidPacketNotificationPacket extends SettablePacket<InvalidPacketNotificationPacket>
 {
-   public String packetClass;
-   public String errorMessage;
+   public StringBuilder packetClass = new StringBuilder();
+   public StringBuilder errorMessage = new StringBuilder();
 
    public InvalidPacketNotificationPacket()
    {
@@ -12,8 +12,20 @@ public class InvalidPacketNotificationPacket extends SettablePacket<InvalidPacke
 
    public void set(Class<? extends Packet<?>> packetClass, String errorMessage)
    {
-      this.packetClass = packetClass.getSimpleName();
-      this.errorMessage = errorMessage;
+      this.packetClass.setLength(0);
+      this.packetClass.append(packetClass.getSimpleName());
+      this.errorMessage.setLength(0);
+      this.errorMessage.append(errorMessage);
+   }
+
+   public String getPacketClassAsString()
+   {
+      return packetClass.toString();
+   }
+
+   public String getErrorMessageAsString()
+   {
+      return errorMessage.toString();
    }
 
    @Override

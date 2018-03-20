@@ -1,13 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.euclid.geometry.Pose3D;
 
 public class StampedPosePacket extends Packet<StampedPosePacket>
 {
-   public TimeStampedTransform3D transform;
+   public Pose3D pose;
+   public long timeStamp;
    public double confidenceFactor;
-   public String frameId;
+   public StringBuilder frameId = new StringBuilder();
 
    public StampedPosePacket()
    {
@@ -17,21 +18,27 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
    @Override
    public void set(StampedPosePacket other)
    {
-      transform = new TimeStampedTransform3D();
-      transform.set(other.transform);
+      pose = new Pose3D(other.pose);
+      timeStamp = other.timeStamp;
       confidenceFactor = other.confidenceFactor;
-      frameId = other.frameId;
+      frameId.setLength(0);
+      frameId.append(other.frameId);
       setPacketInformation(other);
    }
-
-   public String getFrameId()
+   
+   public String getFrameIdAsString()
    {
-      return frameId;
+      return frameId.toString();
    }
 
-   public TimeStampedTransform3D getTransform()
+   public Pose3D getPose()
    {
-      return transform;
+      return pose;
+   }
+
+   public long getTimeStamp()
+   {
+      return timeStamp;
    }
 
    public double getConfidenceFactor()
@@ -42,8 +49,8 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
    @Override
    public boolean epsilonEquals(StampedPosePacket other, double epsilon)
    {
-      boolean ret = frameId.equals(other.getFrameId());
-      ret &= transform.epsilonEquals(other.getTransform(), epsilon);
+      boolean ret = frameId.equals(other.frameId);
+      ret &= pose.epsilonEquals(other.getPose(), epsilon);
       return ret;
    }
 }

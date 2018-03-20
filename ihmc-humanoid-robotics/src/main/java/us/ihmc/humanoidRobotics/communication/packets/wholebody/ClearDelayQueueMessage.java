@@ -3,13 +3,13 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 import us.ihmc.communication.packets.Packet;
 
 /**
- * This message is used to clear the delay buffers on the controller,
- * If you sent a message with a delay and now you do not want them executed, use this command
+ * This message is used to clear the delay buffers on the controller, If you sent a message with a
+ * delay and now you do not want them executed, use this command
  */
 public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
 {
    /** the class you want to clear **/
-   public Class<? extends Packet<?>> clazz;
+   public int classSimpleNameBasedHashCode;
 
    /** clear all the delay buffers **/
    public boolean clearAllDelayBuffers;
@@ -25,31 +25,34 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
    @Override
    public void set(ClearDelayQueueMessage other)
    {
-      clazz = other.clazz;
+      classSimpleNameBasedHashCode = other.classSimpleNameBasedHashCode;
       clearAllDelayBuffers = other.clearAllDelayBuffers;
       setPacketInformation(other);
    }
 
    /**
-    * set the class you want to clear
-    * @param clazz the class you want to clear
+    * set the class you want to clear.
+    * 
+    * @param classSimpleNameBasedHashCode the hash code of the class you want to clear: {@code classToClear.getSimpleName().hashCode()}.
     */
-   public void setClassToClear(Class<? extends Packet<?>> clazz)
+   public void setClassToClearSimpleNameBasedHashCode(int classSimpleNameBasedHashCode)
    {
-      this.clazz = clazz;
+      this.classSimpleNameBasedHashCode = classSimpleNameBasedHashCode;
    }
 
    /**
     * get the class to clear
+    * 
     * @param clazz the class to clear
     */
-   public Class<? extends Packet<?>> getClassToClear()
+   public int getClassToClearSimpleNameBasedHashCode()
    {
-      return clazz;
+      return classSimpleNameBasedHashCode;
    }
 
    /**
     * set whether or not you want to clear all the delay buffers
+    * 
     * @param whether or not to clear all the delay buffers
     */
    public void setClearAllDelayBuffers(boolean clearAll)
@@ -59,6 +62,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
 
    /**
     * get whether or not to clear all the delay buffers
+    * 
     * @param whether or not to clear all the delay buffers
     */
    public boolean getClearAllDelayBuffers()
@@ -73,12 +77,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
          return true;
       if (other == null)
          return false;
-      if (clazz == null)
-      {
-         if (other.clazz != null)
-            return false;
-      }
-      else if (!clazz.equals(other.clazz))
+      if (classSimpleNameBasedHashCode != other.classSimpleNameBasedHashCode)
          return false;
       if (clearAllDelayBuffers != other.clearAllDelayBuffers)
          return false;

@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import boofcv.struct.calib.IntrinsicParameters;
@@ -434,6 +435,11 @@ public class HumanoidMessageTools
    }
 
    public static DoorLocationPacket createDoorLocationPacket(RigidBodyTransform doorTransformToWorld)
+   {
+      return createDoorLocationPacket(new Pose3D(doorTransformToWorld));
+   }
+
+   public static DoorLocationPacket createDoorLocationPacket(Pose3D doorTransformToWorld)
    {
       DoorLocationPacket message = new DoorLocationPacket();
       message.doorTransformToWorld = doorTransformToWorld;
@@ -1110,7 +1116,7 @@ public class HumanoidMessageTools
    }
 
    public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, Point3D actualFootPositionInWorld,
-                                                     Quaternion actualFootOrientationInWorld)
+                                                            Quaternion actualFootOrientationInWorld)
    {
       FootstepStatusMessage message = new FootstepStatusMessage();
       message.footstepStatus = status.toByte();
@@ -1125,7 +1131,7 @@ public class HumanoidMessageTools
    }
 
    public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, Point3D actualFootPositionInWorld,
-                                                     Quaternion actualFootOrientationInWorld, RobotSide robotSide)
+                                                            Quaternion actualFootOrientationInWorld, RobotSide robotSide)
    {
       FootstepStatusMessage message = new FootstepStatusMessage();
       message.footstepStatus = status.toByte();
@@ -1139,8 +1145,8 @@ public class HumanoidMessageTools
    }
 
    public static FootstepStatusMessage createFootstepStatus(FootstepStatus status, int footstepIndex, Point3D desiredFootPositionInWorld,
-                                                     Quaternion desiredFootOrientationInWorld, Point3D actualFootPositionInWorld,
-                                                     Quaternion actualFootOrientationInWorld, RobotSide robotSide)
+                                                            Quaternion desiredFootOrientationInWorld, Point3D actualFootPositionInWorld,
+                                                            Quaternion actualFootOrientationInWorld, RobotSide robotSide)
    {
       FootstepStatusMessage message = new FootstepStatusMessage();
       message.footstepStatus = status.toByte();
@@ -1209,8 +1215,8 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep, double thetaStart,
-                                                                           ArrayList<FootstepDataMessage> goals)
+   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep,
+                                                                           double thetaStart, ArrayList<FootstepDataMessage> goals)
    {
       FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
       message.footstepPlanRequestType = requestType.toByte();
@@ -1220,8 +1226,8 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep, double thetaStart,
-                                                                           ArrayList<FootstepDataMessage> goals, double maxSuboptimality)
+   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep,
+                                                                           double thetaStart, ArrayList<FootstepDataMessage> goals, double maxSuboptimality)
    {
       FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
       message.footstepPlanRequestType = requestType.toByte();
@@ -1412,7 +1418,7 @@ public class HumanoidMessageTools
       message.data = data;
       message.position = new Point3D(position);
       message.orientation = new Quaternion(orientation);
-      message.intrinsicParameters = intrinsicParameters;
+      message.intrinsicParameters = toIntrinsicParametersMessage(intrinsicParameters);
       return message;
    }
 
@@ -1433,7 +1439,7 @@ public class HumanoidMessageTools
       message.data = data;
       message.position = new Point3D(position);
       message.orientation = new Quaternion(orientation);
-      message.intrinsicParameters = intrinsicParameters;
+      message.intrinsicParameters = toIntrinsicParametersMessage(intrinsicParameters);
       return message;
    }
 
@@ -1442,7 +1448,7 @@ public class HumanoidMessageTools
       LocalVideoPacket message = new LocalVideoPacket();
       message.timeStamp = timeStamp;
       message.image = image;
-      message.intrinsicParameters = intrinsicParameters;
+      message.intrinsicParameters = toIntrinsicParametersMessage(intrinsicParameters);
       return message;
    }
 
@@ -1598,7 +1604,7 @@ public class HumanoidMessageTools
    public static SimpleCoactiveBehaviorDataPacket createSimpleCoactiveBehaviorDataPacket(String key, double value)
    {
       SimpleCoactiveBehaviorDataPacket message = new SimpleCoactiveBehaviorDataPacket();
-      message.key = key;
+      message.key.append(key);
       message.value = value;
       return message;
    }
@@ -1803,8 +1809,9 @@ public class HumanoidMessageTools
    public static StampedPosePacket createStampedPosePacket(String frameId, TimeStampedTransform3D transform, double confidenceFactor)
    {
       StampedPosePacket message = new StampedPosePacket();
-      message.frameId = frameId;
-      message.transform = transform;
+      message.frameId.append(frameId);
+      message.pose = new Pose3D(transform.getTransform3D());
+      message.timeStamp = transform.getTimeStamp();
       message.confidenceFactor = confidenceFactor;
       return message;
    }
@@ -1841,7 +1848,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static DetectedObjectPacket createDetectedObjectPacket(RigidBodyTransform pose, int id)
+   public static DetectedObjectPacket createDetectedObjectPacket(Pose3D pose, int id)
    {
       DetectedObjectPacket message = new DetectedObjectPacket();
       message.pose = pose;
@@ -2000,7 +2007,7 @@ public class HumanoidMessageTools
    public static ClearDelayQueueMessage createClearDelayQueueMessage(Class<? extends Packet<?>> clazz)
    {
       ClearDelayQueueMessage message = new ClearDelayQueueMessage();
-      message.clazz = clazz;
+      message.classSimpleNameBasedHashCode = clazz.getSimpleName().hashCode();
       return message;
    }
 
@@ -2008,14 +2015,22 @@ public class HumanoidMessageTools
    {
       LocalizationStatusPacket message = new LocalizationStatusPacket();
       message.overlap = overlap;
-      message.status = status;
+      message.status.append(status);
       return message;
    }
 
    public static ValveLocationPacket createValveLocationPacket(RigidBodyTransform valveTransformToWorld, double valveRadius)
    {
       ValveLocationPacket message = new ValveLocationPacket();
-      message.valveTransformToWorld = valveTransformToWorld;
+      message.valvePoseInWorld = new Pose3D(valveTransformToWorld);
+      message.valveRadius = valveRadius;
+      return message;
+   }
+
+   public static ValveLocationPacket createValveLocationPacket(Pose3D valvePoseInWorld, double valveRadius)
+   {
+      ValveLocationPacket message = new ValveLocationPacket();
+      message.valvePoseInWorld = valvePoseInWorld;
       message.valveRadius = valveRadius;
       return message;
    }
@@ -2092,5 +2107,39 @@ public class HumanoidMessageTools
    {
       if (bodyPart.isRobotSideNeeded())
          throw new RuntimeException("Need to provide robotSide for the bodyPart: " + bodyPart);
+   }
+
+   public static IntrinsicParametersMessage toIntrinsicParametersMessage(IntrinsicParameters intrinsicParameters)
+   {
+      IntrinsicParametersMessage intrinsicParametersMessage = new IntrinsicParametersMessage();
+      intrinsicParametersMessage.width = intrinsicParameters.width;
+      intrinsicParametersMessage.height = intrinsicParameters.height;
+      intrinsicParametersMessage.fx = intrinsicParameters.fx;
+      intrinsicParametersMessage.fy = intrinsicParameters.fy;
+      intrinsicParametersMessage.skew = intrinsicParameters.skew;
+      intrinsicParametersMessage.cx = intrinsicParameters.cx;
+      intrinsicParametersMessage.cy = intrinsicParameters.cy;
+      if (intrinsicParameters.radial != null)
+         intrinsicParametersMessage.radial = Arrays.copyOf(intrinsicParameters.radial, intrinsicParameters.radial.length);
+      intrinsicParametersMessage.t1 = intrinsicParameters.t1;
+      intrinsicParametersMessage.t2 = intrinsicParameters.t2;
+      return intrinsicParametersMessage;
+   }
+
+   public static IntrinsicParameters toIntrinsicParameters(IntrinsicParametersMessage message)
+   {
+      IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+      intrinsicParameters.width = message.width;
+      intrinsicParameters.height = message.height;
+      intrinsicParameters.fx = message.fx;
+      intrinsicParameters.fy = message.fy;
+      intrinsicParameters.skew = message.skew;
+      intrinsicParameters.cx = message.cx;
+      intrinsicParameters.cy = message.cy;
+      if (message.radial != null)
+         intrinsicParameters.radial = Arrays.copyOf(message.radial, message.radial.length);
+      intrinsicParameters.t1 = message.t1;
+      intrinsicParameters.t2 = message.t2;
+      return intrinsicParameters;
    }
 }
