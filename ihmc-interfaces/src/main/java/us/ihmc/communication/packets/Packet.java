@@ -1,7 +1,5 @@
 package us.ihmc.communication.packets;
 
-import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
-
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
