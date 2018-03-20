@@ -39,7 +39,7 @@ public class SimpleCoactiveBehaviorDataPacket implements Settable<SimpleCoactive
       return key_;
    }
 
-   public void setKey(String key)
+   public void setKey(java.lang.String key)
    {
       key_.setLength(0);
       key_.append(key);

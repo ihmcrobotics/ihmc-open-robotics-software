@@ -71,7 +71,7 @@ public class StampedPosePacket implements Settable<StampedPosePacket>, EpsilonCo
       return frame_id_;
    }
 
-   public void setFrameId(String frame_id)
+   public void setFrameId(java.lang.String frame_id)
    {
       frame_id_.setLength(0);
       frame_id_.append(frame_id);

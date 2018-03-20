@@ -50,7 +50,7 @@ public class LocalizationStatusPacket implements Settable<LocalizationStatusPack
       return status_;
    }
 
-   public void setStatus(String status)
+   public void setStatus(java.lang.String status)
    {
       status_.setLength(0);
       status_.append(status);

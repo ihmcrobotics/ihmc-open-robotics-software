@@ -78,7 +78,7 @@ public class TextToSpeechPacket implements Settable<TextToSpeechPacket>, Epsilon
       return text_to_speak_;
    }
 
-   public void setTextToSpeak(String text_to_speak)
+   public void setTextToSpeak(java.lang.String text_to_speak)
    {
       text_to_speak_.setLength(0);
       text_to_speak_.append(text_to_speak);

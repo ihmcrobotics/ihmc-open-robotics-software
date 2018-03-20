@@ -56,7 +56,7 @@ public class ControllerCrashNotificationPacket implements Settable<ControllerCra
       return stacktrace_;
    }
 
-   public void setStacktrace(String stacktrace)
+   public void setStacktrace(java.lang.String stacktrace)
    {
       stacktrace_.setLength(0);
       stacktrace_.append(stacktrace);
