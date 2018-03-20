@@ -123,7 +123,7 @@ public class GroundContactForceMomentumQPSolver
       regularizationMatrix = new DenseMatrix64F(problemSize, problemSize);
 
       momentumRateRegularization.set(0.00001);
-      momentumAccelerationRegularization.set(0.0001);
+      momentumAccelerationRegularization.set(0.000001);
       double defaultRhoRegularization = 0.00001;
       for (int i = 0; i < momentumSize; i++)
          regularizationMatrix.set(i, i, momentumRateRegularization.getDoubleValue());

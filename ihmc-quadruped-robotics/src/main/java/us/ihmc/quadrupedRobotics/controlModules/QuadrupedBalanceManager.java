@@ -118,7 +118,7 @@ public class QuadrupedBalanceManager
 
       crossoverProjection = new QuadrupedStepCrossoverProjection(controllerToolbox.getReferenceFrames().getBodyZUpFrame(), registry);
 
-      linearMomentumRateWeight.set(5.0, 5.0, 1.0);
+      linearMomentumRateWeight.set(10.0, 10.0, 1.0);
       momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
       momentumRateCommand.setSelectionMatrixForLinearControl();
 
