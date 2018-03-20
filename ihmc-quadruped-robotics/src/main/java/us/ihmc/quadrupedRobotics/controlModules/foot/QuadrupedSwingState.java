@@ -162,6 +162,9 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
       if(createSwingTrajectoryGraphics)
          updateGraphics(currentTime, currentStepCommand.getTimeInterval().getEndTime());
 
+      soleForceCommand.changeFrame(soleFrame);
+      virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
+
       super.doControl();
 
       // Trigger support phase.
@@ -174,7 +177,9 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
          return QuadrupedFootControlModule.FootEvent.TIMEOUT;
       }
       else
+      {
          return null;
+      }
    }
 
    @Override

@@ -74,6 +74,8 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
       solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
       solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, soleLinearVelocityEstimate);
 
+      virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
+
       double currentTime = timestamp.getDoubleValue();
       if (useSoleForceFeedForwardParameter.getValue())
       {
