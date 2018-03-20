@@ -94,6 +94,8 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
          solePositionControllerSetpoints.getSolePosition().set(controllerToolbox.getTaskSpaceEstimates().getSolePosition(robotQuadrant));
          solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
 
+         virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
+
          super.doControl();
 
          return QuadrupedFootControlModule.FootEvent.TIMEOUT;
@@ -105,6 +107,8 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
          solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
          solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
          solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant));
+
+         virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
 
          super.doControl();
 
