@@ -51,7 +51,6 @@ public class WholeBodyControlCoreToolbox
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody vmcMainBody;
-   private RigidBody[] controlledBodies;
 
    private List<? extends ContactablePlaneBody> contactablePlaneBodies;
 
@@ -90,13 +89,13 @@ public class WholeBodyControlCoreToolbox
     * sufficient to run the inverse kinematics module. Not that at the moment this method is empty,
     * it should be called wherever the inverse kinematics module is called in case in the future new
     * parameters are added.
-    * <li>{@link #setupForVirtualModelControlSolver(RigidBody, RigidBody[])} to complete the
+    * <li>{@link #setupForVirtualModelControlSolver(RigidBody)} to complete the
     * parameters necessary and sufficient to run the virtual model control module.
     * </ul>
     * Calling these methods will also notice the {@link WholeBodyControllerCore} at construction
     * time which module is to be created.
     * </p>
-    * 
+    *
     * @param controlDT duration of one control tick.
     * @param gravityZ magnitude of the gravity assumed to be along the z-axis. The parameter is
     *           assumed to be positive.
@@ -141,7 +140,7 @@ public class WholeBodyControlCoreToolbox
     * control but is highly beneficial to keep the system in a safe state even if most of it is
     * uncontrolled and is also useful to escape singularity configurations.
     * </p>
-    * 
+    *
     * @param jointPrivilegedConfigurationParameters the set of parameters necessary to initialize
     *           the {@link JointPrivilegedConfigurationHandler}.
     */
@@ -157,7 +156,7 @@ public class WholeBodyControlCoreToolbox
     * <p>
     * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
     * </p>
-    * 
+    *
     * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot
     *           weight.
     */
@@ -188,26 +187,24 @@ public class WholeBodyControlCoreToolbox
     * <p>
     * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
     * </p>
-    * 
+    *
     * @param vmcMainBody the main rigid-body of the robot.
     * @param controlledBodies the set of rigid-bodies that are to be controllable.
     * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot
     *           weight.
     */
-   public void setupForVirtualModelControlSolver(RigidBody vmcMainBody, RigidBody[] controlledBodies,
-                                                 List<? extends ContactablePlaneBody> contactablePlaneBodies)
+   public void setupForVirtualModelControlSolver(RigidBody vmcMainBody, List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
       enableVirtualModelControlModule = true;
       // TODO add tools specific to the virtual model control module here.
       this.vmcMainBody = vmcMainBody;
-      this.controlledBodies = controlledBodies;
       this.contactablePlaneBodies = contactablePlaneBodies;
    }
 
    /**
     * Informs whereas the inverse dynamics module is setup for the controller core using this
     * toolbox.
-    * 
+    *
     * @return {@code true} if the inverse dynamics module is setup, {@code false} otherwise.
     */
    public boolean isEnableInverseDynamicsModule()
@@ -218,7 +215,7 @@ public class WholeBodyControlCoreToolbox
    /**
     * Informs whereas the inverse kinematics module is setup for the controller core using this
     * toolbox.
-    * 
+    *
     * @return {@code true} if the inverse kinematics module is setup, {@code false} otherwise.
     */
    public boolean isEnableInverseKinematicsModule()
@@ -229,7 +226,7 @@ public class WholeBodyControlCoreToolbox
    /**
     * Informs whereas the virtual model control module is setup for the controller core using this
     * toolbox.
-    * 
+    *
     * @return {@code true} if the virtual model control module is setup, {@code false} otherwise.
     */
    public boolean isEnableVirtualModelControlModule()
@@ -300,7 +297,7 @@ public class WholeBodyControlCoreToolbox
     * The convective term is: ADot * v.
     * </ul>
     * </p>
-    * 
+    *
     * @return the centroidalMomentumHandler.
     */
    public CentroidalMomentumHandler getCentroidalMomentumHandler()
@@ -321,11 +318,6 @@ public class WholeBodyControlCoreToolbox
    public RigidBody getVirtualModelControlMainBody()
    {
       return vmcMainBody;
-   }
-
-   public RigidBody[] getControlledBodies()
-   {
-      return controlledBodies;
    }
 
    public double getControlDT()

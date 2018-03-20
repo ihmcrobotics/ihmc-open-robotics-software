@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
@@ -56,6 +57,18 @@ public class QuadrupedControlManagerFactory
 
       balanceManager = new QuadrupedBalanceManager(toolbox, postureProvider, registry, toolbox.getRuntimeEnvironment().getGraphicsListRegistry());
       return balanceManager;
+   }
+
+   public FeedbackControlCommandList createFeedbackControlTemplate()
+   {
+      FeedbackControlCommandList ret = new FeedbackControlCommandList();
+
+      if (feetManager != null)
+         ret.addCommandList(feetManager.createFeedbackControlTemplate());
+      if (bodyOrientationManager != null)
+         ret.addCommand(bodyOrientationManager.createFeedbackControlTemplate());
+
+      return ret;
    }
 
    public QuadrupedSolePositionController getOrCreateSolePositionController(RobotQuadrant robotQuadrant)

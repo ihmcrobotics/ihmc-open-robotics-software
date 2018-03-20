@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -63,6 +65,8 @@ public class QuadrupedBalanceManager
    private final YoFramePoint yoVrpPositionSetpoint = new YoFramePoint("vrpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint yoCmpPositionSetpoint = new YoFramePoint("cmpPositionSetpoint", ReferenceFrame.getWorldFrame(), registry);
 
+   private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", worldFrame, registry);
+
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final GroundPlaneEstimator groundPlaneEstimator;
 
@@ -72,6 +76,9 @@ public class QuadrupedBalanceManager
 
    private final QuadrantDependentList<FramePoint3D> currentSolePositions;
    private final FramePoint3D tempPoint = new FramePoint3D();
+
+   private final FrameVector3D momentumRateForCommand = new FrameVector3D();
+   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
 
    public QuadrupedBalanceManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
                                   YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -93,6 +100,10 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, postureProvider, registry, yoGraphicsListRegistry);
 
       crossoverProjection = new QuadrupedStepCrossoverProjection(controllerToolbox.getReferenceFrames().getBodyZUpFrame(), registry);
+
+      linearMomentumRateWeight.set(5.0, 5.0, 1.0);
+      momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
+      momentumRateCommand.setSelectionMatrixForLinearControl();
 
       adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
       {
@@ -194,6 +205,13 @@ public class QuadrupedBalanceManager
 
       momentumRateOfChangeModule.compute(linearMomentumRateOfChangeToPack, yoVrpPositionSetpoint, yoCmpPositionSetpoint, dcmPositionEstimate,
                                          yoDesiredDCMPosition, yoDesiredDCMVelocity);
+
+      linearMomentumRateOfChangeToPack.changeFrame(worldFrame);
+      momentumRateForCommand.setIncludingFrame(linearMomentumRateOfChangeToPack);
+      momentumRateForCommand.subZ(controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getRuntimeEnvironment().getGravity());
+
+      momentumRateCommand.setLinearMomentumRate(momentumRateForCommand);
+      momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
    }
 
    public void completedStep()
@@ -239,5 +257,10 @@ public class QuadrupedBalanceManager
    public FrameVector3DReadOnly getAccumulatedStepAdjustment()
    {
       return accumulatedStepAdjustment;
+   }
+
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return momentumRateCommand;
    }
 }
