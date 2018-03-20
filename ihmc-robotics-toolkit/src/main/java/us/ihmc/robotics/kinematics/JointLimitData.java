@@ -4,9 +4,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointLimitData
 {
-   private double upperPositionLimit = Double.NaN;
-   private double lowerPositionLimit = Double.NaN;
-
    private double softUpperPositionLimit = Double.NaN;
    private double softLowerPositionLimit = Double.NaN;
 
@@ -21,11 +18,14 @@ public class JointLimitData
       clear();
    }
 
+   public JointLimitData(OneDoFJoint joint)
+   {
+      clear();
+      setJointLimits(joint);
+   }
+
    public void clear()
    {
-      upperPositionLimit = Double.NaN;
-      lowerPositionLimit = Double.NaN;
-
       softUpperPositionLimit = Double.NaN;
       softLowerPositionLimit = Double.NaN;
 
@@ -38,44 +38,42 @@ public class JointLimitData
 
    public void set(JointLimitData other)
    {
-      upperPositionLimit = other.upperPositionLimit;
-      lowerPositionLimit = other.lowerPositionLimit;
       softUpperPositionLimit = other.softUpperPositionLimit;
       softLowerPositionLimit = other.softLowerPositionLimit;
+
       velocityLimit = other.velocityLimit;
       torqueLimit = other.torqueLimit;
+
       positionLimitStiffness = other.positionLimitStiffness;
       positionLimitDamping = other.positionLimitDamping;
    }
 
+   public void setJointLimits(OneDoFJoint joint)
+   {
+      softUpperPositionLimit = joint.getJointLimitUpper();
+      softLowerPositionLimit = joint.getJointLimitLower();
+
+      velocityLimit = joint.getVelocityLimit();
+      torqueLimit = joint.getEffortLimit();
+   }
+
    public void completeWith(JointLimitData other)
    {
-      if (!hasUpperLimit())
-         upperPositionLimit = other.upperPositionLimit;
-      if (!hasLowerLimit())
-         lowerPositionLimit = other.lowerPositionLimit;
       if (!hasSoftUpperLimit())
          softUpperPositionLimit = other.softUpperPositionLimit;
       if (!hasSoftLowerLimit())
          softLowerPositionLimit = other.softLowerPositionLimit;
+
       if (!hasVelocityLimit())
          velocityLimit = other.velocityLimit;
+
       if (!hasTorqueLimit())
          torqueLimit = other.torqueLimit;
+
       if (!hasPositionLimitStiffness())
          positionLimitStiffness = other.positionLimitStiffness;
       if (!hasPositionLimitDamping())
          positionLimitDamping = other.positionLimitDamping;
-   }
-
-   public boolean hasUpperLimit()
-   {
-      return !Double.isNaN(upperPositionLimit);
-   }
-
-   public boolean hasLowerLimit()
-   {
-      return !Double.isNaN(lowerPositionLimit);
    }
 
    public boolean hasSoftUpperLimit()
@@ -108,16 +106,6 @@ public class JointLimitData
       return !Double.isNaN(positionLimitDamping);
    }
 
-   public double getUpperPositionLimit()
-   {
-      return upperPositionLimit;
-   }
-
-   public double getLowerPositionLimit()
-   {
-      return lowerPositionLimit;
-   }
-
    public double getSoftUpperPositionLimit()
    {
       return softUpperPositionLimit;
@@ -148,21 +136,9 @@ public class JointLimitData
       return positionLimitDamping;
    }
 
-
-
    public void setVelocityLimit(double velocityLimit)
    {
       this.velocityLimit = velocityLimit;
-   }
-
-   public void setUpperPositionLimit(double upperPositionLimit)
-   {
-      this.upperPositionLimit = upperPositionLimit;
-   }
-
-   public void setLowerPositionLimit(double lowerPositionLimit)
-   {
-      this.lowerPositionLimit = lowerPositionLimit;
    }
 
    public void setSoftUpperPositionLimit(double softUpperPositionLimit)
@@ -175,9 +151,18 @@ public class JointLimitData
       this.softLowerPositionLimit = softLowerPositionLimit;
    }
 
-
    public void setTorqueLimit(double torqueLimit)
    {
       this.torqueLimit = torqueLimit;
+   }
+
+   public void setPositionLimitStiffness(double stiffness)
+   {
+      this.positionLimitStiffness = stiffness;
+   }
+
+   public void setPositionLimitDamping(double damping)
+   {
+      this.positionLimitDamping = damping;
    }
 }
