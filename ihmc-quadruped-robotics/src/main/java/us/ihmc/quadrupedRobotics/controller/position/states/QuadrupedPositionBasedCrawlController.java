@@ -4,11 +4,7 @@ import java.awt.Color;
 import java.util.Random;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.map.TDoubleCharMap;
-import gnu.trove.map.TDoubleObjectMap;
-import gnu.trove.map.hash.TCharDoubleHashMap;
-import gnu.trove.map.hash.TDoubleCharHashMap;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -49,17 +45,7 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.tools.lists.PairList;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
@@ -84,12 +70,20 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class QuadrupedPositionBasedCrawlController implements QuadrupedController
 {
@@ -126,7 +120,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final FullQuadrupedRobotModel feedForwardFullRobotModel;
    private final QuadrupedReferenceFrames feedForwardReferenceFrames;
 
-   private final StateMachine<CrawlGateWalkingState> walkingStateMachine;
+   private final StateMachine<CrawlGateWalkingState, State> walkingStateMachine;
    private final QuadrupleSupportState quadrupleSupportState;
    private final FilterDesiredsToMatchCrawlControllerState filterDesiredsToMatchCrawlControllerOnTransitionIn;
    private final QuadrupedLegInverseKinematicsCalculator inverseKinematicsCalculators;
@@ -399,7 +393,6 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       this.referenceFrames = new QuadrupedReferenceFrames(environment.getFullRobotModel(), physicalProperties);
       this.actualFullRobotModel = environment.getFullRobotModel();
       this.centerOfMassJacobian = new CenterOfMassJacobian(environment.getFullRobotModel().getElevator());
-      this.walkingStateMachine = new StateMachine<CrawlGateWalkingState>("QuadrupedCrawlState", "walkingStateTranistionTime", CrawlGateWalkingState.class, robotTimestamp, registry);
       this.inverseKinematicsCalculators = legIkCalculator;
 
       actualRobotRootJoint = actualFullRobotModel.getRootJoint();
@@ -581,23 +574,22 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       desiredCoMPoseReferenceFrame.setPoseAndUpdate(centerOfMassPose);
       updateFeedForwardModelAndFrames();
 
-      quadrupleSupportState = new QuadrupleSupportState(CrawlGateWalkingState.QUADRUPLE_SUPPORT, DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT, 0.2);
-      TripleSupportState tripleSupportState = new TripleSupportState(CrawlGateWalkingState.TRIPLE_SUPPORT);
+      quadrupleSupportState = new QuadrupleSupportState(DEFAULT_TIME_TO_STAY_IN_DOUBLE_SUPPORT, 0.2);
+      TripleSupportState tripleSupportState = new TripleSupportState();
 
-      filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS, modelFactory);
+      filterDesiredsToMatchCrawlControllerOnTransitionIn = new FilterDesiredsToMatchCrawlControllerState();
 
-      walkingStateMachine.addState(filterDesiredsToMatchCrawlControllerOnTransitionIn);
-      walkingStateMachine.addState(quadrupleSupportState);
-      walkingStateMachine.addState(tripleSupportState);
-      walkingStateMachine.setCurrentState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS);
+      StateMachineFactory<CrawlGateWalkingState, State> factory = new StateMachineFactory<>(CrawlGateWalkingState.class);
+      factory.setNamePrefix("QuadrupedCrawlState").setRegistry(registry).buildYoClock(robotTimestamp);
+      factory.addState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS, filterDesiredsToMatchCrawlControllerOnTransitionIn);
+      factory.addState(CrawlGateWalkingState.QUADRUPLE_SUPPORT, quadrupleSupportState);
+      factory.addState(CrawlGateWalkingState.TRIPLE_SUPPORT, tripleSupportState);
 
-      StateTransitionCondition quadrupleToTripleCondition = new QuadrupleToTripleCondition(quadrupleSupportState);
-      StateTransitionCondition tripleToQuadrupleCondition = new TripleToQuadrupleCondition(tripleSupportState);
-      StateTransitionCondition filterToQuadrupleCondition = new FilterToQuadrupleCondition(filterDesiredsToMatchCrawlControllerOnTransitionIn);
+      factory.addTransition(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS, CrawlGateWalkingState.QUADRUPLE_SUPPORT, new FilterToQuadrupleCondition(filterDesiredsToMatchCrawlControllerOnTransitionIn));
+      factory.addTransition(CrawlGateWalkingState.QUADRUPLE_SUPPORT, CrawlGateWalkingState.TRIPLE_SUPPORT, new QuadrupleToTripleCondition(quadrupleSupportState));
+      factory.addTransition(CrawlGateWalkingState.TRIPLE_SUPPORT, CrawlGateWalkingState.QUADRUPLE_SUPPORT, new TripleToQuadrupleCondition());
 
-      filterDesiredsToMatchCrawlControllerOnTransitionIn.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, filterToQuadrupleCondition));
-      quadrupleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.TRIPLE_SUPPORT, quadrupleToTripleCondition));
-      tripleSupportState.addStateTransition(new StateTransition<CrawlGateWalkingState>(CrawlGateWalkingState.QUADRUPLE_SUPPORT, tripleToQuadrupleCondition));
+      walkingStateMachine = factory.build(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS);
 
       YoBoolean applyJoystickInput = new YoBoolean("applyJoystickInput", registry);
       applyJoystickInput.set(true);
@@ -732,8 +724,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       updateGraphics();
       pollDataProviders();
       checkForReversedVelocity();
-      walkingStateMachine.checkTransitionConditions();
-      walkingStateMachine.doAction();
+      walkingStateMachine.doActionAndTransition();
       updateDesiredCoMTrajectory();
       updateDesiredHeight();
       updateDesiredYaw();
@@ -742,7 +733,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       updateLegsBasedOnDesiredCoM();
       computeDesiredPositionsAndStoreInFullRobotModel(actualFullRobotModel);
 
-      if(walkingStateMachine.isCurrentState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS))
+      if(walkingStateMachine.getCurrentStateKey() == CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS)
       {
          filterDesiredsToMatchCrawlControllerOnTransitionIn.filterDesireds();
       }
@@ -1062,7 +1053,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
     */
    private void updateDesiredCoMTrajectory()
    {
-      if(!comTrajectoryGenerator.isDone() && !comTrajectoryGeneratorRequiresReInitailization.getBooleanValue() && (walkingStateMachine.isCurrentState(CrawlGateWalkingState.TRIPLE_SUPPORT) || !isDesiredVelocityAndYawRateZero()))
+      if(!comTrajectoryGenerator.isDone() && !comTrajectoryGeneratorRequiresReInitailization.getBooleanValue() && (walkingStateMachine.getCurrentStateKey() == CrawlGateWalkingState.TRIPLE_SUPPORT || !isDesiredVelocityAndYawRateZero()))
       {
 //         double deltaTimeFromLastCall = robotTimestamp.getDoubleValue() - comTrajectoryTimeLastCalled.getDoubleValue();
          double deltaTimeToUse = comTrajectoryTimeScaleFactor.getDoubleValue()*dt;
@@ -1257,9 +1248,9 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
-         if(!quadrupleSupportState.isMinimumTimeInQuadSupportElapsed())
+         if(!quadrupleSupportState.isMinimumTimeInQuadSupportElapsed(timeInState))
          {
             return false;
          }
@@ -1307,19 +1298,13 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
    private class TripleToQuadrupleCondition implements StateTransitionCondition
    {
-      private final TripleSupportState tripleSupportState;
-
-      public TripleToQuadrupleCondition(TripleSupportState tripleSupportState)
-      {
-         this.tripleSupportState = tripleSupportState;
-      }
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
     	  RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
     	  boolean swingTrajectoryIsDone = swingTrajectoryGenerators.get(swingQuadrant).isDone();
     	  boolean swingFootHitGround = false;
-    	  boolean inSwingStateLongEnough = tripleSupportState.getTimeInCurrentState() > swingDuration.getDoubleValue() / 3.0;
+    	  boolean inSwingStateLongEnough = timeInState > swingDuration.getDoubleValue() / 3.0;
 
     	  if (!runOpenLoop.getBooleanValue() && footSwitches != null)
     	  {
@@ -1341,28 +1326,22 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          return filterDesiredsToMatchCrawlControllerState.isInterpolationFinished();
       }
    }
 
-   private class FilterDesiredsToMatchCrawlControllerState extends State<CrawlGateWalkingState>
+   private class FilterDesiredsToMatchCrawlControllerState implements State
    {
       private final MinimumJerkTrajectory minimumJerkTrajectory = new MinimumJerkTrajectory();
       private final TDoubleArrayList initialPositions = new TDoubleArrayList();
-
-      public FilterDesiredsToMatchCrawlControllerState(CrawlGateWalkingState stateEnum, QuadrupedModelFactory robotParameters)
-      {
-         super(stateEnum);
-      }
 
       public void filterDesireds()
       {
          for(int i = 0; i < oneDoFJointsActual.length; i++)
          {
             OneDoFJoint actualOneDoFJoint = oneDoFJointsActual[i];
-            String jointName = actualOneDoFJoint.getName();
 
             double initialPosition = initialPositions.get(i);
 
@@ -1380,14 +1359,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          double newTime = minimumJerkTrajectory.getTimeInMove() + dt;
          minimumJerkTrajectory.computeTrajectory(newTime);
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          minimumJerkTrajectory.setMoveParameters(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, timeToFilterDesiredAtCrawlStart.getDoubleValue());
 
@@ -1400,13 +1379,13 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 
       }
    }
 
-   private class QuadrupleSupportState extends State<CrawlGateWalkingState>
+   private class QuadrupleSupportState implements State
    {
       private final FramePoint3D swingDesired = new FramePoint3D();
       private final QuadrupedSupportPolygon quadStateAfterFirstStep = new QuadrupedSupportPolygon();
@@ -1428,9 +1407,8 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       private final YoBoolean transitioningToSafePosition;
       private final YoBoolean swingLegUpdatedOnTransition;
 
-      public QuadrupleSupportState(CrawlGateWalkingState stateEnum, double minimumTimeInQuadSupport, double minimumTimeInQuadAfterReverseDirection)
+      public QuadrupleSupportState(double minimumTimeInQuadSupport, double minimumTimeInQuadAfterReverseDirection)
       {
-         super(stateEnum);
          this.minimumTimeInQuadSupport = new YoDouble("minimumTimeInQuadSupport", registry);
          this.minimumTimeInQuadSupportForNormalOperation = new YoDouble("minimumTimeInQuadSupportForNormalOperation", registry);
          this.minimumTimeInQuadSupportAfterReverseDirection = new YoDouble("minimumTimeInQuadSupportAfterReverseDirection", registry);
@@ -1444,7 +1422,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          doActionQuadrupleSupportTimer.startMeasurement();
 
@@ -1455,7 +1433,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
             transitioningToSafePosition.set(false);
          }
 
-         else if(shouldTranistionToTripleButItsNotSafeToStep())
+         else if(shouldTranistionToTripleButItsNotSafeToStep(timeInState))
          {
             shiftCoMToSafeStartingPosition();
          }
@@ -1677,14 +1655,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          return desiredVelocity.getX() > 0 && lastDesiredVelocity.getX() < 0 || desiredVelocity.getX() < 0 && lastDesiredVelocity.getX() > 0;
       }
 
-      private boolean shouldTranistionToTripleButItsNotSafeToStep()
+      private boolean shouldTranistionToTripleButItsNotSafeToStep(double timeInState)
       {
          if(!comTrajectoryGenerator.isDone())
          {
             return false;
          }
 
-         if(!isMinimumTimeInQuadSupportElapsed())
+         if(!isMinimumTimeInQuadSupportElapsed(timeInState))
          {
             return false;
          }
@@ -1701,7 +1679,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
        * uses actual to calculate the next three footsteps. Can use feedforward based on desireds instead of the fourFootSupportPolygon
        */
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          doTransitionIntoQuadrupleSupportTimer.startMeasurement();
 
@@ -1939,9 +1917,9 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          comTrajectoryGeneratorRequiresReInitailization.set(false);
       }
 
-      public boolean isMinimumTimeInQuadSupportElapsed()
+      public boolean isMinimumTimeInQuadSupportElapsed(double timeInState)
       {
-         if(getTimeInCurrentState() > minimumTimeInQuadSupport.getDoubleValue())
+         if(timeInState > minimumTimeInQuadSupport.getDoubleValue())
          {
             minimumTimeInQuadSupportElapsed.set(true);
          }
@@ -1949,7 +1927,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
          minimumTimeInQuadSupportElapsed.set(false);
          minimumTimeInQuadSupport.set(minimumTimeInQuadSupportForNormalOperation.getDoubleValue());
@@ -1995,22 +1973,21 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    /**
     * Nothing fancy, just calculate where to swing the leg and swing it until it's done
     */
-   private class TripleSupportState extends State<CrawlGateWalkingState>
+   private class TripleSupportState implements State
    {
       private final FramePoint3D swingTarget = new FramePoint3D(ReferenceFrame.getWorldFrame());
       private final FramePoint3D currentDesiredInTrajectory = new FramePoint3D();
       private final FrameVector3D speedMatchVelocity = new FrameVector3D(ReferenceFrame.getWorldFrame());
       private final YoDouble speedMatchScalar = new YoDouble("speedMatchScalar", registry);
 
-      public TripleSupportState(CrawlGateWalkingState stateEnum)
+      public TripleSupportState()
       {
-         super(stateEnum);
          speedMatchScalar.set(0.0);
       }
 
       private FramePoint3D tempFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          doActionTripleSupportTimer.startMeasurement();
 
@@ -2036,7 +2013,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       FramePoint3D tempCOMTarget = new FramePoint3D(ReferenceFrame.getWorldFrame());
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          doTransitionIntoTripleSupportTimer.startMeasurement();
 
@@ -2138,7 +2115,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
          RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
          if(footSwitches != null)
@@ -2200,7 +2177,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 //      setFeedForwardToActuals();
       updateEstimates();
       updateFeedForwardModelAndFrames();
-      walkingStateMachine.setCurrentState(CrawlGateWalkingState.ALPHA_FILTERING_DESIREDS);
+      walkingStateMachine.resetToInitialState();
    }
 
    @Override

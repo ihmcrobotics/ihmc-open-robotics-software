@@ -10,42 +10,28 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class FootTrajectoryTask<E extends Enum<E>> extends BehaviorAction<E>
+public class FootTrajectoryTask extends BehaviorAction
 {
    private final FootTrajectoryMessage footTrajectoryMessage;
    private final FootTrajectoryBehavior footPoseBehavior;
 
-   
-   
-   public FootTrajectoryTask(RobotSide robotSide, Point3D position, Quaternion orientation, FootTrajectoryBehavior behavior,
-         double trajectoryTime)
+   public FootTrajectoryTask(RobotSide robotSide, Point3D position, Quaternion orientation, FootTrajectoryBehavior behavior, double trajectoryTime)
    {
-      this(null, robotSide,  position,  orientation,  behavior,   trajectoryTime);
-   }
-   
-   public FootTrajectoryTask(E stateEnum,RobotSide robotSide, Point3D position, Quaternion orientation, FootTrajectoryBehavior behavior,
-         double trajectoryTime)
-   {
-     
-      super(stateEnum,behavior);
+
+      super(behavior);
       this.footPoseBehavior = behavior;
       footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, position, orientation);
    }
 
    public FootTrajectoryTask(RobotSide robotSide, FramePose3D pose, FootTrajectoryBehavior behavior, double trajectoryTime)
    {
-      this(null, robotSide,  pose,  behavior,  trajectoryTime);
-   }
-
-   public FootTrajectoryTask(E stateEnum,RobotSide robotSide, FramePose3D pose, FootTrajectoryBehavior behavior, double trajectoryTime)
-   {
-      super(stateEnum,behavior);
+      super(behavior);
       this.footPoseBehavior = behavior;
 
       pose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       Point3D position = new Point3D();
       Quaternion orientation = new Quaternion();
-      pose.get(position, orientation);   
+      pose.get(position, orientation);
       footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, position, orientation);
    }
 
@@ -54,5 +40,4 @@ public class FootTrajectoryTask<E extends Enum<E>> extends BehaviorAction<E>
    {
       footPoseBehavior.setInput(footTrajectoryMessage);
    }
-
 }

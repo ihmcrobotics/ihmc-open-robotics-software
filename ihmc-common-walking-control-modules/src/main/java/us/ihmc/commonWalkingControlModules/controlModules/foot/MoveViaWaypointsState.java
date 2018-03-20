@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.Collection;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -48,7 +47,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    public MoveViaWaypointsState(FootControlHelper footControlHelper, FrameVector3DReadOnly touchdownVelocity, FrameVector3DReadOnly touchdownAcceleration,
                                 PIDSE3GainsReadOnly gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.MOVE_VIA_WAYPOINTS, footControlHelper);
+      super(footControlHelper);
 
       this.gains = gains;
 
@@ -111,9 +110,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      taskspaceControlState.doTransitionIntoAction();
+      taskspaceControlState.onEntry();
       isPerformingTouchdown.set(false);
 
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
@@ -123,11 +122,11 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    }
 
    @Override
-   public void doSpecificAction()
+   public void doSpecificAction(double timeInState)
    {
       if (isPerformingTouchdown.getBooleanValue())
       {
-         positionTrajectoryForDisturbanceRecovery.compute(getTimeInCurrentState());
+         positionTrajectoryForDisturbanceRecovery.compute(timeInState);
          positionTrajectoryForDisturbanceRecovery.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
          desiredAngularVelocity.setToZero();
          desiredAngularAcceleration.setToZero();
@@ -136,11 +135,11 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       }
       else
       {
-         taskspaceControlState.doAction();
+         taskspaceControlState.doAction(timeInState);
          spatialFeedbackControlCommand.set(taskspaceControlState.getSpatialFeedbackControlCommand());
 
          if (taskspaceControlState.abortState())
-            requestTouchdownForDisturbanceRecovery();
+            requestTouchdownForDisturbanceRecovery(timeInState);
       }
 
       doSingularityAvoidance(spatialFeedbackControlCommand);
@@ -154,7 +153,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       spatialFeedbackControlCommand.setGains(gains);
    }
 
-   public void requestTouchdownForDisturbanceRecovery()
+   public void requestTouchdownForDisturbanceRecovery(double timeInState)
    {
       if (isPerformingTouchdown.getBooleanValue())
          return;
@@ -165,7 +164,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       desiredOrientation.changeFrame(worldFrame);
 
       currentDesiredFootPosition.set(desiredPosition);
-      touchdownInitialTimeProvider.setValue(getTimeInCurrentState());
+      touchdownInitialTimeProvider.setValue(timeInState);
       positionTrajectoryForDisturbanceRecovery.initialize();
 
       isPerformingTouchdown.set(true);
@@ -230,8 +229,8 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      taskspaceControlState.doTransitionOutOfAction();
+      taskspaceControlState.onExit();
    }
 }

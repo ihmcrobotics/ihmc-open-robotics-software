@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
@@ -111,7 +110,7 @@ public class SupportState extends AbstractFootControlState
 
    public SupportState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly holdPositionGains, YoVariableRegistry parentRegistry)
    {
-      super(ConstraintType.FULL, footControlHelper);
+      super(footControlHelper);
 
       this.gains = holdPositionGains;
 
@@ -178,9 +177,9 @@ public class SupportState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      super.doTransitionIntoAction();
+      super.onEntry();
       FrameVector3D fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       controllerToolbox.setFootContactStateNormalContactVector(robotSide, fullyConstrainedNormalContactVector);
 
@@ -193,9 +192,9 @@ public class SupportState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      super.doTransitionOutOfAction();
+      super.onExit();
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
       frameViz.hide();
@@ -203,10 +202,10 @@ public class SupportState extends AbstractFootControlState
    }
 
    @Override
-   public void doSpecificAction()
+   public void doSpecificAction(double timeInState)
    {
       // handle partial foothold detection
-      boolean recoverTimeHasPassed = getTimeInCurrentState() > recoverTime.getDoubleValue();
+      boolean recoverTimeHasPassed = timeInState > recoverTime.getDoubleValue();
       boolean contactStateHasChanged = false;
       if (partialFootholdControlModule != null && recoverTimeHasPassed)
       {
@@ -220,7 +219,7 @@ public class SupportState extends AbstractFootControlState
       }
 
       // foothold exploration
-      boolean timeBeforeExploringHasPassed = getTimeInCurrentState() > timeBeforeExploring.getDoubleValue();
+      boolean timeBeforeExploringHasPassed = timeInState > timeBeforeExploring.getDoubleValue();
       if (requestFootholdExploration.getBooleanValue() && timeBeforeExploringHasPassed)
       {
          explorationHelper.startExploring();
@@ -228,18 +227,17 @@ public class SupportState extends AbstractFootControlState
       }
       if (partialFootholdControlModule != null && !timeBeforeExploringHasPassed)
          partialFootholdControlModule.clearCoPGrid();
-      explorationHelper.compute(getTimeInCurrentState(), contactStateHasChanged);
+      explorationHelper.compute(timeInState, contactStateHasChanged);
 
       // toe contact point loading //// TODO: 6/5/17
-      double currentTime = getTimeInCurrentState();
-      if (rampUpAllowableToeLoadAfterContact && currentTime < toeLoadingDuration.getDoubleValue())
+      if (rampUpAllowableToeLoadAfterContact && timeInState < toeLoadingDuration.getDoubleValue())
       {
          computeFootPolygon();
 
          double maxContactPointX = footPolygon.getMaxX();
          double minContactPointX = footPolygon.getMinX();
 
-         double phaseInLoading = currentTime / toeLoadingDuration.getDoubleValue();
+         double phaseInLoading = timeInState / toeLoadingDuration.getDoubleValue();
          double leadingToeMagnitude = InterpolationTools.linearInterpolate(0.0, fullyLoadedMagnitude.getDoubleValue(), phaseInLoading);
          YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotSide);
 

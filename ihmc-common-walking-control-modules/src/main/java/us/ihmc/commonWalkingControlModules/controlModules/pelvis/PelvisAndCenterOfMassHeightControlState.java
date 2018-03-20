@@ -6,34 +6,28 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.robotics.stateMachine.core.State;
 
-public abstract class PelvisAndCenterOfMassHeightControlState extends FinishableState<PelvisHeightControlMode>
+public interface PelvisAndCenterOfMassHeightControlState extends State
 {
-
-   public PelvisAndCenterOfMassHeightControlState(PelvisHeightControlMode stateEnum)
-   {
-      super(stateEnum);
-   }
-
    @Override
-   public boolean isDone()
+   default boolean isDone(double timeInState)
    {
       return true;
    }
 
-   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   default InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return null;
    }
 
    @Override
-   public void doTransitionIntoAction()
+   default void onEntry()
    {
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   default void onExit()
    {
    }
 
@@ -47,6 +41,6 @@ public abstract class PelvisAndCenterOfMassHeightControlState extends Finishable
 
    public abstract void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command);
 
-   public abstract double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
-         FeetManager feetManager);
+   public abstract double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0,
+                                                              boolean isRecoveringFromPush, FeetManager feetManager);
 }

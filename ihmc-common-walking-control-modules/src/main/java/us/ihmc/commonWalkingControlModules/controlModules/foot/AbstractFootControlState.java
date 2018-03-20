@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -13,9 +12,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
+import us.ihmc.robotics.stateMachine.core.State;
 
-public abstract class AbstractFootControlState extends FinishableState<ConstraintType>
+public abstract class AbstractFootControlState implements State
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -36,45 +35,43 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
 
    protected final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   public AbstractFootControlState(ConstraintType stateEnum, FootControlHelper footControlHelper)
+   public AbstractFootControlState(FootControlHelper footControlHelper)
    {
-      super(stateEnum);
-
       this.footControlHelper = footControlHelper;
-      this.contactableFoot = footControlHelper.getContactableFoot();
+      contactableFoot = footControlHelper.getContactableFoot();
 
-      this.controllerToolbox = footControlHelper.getHighLevelHumanoidControllerToolbox();
+      controllerToolbox = footControlHelper.getHighLevelHumanoidControllerToolbox();
 
-      this.robotSide = footControlHelper.getRobotSide();
+      robotSide = footControlHelper.getRobotSide();
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       rootBody = fullRobotModel.getElevator();
    }
 
-   public abstract void doSpecificAction();
+   public abstract void doSpecificAction(double timeInState);
 
    public abstract InverseDynamicsCommand<?> getInverseDynamicsCommand();
 
    public abstract SpatialFeedbackControlCommand getFeedbackControlCommand();
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      doSpecificAction();
+      doSpecificAction(timeInState);
    }
 
    @Override
-   public void doTransitionIntoAction()
-   {
-   }
-
-   @Override
-   public void doTransitionOutOfAction()
+   public void onEntry()
    {
    }
 
    @Override
-   public boolean isDone()
+   public void onExit()
+   {
+   }
+
+   @Override
+   public boolean isDone(double timeInState)
    {
       return true;
    }

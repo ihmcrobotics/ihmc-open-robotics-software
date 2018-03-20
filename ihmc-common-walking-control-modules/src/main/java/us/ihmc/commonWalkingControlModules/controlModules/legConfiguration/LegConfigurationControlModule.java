@@ -4,24 +4,22 @@ import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParame
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.InterpolationTools;
-import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LegConfigurationControlModule
 {
@@ -47,7 +45,7 @@ public class LegConfigurationControlModule
    private final YoEnum<LegConfigurationType> requestedState;
    private final YoEnum<LegControlWeight> legControlWeight;
 
-   private final GenericStateMachine<LegConfigurationType, FinishableState<LegConfigurationType>> stateMachine;
+   private final StateMachine<LegConfigurationType, State> stateMachine;
 
    private final YoDouble highPrivilegedWeight;
    private final YoDouble mediumPrivilegedWeight;
@@ -246,7 +244,6 @@ public class LegConfigurationControlModule
 
       // set up states and state machine
       YoDouble time = controllerToolbox.getYoTime();
-      stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", LegConfigurationType.class, time, registry);
       requestedState = YoEnum.create(namePrefix + "RequestedState", "", LegConfigurationType.class, registry, true);
       requestedState.set(null);
       legControlWeight = YoEnum.create(namePrefix + "LegControlWeight", "", LegControlWeight.class, registry, false);
@@ -267,43 +264,28 @@ public class LegConfigurationControlModule
 
       shinLength = kneePoint.distance(anklePoint);
 
-      setupStateMachine();
-
-      if (legConfigurationParameters.attemptToStraightenLegs())
-         stateMachine.setCurrentState(LegConfigurationType.STRAIGHT);
-      else
-         stateMachine.setCurrentState(LegConfigurationType.BENT);
+      stateMachine = setupStateMachine(namePrefix, legConfigurationParameters.attemptToStraightenLegs(), time);
 
       parentRegistry.addChild(registry);
    }
 
-   private void setupStateMachine()
+   private StateMachine<LegConfigurationType, State> setupStateMachine(String namePrefix, boolean attemptToStraightenLegs, DoubleProvider timeProvider)
    {
-      List<FinishableState<LegConfigurationType>> states = new ArrayList<>();
+      StateMachineFactory<LegConfigurationType, State> factory = new StateMachineFactory<>(LegConfigurationType.class);
+      factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(timeProvider);
 
-      FinishableState<LegConfigurationType> straighteningToStraightState = new StraighteningKneeControlState(straighteningSpeed);
-      FinishableState<LegConfigurationType> straightState = new StraightKneeControlState();
-      FinishableState<LegConfigurationType> bentState = new BentKneeControlState();
-      FinishableState<LegConfigurationType> collapseState = new CollapseKneeControlState();
-      states.add(straighteningToStraightState);
-      states.add(straightState);
-      states.add(bentState);
-      states.add(collapseState);
+      factory.addStateAndDoneTransition(LegConfigurationType.STRAIGHTEN, new StraighteningKneeControlState(straighteningSpeed), LegConfigurationType.STRAIGHT);
+      factory.addState(LegConfigurationType.STRAIGHT, new StraightKneeControlState());
+      factory.addState(LegConfigurationType.BENT, new BentKneeControlState());
+      factory.addState(LegConfigurationType.COLLAPSE, new CollapseKneeControlState());
 
-      straighteningToStraightState.setDefaultNextState(LegConfigurationType.STRAIGHT);
-
-      for (FinishableState<LegConfigurationType> fromState : states)
+      for (LegConfigurationType from : LegConfigurationType.values())
       {
-         for (FinishableState<LegConfigurationType> toState : states)
-         {
-            StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
-         }
+         factory.addRequestedTransition(from, requestedState);
+         factory.addRequestedTransition(from, from, requestedState);
       }
 
-      for (FinishableState<LegConfigurationType> state : states)
-      {
-         stateMachine.addState(state);
-      }
+      return factory.build(attemptToStraightenLegs ? LegConfigurationType.STRAIGHT : LegConfigurationType.BENT);
    }
 
    public void initialize()
@@ -319,8 +301,7 @@ public class LegConfigurationControlModule
       else
          desiredAngle.set(desiredAngleWhenStraight.getDoubleValue());
 
-      stateMachine.checkTransitionConditions();
-      stateMachine.getCurrentState().doAction();
+      stateMachine.doActionAndTransition();
 
       double kneePitchPrivilegedConfigurationWeight;
       if (legControlWeight.getEnumValue() == LegControlWeight.LOW)
@@ -454,7 +435,7 @@ public class LegConfigurationControlModule
 
    public LegConfigurationType getCurrentKneeControlState()
    {
-      return stateMachine.getCurrentStateEnum();
+      return stateMachine.getCurrentStateKey();
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
@@ -462,7 +443,7 @@ public class LegConfigurationControlModule
       return privilegedAccelerationCommand;
    }
 
-   private class StraighteningKneeControlState extends FinishableState<LegConfigurationType>
+   private class StraighteningKneeControlState implements State
    {
       private final YoDouble yoStraighteningSpeed;
 
@@ -479,21 +460,19 @@ public class LegConfigurationControlModule
 
       public StraighteningKneeControlState(YoDouble straighteningSpeed)
       {
-         super(LegConfigurationType.STRAIGHTEN);
-
          this.yoStraighteningSpeed = straighteningSpeed;
       }
 
       @Override
-      public boolean isDone()
+      public boolean isDone(double timeInState)
       {
-         return getTimeInCurrentState() > (timeUntilStraight + dwellTime);
+         return timeInState > (timeUntilStraight + dwellTime);
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
-         double estimatedDT = estimateDT();
+         double estimatedDT = estimateDT(timeInState);
          double currentPosition = kneePitchJoint.getQ();
 
          if (ONLY_MOVE_PRIV_POS_IF_NOT_BENDING)
@@ -523,13 +502,10 @@ public class LegConfigurationControlModule
          blendVelocityError = straightLegGains.getBlendVelocityError();
 
          previousKneePitchAngle = currentPosition;
-
-         if (isDone())
-            transitionToDefaultNextState();
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          startingPosition = kneePitchJoint.getQ();
          previousKneePitchAngle = kneePitchJoint.getQ();
@@ -548,36 +524,29 @@ public class LegConfigurationControlModule
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
 
-      private double estimateDT()
+      private double estimateDT(double timeInState)
       {
-         double currentTime = getTimeInCurrentState();
-
-         double estimatedDT = currentTime - previousTime;
-         previousTime = currentTime;
+         double estimatedDT = timeInState - previousTime;
+         previousTime = timeInState;
 
          return estimatedDT;
       }
    }
 
-   private class StraightKneeControlState extends FinishableState<LegConfigurationType>
+   private class StraightKneeControlState implements State
    {
-      public StraightKneeControlState()
-      {
-         super(LegConfigurationType.STRAIGHT);
-      }
-
       @Override
-      public boolean isDone()
+      public boolean isDone(double timeInState)
       {
          return false;
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          kneePitchPrivilegedConfiguration.set(desiredAngle.getDoubleValue());
 
@@ -595,31 +564,26 @@ public class LegConfigurationControlModule
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
 
-   private class BentKneeControlState extends FinishableState<LegConfigurationType>
+   private class BentKneeControlState implements State
    {
-      public BentKneeControlState()
-      {
-         super(LegConfigurationType.BENT);
-      }
-
       @Override
-      public boolean isDone()
+      public boolean isDone(double timeInState)
       {
          return false;
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          kneePitchPrivilegedConfiguration.set(kneeMidRangeOfMotion);
 
@@ -637,35 +601,30 @@ public class LegConfigurationControlModule
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          legControlWeight.set(LegControlWeight.LOW);
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
 
-   private class CollapseKneeControlState extends FinishableState<LegConfigurationType>
+   private class CollapseKneeControlState implements State
    {
-      public CollapseKneeControlState()
-      {
-         super(LegConfigurationType.COLLAPSE);
-      }
-
       @Override
-      public boolean isDone()
+      public boolean isDone(double timeInState)
       {
          return false;
       }
 
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          double collapsedAngle = desiredFractionOfMidRangeForCollapsed.getDoubleValue() * kneeMidRangeOfMotion;
-         double alpha = MathTools.clamp(getTimeInCurrentState() / collapsingDuration.getDoubleValue(), 0.0, 1.0);
+         double alpha = MathTools.clamp(timeInState / collapsingDuration.getDoubleValue(), 0.0, 1.0);
          double desiredKneePosition = InterpolationTools.linearInterpolate(desiredAngle.getDoubleValue(), collapsedAngle, alpha);
 
          kneePitchPrivilegedConfiguration.set(desiredKneePosition);
@@ -684,13 +643,13 @@ public class LegConfigurationControlModule
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          legControlWeight.set(LegControlWeight.LOW);
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }

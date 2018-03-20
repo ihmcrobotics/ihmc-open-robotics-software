@@ -103,7 +103,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       double timeInTrajectory = getTimeInTrajectory();
       trajectoryDone.set(jointControlHelper.doAction(timeInTrajectory));
@@ -142,12 +142,12 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
    }
 

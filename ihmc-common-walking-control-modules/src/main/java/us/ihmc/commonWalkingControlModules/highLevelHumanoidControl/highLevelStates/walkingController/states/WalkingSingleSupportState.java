@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -60,12 +60,12 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
-   public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-         HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-         WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
+   public WalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
+                                    HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+                                    WalkingControllerParameters walkingControllerParameters, WalkingFailureDetectionControlModule failureDetectionControlModule,
+                                    YoVariableRegistry parentRegistry)
    {
-      super(supportSide, WalkingStateEnum.getWalkingSingleSupportState(supportSide), walkingMessageHandler, controllerToolbox, managerFactory,
-            parentRegistry);
+      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, parentRegistry);
 
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
@@ -92,11 +92,10 @@ public class WalkingSingleSupportState extends SingleSupportState
       remainingSwingTimeAccordingToPlan.setToNaN();
    }
 
-
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      super.doAction();
+      super.doAction(timeInState);
 
       boolean requestSwingSpeedUp = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
 
@@ -165,14 +164,15 @@ public class WalkingSingleSupportState extends SingleSupportState
          double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
          balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
-      boolean feetAreWellPositioned = legConfigurationManager.areFeetWellPositionedForCollapse(swingSide.getOppositeSide(), nextFootstep.getSoleReferenceFrame());
+      boolean feetAreWellPositioned = legConfigurationManager.areFeetWellPositionedForCollapse(swingSide.getOppositeSide(),
+                                                                                               nextFootstep.getSoleReferenceFrame());
 
-      if (getTimeInCurrentState() > fractionOfSwingToStraightenSwingLeg.getDoubleValue() * swingTime)
+      if (timeInState > fractionOfSwingToStraightenSwingLeg.getDoubleValue() * swingTime)
       {
          legConfigurationManager.straightenLegDuringSwing(swingSide);
       }
-      if (getTimeInCurrentState() > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime && !legConfigurationManager.isLegCollapsed(supportSide) &&
-            feetAreWellPositioned)
+      if (timeInState > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime && !legConfigurationManager.isLegCollapsed(supportSide)
+            && feetAreWellPositioned)
       {
          legConfigurationManager.collapseLegDuringSwing(swingSide.getOppositeSide());
       }
@@ -183,9 +183,9 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
-      if (super.isDone())
+      if (super.isDone(timeInState))
       {
          return true;
       }
@@ -194,9 +194,9 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      super.doTransitionIntoAction();
+      super.onEntry();
 
       double defaultSwingTime = walkingMessageHandler.getDefaultSwingTime();
       double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
@@ -291,9 +291,9 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      super.doTransitionOutOfAction();
+      super.onExit();
 
       balanceManager.minimizeAngularMomentumRateZ(false);
 
@@ -316,6 +316,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
    private final FramePoint2D desiredICP = new FramePoint2D(worldFrame);
    private final FramePoint2D currentICP = new FramePoint2D(worldFrame);
+
    public void switchToToeOffIfPossible(RobotSide supportSide)
    {
       boolean shouldComputeToeLineContact = feetManager.shouldComputeToeLineContact();
@@ -341,8 +342,11 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    /**
-    * Request the swing trajectory to speed up using {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
-    * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * Request the swing trajectory to speed up using
+    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
+    * It is clamped w.r.t. to
+    * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
+    * 
     * @return the current swing time remaining for the swing foot trajectory
     */
    private double requestSwingSpeedUpIfNeeded()
@@ -372,7 +376,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
       pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
 
-      TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep, swingSide);
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep,
+                                                                                                                                                swingSide);
       transferToAndNextFootstepsData.setTransferFromDesiredFootstep(walkingMessageHandler.getLastDesiredFootstep(supportSide));
       double extraToeOffHeight = 0.0;
       if (feetManager.canDoSingleSupportToeOff(nextFootstep, swingSide))
@@ -385,7 +390,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    @Override
-   protected boolean hasMinimumTimePassed()
+   protected boolean hasMinimumTimePassed(double timeInState)
    {
       double minimumSwingTime;
       if (balanceManager.isRecoveringFromDoubleSupportFall())
@@ -393,6 +398,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       else
          minimumSwingTime = swingTime * minimumSwingFraction.getDoubleValue();
 
-      return getTimeInCurrentState() > minimumSwingTime;
+      return timeInState > minimumSwingTime;
    }
 }

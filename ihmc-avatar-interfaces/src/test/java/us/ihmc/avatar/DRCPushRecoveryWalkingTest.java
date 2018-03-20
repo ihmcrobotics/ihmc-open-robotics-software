@@ -22,7 +22,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -245,10 +245,10 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
          final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
-               footPrefix + "State");
+               footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
          final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
-               "walkingState");
+               "walkingCurrentState");
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -304,7 +304,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
@@ -323,7 +323,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          if (side == RobotSide.LEFT)
          {

@@ -20,8 +20,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -35,7 +37,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
    private final ConcurrentListeningQueue<WalkToGoalBehaviorPacket> walkToGoalPacketQueue = new ConcurrentListeningQueue<>(20);
    private final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> planningOutputStatusQueue = new ConcurrentListeningQueue<>(5);
 
-   private final StateMachine<WalkToGoalBehaviorStates> stateMachine;
+   private final StateMachine<WalkToGoalBehaviorStates, State> stateMachine;
 
    private final HumanoidReferenceFrames referenceFrames;
 
@@ -47,12 +49,10 @@ public class WalkToGoalBehavior extends AbstractBehavior
 
    private FootstepDataListMessage planToExecute;
 
-   public WalkToGoalBehavior(CommunicationBridge outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters, YoDouble yoTime)
+   public WalkToGoalBehavior(CommunicationBridge outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames,
+                             WalkingControllerParameters walkingControllerParameters, YoDouble yoTime)
    {
       super(outgoingCommunicationBridge);
-
-      stateMachine = new StateMachine<WalkToGoalBehaviorStates>("WalkToGoalBehaviorStateMachine", "WalkToGoalBehaviorStateMachineSwitchTime",
-            WalkToGoalBehaviorStates.class, yoTime, registry);
 
       this.referenceFrames = referenceFrames;
 
@@ -66,32 +66,30 @@ public class WalkToGoalBehavior extends AbstractBehavior
       attachNetworkListeningQueue(walkToGoalPacketQueue, WalkToGoalBehaviorPacket.class);
       attachNetworkListeningQueue(planningOutputStatusQueue, FootstepPlanningToolboxOutputStatus.class);
 
-      setupStateMachine();
+      stateMachine = setupStateMachine(yoTime);
    }
 
-   private void setupStateMachine()
+   private StateMachine<WalkToGoalBehaviorStates, State> setupStateMachine(DoubleProvider timeProvider)
    {
-      WaitingForRequestState waitingForRequestState = new WaitingForRequestState();
-      waitingForRequestState.addStateTransition(WalkToGoalBehaviorStates.PLANNING, walkToGoalPacketQueue::isNewPacketAvailable);
-      stateMachine.addState(waitingForRequestState);
+      StateMachineFactory<WalkToGoalBehaviorStates, State> factory = new StateMachineFactory<>(WalkToGoalBehaviorStates.class);
+      factory.setNamePrefix("walkToGoalBehaviorStateMachine").setRegistry(registry).buildYoClock(timeProvider);
 
-      PlanningState planningState = new PlanningState();
-      planningState.addStateTransition(WalkToGoalBehaviorStates.EXECUTING_PLAN, havePlanToExecute::getBooleanValue);
-      planningState.addStateTransition(WalkToGoalBehaviorStates.WAITING_FOR_REQUEST, transitionBackToWaitingState::getBooleanValue);
-      stateMachine.addState(planningState);
+      factory.addState(WalkToGoalBehaviorStates.WAITING_FOR_REQUEST, new WaitingForRequestState());
+      factory.addState(WalkToGoalBehaviorStates.PLANNING, new PlanningState());
+      factory.addState(WalkToGoalBehaviorStates.EXECUTING_PLAN, new ExecutingPlanState());
 
-      ExecutingPlanState executingPlanState = new ExecutingPlanState();
-      executingPlanState.addStateTransition(WalkToGoalBehaviorStates.WAITING_FOR_REQUEST, footstepListBehavior::isDone);
-      stateMachine.addState(executingPlanState);
+      factory.addTransition(WalkToGoalBehaviorStates.WAITING_FOR_REQUEST, WalkToGoalBehaviorStates.PLANNING, t -> walkToGoalPacketQueue.isNewPacketAvailable());
+      factory.addTransition(WalkToGoalBehaviorStates.PLANNING, WalkToGoalBehaviorStates.EXECUTING_PLAN, t -> havePlanToExecute.getBooleanValue());
+      factory.addTransition(WalkToGoalBehaviorStates.PLANNING, WalkToGoalBehaviorStates.WAITING_FOR_REQUEST, t -> transitionBackToWaitingState.getBooleanValue());
+      factory.addTransition(WalkToGoalBehaviorStates.EXECUTING_PLAN, WalkToGoalBehaviorStates.WAITING_FOR_REQUEST, t -> footstepListBehavior.isDone());
 
-      stateMachine.setCurrentState(WalkToGoalBehaviorStates.WAITING_FOR_REQUEST);
+      return factory.build(WalkToGoalBehaviorStates.WAITING_FOR_REQUEST);
    }
 
    @Override
    public void doControl()
    {
-      stateMachine.checkTransitionConditions();
-      stateMachine.doAction();
+      stateMachine.doActionAndTransition();
    }
 
    @Override
@@ -111,14 +109,14 @@ public class WalkToGoalBehavior extends AbstractBehavior
    @Override
    public void onBehaviorPaused()
    {
-      if(stateMachine.getCurrentStateEnum().equals(WalkToGoalBehaviorStates.EXECUTING_PLAN))
+      if (stateMachine.getCurrentStateKey().equals(WalkToGoalBehaviorStates.EXECUTING_PLAN))
          footstepListBehavior.pause();
    }
 
    @Override
    public void onBehaviorResumed()
    {
-      if(stateMachine.getCurrentStateEnum().equals(WalkToGoalBehaviorStates.EXECUTING_PLAN))
+      if (stateMachine.getCurrentStateKey().equals(WalkToGoalBehaviorStates.EXECUTING_PLAN))
          footstepListBehavior.resume();
    }
 
@@ -134,21 +132,16 @@ public class WalkToGoalBehavior extends AbstractBehavior
       return isDone.getBooleanValue();
    }
 
-   class WaitingForRequestState extends State<WalkToGoalBehaviorStates>
+   class WaitingForRequestState implements State
    {
-      public WaitingForRequestState()
-      {
-         super(WalkToGoalBehaviorStates.WAITING_FOR_REQUEST);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          // Waiting for plan request
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          // Make sure there aren't any old plan requests hanging around
          walkToGoalPacketQueue.clear();
@@ -158,29 +151,24 @@ public class WalkToGoalBehavior extends AbstractBehavior
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
 
-   class PlanningState extends State<WalkToGoalBehaviorStates>
+   class PlanningState implements State
    {
-      public PlanningState()
-      {
-         super(WalkToGoalBehaviorStates.PLANNING);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          // Wait for plan
          boolean newPacketAvailable = planningOutputStatusQueue.isNewPacketAvailable();
 
-         if(newPacketAvailable)
+         if (newPacketAvailable)
          {
             FootstepPlanningToolboxOutputStatus latestPacket = planningOutputStatusQueue.getLatestPacket();
             boolean validForExecution = FootstepPlanningResult.fromByte(latestPacket.footstepPlanningResult).validForExecution();
-            if(validForExecution)
+            if (validForExecution)
             {
                planToExecute = latestPacket.footstepDataList;
                havePlanToExecute.set(true);
@@ -193,8 +181,9 @@ public class WalkToGoalBehavior extends AbstractBehavior
       }
 
       private final Pose3D tempFinalPose = new Pose3D();
+
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          planningOutputStatusQueue.clear();
          isDone.set(false);
@@ -226,34 +215,29 @@ public class WalkToGoalBehavior extends AbstractBehavior
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 
       }
    }
 
-   class ExecutingPlanState extends State<WalkToGoalBehaviorStates>
+   class ExecutingPlanState implements State
    {
-      public ExecutingPlanState()
-      {
-         super(WalkToGoalBehaviorStates.EXECUTING_PLAN);
-      }
-
       @Override
-      public void doAction()
+      public void doAction(double timeInState)
       {
          footstepListBehavior.doControl();
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          footstepListBehavior.initialize();
          footstepListBehavior.set(planToExecute);
       }
 
       @Override
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
          footstepListBehavior.doPostBehaviorCleanup();
          isDone.set(true);

@@ -170,7 +170,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       updateInternal();
 
@@ -282,7 +282,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       desiredContactPosition.setToZero(contactFrame);
       desiredContactOrientation.setToZero(contactFrame);
@@ -305,7 +305,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       hideGraphics();
       hybridModeActive.set(false);
