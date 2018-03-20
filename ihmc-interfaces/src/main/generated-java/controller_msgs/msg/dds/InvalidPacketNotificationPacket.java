@@ -42,7 +42,7 @@ public class InvalidPacketNotificationPacket implements Settable<InvalidPacketNo
       return packet_class_simple_name_;
    }
 
-   public void setPacketClassSimpleName(String packet_class_simple_name)
+   public void setPacketClassSimpleName(java.lang.String packet_class_simple_name)
    {
       packet_class_simple_name_.setLength(0);
       packet_class_simple_name_.append(packet_class_simple_name);
@@ -58,7 +58,7 @@ public class InvalidPacketNotificationPacket implements Settable<InvalidPacketNo
       return error_message_;
    }
 
-   public void setErrorMessage(String error_message)
+   public void setErrorMessage(java.lang.String error_message)
    {
       error_message_.setLength(0);
       error_message_.append(error_message);

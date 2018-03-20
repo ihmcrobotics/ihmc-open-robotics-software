@@ -36,7 +36,7 @@ public class SetDoubleParameter implements Settable<SetDoubleParameter>, Epsilon
       return parameter_name_;
    }
 
-   public void setParameterName(String parameter_name)
+   public void setParameterName(java.lang.String parameter_name)
    {
       parameter_name_.setLength(0);
       parameter_name_.append(parameter_name);
