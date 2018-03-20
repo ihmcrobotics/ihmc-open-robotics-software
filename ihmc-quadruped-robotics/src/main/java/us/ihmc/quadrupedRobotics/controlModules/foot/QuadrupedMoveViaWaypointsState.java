@@ -145,16 +145,4 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
          quadrupedWaypointsPositionTrajectoryGenerator.initialize();
       }
    }
-
-   @Override
-   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
-   {
-      return null;
-   }
-
-   @Override
-   public SpatialFeedbackControlCommand getFeedbackControlCommand()
-   {
-      return null;
-   }
 }

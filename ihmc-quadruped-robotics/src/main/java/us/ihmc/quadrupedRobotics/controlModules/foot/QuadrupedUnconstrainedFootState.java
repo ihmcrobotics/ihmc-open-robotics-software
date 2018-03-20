@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -25,5 +27,17 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
 
    public void doControl()
    {
+   }
+
+   @Override
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      return null;
+   }
+
+   @Override
+   public SpatialFeedbackControlCommand getFeedbackControlCommand()
+   {
+      return null;
    }
 }

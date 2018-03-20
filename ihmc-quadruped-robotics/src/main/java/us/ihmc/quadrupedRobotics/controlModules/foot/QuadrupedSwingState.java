@@ -193,16 +193,4 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
       if(createSwingTrajectoryGraphics)
          stepSequenceVisualization.hideAll();
    }
-
-   @Override
-   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
-   {
-      return null;
-   }
-
-   @Override
-   public SpatialFeedbackControlCommand getFeedbackControlCommand()
-   {
-      return null;
-   }
 }
