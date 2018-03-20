@@ -324,6 +324,15 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       setPositionMinInternal(minPosition);
    }
 
+   public void setPosition(FramePoint3D desiredPosition, VectorEnum<DependentVariableConstraintType> constraintType, FrameVector3D positionWeight)
+   {
+      setPositionInternal(desiredPosition);
+      this.positionConstraintType.set(constraintType);
+      setPositionWeightInternal(positionWeight);
+      positionMax.setToNaN();
+      positionMin.setToNaN();
+   }
+
    private void setPositionWeightInternal(FrameVector3D positionWeight)
    {
       this.positionWeight.setIncludingFrame(positionWeight);
