@@ -59,15 +59,19 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double qDesired;
    @Deprecated
    private double qdDesired;
+   /** Remove April 2nd, 2018. */
    @Deprecated
    private double kp;
+   /** Remove April 2nd, 2018. */
    @Deprecated
    private double kd;
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    private boolean isUnderPositionControl = false;
 
    private boolean enabled = true;
+   /** Remove April 2nd, 2018. */
    @Deprecated
    private boolean useFeedBackForceControl = true;
 
@@ -478,18 +482,21 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return qdDesired;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public double getKp()
    {
       return kp;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public double getKd()
    {
       return kd;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public abstract boolean isPassiveJoint();
 
@@ -509,12 +516,14 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.qdDesired = qdDesired;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public void setKp(double kp)
    {
       this.kp = kp;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public void setKd(double kd)
    {
@@ -535,13 +544,14 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public abstract void getJointAxis(FrameVector3D axisToPack);
 
    // DRC Hack
-
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public boolean isUnderPositionControl()
    {
       return isUnderPositionControl;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public void setUnderPositionControl(boolean val)
    {
@@ -578,12 +588,14 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.isOnline = isOnline;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public boolean isUseFeedBackForceControl()
    {
       return useFeedBackForceControl;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public void setUseFeedBackForceControl(boolean useFeedBackForceControl)
    {
