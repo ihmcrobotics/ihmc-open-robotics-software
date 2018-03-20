@@ -133,6 +133,23 @@ public class JointLimitData
       return torqueLimit;
    }
 
+   public double getVelocityLimit()
+   {
+      return velocityLimit;
+   }
+
+   public double getJointLimitStiffness()
+   {
+      return positionLimitStiffness;
+   }
+
+   public double getJointLimitDamping()
+   {
+      return positionLimitDamping;
+   }
+
+
+
    public void setVelocityLimit(double velocityLimit)
    {
       this.velocityLimit = velocityLimit;
@@ -158,10 +175,6 @@ public class JointLimitData
       this.softLowerPositionLimit = softLowerPositionLimit;
    }
 
-   public double getVelocityLimit()
-   {
-      return velocityLimit;
-   }
 
    public void setTorqueLimit(double torqueLimit)
    {

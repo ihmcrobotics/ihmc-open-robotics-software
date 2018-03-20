@@ -7,10 +7,14 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.kinematics.JointLimitData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -26,6 +30,7 @@ public class WholeBodyControllerBoundCalculator
    private final DenseMatrix64F jointUpperLimits;
    private final HashMap<OneDoFJoint, JointLimitEnforcement> jointLimitTypes = new HashMap<>();
    private final HashMap<OneDoFJoint, JointLimitParameters> jointLimitParameters = new HashMap<>();
+   private final HashMap<OneDoFJoint, JointLimitData> jointLimitData = new HashMap<>();
 
    private final HashMap<OneDoFJoint, YoDouble> filterAlphas = new HashMap<>();
    private final HashMap<OneDoFJoint, YoDouble> velocityGains = new HashMap<>();
@@ -108,6 +113,17 @@ public class WholeBodyControllerBoundCalculator
             filterAlphas.get(joint).set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(), controlDT));
             velocityGains.get(joint).set(params.getVelocityControlGain());
          }
+      }
+   }
+
+   public void submitJointLimitEnforcementCommand(JointLimitEnforcementCommand command)
+   {
+      for (int idx = 0; idx < command.getNumberOfJoints(); idx++)
+      {
+         OneDoFJoint joint = command.getJoint(idx);
+         JointLimitData data = command.getJointLimitData(idx);
+         if (data != null)
+            jointLimitData.put(joint, data);
       }
    }
 
@@ -296,5 +312,59 @@ public class WholeBodyControllerBoundCalculator
       filteredUpperLimits.get(joint).update(qDDotMax);
       qDDotMinToPack.set(index, 0, filteredLowerLimits.get(joint).getDoubleValue());
       qDDotMaxToPack.set(index, 0, filteredUpperLimits.get(joint).getDoubleValue());
+   }
+
+   public void enforceJointTorqueLimits(JointDesiredOutputList jointDesiredOutputList)
+   {
+      for (OneDoFJoint joint : oneDoFJoints)
+      {
+         JointDesiredOutput jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+
+         if (jointLimitData.containsKey(joint))
+         {
+            JointLimitData jointLimitData = this.jointLimitData.get(joint);
+            enforceJointTorqueLimit(joint, jointDesiredOutput, jointLimitData);
+         }
+      }
+   }
+
+   public void enforceJointTorqueLimit(OneDoFJoint joint, JointDesiredOutput jointDesiredOutput, JointLimitData jointLimitData)
+   {
+      double torque;
+      if (!jointDesiredOutput.hasDesiredTorque())
+         torque = 0.0;
+      else
+         torque = jointDesiredOutput.getDesiredTorque();
+
+      if (!jointLimitData.hasSoftLowerLimit() && joint.getQ() < jointLimitData.getSoftLowerPositionLimit())
+      {
+         double stiffnessTorque = 0.0;
+         if (jointLimitData.hasPositionLimitStiffness())
+            stiffnessTorque = jointLimitData.getJointLimitStiffness() * (jointLimitData.getSoftLowerPositionLimit() - joint.getQ());
+
+         double dampingTorque = 0.0;
+         if (jointLimitData.hasPositionLimitDamping())
+            dampingTorque = jointLimitData.getJointLimitDamping() * joint.getQd();
+
+         torque = Math.max(torque, stiffnessTorque - dampingTorque);
+      }
+
+      if (!jointLimitData.hasSoftUpperLimit() && joint.getQ() > jointLimitData.getSoftUpperPositionLimit())
+      {
+         double stiffnessTorque = 0.0;
+         if (jointLimitData.hasPositionLimitStiffness())
+            stiffnessTorque = jointLimitData.getJointLimitStiffness() * (jointLimitData.getSoftUpperPositionLimit() - joint.getQ());
+
+         double dampingTorque = 0.0;
+         if (jointLimitData.hasPositionLimitDamping())
+            dampingTorque = jointLimitData.getJointLimitDamping() * joint.getQd();
+
+         torque = Math.min(torque, stiffnessTorque - dampingTorque);
+      }
+
+      if (jointLimitData.hasTorqueLimit())
+         torque = MathTools.clamp(torque, jointLimitData.getTorqueLimit());
+
+      jointDesiredOutput.setDesiredTorque(torque);
    }
 }
