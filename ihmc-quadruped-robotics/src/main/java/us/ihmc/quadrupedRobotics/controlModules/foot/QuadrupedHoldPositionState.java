@@ -1,14 +1,11 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionControllerSetpoints;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -28,20 +25,13 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame soleFrame;
    private final QuadrupedFootControlModuleParameters parameters;
-   private final RobotQuadrant robotQuadrant;
 
    private final FrameVector3D soleLinearVelocityEstimate;
-
-   private final QuadrupedForceControllerToolbox controllerToolbox;
-
 
    public QuadrupedHoldPositionState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, QuadrupedSolePositionController solePositionController,
                                      YoVariableRegistry parentRegistry)
    {
       super(robotQuadrant, controllerToolbox, solePositionController);
-
-      this.robotQuadrant = robotQuadrant;
-      this.controllerToolbox = controllerToolbox;
 
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
@@ -60,6 +50,8 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
    @Override
    public void onEntry()
    {
+      super.onEntry();
+
       initialTime = timestamp.getDoubleValue();
 
       solePositionController.reset();

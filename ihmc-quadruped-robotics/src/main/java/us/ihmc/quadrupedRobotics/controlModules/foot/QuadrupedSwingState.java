@@ -1,7 +1,5 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -12,12 +10,10 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionControllerSetpoints;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -28,7 +24,6 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean createSwingTrajectoryGraphics = false;
 
-   private final RobotQuadrant robotQuadrant;
    private final ThreeDoFSwingFootTrajectory swingTrajectory;
    private final FramePoint3D goalPosition = new FramePoint3D();
    private final FramePoint3D initialPosition = new FramePoint3D();
@@ -39,8 +34,6 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    private final YoBoolean stepCommandIsValid;
    private final YoDouble timestamp;
    private final YoQuadrupedTimedStep currentStepCommand;
-
-   private final QuadrupedForceControllerToolbox controllerToolbox;
 
    private final ReferenceFrame soleFrame;
 
@@ -55,8 +48,6 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    {
       super(robotQuadrant, controllerToolbox, solePositionController);
 
-      this.robotQuadrant = robotQuadrant;
-      this.controllerToolbox = controllerToolbox;
       this.stepCommandIsValid = stepCommandIsValid;
       this.timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.currentStepCommand = currentStepCommand;
@@ -84,6 +75,8 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    @Override
    public void onEntry()
    {
+      super.onEntry();
+
       // initialize swing trajectory
       double groundClearance = currentStepCommand.getGroundClearance();
       TimeInterval timeInterval = currentStepCommand.getTimeInterval();
