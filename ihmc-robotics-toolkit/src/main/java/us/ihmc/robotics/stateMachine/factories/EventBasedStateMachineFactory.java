@@ -284,8 +284,15 @@ public class EventBasedStateMachineFactory<K extends Enum<K>, S extends EventSta
       stateMachine = new StateMachine<K, S>(initialStateKey, states, stateTransitions, stateChangedListeners, clock, namePrefix, registry);
 
       // Get the current state event
-      stateMachine.addPreTransitionCallback(() -> eventFired.set(stateEventTriggers.fireEvent(stateMachine.getCurrentStateKey(),
-                                                                                              stateMachine.getTimeInCurrentState())));
+      stateMachine.addPreTransitionCallback(() -> {
+         K currentStateKey = stateMachine.getCurrentStateKey();
+         if (currentStateKey != null)
+         {
+            Object newEvent = stateEventTriggers.fireEvent(currentStateKey, stateMachine.getTimeInCurrentState());
+            if (newEvent != null && eventFired.get() == null)
+               eventFired.set(newEvent);
+         }
+      });
 
       stateMachine.addPreTransitionCallback(() -> {
          StateEventCallback callbacks = stateCallbacks.get(stateMachine.getCurrentStateKey());
@@ -343,13 +350,19 @@ public class EventBasedStateMachineFactory<K extends Enum<K>, S extends EventSta
     */
    public <E extends Enum<E>> EventBasedStateMachineFactory<K, S> buildYoEventTrigger(YoEnum<E> yoTrigger)
    {
+      EventTrigger eventTrigger = buildEventTrigger();
+
       yoTrigger.addVariableChangedListener(new VariableChangedListener()
       {
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            eventFired.set(yoTrigger.getEnumValue());
-            yoTrigger.set(null);
+            E newEvent = yoTrigger.getEnumValue();
+            if (newEvent != null)
+            {
+               eventTrigger.fireEvent(yoTrigger.getEnumValue());
+               yoTrigger.set(null);
+            }
          }
       });
       return this;
