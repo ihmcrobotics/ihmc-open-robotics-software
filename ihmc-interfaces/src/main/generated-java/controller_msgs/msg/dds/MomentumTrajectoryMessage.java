@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,14 +9,15 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message can be used to send a predefined angular momentum trajectory to the controller.
  * This trajectory will be used for ICP planning.
  */
-public class MomentumTrajectoryMessage implements Settable<MomentumTrajectoryMessage>, EpsilonComparable<MomentumTrajectoryMessage>
+public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
+      implements Settable<MomentumTrajectoryMessage>, EpsilonComparable<MomentumTrajectoryMessage>
 {
    /**
     * List of angular momentum trajectory waypoints.
     * Each waypoint contains the angular momentum and the angular momentum rate at a given time.
     * NOTE: As the angular momentum can't be encoded using the SO3TrajectoryMessage, the EuclideanTrajectoryMessage is used.
     */
-   private controller_msgs.msg.dds.EuclideanTrajectoryMessage angular_momentum_trajectory_;
+   public controller_msgs.msg.dds.EuclideanTrajectoryMessage angular_momentum_trajectory_;
 
    public MomentumTrajectoryMessage()
    {

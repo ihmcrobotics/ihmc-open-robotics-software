@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,7 +8,8 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * This message allows the user to precisely select what component in taskspace are to be achieved.
  */
-public class SelectionMatrix3DMessage implements Settable<SelectionMatrix3DMessage>, EpsilonComparable<SelectionMatrix3DMessage>
+public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
+      implements Settable<SelectionMatrix3DMessage>, EpsilonComparable<SelectionMatrix3DMessage>
 {
    /**
     * The ID of the reference frame defining the selection frame.
@@ -15,19 +17,19 @@ public class SelectionMatrix3DMessage implements Settable<SelectionMatrix3DMessa
     * This frame is optional. It is preferable to provide it when possible, but when it is absent, i.e. equal to 0,
     * the selection matrix will then be generated regardless to what frame is it used in.
     */
-   private long selection_frame_id_;
+   public long selection_frame_id_;
    /**
     * Specifies whether the x-axis of the selection frame is an axis of interest.
     */
-   private boolean x_selected_ = true;
+   public boolean x_selected_ = true;
    /**
     * Specifies whether the y-axis of the selection frame is an axis of interest.
     */
-   private boolean y_selected_ = true;
+   public boolean y_selected_ = true;
    /**
     * Specifies whether the z-axis of the selection frame is an axis of interest.
     */
-   private boolean z_selected_ = true;
+   public boolean z_selected_ = true;
 
    public SelectionMatrix3DMessage()
    {

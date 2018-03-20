@@ -1,14 +1,15 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * General purpose message that contains vertices to represent a 2D polygon (z ignored).
  */
-public class Polygon2DMessage implements Settable<Polygon2DMessage>, EpsilonComparable<Polygon2DMessage>
+public class Polygon2DMessage extends Packet<Polygon2DMessage> implements Settable<Polygon2DMessage>, EpsilonComparable<Polygon2DMessage>
 {
-   private us.ihmc.euclid.tuple3D.Point3D vertices_;
+   public us.ihmc.euclid.tuple3D.Point3D vertices_;
 
    public Polygon2DMessage()
    {

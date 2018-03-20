@@ -1,15 +1,16 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Represents a 6D vector composed of a 3D anuglar vector and a 3D linear vector.
  */
-public class SpatialVectorMessage implements Settable<SpatialVectorMessage>, EpsilonComparable<SpatialVectorMessage>
+public class SpatialVectorMessage extends Packet<SpatialVectorMessage> implements Settable<SpatialVectorMessage>, EpsilonComparable<SpatialVectorMessage>
 {
-   private us.ihmc.euclid.tuple3D.Vector3D angular_part_;
-   private us.ihmc.euclid.tuple3D.Vector3D linear_part_;
+   public us.ihmc.euclid.tuple3D.Vector3D angular_part_;
+   public us.ihmc.euclid.tuple3D.Vector3D linear_part_;
 
    public SpatialVectorMessage()
    {

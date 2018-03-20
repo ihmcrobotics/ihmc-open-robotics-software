@@ -1,12 +1,13 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class BoundingBox3DMessage implements Settable<BoundingBox3DMessage>, EpsilonComparable<BoundingBox3DMessage>
+public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implements Settable<BoundingBox3DMessage>, EpsilonComparable<BoundingBox3DMessage>
 {
-   private us.ihmc.euclid.tuple3D.Point3D min_point_;
-   private us.ihmc.euclid.tuple3D.Point3D max_point_;
+   public us.ihmc.euclid.tuple3D.Point3D min_point_;
+   public us.ihmc.euclid.tuple3D.Point3D max_point_;
 
    public BoundingBox3DMessage()
    {

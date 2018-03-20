@@ -1,14 +1,15 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
-public class DoorLocationPacket implements Settable<DoorLocationPacket>, EpsilonComparable<DoorLocationPacket>
+public class DoorLocationPacket extends Packet<DoorLocationPacket> implements Settable<DoorLocationPacket>, EpsilonComparable<DoorLocationPacket>
 {
-   private us.ihmc.euclid.geometry.Pose3D door_transform_to_world_;
+   public us.ihmc.euclid.geometry.Pose3D door_transform_to_world_;
 
    public DoorLocationPacket()
    {

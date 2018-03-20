@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,16 +8,17 @@ import us.ihmc.euclid.interfaces.Settable;
  * Configure a constrained trajectory for a given end-effector.
  * Main usage is the IHMC WholeBodyTrajectoryToolbox.
  */
-public class WaypointBasedTrajectoryMessage implements Settable<WaypointBasedTrajectoryMessage>, EpsilonComparable<WaypointBasedTrajectoryMessage>
+public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajectoryMessage>
+      implements Settable<WaypointBasedTrajectoryMessage>, EpsilonComparable<WaypointBasedTrajectoryMessage>
 {
-   private long end_effector_name_based_hash_code_;
-   private us.ihmc.idl.IDLSequence.Double waypoint_times_;
-   private us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> waypoints_;
-   private controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
-   private controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
-   private us.ihmc.euclid.tuple3D.Point3D control_frame_position_in_end_effector_;
-   private us.ihmc.euclid.tuple4D.Quaternion control_frame_orientation_in_end_effector_;
-   private double weight_;
+   public long end_effector_name_based_hash_code_;
+   public us.ihmc.idl.IDLSequence.Double waypoint_times_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> waypoints_;
+   public controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
+   public controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
+   public us.ihmc.euclid.tuple3D.Point3D control_frame_position_in_end_effector_;
+   public us.ihmc.euclid.tuple4D.Quaternion control_frame_orientation_in_end_effector_;
+   public double weight_;
 
    public WaypointBasedTrajectoryMessage()
    {

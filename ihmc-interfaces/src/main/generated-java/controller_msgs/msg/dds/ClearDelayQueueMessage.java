@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,18 +9,19 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is used to clear the delay buffers on the controller, if you sent a message with a
  * delay and now you do not want them executed, use this command.
  */
-public class ClearDelayQueueMessage implements Settable<ClearDelayQueueMessage>, EpsilonComparable<ClearDelayQueueMessage>
+public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
+      implements Settable<ClearDelayQueueMessage>, EpsilonComparable<ClearDelayQueueMessage>
 {
    /**
     * If only a specific message type is to be cleared, use this field.
     * The integer represents the hash code of the message simple name.
     * The hash code of a string should be computed as in java.lang.String.hashCode().
     */
-   private int class_simple_name_based_hash_code_;
+   public int class_simple_name_based_hash_code_;
    /**
     * If all the messages should be cleared, then this field should be set to true.
     */
-   private boolean clear_all_delay_buffers_;
+   public boolean clear_all_delay_buffers_;
 
    public ClearDelayQueueMessage()
    {

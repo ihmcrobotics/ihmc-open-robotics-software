@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,19 +8,19 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * This message commands the controller to move an arm in jointspace to the desired joint angles while going through the specified trajectory points.
  */
-public class ArmTrajectoryMessage implements Settable<ArmTrajectoryMessage>, EpsilonComparable<ArmTrajectoryMessage>
+public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implements Settable<ArmTrajectoryMessage>, EpsilonComparable<ArmTrajectoryMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
     * Specifies the side of the robot that will execute the trajectory.
     */
-   private byte robot_side_ = (byte) 255;
+   public byte robot_side_ = (byte) 255;
    /**
     * Trajectories for each joint.
     * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
     */
-   private controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
+   public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
 
    public ArmTrajectoryMessage()
    {

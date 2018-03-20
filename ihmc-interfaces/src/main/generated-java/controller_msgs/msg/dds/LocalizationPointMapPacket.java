@@ -1,15 +1,17 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Message part of the localization module
  */
-public class LocalizationPointMapPacket implements Settable<LocalizationPointMapPacket>, EpsilonComparable<LocalizationPointMapPacket>
+public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacket>
+      implements Settable<LocalizationPointMapPacket>, EpsilonComparable<LocalizationPointMapPacket>
 {
-   private long timestamp_;
-   private us.ihmc.idl.IDLSequence.Float localization_point_map_;
+   public long timestamp_;
+   public us.ihmc.idl.IDLSequence.Float localization_point_map_;
 
    public LocalizationPointMapPacket()
    {

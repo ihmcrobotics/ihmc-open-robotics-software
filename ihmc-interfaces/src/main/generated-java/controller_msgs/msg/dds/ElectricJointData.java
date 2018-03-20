@@ -1,13 +1,14 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class ElectricJointData implements Settable<ElectricJointData>, EpsilonComparable<ElectricJointData>
+public class ElectricJointData extends Packet<ElectricJointData> implements Settable<ElectricJointData>, EpsilonComparable<ElectricJointData>
 {
-   private boolean joint_enabled_;
-   private float joint_temperature_;
-   private float joint_current_;
+   public boolean joint_enabled_;
+   public float joint_temperature_;
+   public float joint_current_;
 
    public ElectricJointData()
    {

@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,13 +8,14 @@ import us.ihmc.euclid.interfaces.Settable;
  * General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
  * Main usage is for the IHMC KinematicsToolbox.
  */
-public class KinematicsToolboxOutputStatus implements Settable<KinematicsToolboxOutputStatus>, EpsilonComparable<KinematicsToolboxOutputStatus>
+public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutputStatus>
+      implements Settable<KinematicsToolboxOutputStatus>, EpsilonComparable<KinematicsToolboxOutputStatus>
 {
-   private int joint_name_hash_;
-   private us.ihmc.idl.IDLSequence.Float desired_joint_angles_;
-   private us.ihmc.euclid.tuple3D.Vector3D desired_root_translation_;
-   private us.ihmc.euclid.tuple4D.Quaternion desired_root_orientation_;
-   private double solution_quality_;
+   public int joint_name_hash_;
+   public us.ihmc.idl.IDLSequence.Float desired_joint_angles_;
+   public us.ihmc.euclid.tuple3D.Vector3D desired_root_translation_;
+   public us.ihmc.euclid.tuple4D.Quaternion desired_root_orientation_;
+   public double solution_quality_;
 
    public KinematicsToolboxOutputStatus()
    {

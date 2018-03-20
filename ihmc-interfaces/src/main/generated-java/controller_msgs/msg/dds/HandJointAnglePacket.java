@@ -1,19 +1,20 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Message used to report the current joint angles for the fingers of a hand.
  */
-public class HandJointAnglePacket implements Settable<HandJointAnglePacket>, EpsilonComparable<HandJointAnglePacket>
+public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implements Settable<HandJointAnglePacket>, EpsilonComparable<HandJointAnglePacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   private byte robot_side_ = (byte) 255;
-   private us.ihmc.idl.IDLSequence.Double joint_angles_;
-   private boolean connected_;
-   private boolean calibrated_;
+   public byte robot_side_ = (byte) 255;
+   public us.ihmc.idl.IDLSequence.Double joint_angles_;
+   public boolean connected_;
+   public boolean calibrated_;
 
    public HandJointAnglePacket()
    {

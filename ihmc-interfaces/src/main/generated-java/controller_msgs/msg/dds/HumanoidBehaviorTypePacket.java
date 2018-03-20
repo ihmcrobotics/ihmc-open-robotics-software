@@ -1,12 +1,14 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
-public class HumanoidBehaviorTypePacket implements Settable<HumanoidBehaviorTypePacket>, EpsilonComparable<HumanoidBehaviorTypePacket>
+public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacket>
+      implements Settable<HumanoidBehaviorTypePacket>, EpsilonComparable<HumanoidBehaviorTypePacket>
 {
    public static final byte STOP = (byte) 0;
    public static final byte TEST = (byte) 1;
@@ -37,7 +39,7 @@ public class HumanoidBehaviorTypePacket implements Settable<HumanoidBehaviorType
    public static final byte FIRE_FIGHTING = (byte) 26;
    public static final byte CUTTING_WALL = (byte) 27;
    public static final byte REPEATEDLY_WALK_FOOTSTEP_LIST = (byte) 28;
-   private byte humanoid_behavior_type_ = (byte) 255;
+   public byte humanoid_behavior_type_ = (byte) 255;
 
    public HumanoidBehaviorTypePacket()
    {

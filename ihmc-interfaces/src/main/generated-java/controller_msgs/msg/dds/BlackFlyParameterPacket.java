@@ -1,24 +1,26 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Atlas specific message
  */
-public class BlackFlyParameterPacket implements Settable<BlackFlyParameterPacket>, EpsilonComparable<BlackFlyParameterPacket>
+public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
+      implements Settable<BlackFlyParameterPacket>, EpsilonComparable<BlackFlyParameterPacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   private boolean auto_exposure_;
-   private boolean auto_gain_;
-   private boolean auto_shutter_;
-   private double exposure_;
-   private double frame_rate_;
-   private boolean from_ui_;
-   private double gain_;
-   private double shutter_;
-   private byte robot_side_ = (byte) 255;
+   public boolean auto_exposure_;
+   public boolean auto_gain_;
+   public boolean auto_shutter_;
+   public double exposure_;
+   public double frame_rate_;
+   public boolean from_ui_;
+   public double gain_;
+   public double shutter_;
+   public byte robot_side_ = (byte) 255;
 
    public BlackFlyParameterPacket()
    {

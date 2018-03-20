@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -9,37 +10,37 @@ import us.ihmc.euclid.interfaces.Settable;
  * A Hermite based curve (third order) is used to interpolate the orientations.
  * To execute a single straight "line" trajectory to reach a desired orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
  */
-public class SO3TrajectoryMessage implements Settable<SO3TrajectoryMessage>, EpsilonComparable<SO3TrajectoryMessage>
+public class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> implements Settable<SO3TrajectoryMessage>, EpsilonComparable<SO3TrajectoryMessage>
 {
    /**
     * List of trajectory points (in taskpsace) to go through while executing the trajectory.
     */
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SO3TrajectoryPointMessage> taskspace_trajectory_points_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SO3TrajectoryPointMessage> taskspace_trajectory_points_;
    /**
     * The selection matrix for each axis of this trajectory.
     */
-   private controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
+   public controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
    /**
     * Frame information for this message.
     */
-   private controller_msgs.msg.dds.FrameInformation frame_information_;
+   public controller_msgs.msg.dds.FrameInformation frame_information_;
    /**
     * The weight matrix for each axis of this trajectory.
     */
-   private controller_msgs.msg.dds.WeightMatrix3DMessage weight_matrix_;
+   public controller_msgs.msg.dds.WeightMatrix3DMessage weight_matrix_;
    /**
     * Flag that tells the controller whether the use of a custom control frame is requested.
     */
-   private boolean use_custom_control_frame_;
+   public boolean use_custom_control_frame_;
    /**
     * Pose of custom control frame expressed in the end-effector frame.
     * This is the frame attached to the rigid body that the taskspace trajectory is defined for.
     */
-   private us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
+   public us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
    /**
     * Properties for queueing trajectories.
     */
-   private controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public SO3TrajectoryMessage()
    {

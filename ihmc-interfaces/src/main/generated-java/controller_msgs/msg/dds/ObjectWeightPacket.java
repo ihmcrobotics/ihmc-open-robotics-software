@@ -1,17 +1,18 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part the IHMC humanoid behavior module.
  */
-public class ObjectWeightPacket implements Settable<ObjectWeightPacket>, EpsilonComparable<ObjectWeightPacket>
+public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Settable<ObjectWeightPacket>, EpsilonComparable<ObjectWeightPacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   private byte robot_side_ = (byte) 255;
-   private double weight_;
+   public byte robot_side_ = (byte) 255;
+   public double weight_;
 
    public ObjectWeightPacket()
    {

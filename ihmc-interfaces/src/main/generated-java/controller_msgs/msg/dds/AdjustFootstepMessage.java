@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,22 +9,22 @@ import us.ihmc.euclid.interfaces.Settable;
  * The intent of this message is to adjust a footstep when the robot is executing it
  * (a foot is currently swinging to reach the footstep to be adjusted).
  */
-public class AdjustFootstepMessage implements Settable<AdjustFootstepMessage>, EpsilonComparable<AdjustFootstepMessage>
+public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> implements Settable<AdjustFootstepMessage>, EpsilonComparable<AdjustFootstepMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
     * Specifies which foot is expected to be executing the footstep to be adjusted.
     */
-   private byte robot_side_ = (byte) 255;
+   public byte robot_side_ = (byte) 255;
    /**
     * Specifies the adjusted position of the footstep. It is expressed in world frame.
     */
-   private us.ihmc.euclid.tuple3D.Point3D location_;
+   public us.ihmc.euclid.tuple3D.Point3D location_;
    /**
     * Specifies the adjusted orientation of the footstep. It is expressed in world frame.
     */
-   private us.ihmc.euclid.tuple4D.Quaternion orientation_;
+   public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    /**
     * Predicted contact points represent the vertices of the expected contact polygon between the foot and the world.
     * An empty list will request the controller to use the default foot support polygon.
@@ -35,11 +36,11 @@ public class AdjustFootstepMessage implements Settable<AdjustFootstepMessage>, E
     * - x: -0.5 * foot_length, y: 0.5 * heel_width
     * Note: The z coordinate of each point is ignored.
     */
-   private us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> predicted_contact_points_2d_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> predicted_contact_points_2d_;
    /**
     * The time to delay this command on the controller side before being executed.
     */
-   private double execution_delay_time_;
+   public double execution_delay_time_;
 
    public AdjustFootstepMessage()
    {
