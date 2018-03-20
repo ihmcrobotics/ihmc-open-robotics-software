@@ -69,6 +69,6 @@ public class JointLimitEnforcementCommand implements VirtualModelControlCommand<
    @Override
    public ControllerCoreCommandType getCommandType()
    {
-      return ControllerCoreCommandType.LIMIT_REDUCTION;
+      return ControllerCoreCommandType.JOINT_LIMIT_ENFORCEMENT;
    }
 }
