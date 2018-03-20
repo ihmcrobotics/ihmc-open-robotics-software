@@ -14,6 +14,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingStatePac
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedJointSpaceManager;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -67,6 +68,7 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final QuadrupedFeetManager feetManager;
    private final QuadrupedBalanceManager balanceManager;
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
+   private final QuadrupedJointSpaceManager jointSpaceManager;
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
@@ -82,6 +84,7 @@ public class QuadrupedSteppingState implements QuadrupedController
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
+      jointSpaceManager = controlManagerFactory.getOrCreateJointSpaceManager();
 
       FullQuadrupedRobotModel fullRobotModel = runtimeEnvironment.getFullRobotModel();
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(runtimeEnvironment.getControlDT(), runtimeEnvironment.getGravity(),
@@ -282,6 +285,9 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCoreCommand.addVirtualModelControlCommand(bodyOrientationManager.getVirtualModelControlCommand());
 
       controllerCoreCommand.addVirtualModelControlCommand(balanceManager.getVirtualModelControlCommand());
+
+      controllerCoreCommand.addFeedbackControlCommand(jointSpaceManager.getFeedbackControlCommand());
+      controllerCoreCommand.addVirtualModelControlCommand(jointSpaceManager.getVirtualModelControlCommand());
    }
 
    @Override
