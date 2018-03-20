@@ -396,6 +396,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          factory.addTransition(allDoubleSupportStates, singleSupportStateEnum, new DoubSuppToSingSuppCond4DistRecov(swingSide, balanceManager));
       }
 
+      // Update the previous state info for each state using state changed listeners.
+      factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousWalkingStateEnum(from)));
       factory.addStateChangedListener((from, to) -> controllerToolbox.reportControllerStateChangeToListeners(from, to));
 
       return factory.build(WalkingStateEnum.TO_STANDING);

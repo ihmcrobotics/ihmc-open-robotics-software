@@ -1,6 +1,7 @@
 package us.ihmc.robotics.stateMachine.factories;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -194,6 +195,16 @@ public class StateMachineFactory<K extends Enum<K>, S extends State>
    public Set<K> getRegisteredStateKeys()
    {
       return states.keySet();
+   }
+
+   /**
+    * Creates a set of all the state keys that already have been registered.
+    * 
+    * @return the set keys corresponding to all the registered states.
+    */
+   public Collection<S> getRegisteredStates()
+   {
+      return states.values();
    }
 
    /**
