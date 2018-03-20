@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
@@ -68,7 +68,7 @@ public class WholeBodyControlCoreToolbox
    private YoFrameVector yoResidualRootJointTorque;
 
    private MotionQPInputCalculator motionQPInputCalculator;
-   private InverseDynamicsQPBoundCalculator qpBoundCalculator;
+   private WholeBodyControllerBoundCalculator qpBoundCalculator;
    private WrenchMatrixCalculator wrenchMatrixCalculator;
 
    private boolean enableInverseDynamicsModule = false;
@@ -244,12 +244,12 @@ public class WholeBodyControlCoreToolbox
       return motionQPInputCalculator;
    }
 
-   public InverseDynamicsQPBoundCalculator getQPBoundCalculator()
+   public WholeBodyControllerBoundCalculator getQPBoundCalculator()
    {
       if (qpBoundCalculator == null)
       {
          boolean areJointVelocityLimitsConsidered = optimizationSettings.areJointVelocityLimitsConsidered();
-         qpBoundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, areJointVelocityLimitsConsidered, registry);
+         qpBoundCalculator = new WholeBodyControllerBoundCalculator(jointIndexHandler, controlDT, areJointVelocityLimitsConsidered, registry);
       }
       return qpBoundCalculator;
    }
