@@ -224,7 +224,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       double timeInTrajectory = getTimeInTrajectory();
 
@@ -333,12 +333,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       hideGraphics();
       clear();

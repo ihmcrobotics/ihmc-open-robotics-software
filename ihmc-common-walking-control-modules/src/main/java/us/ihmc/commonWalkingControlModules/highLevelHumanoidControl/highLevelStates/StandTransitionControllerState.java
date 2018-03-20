@@ -47,20 +47,20 @@ public class StandTransitionControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      walkingControllerState.doTransitionIntoAction();
+      walkingControllerState.onEntry();
 
       walkingControlRatioTrajectory.setLinear(0.0, standTransitionDuration.getDoubleValue(), 0.0, 1.0);
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      standReadyControllerState.doAction();
-      walkingControllerState.doAction();
+      standReadyControllerState.doAction(timeInState);
+      walkingControllerState.doAction(timeInState);
 
-      double timeInBlending = MathTools.clamp(getTimeInCurrentState(), 0.0, standTransitionDuration.getDoubleValue());
+      double timeInBlending = MathTools.clamp(timeInState, 0.0, standTransitionDuration.getDoubleValue());
       walkingControlRatioTrajectory.compute(timeInBlending);
       double gainRatio = walkingControlRatioTrajectory.getPosition();
       standTransitionGainRatio.set(gainRatio);
@@ -83,15 +83,15 @@ public class StandTransitionControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      standReadyControllerState.doTransitionOutOfAction();
+      standReadyControllerState.onExit();
    }
 
    @Override
-   public boolean isDone()
+   public boolean isDone(double timeInState)
    {
-      return getTimeInCurrentState() > standTransitionDuration.getDoubleValue();
+      return timeInState > standTransitionDuration.getDoubleValue();
    }
 
    @Override

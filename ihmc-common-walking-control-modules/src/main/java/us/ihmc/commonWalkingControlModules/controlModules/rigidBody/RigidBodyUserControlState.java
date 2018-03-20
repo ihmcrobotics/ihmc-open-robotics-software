@@ -76,7 +76,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       if (getTimeInTrajectory() > TIME_WITH_NO_MESSAGE_BEFORE_ABORT)
       {
@@ -113,12 +113,12 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       abortUserControlMode.set(false);
    }

@@ -5,7 +5,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationBehavior.WalkingOrientation;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 
-public class WalkToLocationTask<E extends Enum<E>> extends BehaviorAction<E>
+public class WalkToLocationTask extends BehaviorAction
 {
    private final FramePose2D targetPoseInWorld;
    private final WalkToLocationBehavior walkToLocationBehavior;
@@ -18,15 +18,9 @@ public class WalkToLocationTask<E extends Enum<E>> extends BehaviorAction<E>
    private double swingTime;
 
    public WalkToLocationTask(FramePose2D targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double orientationRelativeToPathDirection,
-         double footstepLength, double swingTime, double transferTime)
+                             double footstepLength, double swingTime, double transferTime)
    {
-      this(null, targetPoseInWorld, walkToLocationBehavior, orientationRelativeToPathDirection, footstepLength, swingTime, transferTime);
-   }
-
-   public WalkToLocationTask(E stateEnum, FramePose2D targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior,
-         double orientationRelativeToPathDirection, double footstepLength, double swingTime, double transferTime)
-   {
-      super(stateEnum, walkToLocationBehavior);
+      super(walkToLocationBehavior);
       this.targetPoseInWorld = new FramePose2D(targetPoseInWorld);
       this.walkToLocationBehavior = walkToLocationBehavior;
       this.orientationRelativeToPathDirection = orientationRelativeToPathDirection;
@@ -37,27 +31,15 @@ public class WalkToLocationTask<E extends Enum<E>> extends BehaviorAction<E>
    }
 
    public WalkToLocationTask(FramePose2D targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, double orientationRelativeToPathDirection,
-         double footstepLength)
+                             double footstepLength)
    {
-      this(null, targetPoseInWorld, walkToLocationBehavior, orientationRelativeToPathDirection, footstepLength);
-   }
-
-   public WalkToLocationTask(E stateEnum, FramePose2D targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior,
-         double orientationRelativeToPathDirection, double footstepLength)
-   {
-      this(stateEnum, targetPoseInWorld, walkToLocationBehavior, orientationRelativeToPathDirection, footstepLength, Double.NaN, Double.NaN);
+      this(targetPoseInWorld, walkToLocationBehavior, orientationRelativeToPathDirection, footstepLength, Double.NaN, Double.NaN);
    }
 
    public WalkToLocationTask(FramePose2D targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, WalkingOrientation walkingOrientation,
-         double footstepLength)
+                             double footstepLength)
    {
-      this(null, targetPoseInWorld, walkToLocationBehavior, walkingOrientation, footstepLength);
-   }
-
-   public WalkToLocationTask(E stateEnum, FramePose2D targetPoseInWorld, WalkToLocationBehavior walkToLocationBehavior, WalkingOrientation walkingOrientation,
-         double footstepLength)
-   {
-      super(stateEnum, walkToLocationBehavior);
+      super(walkToLocationBehavior);
       this.targetPoseInWorld = new FramePose2D(targetPoseInWorld);
       this.walkToLocationBehavior = walkToLocationBehavior;
       this.orientationRelativeToPathDirection = 0.0;

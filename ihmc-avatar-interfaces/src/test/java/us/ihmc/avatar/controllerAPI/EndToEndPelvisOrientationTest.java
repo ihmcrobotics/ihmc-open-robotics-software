@@ -308,7 +308,7 @@ public abstract class EndToEndPelvisOrientationTest implements MultiRobotTestInt
    private PelvisOrientationControlMode findCurrentControlMode()
    {
       String managerName = PelvisOrientationManager.class.getSimpleName();
-      YoVariable<?> variable = scs.getVariable(managerName, managerName + "State");
+      YoVariable<?> variable = scs.getVariable(managerName, managerName + "CurrentState");
       return ((YoEnum<PelvisOrientationControlMode>) variable).getEnumValue();
    }
 

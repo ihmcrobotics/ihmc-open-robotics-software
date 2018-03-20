@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
@@ -60,9 +61,9 @@ public class UnloadedAnkleControlModule
       parentRegistry.addChild(registry);
    }
 
-   public void compute(AbstractFootControlState footControlState)
+   public void compute(ConstraintType currentConstraintType, AbstractFootControlState currentState)
    {
-      boolean footIsInAir = !footControlState.getStateEnum().isLoadBearing();
+      boolean footIsInAir = !currentConstraintType.isLoadBearing();
       enabled.set(useAnkleIKModule.getValue() && footIsInAir);
 
       if (!enabled.getBooleanValue())
@@ -72,7 +73,7 @@ public class UnloadedAnkleControlModule
          return;
       }
 
-      SpatialFeedbackControlCommand feedbackControlCommand = footControlState.getFeedbackControlCommand();
+      SpatialFeedbackControlCommand feedbackControlCommand = currentState.getFeedbackControlCommand();
       if (feedbackControlCommand.getEndEffector().getNameBasedHashCode() != foot.getNameBasedHashCode())
       {
          throw new RuntimeException("Something got messed up. Expecting a command for " + foot.getName());

@@ -1,18 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.EnumMap;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions.FeetLoadedToWalkingStandTransition;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.EnumMap;
 
 public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStateTransitionFactory<HighLevelControllerName>
 {
@@ -25,8 +25,7 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
    private final SideDependentList<String> feetForceSensors;
 
    public FeetLoadedToWalkingStandTransitionFactory(HighLevelControllerName stateToAttachEnum, HighLevelControllerName nextStateEnum,
-                                                    YoEnum<HighLevelControllerName> requestedState,
-                                                    SideDependentList<String> feetForceSensors)
+                                                    YoEnum<HighLevelControllerName> requestedState, SideDependentList<String> feetForceSensors)
    {
       this.stateToAttachEnum = stateToAttachEnum;
       this.nextStateEnum = nextStateEnum;
@@ -35,8 +34,9 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
    }
 
    @Override
-   public StateTransition<HighLevelControllerName> getOrCreateStateTransition(EnumMap<HighLevelControllerName, ? extends FinishableState<HighLevelControllerName>> controllerStateMap,
-                                                                              HighLevelControllerFactoryHelper controllerFactoryHelper, YoVariableRegistry parentRegistry)
+   public StateTransition<HighLevelControllerName> getOrCreateStateTransition(EnumMap<HighLevelControllerName, ? extends State> controllerStateMap,
+                                                                              HighLevelControllerFactoryHelper controllerFactoryHelper,
+                                                                              YoVariableRegistry parentRegistry)
    {
       if (stateTransition != null)
          return stateTransition;
@@ -47,9 +47,9 @@ public class FeetLoadedToWalkingStandTransitionFactory implements ControllerStat
       ForceSensorDataHolderReadOnly forceSensorDataHolder = controllerFactoryHelper.getForceSensorDataHolder();
       HighLevelControllerParameters highLevelControllerParameters = controllerFactoryHelper.getHighLevelControllerParameters();
 
-      StateTransitionCondition stateTransitionCondition = new FeetLoadedToWalkingStandTransition(controllerStateMap.get(stateToAttachEnum), nextStateEnum,
-                                                                                                 requestedState, forceSensorDataHolder, feetForceSensors,
-                                                                                                 controlDT, totalMass, gravityZ, highLevelControllerParameters, parentRegistry);
+      StateTransitionCondition stateTransitionCondition = new FeetLoadedToWalkingStandTransition(nextStateEnum, requestedState, forceSensorDataHolder,
+                                                                                                 feetForceSensors, controlDT, totalMass, gravityZ,
+                                                                                                 highLevelControllerParameters, parentRegistry);
       stateTransition = new StateTransition<>(nextStateEnum, stateTransitionCondition);
 
       return stateTransition;

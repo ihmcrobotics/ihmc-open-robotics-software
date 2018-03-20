@@ -720,7 +720,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    public static RigidBodyControlMode findControllerState(String bodyName, SimulationConstructionSet scs)
    {
       String managerName = bodyName + "Manager";
-      return ((YoEnum<RigidBodyControlMode>) scs.getVariable(managerName, managerName + "State")).getEnumValue();
+      return ((YoEnum<RigidBodyControlMode>) scs.getVariable(managerName, managerName + "CurrentState")).getEnumValue();
    }
 
    public static double[] findControllerDesiredPositions(OneDoFJoint[] armJoints, SimulationConstructionSet scs)

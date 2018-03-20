@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,7 +24,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -63,13 +62,13 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    RobotSide side = RobotSide.RIGHT;
 
    public TurnValveBehaviorStateMachine(CommunicationBridge communicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
-         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
-         AtlasPrimitiveActions atlasPrimitiveActions)
+                                        FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                        WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("turnValveStateMachine", TurnValveBehaviorState.class, yoTime, communicationBridge);
 
       communicationBridge.addListeners(this);
-      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
+//      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable()); // FIXME
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       searchForValveBehavior = new SearchForValveBehavior(communicationBridge);
@@ -77,8 +76,6 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
       userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
-
-      setupStateMachine();
    }
 
    @Override
@@ -88,17 +85,16 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       super.doControl();
    }
 
-   private void setupStateMachine()
+   @Override
+   protected TurnValveBehaviorState configureStateMachineAndReturnInitialKey(StateMachineFactory<TurnValveBehaviorState, BehaviorAction> factory)
    {
-      BehaviorAction<TurnValveBehaviorState> resetRobot = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.RESET_ROBOT, resetRobotBehavior);
+      BehaviorAction resetRobot = new BehaviorAction(resetRobotBehavior);
 
-      BehaviorAction<TurnValveBehaviorState> setup = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SETUP_ROBOT,
-            atlasPrimitiveActions.rightArmGoHomeBehavior, atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
+      BehaviorAction setup = new BehaviorAction(atlasPrimitiveActions.rightArmGoHomeBehavior, atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-
             GoHomeMessage goHomeRightArmMessage = HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, RobotSide.RIGHT, 2);
             atlasPrimitiveActions.rightArmGoHomeBehavior.setInput(goHomeRightArmMessage);
             HandDesiredConfigurationMessage handMessage = HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.LEFT, HandConfiguration.CLOSE);
@@ -107,38 +103,35 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       };
 
       //TODO setup search for ball behavior
-      BehaviorAction<TurnValveBehaviorState> searchForValveFar = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SEARCHING_FOR_VALVE,
-            searchForValveBehavior)
+      BehaviorAction searchForValveFar = new BehaviorAction(searchForValveBehavior)
       {
          @Override
          public void doTransitionOutOfAction()
          {
             super.doTransitionOutOfAction();
             //found the valve location, inform the UI of its location
-
-            ValveLocationPacket valveLocationPacket = HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius());
+            ValveLocationPacket valveLocationPacket = HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(),
+                                                                                                     searchForValveBehavior.getValveRadius());
             communicationBridge.sendPacketToUI(valveLocationPacket);
 
          }
       };
 
-      BehaviorAction<TurnValveBehaviorState> searchForValveNear = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.SEARCHING_FOR_VALVE_FINAL,
-            searchForValveBehavior)
+      BehaviorAction searchForValveNear = new BehaviorAction(searchForValveBehavior)
       {
          @Override
          public void doTransitionOutOfAction()
          {
             super.doTransitionOutOfAction();
             //found the valve location, inform the UI of its location
-
-            ValveLocationPacket valveLocationPacket = HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius());
+            ValveLocationPacket valveLocationPacket = HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(),
+                                                                                                     searchForValveBehavior.getValveRadius());
             communicationBridge.sendPacketToUI(valveLocationPacket);
 
          }
       };
 
-      BehaviorAction<TurnValveBehaviorState> walkToValveAction = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.WALKING_TO_VALVE,
-            walkToInteractableObjectBehavior)
+      BehaviorAction walkToValveAction = new BehaviorAction(walkToInteractableObjectBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -150,8 +143,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          }
       };
 
-      BehaviorAction<TurnValveBehaviorState> graspAndTurnValve = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.TURNING_VALVE,
-            graspAndTurnValveBehavior)
+      BehaviorAction graspAndTurnValve = new BehaviorAction(graspAndTurnValveBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -162,59 +154,47 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
          }
       };
 
-      BehaviorAction<TurnValveBehaviorState> doneState = new BehaviorAction<TurnValveBehaviorState>(TurnValveBehaviorState.BACK_AWAY_FROM_VALVE,
-            new SimpleDoNothingBehavior(communicationBridge))
+      BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(communicationBridge))
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Finished Turning Valve");
-            sendPacket(p1);
+            sendPacket(MessageTools.createTextToSpeechPacket("Finished Turning Valve"));
          }
       };
 
-      BehaviorAction<TurnValveBehaviorState> getUserValidation = new BehaviorAction<TurnValveBehaviorState>(
-            TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION, userValidationExampleBehavior)
+      BehaviorAction getUserValidation = new BehaviorAction(userValidationExampleBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
-            TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Did I Turn It Far Enough?");
-            sendPacket(p1);
-            super.setBehaviorInput();
+            sendPacket(MessageTools.createTextToSpeechPacket("Did I Turn It Far Enough?"));
          }
       };
 
-      StateTransitionCondition notValidatedCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return userValidationExampleBehavior.isDone() && !userValidationExampleBehavior.isValidated();
-         }
-      };
-      StateTransitionCondition validatedCondition = new StateTransitionCondition()
-      {
-         @Override
-         public boolean checkCondition()
-         {
-            return userValidationExampleBehavior.isDone() && userValidationExampleBehavior.isValidated();
-         }
-      };
+      factory.addStateAndDoneTransition(TurnValveBehaviorState.SETUP_ROBOT, setup, TurnValveBehaviorState.SEARCHING_FOR_VALVE);
+      factory.addStateAndDoneTransition(TurnValveBehaviorState.SEARCHING_FOR_VALVE, searchForValveFar, TurnValveBehaviorState.WALKING_TO_VALVE);
+      factory.addStateAndDoneTransition(TurnValveBehaviorState.WALKING_TO_VALVE, walkToValveAction, TurnValveBehaviorState.SEARCHING_FOR_VALVE_FINAL);
+      factory.addStateAndDoneTransition(TurnValveBehaviorState.SEARCHING_FOR_VALVE_FINAL, searchForValveNear, TurnValveBehaviorState.TURNING_VALVE);
+      factory.addStateAndDoneTransition(TurnValveBehaviorState.TURNING_VALVE, graspAndTurnValve, TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION);
 
-      statemachine.addStateWithDoneTransition(setup, TurnValveBehaviorState.SEARCHING_FOR_VALVE);
-      statemachine.addStateWithDoneTransition(searchForValveFar, TurnValveBehaviorState.WALKING_TO_VALVE);
-      statemachine.addStateWithDoneTransition(walkToValveAction, TurnValveBehaviorState.SEARCHING_FOR_VALVE_FINAL);
-      statemachine.addStateWithDoneTransition(searchForValveNear, TurnValveBehaviorState.TURNING_VALVE);
-      statemachine.addStateWithDoneTransition(graspAndTurnValve, TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION);
-      statemachine.addState(getUserValidation);
+      factory.addState(TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION, getUserValidation);
+      factory.addTransition(TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION, TurnValveBehaviorState.BACK_AWAY_FROM_VALVE, time -> isValidationDone() && hasUserValidated());
+      factory.addTransition(TurnValveBehaviorState.WAITING_FOR_USER_CONFIRMATION, TurnValveBehaviorState.TURNING_VALVE, time -> isValidationDone() && !hasUserValidated());
 
-      getUserValidation.addStateTransition(TurnValveBehaviorState.TURNING_VALVE, notValidatedCondition);
-      getUserValidation.addStateTransition(TurnValveBehaviorState.BACK_AWAY_FROM_VALVE, validatedCondition);
+      factory.addState(TurnValveBehaviorState.BACK_AWAY_FROM_VALVE, doneState);
 
-      statemachine.addState(doneState);
-      statemachine.setStartState(TurnValveBehaviorState.SETUP_ROBOT);
+      return TurnValveBehaviorState.SETUP_ROBOT;
+   }
 
+   private boolean isValidationDone()
+   {
+      return userValidationExampleBehavior.isDone();
+   }
+
+   private boolean hasUserValidated()
+   {
+      return userValidationExampleBehavior.isValidated();
    }
 
    private FramePoint3D offsetPointFromValve(Vector3D32 point)
@@ -231,8 +211,6 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    {
 
    }
-
-   
 
    @Override
    public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)

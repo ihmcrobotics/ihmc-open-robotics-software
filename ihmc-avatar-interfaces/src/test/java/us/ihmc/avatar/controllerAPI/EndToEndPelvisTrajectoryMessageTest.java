@@ -453,7 +453,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
    private void assertCenterOfMassHeightManagerIsInState(SimulationConstructionSet scs, PelvisHeightControlMode mode)
    {
-      YoEnum<PelvisHeightControlMode> centerOfMassHeightManagerState = (YoEnum<PelvisHeightControlMode>) scs.getVariable("CenterOfMassHeightManager", "CenterOfMassHeightManagerState");
+      YoEnum<PelvisHeightControlMode> centerOfMassHeightManagerState = (YoEnum<PelvisHeightControlMode>) scs.getVariable("CenterOfMassHeightManager", "CenterOfMassHeightManagerCurrentState");
       assertEquals(mode, centerOfMassHeightManagerState.getEnumValue());
    }
 
@@ -1084,7 +1084,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       String managerName = PelvisOrientationManager.class.getSimpleName();
-      YoEnum<PelvisOrientationControlMode> orientationControlMode = (YoEnum<PelvisOrientationControlMode>) scs.getVariable(managerName, managerName + "State");
+      YoEnum<PelvisOrientationControlMode> orientationControlMode = (YoEnum<PelvisOrientationControlMode>) scs.getVariable(managerName, managerName + "CurrentState");
 
       PelvisTrajectoryMessage pelvisTrajectoryMessage = HumanoidMessageTools.createPelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
 
