@@ -51,6 +51,15 @@ public class JointLimitEnforcementCommand implements VirtualModelControlCommand<
       this.jointLimitData.add().set(jointLimitData);
    }
 
+   public void addJoint(OneDoFJoint joint, double stiffness, double damping)
+   {
+      joints.add(joint);
+      JointLimitData jointLimitData = this.jointLimitData.add();
+      jointLimitData.setJointLimits(joint);
+      jointLimitData.setPositionLimitStiffness(stiffness);
+      jointLimitData.setPositionLimitDamping(damping);
+   }
+
    public int getNumberOfJoints()
    {
       return joints.size();
