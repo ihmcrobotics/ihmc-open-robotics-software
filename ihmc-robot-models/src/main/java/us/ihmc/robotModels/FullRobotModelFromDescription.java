@@ -385,8 +385,8 @@ public class FullRobotModelFromDescription implements FullRobotModel
          throw new RuntimeException("Must be either Pin or Slider here!");
       }
 
-      inverseDynamicsJoint.setEffortLimits(-joint.getEffortLimit(), joint.getEffortLimit());
-      inverseDynamicsJoint.setVelocityLimit(-joint.getVelocityLimit(), joint.getVelocityLimit());
+      inverseDynamicsJoint.setEffortLimit(joint.getEffortLimit());
+      inverseDynamicsJoint.setVelocityLimit(joint.getVelocityLimit());
 
       if (joint.containsLimitStops())
       {
