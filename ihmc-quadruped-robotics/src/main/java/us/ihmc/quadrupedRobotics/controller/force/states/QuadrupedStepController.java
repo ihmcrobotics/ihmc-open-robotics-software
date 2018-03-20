@@ -6,6 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedJointSpaceManager;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -46,6 +47,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final QuadrupedFeetManager feetManager;
    private final QuadrupedBalanceManager balanceManager;
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
+   private final QuadrupedJointSpaceManager jointSpaceManager;
 
    // task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
@@ -73,6 +75,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
+      jointSpaceManager = controlManagerFactory.getOrCreateJointSpaceManager();
 
       // task space controllers
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
@@ -225,6 +228,8 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       {
          taskSpaceControllerSettings.setContactState(robotQuadrant, feetManager.getContactState(robotQuadrant));
       }
+
+      jointSpaceManager.compute();
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);

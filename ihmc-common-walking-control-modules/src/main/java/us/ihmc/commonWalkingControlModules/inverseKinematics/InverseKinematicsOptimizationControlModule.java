@@ -8,7 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
@@ -30,7 +30,7 @@ public class InverseKinematicsOptimizationControlModule
    private final InverseKinematicsQPSolver qpSolver;
    private final MotionQPInput motionQPInput;
    private final MotionQPInputCalculator motionQPInputCalculator;
-   private final InverseDynamicsQPBoundCalculator boundCalculator;
+   private final WholeBodyControllerBoundCalculator boundCalculator;
 
    private final OneDoFJoint[] oneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;

@@ -78,6 +78,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       controlManagerFactory.getOrCreateFeetManager();
       controlManagerFactory.getOrCreateBodyOrientationManager();
       controlManagerFactory.getOrCreateBalanceManager();
+      controlManagerFactory.getOrCreateJointSpaceManager();
 
       // Initialize output processor
       StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment, registry);

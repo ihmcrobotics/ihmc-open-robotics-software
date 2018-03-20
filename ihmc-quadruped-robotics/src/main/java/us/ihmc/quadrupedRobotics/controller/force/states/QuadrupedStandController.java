@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedJointSpaceManager;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -42,6 +43,7 @@ public class QuadrupedStandController implements QuadrupedController
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
    private final QuadrupedFeetManager feetManager;
    private final QuadrupedBalanceManager balanceManager;
+   private final QuadrupedJointSpaceManager jointSpaceManager;
 
    // task space controller
    private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
@@ -68,6 +70,7 @@ public class QuadrupedStandController implements QuadrupedController
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
+      jointSpaceManager = controlManagerFactory.getOrCreateJointSpaceManager();
 
       // task space controllers
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
@@ -121,6 +124,8 @@ public class QuadrupedStandController implements QuadrupedController
       // update desired body orientation and angular rate
       desiredBodyOrientation.setToZero(supportFrame);
       bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation);
+
+      jointSpaceManager.compute();
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);

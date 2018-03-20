@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlModuleException;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelControlOptimizationControlModule;
@@ -67,6 +68,7 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector yoResidualRootJointTorque;
 
    private final JointIndexHandler jointIndexHandler;
+   private final WholeBodyControllerBoundCalculator boundCalculator;
 
    public WholeBodyVirtualModelControlSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -78,6 +80,8 @@ public class WholeBodyVirtualModelControlSolver
       OneDoFJoint[] controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, JointDesiredControlMode.EFFORT);
+
+      boundCalculator = toolbox.getQPBoundCalculator();
 
       controlRootBody = toolbox.getVirtualModelControlMainBody();
       virtualModelController = new VirtualModelMomentumController(toolbox.getJointIndexHandler());
@@ -158,6 +162,8 @@ public class WholeBodyVirtualModelControlSolver
 
       updateLowLevelData(jointTorquesSolution);
 
+      boundCalculator.enforceJointTorqueLimits(lowLevelOneDoFJointDesiredDataHolder);
+
       if (rootJoint != null)
       {
          rootJoint.getWrench(residualRootJointWrench);
@@ -216,6 +222,9 @@ public class WholeBodyVirtualModelControlSolver
             break;
          case JOINTSPACE:
             virtualModelController.addJointTorqueCommand((JointTorqueCommand) command);
+            break;
+         case JOINT_LIMIT_ENFORCEMENT:
+            boundCalculator.submitJointLimitEnforcementCommand((JointLimitEnforcementCommand) command);
             break;
          case COMMAND_LIST:
             submitVirtualModelControlCommandList((VirtualModelControlCommandList) command);
