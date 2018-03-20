@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,7 +8,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * This message gives the status of the current footstep from the controller as well as the position and orientation of the footstep in world coordinates.
  */
-public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, EpsilonComparable<FootstepStatusMessage>
+public class FootstepStatusMessage extends Packet<FootstepStatusMessage> implements Settable<FootstepStatusMessage>, EpsilonComparable<FootstepStatusMessage>
 {
    public static final byte FOOTSTEP_STATUS_STARTED = (byte) 0;
    public static final byte FOOTSTEP_STATUS_COMPLETED = (byte) 1;
@@ -16,31 +17,31 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
    /**
     * The current footstep status enum value.
     */
-   private byte footstep_status_ = (byte) 255;
+   public byte footstep_status_ = (byte) 255;
    /**
     * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
     */
-   private int footstep_index_;
+   public int footstep_index_;
    /**
     * The robot side (left or right) that this footstep status correlates to.
     */
-   private byte robot_side_ = (byte) 255;
+   public byte robot_side_ = (byte) 255;
    /**
     * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
     */
-   private us.ihmc.euclid.tuple3D.Point3D desired_foot_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D desired_foot_position_in_world_;
    /**
     * Specifies the desired orientation of the foot sent to the controller as opposed to where the foot actually landed.
     */
-   private us.ihmc.euclid.tuple4D.Quaternion desired_foot_orientation_in_world_;
+   public us.ihmc.euclid.tuple4D.Quaternion desired_foot_orientation_in_world_;
    /**
     * Specifies the position of where the foot actually landed.
     */
-   private us.ihmc.euclid.tuple3D.Point3D actual_foot_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D actual_foot_position_in_world_;
    /**
     * Specifies the orientation of where the foot actually landed.
     */
-   private us.ihmc.euclid.tuple4D.Quaternion actual_foot_orientation_in_world_;
+   public us.ihmc.euclid.tuple4D.Quaternion actual_foot_orientation_in_world_;
 
    public FootstepStatusMessage()
    {

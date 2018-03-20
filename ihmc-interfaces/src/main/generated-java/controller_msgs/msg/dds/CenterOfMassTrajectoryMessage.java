@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,12 +8,13 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * Request the whole-body controller to track a desired trajectory for the center of mass.
  */
-public class CenterOfMassTrajectoryMessage implements Settable<CenterOfMassTrajectoryMessage>, EpsilonComparable<CenterOfMassTrajectoryMessage>
+public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectoryMessage>
+      implements Settable<CenterOfMassTrajectoryMessage>, EpsilonComparable<CenterOfMassTrajectoryMessage>
 {
    /**
     * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and velocity at a given time.
     */
-   private controller_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
+   public controller_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
 
    public CenterOfMassTrajectoryMessage()
    {

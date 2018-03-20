@@ -1,22 +1,23 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class Footstep implements Settable<Footstep>, EpsilonComparable<Footstep>
+public class Footstep extends Packet<Footstep> implements Settable<Footstep>, EpsilonComparable<Footstep>
 {
-   private long unique_id_;
-   private byte robot_side_;
-   private us.ihmc.euclid.tuple3D.Point3D location_;
-   private us.ihmc.euclid.tuple4D.Quaternion orientation_;
-   private us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> predicted_contact_points_2d_;
-   private byte trajectory_type_;
-   private double swing_height_;
-   private us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> position_waypoints_;
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TaskspaceTrajectoryStamped> swing_trajectory_;
-   private double swing_trajectory_blend_duration_;
-   private double swing_duration_;
-   private double transfer_duration_;
+   public long unique_id_;
+   public byte robot_side_;
+   public us.ihmc.euclid.tuple3D.Point3D location_;
+   public us.ihmc.euclid.tuple4D.Quaternion orientation_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> predicted_contact_points_2d_;
+   public byte trajectory_type_;
+   public double swing_height_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> position_waypoints_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TaskspaceTrajectoryStamped> swing_trajectory_;
+   public double swing_trajectory_blend_duration_;
+   public double swing_duration_;
+   public double transfer_duration_;
 
    public Footstep()
    {

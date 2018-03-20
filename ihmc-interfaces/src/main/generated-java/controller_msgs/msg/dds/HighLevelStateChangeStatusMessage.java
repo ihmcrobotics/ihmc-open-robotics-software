@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,7 +9,8 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message notifies the user of a change in the high level state.
  * This message's primary use is to signal a requested state change is completed.
  */
-public class HighLevelStateChangeStatusMessage implements Settable<HighLevelStateChangeStatusMessage>, EpsilonComparable<HighLevelStateChangeStatusMessage>
+public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChangeStatusMessage>
+      implements Settable<HighLevelStateChangeStatusMessage>, EpsilonComparable<HighLevelStateChangeStatusMessage>
 {
    public static final byte DO_NOTHING_BEHAVIOR = (byte) 0;
    public static final byte STAND_PREP_STATE = (byte) 1;
@@ -21,11 +23,11 @@ public class HighLevelStateChangeStatusMessage implements Settable<HighLevelStat
    /**
     * Specifies the controller's state prior to transition.
     */
-   private byte initial_high_level_controller_name_ = (byte) 255;
+   public byte initial_high_level_controller_name_ = (byte) 255;
    /**
     * Specifies the state the controller has transitioned into.
     */
-   private byte end_high_level_controller_name_ = (byte) 255;
+   public byte end_high_level_controller_name_ = (byte) 255;
 
    public HighLevelStateChangeStatusMessage()
    {

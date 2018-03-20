@@ -1,16 +1,17 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
-public class WallPosePacket implements Settable<WallPosePacket>, EpsilonComparable<WallPosePacket>
+public class WallPosePacket extends Packet<WallPosePacket> implements Settable<WallPosePacket>, EpsilonComparable<WallPosePacket>
 {
-   private double cutting_radius_ = 0.2;
-   private us.ihmc.euclid.tuple3D.Point3D center_position_;
-   private us.ihmc.euclid.tuple4D.Quaternion center_orientation_;
+   public double cutting_radius_ = 0.2;
+   public us.ihmc.euclid.tuple3D.Point3D center_position_;
+   public us.ihmc.euclid.tuple4D.Quaternion center_orientation_;
 
    public WallPosePacket()
    {

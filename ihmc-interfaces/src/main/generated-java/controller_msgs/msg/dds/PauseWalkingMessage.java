@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,12 +9,12 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message pauses the execution of a list of footsteps.
  * If this message is in the middle of executing a footstep, the robot will finish the step and pause when back in double support.
  */
-public class PauseWalkingMessage implements Settable<PauseWalkingMessage>, EpsilonComparable<PauseWalkingMessage>
+public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements Settable<PauseWalkingMessage>, EpsilonComparable<PauseWalkingMessage>
 {
    /**
     * True to pause walking, false to unpause and resume an existing footstep plan.
     */
-   private boolean pause_;
+   public boolean pause_;
 
    public PauseWalkingMessage()
    {

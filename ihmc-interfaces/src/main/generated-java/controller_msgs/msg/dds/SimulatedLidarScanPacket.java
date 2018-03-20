@@ -1,13 +1,15 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class SimulatedLidarScanPacket implements Settable<SimulatedLidarScanPacket>, EpsilonComparable<SimulatedLidarScanPacket>
+public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
+      implements Settable<SimulatedLidarScanPacket>, EpsilonComparable<SimulatedLidarScanPacket>
 {
-   private us.ihmc.idl.IDLSequence.Float ranges_;
-   private int sensor_id_;
-   private controller_msgs.msg.dds.LidarScanParametersMessage lidar_scan_parameters_;
+   public us.ihmc.idl.IDLSequence.Float ranges_;
+   public int sensor_id_;
+   public controller_msgs.msg.dds.LidarScanParametersMessage lidar_scan_parameters_;
 
    public SimulatedLidarScanPacket()
    {

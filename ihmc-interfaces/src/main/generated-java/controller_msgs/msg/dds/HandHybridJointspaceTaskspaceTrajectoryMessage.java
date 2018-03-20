@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,7 +9,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message commands the controller to move the hand in both taskspace and jointspace
  * to the desired orientation and joint angles while going through the specified trajectory points.
  */
-public class HandHybridJointspaceTaskspaceTrajectoryMessage
+public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandHybridJointspaceTaskspaceTrajectoryMessage>
       implements Settable<HandHybridJointspaceTaskspaceTrajectoryMessage>, EpsilonComparable<HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
@@ -16,16 +17,16 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage
    /**
     * Specifies the side of the robot that will execute the trajectory.
     */
-   private byte robot_side_ = (byte) 255;
+   public byte robot_side_ = (byte) 255;
    /**
     * The taskspace trajectory information.
     */
-   private controller_msgs.msg.dds.SO3TrajectoryMessage taskspace_trajectory_message_;
+   public controller_msgs.msg.dds.SO3TrajectoryMessage taskspace_trajectory_message_;
    /**
     * The jointspace trajectory information.
     * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
     */
-   private controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_message_;
+   public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_message_;
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage()
    {

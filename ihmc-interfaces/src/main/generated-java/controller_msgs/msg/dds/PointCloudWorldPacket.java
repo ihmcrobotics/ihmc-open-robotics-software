@@ -1,17 +1,18 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is obsolete
  */
-public class PointCloudWorldPacket implements Settable<PointCloudWorldPacket>, EpsilonComparable<PointCloudWorldPacket>
+public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket> implements Settable<PointCloudWorldPacket>, EpsilonComparable<PointCloudWorldPacket>
 {
-   private long timestamp_;
-   private us.ihmc.idl.IDLSequence.Float ground_quad_tree_support_;
-   private us.ihmc.idl.IDLSequence.Float decaying_world_scan_;
-   private float default_ground_height_;
+   public long timestamp_;
+   public us.ihmc.idl.IDLSequence.Float ground_quad_tree_support_;
+   public us.ihmc.idl.IDLSequence.Float decaying_world_scan_;
+   public float default_ground_height_;
 
    public PointCloudWorldPacket()
    {

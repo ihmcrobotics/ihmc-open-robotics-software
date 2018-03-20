@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,7 +8,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * The controller sends this message to notify the user of the status of walking.
  */
-public class WalkingStatusMessage implements Settable<WalkingStatusMessage>, EpsilonComparable<WalkingStatusMessage>
+public class WalkingStatusMessage extends Packet<WalkingStatusMessage> implements Settable<WalkingStatusMessage>, EpsilonComparable<WalkingStatusMessage>
 {
    public static final byte STARTED = (byte) 0;
    public static final byte COMPLETED = (byte) 1;
@@ -15,7 +16,7 @@ public class WalkingStatusMessage implements Settable<WalkingStatusMessage>, Eps
    /**
     * Status of walking.
     */
-   private byte walking_status_ = (byte) 255;
+   public byte walking_status_ = (byte) 255;
 
    public WalkingStatusMessage()
    {

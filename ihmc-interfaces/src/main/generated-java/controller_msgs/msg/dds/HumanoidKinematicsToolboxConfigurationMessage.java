@@ -1,12 +1,13 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC whole-body inverse kinematics module.
  */
-public class HumanoidKinematicsToolboxConfigurationMessage
+public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<HumanoidKinematicsToolboxConfigurationMessage>
       implements Settable<HumanoidKinematicsToolboxConfigurationMessage>, EpsilonComparable<HumanoidKinematicsToolboxConfigurationMessage>
 {
    /**
@@ -14,11 +15,11 @@ public class HumanoidKinematicsToolboxConfigurationMessage
     * of mass. By 'current', it means that the solver will use the robot configuration data
     * broadcasted by the controller to obtain the center of mass position.
     */
-   private boolean hold_current_center_of_mass_xy_position_ = true;
+   public boolean hold_current_center_of_mass_xy_position_ = true;
    /**
     * When set to true, the solver will hold the pose of the active support foot/feet.
     */
-   private boolean hold_support_foot_positions_ = true;
+   public boolean hold_support_foot_positions_ = true;
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {

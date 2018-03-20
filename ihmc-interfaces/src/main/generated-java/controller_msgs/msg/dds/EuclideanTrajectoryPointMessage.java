@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -9,20 +10,21 @@ import us.ihmc.euclid.interfaces.Settable;
  * It holds the only the translational information for one trajectory point (position & linear velocity).
  * Feel free to look at SO3TrajectoryPointMessage (rotational) and SE3TrajectoryPointMessage (rotational AND translational).
  */
-public class EuclideanTrajectoryPointMessage implements Settable<EuclideanTrajectoryPointMessage>, EpsilonComparable<EuclideanTrajectoryPointMessage>
+public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryPointMessage>
+      implements Settable<EuclideanTrajectoryPointMessage>, EpsilonComparable<EuclideanTrajectoryPointMessage>
 {
    /**
     * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
     */
-   private double time_;
+   public double time_;
    /**
     * Define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.
     */
-   private us.ihmc.euclid.tuple3D.Point3D position_;
+   public us.ihmc.euclid.tuple3D.Point3D position_;
    /**
     * Define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.
     */
-   private us.ihmc.euclid.tuple3D.Vector3D linear_velocity_;
+   public us.ihmc.euclid.tuple3D.Vector3D linear_velocity_;
 
    public EuclideanTrajectoryPointMessage()
    {

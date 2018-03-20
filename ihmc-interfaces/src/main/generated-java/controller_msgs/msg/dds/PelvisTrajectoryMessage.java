@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -10,22 +11,23 @@ import us.ihmc.euclid.interfaces.Settable;
  * To excute a single straight line trajectory to reach a desired pelvis pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
  * Note that the pelvis position is limited keep the robot's balance (center of mass has to remain inside the support polygon).
  */
-public class PelvisTrajectoryMessage implements Settable<PelvisTrajectoryMessage>, EpsilonComparable<PelvisTrajectoryMessage>
+public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage>
+      implements Settable<PelvisTrajectoryMessage>, EpsilonComparable<PelvisTrajectoryMessage>
 {
    /**
     * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
     */
-   private boolean enable_user_pelvis_control_;
+   public boolean enable_user_pelvis_control_;
    /**
     * If enable_user_pelvis_control is true then enable_user_pelvis_control_during_walking
     * will keep the manager in user mode while walking.
     * If this is false the manager will switch back to controller mode when walking.
     */
-   private boolean enable_user_pelvis_control_during_walking_;
+   public boolean enable_user_pelvis_control_during_walking_;
    /**
     * The position/orientation trajectory information.
     */
-   private controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
+   public controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
 
    public PelvisTrajectoryMessage()
    {

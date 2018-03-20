@@ -1,12 +1,14 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class UIPositionCheckerPacket implements Settable<UIPositionCheckerPacket>, EpsilonComparable<UIPositionCheckerPacket>
+public class UIPositionCheckerPacket extends Packet<UIPositionCheckerPacket>
+      implements Settable<UIPositionCheckerPacket>, EpsilonComparable<UIPositionCheckerPacket>
 {
-   private us.ihmc.euclid.tuple3D.Point3D position_;
-   private us.ihmc.euclid.tuple4D.Quaternion orientation_;
+   public us.ihmc.euclid.tuple3D.Point3D position_;
+   public us.ihmc.euclid.tuple4D.Quaternion orientation_;
 
    public UIPositionCheckerPacket()
    {

@@ -1,15 +1,16 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class BoundingBoxesPacket implements Settable<BoundingBoxesPacket>, EpsilonComparable<BoundingBoxesPacket>
+public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements Settable<BoundingBoxesPacket>, EpsilonComparable<BoundingBoxesPacket>
 {
-   private us.ihmc.idl.IDLSequence.Double bounding_boxes_x_coordinates_;
-   private us.ihmc.idl.IDLSequence.Double bounding_boxes_y_coordinates_;
-   private us.ihmc.idl.IDLSequence.Double bounding_boxes_widths_;
-   private us.ihmc.idl.IDLSequence.Double bounding_boxes_heights_;
-   private us.ihmc.idl.IDLSequence.StringBuilderHolder labels_;
+   public us.ihmc.idl.IDLSequence.Double bounding_boxes_x_coordinates_;
+   public us.ihmc.idl.IDLSequence.Double bounding_boxes_y_coordinates_;
+   public us.ihmc.idl.IDLSequence.Double bounding_boxes_widths_;
+   public us.ihmc.idl.IDLSequence.Double bounding_boxes_heights_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder labels_;
 
    public BoundingBoxesPacket()
    {

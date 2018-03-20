@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -9,13 +10,13 @@ import us.ihmc.euclid.interfaces.Settable;
  * It is defined by an origin, a normal, and a concave hull.
  * For easier processing, a set of convex polygons approximating the concave hull are also provided.
  */
-public class PlanarRegionMessage implements Settable<PlanarRegionMessage>, EpsilonComparable<PlanarRegionMessage>
+public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements Settable<PlanarRegionMessage>, EpsilonComparable<PlanarRegionMessage>
 {
    public static final int NO_REGION_ID = -1;
-   private int region_id_ = -1;
-   private us.ihmc.euclid.tuple3D.Point3D region_origin_;
-   private us.ihmc.euclid.tuple3D.Vector3D region_normal_;
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Polygon2DMessage> convex_polygons_;
+   public int region_id_ = -1;
+   public us.ihmc.euclid.tuple3D.Point3D region_origin_;
+   public us.ihmc.euclid.tuple3D.Vector3D region_normal_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Polygon2DMessage> convex_polygons_;
 
    public PlanarRegionMessage()
    {

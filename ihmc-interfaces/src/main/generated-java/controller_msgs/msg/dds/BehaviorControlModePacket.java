@@ -1,17 +1,19 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
-public class BehaviorControlModePacket implements Settable<BehaviorControlModePacket>, EpsilonComparable<BehaviorControlModePacket>
+public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
+      implements Settable<BehaviorControlModePacket>, EpsilonComparable<BehaviorControlModePacket>
 {
    public static final byte STOP = (byte) 0;
    public static final byte PAUSE = (byte) 1;
    public static final byte RESUME = (byte) 2;
-   private byte behavior_control_mode_enum_request_ = (byte) 255;
+   public byte behavior_control_mode_enum_request_ = (byte) 255;
 
    public BehaviorControlModePacket()
    {

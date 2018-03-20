@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,9 +8,9 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * This message is used to abort walking, forcing the robot to switch back to double support and clear the footstep list.
  */
-public class AbortWalkingMessage implements Settable<AbortWalkingMessage>, EpsilonComparable<AbortWalkingMessage>
+public class AbortWalkingMessage extends Packet<AbortWalkingMessage> implements Settable<AbortWalkingMessage>, EpsilonComparable<AbortWalkingMessage>
 {
-   private boolean unused_placeholder_field_;
+   public boolean unused_placeholder_field_;
 
    public AbortWalkingMessage()
    {

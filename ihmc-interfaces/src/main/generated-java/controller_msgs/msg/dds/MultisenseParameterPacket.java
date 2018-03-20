@@ -1,18 +1,20 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class MultisenseParameterPacket implements Settable<MultisenseParameterPacket>, EpsilonComparable<MultisenseParameterPacket>
+public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
+      implements Settable<MultisenseParameterPacket>, EpsilonComparable<MultisenseParameterPacket>
 {
-   private boolean initialize_;
-   private double gain_;
-   private double motor_speed_;
-   private boolean led_enable_;
-   private boolean flash_enable_;
-   private double duty_cycle_;
-   private boolean auto_exposure_;
-   private boolean auto_white_balance_;
+   public boolean initialize_;
+   public double gain_;
+   public double motor_speed_;
+   public boolean led_enable_;
+   public boolean flash_enable_;
+   public double duty_cycle_;
+   public boolean auto_exposure_;
+   public boolean auto_white_balance_;
 
    public MultisenseParameterPacket()
    {

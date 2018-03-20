@@ -1,15 +1,16 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC behavior module.
  */
-public class DetectedObjectPacket implements Settable<DetectedObjectPacket>, EpsilonComparable<DetectedObjectPacket>
+public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implements Settable<DetectedObjectPacket>, EpsilonComparable<DetectedObjectPacket>
 {
-   private us.ihmc.euclid.geometry.Pose3D pose_;
-   private int id_;
+   public us.ihmc.euclid.geometry.Pose3D pose_;
+   public int id_;
 
    public DetectedObjectPacket()
    {

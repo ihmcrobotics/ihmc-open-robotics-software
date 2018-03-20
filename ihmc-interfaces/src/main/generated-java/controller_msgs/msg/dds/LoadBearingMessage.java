@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,24 +9,24 @@ import us.ihmc.euclid.interfaces.Settable;
  * Message carrying the information needed to enable load bearing for a end-effector.
  * A contact point will be used to enable this feature. This point is attached to the end-effector.
  */
-public class LoadBearingMessage implements Settable<LoadBearingMessage>, EpsilonComparable<LoadBearingMessage>
+public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Settable<LoadBearingMessage>, EpsilonComparable<LoadBearingMessage>
 {
    /**
     * If set to true this will load the contact point. Otherwise the rigid body will stop bearing load.
     */
-   private boolean load_;
+   public boolean load_;
    /**
     * Sets the coefficient of friction that the controller will use for the contact point.
     */
-   private double coefficient_of_friction_;
+   public double coefficient_of_friction_;
    /**
     * Sets the pose of the contact frame in the frame of the end effector body.
     */
-   private us.ihmc.euclid.geometry.Pose3D body_frame_to_control_frame_;
+   public us.ihmc.euclid.geometry.Pose3D body_frame_to_control_frame_;
    /**
     * Sets the contact normal used by the controller to load the contact point.
     */
-   private us.ihmc.euclid.tuple3D.Vector3D contact_normal_in_world_frame_;
+   public us.ihmc.euclid.tuple3D.Vector3D contact_normal_in_world_frame_;
 
    public LoadBearingMessage()
    {

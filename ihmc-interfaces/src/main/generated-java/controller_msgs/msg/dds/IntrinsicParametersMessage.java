@@ -1,23 +1,25 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is used to provides additional properties for cameras.
  */
-public class IntrinsicParametersMessage implements Settable<IntrinsicParametersMessage>, EpsilonComparable<IntrinsicParametersMessage>
+public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessage>
+      implements Settable<IntrinsicParametersMessage>, EpsilonComparable<IntrinsicParametersMessage>
 {
-   private int width_;
-   private int height_;
-   private double fx_;
-   private double fy_;
-   private double skew_;
-   private double cx_;
-   private double cy_;
-   private us.ihmc.idl.IDLSequence.Double radial_;
-   private double t1_;
-   private double t2_;
+   public int width_;
+   public int height_;
+   public double fx_;
+   public double fy_;
+   public double skew_;
+   public double cx_;
+   public double cy_;
+   public us.ihmc.idl.IDLSequence.Double radial_;
+   public double t1_;
+   public double t2_;
 
    public IntrinsicParametersMessage()
    {

@@ -1,12 +1,14 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class PoseWithConfidenceStamped implements Settable<PoseWithConfidenceStamped>, EpsilonComparable<PoseWithConfidenceStamped>
+public class PoseWithConfidenceStamped extends Packet<PoseWithConfidenceStamped>
+      implements Settable<PoseWithConfidenceStamped>, EpsilonComparable<PoseWithConfidenceStamped>
 {
-   private geometry_msgs.msg.dds.PoseStamped pose_;
-   private float confidence_;
+   public geometry_msgs.msg.dds.PoseStamped pose_;
+   public float confidence_;
 
    public PoseWithConfidenceStamped()
    {
