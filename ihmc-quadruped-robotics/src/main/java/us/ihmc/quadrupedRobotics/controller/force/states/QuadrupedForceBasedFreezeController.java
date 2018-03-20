@@ -117,6 +117,7 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.getValue());
 
       controllerToolbox.update();
+      feetManager.updateSupportPolygon();
 
       feetManager.compute(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);

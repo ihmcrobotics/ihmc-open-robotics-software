@@ -164,6 +164,7 @@ public class QuadrupedForceBasedFallController implements QuadrupedController, Q
    public ControllerEvent process()
    {
       controllerToolbox.update();
+      feetManager.updateSupportPolygon();
       feetManager.compute(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
       return isDoneMoving.getBooleanValue() ? ControllerEvent.DONE : null;
