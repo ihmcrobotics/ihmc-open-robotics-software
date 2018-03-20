@@ -14,7 +14,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
+public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootState
 {
    // Yo variables
    private final YoVariableRegistry registry;
@@ -24,10 +24,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    private final MultipleWaypointsPositionTrajectoryGenerator quadrupedWaypointsPositionTrajectoryGenerator;
 
    // Feedback controller
-   private final QuadrupedSolePositionController solePositionController;
-   private final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
-   private final FrameVector3D initialSoleForces = new FrameVector3D();
-
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame soleFrame;
    private final QuadrupedSoleWaypointList quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
@@ -42,16 +38,14 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,
                                          QuadrupedSolePositionController solePositionController, YoVariableRegistry parentRegistry)
    {
+      super(robotQuadrant, controllerToolbox, solePositionController);
+
       this.robotQuadrant = robotQuadrant;
       this.controllerToolbox = controllerToolbox;
       this.bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       this.soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
       this.parameters = controllerToolbox.getFootControlModuleParameters();
       robotTime = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
-
-      // Feedback controller
-      this.solePositionController = solePositionController;
-      solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
       registry = new YoVariableRegistry(robotQuadrant.getShortName() + getClass().getSimpleName());
 
@@ -105,6 +99,11 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
          if (waypointCallback != null)
             waypointCallback.isDoneMoving(true);
 
+         solePositionControllerSetpoints.getSolePosition().set(controllerToolbox.getTaskSpaceEstimates().getSolePosition(robotQuadrant));
+         solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
+
+         super.doControl();
+
          return QuadrupedFootControlModule.FootEvent.TIMEOUT;
       }
       else
@@ -114,6 +113,8 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
          solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
          solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
          solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant));
+
+         super.doControl();
 
          if (waypointCallback != null)
             waypointCallback.isDoneMoving(false);
