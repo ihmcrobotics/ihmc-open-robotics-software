@@ -24,23 +24,13 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
 
    private double tau;
 
-   /** Use {@param effortLimit}. Removing April 2nd, 2018 */
-   @Deprecated
    private double effortLimitLower = Double.NEGATIVE_INFINITY;
-   /** Use {@param effortLimit}. Removing April 2nd, 2018 */
-   @Deprecated
    private double effortLimitUpper = Double.POSITIVE_INFINITY;
-   private double effortLimit = Double.POSITIVE_INFINITY;
 
    private double jointLimitLower = Double.NEGATIVE_INFINITY;
    private double jointLimitUpper = Double.POSITIVE_INFINITY;
-   /** Use {@param velocityLimit}. Removing April 2nd, 2018 */
-   @Deprecated
    private double velocityLimitLower = Double.NEGATIVE_INFINITY;
-   /** Use {@param velocityLimit}. Removing April 2nd, 2018 */
-   @Deprecated
    private double velocityLimitUpper = Double.POSITIVE_INFINITY;
-   private double velocityLimit = Double.POSITIVE_INFINITY;
 
    //   private double tauDamping;
 
@@ -362,70 +352,46 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.jointLimitUpper = jointLimitUpper;
    }
 
-   /** Replaced with absolute velocity limit {@link #getVelocityLimit()}  */
-   @Deprecated
-   public double getVelocityLimitUpper()
-   {
-      return velocityLimitUpper;
-   }
-
-   /** Replaced with absolute velocity limit {@link #getVelocityLimit()}  */
-   @Deprecated
    public double getVelocityLimitLower()
    {
       return velocityLimitLower;
    }
 
-   public double getVelocityLimit()
+   public double getVelocityLimitUpper()
    {
-      return velocityLimit;
+      return velocityLimitUpper;
    }
 
-   /** Replaced with {@link #setVelocityLimit(double)}. Removing April 2nd, 2018.*/
-   @Deprecated
    public void setVelocityLimit(double velocityLimitLower, double velocityLimitUpper)
    {
-      setVelocityLimit(Math.min(velocityLimitUpper, -velocityLimitLower));
+      this.velocityLimitLower = velocityLimitLower;
+      this.velocityLimitUpper = velocityLimitUpper;
    }
 
    public void setVelocityLimit(double velocityLimit)
    {
-      this.velocityLimit = velocityLimit;
-      this.velocityLimitLower = -velocityLimit;
-      this.velocityLimitUpper = velocityLimit;
+      setVelocityLimit(-velocityLimit, velocityLimit);
+   }
+
+   public void setEffortLimits(double effortLimitLower, double effortLimitUpper)
+   {
+      this.effortLimitLower = effortLimitLower;
+      this.effortLimitUpper = effortLimitUpper;
    }
 
    public void setEffortLimit(double effortLimit)
    {
-      this.effortLimit = effortLimit;
-      this.effortLimitLower = -effortLimit;
-      this.effortLimitUpper = effortLimit;
+      setEffortLimits(-effortLimit, effortLimit);
    }
 
-   /** Replaced with {@link #setEffortLimit(double)}. Removing April 2nd, 2018.*/
-   @Deprecated
-   public void setEffortLimits(double effortLimitLower, double effortLimitUpper)
-   {
-      setEffortLimit(Math.min(effortLimitUpper, -effortLimitLower));
-   }
-
-   /** Replaced with absolute effort limit {@link #getEffortLimit()} */
-   @Deprecated
    public double getMinEffortLimit()
    {
       return effortLimitLower;
    }
 
-   /** Replaced with absolute effort limit {@link #getEffortLimit()} */
-   @Deprecated
    public double getMaxEffortLimit()
    {
       return effortLimitUpper;
-   }
-
-   public double getEffortLimit()
-   {
-      return effortLimit;
    }
 
    @Deprecated

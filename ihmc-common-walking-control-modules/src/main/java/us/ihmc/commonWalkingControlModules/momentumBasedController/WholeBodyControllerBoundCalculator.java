@@ -336,11 +336,11 @@ public class WholeBodyControllerBoundCalculator
       else
          torque = jointDesiredOutput.getDesiredTorque();
 
-      if (!jointLimitData.hasSoftLowerLimit() && joint.getQ() < jointLimitData.getSoftLowerPositionLimit())
+      if (!jointLimitData.hasPositionSoftLowerLimit() && joint.getQ() < jointLimitData.getPositionSoftLowerLimit())
       {
          double stiffnessTorque = 0.0;
          if (jointLimitData.hasPositionLimitStiffness())
-            stiffnessTorque = jointLimitData.getJointLimitStiffness() * (jointLimitData.getSoftLowerPositionLimit() - joint.getQ());
+            stiffnessTorque = jointLimitData.getJointLimitStiffness() * (jointLimitData.getPositionSoftLowerLimit() - joint.getQ());
 
          double dampingTorque = 0.0;
          if (jointLimitData.hasPositionLimitDamping())
@@ -349,11 +349,11 @@ public class WholeBodyControllerBoundCalculator
          torque = Math.max(torque, stiffnessTorque - dampingTorque);
       }
 
-      if (!jointLimitData.hasSoftUpperLimit() && joint.getQ() > jointLimitData.getSoftUpperPositionLimit())
+      if (!jointLimitData.hasPositionSoftUpperLimit() && joint.getQ() > jointLimitData.getPositionSoftUpperLimit())
       {
          double stiffnessTorque = 0.0;
          if (jointLimitData.hasPositionLimitStiffness())
-            stiffnessTorque = jointLimitData.getJointLimitStiffness() * (jointLimitData.getSoftUpperPositionLimit() - joint.getQ());
+            stiffnessTorque = jointLimitData.getJointLimitStiffness() * (jointLimitData.getPositionSoftUpperLimit() - joint.getQ());
 
          double dampingTorque = 0.0;
          if (jointLimitData.hasPositionLimitDamping())
@@ -362,8 +362,10 @@ public class WholeBodyControllerBoundCalculator
          torque = Math.min(torque, stiffnessTorque - dampingTorque);
       }
 
-      if (jointLimitData.hasTorqueLimit())
-         torque = MathTools.clamp(torque, jointLimitData.getTorqueLimit());
+      if (jointLimitData.hasTorqueUpperLimit())
+         torque = Math.min(torque, jointLimitData.getTorqueUpperLimit());
+      if (jointLimitData.hasTorqueLowerLimit())
+         torque = Math.max(torque, jointLimitData.getTorqueLowerLimit());
 
       jointDesiredOutput.setDesiredTorque(torque);
    }
