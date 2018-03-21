@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class GroundContactForceMomentumQPSolver
 {
-   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = false;
+   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
