@@ -16,7 +16,7 @@ geometry_msgs/Vector3 pelvis_linear_acceleration
 
 SpatialVectorMessage[<=50] force_sensor_data
 IMUPacket[<=10] imu_sensor_data
-byte robot_motion_status -1
+byte robot_motion_status 255
 
 int32 last_received_packet_type_id
 int64 last_received_packet_unique_id
