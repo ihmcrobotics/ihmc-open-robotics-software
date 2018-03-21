@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class GroundContactForceMomentumQPSolver
 {
-   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = true;
+   private static final boolean SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -476,7 +476,7 @@ public class GroundContactForceMomentumQPSolver
          MatrixTools.setMatrixBlock(tempWrenchConstraint_J, 0, 0, momentumJacobian, 0, 0, Wrench.SIZE, momentumSize, -1.0);
          CommonOps.insert(rhoJacobian, tempWrenchConstraint_J, 0, momentumSize);
 
-         double weight = 150.0;
+         double weight = 1500.0;
          tempWrenchConstraint_H.reshape(problemSize, problemSize);
          CommonOps.multInner(tempWrenchConstraint_J, tempWrenchConstraint_H);
          CommonOps.scale(weight, tempWrenchConstraint_H);

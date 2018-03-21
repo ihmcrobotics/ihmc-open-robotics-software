@@ -67,7 +67,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     *  Creates an empty command. It needs to be configured before being submitted to the controller
     *  core.
      */
-   private VirtualTorqueCommand()
+   public VirtualTorqueCommand()
    {
    }
 
