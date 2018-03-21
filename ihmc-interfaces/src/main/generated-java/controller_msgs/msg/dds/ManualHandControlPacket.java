@@ -1,23 +1,25 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Atlas specific message
  */
-public class ManualHandControlPacket implements Settable<ManualHandControlPacket>, EpsilonComparable<ManualHandControlPacket>
+public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
+      implements Settable<ManualHandControlPacket>, EpsilonComparable<ManualHandControlPacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    public static final int VELOCITY = 0;
    public static final int POSITION = 1;
-   private byte robot_side_ = (byte) 255;
-   private double index_;
-   private double middle_;
-   private double thumb_;
-   private double spread_;
-   private int control_type_;
+   public byte robot_side_ = (byte) 255;
+   public double index_;
+   public double middle_;
+   public double thumb_;
+   public double spread_;
+   public int control_type_;
 
    public ManualHandControlPacket()
    {

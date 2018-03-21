@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,12 +8,12 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * The controller sends this message to notify that it has shifted the remaining footsteps to be executed due to some execution error.
  */
-public class PlanOffsetStatus implements Settable<PlanOffsetStatus>, EpsilonComparable<PlanOffsetStatus>
+public class PlanOffsetStatus extends Packet<PlanOffsetStatus> implements Settable<PlanOffsetStatus>, EpsilonComparable<PlanOffsetStatus>
 {
    /**
     * The amount by which the remaining footsteps have been translated.
     */
-   private us.ihmc.euclid.tuple3D.Vector3D offset_vector_;
+   public us.ihmc.euclid.tuple3D.Vector3D offset_vector_;
 
    public PlanOffsetStatus()
    {

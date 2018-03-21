@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,9 +8,10 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC robot environment awareness module.
  * This message contains a list of planar regions.
  */
-public class PlanarRegionsListMessage implements Settable<PlanarRegionsListMessage>, EpsilonComparable<PlanarRegionsListMessage>
+public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage>
+      implements Settable<PlanarRegionsListMessage>, EpsilonComparable<PlanarRegionsListMessage>
 {
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.PlanarRegionMessage> planar_regions_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.PlanarRegionMessage> planar_regions_;
 
    public PlanarRegionsListMessage()
    {

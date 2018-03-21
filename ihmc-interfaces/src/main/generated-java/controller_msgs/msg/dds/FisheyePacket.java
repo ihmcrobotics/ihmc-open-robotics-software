@@ -1,11 +1,12 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class FisheyePacket implements Settable<FisheyePacket>, EpsilonComparable<FisheyePacket>
+public class FisheyePacket extends Packet<FisheyePacket> implements Settable<FisheyePacket>, EpsilonComparable<FisheyePacket>
 {
-   private controller_msgs.msg.dds.VideoPacket video_packet_;
+   public controller_msgs.msg.dds.VideoPacket video_packet_;
 
    public FisheyePacket()
    {

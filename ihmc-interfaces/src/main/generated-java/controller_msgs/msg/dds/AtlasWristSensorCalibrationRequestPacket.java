@@ -1,12 +1,13 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Atlas specific message: request taring of the wrist force/torque sensors.
  */
-public class AtlasWristSensorCalibrationRequestPacket
+public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristSensorCalibrationRequestPacket>
       implements Settable<AtlasWristSensorCalibrationRequestPacket>, EpsilonComparable<AtlasWristSensorCalibrationRequestPacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
@@ -14,7 +15,7 @@ public class AtlasWristSensorCalibrationRequestPacket
    /**
     * The robot side (left or right) for the wrist sensor you would like to request calibration for.
     */
-   private byte robot_side_ = (byte) 255;
+   public byte robot_side_ = (byte) 255;
 
    public AtlasWristSensorCalibrationRequestPacket()
    {

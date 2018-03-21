@@ -1,15 +1,17 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
-public class SimpleCoactiveBehaviorDataPacket implements Settable<SimpleCoactiveBehaviorDataPacket>, EpsilonComparable<SimpleCoactiveBehaviorDataPacket>
+public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehaviorDataPacket>
+      implements Settable<SimpleCoactiveBehaviorDataPacket>, EpsilonComparable<SimpleCoactiveBehaviorDataPacket>
 {
-   private java.lang.StringBuilder key_;
-   private double value_;
+   public java.lang.StringBuilder key_;
+   public double value_;
 
    public SimpleCoactiveBehaviorDataPacket()
    {

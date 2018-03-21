@@ -1,29 +1,31 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class RobotConfigurationData implements Settable<RobotConfigurationData>, EpsilonComparable<RobotConfigurationData>
+public class RobotConfigurationData extends Packet<RobotConfigurationData>
+      implements Settable<RobotConfigurationData>, EpsilonComparable<RobotConfigurationData>
 {
    public static final byte ROBOT_MOTION_STATUS_STANDING = (byte) 0;
    public static final byte ROBOT_MOTION_STATUS_IN_MOTION = (byte) 1;
-   private long timestamp_;
-   private long sensor_head_pps_timestamp_;
-   private int joint_name_hash_;
-   private us.ihmc.idl.IDLSequence.Float joint_angles_;
-   private us.ihmc.idl.IDLSequence.Float joint_velocities_;
-   private us.ihmc.idl.IDLSequence.Float joint_torques_;
-   private us.ihmc.euclid.tuple3D.Vector3D root_translation_;
-   private us.ihmc.euclid.tuple4D.Quaternion root_orientation_;
-   private us.ihmc.euclid.tuple3D.Vector3D pelvis_linear_velocity_;
-   private us.ihmc.euclid.tuple3D.Vector3D pelvis_angular_velocity_;
-   private us.ihmc.euclid.tuple3D.Vector3D pelvis_linear_acceleration_;
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SpatialVectorMessage> force_sensor_data_;
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.IMUPacket> imu_sensor_data_;
-   private byte robot_motion_status_ = (byte) 255;
-   private int last_received_packet_type_id_;
-   private long last_received_packet_unique_id_;
-   private long last_received_packet_robot_timestamp_;
+   public long timestamp_;
+   public long sensor_head_pps_timestamp_;
+   public int joint_name_hash_;
+   public us.ihmc.idl.IDLSequence.Float joint_angles_;
+   public us.ihmc.idl.IDLSequence.Float joint_velocities_;
+   public us.ihmc.idl.IDLSequence.Float joint_torques_;
+   public us.ihmc.euclid.tuple3D.Vector3D root_translation_;
+   public us.ihmc.euclid.tuple4D.Quaternion root_orientation_;
+   public us.ihmc.euclid.tuple3D.Vector3D pelvis_linear_velocity_;
+   public us.ihmc.euclid.tuple3D.Vector3D pelvis_angular_velocity_;
+   public us.ihmc.euclid.tuple3D.Vector3D pelvis_linear_acceleration_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SpatialVectorMessage> force_sensor_data_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.IMUPacket> imu_sensor_data_;
+   public byte robot_motion_status_ = (byte) 255;
+   public int last_received_packet_type_id_;
+   public long last_received_packet_unique_id_;
+   public long last_received_packet_robot_timestamp_;
 
    public RobotConfigurationData()
    {

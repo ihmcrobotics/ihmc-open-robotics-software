@@ -1,11 +1,13 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class ManipulationAbortedStatus implements Settable<ManipulationAbortedStatus>, EpsilonComparable<ManipulationAbortedStatus>
+public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus>
+      implements Settable<ManipulationAbortedStatus>, EpsilonComparable<ManipulationAbortedStatus>
 {
-   private boolean unused_placeholder_field_;
+   public boolean unused_placeholder_field_;
 
    public ManipulationAbortedStatus()
    {

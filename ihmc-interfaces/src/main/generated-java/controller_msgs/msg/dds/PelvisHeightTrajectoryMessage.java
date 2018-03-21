@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -9,22 +10,23 @@ import us.ihmc.euclid.interfaces.Settable;
  * Sending this command will not affect the pelvis horizontal position.
  * To control the pelvis 3D position use the PelvisTrajectoryMessage instead.
  */
-public class PelvisHeightTrajectoryMessage implements Settable<PelvisHeightTrajectoryMessage>, EpsilonComparable<PelvisHeightTrajectoryMessage>
+public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectoryMessage>
+      implements Settable<PelvisHeightTrajectoryMessage>, EpsilonComparable<PelvisHeightTrajectoryMessage>
 {
    /**
     * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
     */
-   private boolean enable_user_pelvis_control_;
+   public boolean enable_user_pelvis_control_;
    /**
     * If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking
     * will keep the height manager in user mode while walking.
     * If this is false the height manager will switch back to controller mode when walking.
     */
-   private boolean enable_user_pelvis_height_control_during_walking_;
+   public boolean enable_user_pelvis_height_control_during_walking_;
    /**
     * The position trajectory information.
     */
-   private controller_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
+   public controller_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
 
    public PelvisHeightTrajectoryMessage()
    {

@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,12 +8,12 @@ import us.ihmc.euclid.interfaces.Settable;
  * General purpose message normally used to report the solution of a whole-body trajectory planner.
  * Main usage is the IHMC WholeBodyTrajectoryToolbox.
  */
-public class WholeBodyTrajectoryToolboxOutputStatus
+public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTrajectoryToolboxOutputStatus>
       implements Settable<WholeBodyTrajectoryToolboxOutputStatus>, EpsilonComparable<WholeBodyTrajectoryToolboxOutputStatus>
 {
-   private int planning_result_;
-   private us.ihmc.idl.IDLSequence.Double trajectory_times_;
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus> robot_configurations_;
+   public int planning_result_;
+   public us.ihmc.idl.IDLSequence.Double trajectory_times_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus> robot_configurations_;
 
    public WholeBodyTrajectoryToolboxOutputStatus()
    {

@@ -39,17 +39,17 @@ testSuites {
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.5'
-   compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.6.0-alpha'
-   compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.5.0-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.6.1-alpha'
+   compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.5.1-alpha'
 }
 
 testDependencies {
-   compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.5.0-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.5.1-alpha'
 }
 
 generatorDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
-   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.5.0-alpha"
+   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.5.1-alpha"
 }
 
 task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {

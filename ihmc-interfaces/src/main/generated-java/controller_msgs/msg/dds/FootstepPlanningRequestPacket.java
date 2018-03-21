@@ -1,12 +1,14 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC footstep planning module.
  */
-public class FootstepPlanningRequestPacket implements Settable<FootstepPlanningRequestPacket>, EpsilonComparable<FootstepPlanningRequestPacket>
+public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningRequestPacket>
+      implements Settable<FootstepPlanningRequestPacket>, EpsilonComparable<FootstepPlanningRequestPacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -16,15 +18,15 @@ public class FootstepPlanningRequestPacket implements Settable<FootstepPlanningR
    public static final byte FOOTSTEP_PLANNER_TYPE_SIMPLE_BODY_PATH = (byte) 3;
    public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = (byte) 4;
    public static final int NO_PLAN_ID = -1;
-   private byte initial_stance_robot_side_ = (byte) 255;
-   private us.ihmc.euclid.tuple3D.Point3D stance_foot_position_in_world_;
-   private us.ihmc.euclid.tuple4D.Quaternion stance_foot_orientation_in_world_;
-   private us.ihmc.euclid.tuple3D.Point3D goal_position_in_world_;
-   private us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
-   private byte requested_footstep_planner_type_ = (byte) 255;
-   private double timeout_;
-   private controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
-   private int planner_request_id_ = -1;
+   public byte initial_stance_robot_side_ = (byte) 255;
+   public us.ihmc.euclid.tuple3D.Point3D stance_foot_position_in_world_;
+   public us.ihmc.euclid.tuple4D.Quaternion stance_foot_orientation_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D goal_position_in_world_;
+   public us.ihmc.euclid.tuple4D.Quaternion goal_orientation_in_world_;
+   public byte requested_footstep_planner_type_ = (byte) 255;
+   public double timeout_;
+   public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
+   public int planner_request_id_ = -1;
 
    public FootstepPlanningRequestPacket()
    {

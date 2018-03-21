@@ -1,9 +1,10 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class VideoPacket implements Settable<VideoPacket>, EpsilonComparable<VideoPacket>
+public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPacket>, EpsilonComparable<VideoPacket>
 {
    public static final byte VIDEO_SOURCE_MULTISENSE_LEFT_EYE = (byte) 0;
    public static final byte VIDEO_SOURCE_MULTISENSE_RIGHT_EYE = (byte) 1;
@@ -12,12 +13,12 @@ public class VideoPacket implements Settable<VideoPacket>, EpsilonComparable<Vid
    public static final byte VIDEO_SOURCE_CV_THRESHOLD = (byte) 4;
    public static final byte VIDEO_SOURCE_IMAGE_PROCESSING_BEHAVIOR = (byte) 5;
    public static final byte VIDEO_SOURCE_AWARE_FACE_TRACKER = (byte) 6;
-   private byte video_source_ = (byte) 255;
-   private long timestamp_;
-   private us.ihmc.idl.IDLSequence.Byte data_;
-   private us.ihmc.euclid.tuple3D.Point3D position_;
-   private us.ihmc.euclid.tuple4D.Quaternion orientation_;
-   private controller_msgs.msg.dds.IntrinsicParametersMessage intrinsic_parameters_;
+   public byte video_source_ = (byte) 255;
+   public long timestamp_;
+   public us.ihmc.idl.IDLSequence.Byte data_;
+   public us.ihmc.euclid.tuple3D.Point3D position_;
+   public us.ihmc.euclid.tuple4D.Quaternion orientation_;
+   public controller_msgs.msg.dds.IntrinsicParametersMessage intrinsic_parameters_;
 
    public VideoPacket()
    {

@@ -1,17 +1,18 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
-public class BehaviorStatusPacket implements Settable<BehaviorStatusPacket>, EpsilonComparable<BehaviorStatusPacket>
+public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implements Settable<BehaviorStatusPacket>, EpsilonComparable<BehaviorStatusPacket>
 {
    public static final byte NO_BEHAVIOR_RUNNING = (byte) 0;
    public static final byte BEHAVIOS_RUNNING = (byte) 1;
    public static final byte BEHAVIOR_PAUSED = (byte) 2;
-   private byte current_behavior_status_ = (byte) 255;
+   public byte current_behavior_status_ = (byte) 255;
 
    public BehaviorStatusPacket()
    {

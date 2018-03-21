@@ -1,12 +1,14 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Atlas specific message.
  */
-public class BDIBehaviorCommandPacket implements Settable<BDIBehaviorCommandPacket>, EpsilonComparable<BDIBehaviorCommandPacket>
+public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
+      implements Settable<BDIBehaviorCommandPacket>, EpsilonComparable<BDIBehaviorCommandPacket>
 {
    public static final byte NONE = (byte) 0;
    public static final byte FREEZE = (byte) 1;
@@ -18,8 +20,8 @@ public class BDIBehaviorCommandPacket implements Settable<BDIBehaviorCommandPack
    public static final byte USER = (byte) 7;
    public static final byte CALIBRATE = (byte) 8;
    public static final byte SOFT_STOP = (byte) 9;
-   private byte atlas_bdi_robot_behavior_ = (byte) 255;
-   private boolean stop_;
+   public byte atlas_bdi_robot_behavior_ = (byte) 255;
+   public boolean stop_;
 
    public BDIBehaviorCommandPacket()
    {

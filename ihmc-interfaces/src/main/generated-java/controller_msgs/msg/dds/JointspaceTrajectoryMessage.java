@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -10,16 +11,17 @@ import us.ihmc.euclid.interfaces.Settable;
  * The joint_trajectory_messages can have different waypoint times and different number of waypoints.
  * If a joint trajectory message is empty, the controller will hold the last desired joint position while executing the other joint trajectories.
  */
-public class JointspaceTrajectoryMessage implements Settable<JointspaceTrajectoryMessage>, EpsilonComparable<JointspaceTrajectoryMessage>
+public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMessage>
+      implements Settable<JointspaceTrajectoryMessage>, EpsilonComparable<JointspaceTrajectoryMessage>
 {
    /**
     * Trajectory for each.
     */
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage> joint_trajectory_messages_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage> joint_trajectory_messages_;
    /**
     * Properties for queueing trajectories.
     */
-   private controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public JointspaceTrajectoryMessage()
    {
