@@ -75,14 +75,14 @@ public class JointAccelerationIntegrationCalculator
             jointsToComputeDesiredPositionFor.add(jointToComputeDesierdPositionFor);
             jointSpecificAlphaPosition.add(newAlphaPosition);
             jointSpecificAlphaVelocity.add(newAlphaVelocity);
-            jointSpecificMaxPositionError.add(newMaxVelocity);
+            jointSpecificMaxPositionError.add(newMaxPositionError);
             jointSpecificMaxVelocity.add(newMaxVelocity);
          }
          else
          {
             jointSpecificAlphaPosition.set(localJointIndex, newAlphaPosition);
             jointSpecificAlphaVelocity.set(localJointIndex, newAlphaVelocity);
-            jointSpecificMaxPositionError.set(localJointIndex, newMaxVelocity);
+            jointSpecificMaxPositionError.set(localJointIndex, newMaxPositionError);
             jointSpecificMaxVelocity.set(localJointIndex, newMaxVelocity);
          }
       }
