@@ -21,6 +21,7 @@ import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStream;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -41,6 +42,8 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final DoubleParameter jointPositionLimitDampingParameter = new DoubleParameter("jointPositionLimitDampingParameter", registry, 10);
    private final DoubleParameter jointPositionLimitStiffnessParameter = new DoubleParameter("jointPositionLimitStiffnessParameter", registry, 100);
    private final DoubleParameter coefficientOfFrictionParameter = new DoubleParameter("coefficientOfFrictionParameter", registry, 0.5);
+
+   private final YoFrameVector comForce = new YoFrameVector("ComForce", worldFrame, registry);
 
    private final QuadrupedStepMessageHandler stepMessageHandler;
 
@@ -148,16 +151,15 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       feetManager.reset();
       feetManager.requestFullContact();
 
+      //taskSpaceController.setWriteOutput(false);
       // initialize task space controller
-      /*
       taskSpaceControllerSettings.initialize();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.getContactForceOptimizationSettings().setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
       }
-      taskSpaceController.reset();
-      */
+      //taskSpaceController.reset();
 
       // initialize ground plane
       groundPlaneEstimator.clearContactPoints();
@@ -221,6 +223,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
       // update desired horizontal com forces
       balanceManager.compute(taskSpaceControllerCommands.getComForce(), taskSpaceControllerSettings);
+      comForce.setAndMatchFrame(taskSpaceControllerCommands.getComForce());
 
       // update desired body orientation, angular velocity, and torque
       bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), stepStream.getBodyOrientation());
@@ -257,6 +260,8 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       stepStream.onExit();
 
       feetManager.registerStepTransitionCallback(null);
+
+      //taskSpaceController.setWriteOutput(true);
    }
 
    public void halt()

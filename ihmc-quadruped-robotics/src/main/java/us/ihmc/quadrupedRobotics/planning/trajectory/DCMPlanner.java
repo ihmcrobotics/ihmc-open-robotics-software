@@ -27,7 +27,7 @@ public class DCMPlanner
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    private static final double POINT_SIZE = 0.005;
 
    private static final int STEP_SEQUENCE_CAPACITY = 50;
