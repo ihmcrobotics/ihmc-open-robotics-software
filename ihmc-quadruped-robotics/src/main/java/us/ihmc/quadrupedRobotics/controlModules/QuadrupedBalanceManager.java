@@ -242,15 +242,15 @@ public class QuadrupedBalanceManager
       dcmPlanner.initializeForStanding();
    }
 
-   public void initializeForStepping(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   public void initializeForStepping(QuadrantDependentList<ContactState> contactStates)
    {
       initialize();
 
-      dcmPlanner.initializeForStepping(taskSpaceControllerSettings, dcmPositionEstimate);
+      dcmPlanner.initializeForStepping(contactStates, dcmPositionEstimate);
    }
 
 
-   public void compute(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   public void compute(QuadrantDependentList<ContactState> contactStates)
    {
       // update model
       linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
@@ -260,7 +260,7 @@ public class QuadrupedBalanceManager
       dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getComHeight());
 
       // update desired horizontal com forces
-      dcmPlanner.computeDcmSetpoints(taskSpaceControllerSettings, yoDesiredDCMPosition, yoDesiredDCMVelocity);
+      dcmPlanner.computeDcmSetpoints(contactStates, yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
 
       momentumRateOfChangeModule.compute(momentumRateForCommand, yoVrpPositionSetpoint, yoDesiredCMP, dcmPositionEstimate,

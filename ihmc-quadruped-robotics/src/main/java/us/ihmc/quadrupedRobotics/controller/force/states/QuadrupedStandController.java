@@ -3,7 +3,6 @@ package us.ihmc.quadrupedRobotics.controller.force.states;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -12,27 +11,17 @@ import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedStandController implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
-   private final ParameterVector3D comForceCommandWeightsParameter;
-   private final ParameterVector3D comTorqueCommandWeightsParameter;
-
-   private final DoubleParameter jointDampingParameter = new DoubleParameter("jointDamping", registry, 2.0);
-   private final DoubleParameter jointPositionLimitDampingParameter = new DoubleParameter("jointPositionLimitDampingParameter", registry, 10);
-   private final DoubleParameter jointPositionLimitStiffnessParameter = new DoubleParameter("jointPositionLimitStiffnessParameter", registry, 100);
-   private final DoubleParameter contactPressureLowerLimitParameter = new DoubleParameter("contactPressureLowerLimitParameter", registry, 50);
-   private final DoubleParameter coefficientOfFrictionParameter = new DoubleParameter("coefficientOfFrictionParameter", registry, 0.5);
 
    // frames
    private final ReferenceFrame supportFrame;
@@ -44,7 +33,7 @@ public class QuadrupedStandController implements QuadrupedController
    private final QuadrupedJointSpaceManager jointSpaceManager;
 
    // task space controller
-   private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
+   private final QuadrantDependentList<ContactState> contactStates = new QuadrantDependentList<>();
 
    // planning
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -54,7 +43,8 @@ public class QuadrupedStandController implements QuadrupedController
 
    private final QuadrantDependentList<FramePoint3D> solePositions;
 
-   public QuadrupedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
+   public QuadrupedStandController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
+                                   YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
 
@@ -68,19 +58,10 @@ public class QuadrupedStandController implements QuadrupedController
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
       jointSpaceManager = controlManagerFactory.getOrCreateJointSpaceManager();
 
-      // task space controllers
-      taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
-
       // planning
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
       solePositions = controllerToolbox.getTaskSpaceEstimates().getSolePositions();
-
-      Vector3D defaultComForceCommandWeights = new Vector3D(1.0, 1.0, 1.0);
-      Vector3D defaultComTorqueCommandWeights = new Vector3D(1.0, 1.0, 1.0);
-
-      comForceCommandWeightsParameter = new ParameterVector3D("comForceCommandWeight", defaultComForceCommandWeights, registry);
-      comTorqueCommandWeightsParameter = new ParameterVector3D("comTorqueCommandWeight", defaultComTorqueCommandWeights, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -90,22 +71,9 @@ public class QuadrupedStandController implements QuadrupedController
       return registry;
    }
 
-   private void updateGains()
-   {
-      taskSpaceControllerSettings.getContactForceLimits().setCoefficientOfFriction(coefficientOfFrictionParameter.getValue());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointDamping(jointDampingParameter.getValue());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitDamping(jointPositionLimitDampingParameter.getValue());
-      taskSpaceControllerSettings.getVirtualModelControllerSettings().setJointPositionLimitStiffness(jointPositionLimitStiffnessParameter.getValue());
-      taskSpaceControllerSettings.getContactForceOptimizationSettings().setComForceCommandWeights(comForceCommandWeightsParameter);
-      taskSpaceControllerSettings.getContactForceOptimizationSettings().setComTorqueCommandWeights(comTorqueCommandWeightsParameter);
-      taskSpaceControllerSettings.getContactForceLimits().setPressureLowerLimit(contactPressureLowerLimitParameter.getValue());
-   }
-
    @Override
    public ControllerEvent process()
    {
-      updateGains();
-
       controllerToolbox.update();
       feetManager.updateSupportPolygon();
 
@@ -113,7 +81,7 @@ public class QuadrupedStandController implements QuadrupedController
       groundPlaneEstimator.compute(solePositions);
 
       // update desired dcm, com position
-      balanceManager.compute(taskSpaceControllerSettings);
+      balanceManager.compute(contactStates);
 
       // update desired body orientation and angular rate
       desiredBodyOrientation.setToZero(supportFrame);
@@ -139,6 +107,9 @@ public class QuadrupedStandController implements QuadrupedController
       // initialize feedback controllers
       balanceManager.initializeForStanding();
       bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
+
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+         contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
 
       feetManager.requestFullContact();
    }
