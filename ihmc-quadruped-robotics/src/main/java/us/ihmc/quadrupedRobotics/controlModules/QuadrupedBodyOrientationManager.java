@@ -41,6 +41,7 @@ public class QuadrupedBodyOrientationManager
 
    private final MomentumRateCommand angularMomentumCommand = new MomentumRateCommand();
    private final YoFrameVector bodyAngularWeight = new YoFrameVector("bodyAngularWeight", worldFrame, registry);
+   private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
 
    public QuadrupedBodyOrientationManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
                                           YoVariableRegistry parentRegistry)
@@ -74,7 +75,7 @@ public class QuadrupedBodyOrientationManager
       controller.reset();
    }
 
-   public void compute(FrameVector3D angularMomentumRateToPack, FrameQuaternionReadOnly bodyOrientationDesired)
+   public void compute(FrameQuaternionReadOnly bodyOrientationDesired)
    {
       gains.set(bodyOrientationGainsParameter);
 
@@ -93,11 +94,15 @@ public class QuadrupedBodyOrientationManager
       setpoints.getBodyAngularVelocity().set(postureProvider.getBodyAngularRateInput());
       setpoints.getComTorqueFeedforward().setToZero();
 
-      controller.compute(angularMomentumRateToPack, setpoints, controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity());
+      controller.compute(desiredAngularMomentumRate, setpoints, controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity());
 
-      angularMomentumRateToPack.changeFrame(worldFrame);
-      angularMomentumCommand.setAngularMomentumRate(angularMomentumRateToPack);
+      angularMomentumCommand.setAngularMomentumRate(desiredAngularMomentumRate);
       angularMomentumCommand.setAngularWeights(bodyAngularWeight);
+   }
+
+   public void getDesiredAngularMomentumRate(FrameVector3D angularMomentumRateToPack)
+   {
+      angularMomentumRateToPack.setIncludingFrame(desiredAngularMomentumRate);
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()

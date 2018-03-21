@@ -119,7 +119,8 @@ public class QuadrupedForceBasedFreezeController implements QuadrupedController
       controllerToolbox.update();
       feetManager.updateSupportPolygon();
 
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
+      feetManager.compute();
+      feetManager.getDesiredSoleForceCommand(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
       virtualModelControlCommandList.clear();

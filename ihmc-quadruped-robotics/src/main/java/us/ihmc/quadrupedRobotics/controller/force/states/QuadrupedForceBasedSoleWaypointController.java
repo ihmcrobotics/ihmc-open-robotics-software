@@ -108,7 +108,8 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    {
       controllerToolbox.update();
       feetManager.updateSupportPolygon();
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
+      feetManager.compute();
+      feetManager.getDesiredSoleForceCommand(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
       return isDoneMoving.getBooleanValue() ? ControllerEvent.DONE : null;
    }

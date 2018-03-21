@@ -44,9 +44,7 @@ public class QuadrupedStandController implements QuadrupedController
    private final QuadrupedJointSpaceManager jointSpaceManager;
 
    // task space controller
-   private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
-   //private final QuadrupedTaskSpaceController taskSpaceController;
 
    // planning
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -71,9 +69,7 @@ public class QuadrupedStandController implements QuadrupedController
       jointSpaceManager = controlManagerFactory.getOrCreateJointSpaceManager();
 
       // task space controllers
-      taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
-      //taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // planning
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
@@ -117,18 +113,15 @@ public class QuadrupedStandController implements QuadrupedController
       groundPlaneEstimator.compute(solePositions);
 
       // update desired dcm, com position
-      balanceManager.compute(taskSpaceControllerCommands.getComForce(), taskSpaceControllerSettings);
+      balanceManager.compute(taskSpaceControllerSettings);
 
       // update desired body orientation and angular rate
       desiredBodyOrientation.setToZero(supportFrame);
-      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation);
+      bodyOrientationManager.compute(desiredBodyOrientation);
 
       jointSpaceManager.compute();
 
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
-
-      // update joint setpoints
-      //taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
+      feetManager.compute();
 
       return null;
    }
@@ -148,17 +141,6 @@ public class QuadrupedStandController implements QuadrupedController
       bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
 
       feetManager.requestFullContact();
-
-      // initialize task space controller
-      /*
-      taskSpaceControllerSettings.initialize();
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-      {
-         taskSpaceControllerSettings.getContactForceOptimizationSettings().setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
-         taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
-      }
-      taskSpaceController.reset();
-      */
    }
 
    @Override

@@ -43,8 +43,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final DoubleParameter jointPositionLimitStiffnessParameter = new DoubleParameter("jointPositionLimitStiffnessParameter", registry, 100);
    private final DoubleParameter coefficientOfFrictionParameter = new DoubleParameter("coefficientOfFrictionParameter", registry, 0.5);
 
-   private final YoFrameVector comForce = new YoFrameVector("ComForce", worldFrame, registry);
-
    private final QuadrupedStepMessageHandler stepMessageHandler;
 
    // managers
@@ -54,9 +52,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final QuadrupedJointSpaceManager jointSpaceManager;
 
    // task space controller
-   private final QuadrupedTaskSpaceController.Commands taskSpaceControllerCommands;
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
-   //private final QuadrupedTaskSpaceController taskSpaceController;
 
    // step planner
    private final GroundPlaneEstimator groundPlaneEstimator;
@@ -82,9 +78,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       jointSpaceManager = controlManagerFactory.getOrCreateJointSpaceManager();
 
       // task space controllers
-      taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
-      //taskSpaceController = controllerToolbox.getTaskSpaceController();
 
       // step planner
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
@@ -151,7 +145,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       feetManager.reset();
       feetManager.requestFullContact();
 
-      //taskSpaceController.setWriteOutput(false);
       // initialize task space controller
       taskSpaceControllerSettings.initialize();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -159,7 +152,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
          taskSpaceControllerSettings.getContactForceOptimizationSettings().setContactForceCommandWeights(robotQuadrant, 0.0, 0.0, 0.0);
          taskSpaceControllerSettings.setContactState(robotQuadrant, ContactState.IN_CONTACT);
       }
-      //taskSpaceController.reset();
 
       // initialize ground plane
       groundPlaneEstimator.clearContactPoints();
@@ -222,23 +214,19 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       feetManager.adjustSteps(adjustedSteps);
 
       // update desired horizontal com forces
-      balanceManager.compute(taskSpaceControllerCommands.getComForce(), taskSpaceControllerSettings);
-      comForce.setAndMatchFrame(taskSpaceControllerCommands.getComForce());
+      balanceManager.compute(taskSpaceControllerSettings);
 
       // update desired body orientation, angular velocity, and torque
-      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), stepStream.getBodyOrientation());
+      bodyOrientationManager.compute(stepStream.getBodyOrientation());
 
       // update desired contact state and sole forces
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
+      feetManager.compute();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          taskSpaceControllerSettings.setContactState(robotQuadrant, feetManager.getContactState(robotQuadrant));
       }
 
       jointSpaceManager.compute();
-
-      // update joint setpoints
-      //taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
 
       // update accumulated step adjustment
       if (onLiftOffTriggered.getBooleanValue())
@@ -260,8 +248,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       stepStream.onExit();
 
       feetManager.registerStepTransitionCallback(null);
-
-      //taskSpaceController.setWriteOutput(true);
    }
 
    public void halt()
