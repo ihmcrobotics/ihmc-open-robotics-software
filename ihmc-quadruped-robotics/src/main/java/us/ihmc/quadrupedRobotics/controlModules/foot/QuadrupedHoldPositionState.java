@@ -98,16 +98,4 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
    {
       soleForceCommand.setToZero();
    }
-
-   @Override
-   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
-   {
-      return null;
-   }
-
-   @Override
-   public SpatialFeedbackControlCommand getFeedbackControlCommand()
-   {
-      return null;
-   }
 }
