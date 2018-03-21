@@ -142,6 +142,11 @@ public class QuadrupedForceControllerToolbox
       return footContactStates.get(robotQuadrant);
    }
 
+   public QuadrantDependentList<YoPlaneContactState> getFootContactStates()
+   {
+      return footContactStates;
+   }
+
    public List<ContactablePlaneBody> getContactablePlaneBodies()
    {
       return contactablePlaneBodies;
