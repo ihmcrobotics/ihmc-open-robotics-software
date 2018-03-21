@@ -1,17 +1,18 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC toolbox framework.
  */
-public class ToolboxStateMessage implements Settable<ToolboxStateMessage>, EpsilonComparable<ToolboxStateMessage>
+public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements Settable<ToolboxStateMessage>, EpsilonComparable<ToolboxStateMessage>
 {
    public static final byte WAKE_UP = (byte) 0;
    public static final byte REINITIALIZE = (byte) 1;
    public static final byte SLEEP = (byte) 2;
-   private byte requested_toolbox_state_ = (byte) 255;
+   public byte requested_toolbox_state_ = (byte) 255;
 
    public ToolboxStateMessage()
    {

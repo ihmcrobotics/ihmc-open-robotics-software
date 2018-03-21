@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,12 +9,12 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message commands the controller to move the neck in jointspace to the desired joint angles while going through the specified trajectory points.
  * A third order polynomial function is used to interpolate between trajectory points.
  */
-public class NeckTrajectoryMessage implements Settable<NeckTrajectoryMessage>, EpsilonComparable<NeckTrajectoryMessage>
+public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> implements Settable<NeckTrajectoryMessage>, EpsilonComparable<NeckTrajectoryMessage>
 {
    /**
     * The trajectories for each joint in order from the one closest to the chest to the one the closest to the head.
     */
-   private controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
+   public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
 
    public NeckTrajectoryMessage()
    {

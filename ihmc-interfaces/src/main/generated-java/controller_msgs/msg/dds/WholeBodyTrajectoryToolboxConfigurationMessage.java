@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,12 +8,12 @@ import us.ihmc.euclid.interfaces.Settable;
  * Message used to configure the IHMC whole-body trajetory planner.
  * Main usage is the IHMC WholeBodyTrajectoryToolbox.
  */
-public class WholeBodyTrajectoryToolboxConfigurationMessage
+public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<WholeBodyTrajectoryToolboxConfigurationMessage>
       implements Settable<WholeBodyTrajectoryToolboxConfigurationMessage>, EpsilonComparable<WholeBodyTrajectoryToolboxConfigurationMessage>
 {
-   private int number_of_initial_guesses_ = -1;
-   private int maximum_expansion_size_ = -1;
-   private controller_msgs.msg.dds.KinematicsToolboxOutputStatus initial_configuration_;
+   public int number_of_initial_guesses_ = -1;
+   public int maximum_expansion_size_ = -1;
+   public controller_msgs.msg.dds.KinematicsToolboxOutputStatus initial_configuration_;
 
    public WholeBodyTrajectoryToolboxConfigurationMessage()
    {

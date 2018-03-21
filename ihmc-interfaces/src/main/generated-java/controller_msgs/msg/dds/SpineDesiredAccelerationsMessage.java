@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,12 +9,13 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message gives the user the option to bypass IHMC feedback controllers for the spine joints by sending desired spine joint accelerations.
  * One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations.
  */
-public class SpineDesiredAccelerationsMessage implements Settable<SpineDesiredAccelerationsMessage>, EpsilonComparable<SpineDesiredAccelerationsMessage>
+public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAccelerationsMessage>
+      implements Settable<SpineDesiredAccelerationsMessage>, EpsilonComparable<SpineDesiredAccelerationsMessage>
 {
    /**
     * The desired joint acceleration information.
     */
-   private controller_msgs.msg.dds.DesiredAccelerationsMessage desired_accelerations_;
+   public controller_msgs.msg.dds.DesiredAccelerationsMessage desired_accelerations_;
 
    public SpineDesiredAccelerationsMessage()
    {

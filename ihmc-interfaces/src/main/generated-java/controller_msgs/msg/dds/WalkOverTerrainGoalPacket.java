@@ -1,15 +1,17 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
-public class WalkOverTerrainGoalPacket implements Settable<WalkOverTerrainGoalPacket>, EpsilonComparable<WalkOverTerrainGoalPacket>
+public class WalkOverTerrainGoalPacket extends Packet<WalkOverTerrainGoalPacket>
+      implements Settable<WalkOverTerrainGoalPacket>, EpsilonComparable<WalkOverTerrainGoalPacket>
 {
-   private us.ihmc.euclid.tuple3D.Point3D position_;
-   private us.ihmc.euclid.tuple4D.Quaternion orientation_;
+   public us.ihmc.euclid.tuple3D.Point3D position_;
+   public us.ihmc.euclid.tuple4D.Quaternion orientation_;
 
    public WalkOverTerrainGoalPacket()
    {

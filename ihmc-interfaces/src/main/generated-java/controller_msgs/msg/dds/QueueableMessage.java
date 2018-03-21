@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,7 +8,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * General message carrying the information needed to safely queue messages.
  */
-public class QueueableMessage implements Settable<QueueableMessage>, EpsilonComparable<QueueableMessage>
+public class QueueableMessage extends Packet<QueueableMessage> implements Settable<QueueableMessage>, EpsilonComparable<QueueableMessage>
 {
    public static final byte EXECUTION_MODE_OVERRIDE = (byte) 0;
    public static final byte EXECUTION_MODE_QUEUE = (byte) 1;
@@ -23,21 +24,21 @@ public class QueueableMessage implements Settable<QueueableMessage>, EpsilonComp
     * - the time of the first trajectory point has to be greater than zero.
     * - When joint-space trajectory: the controller will queue the joint trajectory messages as a per joint basis.
     */
-   private byte execution_mode_;
+   public byte execution_mode_;
    /**
     * Defines a unique ID for this message. Only needed when you want to queue another message to this message.
     */
-   private long message_id_ = 1;
+   public long message_id_ = 1;
    /**
     * Only needed when using EXECUTION_MODE_QUEUE mode, it refers to the message_id to which this message should be queued to.
     * It is used by the controller to ensure that no message has been lost on the way.
     * If a message appears to be missing (previous_message_id different from the last message_id received by the controller), the motion is aborted.
     */
-   private long previous_message_id_;
+   public long previous_message_id_;
    /**
     * The time to delay this message on the controller side before being executed.
     */
-   private double execution_delay_time_;
+   public double execution_delay_time_;
 
    public QueueableMessage()
    {

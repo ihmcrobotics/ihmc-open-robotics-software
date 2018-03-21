@@ -1,12 +1,14 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Message notifying if the IHMC whole-body controller has crashed unexpectedly.
  */
-public class ControllerCrashNotificationPacket implements Settable<ControllerCrashNotificationPacket>, EpsilonComparable<ControllerCrashNotificationPacket>
+public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNotificationPacket>
+      implements Settable<ControllerCrashNotificationPacket>, EpsilonComparable<ControllerCrashNotificationPacket>
 {
    public static final byte CONTROLLER_READ = (byte) 0;
    public static final byte CONTROLLER_WRITE = (byte) 1;
@@ -14,8 +16,8 @@ public class ControllerCrashNotificationPacket implements Settable<ControllerCra
    public static final byte ESTIMATOR_READ = (byte) 3;
    public static final byte ESTIMATOR_WRITE = (byte) 4;
    public static final byte ESTIMATOR_RUN = (byte) 5;
-   private byte controller_crash_location_ = (byte) 255;
-   private java.lang.StringBuilder stacktrace_;
+   public byte controller_crash_location_ = (byte) 255;
+   public java.lang.StringBuilder stacktrace_;
 
    public ControllerCrashNotificationPacket()
    {

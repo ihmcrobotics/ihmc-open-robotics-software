@@ -1,12 +1,13 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Use this message for the robot to speak.
  */
-public class TextToSpeechPacket implements Settable<TextToSpeechPacket>, EpsilonComparable<TextToSpeechPacket>
+public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Settable<TextToSpeechPacket>, EpsilonComparable<TextToSpeechPacket>
 {
    public static final String FOOTSTEP_COMPLETED = "Finished Taking Footstep";
 
@@ -23,9 +24,9 @@ public class TextToSpeechPacket implements Settable<TextToSpeechPacket>, Epsilon
    public static final String MOVING_RIGHT_ARM = "moving the right arm";
 
    public static final String NETWORKPROCESSOR_ONLINE = "Reestablished Connection To The Network Processor";
-   private boolean speak_packet_;
-   private boolean beep_ = true;
-   private java.lang.StringBuilder text_to_speak_;
+   public boolean speak_packet_;
+   public boolean beep_ = true;
+   public java.lang.StringBuilder text_to_speak_;
 
    public TextToSpeechPacket()
    {

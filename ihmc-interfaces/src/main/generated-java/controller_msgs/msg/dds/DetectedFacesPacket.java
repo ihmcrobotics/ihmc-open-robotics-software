@@ -1,12 +1,13 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class DetectedFacesPacket implements Settable<DetectedFacesPacket>, EpsilonComparable<DetectedFacesPacket>
+public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements Settable<DetectedFacesPacket>, EpsilonComparable<DetectedFacesPacket>
 {
-   private us.ihmc.idl.IDLSequence.StringBuilderHolder ids_;
-   private us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> positions_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder ids_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> positions_;
 
    public DetectedFacesPacket()
    {

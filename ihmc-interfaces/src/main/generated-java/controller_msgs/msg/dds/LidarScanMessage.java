@@ -1,17 +1,18 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message should disappear to be replaced by ROS equivalent.
  */
-public class LidarScanMessage implements Settable<LidarScanMessage>, EpsilonComparable<LidarScanMessage>
+public class LidarScanMessage extends Packet<LidarScanMessage> implements Settable<LidarScanMessage>, EpsilonComparable<LidarScanMessage>
 {
-   private long robot_timestamp_;
-   private us.ihmc.euclid.tuple3D.Point3D lidar_position_;
-   private us.ihmc.euclid.tuple4D.Quaternion lidar_orientation_;
-   private us.ihmc.idl.IDLSequence.Float scan_;
+   public long robot_timestamp_;
+   public us.ihmc.euclid.tuple3D.Point3D lidar_position_;
+   public us.ihmc.euclid.tuple4D.Quaternion lidar_orientation_;
+   public us.ihmc.idl.IDLSequence.Float scan_;
 
    public LidarScanMessage()
    {

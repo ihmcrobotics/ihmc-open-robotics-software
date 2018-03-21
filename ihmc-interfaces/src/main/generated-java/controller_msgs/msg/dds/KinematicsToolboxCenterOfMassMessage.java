@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,14 +8,14 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC hole-body inverse kinematics module.
  * It holds all the information needed for detailing the type of constraint to apply to the center of mass.
  */
-public class KinematicsToolboxCenterOfMassMessage
+public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolboxCenterOfMassMessage>
       implements Settable<KinematicsToolboxCenterOfMassMessage>, EpsilonComparable<KinematicsToolboxCenterOfMassMessage>
 {
    /**
     * Specifies the desired center of mass position.
     * The data is assumed to be expressed in world frame.
     */
-   private us.ihmc.euclid.tuple3D.Point3D desired_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D desired_position_in_world_;
    /**
     * The selection matrix is used to determinate which degree of freedom of the center of mass
     * should be controlled.
@@ -25,13 +26,13 @@ public class KinematicsToolboxCenterOfMassMessage
     * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
     * if not defined otherwise.
     */
-   private controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
+   public controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
    /**
     * Specifies the priority of controller the position along each axis independently.
     * If no frame is provided, the weight matrix will be applied in the center of mass frame which is
     * aligned with the world axes.
     */
-   private controller_msgs.msg.dds.WeightMatrix3DMessage weights_;
+   public controller_msgs.msg.dds.WeightMatrix3DMessage weights_;
 
    public KinematicsToolboxCenterOfMassMessage()
    {

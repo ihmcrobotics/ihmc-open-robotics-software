@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -10,16 +11,17 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message allows controlling the pelvis orientation without interfering with position that will still be controlled to maintain the current desired capture point position.
  * To execute a normal trajectory to reach a desired pelvis orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
  */
-public class PelvisOrientationTrajectoryMessage implements Settable<PelvisOrientationTrajectoryMessage>, EpsilonComparable<PelvisOrientationTrajectoryMessage>
+public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientationTrajectoryMessage>
+      implements Settable<PelvisOrientationTrajectoryMessage>, EpsilonComparable<PelvisOrientationTrajectoryMessage>
 {
    /**
     * Whether the pelvis orientation is allowed to be controlled by the user when the robot is walking.
     */
-   private boolean enable_user_pelvis_control_during_walking_;
+   public boolean enable_user_pelvis_control_during_walking_;
    /**
     * The orientation trajectory information.
     */
-   private controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
+   public controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
 
    public PelvisOrientationTrajectoryMessage()
    {

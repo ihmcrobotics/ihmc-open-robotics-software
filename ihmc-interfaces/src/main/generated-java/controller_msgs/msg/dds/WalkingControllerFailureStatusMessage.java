@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,13 +8,13 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * The controller will send this message when detecting a fall.
  */
-public class WalkingControllerFailureStatusMessage
+public class WalkingControllerFailureStatusMessage extends Packet<WalkingControllerFailureStatusMessage>
       implements Settable<WalkingControllerFailureStatusMessage>, EpsilonComparable<WalkingControllerFailureStatusMessage>
 {
    /**
     * Specifies the estimated falling direction in 2D
     */
-   private us.ihmc.euclid.tuple3D.Vector3D falling_direction_;
+   public us.ihmc.euclid.tuple3D.Vector3D falling_direction_;
 
    public WalkingControllerFailureStatusMessage()
    {

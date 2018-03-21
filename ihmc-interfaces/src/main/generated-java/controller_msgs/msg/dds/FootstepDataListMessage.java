@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,14 +9,15 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message commands the controller to execute a list of footsteps.
  * See FootstepDataMessage for more information about defining a footstep.
  */
-public class FootstepDataListMessage implements Settable<FootstepDataListMessage>, EpsilonComparable<FootstepDataListMessage>
+public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
+      implements Settable<FootstepDataListMessage>, EpsilonComparable<FootstepDataListMessage>
 {
    public static final byte EXECUTION_TIMING_CONTROL_DURATIONS = (byte) 0;
    public static final byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = (byte) 1;
    /**
     * Defines the list of footstep to perform.
     */
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> footstep_data_list_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> footstep_data_list_;
    /**
     * When CONTROL_DURATIONS is chosen:
     * The controller will try to achieve the swing_duration and the transfer_duration specified in the message.
@@ -25,43 +27,43 @@ public class FootstepDataListMessage implements Settable<FootstepDataListMessage
     * If a footstep touches down early, the following transfer will be extended to make up for this
     * time difference and the footstep plan will finish at the expected time.
     */
-   private byte execution_timing_;
+   public byte execution_timing_;
    /**
     * The swing_duration is the time a foot is not in ground contact during a step.
     * Each step in a list of footsteps might have a different swing duration.
     * The value specified here is a default value, used if a footstep in this list was created without a swing_duration.
     * When set to zero or a negative value, the controller will its own default value.
     */
-   private double default_swing_duration_ = -1.0;
+   public double default_swing_duration_ = -1.0;
    /**
     * The transfer_duration is the time spent with the feet in ground contact before a step.
     * Each step in a list of footsteps might have a different transfer duration.
     * The value specified here is a default value, used if a footstep in this list was created without a transfer-duration.
     * When set to zero or a negative value, the controller will its own default value.
     */
-   private double default_transfer_duration_ = -1.0;
+   public double default_transfer_duration_ = -1.0;
    /**
     * Specifies the time used to return to a stable standing stance after the execution of the
     * footstep list is finished. If the value is negative the default_transfer_duration will be used,
     * which in turn if not provided indicate the controller to use its own internal default value.
     */
-   private double final_transfer_duration_ = -1.0;
+   public double final_transfer_duration_ = -1.0;
    /**
     * If false the controller adjust each footstep height to be at the support sole height.
     */
-   private boolean trust_height_of_footsteps_ = true;
+   public boolean trust_height_of_footsteps_ = true;
    /**
     * Contains information on whether the robot can automatically adjust its footsteps to retain balance.
     */
-   private boolean are_footsteps_adjustable_ = true;
+   public boolean are_footsteps_adjustable_ = true;
    /**
     * If true the controller will adjust upcoming footsteps with the location error of previous steps.
     */
-   private boolean offset_footsteps_with_execution_error_;
+   public boolean offset_footsteps_with_execution_error_;
    /**
     * Properties for queueing footstep lists.
     */
-   private controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public FootstepDataListMessage()
    {

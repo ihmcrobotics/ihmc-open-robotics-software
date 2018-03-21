@@ -1,15 +1,17 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message notifies the user that a previously sent message was rejected by the whole-body controller.
  */
-public class InvalidPacketNotificationPacket implements Settable<InvalidPacketNotificationPacket>, EpsilonComparable<InvalidPacketNotificationPacket>
+public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotificationPacket>
+      implements Settable<InvalidPacketNotificationPacket>, EpsilonComparable<InvalidPacketNotificationPacket>
 {
-   private java.lang.StringBuilder packet_class_simple_name_;
-   private java.lang.StringBuilder error_message_;
+   public java.lang.StringBuilder packet_class_simple_name_;
+   public java.lang.StringBuilder error_message_;
 
    public InvalidPacketNotificationPacket()
    {

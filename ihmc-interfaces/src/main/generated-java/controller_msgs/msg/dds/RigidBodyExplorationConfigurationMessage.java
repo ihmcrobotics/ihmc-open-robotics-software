@@ -1,5 +1,6 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -7,7 +8,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * Message used to configure the exploration for a RRT-based planner.
  * Main usage is the IHMC WholeBodyTrajectoryToolbox.
  */
-public class RigidBodyExplorationConfigurationMessage
+public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyExplorationConfigurationMessage>
       implements Settable<RigidBodyExplorationConfigurationMessage>, EpsilonComparable<RigidBodyExplorationConfigurationMessage>
 {
    public static final byte CONFIGURATION_SPACE_NAME_X = (byte) 0;
@@ -16,10 +17,10 @@ public class RigidBodyExplorationConfigurationMessage
    public static final byte CONFIGURATION_SPACE_NAME_ROLL = (byte) 3;
    public static final byte CONFIGURATION_SPACE_NAME_PITCH = (byte) 4;
    public static final byte CONFIGURATION_SPACE_NAME_YAW = (byte) 5;
-   private long rigid_body_name_based_hash_code_;
-   private us.ihmc.idl.IDLSequence.Byte configuration_space_names_to_explore_;
-   private us.ihmc.idl.IDLSequence.Double exploration_range_upper_limits_;
-   private us.ihmc.idl.IDLSequence.Double exploration_range_lower_limits_;
+   public long rigid_body_name_based_hash_code_;
+   public us.ihmc.idl.IDLSequence.Byte configuration_space_names_to_explore_;
+   public us.ihmc.idl.IDLSequence.Double exploration_range_upper_limits_;
+   public us.ihmc.idl.IDLSequence.Double exploration_range_lower_limits_;
 
    public RigidBodyExplorationConfigurationMessage()
    {

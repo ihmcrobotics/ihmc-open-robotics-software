@@ -1,12 +1,13 @@
 package controller_msgs.msg.dds;
 
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC footstep planning module.
  */
-public class FootstepPlanningToolboxOutputStatus
+public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanningToolboxOutputStatus>
       implements Settable<FootstepPlanningToolboxOutputStatus>, EpsilonComparable<FootstepPlanningToolboxOutputStatus>
 {
    public static final byte FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION = (byte) 0;
@@ -16,12 +17,12 @@ public class FootstepPlanningToolboxOutputStatus
    public static final byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = (byte) 4;
    public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = (byte) 5;
    public static final int NO_PLAN_ID = -1;
-   private controller_msgs.msg.dds.FootstepDataListMessage footstep_data_list_;
-   private byte footstep_planning_result_ = (byte) 255;
-   private int plan_id_ = -1;
-   private controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
-   private us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> body_path_;
-   private us.ihmc.euclid.geometry.Pose2D low_level_planner_goal_;
+   public controller_msgs.msg.dds.FootstepDataListMessage footstep_data_list_;
+   public byte footstep_planning_result_ = (byte) 255;
+   public int plan_id_ = -1;
+   public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> body_path_;
+   public us.ihmc.euclid.geometry.Pose2D low_level_planner_goal_;
 
    public FootstepPlanningToolboxOutputStatus()
    {
