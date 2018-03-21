@@ -150,15 +150,26 @@ public class QuadrupedFeetManager
          footControlModules.get(robotQuadrant).registerWaypointCallback(waypointCallback);
    }
 
-   public void compute(QuadrantDependentList<FrameVector3D> soleForcesToPack)
+   public void compute()
    {
       for (RobotQuadrant quadrant : RobotQuadrant.values)
-         compute(soleForcesToPack.get(quadrant), quadrant);
+         compute(quadrant);
    }
 
-   public void compute(FrameVector3D soleForceToPack, RobotQuadrant robotQuadrant)
+   public void compute(RobotQuadrant robotQuadrant)
    {
-      footControlModules.get(robotQuadrant).compute(soleForceToPack);
+      footControlModules.get(robotQuadrant).compute();
+   }
+
+   public void getDesiredSoleForceCommand(QuadrantDependentList<FrameVector3D> soleForceToPack)
+   {
+      for (RobotQuadrant quadrant : RobotQuadrant.values)
+         getDesiredSoleForceCommand(soleForceToPack.get(quadrant), quadrant);
+   }
+
+   public void getDesiredSoleForceCommand(FrameVector3D soleForceToPack, RobotQuadrant robotQuadrant)
+   {
+      footControlModules.get(robotQuadrant).getDesiredSoleForce(soleForceToPack);
    }
 
    public ContactState getContactState(RobotQuadrant robotQuadrant)

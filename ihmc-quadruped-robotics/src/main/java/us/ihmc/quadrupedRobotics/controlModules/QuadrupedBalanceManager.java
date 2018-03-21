@@ -250,7 +250,7 @@ public class QuadrupedBalanceManager
    }
 
 
-   public void compute(FrameVector3D linearMomentumRateOfChangeToPack, QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
+   public void compute(QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings)
    {
       // update model
       linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
@@ -263,11 +263,10 @@ public class QuadrupedBalanceManager
       dcmPlanner.computeDcmSetpoints(taskSpaceControllerSettings, yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
 
-      momentumRateOfChangeModule.compute(linearMomentumRateOfChangeToPack, yoVrpPositionSetpoint, yoDesiredCMP, dcmPositionEstimate,
+      momentumRateOfChangeModule.compute(momentumRateForCommand, yoVrpPositionSetpoint, yoDesiredCMP, dcmPositionEstimate,
                                          yoDesiredDCMPosition, yoDesiredDCMVelocity);
 
-      linearMomentumRateOfChangeToPack.changeFrame(worldFrame);
-      momentumRateForCommand.setIncludingFrame(linearMomentumRateOfChangeToPack);
+      momentumRateForCommand.changeFrame(worldFrame);
       momentumRateForCommand.subZ(controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getRuntimeEnvironment().getGravity());
 
       momentumRateCommand.setLinearMomentumRate(momentumRateForCommand);
