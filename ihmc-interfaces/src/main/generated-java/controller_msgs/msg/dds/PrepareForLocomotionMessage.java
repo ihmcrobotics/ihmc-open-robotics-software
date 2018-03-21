@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,17 +7,16 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * Configure the controller manipulation and pelvis managers.
  */
-public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMessage>
-      implements Settable<PrepareForLocomotionMessage>, EpsilonComparable<PrepareForLocomotionMessage>
+public class PrepareForLocomotionMessage implements Settable<PrepareForLocomotionMessage>, EpsilonComparable<PrepareForLocomotionMessage>
 {
    /**
     * When true, the controller will cancel any arm trajectory in progress, if any, before starting to walk.
     */
-   public boolean prepare_manipulation_ = true;
+   private boolean prepare_manipulation_ = true;
    /**
     * When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
     */
-   public boolean prepare_pelvis_ = true;
+   private boolean prepare_pelvis_ = true;
 
    public PrepareForLocomotionMessage()
    {

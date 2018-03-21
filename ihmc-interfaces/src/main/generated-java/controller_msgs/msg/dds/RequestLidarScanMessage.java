@@ -1,17 +1,15 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Message used to request a new LIDAR scan, and also enable some filters.
  */
-public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage>
-      implements Settable<RequestLidarScanMessage>, EpsilonComparable<RequestLidarScanMessage>
+public class RequestLidarScanMessage implements Settable<RequestLidarScanMessage>, EpsilonComparable<RequestLidarScanMessage>
 {
-   public boolean remove_shadows_ = true;
-   public boolean remove_self_collisions_ = true;
+   private boolean remove_shadows_ = true;
+   private boolean remove_self_collisions_ = true;
 
    public RequestLidarScanMessage()
    {

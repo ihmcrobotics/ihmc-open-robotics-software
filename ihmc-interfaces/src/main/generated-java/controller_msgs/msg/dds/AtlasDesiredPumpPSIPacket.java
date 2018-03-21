@@ -1,19 +1,17 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Send a request to change the desired PSI of the Atlas hydraulic pump.
  */
-public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
-      implements Settable<AtlasDesiredPumpPSIPacket>, EpsilonComparable<AtlasDesiredPumpPSIPacket>
+public class AtlasDesiredPumpPSIPacket implements Settable<AtlasDesiredPumpPSIPacket>, EpsilonComparable<AtlasDesiredPumpPSIPacket>
 {
    /**
     * The desired hydraulic pump PSI.
     */
-   public int desired_pump_psi_;
+   private int desired_pump_psi_;
 
    public AtlasDesiredPumpPSIPacket()
    {

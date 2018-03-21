@@ -17,7 +17,7 @@ module controller_msgs
       {
         sequence<float, 6> electric_joint_temperatures;
         sequence<float, 6> electric_joint_currents;
-        sequence<float, 6> electric_joint_enabled_array;
+        sequence<boolean, 6> electric_joint_enabled_array;
         float raw_imu_timestamps[15];
         float raw_imu_packet_counts[15];
         geometry_msgs::msg::dds::Vector3 raw_imu_rates[15];

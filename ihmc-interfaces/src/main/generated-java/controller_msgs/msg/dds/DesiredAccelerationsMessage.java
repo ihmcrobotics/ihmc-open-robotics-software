@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -9,17 +8,16 @@ import us.ihmc.euclid.interfaces.Settable;
  * General message that carries desired joint accelerations.
  * It is used by ArmDesiredAccelerationsMessage, SpineDesiredAccelerationsMessage, NeckDesiredAccelerationsMessage.
  */
-public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMessage>
-      implements Settable<DesiredAccelerationsMessage>, EpsilonComparable<DesiredAccelerationsMessage>
+public class DesiredAccelerationsMessage implements Settable<DesiredAccelerationsMessage>, EpsilonComparable<DesiredAccelerationsMessage>
 {
    /**
     * Specifies the desired joint accelerations.
     */
-   public us.ihmc.idl.IDLSequence.Double desired_joint_accelerations_;
+   private us.ihmc.idl.IDLSequence.Double desired_joint_accelerations_;
    /**
     * Properties for queueing commands.
     */
-   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   private controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public DesiredAccelerationsMessage()
    {

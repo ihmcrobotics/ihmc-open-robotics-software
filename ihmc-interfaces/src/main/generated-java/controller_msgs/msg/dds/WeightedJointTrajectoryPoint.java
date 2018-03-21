@@ -1,14 +1,12 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class WeightedJointTrajectoryPoint extends Packet<WeightedJointTrajectoryPoint>
-      implements Settable<WeightedJointTrajectoryPoint>, EpsilonComparable<WeightedJointTrajectoryPoint>
+public class WeightedJointTrajectoryPoint implements Settable<WeightedJointTrajectoryPoint>, EpsilonComparable<WeightedJointTrajectoryPoint>
 {
-   public trajectory_msgs.msg.dds.JointTrajectoryPoint point_;
-   public double weight_;
+   private trajectory_msgs.msg.dds.JointTrajectoryPoint point_;
+   private double weight_;
 
    public WeightedJointTrajectoryPoint()
    {

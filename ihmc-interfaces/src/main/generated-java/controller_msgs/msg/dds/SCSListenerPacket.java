@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,9 +7,9 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of IHMC Simulation Construction Set.
  * Notifies the user when the simulation has stopped.
  */
-public class SCSListenerPacket extends Packet<SCSListenerPacket> implements Settable<SCSListenerPacket>, EpsilonComparable<SCSListenerPacket>
+public class SCSListenerPacket implements Settable<SCSListenerPacket>, EpsilonComparable<SCSListenerPacket>
 {
-   public boolean is_stopped_ = true;
+   private boolean is_stopped_ = true;
 
    public SCSListenerPacket()
    {

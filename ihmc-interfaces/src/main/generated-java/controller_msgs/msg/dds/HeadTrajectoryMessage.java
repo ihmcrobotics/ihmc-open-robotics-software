@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -10,12 +9,12 @@ import us.ihmc.euclid.interfaces.Settable;
  * A Hermite based curve (third order) is used to interpolate the orientations.
  * To execute a simple trajectory to reach a desired head orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
  */
-public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> implements Settable<HeadTrajectoryMessage>, EpsilonComparable<HeadTrajectoryMessage>
+public class HeadTrajectoryMessage implements Settable<HeadTrajectoryMessage>, EpsilonComparable<HeadTrajectoryMessage>
 {
    /**
     * The orientation trajectory information.
     */
-   public controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
+   private controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
 
    public HeadTrajectoryMessage()
    {

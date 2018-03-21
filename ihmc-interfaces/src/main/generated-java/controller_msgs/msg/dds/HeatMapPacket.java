@@ -1,15 +1,14 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<HeatMapPacket>, EpsilonComparable<HeatMapPacket>
+public class HeatMapPacket implements Settable<HeatMapPacket>, EpsilonComparable<HeatMapPacket>
 {
-   public us.ihmc.idl.IDLSequence.Float data_;
-   public int width_;
-   public int height_;
-   public java.lang.StringBuilder name_;
+   private us.ihmc.idl.IDLSequence.Float data_;
+   private int width_;
+   private int height_;
+   private java.lang.StringBuilder name_;
 
    public HeatMapPacket()
    {

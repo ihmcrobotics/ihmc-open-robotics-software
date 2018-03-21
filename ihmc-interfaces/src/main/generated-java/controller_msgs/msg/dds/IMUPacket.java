@@ -1,17 +1,16 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * General purpose packet to carry IMU data. (need to be replace with the ROS IMUData)
  */
-public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>, EpsilonComparable<IMUPacket>
+public class IMUPacket implements Settable<IMUPacket>, EpsilonComparable<IMUPacket>
 {
-   public us.ihmc.euclid.tuple4D.Quaternion orientation_;
-   public us.ihmc.euclid.tuple3D.Vector3D angular_velocity_;
-   public us.ihmc.euclid.tuple3D.Vector3D linear_acceleration_;
+   private us.ihmc.euclid.tuple4D.Quaternion orientation_;
+   private us.ihmc.euclid.tuple3D.Vector3D angular_velocity_;
+   private us.ihmc.euclid.tuple3D.Vector3D linear_acceleration_;
 
    public IMUPacket()
    {

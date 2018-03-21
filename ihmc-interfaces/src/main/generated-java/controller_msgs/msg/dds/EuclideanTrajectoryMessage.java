@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -10,37 +9,36 @@ import us.ihmc.euclid.interfaces.Settable;
  * A third order polynomial function is used to interpolate positions.
  * To execute a single straight line trajectory to reach a desired position, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
  */
-public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage>
-      implements Settable<EuclideanTrajectoryMessage>, EpsilonComparable<EuclideanTrajectoryMessage>
+public class EuclideanTrajectoryMessage implements Settable<EuclideanTrajectoryMessage>, EpsilonComparable<EuclideanTrajectoryMessage>
 {
    /**
     * List of trajectory points (in taskpsace) to go through while executing the trajectory.
     */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage> taskspace_trajectory_points_;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage> taskspace_trajectory_points_;
    /**
     * The selection matrix for each axis.
     */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
+   private controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
    /**
     * Frame information for this message.
     */
-   public controller_msgs.msg.dds.FrameInformation frame_information_;
+   private controller_msgs.msg.dds.FrameInformation frame_information_;
    /**
     * The weight matrix for each axis.
     */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage weight_matrix_;
+   private controller_msgs.msg.dds.WeightMatrix3DMessage weight_matrix_;
    /**
     * Flag that tells the controller whether the use of a custom control frame is requested.
     */
-   public boolean use_custom_control_frame_;
+   private boolean use_custom_control_frame_;
    /**
     * Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.
     */
-   public us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
+   private us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
    /**
     * Properties for queueing trajectories.
     */
-   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   private controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public EuclideanTrajectoryMessage()
    {

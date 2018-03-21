@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -9,8 +8,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is old will be refreshed in a future release.
  * Message for commanding the hands to perform various predefined grasps.
  */
-public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigurationMessage>
-      implements Settable<HandDesiredConfigurationMessage>, EpsilonComparable<HandDesiredConfigurationMessage>
+public class HandDesiredConfigurationMessage implements Settable<HandDesiredConfigurationMessage>, EpsilonComparable<HandDesiredConfigurationMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -48,11 +46,11 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    /**
     * Specifies the side of the robot that will execute the trajectory
     */
-   public byte robot_side_ = (byte) 255;
+   private byte robot_side_ = (byte) 255;
    /**
     * Specifies the grasp to perform
     */
-   public byte desired_hand_configuration_ = (byte) 255;
+   private byte desired_hand_configuration_ = (byte) 255;
 
    public HandDesiredConfigurationMessage()
    {

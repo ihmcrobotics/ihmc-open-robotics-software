@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -9,38 +8,37 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message contains all the information needed to configure the objectives/constraints to apply on
  * a given end-effector in the solver.
  */
-public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxRigidBodyMessage>
-      implements Settable<KinematicsToolboxRigidBodyMessage>, EpsilonComparable<KinematicsToolboxRigidBodyMessage>
+public class KinematicsToolboxRigidBodyMessage implements Settable<KinematicsToolboxRigidBodyMessage>, EpsilonComparable<KinematicsToolboxRigidBodyMessage>
 {
    /**
     * The is the unique hash code of the end-effector to be solved for.
     * It is used on the solver side to retrieve the desired end-effector to be controlled.
     * See RigidBody.getNameBasedHashCode() for the computation of a rigid-body hash code.
     */
-   public long end_effector_name_based_hash_code_;
+   private long end_effector_name_based_hash_code_;
    /**
     * This is the desired position of the control frame's origin.
     * If the control frame has not been defined, it represents the desired position endEffector.getBodyFixedFrame().
     * The data is assumed to be expressed in world frame.
     */
-   public us.ihmc.euclid.tuple3D.Point3D desired_position_in_world_;
+   private us.ihmc.euclid.tuple3D.Point3D desired_position_in_world_;
    /**
     * This is the desired orientation of the control frame.
     * I the control frame has not been defined, it represents the desired orientation of endEffector.getBodyFixedFrame().
     * The data is assumed to be expressed in world frame.
     */
-   public us.ihmc.euclid.tuple4D.Quaternion desired_orientation_in_world_;
+   private us.ihmc.euclid.tuple4D.Quaternion desired_orientation_in_world_;
    /**
     * This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
     * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
     * The control frame is rigidly attached to the end-effector.
     */
-   public us.ihmc.euclid.tuple3D.Point3D control_frame_position_in_end_effector_;
+   private us.ihmc.euclid.tuple3D.Point3D control_frame_position_in_end_effector_;
    /**
     * This is the orientation of the control frame expressed in endEffector.getBodyFixedFrame().
     * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
     */
-   public us.ihmc.euclid.tuple4D.Quaternion control_frame_orientation_in_end_effector_;
+   private us.ihmc.euclid.tuple4D.Quaternion control_frame_orientation_in_end_effector_;
    /**
     * The selection matrix is used to determinate which degree of freedom of the end-effector should
     * be controlled.
@@ -51,7 +49,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
     * frame if not defined otherwise.
     */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
+   private controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
    /**
     * The selection matrix is used to determinate which degree of freedom of the end-effector should
     * be controlled.
@@ -62,15 +60,15 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
     * frame if not defined otherwise.
     */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
+   private controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
    /**
     * Weight matrix used to define the priority of controlling the rotation around each axis on the solver side.
     */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage angular_weight_matrix_;
+   private controller_msgs.msg.dds.WeightMatrix3DMessage angular_weight_matrix_;
    /**
     * Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
     */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage linear_weight_matrix_;
+   private controller_msgs.msg.dds.WeightMatrix3DMessage linear_weight_matrix_;
 
    public KinematicsToolboxRigidBodyMessage()
    {

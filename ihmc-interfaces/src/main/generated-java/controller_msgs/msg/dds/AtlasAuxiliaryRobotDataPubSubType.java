@@ -33,7 +33,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += (6 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (6 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (6 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += ((15) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -94,7 +94,7 @@ public class AtlasAuxiliaryRobotDataPubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += (data.getElectricJointCurrents().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getElectricJointEnabledArray().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getElectricJointEnabledArray().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += ((15) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += ((15) * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);

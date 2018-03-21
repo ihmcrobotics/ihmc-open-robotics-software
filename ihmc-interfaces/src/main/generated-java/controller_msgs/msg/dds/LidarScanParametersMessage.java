@@ -1,26 +1,24 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Message used for simulated LIDAR
  */
-public class LidarScanParametersMessage extends Packet<LidarScanParametersMessage>
-      implements Settable<LidarScanParametersMessage>, EpsilonComparable<LidarScanParametersMessage>
+public class LidarScanParametersMessage implements Settable<LidarScanParametersMessage>, EpsilonComparable<LidarScanParametersMessage>
 {
-   public long timestamp_;
-   public float sweep_yaw_max_;
-   public float sweep_yaw_min_;
-   public float height_pitch_max_;
-   public float height_pitch_min_;
-   public float time_increment_;
-   public float scan_time_;
-   public float min_range_;
-   public float max_range_;
-   public int points_per_sweep_;
-   public int scan_height_;
+   private long timestamp_;
+   private float sweep_yaw_max_;
+   private float sweep_yaw_min_;
+   private float height_pitch_max_;
+   private float height_pitch_min_;
+   private float time_increment_;
+   private float scan_time_;
+   private float min_range_;
+   private float max_range_;
+   private int points_per_sweep_;
+   private int scan_height_;
 
    public LidarScanParametersMessage()
    {

@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,26 +7,26 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC hole-body inverse kinematics module.
  * It contains auxiliary information that allows to further customized the behavior of the solver.
  */
-public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsToolboxConfigurationMessage>
+public class KinematicsToolboxConfigurationMessage
       implements Settable<KinematicsToolboxConfigurationMessage>, EpsilonComparable<KinematicsToolboxConfigurationMessage>
 {
    /**
     * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
     */
-   public us.ihmc.euclid.tuple3D.Point3D privileged_root_joint_position_;
+   private us.ihmc.euclid.tuple3D.Point3D privileged_root_joint_position_;
    /**
     * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
     */
-   public us.ihmc.euclid.tuple4D.Quaternion privileged_root_joint_orientation_;
+   private us.ihmc.euclid.tuple4D.Quaternion privileged_root_joint_orientation_;
    /**
     * This array is used to identify to which joint each angle in privileged_joint_angles belongs to.
     * See AbstractInverseDynamicsJoint.getNameBaseHashCode() for the computation of a joint hash code.
     */
-   public us.ihmc.idl.IDLSequence.Long privileged_joint_name_based_hash_codes_;
+   private us.ihmc.idl.IDLSequence.Long privileged_joint_name_based_hash_codes_;
    /**
     * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
     */
-   public float privileged_joint_angles_;
+   private float privileged_joint_angles_;
 
    public KinematicsToolboxConfigurationMessage()
    {

@@ -1,26 +1,25 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements Settable<BoundingBoxesPacket>, EpsilonComparable<BoundingBoxesPacket>
+public class BoundingBoxesPacket implements Settable<BoundingBoxesPacket>, EpsilonComparable<BoundingBoxesPacket>
 {
-   public us.ihmc.idl.IDLSequence.Double bounding_boxes_x_coordinates_;
-   public us.ihmc.idl.IDLSequence.Double bounding_boxes_y_coordinates_;
-   public us.ihmc.idl.IDLSequence.Double bounding_boxes_widths_;
-   public us.ihmc.idl.IDLSequence.Double bounding_boxes_heights_;
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder labels_;
+   private us.ihmc.idl.IDLSequence.Integer bounding_boxes_x_coordinates_;
+   private us.ihmc.idl.IDLSequence.Integer bounding_boxes_y_coordinates_;
+   private us.ihmc.idl.IDLSequence.Integer bounding_boxes_widths_;
+   private us.ihmc.idl.IDLSequence.Integer bounding_boxes_heights_;
+   private us.ihmc.idl.IDLSequence.StringBuilderHolder labels_;
 
    public BoundingBoxesPacket()
    {
-      bounding_boxes_x_coordinates_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
+      bounding_boxes_x_coordinates_ = new us.ihmc.idl.IDLSequence.Integer(100, "type_2");
 
-      bounding_boxes_y_coordinates_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
+      bounding_boxes_y_coordinates_ = new us.ihmc.idl.IDLSequence.Integer(100, "type_2");
 
-      bounding_boxes_widths_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
+      bounding_boxes_widths_ = new us.ihmc.idl.IDLSequence.Integer(100, "type_2");
 
-      bounding_boxes_heights_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
+      bounding_boxes_heights_ = new us.ihmc.idl.IDLSequence.Integer(100, "type_2");
 
       labels_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder(100, "type_d");
    }
@@ -39,22 +38,22 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
       labels_.set(other.labels_);
    }
 
-   public us.ihmc.idl.IDLSequence.Double getBoundingBoxesXCoordinates()
+   public us.ihmc.idl.IDLSequence.Integer getBoundingBoxesXCoordinates()
    {
       return bounding_boxes_x_coordinates_;
    }
 
-   public us.ihmc.idl.IDLSequence.Double getBoundingBoxesYCoordinates()
+   public us.ihmc.idl.IDLSequence.Integer getBoundingBoxesYCoordinates()
    {
       return bounding_boxes_y_coordinates_;
    }
 
-   public us.ihmc.idl.IDLSequence.Double getBoundingBoxesWidths()
+   public us.ihmc.idl.IDLSequence.Integer getBoundingBoxesWidths()
    {
       return bounding_boxes_widths_;
    }
 
-   public us.ihmc.idl.IDLSequence.Double getBoundingBoxesHeights()
+   public us.ihmc.idl.IDLSequence.Integer getBoundingBoxesHeights()
    {
       return bounding_boxes_heights_;
    }
@@ -72,16 +71,16 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
       if (other == this)
          return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.bounding_boxes_x_coordinates_, other.bounding_boxes_x_coordinates_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.bounding_boxes_x_coordinates_, other.bounding_boxes_x_coordinates_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.bounding_boxes_y_coordinates_, other.bounding_boxes_y_coordinates_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.bounding_boxes_y_coordinates_, other.bounding_boxes_y_coordinates_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.bounding_boxes_widths_, other.bounding_boxes_widths_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.bounding_boxes_widths_, other.bounding_boxes_widths_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.bounding_boxes_heights_, other.bounding_boxes_heights_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.bounding_boxes_heights_, other.bounding_boxes_heights_, epsilon))
          return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.labels_, other.labels_, epsilon))

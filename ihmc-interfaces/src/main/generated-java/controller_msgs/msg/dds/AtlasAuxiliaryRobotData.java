@@ -1,36 +1,34 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Message specific to Atlas, it is reported by the IHMC state estimator.
  */
-public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
-      implements Settable<AtlasAuxiliaryRobotData>, EpsilonComparable<AtlasAuxiliaryRobotData>
+public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData>, EpsilonComparable<AtlasAuxiliaryRobotData>
 {
-   public us.ihmc.idl.IDLSequence.Float electric_joint_temperatures_;
-   public us.ihmc.idl.IDLSequence.Float electric_joint_currents_;
-   public us.ihmc.idl.IDLSequence.Float electric_joint_enabled_array_;
-   public float[] raw_imu_timestamps_;
-   public float[] raw_imu_packet_counts_;
-   public us.ihmc.euclid.tuple3D.Vector3D[] raw_imu_rates_;
-   public us.ihmc.euclid.tuple3D.Vector3D[] raw_imu_deltas_;
-   public boolean battery_charging_;
-   public float battery_voltage_;
-   public float battery_current_;
-   public float remaining_battery_time_;
-   public float remaining_amp_hours_;
-   public float remaining_charge_percentage_;
-   public long battery_cycle_count_;
-   public float pump_inlet_pressure_;
-   public float pump_supply_pressure_;
-   public float air_sump_pressure_;
-   public float pump_supply_temperature_;
-   public float pump_rpm_;
-   public float motor_temperature_;
-   public float motor_driver_temperature_;
+   private us.ihmc.idl.IDLSequence.Float electric_joint_temperatures_;
+   private us.ihmc.idl.IDLSequence.Float electric_joint_currents_;
+   private us.ihmc.idl.IDLSequence.Boolean electric_joint_enabled_array_;
+   private float[] raw_imu_timestamps_;
+   private float[] raw_imu_packet_counts_;
+   private us.ihmc.euclid.tuple3D.Vector3D[] raw_imu_rates_;
+   private us.ihmc.euclid.tuple3D.Vector3D[] raw_imu_deltas_;
+   private boolean battery_charging_;
+   private float battery_voltage_;
+   private float battery_current_;
+   private float remaining_battery_time_;
+   private float remaining_amp_hours_;
+   private float remaining_charge_percentage_;
+   private long battery_cycle_count_;
+   private float pump_inlet_pressure_;
+   private float pump_supply_pressure_;
+   private float air_sump_pressure_;
+   private float pump_supply_temperature_;
+   private float pump_rpm_;
+   private float motor_temperature_;
+   private float motor_driver_temperature_;
 
    public AtlasAuxiliaryRobotData()
    {
@@ -38,7 +36,7 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 
       electric_joint_currents_ = new us.ihmc.idl.IDLSequence.Float(6, "type_5");
 
-      electric_joint_enabled_array_ = new us.ihmc.idl.IDLSequence.Float(6, "type_5");
+      electric_joint_enabled_array_ = new us.ihmc.idl.IDLSequence.Boolean(6, "type_7");
 
       raw_imu_timestamps_ = new float[15];
 
@@ -126,7 +124,7 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
       return electric_joint_currents_;
    }
 
-   public us.ihmc.idl.IDLSequence.Float getElectricJointEnabledArray()
+   public us.ihmc.idl.IDLSequence.Boolean getElectricJointEnabledArray()
    {
       return electric_joint_enabled_array_;
    }
@@ -305,7 +303,7 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.electric_joint_currents_, other.electric_joint_currents_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.electric_joint_enabled_array_, other.electric_joint_enabled_array_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBooleanSequence(this.electric_joint_enabled_array_, other.electric_joint_enabled_array_, epsilon))
          return false;
 
       for (int i13 = 0; i13 < raw_imu_timestamps_.length; ++i13)

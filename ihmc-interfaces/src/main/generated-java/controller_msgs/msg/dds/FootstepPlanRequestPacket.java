@@ -1,23 +1,21 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * (Obsolete) This message is part of the old IHMC footstep planning module.
  */
-public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
-      implements Settable<FootstepPlanRequestPacket>, EpsilonComparable<FootstepPlanRequestPacket>
+public class FootstepPlanRequestPacket implements Settable<FootstepPlanRequestPacket>, EpsilonComparable<FootstepPlanRequestPacket>
 {
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_START_SEARCH = (byte) 0;
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_STOP_SEARCH = (byte) 1;
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_UPDATE_START = (byte) 2;
-   public controller_msgs.msg.dds.FootstepDataMessage start_footstep_;
-   public double theta_start_;
-   public double max_sub_optimality_ = 1.0;
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> goals_;
-   public byte footstep_plan_request_type_ = (byte) 255;
+   private controller_msgs.msg.dds.FootstepDataMessage start_footstep_;
+   private double theta_start_;
+   private double max_sub_optimality_ = 1.0;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> goals_;
+   private byte footstep_plan_request_type_ = (byte) 255;
 
    public FootstepPlanRequestPacket()
    {

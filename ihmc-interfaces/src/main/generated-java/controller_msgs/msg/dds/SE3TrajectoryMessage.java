@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -10,45 +9,45 @@ import us.ihmc.euclid.interfaces.Settable;
  * A third order polynomial function is used to interpolate positions and a Hermite based curve (third order) is used to interpolate the orientations.
  * To execute a single straight line trajectory to reach a desired pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
  */
-public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implements Settable<SE3TrajectoryMessage>, EpsilonComparable<SE3TrajectoryMessage>
+public class SE3TrajectoryMessage implements Settable<SE3TrajectoryMessage>, EpsilonComparable<SE3TrajectoryMessage>
 {
    /**
     * List of trajectory points (in taskpsace) to go through while executing the trajectory.
     */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> taskspace_trajectory_points_;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> taskspace_trajectory_points_;
    /**
     * The selection matrix for each axis of the angular part of this trajectory.
     */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
+   private controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
    /**
     * The selection matrix for each axis of the linear part of this trajectory.
     */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
+   private controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
    /**
     * Frame information for this message.
     */
-   public controller_msgs.msg.dds.FrameInformation frame_information_;
+   private controller_msgs.msg.dds.FrameInformation frame_information_;
    /**
     * The weight matrix for each axis of the angular part of this trajectory.
     */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage angular_weight_matrix_;
+   private controller_msgs.msg.dds.WeightMatrix3DMessage angular_weight_matrix_;
    /**
     * The weight matrix for each axis of the linear part of this trajectory.
     */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage linear_weight_matrix_;
+   private controller_msgs.msg.dds.WeightMatrix3DMessage linear_weight_matrix_;
    /**
     * Flag that tells the controller whether the use of a custom control frame is requested.
     */
-   public boolean use_custom_control_frame_;
+   private boolean use_custom_control_frame_;
    /**
     * Pose of custom control frame expressed in the end-effector frame.
     * This is the frame attached to the rigid body that the taskspace trajectory is defined for.
     */
-   public us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
+   private us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
    /**
     * Properties for queueing trajectories.
     */
-   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   private controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public SE3TrajectoryMessage()
    {

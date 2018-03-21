@@ -1,10 +1,9 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class FrameInformation extends Packet<FrameInformation> implements Settable<FrameInformation>, EpsilonComparable<FrameInformation>
+public class FrameInformation implements Settable<FrameInformation>, EpsilonComparable<FrameInformation>
 {
    /**
     * This message is part of the IHMC whole-body controller API.
@@ -22,7 +21,7 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
    /**
     * The ID of the reference frame that a trajectory is executed in.
     */
-   public long trajectory_reference_frame_id_;
+   private long trajectory_reference_frame_id_;
    /**
     * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of the
     * trajectory data will be switched to the trajectory frame immediately when the message is received
@@ -41,7 +40,7 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
     * this will cause the resulting trajectory to be wrong since the transformation to trajectory frame
     * happens at the start of execution rather than every controller tick.
     */
-   public long data_reference_frame_id_;
+   private long data_reference_frame_id_;
 
    public FrameInformation()
    {

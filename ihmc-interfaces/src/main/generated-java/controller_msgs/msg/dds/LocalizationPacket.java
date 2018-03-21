@@ -1,16 +1,15 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Message part of the localization module
  */
-public class LocalizationPacket extends Packet<LocalizationPacket> implements Settable<LocalizationPacket>, EpsilonComparable<LocalizationPacket>
+public class LocalizationPacket implements Settable<LocalizationPacket>, EpsilonComparable<LocalizationPacket>
 {
-   public boolean reset_;
-   public boolean toggle_;
+   private boolean reset_;
+   private boolean toggle_;
 
    public LocalizationPacket()
    {

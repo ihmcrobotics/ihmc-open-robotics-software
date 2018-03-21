@@ -1,17 +1,16 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Message part of the localization module
  */
-public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket> implements Settable<PelvisPoseErrorPacket>, EpsilonComparable<PelvisPoseErrorPacket>
+public class PelvisPoseErrorPacket implements Settable<PelvisPoseErrorPacket>, EpsilonComparable<PelvisPoseErrorPacket>
 {
-   public float residual_error_;
-   public float total_error_;
-   public boolean has_map_been_reset_;
+   private float residual_error_;
+   private float total_error_;
+   private boolean has_map_been_reset_;
 
    public PelvisPoseErrorPacket()
    {

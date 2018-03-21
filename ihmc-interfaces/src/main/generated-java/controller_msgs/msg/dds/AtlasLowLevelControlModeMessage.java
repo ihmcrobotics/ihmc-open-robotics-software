@@ -1,18 +1,16 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Atlas specific message.
  */
-public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControlModeMessage>
-      implements Settable<AtlasLowLevelControlModeMessage>, EpsilonComparable<AtlasLowLevelControlModeMessage>
+public class AtlasLowLevelControlModeMessage implements Settable<AtlasLowLevelControlModeMessage>, EpsilonComparable<AtlasLowLevelControlModeMessage>
 {
    public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_STAND_PREP = (byte) 0;
    public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_FREEZE = (byte) 1;
-   public byte requested_atlas_low_level_control_mode_ = (byte) 255;
+   private byte requested_atlas_low_level_control_mode_ = (byte) 255;
 
    public AtlasLowLevelControlModeMessage()
    {

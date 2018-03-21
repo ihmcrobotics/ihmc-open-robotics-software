@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,7 +7,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * This message allows the user to precisely choose the priority of each component of a taskspace command.
  */
-public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> implements Settable<WeightMatrix3DMessage>, EpsilonComparable<WeightMatrix3DMessage>
+public class WeightMatrix3DMessage implements Settable<WeightMatrix3DMessage>, EpsilonComparable<WeightMatrix3DMessage>
 {
    /**
     * The ID of the reference frame defining the weight frame.
@@ -16,19 +15,19 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
     * This frame is optional. It is preferable to provide it when possible, but when it is absent, i.e. equal to 0,
     * the weight matrix will then be generated regardless to what frame is it used in.
     */
-   public long weight_frame_id_;
+   private long weight_frame_id_;
    /**
     * Specifies the qp weight for the x-axis, if set to NaN the controller will use the default weight for this axis. The weight is NaN by default.
     */
-   public double x_weight_;
+   private double x_weight_;
    /**
     * Specifies the qp weight for the y-axis, if set to NaN the controller will use the default weight for this axis. The weight is NaN by default.
     */
-   public double y_weight_;
+   private double y_weight_;
    /**
     * Specifies the qp weight for the z-axis, if set to NaN the controller will use the default weight for this axis. The weight is NaN by default.
     */
-   public double z_weight_;
+   private double z_weight_;
 
    public WeightMatrix3DMessage()
    {

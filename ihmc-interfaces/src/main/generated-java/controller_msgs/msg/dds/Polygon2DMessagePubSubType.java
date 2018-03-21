@@ -26,7 +26,11 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < 100; ++i0)
+      {
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -40,7 +44,11 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getVertices(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < data.getVertices().size(); ++i0)
+      {
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getVertices().get(i0), current_alignment);
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -48,13 +56,16 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    public static void write(controller_msgs.msg.dds.Polygon2DMessage data, us.ihmc.idl.CDR cdr)
    {
 
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getVertices(), cdr);
+      if (data.getVertices().size() <= 100)
+         cdr.write_type_e(data.getVertices());
+      else
+         throw new RuntimeException("vertices field exceeds the maximum length");
    }
 
    public static void read(controller_msgs.msg.dds.Polygon2DMessage data, us.ihmc.idl.CDR cdr)
    {
 
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getVertices(), cdr);
+      cdr.read_type_e(data.getVertices());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.Polygon2DMessage src, controller_msgs.msg.dds.Polygon2DMessage dest)
@@ -81,13 +92,13 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(controller_msgs.msg.dds.Polygon2DMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getVertices());
+      ser.write_type_e("vertices", data.getVertices());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.Polygon2DMessage data)
    {
-      ser.read_type_a("vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getVertices());
+      ser.read_type_e("vertices", data.getVertices());
    }
 
    @Override

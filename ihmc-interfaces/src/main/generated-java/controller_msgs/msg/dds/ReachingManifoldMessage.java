@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,8 +7,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * Message used to encode the manifold of an object to be used as input by a reaching motion planner.
  * Main usage is the IHMC WholeBodyTrajectoryToolbox.
  */
-public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
-      implements Settable<ReachingManifoldMessage>, EpsilonComparable<ReachingManifoldMessage>
+public class ReachingManifoldMessage implements Settable<ReachingManifoldMessage>, EpsilonComparable<ReachingManifoldMessage>
 {
    public static final byte CONFIGURATION_SPACE_NAME_X = (byte) 0;
    public static final byte CONFIGURATION_SPACE_NAME_Y = (byte) 1;
@@ -17,12 +15,12 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
    public static final byte CONFIGURATION_SPACE_NAME_ROLL = (byte) 3;
    public static final byte CONFIGURATION_SPACE_NAME_PITCH = (byte) 4;
    public static final byte CONFIGURATION_SPACE_NAME_YAW = (byte) 5;
-   public long end_effector_name_based_hash_code_;
-   public us.ihmc.euclid.tuple3D.Point3D manifold_origin_position_;
-   public us.ihmc.euclid.tuple4D.Quaternion manifold_origin_orientation_;
-   public us.ihmc.idl.IDLSequence.Byte manifold_configuration_space_names_;
-   public us.ihmc.idl.IDLSequence.Double manifold_lower_limits_;
-   public us.ihmc.idl.IDLSequence.Double manifold_upper_limits_;
+   private long end_effector_name_based_hash_code_;
+   private us.ihmc.euclid.tuple3D.Point3D manifold_origin_position_;
+   private us.ihmc.euclid.tuple4D.Quaternion manifold_origin_orientation_;
+   private us.ihmc.idl.IDLSequence.Byte manifold_configuration_space_names_;
+   private us.ihmc.idl.IDLSequence.Double manifold_lower_limits_;
+   private us.ihmc.idl.IDLSequence.Double manifold_upper_limits_;
 
    public ReachingManifoldMessage()
    {

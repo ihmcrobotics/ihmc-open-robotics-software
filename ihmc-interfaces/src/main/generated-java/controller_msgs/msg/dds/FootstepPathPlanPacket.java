@@ -1,22 +1,20 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * (Obsolete) This message is part of the old IHMC footstep planning module.
  */
-public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
-      implements Settable<FootstepPathPlanPacket>, EpsilonComparable<FootstepPathPlanPacket>
+public class FootstepPathPlanPacket implements Settable<FootstepPathPlanPacket>, EpsilonComparable<FootstepPathPlanPacket>
 {
-   public boolean goals_valid_;
-   public controller_msgs.msg.dds.FootstepDataMessage start_;
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> original_goals_;
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> path_plan_;
-   public us.ihmc.idl.IDLSequence.Boolean footstep_unknown_;
-   public double sub_optimality_;
-   public double path_cost_ = Double.POSITIVE_INFINITY;
+   private boolean goals_valid_;
+   private controller_msgs.msg.dds.FootstepDataMessage start_;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> original_goals_;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> path_plan_;
+   private us.ihmc.idl.IDLSequence.Boolean footstep_unknown_;
+   private double sub_optimality_;
+   private double path_cost_ = Double.POSITIVE_INFINITY;
 
    public FootstepPathPlanPacket()
    {
