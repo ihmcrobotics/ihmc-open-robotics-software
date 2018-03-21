@@ -1,18 +1,18 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements Settable<DetectedFacesPacket>, EpsilonComparable<DetectedFacesPacket>
+public class DetectedFacesPacket implements Settable<DetectedFacesPacket>, EpsilonComparable<DetectedFacesPacket>
 {
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder ids_;
-   public us.ihmc.euclid.tuple3D.Point3D positions_;
+   private us.ihmc.idl.IDLSequence.StringBuilderHolder ids_;
+   private us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> positions_;
 
    public DetectedFacesPacket()
    {
       ids_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder(100, "type_d");
-      positions_ = new us.ihmc.euclid.tuple3D.Point3D();
+      positions_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>(100, us.ihmc.euclid.tuple3D.Point3D.class,
+                                                                                      new geometry_msgs.msg.dds.PointPubSubType());
    }
 
    public DetectedFacesPacket(DetectedFacesPacket other)
@@ -23,7 +23,7 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements 
    public void set(DetectedFacesPacket other)
    {
       ids_.set(other.ids_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.positions_, positions_);
+      positions_.set(other.positions_);
    }
 
    public us.ihmc.idl.IDLSequence.StringBuilderHolder getIds()
@@ -31,7 +31,7 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements 
       return ids_;
    }
 
-   public us.ihmc.euclid.tuple3D.Point3D getPositions()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> getPositions()
    {
       return positions_;
    }
@@ -47,8 +47,18 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.ids_, other.ids_, epsilon))
          return false;
 
-      if (!this.positions_.epsilonEquals(other.positions_, epsilon))
+      if (this.positions_.size() == other.positions_.size())
+      {
          return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.positions_.size(); i++)
+         {
+            if (!this.positions_.get(i).epsilonEquals(other.positions_.get(i), epsilon))
+               return false;
+         }
+      }
 
       return true;
    }

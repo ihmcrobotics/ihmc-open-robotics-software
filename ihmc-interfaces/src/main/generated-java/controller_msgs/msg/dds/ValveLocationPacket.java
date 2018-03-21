@@ -1,16 +1,15 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
-public class ValveLocationPacket extends Packet<ValveLocationPacket> implements Settable<ValveLocationPacket>, EpsilonComparable<ValveLocationPacket>
+public class ValveLocationPacket implements Settable<ValveLocationPacket>, EpsilonComparable<ValveLocationPacket>
 {
-   public us.ihmc.euclid.geometry.Pose3D valve_pose_in_world_;
-   public double valve_radius_;
+   private us.ihmc.euclid.geometry.Pose3D valve_pose_in_world_;
+   private double valve_radius_;
 
    public ValveLocationPacket()
    {

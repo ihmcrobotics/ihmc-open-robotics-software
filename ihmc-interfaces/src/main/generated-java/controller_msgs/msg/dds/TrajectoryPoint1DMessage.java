@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -12,21 +11,20 @@ import us.ihmc.euclid.interfaces.Settable;
  * - SO3TrajectoryPointMessage (rotational),
  * - SE3TrajectoryPointMessage (translational AND rotational).
  */
-public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
-      implements Settable<TrajectoryPoint1DMessage>, EpsilonComparable<TrajectoryPoint1DMessage>
+public class TrajectoryPoint1DMessage implements Settable<TrajectoryPoint1DMessage>, EpsilonComparable<TrajectoryPoint1DMessage>
 {
    /**
     * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
     */
-   public double time_;
+   private double time_;
    /**
     * Define the desired 1D position to be reached at this trajectory point.
     */
-   public double position_;
+   private double position_;
    /**
     * Define the desired 1D velocity to be reached at this trajectory point.
     */
-   public double velocity_;
+   private double velocity_;
 
    public TrajectoryPoint1DMessage()
    {

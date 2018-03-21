@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,45 +7,44 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.
  */
-public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage>
-      implements Settable<WholeBodyTrajectoryMessage>, EpsilonComparable<WholeBodyTrajectoryMessage>
+public class WholeBodyTrajectoryMessage implements Settable<WholeBodyTrajectoryMessage>, EpsilonComparable<WholeBodyTrajectoryMessage>
 {
    /**
     * Trajectory for the left hand
     */
-   public controller_msgs.msg.dds.HandTrajectoryMessage left_hand_trajectory_message_;
+   private controller_msgs.msg.dds.HandTrajectoryMessage left_hand_trajectory_message_;
    /**
     * Trajectory for the right hand
     */
-   public controller_msgs.msg.dds.HandTrajectoryMessage right_hand_trajectory_message_;
+   private controller_msgs.msg.dds.HandTrajectoryMessage right_hand_trajectory_message_;
    /**
     * Trajectory for the left arm joints
     */
-   public controller_msgs.msg.dds.ArmTrajectoryMessage left_arm_trajectory_message_;
+   private controller_msgs.msg.dds.ArmTrajectoryMessage left_arm_trajectory_message_;
    /**
     * Trajectory for the right arm joints
     */
-   public controller_msgs.msg.dds.ArmTrajectoryMessage right_arm_trajectory_message_;
+   private controller_msgs.msg.dds.ArmTrajectoryMessage right_arm_trajectory_message_;
    /**
     * Trajectory for the chest
     */
-   public controller_msgs.msg.dds.ChestTrajectoryMessage chest_trajectory_message_;
+   private controller_msgs.msg.dds.ChestTrajectoryMessage chest_trajectory_message_;
    /**
     * Trajectory for the pelvis
     */
-   public controller_msgs.msg.dds.PelvisTrajectoryMessage pelvis_trajectory_message_;
+   private controller_msgs.msg.dds.PelvisTrajectoryMessage pelvis_trajectory_message_;
    /**
     * Trajectory for the left foot
     */
-   public controller_msgs.msg.dds.FootTrajectoryMessage left_foot_trajectory_message_;
+   private controller_msgs.msg.dds.FootTrajectoryMessage left_foot_trajectory_message_;
    /**
     * Trajectory for the right foot
     */
-   public controller_msgs.msg.dds.FootTrajectoryMessage right_foot_trajectory_message_;
+   private controller_msgs.msg.dds.FootTrajectoryMessage right_foot_trajectory_message_;
    /**
     * Trajectory for the head
     */
-   public controller_msgs.msg.dds.HeadTrajectoryMessage head_trajectory_message_;
+   private controller_msgs.msg.dds.HeadTrajectoryMessage head_trajectory_message_;
 
    public WholeBodyTrajectoryMessage()
    {

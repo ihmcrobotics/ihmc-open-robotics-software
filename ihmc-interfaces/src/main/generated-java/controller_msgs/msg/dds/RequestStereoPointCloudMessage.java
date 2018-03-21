@@ -1,13 +1,11 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointCloudMessage>
-      implements Settable<RequestStereoPointCloudMessage>, EpsilonComparable<RequestStereoPointCloudMessage>
+public class RequestStereoPointCloudMessage implements Settable<RequestStereoPointCloudMessage>, EpsilonComparable<RequestStereoPointCloudMessage>
 {
-   public boolean unused_placeholder_field_;
+   private boolean unused_placeholder_field_;
 
    public RequestStereoPointCloudMessage()
    {

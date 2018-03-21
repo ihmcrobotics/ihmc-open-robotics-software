@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -13,7 +12,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * hybrid velocity+force controller, most force comes from velocity control, therefore, only
  * parameter related to velocity control is exposed.
  */
-public class LegCompliancePacket extends Packet<LegCompliancePacket> implements Settable<LegCompliancePacket>, EpsilonComparable<LegCompliancePacket>
+public class LegCompliancePacket implements Settable<LegCompliancePacket>, EpsilonComparable<LegCompliancePacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -24,8 +23,8 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
     * gives decent tracking for slow motion and yet still compliant. The numbers in the array
     * correspond to joints HPZ, HPX, HPY, KNY, AKY, AKX, respectively.
     */
-   public us.ihmc.idl.IDLSequence.Double max_velocity_deltas_;
-   public byte robot_side_ = (byte) 255;
+   private us.ihmc.idl.IDLSequence.Double max_velocity_deltas_;
+   private byte robot_side_ = (byte) 255;
 
    public LegCompliancePacket()
    {

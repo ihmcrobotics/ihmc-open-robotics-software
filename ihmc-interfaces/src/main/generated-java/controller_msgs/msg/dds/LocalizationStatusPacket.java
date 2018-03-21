@@ -1,17 +1,15 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Message part of the localization module
  */
-public class LocalizationStatusPacket extends Packet<LocalizationStatusPacket>
-      implements Settable<LocalizationStatusPacket>, EpsilonComparable<LocalizationStatusPacket>
+public class LocalizationStatusPacket implements Settable<LocalizationStatusPacket>, EpsilonComparable<LocalizationStatusPacket>
 {
-   public double overlap_;
-   public java.lang.StringBuilder status_;
+   private double overlap_;
+   private java.lang.StringBuilder status_;
 
    public LocalizationStatusPacket()
    {

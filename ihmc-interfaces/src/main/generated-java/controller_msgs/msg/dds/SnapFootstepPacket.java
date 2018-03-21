@@ -1,17 +1,16 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Old message, needs to be tested and cleaned up.
  */
-public class SnapFootstepPacket extends Packet<SnapFootstepPacket> implements Settable<SnapFootstepPacket>, EpsilonComparable<SnapFootstepPacket>
+public class SnapFootstepPacket implements Settable<SnapFootstepPacket>, EpsilonComparable<SnapFootstepPacket>
 {
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> footstep_data_;
-   public us.ihmc.idl.IDLSequence.Integer footstep_order_;
-   public us.ihmc.idl.IDLSequence.Byte flag_;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> footstep_data_;
+   private us.ihmc.idl.IDLSequence.Integer footstep_order_;
+   private us.ihmc.idl.IDLSequence.Byte flag_;
 
    public SnapFootstepPacket()
    {

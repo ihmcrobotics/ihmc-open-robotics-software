@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -10,14 +9,13 @@ import us.ihmc.euclid.interfaces.Settable;
  * It holds all the trajectory points to go through with a one-dimensional trajectory.
  * A third order polynomial function is used to interpolate between trajectory points.
  */
-public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMessage>
-      implements Settable<OneDoFJointTrajectoryMessage>, EpsilonComparable<OneDoFJointTrajectoryMessage>
+public class OneDoFJointTrajectoryMessage implements Settable<OneDoFJointTrajectoryMessage>, EpsilonComparable<OneDoFJointTrajectoryMessage>
 {
    /**
     * The list of trajectory points to go through while executing the trajectory.
     * The time has to be strictly increasing.
     */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TrajectoryPoint1DMessage> trajectory_points_;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TrajectoryPoint1DMessage> trajectory_points_;
    /**
     * Weight used to encode the priority for achieving this trajectory:
     * - if too low, in the event the controller can't achieve all of the objectives it may lower the trajectory tracking quality.
@@ -25,7 +23,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
     * - if set to NaN, the controller will use the default weight for that trajectory.
     * The priority of this trajectory is determined from the relative weight of this trajectory and the weight of the other objectives.
     */
-   public double weight_;
+   private double weight_;
 
    public OneDoFJointTrajectoryMessage()
    {

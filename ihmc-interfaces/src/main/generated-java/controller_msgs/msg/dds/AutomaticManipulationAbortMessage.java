@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -9,10 +8,9 @@ import us.ihmc.euclid.interfaces.Settable;
  * Request the controller to enable the automatic manipulation abort feature.
  * When enabled, any arm trajectory will get aborted as soon as the balance controller has a large tracking error.
  */
-public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulationAbortMessage>
-      implements Settable<AutomaticManipulationAbortMessage>, EpsilonComparable<AutomaticManipulationAbortMessage>
+public class AutomaticManipulationAbortMessage implements Settable<AutomaticManipulationAbortMessage>, EpsilonComparable<AutomaticManipulationAbortMessage>
 {
-   public boolean enable_;
+   private boolean enable_;
 
    public AutomaticManipulationAbortMessage()
    {

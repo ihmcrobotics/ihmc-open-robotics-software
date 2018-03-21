@@ -1,13 +1,12 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWristForceSensorCalibrationPacket>
+public class RequestWristForceSensorCalibrationPacket
       implements Settable<RequestWristForceSensorCalibrationPacket>, EpsilonComparable<RequestWristForceSensorCalibrationPacket>
 {
-   public boolean unused_placeholder_field_;
+   private boolean unused_placeholder_field_;
 
    public RequestWristForceSensorCalibrationPacket()
    {

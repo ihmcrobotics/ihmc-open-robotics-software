@@ -1,18 +1,16 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC whole-body controller API.
  */
-public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
-      implements Settable<StateEstimatorModePacket>, EpsilonComparable<StateEstimatorModePacket>
+public class StateEstimatorModePacket implements Settable<StateEstimatorModePacket>, EpsilonComparable<StateEstimatorModePacket>
 {
    public static final byte NORMAL = (byte) 0;
    public static final byte FROZEN = (byte) 1;
-   public byte requested_state_estimator_mode_ = (byte) 255;
+   private byte requested_state_estimator_mode_ = (byte) 255;
 
    public StateEstimatorModePacket()
    {

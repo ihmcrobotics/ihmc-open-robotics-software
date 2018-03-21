@@ -1,18 +1,17 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class BatteryState extends Packet<BatteryState> implements Settable<BatteryState>, EpsilonComparable<BatteryState>
+public class BatteryState implements Settable<BatteryState>, EpsilonComparable<BatteryState>
 {
-   public boolean battery_charging_;
-   public float battery_voltage_;
-   public float battery_current_;
-   public float remaining_battery_time_;
-   public float remaining_amp_hours_;
-   public float remaining_charge_percentage_;
-   public long battery_cycle_count_;
+   private boolean battery_charging_;
+   private float battery_voltage_;
+   private float battery_current_;
+   private float remaining_battery_time_;
+   private float remaining_amp_hours_;
+   private float remaining_charge_percentage_;
+   private long battery_cycle_count_;
 
    public BatteryState()
    {

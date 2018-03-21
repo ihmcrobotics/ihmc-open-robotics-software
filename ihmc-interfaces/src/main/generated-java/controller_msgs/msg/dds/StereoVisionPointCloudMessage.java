@@ -1,18 +1,16 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Should disappear for the ROS equivalent.
  */
-public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloudMessage>
-      implements Settable<StereoVisionPointCloudMessage>, EpsilonComparable<StereoVisionPointCloudMessage>
+public class StereoVisionPointCloudMessage implements Settable<StereoVisionPointCloudMessage>, EpsilonComparable<StereoVisionPointCloudMessage>
 {
-   public long robot_timestamp_;
-   public us.ihmc.idl.IDLSequence.Float point_cloud_;
-   public us.ihmc.idl.IDLSequence.Integer colors_;
+   private long robot_timestamp_;
+   private us.ihmc.idl.IDLSequence.Float point_cloud_;
+   private us.ihmc.idl.IDLSequence.Integer colors_;
 
    public StereoVisionPointCloudMessage()
    {

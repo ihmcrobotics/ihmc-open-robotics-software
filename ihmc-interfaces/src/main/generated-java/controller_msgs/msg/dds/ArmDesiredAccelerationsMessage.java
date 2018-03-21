@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -10,19 +9,18 @@ import us.ihmc.euclid.interfaces.Settable;
  * One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations.
  * A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.
  */
-public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAccelerationsMessage>
-      implements Settable<ArmDesiredAccelerationsMessage>, EpsilonComparable<ArmDesiredAccelerationsMessage>
+public class ArmDesiredAccelerationsMessage implements Settable<ArmDesiredAccelerationsMessage>, EpsilonComparable<ArmDesiredAccelerationsMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
     * Specifies the side of the robot that will execute the command.
     */
-   public byte robot_side_ = (byte) 255;
+   private byte robot_side_ = (byte) 255;
    /**
     * The desired joint acceleration information.
     */
-   public controller_msgs.msg.dds.DesiredAccelerationsMessage desired_accelerations_;
+   private controller_msgs.msg.dds.DesiredAccelerationsMessage desired_accelerations_;
 
    public ArmDesiredAccelerationsMessage()
    {

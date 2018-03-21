@@ -1,19 +1,17 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Message for the IHMC humanoid behavior module.
  */
-public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPacket>
-      implements Settable<HandCollisionDetectedPacket>, EpsilonComparable<HandCollisionDetectedPacket>
+public class HandCollisionDetectedPacket implements Settable<HandCollisionDetectedPacket>, EpsilonComparable<HandCollisionDetectedPacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public byte robot_side_ = (byte) 255;
-   public int collision_severity_level_one_to_three_;
+   private byte robot_side_ = (byte) 255;
+   private int collision_severity_level_one_to_three_;
 
    public HandCollisionDetectedPacket()
    {

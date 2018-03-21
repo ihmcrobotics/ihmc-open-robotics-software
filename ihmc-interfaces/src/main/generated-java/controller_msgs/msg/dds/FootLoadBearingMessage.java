@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -9,8 +8,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message commands the controller to start loading a foot that was unloaded to support the robot weight.
  * When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support.
  */
-public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
-      implements Settable<FootLoadBearingMessage>, EpsilonComparable<FootLoadBearingMessage>
+public class FootLoadBearingMessage implements Settable<FootLoadBearingMessage>, EpsilonComparable<FootLoadBearingMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -19,15 +17,15 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    /**
     * Needed to identify a side dependent end-effector.
     */
-   public byte robot_side_ = (byte) 255;
+   private byte robot_side_ = (byte) 255;
    /**
     * Whether the end-effector should be loaded or unloaded.
     */
-   public byte load_bearing_request_;
+   private byte load_bearing_request_;
    /**
     * The time to delay this command on the controller side before being executed.
     */
-   public double execution_delay_time_;
+   private double execution_delay_time_;
 
    public FootLoadBearingMessage()
    {

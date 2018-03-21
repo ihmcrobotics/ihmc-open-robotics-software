@@ -1,13 +1,12 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class SetStringParameter extends Packet<SetStringParameter> implements Settable<SetStringParameter>, EpsilonComparable<SetStringParameter>
+public class SetStringParameter implements Settable<SetStringParameter>, EpsilonComparable<SetStringParameter>
 {
-   public java.lang.StringBuilder parameter_name_;
-   public java.lang.StringBuilder parameter_value_;
+   private java.lang.StringBuilder parameter_name_;
+   private java.lang.StringBuilder parameter_value_;
 
    public SetStringParameter()
    {

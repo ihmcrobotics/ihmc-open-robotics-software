@@ -13,7 +13,7 @@ module controller_msgs
       struct DetectedFacesPacket
       {
         sequence<string> ids;
-        geometry_msgs::msg::dds::Point positions;
+        sequence<geometry_msgs::msg::dds::Point> positions;
       };
     };
   };

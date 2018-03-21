@@ -1,17 +1,15 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC behavior module
  */
-public class ObjectDetectorResultPacket extends Packet<ObjectDetectorResultPacket>
-      implements Settable<ObjectDetectorResultPacket>, EpsilonComparable<ObjectDetectorResultPacket>
+public class ObjectDetectorResultPacket implements Settable<ObjectDetectorResultPacket>, EpsilonComparable<ObjectDetectorResultPacket>
 {
-   public controller_msgs.msg.dds.HeatMapPacket heat_map_;
-   public controller_msgs.msg.dds.BoundingBoxesPacket bounding_boxes_;
+   private controller_msgs.msg.dds.HeatMapPacket heat_map_;
+   private controller_msgs.msg.dds.BoundingBoxesPacket bounding_boxes_;
 
    public ObjectDetectorResultPacket()
    {

@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,13 +7,12 @@ import us.ihmc.euclid.interfaces.Settable;
  * Message that carries all the information required to configure the IHMC whole-body trajectory planner.
  * Main usage is the IHMC WholeBodyTrajectoryToolbox.
  */
-public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajectoryToolboxMessage>
-      implements Settable<WholeBodyTrajectoryToolboxMessage>, EpsilonComparable<WholeBodyTrajectoryToolboxMessage>
+public class WholeBodyTrajectoryToolboxMessage implements Settable<WholeBodyTrajectoryToolboxMessage>, EpsilonComparable<WholeBodyTrajectoryToolboxMessage>
 {
-   public controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage configuration_;
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WaypointBasedTrajectoryMessage> end_effector_trajectories_;
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage> exploration_configurations_;
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.ReachingManifoldMessage> reaching_manifolds_;
+   private controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage configuration_;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WaypointBasedTrajectoryMessage> end_effector_trajectories_;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage> exploration_configurations_;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.ReachingManifoldMessage> reaching_manifolds_;
 
    public WholeBodyTrajectoryToolboxMessage()
    {

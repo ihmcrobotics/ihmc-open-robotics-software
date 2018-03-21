@@ -1,12 +1,11 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implements Settable<DrillDetectionPacket>, EpsilonComparable<DrillDetectionPacket>
+public class DrillDetectionPacket implements Settable<DrillDetectionPacket>, EpsilonComparable<DrillDetectionPacket>
 {
-   public boolean is_drill_on_;
+   private boolean is_drill_on_;
 
    public DrillDetectionPacket()
    {

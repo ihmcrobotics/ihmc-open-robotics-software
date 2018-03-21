@@ -1,14 +1,12 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Specifies a specific electric motor in the Atlas forearm to power on or off.
  */
-public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEnablePacket>
-      implements Settable<AtlasElectricMotorEnablePacket>, EpsilonComparable<AtlasElectricMotorEnablePacket>
+public class AtlasElectricMotorEnablePacket implements Settable<AtlasElectricMotorEnablePacket>, EpsilonComparable<AtlasElectricMotorEnablePacket>
 {
    public static final byte L_ARM_WRY = (byte) 0;
    public static final byte L_ARM_WRX = (byte) 1;
@@ -19,11 +17,11 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
    /**
     * The Enum value of the motor to enable
     */
-   public byte atlas_electric_motor_packet_enum_enable_ = (byte) 255;
+   private byte atlas_electric_motor_packet_enum_enable_ = (byte) 255;
    /**
     * Boolean for enable state; true for enable, false for disable.
     */
-   public boolean enable_;
+   private boolean enable_;
 
    public AtlasElectricMotorEnablePacket()
    {

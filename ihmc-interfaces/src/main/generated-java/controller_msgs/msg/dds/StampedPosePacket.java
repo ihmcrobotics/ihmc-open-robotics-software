@@ -1,18 +1,17 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC localization module.
  */
-public class StampedPosePacket extends Packet<StampedPosePacket> implements Settable<StampedPosePacket>, EpsilonComparable<StampedPosePacket>
+public class StampedPosePacket implements Settable<StampedPosePacket>, EpsilonComparable<StampedPosePacket>
 {
-   public us.ihmc.euclid.geometry.Pose3D pose_;
-   public long timestamp_;
-   public double confidence_factor_;
-   public java.lang.StringBuilder frame_id_;
+   private us.ihmc.euclid.geometry.Pose3D pose_;
+   private long timestamp_;
+   private double confidence_factor_;
+   private java.lang.StringBuilder frame_id_;
 
    public StampedPosePacket()
    {

@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -8,32 +7,31 @@ import us.ihmc.euclid.interfaces.Settable;
  * This message is part of the IHMC whole-body controller API.
  * Request the controller to use a hand to help supporting the robot weight.
  */
-public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
-      implements Settable<HandLoadBearingMessage>, EpsilonComparable<HandLoadBearingMessage>
+public class HandLoadBearingMessage implements Settable<HandLoadBearingMessage>, EpsilonComparable<HandLoadBearingMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
     * The robot side of the hand that will be load bearing.
     */
-   public byte robot_side_ = (byte) 255;
+   private byte robot_side_ = (byte) 255;
    /**
     * Determines whether hybrid load bearing and jointspace control will be used.
     */
-   public boolean use_jointspace_command_;
+   private boolean use_jointspace_command_;
    /**
     * The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
     * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
     */
-   public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
+   private controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
    /**
     * The time to delay this message on the controller side before being executed.
     */
-   public double execution_delay_time_;
+   private double execution_delay_time_;
    /**
     * Information specific to the load bearing properties.
     */
-   public controller_msgs.msg.dds.LoadBearingMessage load_bearing_message_;
+   private controller_msgs.msg.dds.LoadBearingMessage load_bearing_message_;
 
    public HandLoadBearingMessage()
    {

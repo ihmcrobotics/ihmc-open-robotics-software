@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -9,7 +8,7 @@ import us.ihmc.euclid.interfaces.Settable;
  * The message commands the controller to bring the given part of the body back to a default configuration called 'home'.
  * It is useful to get back to a safe configuration before walking.
  */
-public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoHomeMessage>, EpsilonComparable<GoHomeMessage>
+public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable<GoHomeMessage>
 {
    public static final byte HUMANOID_BODY_PART_ARM = (byte) 0;
    public static final byte HUMANOID_BODY_PART_CHEST = (byte) 1;
@@ -19,19 +18,19 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
    /**
     * Specifies the part of the body the use wants to move back to its home configuration.
     */
-   public byte humanoid_body_part_ = (byte) 255;
+   private byte humanoid_body_part_ = (byte) 255;
    /**
     * Needed to identify a side dependent end-effector.
     */
-   public byte robot_side_ = (byte) 255;
+   private byte robot_side_ = (byte) 255;
    /**
     * How long the trajectory will spline from the current desired to the home configuration.
     */
-   public double trajectory_time_;
+   private double trajectory_time_;
    /**
     * The time to delay this command on the controller side before being executed.
     */
-   public double execution_delay_time_;
+   private double execution_delay_time_;
 
    public GoHomeMessage()
    {

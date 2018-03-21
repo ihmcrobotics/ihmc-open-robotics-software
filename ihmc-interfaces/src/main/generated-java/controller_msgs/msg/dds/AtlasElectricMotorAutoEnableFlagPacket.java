@@ -1,16 +1,15 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Atlas specific message.
  */
-public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectricMotorAutoEnableFlagPacket>
+public class AtlasElectricMotorAutoEnableFlagPacket
       implements Settable<AtlasElectricMotorAutoEnableFlagPacket>, EpsilonComparable<AtlasElectricMotorAutoEnableFlagPacket>
 {
-   public boolean should_auto_enable_;
+   private boolean should_auto_enable_;
 
    public AtlasElectricMotorAutoEnableFlagPacket()
    {

@@ -1,14 +1,12 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
-public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
-      implements Settable<WalkToGoalBehaviorPacket>, EpsilonComparable<WalkToGoalBehaviorPacket>
+public class WalkToGoalBehaviorPacket implements Settable<WalkToGoalBehaviorPacket>, EpsilonComparable<WalkToGoalBehaviorPacket>
 {
    public static final byte WALK_TO_GOAL_ACTION_FIND_PATH = (byte) 0;
    public static final byte WALK_TO_GOAL_ACTION_EXECUTE = (byte) 1;
@@ -16,11 +14,11 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
    public static final byte WALK_TO_GOAL_ACTION_STOP = (byte) 3;
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public byte walk_to_goal_action_ = (byte) 255;
-   public double x_goal_;
-   public double y_goal_;
-   public double theta_goal_;
-   public byte goal_robot_side_ = (byte) 255;
+   private byte walk_to_goal_action_ = (byte) 255;
+   private double x_goal_;
+   private double y_goal_;
+   private double theta_goal_;
+   private byte goal_robot_side_ = (byte) 255;
 
    public WalkToGoalBehaviorPacket()
    {

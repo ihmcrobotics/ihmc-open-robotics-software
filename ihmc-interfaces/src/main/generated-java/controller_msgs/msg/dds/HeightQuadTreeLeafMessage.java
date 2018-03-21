@@ -1,18 +1,16 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * This message is part of the IHMC height quad tree module
  */
-public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
-      implements Settable<HeightQuadTreeLeafMessage>, EpsilonComparable<HeightQuadTreeLeafMessage>
+public class HeightQuadTreeLeafMessage implements Settable<HeightQuadTreeLeafMessage>, EpsilonComparable<HeightQuadTreeLeafMessage>
 {
-   public float x_center_;
-   public float y_center_;
-   public float height_;
+   private float x_center_;
+   private float y_center_;
+   private float height_;
 
    public HeightQuadTreeLeafMessage()
    {

@@ -1,15 +1,14 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class RawImuData extends Packet<RawImuData> implements Settable<RawImuData>, EpsilonComparable<RawImuData>
+public class RawImuData implements Settable<RawImuData>, EpsilonComparable<RawImuData>
 {
-   public long timestamp_;
-   public long packet_count_;
-   public us.ihmc.euclid.tuple3D.Vector3D imu_rates_;
-   public us.ihmc.euclid.tuple3D.Vector3D imu_deltas_;
+   private long timestamp_;
+   private long packet_count_;
+   private us.ihmc.euclid.tuple3D.Vector3D imu_rates_;
+   private us.ihmc.euclid.tuple3D.Vector3D imu_deltas_;
 
    public RawImuData()
    {

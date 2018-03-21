@@ -1,17 +1,16 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
 /**
  * Atlas specific message used to power cycle the hands.
  */
-public class HandPowerCyclePacket extends Packet<HandPowerCyclePacket> implements Settable<HandPowerCyclePacket>, EpsilonComparable<HandPowerCyclePacket>
+public class HandPowerCyclePacket implements Settable<HandPowerCyclePacket>, EpsilonComparable<HandPowerCyclePacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   public byte robot_side_ = (byte) 255;
+   private byte robot_side_ = (byte) 255;
 
    public HandPowerCyclePacket()
    {

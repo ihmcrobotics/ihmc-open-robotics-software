@@ -1,16 +1,15 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class FootstepList extends Packet<FootstepList> implements Settable<FootstepList>, EpsilonComparable<FootstepList>
+public class FootstepList implements Settable<FootstepList>, EpsilonComparable<FootstepList>
 {
-   public long unique_id_;
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Footstep> footsteps_;
-   public byte executing_timing_;
-   public double default_swing_duration_;
-   public double final_transfer_duration_;
+   private long unique_id_;
+   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Footstep> footsteps_;
+   private byte executing_timing_;
+   private double default_swing_duration_;
+   private double final_transfer_duration_;
 
    public FootstepList()
    {

@@ -1,6 +1,5 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -10,14 +9,13 @@ import us.ihmc.euclid.interfaces.Settable;
  * to the current balance status of the robot.
  * All the information here is expressed in the world frame.
  */
-public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
-      implements Settable<CapturabilityBasedStatus>, EpsilonComparable<CapturabilityBasedStatus>
+public class CapturabilityBasedStatus implements Settable<CapturabilityBasedStatus>, EpsilonComparable<CapturabilityBasedStatus>
 {
-   public us.ihmc.euclid.tuple3D.Point3D capture_point_2d_;
-   public us.ihmc.euclid.tuple3D.Point3D desired_capture_point_2d_;
-   public us.ihmc.euclid.tuple3D.Point3D center_of_mass_3d_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> left_foot_support_polygon_2d_;
-   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> right_foot_support_polygon_2d_;
+   private us.ihmc.euclid.tuple3D.Point3D capture_point_2d_;
+   private us.ihmc.euclid.tuple3D.Point3D desired_capture_point_2d_;
+   private us.ihmc.euclid.tuple3D.Point3D center_of_mass_3d_;
+   private us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> left_foot_support_polygon_2d_;
+   private us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> right_foot_support_polygon_2d_;
 
    public CapturabilityBasedStatus()
    {

@@ -1,18 +1,17 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class PumpState extends Packet<PumpState> implements Settable<PumpState>, EpsilonComparable<PumpState>
+public class PumpState implements Settable<PumpState>, EpsilonComparable<PumpState>
 {
-   public float pump_inlet_pressure_;
-   public float pump_supply_pressure_;
-   public float air_sump_pressure_;
-   public float pump_supply_temperature_;
-   public float pump_rpm_;
-   public float motor_temperature_;
-   public float motor_driver_temperature_;
+   private float pump_inlet_pressure_;
+   private float pump_supply_pressure_;
+   private float air_sump_pressure_;
+   private float pump_supply_temperature_;
+   private float pump_rpm_;
+   private float motor_temperature_;
+   private float motor_driver_temperature_;
 
    public PumpState()
    {

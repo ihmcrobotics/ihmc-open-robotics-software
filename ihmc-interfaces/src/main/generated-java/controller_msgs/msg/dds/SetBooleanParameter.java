@@ -1,13 +1,12 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 
-public class SetBooleanParameter extends Packet<SetBooleanParameter> implements Settable<SetBooleanParameter>, EpsilonComparable<SetBooleanParameter>
+public class SetBooleanParameter implements Settable<SetBooleanParameter>, EpsilonComparable<SetBooleanParameter>
 {
-   public java.lang.StringBuilder parameter_name_;
-   public boolean parameter_value_;
+   private java.lang.StringBuilder parameter_name_;
+   private boolean parameter_value_;
 
    public SetBooleanParameter()
    {
