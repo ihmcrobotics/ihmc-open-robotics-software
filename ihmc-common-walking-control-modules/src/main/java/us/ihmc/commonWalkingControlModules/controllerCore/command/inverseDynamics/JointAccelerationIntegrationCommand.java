@@ -97,8 +97,8 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * <p>
     * The two alpha parameters are used as leak ratios for each integration: <br>
     * Desired velocity:<br>
-    * qDot<sub>des</sub><sup>t</sup> = &alpha;<sub>V</sub> qDot<sub>des</sub><sup>t - &Delta;t</sup>
-    * + &Delta;t qDDot<sub>des</sub><sup>t</sup> <br>
+    * qDot<sub>des</sub><sup>t</sup> = &alpha;<sub>V</sub> (qDot<sub>des</sub><sup>t - &Delta;t</sup>
+    * + &Delta;t qDDot<sub>des</sub><sup>t</sup>) <br>
     * Desired position:<br>
     * q<sub>des</sub><sup>t</sup> = (1 - &alpha;<sub>P</sub>) q<sub>cur</sub><sup>t</sup> +
     * &alpha;<sub>P</sub> (q<sub>des</sub><sup>t - &Delta;t</sup> + &Delta;t
