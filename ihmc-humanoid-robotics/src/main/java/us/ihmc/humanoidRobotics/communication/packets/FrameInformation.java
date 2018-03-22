@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.referenceFrame.FrameGeometryObject;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -21,7 +20,7 @@ import us.ihmc.euclid.utils.NameBasedHashCodeTools;
       + "CENTER_OF_MASS_FRAME = -104\n"
       + "LEFT_SOLE_FRAME = -105\n"
       + "RIGHT_SOLE_FRAME = -106", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, isIHMCPacket = false)
-public class FrameInformation extends Packet<FrameInformation> implements EpsilonComparable<FrameInformation>
+public class FrameInformation extends Packet<FrameInformation>
 {
    /**
     * The ID of the reference frame that a trajectory is executed in.

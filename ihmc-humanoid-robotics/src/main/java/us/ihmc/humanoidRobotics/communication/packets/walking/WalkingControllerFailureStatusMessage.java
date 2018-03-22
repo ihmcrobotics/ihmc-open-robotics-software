@@ -1,12 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import us.ihmc.communication.packets.SettablePacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.Vector2D32;
 
-public class WalkingControllerFailureStatusMessage extends SettablePacket<WalkingControllerFailureStatusMessage>
+public class WalkingControllerFailureStatusMessage extends Packet<WalkingControllerFailureStatusMessage>
 {
    public Vector2D32 fallingDirection;
 

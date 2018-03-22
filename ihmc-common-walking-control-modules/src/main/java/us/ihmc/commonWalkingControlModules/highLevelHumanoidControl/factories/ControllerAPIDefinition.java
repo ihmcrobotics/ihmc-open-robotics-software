@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
-import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
@@ -50,7 +50,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessa
 public abstract class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> supportedCommands;
-   private static final List<Class<? extends SettablePacket<?>>> supportedStatusMessages;
+   private static final List<Class<? extends Packet<?>>> supportedStatusMessages;
 
    static
    {
@@ -89,7 +89,7 @@ public abstract class ControllerAPIDefinition
 
       supportedCommands = Collections.unmodifiableList(commands);
 
-      List<Class<? extends SettablePacket<?>>> statusMessages = new ArrayList<>();
+      List<Class<? extends Packet<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(CapturabilityBasedStatus.class);
       statusMessages.add(FootstepStatusMessage.class);
       statusMessages.add(PlanOffsetStatus.class);
@@ -108,7 +108,7 @@ public abstract class ControllerAPIDefinition
       return supportedCommands;
    }
 
-   public static List<Class<? extends SettablePacket<?>>> getControllerSupportedStatusMessages()
+   public static List<Class<? extends Packet<?>>> getControllerSupportedStatusMessages()
    {
       return supportedStatusMessages;
    }

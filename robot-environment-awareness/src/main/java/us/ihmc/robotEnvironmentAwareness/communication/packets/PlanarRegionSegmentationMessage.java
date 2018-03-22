@@ -73,7 +73,7 @@ public class PlanarRegionSegmentationMessage extends Packet<PlanarRegionSegmenta
 
    public void getNodeKey(int index, OcTreeKey nodeKeyToPack)
    {
-      nodeKeyToPack.set(nodeKeys[index]);
+      nodeKeyToPack.set(nodeKeys[index].k);
    }
 
    public void getHitLocation(int index, Point3D hitLocationToPack)

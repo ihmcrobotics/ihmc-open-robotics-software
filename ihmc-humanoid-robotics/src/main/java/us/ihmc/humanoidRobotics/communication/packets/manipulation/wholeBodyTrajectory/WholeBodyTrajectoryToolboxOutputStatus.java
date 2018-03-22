@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.SettablePacket;
+import us.ihmc.communication.packets.Packet;
 
-public class WholeBodyTrajectoryToolboxOutputStatus extends SettablePacket<WholeBodyTrajectoryToolboxOutputStatus>
+public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTrajectoryToolboxOutputStatus>
 {
    /**
     * <ul>
