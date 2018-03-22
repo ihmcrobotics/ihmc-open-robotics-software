@@ -8,10 +8,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointAccelerationIntegrationCalculator
 {
@@ -75,14 +77,14 @@ public class JointAccelerationIntegrationCalculator
             jointsToComputeDesiredPositionFor.add(jointToComputeDesierdPositionFor);
             jointSpecificAlphaPosition.add(newAlphaPosition);
             jointSpecificAlphaVelocity.add(newAlphaVelocity);
-            jointSpecificMaxPositionError.add(newMaxVelocity);
+            jointSpecificMaxPositionError.add(newMaxPositionError);
             jointSpecificMaxVelocity.add(newMaxVelocity);
          }
          else
          {
             jointSpecificAlphaPosition.set(localJointIndex, newAlphaPosition);
             jointSpecificAlphaVelocity.set(localJointIndex, newAlphaVelocity);
-            jointSpecificMaxPositionError.set(localJointIndex, newMaxVelocity);
+            jointSpecificMaxPositionError.set(localJointIndex, newMaxPositionError);
             jointSpecificMaxVelocity.set(localJointIndex, newMaxVelocity);
          }
       }
@@ -111,19 +113,33 @@ public class JointAccelerationIntegrationCalculator
          double maxPositionError = jointSpecificMaxPositionError.get(jointIndex);
          double maxVelocity = jointSpecificMaxVelocity.get(jointIndex);
 
-         desiredVelocity *= alphaVelocity;
+         // Decay desiredVelocity towards the velocityReference and then predict the desired velocity.
+         double velocityReference = 0.0;
+         desiredVelocity = desiredVelocity * alphaVelocity + (1.0 - alphaVelocity) * velocityReference;
          desiredVelocity += desiredAcceleration * controlDT;
-         desiredVelocity = MathTools.clamp(desiredVelocity, maxVelocity);
-         desiredPosition += desiredVelocity * controlDT;
+         desiredVelocity = MathTools.clamp(desiredVelocity, velocityReference - maxVelocity, velocityReference + maxVelocity);
 
-         double errorPosition = MathTools.clamp(desiredPosition - joint.getQ(), maxPositionError);
-         desiredPosition = joint.getQ() + errorPosition;
+         // Decay desiredPosition towards the positionReference and then predict the desired position.
+         double positionReference = joint.getQ();
+         desiredPosition = desiredPosition * alphaPosition + (1.0 - alphaPosition) * positionReference;
+         desiredPosition += desiredVelocity * controlDT;
+         desiredPosition = MathTools.clamp(desiredPosition, positionReference - maxPositionError, positionReference + maxPositionError);
+
+         // Limit the desired position to the joint range and recompute the desired velocity.
          desiredPosition = MathTools.clamp(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
-         desiredPosition = alphaPosition * desiredPosition + (1.0 - alphaPosition) * joint.getQ();
          desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
 
          lowLevelJointData.setDesiredVelocity(desiredVelocity);
          lowLevelJointData.setDesiredPosition(desiredPosition);
       }
+   }
+
+   public static void main(String[] args)
+   {
+      double controlDT = 1.0 / 250.0;
+      double f_pos = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(DEFAULT_ALPHA_POSITION, controlDT);
+      double f_vel = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(DEFAULT_ALPHA_VELOCITY, controlDT);
+      PrintTools.info("Break Frequency Position: " + f_pos);
+      PrintTools.info("Break Frequency Velocity: " + f_vel);
    }
 }
