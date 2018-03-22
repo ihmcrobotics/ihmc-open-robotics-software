@@ -7,24 +7,32 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.commons.Epsilons;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
 public class AngularControlModuleHelperTest
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final CentroidalMotionPlannerParameters parameters = new CentroidalMotionPlannerParameters();
+   static
+   {
+      parameters.setRobotMass(1.0);
+      parameters.setDeltaTMin(0.001);
+      parameters.setGravityZ(-9.81);
+   }
+
    @Test
    public void testConstructor()
    {
-      AngularControlModuleHelper angularHelper = new AngularControlModuleHelper();
+      AngularControlModuleHelper angularHelper = new AngularControlModuleHelper(parameters);
       assertTrue(angularHelper != null);
    }
 
    @Test
    public void testCoPPolygonConstraintGeneration()
    {
-      AngularControlModuleHelper angularHelper = new AngularControlModuleHelper();
+      AngularControlModuleHelper angularHelper = new AngularControlModuleHelper(parameters);
       RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> nodeEntry1 = nodeList.getOrCreateFirstEntry();
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> nodeEntry2 = nodeList.insertAfter(nodeEntry1);
@@ -35,7 +43,6 @@ public class AngularControlModuleHelperTest
       RecycledLinkedListBuilder<CentroidalMotionSupportPolygon>.RecycledLinkedListEntry<CentroidalMotionSupportPolygon> supportPolygonEntry2 = supportPolygonList.insertAfter(supportPolygonEntry1);
       RecycledLinkedListBuilder<CentroidalMotionSupportPolygon>.RecycledLinkedListEntry<CentroidalMotionSupportPolygon> supportPolygonEntry3 = supportPolygonList.insertAfter(supportPolygonEntry2);
 
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       FrameConvexPolygon2d polygon1 = new FrameConvexPolygon2d(worldFrame);
       FramePoint2D point = new FramePoint2D(worldFrame);
       double l = 0.05;
@@ -73,8 +80,7 @@ public class AngularControlModuleHelperTest
       supportPolygon3.setStartTime(1.0);
       supportPolygon3.setEndTime(1.1);
       supportPolygon3.setSupportPolygon(polygon3);
-      
-      
+
       CentroidalMotionNode node1 = nodeEntry1.element;
       node1.setTime(0.0);
       CentroidalMotionNode node2 = nodeEntry2.element;
@@ -89,7 +95,7 @@ public class AngularControlModuleHelperTest
       assertTrue(bin.getNumRows() == 12);
       assertTrue(Ain.getNumCols() == 6);
       assertTrue(bin.getNumCols() == 1);
-      
+
       double epsilon = Epsilons.ONE_BILLIONTH;
       assertEquals(0.005, bin.get(0, 0), epsilon);
       assertEquals(0.005, bin.get(1, 0), epsilon);
@@ -104,4 +110,5 @@ public class AngularControlModuleHelperTest
       assertEquals(0.005, bin.get(10, 0), epsilon);
       assertEquals(-0.015, bin.get(11, 0), epsilon);
    }
+
 }

@@ -29,11 +29,11 @@ public class AngularControlModuleHelper
    private final DenseMatrix64F copSupportPolygonAinMatrix;
    private final DenseMatrix64F copSupportPolygonbinMatrix;
 
-   private final double robotMass = 18.0;
-   private final double deltaTMin = 0.001;
+   private final double robotMass;
 
-   public AngularControlModuleHelper()
+   public AngularControlModuleHelper(CentroidalMotionPlannerParameters parameters)
    {
+      this.robotMass = parameters.getRobotMass();
       zForceCoefficient = new DenseMatrix64F[index_az + 1];
       zVelocityValues = new DenseMatrix64F(defaultNumberOfNodes - 1, 1);
       zPositionValues = new DenseMatrix64F(defaultNumberOfNodes - 1, 1);
