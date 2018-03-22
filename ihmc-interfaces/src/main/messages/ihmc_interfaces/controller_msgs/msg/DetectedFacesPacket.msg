@@ -1,2 +1,2 @@
 string[] ids
-geometry_msgs/Point positions
+geometry_msgs/Point[] positions

@@ -15,7 +15,7 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::Polygon2DMessage_")
       struct Polygon2DMessage
       {
-        geometry_msgs::msg::dds::Point vertices;
+        sequence<geometry_msgs::msg::dds::Point, 100> vertices;
       };
     };
   };

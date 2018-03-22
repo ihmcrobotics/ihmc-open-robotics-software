@@ -15,7 +15,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
    /**
     * The taskspace trajectory information.
     */
-   public controller_msgs.msg.dds.SE3TrajectoryMessage taskspace_trajectory_message_;
+   public controller_msgs.msg.dds.SO3TrajectoryMessage taskspace_trajectory_message_;
    /**
     * The jointspace trajectory information.
     * The indexing for the joints goes increasingly from the joint the closest to the pelvis to the joint the closest to the chest.
@@ -24,7 +24,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
    public ChestHybridJointspaceTaskspaceTrajectoryMessage()
    {
-      taskspace_trajectory_message_ = new controller_msgs.msg.dds.SE3TrajectoryMessage();
+      taskspace_trajectory_message_ = new controller_msgs.msg.dds.SO3TrajectoryMessage();
       jointspace_trajectory_message_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
    }
 
@@ -35,14 +35,14 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
    public void set(ChestHybridJointspaceTaskspaceTrajectoryMessage other)
    {
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.taskspace_trajectory_message_, taskspace_trajectory_message_);
+      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.taskspace_trajectory_message_, taskspace_trajectory_message_);
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_message_, jointspace_trajectory_message_);
    }
 
    /**
     * The taskspace trajectory information.
     */
-   public controller_msgs.msg.dds.SE3TrajectoryMessage getTaskspaceTrajectoryMessage()
+   public controller_msgs.msg.dds.SO3TrajectoryMessage getTaskspaceTrajectoryMessage()
    {
       return taskspace_trajectory_message_;
    }

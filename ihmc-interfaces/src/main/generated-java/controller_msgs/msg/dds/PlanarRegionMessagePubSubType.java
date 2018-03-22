@@ -30,6 +30,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.Polygon2DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < 100; ++i0)
       {
@@ -52,6 +53,7 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRegionOrigin(), current_alignment);
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRegionNormal(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.Polygon2DMessagePubSubType.getCdrSerializedSize(data.getConcaveHull(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < data.getConvexPolygons().size(); ++i0)
       {
@@ -70,6 +72,8 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
 
+      controller_msgs.msg.dds.Polygon2DMessagePubSubType.write(data.getConcaveHull(), cdr);
+
       if (data.getConvexPolygons().size() <= 100)
          cdr.write_type_e(data.getConvexPolygons());
       else
@@ -84,6 +88,8 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       geometry_msgs.msg.dds.PointPubSubType.read(data.getRegionOrigin(), cdr);
 
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRegionNormal(), cdr);
+
+      controller_msgs.msg.dds.Polygon2DMessagePubSubType.read(data.getConcaveHull(), cdr);
 
       cdr.read_type_e(data.getConvexPolygons());
    }
@@ -119,6 +125,8 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       ser.write_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
 
+      ser.write_type_a("concave_hull", new controller_msgs.msg.dds.Polygon2DMessagePubSubType(), data.getConcaveHull());
+
       ser.write_type_e("convex_polygons", data.getConvexPolygons());
    }
 
@@ -130,6 +138,8 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.read_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
 
       ser.read_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
+
+      ser.read_type_a("concave_hull", new controller_msgs.msg.dds.Polygon2DMessagePubSubType(), data.getConcaveHull());
 
       ser.read_type_e("convex_polygons", data.getConvexPolygons());
    }

@@ -27,6 +27,7 @@ module controller_msgs
         long region_id;
         geometry_msgs::msg::dds::Point region_origin;
         geometry_msgs::msg::dds::Vector3 region_normal;
+        controller_msgs::msg::dds::Polygon2DMessage concave_hull;
         sequence<controller_msgs::msg::dds::Polygon2DMessage> convex_polygons;
       };
     };

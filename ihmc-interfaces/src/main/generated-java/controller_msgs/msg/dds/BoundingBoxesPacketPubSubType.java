@@ -27,16 +27,16 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < 100; ++i0)
@@ -57,16 +57,16 @@ public class BoundingBoxesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getBoundingBoxesXCoordinates().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (data.getBoundingBoxesXCoordinates().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getBoundingBoxesYCoordinates().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (data.getBoundingBoxesYCoordinates().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getBoundingBoxesWidths().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (data.getBoundingBoxesWidths().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getBoundingBoxesHeights().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (data.getBoundingBoxesHeights().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < data.getLabels().size(); ++i0)

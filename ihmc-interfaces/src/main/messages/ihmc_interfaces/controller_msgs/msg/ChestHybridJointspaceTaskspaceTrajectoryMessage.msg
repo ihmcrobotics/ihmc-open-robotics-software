@@ -3,7 +3,7 @@
 # to the desired orientation and joint angles while going through the specified trajectory points.
 
 # The taskspace trajectory information.
-SE3TrajectoryMessage taskspace_trajectory_message
+SO3TrajectoryMessage taskspace_trajectory_message
 # The jointspace trajectory information.
 # The indexing for the joints goes increasingly from the joint the closest to the pelvis to the joint the closest to the chest.
 JointspaceTrajectoryMessage jointspace_trajectory_message

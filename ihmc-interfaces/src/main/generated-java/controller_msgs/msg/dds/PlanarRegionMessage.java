@@ -16,6 +16,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
    public int region_id_ = -1;
    public us.ihmc.euclid.tuple3D.Point3D region_origin_;
    public us.ihmc.euclid.tuple3D.Vector3D region_normal_;
+   public controller_msgs.msg.dds.Polygon2DMessage concave_hull_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Polygon2DMessage> convex_polygons_;
 
    public PlanarRegionMessage()
@@ -23,6 +24,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 
       region_origin_ = new us.ihmc.euclid.tuple3D.Point3D();
       region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      concave_hull_ = new controller_msgs.msg.dds.Polygon2DMessage();
       convex_polygons_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Polygon2DMessage>(100, controller_msgs.msg.dds.Polygon2DMessage.class,
                                                                                                       new controller_msgs.msg.dds.Polygon2DMessagePubSubType());
    }
@@ -38,6 +40,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.region_origin_, region_origin_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.region_normal_, region_normal_);
+      controller_msgs.msg.dds.Polygon2DMessagePubSubType.staticCopy(other.concave_hull_, concave_hull_);
       convex_polygons_.set(other.convex_polygons_);
    }
 
@@ -61,6 +64,11 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       return region_normal_;
    }
 
+   public controller_msgs.msg.dds.Polygon2DMessage getConcaveHull()
+   {
+      return concave_hull_;
+   }
+
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Polygon2DMessage> getConvexPolygons()
    {
       return convex_polygons_;
@@ -81,6 +89,9 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
          return false;
 
       if (!this.region_normal_.epsilonEquals(other.region_normal_, epsilon))
+         return false;
+
+      if (!this.concave_hull_.epsilonEquals(other.concave_hull_, epsilon))
          return false;
 
       if (this.convex_polygons_.size() == other.convex_polygons_.size())
@@ -120,6 +131,9 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       if (!this.region_normal_.equals(otherMyClass.region_normal_))
          return false;
 
+      if (!this.concave_hull_.equals(otherMyClass.concave_hull_))
+         return false;
+
       if (!this.convex_polygons_.equals(otherMyClass.convex_polygons_))
          return false;
 
@@ -142,6 +156,10 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       builder.append(", ");
       builder.append("region_normal=");
       builder.append(this.region_normal_);
+
+      builder.append(", ");
+      builder.append("concave_hull=");
+      builder.append(this.concave_hull_);
 
       builder.append(", ");
       builder.append("convex_polygons=");

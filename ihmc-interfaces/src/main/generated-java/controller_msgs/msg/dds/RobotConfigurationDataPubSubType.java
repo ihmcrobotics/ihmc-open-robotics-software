@@ -26,7 +26,6 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -41,18 +40,6 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (50 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 50; ++i0)
-      {
-         current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 5; ++i0)
-      {
-         current_alignment += sensor_msgs.msg.dds.ImuPubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -60,6 +47,18 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < 50; ++i0)
+      {
+         current_alignment += controller_msgs.msg.dds.SpatialVectorMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      }
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < 10; ++i0)
+      {
+         current_alignment += controller_msgs.msg.dds.IMUPacketPubSubType.getMaxCdrSerializedSize(current_alignment);
+      }
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -79,7 +78,6 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -95,24 +93,24 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getJointTorques().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getForceSensorData().size(); ++i0)
-      {
-         current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getCdrSerializedSize(data.getForceSensorData().get(i0), current_alignment);
-      }
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getImuSensorData().size(); ++i0)
-      {
-         current_alignment += sensor_msgs.msg.dds.ImuPubSubType.getCdrSerializedSize(data.getImuSensorData().get(i0), current_alignment);
-      }
-
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRootTranslation(), current_alignment);
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRootOrientation(), current_alignment);
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getPelvisLinearVelocity(), current_alignment);
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getPelvisAngularVelocity(), current_alignment);
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getPelvisLinearAcceleration(), current_alignment);
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < data.getForceSensorData().size(); ++i0)
+      {
+         current_alignment += controller_msgs.msg.dds.SpatialVectorMessagePubSubType.getCdrSerializedSize(data.getForceSensorData().get(i0), current_alignment);
+      }
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < data.getImuSensorData().size(); ++i0)
+      {
+         current_alignment += controller_msgs.msg.dds.IMUPacketPubSubType.getCdrSerializedSize(data.getImuSensorData().get(i0), current_alignment);
+      }
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -126,9 +124,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    public static void write(controller_msgs.msg.dds.RobotConfigurationData data, us.ihmc.idl.CDR cdr)
    {
 
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
-
-      cdr.write_type_11(data.getDroppedMessages());
+      cdr.write_type_11(data.getTimestamp());
 
       cdr.write_type_11(data.getSensorHeadPpsTimestamp());
 
@@ -149,16 +145,6 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       else
          throw new RuntimeException("joint_torques field exceeds the maximum length");
 
-      if (data.getForceSensorData().size() <= 50)
-         cdr.write_type_e(data.getForceSensorData());
-      else
-         throw new RuntimeException("force_sensor_data field exceeds the maximum length");
-
-      if (data.getImuSensorData().size() <= 5)
-         cdr.write_type_e(data.getImuSensorData());
-      else
-         throw new RuntimeException("imu_sensor_data field exceeds the maximum length");
-
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRootTranslation(), cdr);
 
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRootOrientation(), cdr);
@@ -169,7 +155,17 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPelvisLinearAcceleration(), cdr);
 
-      cdr.write_type_2(data.getRobotMotionStatus());
+      if (data.getForceSensorData().size() <= 50)
+         cdr.write_type_e(data.getForceSensorData());
+      else
+         throw new RuntimeException("force_sensor_data field exceeds the maximum length");
+
+      if (data.getImuSensorData().size() <= 10)
+         cdr.write_type_e(data.getImuSensorData());
+      else
+         throw new RuntimeException("imu_sensor_data field exceeds the maximum length");
+
+      cdr.write_type_9(data.getRobotMotionStatus());
 
       cdr.write_type_2(data.getLastReceivedPacketTypeId());
 
@@ -181,9 +177,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    public static void read(controller_msgs.msg.dds.RobotConfigurationData data, us.ihmc.idl.CDR cdr)
    {
 
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
-
-      data.setDroppedMessages(cdr.read_type_11());
+      data.setTimestamp(cdr.read_type_11());
 
       data.setSensorHeadPpsTimestamp(cdr.read_type_11());
 
@@ -195,10 +189,6 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       cdr.read_type_e(data.getJointTorques());
 
-      cdr.read_type_e(data.getForceSensorData());
-
-      cdr.read_type_e(data.getImuSensorData());
-
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRootTranslation(), cdr);
 
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRootOrientation(), cdr);
@@ -209,7 +199,11 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getPelvisLinearAcceleration(), cdr);
 
-      data.setRobotMotionStatus(cdr.read_type_2());
+      cdr.read_type_e(data.getForceSensorData());
+
+      cdr.read_type_e(data.getImuSensorData());
+
+      data.setRobotMotionStatus(cdr.read_type_9());
 
       data.setLastReceivedPacketTypeId(cdr.read_type_2());
 
@@ -244,9 +238,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.RobotConfigurationData data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
-      ser.write_type_11("dropped_messages", data.getDroppedMessages());
+      ser.write_type_11("timestamp", data.getTimestamp());
 
       ser.write_type_11("sensor_head_pps_timestamp", data.getSensorHeadPpsTimestamp());
 
@@ -258,10 +250,6 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.write_type_e("joint_torques", data.getJointTorques());
 
-      ser.write_type_e("force_sensor_data", data.getForceSensorData());
-
-      ser.write_type_e("imu_sensor_data", data.getImuSensorData());
-
       ser.write_type_a("root_translation", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRootTranslation());
 
       ser.write_type_a("root_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRootOrientation());
@@ -272,7 +260,11 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.write_type_a("pelvis_linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getPelvisLinearAcceleration());
 
-      ser.write_type_2("robot_motion_status", data.getRobotMotionStatus());
+      ser.write_type_e("force_sensor_data", data.getForceSensorData());
+
+      ser.write_type_e("imu_sensor_data", data.getImuSensorData());
+
+      ser.write_type_9("robot_motion_status", data.getRobotMotionStatus());
 
       ser.write_type_2("last_received_packet_type_id", data.getLastReceivedPacketTypeId());
 
@@ -284,9 +276,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.RobotConfigurationData data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
-      data.setDroppedMessages(ser.read_type_11("dropped_messages"));
+      data.setTimestamp(ser.read_type_11("timestamp"));
 
       data.setSensorHeadPpsTimestamp(ser.read_type_11("sensor_head_pps_timestamp"));
 
@@ -298,10 +288,6 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.read_type_e("joint_torques", data.getJointTorques());
 
-      ser.read_type_e("force_sensor_data", data.getForceSensorData());
-
-      ser.read_type_e("imu_sensor_data", data.getImuSensorData());
-
       ser.read_type_a("root_translation", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRootTranslation());
 
       ser.read_type_a("root_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRootOrientation());
@@ -312,7 +298,11 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.read_type_a("pelvis_linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getPelvisLinearAcceleration());
 
-      data.setRobotMotionStatus(ser.read_type_2("robot_motion_status"));
+      ser.read_type_e("force_sensor_data", data.getForceSensorData());
+
+      ser.read_type_e("imu_sensor_data", data.getImuSensorData());
+
+      data.setRobotMotionStatus(ser.read_type_9("robot_motion_status"));
 
       data.setLastReceivedPacketTypeId(ser.read_type_2("last_received_packet_type_id"));
 
