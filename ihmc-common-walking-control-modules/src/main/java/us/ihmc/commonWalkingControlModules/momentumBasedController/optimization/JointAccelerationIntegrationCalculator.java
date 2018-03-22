@@ -113,8 +113,8 @@ public class JointAccelerationIntegrationCalculator
          double maxPositionError = jointSpecificMaxPositionError.get(jointIndex);
          double maxVelocity = jointSpecificMaxVelocity.get(jointIndex);
 
-         desiredVelocity *= alphaVelocity;
          desiredVelocity += desiredAcceleration * controlDT;
+         desiredVelocity *= alphaVelocity;
          desiredVelocity = MathTools.clamp(desiredVelocity, maxVelocity);
          desiredPosition += desiredVelocity * controlDT;
 
