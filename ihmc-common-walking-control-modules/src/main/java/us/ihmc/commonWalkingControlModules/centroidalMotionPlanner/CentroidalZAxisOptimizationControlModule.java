@@ -17,7 +17,7 @@ public class CentroidalZAxisOptimizationControlModule
    private final Axis axis = Axis.Z;
 
    // Planner runtime variables
-   private final OptimizationControlModuleHelper helper;
+   private final LinearControlModuleHelper helper;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -37,7 +37,7 @@ public class CentroidalZAxisOptimizationControlModule
 
    private DenseMatrix64F tempMatrixForComputation = new DenseMatrix64F(0, 1);
 
-   public CentroidalZAxisOptimizationControlModule(OptimizationControlModuleHelper helper, CentroidalMotionPlannerParameters parameters)
+   public CentroidalZAxisOptimizationControlModule(LinearControlModuleHelper helper, CentroidalMotionPlannerParameters parameters)
    {
       this.helper = helper;
 

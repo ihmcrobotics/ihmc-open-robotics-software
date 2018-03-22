@@ -17,7 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
-public class OptimizationControlModuleHelperTest
+public class LinearControlModuleHelperTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final CentroidalMotionPlannerParameters parameters = new CentroidalMotionPlannerParameters();
@@ -31,14 +31,14 @@ public class OptimizationControlModuleHelperTest
    @Test
    public void testConstructor()
    {
-      OptimizationControlModuleHelper helper = new OptimizationControlModuleHelper(parameters);
+      LinearControlModuleHelper helper = new LinearControlModuleHelper(parameters);
       assertTrue(helper != null);
    }
 
    @Test
    public void testNodeSubmissionWithInvalidNodeList()
    {
-      OptimizationControlModuleHelper helper = new OptimizationControlModuleHelper(parameters);
+      LinearControlModuleHelper helper = new LinearControlModuleHelper(parameters);
       RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
       boolean success = false;
       try
@@ -55,7 +55,7 @@ public class OptimizationControlModuleHelperTest
    @Test
    public void testNodeSubmissionWithValidNodeList()
    {
-      OptimizationControlModuleHelper helper = new OptimizationControlModuleHelper(parameters);
+      LinearControlModuleHelper helper = new LinearControlModuleHelper(parameters);
       RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry1 = nodeList.getOrCreateFirstEntry();
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry2 = nodeList.insertAfter(entry1);
@@ -93,7 +93,7 @@ public class OptimizationControlModuleHelperTest
       double gravityZ = -9.81d;
       double epsilon = Epsilons.ONE_TEN_MILLIONTH;
 
-      OptimizationControlModuleHelper helper = new OptimizationControlModuleHelper(parameters);
+      LinearControlModuleHelper helper = new LinearControlModuleHelper(parameters);
       RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry1 = nodeList.getOrCreateFirstEntry();
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry2 = nodeList.insertAfter(entry1);
@@ -147,7 +147,7 @@ public class OptimizationControlModuleHelperTest
       double gravityZ = -9.81d;
       double epsilon = Epsilons.ONE_TEN_MILLIONTH;
 
-      OptimizationControlModuleHelper helper = new OptimizationControlModuleHelper(parameters);
+      LinearControlModuleHelper helper = new LinearControlModuleHelper(parameters);
       RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry1 = nodeList.getOrCreateFirstEntry();
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry2 = nodeList.insertAfter(entry1);
@@ -201,7 +201,7 @@ public class OptimizationControlModuleHelperTest
       double gravityZ = -9.81d;
       double epsilon = Epsilons.ONE_TEN_MILLIONTH;
 
-      OptimizationControlModuleHelper helper = new OptimizationControlModuleHelper(parameters);
+      LinearControlModuleHelper helper = new LinearControlModuleHelper(parameters);
       RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry1 = nodeList.getOrCreateFirstEntry();
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry2 = nodeList.insertAfter(entry1);
@@ -256,7 +256,7 @@ public class OptimizationControlModuleHelperTest
       double gravityZ = -9.81d;
       double epsilon = Epsilons.ONE_TEN_MILLIONTH;
 
-      OptimizationControlModuleHelper helper = new OptimizationControlModuleHelper(parameters);
+      LinearControlModuleHelper helper = new LinearControlModuleHelper(parameters);
       RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry1 = nodeList.getOrCreateFirstEntry();
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry2 = nodeList.insertAfter(entry1);
@@ -288,7 +288,7 @@ public class OptimizationControlModuleHelperTest
       testAxisOptimization(epsilon, helper, Axis.Z, 9.81, 0.00);
    }
 
-   private void testAxisOptimization(double epsilon, OptimizationControlModuleHelper helper, Axis axisToTest, double expectedForceValue, double expectedForceRateValue)
+   private void testAxisOptimization(double epsilon, LinearControlModuleHelper helper, Axis axisToTest, double expectedForceValue, double expectedForceRateValue)
    {
 //      PrintTools.debug("Testing axis: " + axisToTest.toString());
       JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();

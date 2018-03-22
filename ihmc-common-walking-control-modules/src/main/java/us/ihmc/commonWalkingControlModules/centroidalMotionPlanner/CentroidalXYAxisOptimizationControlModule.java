@@ -14,7 +14,7 @@ import us.ihmc.robotics.math.trajectories.Trajectory;
 
 public class CentroidalXYAxisOptimizationControlModule
 {
-   private final OptimizationControlModuleHelper helper;
+   private final LinearControlModuleHelper helper;
 
    private final DenseMatrix64F solverInput_H;
    private final DenseMatrix64F solverInput_f;
@@ -33,7 +33,7 @@ public class CentroidalXYAxisOptimizationControlModule
    private int numberOfXAxisDecisionVariables;
    private int numberOfYAxisDecisionVariables;
 
-   public CentroidalXYAxisOptimizationControlModule(OptimizationControlModuleHelper helper, CentroidalMotionPlannerParameters parameters)
+   public CentroidalXYAxisOptimizationControlModule(LinearControlModuleHelper helper, CentroidalMotionPlannerParameters parameters)
    {
       this.helper = helper;
 

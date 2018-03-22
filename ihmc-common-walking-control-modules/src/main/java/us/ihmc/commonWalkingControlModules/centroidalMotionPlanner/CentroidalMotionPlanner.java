@@ -21,7 +21,7 @@ public class CentroidalMotionPlanner
    private final double deltaTMin;
 
    private final RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = new RecycledLinkedListBuilder<>(CentroidalMotionNode.class);
-   private final OptimizationControlModuleHelper helper;
+   private final LinearControlModuleHelper helper;
    private final CentroidalZAxisOptimizationControlModule heightControlModule;
    private final CentroidalXYAxisOptimizationControlModule transversePlaneControlModule;
    private final ForceTrajectory forceTrajectory;
@@ -37,12 +37,12 @@ public class CentroidalMotionPlanner
       this.Iyy = parameters.getNominalIyy();
       this.Izz = parameters.getNominalIzz();
       this.deltaTMin = parameters.getDeltaTMin();
-      this.helper = new OptimizationControlModuleHelper(parameters);
+      this.helper = new LinearControlModuleHelper(parameters);
       this.heightControlModule = new CentroidalZAxisOptimizationControlModule(helper, parameters);
       this.transversePlaneControlModule = new CentroidalXYAxisOptimizationControlModule(helper, parameters);
-      this.forceTrajectory = new ForceTrajectory(100, OptimizationControlModuleHelper.forceCoefficients);
+      this.forceTrajectory = new ForceTrajectory(100, LinearControlModuleHelper.forceCoefficients);
 
-      this.tempTrajectory = new FrameTrajectory3D(OptimizationControlModuleHelper.forceCoefficients, plannerFrame);
+      this.tempTrajectory = new FrameTrajectory3D(LinearControlModuleHelper.forceCoefficients, plannerFrame);
       reset();
    }
 

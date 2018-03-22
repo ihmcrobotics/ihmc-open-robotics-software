@@ -9,7 +9,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class OptimizationControlModuleHelper
+public class LinearControlModuleHelper
 {
    static final int forceCoefficients = 4;
    static final int velocityCoefficients = forceCoefficients + 1;
@@ -56,7 +56,7 @@ public class OptimizationControlModuleHelper
 
    private RecycledLinkedListBuilder<CentroidalMotionNode> nodeList;
 
-   public OptimizationControlModuleHelper(CentroidalMotionPlannerParameters parameters)
+   public LinearControlModuleHelper(CentroidalMotionPlannerParameters parameters)
    {
       this.robotMass = parameters.getRobotMass();
       for (int i = 0; i < numberOfAxis; i++)
