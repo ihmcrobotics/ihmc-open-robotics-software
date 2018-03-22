@@ -96,6 +96,7 @@ public class QuadrupedBodyOrientationManager
 
       controller.compute(desiredAngularMomentumRate, setpoints, controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity());
 
+      desiredAngularMomentumRate.changeFrame(worldFrame);
       angularMomentumCommand.setAngularMomentumRate(desiredAngularMomentumRate);
       angularMomentumCommand.setAngularWeights(bodyAngularWeight);
    }
