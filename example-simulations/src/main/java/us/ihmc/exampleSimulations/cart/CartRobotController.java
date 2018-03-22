@@ -13,7 +13,7 @@ public class CartRobotController implements RobotController
 
    public CartRobotController(Robot robot)
    {
-      frontWheelJoint = (PinJoint) robot.getJoint("frontwheel");
+      frontWheelJoint = (PinJoint) robot.getJoint("frontWheel");
    }
 
    @Override
