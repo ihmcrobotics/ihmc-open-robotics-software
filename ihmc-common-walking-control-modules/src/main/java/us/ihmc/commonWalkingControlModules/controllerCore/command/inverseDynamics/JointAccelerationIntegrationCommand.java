@@ -95,40 +95,18 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * Provides to the {@link JointAccelerationIntegrationCalculator} specific parameter values for
     * the {@code jointIndex}<sup>th</sup> of this command.
     * <p>
-    * The two alpha parameters are used as leak ratios for each integration: <br>
-    * Desired velocity:<br>
-    * qDot<sub>des</sub><sup>t</sup> = [ &alpha;<sub>V</sub> qDot<sub>des</sub><sup>t - &Delta;t</sup>
-    * ] + &Delta;t qDDot<sub>des</sub><sup>t</sup> <br>
-    * Desired position:<br>
-    * q<sub>des</sub><sup>t</sup> = [ (1 - &alpha;<sub>P</sub>) q<sub>cur</sub><sup>t</sup> +
-    * &alpha;<sub>P</sub> (q<sub>des</sub><sup>t - &Delta;t</sup> ] + &Delta;t
-    * qDot<sub>des</sub><sup>t</sup>
+    * For the usage of these parameters see<br>
+    * {@link JointAccelerationIntegrationParametersReadOnly#getPositionBreakFrequency()}<br>
+    * {@link JointAccelerationIntegrationParametersReadOnly#getVelocityBreakFrequency()}
     * </p>
-    * <p>
-    * Both leak ratios have to be &in; [0, 1].
-    * </p>
-    * <p>
-    * Decreasing the leak ratio &alpha;<sub>V</sub> used to compute the desired velocity appears to
-    * be equivalent to inserting damping to the joint. A low value will cause a loss of precision on
-    * the resulting q<sub>des</sub> such it does impair the tracking that high-level controller is
-    * performing. If not specified otherwise, &alpha;<sub>V</sub> =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_ALPHA_VELOCITY}.
-    * </p>
-    * <p>
-    * A high value for the leak ratio &alpha;<sub>P</sup> used to compute the desired position will
-    * cause the joint to never settle by having stick-slip behavior around the "true" desired
-    * position the high-level controller is trying to achieve. It can simply be downtuned until this
-    * undesirable effect disappear. If not specified otherwise, &alpha;<sub>P</sup> =
-    * {@link JointAccelerationIntegrationCalculator#DEFAUTL_ALPHA_POSITION}.
-    * </p>
-    * 
+    *
     * @param jointIndex the index of the joint to provide parameters for.
-    * @param alphaPosition the leak ratio &alpha;<sub>P</sup> used to compute the desired position.
-    * @param alphaVelocity the leak ratio &alpha;<sub>V</sup> used to compute the desired velocity.
+    * @param positionBreakFrequency the break frequency used to compute the desired position.
+    * @param velocityBreakFrequency the break frequency used to compute the desired velocity.
     */
-   public void setJointAlphas(int jointIndex, double alphaPosition, double alphaVelocity)
+   public void setBreakFrequencies(int jointIndex, double positionBreakFrequency, double velocityBreakFrequency)
    {
-      jointParameters.get(jointIndex).setAlphas(alphaPosition, alphaVelocity);
+      jointParameters.get(jointIndex).setBreakFrequencies(positionBreakFrequency, velocityBreakFrequency);
    }
 
    /**
