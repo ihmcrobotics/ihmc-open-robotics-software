@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
 /**
  * This class is used to store all the relevant data for a particular node of a trajectory.
@@ -60,6 +61,8 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    private final VectorEnum<DependentVariableConstraintType> orientationConstraintType = new VectorEnum<>();
    private final FrameVector3D orientationWeight;
 
+   private final FrameConvexPolygon2d prevSupportPolygon;
+
    /**
     * Default constructor. Initialized all variables to NaN so that they form part of the optimization
     */
@@ -96,6 +99,8 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
 
       torque = new FrameVector3D(referenceFrame);
       torqueWeight = new FrameVector3D(referenceFrame);
+
+      prevSupportPolygon = new FrameConvexPolygon2d(referenceFrame);
 
       reset();
    }
@@ -499,6 +504,17 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       setAngularVelocityInternal(desiredAngularVelocity);
       this.angularVelocityConstraintType.set(constraintType);
       setAngularVelocityWeightInternal(angularVelocityWeight);
+   }
+
+   public void setPreviousSupportPolygon(FrameConvexPolygon2d supportPolygonToSet)
+   {
+      this.prevSupportPolygon.setIncludingFrame(supportPolygonToSet);
+      prevSupportPolygon.changeFrameAndProjectToXYPlane(referenceFrame);
+   }
+
+   public void getPreviousSupportPolygon(FrameConvexPolygon2d supportPolygonToSet)
+   {
+      supportPolygonToSet.setIncludingFrame(prevSupportPolygon);
    }
 
    public double getTime()

@@ -3,6 +3,9 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+
 public class AngularControlModuleHelper
 {
    private static final int numberOfTorqueCoefficients = 8;
@@ -22,6 +25,8 @@ public class AngularControlModuleHelper
    private final DenseMatrix64F[] yTorquePositionContributionCoefficientBiasMatrices;
    private final DenseMatrix64F[] xTorqueCoPContributionCoefficientCoefficientMatrices;
    private final DenseMatrix64F[] yTorqueCoPContributionCoefficientCoefficientMatrices;
+   private final DenseMatrix64F copSupportPolygonAinMatrix;
+   private final DenseMatrix64F copSupportPolygonbinMatrix;
 
    private final double robotMass = 18.0;
 
@@ -40,6 +45,8 @@ public class AngularControlModuleHelper
       yTorquePositionContributionCoefficientBiasMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
       xTorqueCoPContributionCoefficientCoefficientMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
       yTorqueCoPContributionCoefficientCoefficientMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
+      copSupportPolygonAinMatrix = new DenseMatrix64F(0, 1);
+      copSupportPolygonbinMatrix = new DenseMatrix64F(0, 1);
 
       for (int i = 0; i < numberOfTorqueCoefficients; i++)
       {
@@ -129,9 +136,41 @@ public class AngularControlModuleHelper
          CommonOps.scale(-1.0, yTorqueCoPContributionCoefficientCoefficientMatrices[i]);
    }
 
-   public void computeYTorqueContributionFromCop(int numberOfNodes)
-   {
+   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
 
+   public void computeCoPPointConstraints(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList)
+   {
+      int numberOfNodes = nodeList.getSize();
+      RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry = nodeList.getFirstEntry();
+      entry.element.getPreviousSupportPolygon(supportPolygon);
+      for (int i = 0; i < numberOfNodes - 1; i++)
+      {
+         setCoPConstraintsForSupportPolygon(numberOfNodes, i, supportPolygon);
+         entry = entry.getNext();
+         entry.element.getPreviousSupportPolygon(supportPolygon);
+         setCoPConstraintsForSupportPolygon(numberOfNodes, i, supportPolygon);
+      }
+      setCoPConstraintsForSupportPolygon(numberOfNodes, numberOfNodes - 1, supportPolygon);
+   }
+
+   private void setCoPConstraintsForSupportPolygon(int numberOfNodes, int i, FrameConvexPolygon2d supportPolygon)
+   {
+      int numberOfVertices = supportPolygon.getNumberOfVertices();
+      int existingNumberOfConstraints = copSupportPolygonAinMatrix.getNumRows();
+      copSupportPolygonAinMatrix.reshape(existingNumberOfConstraints + numberOfVertices, numberOfNodes * 2);
+      copSupportPolygonbinMatrix.reshape(existingNumberOfConstraints + numberOfVertices, 1);
+      for (int j = 0; j < numberOfVertices - 1; j++)
+         setCoPPositionConstraint(numberOfNodes, i, existingNumberOfConstraints, j, supportPolygon.getVertex(i), supportPolygon.getVertex(i + 1));
+      setCoPPositionConstraint(numberOfNodes, i, existingNumberOfConstraints, numberOfVertices, supportPolygon.getVertex(numberOfVertices - 1), supportPolygon.getVertex(0));
+   }
+
+   private void setCoPPositionConstraint(int numberOfNodes, int columnIndex, int existingNumberOfConstraints, int rowIndex, Point2DReadOnly vertex1, Point2DReadOnly vertex2)
+   {
+      double xCoefficient = vertex2.getX() - vertex1.getX();
+      double yCoefficient = vertex2.getY() - vertex1.getY();
+      copSupportPolygonAinMatrix.set(existingNumberOfConstraints + rowIndex, columnIndex, -xCoefficient);
+      copSupportPolygonAinMatrix.set(existingNumberOfConstraints + rowIndex, numberOfNodes + columnIndex, -yCoefficient);
+      copSupportPolygonbinMatrix.set(existingNumberOfConstraints + rowIndex, xCoefficient * vertex1.getX() + yCoefficient * vertex1.getY());
    }
 
    private void computeTorqueContributionFromCoPTrajectoryAssumingSignConventionForXAxis(int numberOfNodes, DenseMatrix64F[] torqueCoefficientCoefficientMatrix)
