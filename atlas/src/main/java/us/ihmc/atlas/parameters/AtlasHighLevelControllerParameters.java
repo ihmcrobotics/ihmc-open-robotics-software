@@ -5,12 +5,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.atlas.AtlasJointMap;
-import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -133,8 +134,8 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
 
       // Neck joints:
       JointAccelerationIntegrationParameters neckJointSettings = new JointAccelerationIntegrationParameters();
-      neckJointSettings.setAlphaPosition(0.9996);
-      neckJointSettings.setAlphaVelocity(0.95);
+      neckJointSettings.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9996, 0.004));
+      neckJointSettings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.004));
       neckJointSettings.setMaxPositionError(0.2);
       neckJointSettings.setMaxVelocity(2.0);
 
@@ -145,8 +146,8 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
 
       // Shoulder joints:
       JointAccelerationIntegrationParameters shoulderJointSettings = new JointAccelerationIntegrationParameters();
-      shoulderJointSettings.setAlphaPosition(0.9998);
-      shoulderJointSettings.setAlphaVelocity(0.95);
+      shoulderJointSettings.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9998, 0.004));
+      shoulderJointSettings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.004));
       shoulderJointSettings.setMaxPositionError(0.2);
       shoulderJointSettings.setMaxVelocity(2.0);
 
@@ -163,8 +164,8 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
 
       // Elbow joints:
       JointAccelerationIntegrationParameters elbowJointSettings = new JointAccelerationIntegrationParameters();
-      elbowJointSettings.setAlphaPosition(0.9996);
-      elbowJointSettings.setAlphaVelocity(0.95);
+      elbowJointSettings.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9996, 0.004));
+      elbowJointSettings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.004));
       elbowJointSettings.setMaxPositionError(0.2);
       elbowJointSettings.setMaxVelocity(2.0);
 
@@ -181,8 +182,8 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
 
       // Wrist joints:
       JointAccelerationIntegrationParameters wristJointSettings = new JointAccelerationIntegrationParameters();
-      wristJointSettings.setAlphaPosition(0.9999);
-      wristJointSettings.setAlphaVelocity(0.95);
+      wristJointSettings.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9999, 0.004));
+      wristJointSettings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.004));
       wristJointSettings.setMaxPositionError(0.2);
       wristJointSettings.setMaxVelocity(2.0);
 
