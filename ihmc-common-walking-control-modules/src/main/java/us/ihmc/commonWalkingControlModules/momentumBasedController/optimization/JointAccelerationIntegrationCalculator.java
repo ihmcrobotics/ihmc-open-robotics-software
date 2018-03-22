@@ -113,15 +113,20 @@ public class JointAccelerationIntegrationCalculator
          double maxPositionError = jointSpecificMaxPositionError.get(jointIndex);
          double maxVelocity = jointSpecificMaxVelocity.get(jointIndex);
 
+         // Decay desiredVelocity towards the velocityReference and then predict the desired velocity.
+         double velocityReference = 0.0;
+         desiredVelocity = desiredVelocity * alphaVelocity + (1.0 - alphaVelocity) * velocityReference;
          desiredVelocity += desiredAcceleration * controlDT;
-         desiredVelocity *= alphaVelocity;
-         desiredVelocity = MathTools.clamp(desiredVelocity, maxVelocity);
-         desiredPosition += desiredVelocity * controlDT;
+         desiredVelocity = MathTools.clamp(desiredVelocity, velocityReference - maxVelocity, velocityReference + maxVelocity);
 
-         double errorPosition = MathTools.clamp(desiredPosition - joint.getQ(), maxPositionError);
-         desiredPosition = joint.getQ() + errorPosition;
+         // Decay desiredPosition towards the positionReference and then predict the desired position.
+         double positionReference = joint.getQ();
+         desiredPosition = desiredPosition * alphaPosition + (1.0 - alphaPosition) * positionReference;
+         desiredPosition += desiredVelocity * controlDT;
+         desiredPosition = MathTools.clamp(desiredPosition, positionReference - maxPositionError, positionReference + maxPositionError);
+
+         // Limit the desired position to the joint range and recompute the desired velocity.
          desiredPosition = MathTools.clamp(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
-         desiredPosition = alphaPosition * desiredPosition + (1.0 - alphaPosition) * joint.getQ();
          desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
 
          lowLevelJointData.setDesiredVelocity(desiredVelocity);
