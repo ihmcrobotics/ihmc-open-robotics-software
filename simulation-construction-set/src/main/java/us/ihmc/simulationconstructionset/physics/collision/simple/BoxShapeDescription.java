@@ -98,6 +98,6 @@ public class BoxShapeDescription<T extends BoxShapeDescription<T>> implements Co
    @Override
    public boolean rollContactIfRolling(Vector3D surfaceNormal, Point3D pointToRoll)
    {
-      throw new RuntimeException("Implement Me!");      
+      return false;
    }
 }
