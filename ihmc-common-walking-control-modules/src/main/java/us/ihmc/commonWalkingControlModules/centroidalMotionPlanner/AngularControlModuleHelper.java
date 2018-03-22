@@ -16,10 +16,13 @@ public class AngularControlModuleHelper
    private final DenseMatrix64F[] zForceCoefficient;
    private final DenseMatrix64F zVelocityValues;
    private final DenseMatrix64F zPositionValues;
-   private final DenseMatrix64F[] xTorqueCoefficientCoefficientMatrices;
-   private final DenseMatrix64F[] xTorqueCoefficientBiasMatrices;
-   private final DenseMatrix64F[] yTorqueCoefficientCoefficientMatrices;
-   private final DenseMatrix64F[] yTorqueCoefficientBiasMatrices;
+   private final DenseMatrix64F[] xTorquePositionContributionCoefficientCoefficientMatrices;
+   private final DenseMatrix64F[] xTorquePositionContributionCoefficientBiasMatrices;
+   private final DenseMatrix64F[] yTorquePositionContributionCoefficientCoefficientMatrices;
+   private final DenseMatrix64F[] yTorquePositionContributionCoefficientBiasMatrices;
+   private final DenseMatrix64F[] xTorqueCoPContributionCoefficientCoefficientMatrices;
+   private final DenseMatrix64F[] yTorqueCoPContributionCoefficientCoefficientMatrices;
+
    private final double robotMass = 18.0;
 
    public AngularControlModuleHelper()
@@ -31,21 +34,27 @@ public class AngularControlModuleHelper
       for (int i = 0; i < 4; i++)
          zForceCoefficient[i] = new DenseMatrix64F(defaultNumberOfNodes - 1, 1);
 
-      xTorqueCoefficientCoefficientMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
-      yTorqueCoefficientCoefficientMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
-      xTorqueCoefficientBiasMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
-      yTorqueCoefficientBiasMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
+      xTorquePositionContributionCoefficientCoefficientMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
+      yTorquePositionContributionCoefficientCoefficientMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
+      xTorquePositionContributionCoefficientBiasMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
+      yTorquePositionContributionCoefficientBiasMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
+      xTorqueCoPContributionCoefficientCoefficientMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
+      yTorqueCoPContributionCoefficientCoefficientMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
+
       for (int i = 0; i < numberOfTorqueCoefficients; i++)
       {
-         xTorqueCoefficientCoefficientMatrices[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes * 2);
-         yTorqueCoefficientCoefficientMatrices[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes * 2);
-         xTorqueCoefficientBiasMatrices[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
-         yTorqueCoefficientBiasMatrices[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
+         xTorquePositionContributionCoefficientCoefficientMatrices[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes * 2);
+         yTorquePositionContributionCoefficientCoefficientMatrices[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes * 2);
+         xTorquePositionContributionCoefficientBiasMatrices[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
+         yTorquePositionContributionCoefficientBiasMatrices[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
+         xTorqueCoPContributionCoefficientCoefficientMatrices[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes);
+         yTorqueCoPContributionCoefficientCoefficientMatrices[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes);
       }
    }
 
    public void reset()
    {
+
    }
 
    public void setZForceValues(DenseMatrix64F forceValues, DenseMatrix64F forceRateValues, DenseMatrix64F velocityValues, DenseMatrix64F positionValues,
@@ -77,19 +86,137 @@ public class AngularControlModuleHelper
    private final DenseMatrix64F tempVelocityCoefficient = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F tempPositionCoefficient = new DenseMatrix64F(0, 1);
 
+   public void computeYTorqueCoefficientsInTermsOfXDecisionVariables(DenseMatrix64F xPositionCoefficients, DenseMatrix64F xPositionBias,
+                                                                     DenseMatrix64F xVelocityCoefficients, DenseMatrix64F xVelocityBias,
+                                                                     DenseMatrix64F xForceCoefficients, DenseMatrix64F xForceBias,
+                                                                     DenseMatrix64F xForceRateCoefficients, DenseMatrix64F xForceRateBias,
+                                                                     DenseMatrix64F deltaT)
+   {
+      computeTorqueContributionFromCentroidalTrajectoryAssumingSignConventionsForXAxis(xPositionCoefficients, xPositionBias, xVelocityCoefficients,
+                                                                                       xVelocityBias, xForceCoefficients, xForceBias, xForceRateCoefficients,
+                                                                                       xForceRateBias, deltaT,
+                                                                                       yTorquePositionContributionCoefficientCoefficientMatrices,
+                                                                                       yTorquePositionContributionCoefficientBiasMatrices);
+      for (int i = 0; i < 8; i++)
+      {
+         CommonOps.scale(-1.0, yTorquePositionContributionCoefficientCoefficientMatrices[i]);
+         CommonOps.scale(-1.0, yTorquePositionContributionCoefficientBiasMatrices[i]);
+      }
+   }
+
    public void computeXTorqueCoefficientsInTermsOfYDecisionVariables(DenseMatrix64F yPositionCoefficients, DenseMatrix64F yPositionBias,
                                                                      DenseMatrix64F yVelocityCoefficients, DenseMatrix64F yVelocityBias,
                                                                      DenseMatrix64F yForceCoefficients, DenseMatrix64F yForceBias,
                                                                      DenseMatrix64F yForceRateCoefficients, DenseMatrix64F yForceRateBias,
                                                                      DenseMatrix64F deltaT)
    {
-      int numberOfNodes = yPositionCoefficients.getNumRows();
-      int numberOfDecisionVariables = yPositionCoefficients.getNumCols();
+      computeTorqueContributionFromCentroidalTrajectoryAssumingSignConventionsForXAxis(yPositionCoefficients, yPositionBias, yVelocityCoefficients,
+                                                                                       yVelocityBias, yForceCoefficients, yForceBias, yForceRateCoefficients,
+                                                                                       yForceRateBias, deltaT,
+                                                                                       xTorquePositionContributionCoefficientCoefficientMatrices,
+                                                                                       xTorquePositionContributionCoefficientBiasMatrices);
+   }
+
+   public void computeXTorqueContributionFromCoP(int numberOfNodes)
+   {
+      computeTorqueContributionFromCoPTrajectoryAssumingSignConventionForXAxis(numberOfNodes, xTorqueCoPContributionCoefficientCoefficientMatrices);
+   }
+
+   public void computeYTorqueContributionFromCoP(int numberOfNodes)
+   {
+      computeTorqueContributionFromCoPTrajectoryAssumingSignConventionForXAxis(numberOfNodes, yTorqueCoPContributionCoefficientCoefficientMatrices);
+      for (int i = 0; i < 7; i++)
+         CommonOps.scale(-1.0, yTorqueCoPContributionCoefficientCoefficientMatrices[i]);
+   }
+
+   public void computeYTorqueContributionFromCop(int numberOfNodes)
+   {
+
+   }
+
+   private void computeTorqueContributionFromCoPTrajectoryAssumingSignConventionForXAxis(int numberOfNodes, DenseMatrix64F[] torqueCoefficientCoefficientMatrix)
+   {
+      int numberOfDecisionVariables = numberOfNodes;
+      for (int i = 0; i < 8; i++)
+      {
+         torqueCoefficientCoefficientMatrix[i].reshape(numberOfNodes - 1, numberOfDecisionVariables);
+         torqueCoefficientCoefficientMatrix[i].zero();
+      }
+      for (int i = 0; i < numberOfNodes - 1; i++)
+      {
+         double az = zForceCoefficient[index_az].get(i);
+         double bz = zForceCoefficient[index_bz].get(i);
+         double cz = zForceCoefficient[index_cz].get(i);
+         double dz = zForceCoefficient[index_dz].get(i);
+
+         setCoPCoefficientT6(torqueCoefficientCoefficientMatrix[6], i, az, bz, cz, dz);
+         setCoPCoefficientT5(torqueCoefficientCoefficientMatrix[5], i, az, bz, cz, dz);
+         setCoPCoefficientT4(torqueCoefficientCoefficientMatrix[4], i, az, bz, cz, dz);
+         setCoPCoefficientT3(torqueCoefficientCoefficientMatrix[3], i, az, bz, cz, dz);
+         setCoPCoefficientT2(torqueCoefficientCoefficientMatrix[2], i, az, bz, cz, dz);
+         setCoPCoefficientT1(torqueCoefficientCoefficientMatrix[1], i, az, bz, cz, dz);
+         setCoPCoefficientT0(torqueCoefficientCoefficientMatrix[0], i, az, bz, cz, dz);
+      }
+   }
+
+   public void setCoPCoefficientT6(DenseMatrix64F coefficientMatrixToSet, int rowIndex, double az, double bz, double cz, double dz)
+   {
+      coefficientMatrixToSet.set(rowIndex, rowIndex, 2 * az);
+      coefficientMatrixToSet.set(rowIndex, rowIndex + 1. - 2 * az);
+   }
+
+   public void setCoPCoefficientT5(DenseMatrix64F coefficientMatrixToSet, int rowIndex, double az, double bz, double cz, double dz)
+   {
+      double value = -3.0 * az + 2 * bz;
+      coefficientMatrixToSet.set(rowIndex, rowIndex, value);
+      coefficientMatrixToSet.set(rowIndex, rowIndex + 1. - value);
+   }
+
+   public void setCoPCoefficientT4(DenseMatrix64F coefficientMatrixToSet, int rowIndex, double az, double bz, double cz, double dz)
+   {
+      double value = -3.0 * bz + 2 * cz;
+      coefficientMatrixToSet.set(rowIndex, rowIndex, value);
+      coefficientMatrixToSet.set(rowIndex, rowIndex + 1. - value);
+   }
+
+   public void setCoPCoefficientT3(DenseMatrix64F coefficientMatrixToSet, int rowIndex, double az, double bz, double cz, double dz)
+   {
+      coefficientMatrixToSet.set(rowIndex, rowIndex, az - 3.0 * cz);
+      coefficientMatrixToSet.set(rowIndex, rowIndex + 1. + 3 * cz);
+   }
+
+   public void setCoPCoefficientT2(DenseMatrix64F coefficientMatrixToSet, int rowIndex, double az, double bz, double cz, double dz)
+   {
+      coefficientMatrixToSet.set(rowIndex, rowIndex, bz - 3.0 * dz);
+      coefficientMatrixToSet.set(rowIndex, rowIndex + 1. + 3.0 * dz);
+   }
+
+   public void setCoPCoefficientT1(DenseMatrix64F coefficientMatrixToSet, int rowIndex, double az, double bz, double cz, double dz)
+   {
+      coefficientMatrixToSet.set(rowIndex, rowIndex, cz);
+   }
+
+   public void setCoPCoefficientT0(DenseMatrix64F coefficientMatrixToSet, int rowIndex, double az, double bz, double cz, double dz)
+   {
+      coefficientMatrixToSet.set(rowIndex, rowIndex, dz);
+   }
+
+   private void computeTorqueContributionFromCentroidalTrajectoryAssumingSignConventionsForXAxis(DenseMatrix64F positionCoefficients,
+                                                                                                 DenseMatrix64F positionBias,
+                                                                                                 DenseMatrix64F velocityCoefficients,
+                                                                                                 DenseMatrix64F velocityBias, DenseMatrix64F forceCoefficients,
+                                                                                                 DenseMatrix64F forceBias, DenseMatrix64F forceRateCoefficients,
+                                                                                                 DenseMatrix64F forceRateBias, DenseMatrix64F deltaT,
+                                                                                                 DenseMatrix64F[] torqueCoefficientCoefficientMatrix,
+                                                                                                 DenseMatrix64F[] torqueCoefficientBiasMatrix)
+   {
+      int numberOfNodes = positionCoefficients.getNumRows();
+      int numberOfDecisionVariables = positionCoefficients.getNumCols();
       tempMatrixForCoefficients.reshape(1, numberOfDecisionVariables);
       for (int i = 0; i < 8; i++)
       {
-         xTorqueCoefficientCoefficientMatrices[i].reshape(numberOfNodes - 1, numberOfDecisionVariables);
-         xTorqueCoefficientBiasMatrices[i].reshape(numberOfNodes - 1, 1);
+         torqueCoefficientCoefficientMatrix[i].reshape(numberOfNodes - 1, numberOfDecisionVariables);
+         torqueCoefficientBiasMatrix[i].reshape(numberOfNodes - 1, 1);
       }
       for (int i = 0; i < numberOfNodes - 1; i++)
       {
@@ -108,28 +235,28 @@ public class AngularControlModuleHelper
          tempPositionCoefficient.reshape(1, numberOfDecisionVariables);
 
          double deltaTi = deltaT.get(i);
-         CommonOps.extract(yForceCoefficients, i, i + 1, 0, numberOfDecisionVariables, tempForceCoefficient1, 0, 0);
-         CommonOps.extract(yForceRateCoefficients, i, i + 1, 0, numberOfDecisionVariables, tempForceRateCoefficient1, 0, 0);
-         CommonOps.extract(yForceCoefficients, i + 1, i + 2, 0, numberOfDecisionVariables, tempForceCoefficient2, 0, 0);
-         CommonOps.extract(yForceRateCoefficients, i + 1, i + 2, 0, numberOfDecisionVariables, tempForceRateCoefficient2, 0, 0);
-         CommonOps.extract(yVelocityCoefficients, i, i + 1, 0, numberOfDecisionVariables, tempVelocityCoefficient, 0, 0);
-         CommonOps.extract(yPositionCoefficients, i, i + 1, 0, numberOfDecisionVariables, tempPositionCoefficient, 0, 0);
+         CommonOps.extract(forceCoefficients, i, i + 1, 0, numberOfDecisionVariables, tempForceCoefficient1, 0, 0);
+         CommonOps.extract(forceRateCoefficients, i, i + 1, 0, numberOfDecisionVariables, tempForceRateCoefficient1, 0, 0);
+         CommonOps.extract(forceCoefficients, i + 1, i + 2, 0, numberOfDecisionVariables, tempForceCoefficient2, 0, 0);
+         CommonOps.extract(forceRateCoefficients, i + 1, i + 2, 0, numberOfDecisionVariables, tempForceRateCoefficient2, 0, 0);
+         CommonOps.extract(velocityCoefficients, i, i + 1, 0, numberOfDecisionVariables, tempVelocityCoefficient, 0, 0);
+         CommonOps.extract(positionCoefficients, i, i + 1, 0, numberOfDecisionVariables, tempPositionCoefficient, 0, 0);
 
-         setCoefficientT7(xTorqueCoefficientCoefficientMatrices[7], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT7(torqueCoefficientCoefficientMatrix[7], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT6(xTorqueCoefficientCoefficientMatrices[6], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT6(torqueCoefficientCoefficientMatrix[6], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT5(xTorqueCoefficientCoefficientMatrices[5], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT5(torqueCoefficientCoefficientMatrix[5], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT4(xTorqueCoefficientCoefficientMatrices[4], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT4(torqueCoefficientCoefficientMatrix[4], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT3(xTorqueCoefficientCoefficientMatrices[3], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT3(torqueCoefficientCoefficientMatrix[3], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT2(xTorqueCoefficientCoefficientMatrices[2], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT2(torqueCoefficientCoefficientMatrix[2], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT1(xTorqueCoefficientCoefficientMatrices[1], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT1(torqueCoefficientCoefficientMatrix[1], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT0(xTorqueCoefficientCoefficientMatrices[0], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT0(torqueCoefficientCoefficientMatrix[0], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
 
          tempForceCoefficient1.reshape(1, 1);
@@ -139,28 +266,28 @@ public class AngularControlModuleHelper
          tempVelocityCoefficient.reshape(1, 1);
          tempPositionCoefficient.reshape(1, 1);
 
-         CommonOps.extract(yForceBias, i, i + 1, 0, 1, tempForceCoefficient1, 0, 0);
-         CommonOps.extract(yForceRateBias, i, i + 1, 0, 1, tempForceRateCoefficient1, 0, 0);
-         CommonOps.extract(yForceBias, i + 1, i + 2, 0, 1, tempForceCoefficient2, 0, 0);
-         CommonOps.extract(yForceRateBias, i + 1, i + 2, 0, 1, tempForceRateCoefficient2, 0, 0);
-         CommonOps.extract(yVelocityBias, i, i + 1, 0, 1, tempVelocityCoefficient, 0, 0);
-         CommonOps.extract(yPositionBias, i, i + 1, 0, 1, tempPositionCoefficient, 0, 0);
+         CommonOps.extract(forceBias, i, i + 1, 0, 1, tempForceCoefficient1, 0, 0);
+         CommonOps.extract(forceRateBias, i, i + 1, 0, 1, tempForceRateCoefficient1, 0, 0);
+         CommonOps.extract(forceBias, i + 1, i + 2, 0, 1, tempForceCoefficient2, 0, 0);
+         CommonOps.extract(forceRateBias, i + 1, i + 2, 0, 1, tempForceRateCoefficient2, 0, 0);
+         CommonOps.extract(velocityBias, i, i + 1, 0, 1, tempVelocityCoefficient, 0, 0);
+         CommonOps.extract(positionBias, i, i + 1, 0, 1, tempPositionCoefficient, 0, 0);
 
-         setCoefficientT7(xTorqueCoefficientBiasMatrices[7], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT7(torqueCoefficientBiasMatrix[7], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT6(xTorqueCoefficientBiasMatrices[6], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT6(torqueCoefficientBiasMatrix[6], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT5(xTorqueCoefficientBiasMatrices[5], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT5(torqueCoefficientBiasMatrix[5], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT4(xTorqueCoefficientBiasMatrices[4], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT4(torqueCoefficientBiasMatrix[4], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT3(xTorqueCoefficientBiasMatrices[3], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT3(torqueCoefficientBiasMatrix[3], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT2(xTorqueCoefficientBiasMatrices[2], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT2(torqueCoefficientBiasMatrix[2], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT1(xTorqueCoefficientBiasMatrices[1], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT1(torqueCoefficientBiasMatrix[1], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-         setCoefficientT0(xTorqueCoefficientBiasMatrices[0], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
+         setCoefficientT0(torqueCoefficientBiasMatrix[0], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
 
       }
