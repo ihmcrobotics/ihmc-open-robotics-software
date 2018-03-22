@@ -17,21 +17,21 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointAccelerationIntegrationCalculator
 {
-   public static final double DEFAULT_ALPHA_POSITION = 0.9996;
-   public static final double DEFAULT_ALPHA_VELOCITY = 0.95;
+   public static final double DEFAULT_POSITION_BREAK_FREQUENCY = 0.016;
+   public static final double DEFAULT_VELOCITY_BREAK_FREQUENCY = 2.04;
    public static final double DEFAULT_MAX_POSITION_ERROR = 0.2;
    public static final double DEFAULT_MAX_VELOCITY = 2.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
-   private final TDoubleArrayList jointSpecificAlphaPosition = new TDoubleArrayList();
-   private final TDoubleArrayList jointSpecificAlphaVelocity = new TDoubleArrayList();
+   private final TDoubleArrayList jointSpecificPositionBreakFrequency = new TDoubleArrayList();
+   private final TDoubleArrayList jointSpecificVelocityBreakFrequency = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificMaxPositionError = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificMaxVelocity = new TDoubleArrayList();
 
-   private final YoDouble defaultAlphaPositionIntegration = new YoDouble("defaultAlphaPositionIntegration", registry);
-   private final YoDouble defaultAlphaVelocityIntegration = new YoDouble("defaultAlphaVelocityIntegration", registry);
+   private final YoDouble defaultPositionBreakFrequency = new YoDouble("defaultPositionBreakFrequencyIntegration", registry);
+   private final YoDouble defaultVelocityBreakFrequency = new YoDouble("defaultVelocityBreakFrequencyIntegration", registry);
    private final YoDouble defaultIntegrationMaxVelocity = new YoDouble("defaultIntegrationMaxVelocity", registry);
    private final YoDouble defaultIntegrationMaxPositionError = new YoDouble("defaultIntegrationMaxPositionError", registry);
 
@@ -40,8 +40,8 @@ public class JointAccelerationIntegrationCalculator
    public JointAccelerationIntegrationCalculator(double controlDT, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
-      defaultAlphaPositionIntegration.set(DEFAULT_ALPHA_POSITION);
-      defaultAlphaVelocityIntegration.set(DEFAULT_ALPHA_VELOCITY);
+      defaultPositionBreakFrequency.set(DEFAULT_POSITION_BREAK_FREQUENCY);
+      defaultVelocityBreakFrequency.set(DEFAULT_VELOCITY_BREAK_FREQUENCY);
       defaultIntegrationMaxPositionError.set(DEFAULT_MAX_POSITION_ERROR);
       defaultIntegrationMaxVelocity.set(DEFAULT_MAX_VELOCITY);
 
@@ -56,13 +56,13 @@ public class JointAccelerationIntegrationCalculator
          int localJointIndex = jointsToComputeDesiredPositionFor.indexOf(jointToComputeDesierdPositionFor);
          JointAccelerationIntegrationParametersReadOnly jointParameters = command.getJointParameters(commandJointIndex);
 
-         double newAlphaPosition = jointParameters.getAlphaPosition();
-         if (Double.isNaN(newAlphaPosition) || !MathTools.intervalContains(newAlphaPosition, 0.0, 1.0))
-            newAlphaPosition = defaultAlphaPositionIntegration.getDoubleValue();
+         double newPositionBreakFrequency = jointParameters.getPositionBreakFrequency();
+         if (Double.isNaN(newPositionBreakFrequency) || newPositionBreakFrequency < 0.0)
+            newPositionBreakFrequency = defaultPositionBreakFrequency.getDoubleValue();
 
-         double newAlphaVelocity = jointParameters.getAlphaVelocity();
-         if (Double.isNaN(newAlphaVelocity) || !MathTools.intervalContains(newAlphaVelocity, 0.0, 1.0))
-            newAlphaVelocity = defaultAlphaVelocityIntegration.getDoubleValue();
+         double newVelocityBreakFrequency = jointParameters.getVelocityBreakFrequency();
+         if (Double.isNaN(newVelocityBreakFrequency) || newVelocityBreakFrequency < 0.0)
+            newVelocityBreakFrequency = defaultVelocityBreakFrequency.getDoubleValue();
 
          double newMaxPositionError = jointParameters.getMaxPositionError();
          if (Double.isNaN(newMaxPositionError) || newMaxPositionError < 0.0)
@@ -75,15 +75,15 @@ public class JointAccelerationIntegrationCalculator
          if (localJointIndex < 0)
          {
             jointsToComputeDesiredPositionFor.add(jointToComputeDesierdPositionFor);
-            jointSpecificAlphaPosition.add(newAlphaPosition);
-            jointSpecificAlphaVelocity.add(newAlphaVelocity);
+            jointSpecificPositionBreakFrequency.add(newPositionBreakFrequency);
+            jointSpecificVelocityBreakFrequency.add(newVelocityBreakFrequency);
             jointSpecificMaxPositionError.add(newMaxPositionError);
             jointSpecificMaxVelocity.add(newMaxVelocity);
          }
          else
          {
-            jointSpecificAlphaPosition.set(localJointIndex, newAlphaPosition);
-            jointSpecificAlphaVelocity.set(localJointIndex, newAlphaVelocity);
+            jointSpecificPositionBreakFrequency.set(localJointIndex, newPositionBreakFrequency);
+            jointSpecificVelocityBreakFrequency.set(localJointIndex, newVelocityBreakFrequency);
             jointSpecificMaxPositionError.set(localJointIndex, newMaxPositionError);
             jointSpecificMaxVelocity.set(localJointIndex, newMaxVelocity);
          }
@@ -108,8 +108,8 @@ public class JointAccelerationIntegrationCalculator
          double desiredVelocity = lowLevelJointData.getDesiredVelocity();
          double desiredPosition = lowLevelJointData.getDesiredPosition();
 
-         double alphaPosition = jointSpecificAlphaPosition.get(jointIndex);
-         double alphaVelocity = jointSpecificAlphaVelocity.get(jointIndex);
+         double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointSpecificPositionBreakFrequency.get(jointIndex), controlDT);
+         double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointSpecificVelocityBreakFrequency.get(jointIndex), controlDT);
          double maxPositionError = jointSpecificMaxPositionError.get(jointIndex);
          double maxVelocity = jointSpecificMaxVelocity.get(jointIndex);
 
@@ -137,9 +137,9 @@ public class JointAccelerationIntegrationCalculator
    public static void main(String[] args)
    {
       double controlDT = 1.0 / 250.0;
-      double f_pos = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(DEFAULT_ALPHA_POSITION, controlDT);
-      double f_vel = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(DEFAULT_ALPHA_VELOCITY, controlDT);
-      PrintTools.info("Break Frequency Position: " + f_pos);
-      PrintTools.info("Break Frequency Velocity: " + f_vel);
+      double alpha_pos = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(DEFAULT_POSITION_BREAK_FREQUENCY, controlDT);
+      double alpha_vel = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(DEFAULT_VELOCITY_BREAK_FREQUENCY, controlDT);
+      PrintTools.info("Alpha Position: " + alpha_pos);
+      PrintTools.info("Alpha Velocity: " + alpha_vel);
    }
 }
