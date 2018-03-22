@@ -87,13 +87,13 @@ public class QuadrupedTimedContactSequence extends PreallocatedList<QuadrupedTim
     * @param currentContactState current sole contact state (input)
     * @param currentTime current time (input)
     */
-   public void update(List<? extends QuadrupedTimedStep> stepSequence, QuadrantDependentList<FramePoint3D> currentSolePosition,
+   public void update(List<? extends QuadrupedTimedStep> stepSequence, QuadrantDependentList<? extends ReferenceFrame> soleFrames,
          QuadrantDependentList<ContactState> currentContactState, double currentTime)
    {
       // initialize contact state and sole positions
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         solePosition.get(robotQuadrant).setIncludingFrame(currentSolePosition.get(robotQuadrant));
+         solePosition.get(robotQuadrant).setToZero(soleFrames.get(robotQuadrant));
          solePosition.get(robotQuadrant).changeFrame(ReferenceFrame.getWorldFrame());
          contactState.set(robotQuadrant, currentContactState.get(robotQuadrant));
       }
