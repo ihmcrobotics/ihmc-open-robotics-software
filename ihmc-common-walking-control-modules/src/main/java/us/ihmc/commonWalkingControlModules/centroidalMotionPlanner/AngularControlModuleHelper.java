@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
@@ -29,6 +30,7 @@ public class AngularControlModuleHelper
    private final DenseMatrix64F copSupportPolygonbinMatrix;
 
    private final double robotMass = 18.0;
+   private final double deltaTMin = 0.001;
 
    public AngularControlModuleHelper()
    {
@@ -136,41 +138,56 @@ public class AngularControlModuleHelper
          CommonOps.scale(-1.0, yTorqueCoPContributionCoefficientCoefficientMatrices[i]);
    }
 
-   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2d tempSupportPolygon = new FrameConvexPolygon2d();
 
-   public void computeCoPPointConstraints(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList)
+   public void computeCoPPointConstraints(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList,
+                                          RecycledLinkedListBuilder<CentroidalMotionSupportPolygon> supportPolygonList)
    {
       int numberOfNodes = nodeList.getSize();
-      RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry = nodeList.getFirstEntry();
-      entry.element.getPreviousSupportPolygon(supportPolygon);
-      for (int i = 0; i < numberOfNodes - 1; i++)
+      int numberOfSupportPolygons = supportPolygonList.getSize();
+      RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> nodeEntry = nodeList.getFirstEntry();
+      RecycledLinkedListBuilder<CentroidalMotionSupportPolygon>.RecycledLinkedListEntry<CentroidalMotionSupportPolygon> supportPolygonEntry = supportPolygonList.getFirstEntry();
+      double nodeTime;
+      for(int nodeIndex = 0, supportPolygonIndex = 0; nodeIndex < numberOfNodes; nodeIndex++, nodeEntry = nodeEntry.getNext())
       {
-         setCoPConstraintsForSupportPolygon(numberOfNodes, i, supportPolygon);
-         entry = entry.getNext();
-         entry.element.getPreviousSupportPolygon(supportPolygon);
-         setCoPConstraintsForSupportPolygon(numberOfNodes, i, supportPolygon);
+         nodeTime = nodeEntry.element.getTime();
+         for(;supportPolygonIndex < numberOfSupportPolygons; supportPolygonIndex++, supportPolygonEntry = supportPolygonEntry.getNext())
+         {
+            if(nodeTime < supportPolygonEntry.element.getStartTime())
+               break;
+            else if (nodeTime > supportPolygonEntry.element.getEndTime())
+               continue;
+            else
+            {
+               supportPolygonEntry.element.getSupportPolygon(tempSupportPolygon);
+               setCoPConstraintsForSupportPolygon(numberOfNodes, nodeIndex, tempSupportPolygon);
+            }
+         }
       }
-      setCoPConstraintsForSupportPolygon(numberOfNodes, numberOfNodes - 1, supportPolygon);
    }
 
    private void setCoPConstraintsForSupportPolygon(int numberOfNodes, int i, FrameConvexPolygon2d supportPolygon)
    {
       int numberOfVertices = supportPolygon.getNumberOfVertices();
+      if (numberOfVertices == 0)
+         return;
       int existingNumberOfConstraints = copSupportPolygonAinMatrix.getNumRows();
-      copSupportPolygonAinMatrix.reshape(existingNumberOfConstraints + numberOfVertices, numberOfNodes * 2);
-      copSupportPolygonbinMatrix.reshape(existingNumberOfConstraints + numberOfVertices, 1);
+      copSupportPolygonAinMatrix.reshape(existingNumberOfConstraints + numberOfVertices, numberOfNodes * 2, true);
+      copSupportPolygonbinMatrix.reshape(existingNumberOfConstraints + numberOfVertices, 1, true);
       for (int j = 0; j < numberOfVertices - 1; j++)
-         setCoPPositionConstraint(numberOfNodes, i, existingNumberOfConstraints, j, supportPolygon.getVertex(i), supportPolygon.getVertex(i + 1));
-      setCoPPositionConstraint(numberOfNodes, i, existingNumberOfConstraints, numberOfVertices, supportPolygon.getVertex(numberOfVertices - 1), supportPolygon.getVertex(0));
+         setCoPPositionConstraint(numberOfNodes, i, existingNumberOfConstraints, j, supportPolygon.getVertex(j), supportPolygon.getVertex(j + 1));
+      setCoPPositionConstraint(numberOfNodes, i, existingNumberOfConstraints, numberOfVertices - 1, supportPolygon.getVertex(numberOfVertices - 1),
+                               supportPolygon.getVertex(0));
    }
 
-   private void setCoPPositionConstraint(int numberOfNodes, int columnIndex, int existingNumberOfConstraints, int rowIndex, Point2DReadOnly vertex1, Point2DReadOnly vertex2)
+   private void setCoPPositionConstraint(int numberOfNodes, int columnIndex, int existingNumberOfConstraints, int rowIndex, Point2DReadOnly vertex1,
+                                         Point2DReadOnly vertex2)
    {
-      double xCoefficient = vertex2.getX() - vertex1.getX();
-      double yCoefficient = vertex2.getY() - vertex1.getY();
-      copSupportPolygonAinMatrix.set(existingNumberOfConstraints + rowIndex, columnIndex, -xCoefficient);
-      copSupportPolygonAinMatrix.set(existingNumberOfConstraints + rowIndex, numberOfNodes + columnIndex, -yCoefficient);
-      copSupportPolygonbinMatrix.set(existingNumberOfConstraints + rowIndex, xCoefficient * vertex1.getX() + yCoefficient * vertex1.getY());
+      double deltaX = vertex2.getX() - vertex1.getX();
+      double deltaY = vertex2.getY() - vertex1.getY();
+      copSupportPolygonAinMatrix.set(existingNumberOfConstraints + rowIndex, columnIndex, -deltaY);
+      copSupportPolygonAinMatrix.set(existingNumberOfConstraints + rowIndex, numberOfNodes + columnIndex, deltaX);
+      copSupportPolygonbinMatrix.set(existingNumberOfConstraints + rowIndex, -deltaY * vertex1.getX() + deltaX * vertex1.getY());
    }
 
    private void computeTorqueContributionFromCoPTrajectoryAssumingSignConventionForXAxis(int numberOfNodes, DenseMatrix64F[] torqueCoefficientCoefficientMatrix)
@@ -433,5 +450,15 @@ public class AngularControlModuleHelper
       CommonOps.addEquals(tempMatrixForCoefficients, (1.0 * bz + 2.0 * az) * timeMultiplier * deltaTi, m0);
       CommonOps.addEquals(tempMatrixForCoefficients, (1.0 * bz + 1.0 * az) * timeMultiplier * deltaTi, m1);
       CommonOps.insert(tempMatrixForCoefficients, coefficientMatrixToSet, rowIndex, 0);
+   }
+
+   public DenseMatrix64F getCoPSupportPolygonConstraintAinMatrix()
+   {
+      return copSupportPolygonAinMatrix;
+   }
+
+   public DenseMatrix64F getCoPSupportPolygonConstraintbinMatrix()
+   {
+      return copSupportPolygonbinMatrix;
    }
 }

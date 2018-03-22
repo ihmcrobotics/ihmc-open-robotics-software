@@ -503,8 +503,8 @@ public class LinearControlModuleHelper
       int indexToInsertAt = A.getNumRows();
       int numberOfRowsToInsert = jacobian.getNumRows();
       int numberOfRows = indexToInsertAt + numberOfRowsToInsert;
-      A.reshape(numberOfRows, A.getNumCols());
-      b.reshape(numberOfRows, 1);
+      A.reshape(numberOfRows, A.getNumCols(), true);
+      b.reshape(numberOfRows, 1, true);
       CommonOps.insert(jacobian, A, indexToInsertAt, 0);
       b.set(indexToInsertAt, 0, value);
    }

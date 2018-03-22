@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
-import org.omg.CORBA._PolicyStub;
-
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -61,8 +59,6 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    private final VectorEnum<DependentVariableConstraintType> orientationConstraintType = new VectorEnum<>();
    private final FrameVector3D orientationWeight;
 
-   private final FrameConvexPolygon2d prevSupportPolygon;
-
    /**
     * Default constructor. Initialized all variables to NaN so that they form part of the optimization
     */
@@ -99,8 +95,6 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
 
       torque = new FrameVector3D(referenceFrame);
       torqueWeight = new FrameVector3D(referenceFrame);
-
-      prevSupportPolygon = new FrameConvexPolygon2d(referenceFrame);
 
       reset();
    }
@@ -504,17 +498,6 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       setAngularVelocityInternal(desiredAngularVelocity);
       this.angularVelocityConstraintType.set(constraintType);
       setAngularVelocityWeightInternal(angularVelocityWeight);
-   }
-
-   public void setPreviousSupportPolygon(FrameConvexPolygon2d supportPolygonToSet)
-   {
-      this.prevSupportPolygon.setIncludingFrame(supportPolygonToSet);
-      prevSupportPolygon.changeFrameAndProjectToXYPlane(referenceFrame);
-   }
-
-   public void getPreviousSupportPolygon(FrameConvexPolygon2d supportPolygonToSet)
-   {
-      supportPolygonToSet.setIncludingFrame(prevSupportPolygon);
    }
 
    public double getTime()
