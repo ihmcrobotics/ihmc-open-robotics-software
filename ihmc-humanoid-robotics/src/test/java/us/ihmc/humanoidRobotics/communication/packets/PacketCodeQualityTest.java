@@ -60,6 +60,49 @@ public class PacketCodeQualityTest
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = Integer.MAX_VALUE)
+   public void testPacketOnlyExtendPacketClass()
+   {
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+
+      Set<Class<? extends Packet>> packetTypesWithAdditionalSuperTypes = new HashSet<>();
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            if (packetType.getSuperclass() != Packet.class)
+               packetTypesWithAdditionalSuperTypes.add(packetType);
+
+            if (packetType.getInterfaces().length != 0)
+               packetTypesWithAdditionalSuperTypes.add(packetType);
+         }
+         catch (Exception e)
+         {
+            PrintTools.error("Problem with packet: " + packetType.getSimpleName());
+            e.printStackTrace();
+         }
+      }
+
+      if (verbose)
+      {
+         if (!packetTypesWithAdditionalSuperTypes.isEmpty())
+         {
+            System.out.println();
+            System.out.println();
+            PrintTools.error("List of packet with illegal hierarchy:");
+            packetTypesWithAdditionalSuperTypes.forEach(type -> PrintTools.error(type.getSimpleName()));
+         }
+      }
+
+      assertTrue("Packet sub-types should only extend Packet class.", packetTypesWithAdditionalSuperTypes.isEmpty());
+   }
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testPacketDoNotDeclareTypes()
    {
       boolean verbose = true;
@@ -74,9 +117,9 @@ public class PacketCodeQualityTest
          try
          {
             Class<?>[] declaredClasses = packetType.getDeclaredClasses();
-            
+
             if (declaredClasses.length > 0)
-                  packetTypesWithNestedType.add(packetType);
+               packetTypesWithNestedType.add(packetType);
          }
          catch (Exception e)
          {
@@ -119,7 +162,8 @@ public class PacketCodeQualityTest
             numberOfCollisions++;
             if (verbose)
             {
-               PrintTools.error("Hash-code collision between: " + packetType.getSimpleName() + " and " + allPacketSimpleNameBasedHashCode.get(simpleNameBasedHashCode).getSimpleName());
+               PrintTools.error("Hash-code collision between: " + packetType.getSimpleName() + " and "
+                     + allPacketSimpleNameBasedHashCode.get(simpleNameBasedHashCode).getSimpleName());
             }
          }
       }

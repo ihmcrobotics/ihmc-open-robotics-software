@@ -6,7 +6,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.key.OcTreeKeyReadOnly;
 
-public class OcTreeKeyMessage extends Packet<OcTreeKeyMessage> implements OcTreeKeyReadOnly
+public class OcTreeKeyMessage extends Packet<OcTreeKeyMessage>
 {
    public int[] k;
 
@@ -35,7 +35,6 @@ public class OcTreeKeyMessage extends Packet<OcTreeKeyMessage> implements OcTree
       k[2] = k2;
    }
 
-   @Override
    public int getKey(int index)
    {
       return k[index];
@@ -56,7 +55,6 @@ public class OcTreeKeyMessage extends Packet<OcTreeKeyMessage> implements OcTree
       return Arrays.equals(k, other.k);
    }
 
-   @Override
    public boolean equals(OcTreeKey other)
    {
       return k[0] == other.getKey(0) && k[1] == other.getKey(1) && k[2] == other.getKey(2);
