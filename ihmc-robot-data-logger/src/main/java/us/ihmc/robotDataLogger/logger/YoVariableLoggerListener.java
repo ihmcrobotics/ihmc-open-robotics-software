@@ -96,8 +96,10 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       {
          
          System.out.println("Cameras: " + request.getCameras());
-         cameras.addAll(Arrays.asList(request.getCameras().toArray()));
-         
+         for (us.ihmc.robotDataLogger.CameraAnnouncement cameraAnnouncement : request.getCameras())
+         {
+            cameras.add(cameraAnnouncement);
+         }
       }
       else
       {
