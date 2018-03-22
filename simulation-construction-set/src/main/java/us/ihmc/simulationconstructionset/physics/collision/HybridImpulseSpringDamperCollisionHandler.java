@@ -40,7 +40,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private final YoDouble kdRotationalDamping = new YoDouble("kdRotationalDamping", registry);
    private final YoDouble pullingOutSpringHysteresisReduction = new YoDouble("pullingOutSpringHysteresisReduction", registry);
 
-   private double velocityForMicrocollision = 0.01; //0.1; //0.1;//0.01;
+   private double velocityForMicrocollision = 0.05; //0.1; //0.1;//0.01;
    private int numberOfCyclesPerContactPair = 1;///4
    private double minDistanceToConsiderDifferent = 0.003; //0.003; //0.002; //0.02;
    private double percentMoveTowardTouchdownWhenSamePoint = 0.2; //0.2; //0.05; //1.0; //0.05; 
@@ -53,7 +53,7 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
 
    private static final boolean divideByNumberContacting = true; //true; //false;
 
-   private static final boolean resolveCollisionWithAnImpact = false;
+   private static final boolean resolveCollisionWithAnImpact = true;
    private static final boolean allowMicroCollisions = false;
 
    private static final boolean performSpringDamper = true;
@@ -93,8 +93,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       this.coefficientOfFriction.set(mu);
 
       rotationalCoefficientOfFrictionBeta.set(0.01);
-      kpCollision.set(2000.0);
-      kdCollision.set(200.0);
+      kpCollision.set(20000.0);
+      kdCollision.set(5000.0);
       kdRotationalDamping.set(0.05);
       pullingOutSpringHysteresisReduction.set(0.8);
 
@@ -936,7 +936,6 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
                                                                             p_world); // link1.epsilon, link1.mu, p_world);
          }
       }
-
       if (collisionOccurred)
       {
          for (CollisionHandlerListener listener : listeners)
