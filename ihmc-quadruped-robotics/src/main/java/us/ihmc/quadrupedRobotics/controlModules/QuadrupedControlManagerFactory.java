@@ -22,6 +22,7 @@ public class QuadrupedControlManagerFactory
    private QuadrupedFeetManager feetManager;
    private QuadrupedBodyOrientationManager bodyOrientationManager;
    private QuadrupedBalanceManager balanceManager;
+   private QuadrupedJointSpaceManager jointSpaceManager;
 
    public QuadrupedControlManagerFactory(QuadrupedForceControllerToolbox toolbox, QuadrupedPostureInputProviderInterface postureProvider, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
@@ -59,6 +60,15 @@ public class QuadrupedControlManagerFactory
       return balanceManager;
    }
 
+   public QuadrupedJointSpaceManager getOrCreateJointSpaceManager()
+   {
+      if (jointSpaceManager != null)
+         return jointSpaceManager;
+
+      jointSpaceManager = new QuadrupedJointSpaceManager(toolbox, registry);
+      return jointSpaceManager;
+   }
+
    public FeedbackControlCommandList createFeedbackControlTemplate()
    {
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
@@ -67,6 +77,8 @@ public class QuadrupedControlManagerFactory
          ret.addCommandList(feetManager.createFeedbackControlTemplate());
       if (bodyOrientationManager != null)
          ret.addCommand(bodyOrientationManager.createFeedbackControlTemplate());
+      if (jointSpaceManager != null)
+         ret.addCommand(jointSpaceManager.createFeedbackControlTemplate());
 
       return ret;
    }

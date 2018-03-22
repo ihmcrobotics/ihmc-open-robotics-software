@@ -21,11 +21,12 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double qdd;
    private double tauMeasured;
    private double qddDesired;
-   
+
    private double tau;
 
    private double effortLimitLower = Double.NEGATIVE_INFINITY;
    private double effortLimitUpper = Double.POSITIVE_INFINITY;
+
    private double jointLimitLower = Double.NEGATIVE_INFINITY;
    private double jointLimitUpper = Double.POSITIVE_INFINITY;
    private double velocityLimitLower = Double.NEGATIVE_INFINITY;
@@ -48,15 +49,19 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double qDesired;
    @Deprecated
    private double qdDesired;
+   /** Remove April 2nd, 2018. */
    @Deprecated
    private double kp;
+   /** Remove April 2nd, 2018. */
    @Deprecated
    private double kd;
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    private boolean isUnderPositionControl = false;
 
    private boolean enabled = true;
+   /** Remove April 2nd, 2018. */
    @Deprecated
    private boolean useFeedBackForceControl = true;
 
@@ -225,25 +230,21 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.qdd = qdd;
    }
 
-   
    public double getQddDesired()
    {
       return qddDesired;
    }
 
-  
    public void setQddDesired(double qddDesired)
    {
       this.qddDesired = qddDesired;
    }
 
-   
    public double getTau()
    {
       return tau;
    }
 
-   
    public void setTau(double tau)
    {
       this.tau = tau;
@@ -340,7 +341,7 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    {
       this.jointLimitLower = jointLimitLower;
    }
-   
+
    public double getJointLimitUpper()
    {
       return jointLimitUpper;
@@ -350,32 +351,37 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    {
       this.jointLimitUpper = jointLimitUpper;
    }
-   
-   public double getVelocityLimitUpper()
-   {
-      return velocityLimitUpper;
-   }
-   
+
    public double getVelocityLimitLower()
    {
       return velocityLimitLower;
    }
-   
+
+   public double getVelocityLimitUpper()
+   {
+      return velocityLimitUpper;
+   }
+
    public void setVelocityLimit(double velocityLimitLower, double velocityLimitUpper)
    {
       this.velocityLimitLower = velocityLimitLower;
       this.velocityLimitUpper = velocityLimitUpper;
    }
 
-   public void setEffortLimit(double effortLimit)
+   public void setVelocityLimit(double velocityLimit)
    {
-      setEffortLimits(-effortLimit, effortLimit);
+      setVelocityLimit(-velocityLimit, velocityLimit);
    }
 
    public void setEffortLimits(double effortLimitLower, double effortLimitUpper)
    {
       this.effortLimitLower = effortLimitLower;
       this.effortLimitUpper = effortLimitUpper;
+   }
+
+   public void setEffortLimit(double effortLimit)
+   {
+      setEffortLimits(-effortLimit, effortLimit);
    }
 
    public double getMinEffortLimit()
@@ -442,18 +448,21 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       return qdDesired;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public double getKp()
    {
       return kp;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public double getKd()
    {
       return kd;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public abstract boolean isPassiveJoint();
 
@@ -473,12 +482,14 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.qdDesired = qdDesired;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public void setKp(double kp)
    {
       this.kp = kp;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public void setKd(double kd)
    {
@@ -499,13 +510,14 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    public abstract void getJointAxis(FrameVector3D axisToPack);
 
    // DRC Hack
-
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public boolean isUnderPositionControl()
    {
       return isUnderPositionControl;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public void setUnderPositionControl(boolean val)
    {
@@ -542,12 +554,14 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       this.isOnline = isOnline;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public boolean isUseFeedBackForceControl()
    {
       return useFeedBackForceControl;
    }
 
+   /** Remove April 2nd, 2018. */
    @Deprecated
    public void setUseFeedBackForceControl(boolean useFeedBackForceControl)
    {

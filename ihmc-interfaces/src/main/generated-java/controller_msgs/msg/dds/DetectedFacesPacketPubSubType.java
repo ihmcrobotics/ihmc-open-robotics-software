@@ -31,7 +31,11 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       {
          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < 100; ++i0)
+      {
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -50,7 +54,11 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       {
          current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getIds().get(i0).length() + 1;
       }
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPositions(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < data.getPositions().size(); ++i0)
+      {
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPositions().get(i0), current_alignment);
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -63,7 +71,10 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       else
          throw new RuntimeException("ids field exceeds the maximum length");
 
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getPositions(), cdr);
+      if (data.getPositions().size() <= 100)
+         cdr.write_type_e(data.getPositions());
+      else
+         throw new RuntimeException("positions field exceeds the maximum length");
    }
 
    public static void read(controller_msgs.msg.dds.DetectedFacesPacket data, us.ihmc.idl.CDR cdr)
@@ -71,7 +82,7 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       cdr.read_type_e(data.getIds());
 
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getPositions(), cdr);
+      cdr.read_type_e(data.getPositions());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.DetectedFacesPacket src, controller_msgs.msg.dds.DetectedFacesPacket dest)
@@ -101,7 +112,7 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       ser.write_type_e("ids", data.getIds());
 
-      ser.write_type_a("positions", new geometry_msgs.msg.dds.PointPubSubType(), data.getPositions());
+      ser.write_type_e("positions", data.getPositions());
    }
 
    @Override
@@ -109,7 +120,7 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       ser.read_type_e("ids", data.getIds());
 
-      ser.read_type_a("positions", new geometry_msgs.msg.dds.PointPubSubType(), data.getPositions());
+      ser.read_type_e("positions", data.getPositions());
    }
 
    @Override

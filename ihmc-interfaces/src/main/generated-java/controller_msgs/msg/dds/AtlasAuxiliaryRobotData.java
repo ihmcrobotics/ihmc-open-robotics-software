@@ -12,7 +12,7 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 {
    public us.ihmc.idl.IDLSequence.Float electric_joint_temperatures_;
    public us.ihmc.idl.IDLSequence.Float electric_joint_currents_;
-   public us.ihmc.idl.IDLSequence.Float electric_joint_enabled_array_;
+   public us.ihmc.idl.IDLSequence.Boolean electric_joint_enabled_array_;
    public float[] raw_imu_timestamps_;
    public float[] raw_imu_packet_counts_;
    public us.ihmc.euclid.tuple3D.Vector3D[] raw_imu_rates_;
@@ -38,7 +38,7 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 
       electric_joint_currents_ = new us.ihmc.idl.IDLSequence.Float(6, "type_5");
 
-      electric_joint_enabled_array_ = new us.ihmc.idl.IDLSequence.Float(6, "type_5");
+      electric_joint_enabled_array_ = new us.ihmc.idl.IDLSequence.Boolean(6, "type_7");
 
       raw_imu_timestamps_ = new float[15];
 
@@ -126,7 +126,7 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
       return electric_joint_currents_;
    }
 
-   public us.ihmc.idl.IDLSequence.Float getElectricJointEnabledArray()
+   public us.ihmc.idl.IDLSequence.Boolean getElectricJointEnabledArray()
    {
       return electric_joint_enabled_array_;
    }
@@ -305,7 +305,7 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.electric_joint_currents_, other.electric_joint_currents_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.electric_joint_enabled_array_, other.electric_joint_enabled_array_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBooleanSequence(this.electric_joint_enabled_array_, other.electric_joint_enabled_array_, epsilon))
          return false;
 
       for (int i13 = 0; i13 < raw_imu_timestamps_.length; ++i13)

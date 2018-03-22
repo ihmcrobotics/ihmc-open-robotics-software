@@ -94,10 +94,8 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       
       if(!options.getDisableVideo())
       {
-         
          System.out.println("Cameras: " + request.getCameras());
          cameras.addAll(Arrays.asList(request.getCameras().toArray()));
-         
       }
       else
       {

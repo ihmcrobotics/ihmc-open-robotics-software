@@ -41,7 +41,8 @@ public class MockNetworkProcessor
             try { if (subscriber.takeNextData(robotConfigurationData, null))
             {
                // Access message data
-               long nanosec = robotConfigurationData.getHeader().getStamp().getNanosec();
+//               long nanosec = robotConfigurationData.getHeader().getStamp().getNanosec();
+               long nanosec = robotConfigurationData.getTimestamp();
 
             } } catch (Exception e) {}
          }

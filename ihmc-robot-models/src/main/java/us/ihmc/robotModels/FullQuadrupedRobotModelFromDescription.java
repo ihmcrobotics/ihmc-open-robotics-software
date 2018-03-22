@@ -1,16 +1,15 @@
 package us.ihmc.robotModels;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import afu.org.checkerframework.checker.oigj.qual.O;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.JointLimit;
+import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -24,7 +23,9 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDescription implements FullQuadrupedRobotModel
 {
    private final BiMap<QuadrupedJointName, OneDoFJoint> jointNameOneDoFJointBiMap = HashBiMap.create();
+   @Deprecated
    private final Map<QuadrupedJointName, JointLimit> jointLimits = new EnumMap<>(QuadrupedJointName.class);
+   private final Map<OneDoFJoint, JointLimitData> jointLimitData = new HashMap<>();
    private final QuadrantDependentList<MovingReferenceFrame> soleFrames = new QuadrantDependentList<>();
 
    private QuadrantDependentList<EnumMap<LegJointName, OneDoFJoint>> legJointMaps;
@@ -54,6 +55,8 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
          // Assign default joint limits
          JointLimit jointLimit = new JointLimit(oneDoFJoint);
          jointLimits.put(quadrupedJointName, jointLimit);
+
+         jointLimitData.put(oneDoFJoint, new JointLimitData(oneDoFJoint));
       }
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -177,10 +180,17 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    /* (non-Javadoc)
     * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getJointLimit(us.ihmc.modelFileLoaders.SdfLoader.partNames.QuadrupedJointName)
     */
+   @Deprecated
    @Override
    public JointLimit getJointLimit(QuadrupedJointName jointName)
    {
       return jointLimits.get(jointName);
+   }
+
+   @Override
+   public JointLimitData getJointLimitData(OneDoFJoint joint)
+   {
+      return jointLimitData.get(joint);
    }
 
    @Override

@@ -26,8 +26,8 @@ public class ROS2IntraProcessDemo
             //         AtlasRobotConfigurationData robotConfigurationData = new AtlasRobotConfigurationData();
             RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-            robotConfigurationData.getHeader().getStamp().setNanosec(i);
-            //         robotConfigurationData.setTimestamp(i);
+            //            robotConfigurationData.getHeader().getStamp().setNanosec(i);
+            robotConfigurationData.setTimestamp(i);
             System.out.println("Publishing: " + i);
             publisher.publish(robotConfigurationData);
             Thread.sleep(1000);
@@ -55,7 +55,8 @@ public class ROS2IntraProcessDemo
             {
                if (subscriber.takeNextData(robotConfigurationData, null))
                {
-                  System.out.println(robotConfigurationData.getHeader().getStamp().getNanosec());
+//                  System.out.println(robotConfigurationData.getHeader().getStamp().getNanosec());
+                  System.out.println(robotConfigurationData.getTimestamp());
                }
             }
             catch (IOException e)

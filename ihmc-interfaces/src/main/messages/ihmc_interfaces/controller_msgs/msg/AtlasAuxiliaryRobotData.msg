@@ -2,7 +2,7 @@
 
 float32[<=6] electric_joint_temperatures
 float32[<=6] electric_joint_currents
-float32[<=6] electric_joint_enabled_array
+bool[<=6] electric_joint_enabled_array
 
 float32[15] raw_imu_timestamps
 float32[15] raw_imu_packet_counts
