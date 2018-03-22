@@ -39,7 +39,7 @@ import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 public class IHMCROSTranslationRuntimeToolsTest
 {
    @Rule
-   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(1, TimeUnit.MINUTES));
+   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(5, TimeUnit.MINUTES));
 
    @SuppressWarnings({"rawtypes", "unchecked"})
    @ContinuousIntegrationTest(estimatedDuration = 16.5)
