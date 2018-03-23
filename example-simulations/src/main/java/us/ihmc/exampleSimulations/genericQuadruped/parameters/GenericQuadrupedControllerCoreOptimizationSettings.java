@@ -10,8 +10,8 @@ public class GenericQuadrupedControllerCoreOptimizationSettings implements Contr
 
    private static final double defaultRhoWeight = 0.00001;
    private static final double defaultRhoMin = 1.0;
-   private static final double defaultRhoRateDefaultWeight = 1e-10;
-   private static final double defaultRhoRateHighWeight = 1e-8;
+   private static final double defaultRhoRateDefaultWeight = 0.002;
+   private static final double defaultRhoRateHighWeight = 0.05;
 
    private final double rhoWeight;
    private final double rhoMin;
