@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
@@ -553,6 +552,27 @@ public class AngularControlModuleHelper
    public DenseMatrix64F getYCoPSupportPolygonConstraintAinMatrix()
    {
       return yCoPSupportPolygonAinMatrix;
+   }
+
+   public void processLinearConstraints(DenseMatrix64F Ax, DenseMatrix64F bx, DenseMatrix64F Ay, DenseMatrix64F by, DenseMatrix64F consolidatedA,
+                                        DenseMatrix64F consolidatedB)
+   {
+      int numberOfXDecisionVariables = xTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols()
+            + xTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int numberOfYDecisionVariables = yTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols()
+            + yTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int numberOfVariables = numberOfXDecisionVariables + numberOfYDecisionVariables;
+      int totalNumberOfConstraints = Ax.getNumRows() + Ay.getNumRows();
+
+      consolidatedA.reshape(totalNumberOfConstraints, numberOfVariables);
+      consolidatedA.zero();
+      CommonOps.insert(Ax, consolidatedA, 0, 0);
+      CommonOps.insert(Ay, consolidatedA, Ax.getNumRows(), numberOfXDecisionVariables);
+
+      consolidatedB.reshape(totalNumberOfConstraints, 1);
+      consolidatedB.zero();
+      CommonOps.insert(bx, consolidatedB, 0, 0);
+      CommonOps.insert(by, consolidatedB, bx.getNumRows(), 0);
    }
 
    //   private void consolidateTorqueBiasMatrix(DenseMatrix64F forceBiasMatrix, DenseMatrix64F copBiasMatrix, DenseMatrix64F matrixToSet)
