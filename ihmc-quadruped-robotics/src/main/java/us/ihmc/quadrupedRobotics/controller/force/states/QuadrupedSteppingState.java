@@ -5,10 +5,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingStatePacket;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
@@ -70,6 +72,8 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
    private final QuadrupedJointSpaceManager jointSpaceManager;
 
+   private ControllerCoreOutputReadOnly controllerCoreOutput;
+
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
    private final WholeBodyControllerCore controllerCore;
@@ -96,6 +100,7 @@ public class QuadrupedSteppingState implements QuadrupedController
       controlCoreToolbox.setupForVirtualModelControlSolver(fullRobotModel.getBody(), controllerToolbox.getContactablePlaneBodies());
       FeedbackControlCommandList feedbackTemplate = controlManagerFactory.createFeedbackControlTemplate();
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(), registry);
+      controllerCoreOutput = controllerCore.getControllerCoreOutput();
 
       // Initialize input providers.
       xGaitSettingsProvider = new YoQuadrupedXGaitSettings(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
@@ -129,14 +134,13 @@ public class QuadrupedSteppingState implements QuadrupedController
 
       this.quadrupedSteppingStatePacket = new QuadrupedSteppingStatePacket();
 
-      this.stateMachine = buildStateMachine(runtimeEnvironment);
+      this.stateMachine = buildStateMachine();
       this.stepTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "stepTrigger", registry, QuadrupedSteppingRequestedEvent.class);
 
       parentRegistry.addChild(registry);
    }
 
-   private FiniteStateMachine<QuadrupedSteppingStateEnum, ControllerEvent, QuadrupedController> buildStateMachine(
-         QuadrupedRuntimeEnvironment runtimeEnvironment)
+   private FiniteStateMachine<QuadrupedSteppingStateEnum, ControllerEvent, QuadrupedController> buildStateMachine()
    {
       // Initialize controllers.
       final QuadrupedController standController = new QuadrupedStandController(controllerToolbox, controlManagerFactory, registry);
@@ -222,9 +226,14 @@ public class QuadrupedSteppingState implements QuadrupedController
 
    }
 
+   private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
+
    @Override
    public ControllerEvent process()
    {
+      controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
+      balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
+
       QuadrupedSteppingRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)
       {
@@ -256,8 +265,8 @@ public class QuadrupedSteppingState implements QuadrupedController
       submitControllerCoreCommands();
 
       controllerCoreTimer.startMeasurement();
-      //controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      //controllerCore.compute();
+      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
+      controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
 
       return null;

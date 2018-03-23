@@ -184,11 +184,14 @@ public class QuadrupedFootControlModule
          return ContactState.NO_CONTACT;
    }
 
-   public void compute(FrameVector3D soleForceCommandToPack)
+   public void compute()
    {
       // Update foot state machine.
       footStateMachine.process();
+   }
 
+   public void getDesiredSoleForce(FrameVector3D soleForceCommandToPack)
+   {
       // Pack sole force command result.
       ReferenceFrame originalFrame = soleForceCommandToPack.getReferenceFrame();
       soleForceCommandToPack.setIncludingFrame(footStateMachine.getCurrentState().getSoleForceCommand());
