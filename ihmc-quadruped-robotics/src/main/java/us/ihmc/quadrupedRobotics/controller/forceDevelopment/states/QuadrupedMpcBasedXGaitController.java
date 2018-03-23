@@ -1,7 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.forceDevelopment.states;
 
-import java.util.ArrayList;
-
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -30,14 +28,16 @@ import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
 
 public class QuadrupedMpcBasedXGaitController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
@@ -62,7 +62,8 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
    private final DoubleParameter mpcMaximumPreviewTimeParameter = new DoubleParameter("mpcMaximumPreviewTime", registry, 5);
    private final DoubleParameter mpcStepAdjustmentCostParameter = new DoubleParameter("mpcStepAdjustmentCost", registry, 100000);
    private final DoubleParameter mpcCopAdjustmentCostParameter = new DoubleParameter("mpcCopAdjustmentCost", registry, 1);
-   private final DoubleParameter mpcMinimumNormalizedContactPressureParameter = new DoubleParameter("mpcMinimumNormalizedContactPressure", registry, defaultMpcMinimumNormalizedContactPressureParameter);
+   private final DoubleParameter mpcMinimumNormalizedContactPressureParameter = new DoubleParameter("mpcMinimumNormalizedContactPressure", registry,
+                                                                                                    defaultMpcMinimumNormalizedContactPressureParameter);
    private final DoubleParameter comPositionMaxIntegralErrorParameter = new DoubleParameter("comPositionMaxIntegralError", registry, 0);
    private final DoubleParameter comPositionGravityCompensationParameter = new DoubleParameter("comPositionGravityCompensation", registry, 1);
    private final DoubleParameter jointDampingParameter = new DoubleParameter("jointDamping", registry, 1);
@@ -148,11 +149,13 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
 
       bodyOrientationManager = controlManagerFactory.getOrCreateBodyOrientationManager();
       DivergentComponentOfMotionEstimator dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassZUpFrame(), lipModel,
-                                                                                                         registry, runtimeEnvironment.getGraphicsListRegistry());
+                                                                                                         registry,
+                                                                                                         runtimeEnvironment.getGraphicsListRegistry());
       mpcOptimization = new QuadrupedDcmBasedMpcOptimizationWithLaneChange(dcmPositionEstimator, NUMBER_OF_PREVIEW_STEPS, registry,
-            runtimeEnvironment.getGraphicsListRegistry());
+                                                                           runtimeEnvironment.getGraphicsListRegistry());
       mpcSettings = new QuadrupedMpcOptimizationWithLaneChangeSettings(defaultMpcMaximumPreviewTimeParameter, defaultMpcStepAdjustmentCostParameter,
-            defaultMpcCopAdjustmentCostParameter, defaultMpcMinimumNormalizedContactPressureParameter);
+                                                                       defaultMpcCopAdjustmentCostParameter,
+                                                                       defaultMpcMinimumNormalizedContactPressureParameter);
 
       QuadrantDependentList<QuadrupedSolePositionController> solePositionControllers = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
@@ -246,10 +249,12 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       bodyYawSetpoint += planarVelocityProvider.get().getZ() * controlDT;
       desiredBodyOrientation.setToZero(worldFrame);
       desiredBodyOrientation.setYawPitchRoll(bodyYawSetpoint, 0.0, 0.0);
-      bodyOrientationManager.compute(taskSpaceControllerCommands.getComTorque(), desiredBodyOrientation);
+      bodyOrientationManager.compute(desiredBodyOrientation);
+      bodyOrientationManager.getDesiredAngularMomentumRate(taskSpaceControllerCommands.getComTorque());
 
       // update desired contact state and sole forces
-      timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerSettings.getContactForceLimits(), taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
+      timedStepController.compute(taskSpaceControllerSettings.getContactState(), taskSpaceControllerSettings.getContactForceLimits(),
+                                  taskSpaceControllerCommands.getSoleForce(), taskSpaceEstimates);
 
       // update joint setpoints
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
@@ -305,8 +310,10 @@ public class QuadrupedMpcBasedXGaitController implements QuadrupedController, Qu
       QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
       // solve for step adjustment and cmp position
-      mpcOptimization.compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getStepSequence(), taskSpaceEstimates.getSolePositions(),
-            taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity(), currentTime, mpcSettings);
+      mpcOptimization
+            .compute(stepAdjustmentVector, cmpPositionSetpoint, timedStepController.getStepSequence(), controllerToolbox.getReferenceFrames().getSoleFrames(),
+                     taskSpaceControllerSettings.getContactState(), taskSpaceEstimates.getComPosition(), taskSpaceEstimates.getComVelocity(), currentTime,
+                     mpcSettings);
 
       // adjust goal positions in step controller queue
       stepAdjustmentVector.changeFrame(worldFrame);

@@ -250,6 +250,7 @@ public class WholeBodyVirtualModelControlSolver
       {
          commandToSubmit.getDesiredWrench(controlFrame, tempExternalWrench);
          tempExternalWrench.negate();
+         tempExternalWrench.changeFrame(commandToSubmit.getEndEffector().getBodyFixedFrame());
          optimizationControlModule.submitExternalWrench(commandToSubmit.getEndEffector(), tempExternalWrench);
       }
 
@@ -264,6 +265,7 @@ public class WholeBodyVirtualModelControlSolver
       {
          commandToSubmit.getDesiredWrench(controlFrame, tempExternalWrench);
          tempExternalWrench.negate();
+         tempExternalWrench.changeFrame(commandToSubmit.getEndEffector().getBodyFixedFrame());
          optimizationControlModule.submitExternalWrench(commandToSubmit.getEndEffector(), tempExternalWrench);
       }
 
@@ -278,6 +280,7 @@ public class WholeBodyVirtualModelControlSolver
       {
          commandToSubmit.getDesiredWrench(controlFrame, tempExternalWrench);
          tempExternalWrench.negate();
+         tempExternalWrench.changeFrame(commandToSubmit.getEndEffector().getBodyFixedFrame());
          optimizationControlModule.submitExternalWrench(commandToSubmit.getEndEffector(), tempExternalWrench);
       }
 
