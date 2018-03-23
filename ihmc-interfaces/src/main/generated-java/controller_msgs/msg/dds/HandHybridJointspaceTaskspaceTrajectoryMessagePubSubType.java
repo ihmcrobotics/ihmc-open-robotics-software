@@ -29,7 +29,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       return current_alignment - initial_alignment;
@@ -46,7 +46,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getTaskspaceTrajectoryMessage(), current_alignment);
+      current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getTaskspaceTrajectoryMessage(), current_alignment);
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType
             .getCdrSerializedSize(data.getJointspaceTrajectoryMessage(), current_alignment);
 
@@ -58,7 +58,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType
 
       cdr.write_type_9(data.getRobotSide());
 
-      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.write(data.getTaskspaceTrajectoryMessage(), cdr);
+      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getTaskspaceTrajectoryMessage(), cdr);
 
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectoryMessage(), cdr);
    }
@@ -68,7 +68,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType
 
       data.setRobotSide(cdr.read_type_9());
 
-      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getTaskspaceTrajectoryMessage(), cdr);
+      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getTaskspaceTrajectoryMessage(), cdr);
 
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectoryMessage(), cdr);
    }
@@ -102,7 +102,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType
    {
       ser.write_type_9("robot_side", data.getRobotSide());
 
-      ser.write_type_a("taskspace_trajectory_message", new controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
+      ser.write_type_a("taskspace_trajectory_message", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
 
       ser.write_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(),
                        data.getJointspaceTrajectoryMessage());
@@ -113,7 +113,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType
    {
       data.setRobotSide(ser.read_type_9("robot_side"));
 
-      ser.read_type_a("taskspace_trajectory_message", new controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
+      ser.read_type_a("taskspace_trajectory_message", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
 
       ser.read_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(),
                       data.getJointspaceTrajectoryMessage());

@@ -33,6 +33,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType
       current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       return current_alignment - initial_alignment;
    }
@@ -52,6 +53,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType
       current_alignment += (data.getPrivilegedJointNameBasedHashCodes().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getPrivilegedJointAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       return current_alignment - initial_alignment;
    }
@@ -68,7 +70,10 @@ public class KinematicsToolboxConfigurationMessagePubSubType
       else
          throw new RuntimeException("privileged_joint_name_based_hash_codes field exceeds the maximum length");
 
-      cdr.write_type_5(data.getPrivilegedJointAngles());
+      if (data.getPrivilegedJointAngles().size() <= 100)
+         cdr.write_type_e(data.getPrivilegedJointAngles());
+      else
+         throw new RuntimeException("privileged_joint_angles field exceeds the maximum length");
    }
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
@@ -80,7 +85,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType
 
       cdr.read_type_e(data.getPrivilegedJointNameBasedHashCodes());
 
-      data.setPrivilegedJointAngles(cdr.read_type_5());
+      cdr.read_type_e(data.getPrivilegedJointAngles());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage src,
@@ -116,7 +121,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType
 
       ser.write_type_e("privileged_joint_name_based_hash_codes", data.getPrivilegedJointNameBasedHashCodes());
 
-      ser.write_type_5("privileged_joint_angles", data.getPrivilegedJointAngles());
+      ser.write_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
    }
 
    @Override
@@ -128,7 +133,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType
 
       ser.read_type_e("privileged_joint_name_based_hash_codes", data.getPrivilegedJointNameBasedHashCodes());
 
-      data.setPrivilegedJointAngles(ser.read_type_5("privileged_joint_angles"));
+      ser.read_type_e("privileged_joint_angles", data.getPrivilegedJointAngles());
    }
 
    @Override

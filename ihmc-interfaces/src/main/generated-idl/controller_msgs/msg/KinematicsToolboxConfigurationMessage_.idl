@@ -33,7 +33,7 @@ module controller_msgs
         /**
          * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
          */
-        float privileged_joint_angles;
+        sequence<float> privileged_joint_angles;
       };
     };
   };
