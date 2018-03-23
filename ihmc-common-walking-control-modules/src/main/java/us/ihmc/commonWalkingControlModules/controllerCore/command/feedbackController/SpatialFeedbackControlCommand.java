@@ -344,6 +344,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 
       desiredPositionInWorld.set(desiredPosition);
       desiredLinearVelocityInWorld.set(desiredLinearVelocity);
+      feedForwardLinearActionInWorld.setToZero();
    }
 
    /**
@@ -434,6 +435,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 
       desiredOrientationInWorld.set(desiredOrientation);
       desiredAngularVelocityInWorld.set(desiredAngularVelocity);
+      feedForwardAngularActionInWorld.setToZero();
    }
 
    /**
@@ -477,6 +479,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 
       desiredPositionInWorld.set(desiredPosition);
       desiredLinearVelocityInWorld.set(desiredLinearVelocity);
+
+      feedForwardLinearActionInWorld.setToZero();
    }
 
 
@@ -501,6 +505,8 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 
       desiredOrientationInWorld.set(desiredOrientation);
       desiredAngularVelocityInWorld.set(desiredAngularVelocity);
+
+      feedForwardAngularActionInWorld.setToZero();
    }
 
    /**
@@ -512,13 +518,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     *
     * @param feedForwardAngularAction describes the desired angular action of
     *           {@code controlFrame} with respect to the {@code base}. It is equivalent to the
-    *           desired angular acceleration of {@code endEffector.getBodyFixedFrame()}. Modified.
+    *           desired angular action of {@code endEffector.getBodyFixedFrame()}. Modified.
     * @param feedForwardLinearAction describes the desired linear action of the
     *           {@code controlFrame}'s origin with respect to the {@code base}. It does NOT describe
-    *           the desired linear acceleration of {@code endEffector.getBodyFixedFrame()}'s origin.
+    *           the desired linear action of {@code endEffector.getBodyFixedFrame()}'s origin.
     *           Modified.
     */
-
    public void changeFrameAndSetFeedForward(FrameVector3D feedForwardAngularAction, FrameVector3D feedForwardLinearAction)
    {
       changeFrameAndSetAngularFeedForward(feedForwardAngularAction);

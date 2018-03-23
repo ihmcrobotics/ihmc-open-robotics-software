@@ -224,6 +224,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
       desiredPositionInWorld.set(desiredPosition);
       desiredLinearVelocityInWorld.set(desiredLinearVelocity);
+      feedForwardLinearActionInWorld.setToZero();
    }
 
    /**
@@ -232,9 +233,9 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * WARNING: The information provided has to be relevant to the {@code bodyFixedPoint} provided.
     * </p>
     *
-    * @param feedForwardLinearAcceleration describes the desired linear acceleration of the
+    * @param feedForwardLinearAcceleration describes the desired linear action of the
     *           {@code bodyFixedPoint} with respect to the {@code base}. It does NOT describe the
-    *           desired linear acceleration of {@code endEffector.getBodyFixedFrame()}'s origin. Not
+    *           desired linear action of {@code endEffector.getBodyFixedFrame()}'s origin. Not
     *           modified.
     * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
     *            {@link ReferenceFrame#getWorldFrame()}.
@@ -325,7 +326,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * commands value will be treated as more important than the other commands.
     * </p>
     *
-    * @param linearWeightMatrix weight matrix holding the linear weights to use for each component of the desired
+    * @param weightMatrix weight matrix holding the linear weights to use for each component of the desired
     *           acceleration. Not modified.
     */
    public void setWeightMatrix(WeightMatrix3D weightMatrix)
