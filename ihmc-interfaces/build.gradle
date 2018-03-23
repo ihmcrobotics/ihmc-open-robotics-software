@@ -9,7 +9,7 @@ buildscript {
    }
    dependencies {
       classpath "us.ihmc:ihmc-build:0.12.10"
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.5.3-alpha"
+      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.5.4-alpha"
 //      classpath "us.ihmc:ihmc-pub-sub-generator:0.3.7"
       classpath "org.ajoberstar:grgit:2.1.0"
       classpath "com.bmuschko:gradle-docker-plugin:3.2.5"
@@ -40,16 +40,16 @@ mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.5'
    compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.6.2-alpha'
-   compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.5.3-alpha'
+   compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.5.4-alpha'
 }
 
 testDependencies {
-   compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.5.3-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.5.4-alpha'
 }
 
 generatorDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
-   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.5.3-alpha"
+   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.5.4-alpha"
 }
 
 task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
@@ -81,13 +81,13 @@ task generateMessages {
 
       def generator = new us.ihmc.ros2.rosidl.RosInterfaceGenerator();
 
-      generator.addPackageRoot(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces"));
-      generator.addPackageRoot(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces"));
-      generator.addPackageRoot(Paths.get("src/main/messages/ihmc_interfaces"));
+      generator.addPackageRoot(file("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces").toPath());
+      generator.addPackageRoot(file("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces").toPath());
+      generator.addPackageRoot(file("src/main/messages/ihmc_interfaces").toPath());
 
-      generator.addCustomIDLFiles(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/"));
+      generator.addCustomIDLFiles(file("build/tmp/generateMessages/ros2-common-interfaces/").toPath());
 
-      generator.generate(Paths.get("build/tmp/generateMessages/generated-idl"), Paths.get("build/tmp/generateMessages/generated-java"));
+      generator.generate(file("build/tmp/generateMessages/generated-idl").toPath(), file("build/tmp/generateMessages/generated-java").toPath());
 
       copy {
          from "build/tmp/generateMessages/generated-idl/controller_msgs"
@@ -99,7 +99,7 @@ task generateMessages {
          into "src/main/generated-java/controller_msgs"
       }
 
-      generator.convertDirectoryToUnixEOL("src/main/generated-idl")
-      generator.convertDirectoryToUnixEOL("src/main/generated-java")
+      generator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())
+      generator.convertDirectoryToUnixEOL(file("src/main/generated-java").toPath())
    }
 }
