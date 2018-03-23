@@ -74,6 +74,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
    private final MomentumRateCommand inverseDynamicsOutput = new MomentumRateCommand();
    private final MomentumCommand inverseKinematicsOutput = new MomentumCommand();
+   private final MomentumRateCommand virtualModelControlOutput = new MomentumRateCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPID3DGains gains;
@@ -243,7 +244,31 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    @Override
    public void computeVirtualModelControl()
    {
-      computeInverseDynamics();
+      if (!isEnabled())
+         return;
+
+      computeProportionalTerm(proportionalFeedback);
+      computeDerivativeTerm(derivativeFeedback);
+      computeIntegralTerm(integralFeedback);
+      feedForwardLinearAcceleration.setIncludingFrame(yoFeedForwardLinearAcceleration);
+      feedForwardLinearAcceleration.changeFrame(centerOfMassFrame);
+
+      desiredLinearAcceleration.setIncludingFrame(proportionalFeedback);
+      desiredLinearAcceleration.add(derivativeFeedback);
+      desiredLinearAcceleration.add(integralFeedback);
+      desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
+      yoFeedbackLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
+      rateLimitedFeedbackLinearAcceleration.update();
+      desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackLinearAcceleration);
+
+      desiredLinearAcceleration.changeFrame(centerOfMassFrame);
+      desiredLinearAcceleration.add(feedForwardLinearAcceleration);
+
+      yoDesiredLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
+
+      desiredLinearAcceleration.scale(totalRobotMass);
+      desiredLinearAcceleration.changeFrame(worldFrame);
+      virtualModelControlOutput.setLinearMomentumRate(desiredLinearAcceleration);
    }
 
    @Override
@@ -379,6 +404,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    @Override
    public MomentumRateCommand getVirtualModelControlOutput()
    {
-      return getInverseDynamicsOutput();
+      if (!isEnabled())
+         throw new RuntimeException("This controller is disabled.");
+      return virtualModelControlOutput;
    }
 }
