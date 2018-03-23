@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -14,7 +15,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.idl.PreallocatedList;
-import us.ihmc.idl.PreallocatedList.ListAllocator;
 
 public class ScriptFileSaver
 {
@@ -126,7 +126,7 @@ public class ScriptFileSaver
    {
       Field clazzField = list.getClass().getDeclaredField("clazz");
       clazzField.setAccessible(true);
-      PreallocatedList<T> trimmed = new PreallocatedList<>((Class<T>) clazzField.get(list), (ListAllocator<T>) null, 0);
+      PreallocatedList<T> trimmed = new PreallocatedList<>((Class<T>) clazzField.get(list), (Supplier<T>) null, 0);
       Field posField = list.getClass().getDeclaredField("pos");
       posField.setAccessible(true);
       posField.setInt(trimmed, list.size() - 1);

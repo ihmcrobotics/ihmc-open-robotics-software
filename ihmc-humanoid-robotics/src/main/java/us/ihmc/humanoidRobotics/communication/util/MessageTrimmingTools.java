@@ -6,6 +6,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import us.ihmc.communication.net.NetClassList.PacketTrimmer;
 import us.ihmc.communication.packets.BoundingBoxesPacket;
@@ -62,7 +63,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMan
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.idl.PreallocatedList;
-import us.ihmc.idl.PreallocatedList.ListAllocator;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 /**
@@ -804,12 +804,12 @@ public final class MessageTrimmingTools
 
    private static <T> PreallocatedList<T> trimList(PreallocatedList<T> listToTrim, PacketTrimmer<T> elementTrimmer, Class<T> elementClass)
    {
-      ListAllocator<T> allocator = new ListAllocator<T>()
+      Supplier<T> allocator = new Supplier<T>()
       {
          int index = 0;
 
          @Override
-         public T createInstance()
+         public T get()
          { // Cheating here, knowing that the allocator will be used for each element in order starting at index 0.
             return elementTrimmer.trim(listToTrim.get(index++));
          }
