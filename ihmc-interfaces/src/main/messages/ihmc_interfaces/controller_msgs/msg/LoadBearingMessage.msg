@@ -7,6 +7,6 @@ bool load false
 # Sets the coefficient of friction that the controller will use for the contact point.
 float64 coefficient_of_friction 0
 # Sets the pose of the contact frame in the frame of the end effector body.
-geometry_msgs/Pose body_frame_to_control_frame
+geometry_msgs/Pose body_frame_to_contact_frame
 # Sets the contact normal used by the controller to load the contact point.
 geometry_msgs/Vector3 contact_normal_in_world_frame
