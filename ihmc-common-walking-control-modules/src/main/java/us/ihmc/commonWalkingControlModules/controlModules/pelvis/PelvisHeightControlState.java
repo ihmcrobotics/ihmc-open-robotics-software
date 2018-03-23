@@ -327,7 +327,8 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       pointFeedbackCommand.set(spatialFeedbackControlCommand.getBase(), spatialFeedbackControlCommand.getEndEffector());
       spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
       spatialFeedbackControlCommand.getFeedForwardLinearActionIncludingFrame(feedForwardLinearAcceleration);
-      pointFeedbackCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      pointFeedbackCommand.set(desiredPosition, desiredLinearVelocity);
+      pointFeedbackCommand.setFeedForwardAction(feedForwardLinearAcceleration);
       pointFeedbackCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
       pointFeedbackCommand.setGains(spatialFeedbackControlCommand.getGains().getPositionGains());
       pointFeedbackCommand.setGainsFrame(baseFrame);
