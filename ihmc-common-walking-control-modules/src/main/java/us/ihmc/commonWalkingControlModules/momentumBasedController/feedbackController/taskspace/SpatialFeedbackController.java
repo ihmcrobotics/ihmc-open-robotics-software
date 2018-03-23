@@ -72,6 +72,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final RateLimitedYoSpatialVector rateLimitedFeedbackAcceleration;
    private final YoSpatialVector yoAchievedAcceleration;
 
+   private final YoSpatialVector yoDesiredWrench;
+   private final YoSpatialVector yoFeedbackWrench;
+   private final RateLimitedYoSpatialVector rateLimitedFeedbackWrench;
+
    private final YoFrameVector yoDesiredRotationVector;
    private final YoFrameVector yoCurrentRotationVector;
 
@@ -96,6 +100,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final FrameVector3D biasLinearAcceleration = new FrameVector3D();
    private final FrameVector3D achievedAngularAcceleration = new FrameVector3D();
    private final FrameVector3D achievedLinearAcceleration = new FrameVector3D();
+
+   private final FrameVector3D desiredLinearForce = new FrameVector3D();
+   private final FrameVector3D desiredAngularTorque = new FrameVector3D();
 
    private final Twist currentTwist = new Twist();
    private final SpatialAccelerationVector endEffectorAchievedAcceleration = new SpatialAccelerationVector();
@@ -160,15 +167,41 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
       {
+
          yoCurrentVelocity = feedbackControllerToolbox.getVelocity(endEffector, CURRENT, isEnabled);
          yoErrorVelocity = feedbackControllerToolbox.getVelocity(endEffector, ERROR, isEnabled);
 
-         yoDesiredAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, DESIRED, isEnabled);
-         yoFeedForwardAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, FEEDFORWARD, isEnabled);
-         yoFeedbackAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, FEEDBACK, isEnabled);
-         rateLimitedFeedbackAcceleration = feedbackControllerToolbox.getRateLimitedAcceleration(endEffector, FEEDBACK, dt, maximumLinearRate,
-                                                                                                maximumAngularRate, isEnabled);
-         yoAchievedAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, ACHIEVED, isEnabled);
+         if (toolbox.isEnableInverseDynamicsModule())
+         {
+            yoDesiredAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, DESIRED, isEnabled);
+            yoFeedForwardAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, FEEDFORWARD, isEnabled);
+            yoFeedbackAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, FEEDBACK, isEnabled);
+            rateLimitedFeedbackAcceleration = feedbackControllerToolbox
+                  .getRateLimitedAcceleration(endEffector, FEEDBACK, dt, maximumLinearRate, maximumAngularRate, isEnabled);
+            yoAchievedAcceleration = feedbackControllerToolbox.getAcceleration(endEffector, ACHIEVED, isEnabled);
+         }
+         else
+         {
+            yoDesiredAcceleration = null;
+            yoFeedForwardAcceleration = null;
+            yoFeedbackAcceleration = null;
+            rateLimitedFeedbackAcceleration = null;
+            yoAchievedAcceleration = null;
+         }
+
+         if (toolbox.isEnableVirtualModelControlModule())
+         {
+            yoDesiredWrench = feedbackControllerToolbox.getWrench(endEffector, DESIRED, isEnabled);
+            yoFeedbackWrench = feedbackControllerToolbox.getWrench(endEffector, FEEDBACK, isEnabled);
+            rateLimitedFeedbackWrench = feedbackControllerToolbox.getRateLimitedWrench(endEffector, FEEDBACK, dt, maximumLinearRate, maximumAngularRate,
+                                                                                       isEnabled);
+         }
+         else
+         {
+            yoDesiredWrench = null;
+            yoFeedbackWrench = null;
+            rateLimitedFeedbackWrench = null;
+         }
       }
       else
       {
@@ -180,6 +213,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoFeedbackAcceleration = null;
          rateLimitedFeedbackAcceleration = null;
          yoAchievedAcceleration = null;
+
+         yoDesiredWrench = null;
+         yoFeedbackWrench = null;
+         rateLimitedFeedbackWrench = null;
       }
 
       if (toolbox.isEnableInverseKinematicsModule())
@@ -196,6 +233,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          rateLimitedFeedbackVelocity = null;
       }
 
+
+
       parentRegistry.addChild(registry);
    }
 
@@ -208,6 +247,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       controlBaseFrame = command.getControlBaseFrame();
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
+      virtualModelControlOutput.setProperties(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
       command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
@@ -331,7 +371,35 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    @Override
    public void computeVirtualModelControl()
    {
-      computeInverseDynamics();
+      if (!isEnabled())
+         return;
+
+      virtualModelControlOutput.setProperties(inverseDynamicsOutput);
+
+      computeProportionalTerm(linearProportionalFeedback, angularProportionalFeedback);
+      computeDerivativeTerm(linearDerivativeFeedback, angularDerivativeFeedback);
+      computeIntegralTerm(linearIntegralFeedback, angularIntegralFeedback);
+
+      desiredLinearForce.setIncludingFrame(linearProportionalFeedback);
+      desiredLinearForce.add(linearDerivativeFeedback);
+      desiredLinearForce.add(linearIntegralFeedback);
+      desiredLinearForce.clipToMaxLength(positionGains.getMaximumFeedback());
+
+      desiredAngularTorque.setIncludingFrame(angularProportionalFeedback);
+      desiredAngularTorque.add(angularDerivativeFeedback);
+      desiredAngularTorque.add(angularIntegralFeedback);
+      desiredAngularTorque.clipToMaxLength(orientationGains.getMaximumFeedback());
+
+      yoFeedbackWrench.setAndMatchFrame(desiredLinearForce, desiredAngularTorque);
+      rateLimitedFeedbackWrench.update();
+      rateLimitedFeedbackWrench.getIncludingFrame(desiredLinearForce, desiredAngularTorque);
+
+      desiredLinearForce.changeFrame(controlFrame);
+      desiredAngularTorque.changeFrame(controlFrame);
+
+      yoDesiredWrench.setAndMatchFrame(desiredLinearForce, desiredAngularTorque);
+
+      virtualModelControlOutput.setWrench(controlFrame, desiredAngularTorque, desiredLinearForce);
    }
 
    @Override
