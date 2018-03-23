@@ -8,7 +8,7 @@ byte ROBOT_SIDE_RIGHT = 1
 # Specifies the side of the robot that will execute the trajectory.
 byte robot_side 255
 # The taskspace trajectory information.
-SO3TrajectoryMessage taskspace_trajectory_message
+SE3TrajectoryMessage taskspace_trajectory_message
 # The jointspace trajectory information.
 # The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
 JointspaceTrajectoryMessage jointspace_trajectory_message

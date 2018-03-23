@@ -2,6 +2,6 @@
 
 float32 default_height
 float32 resolution
-float32 x_size
-float32 y_size
+float32 size_x
+float32 size_y
 HeightQuadTreeLeafMessage[<=5000] leaves
