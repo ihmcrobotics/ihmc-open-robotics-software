@@ -247,6 +247,8 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       if (!isEnabled())
          return;
 
+      virtualModelControlOutput.set(inverseDynamicsOutput);
+
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
       computeIntegralTerm(integralFeedback);
