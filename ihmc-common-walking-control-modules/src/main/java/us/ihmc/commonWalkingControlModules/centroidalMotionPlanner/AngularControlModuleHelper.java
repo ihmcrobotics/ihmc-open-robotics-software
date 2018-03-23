@@ -26,7 +26,8 @@ public class AngularControlModuleHelper
    private final DenseMatrix64F[] yTorquePositionContributionCoefficientBiasMatrices;
    private final DenseMatrix64F[] xTorqueCoPContributionCoefficientCoefficientMatrices;
    private final DenseMatrix64F[] yTorqueCoPContributionCoefficientCoefficientMatrices;
-   private final DenseMatrix64F copSupportPolygonAinMatrix;
+   private final DenseMatrix64F xCoPSupportPolygonAinMatrix;
+   private final DenseMatrix64F yCoPSupportPolygonAinMatrix;
    private final DenseMatrix64F copSupportPolygonbinMatrix;
 
    private final double robotMass;
@@ -47,7 +48,8 @@ public class AngularControlModuleHelper
       yTorquePositionContributionCoefficientBiasMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
       xTorqueCoPContributionCoefficientCoefficientMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
       yTorqueCoPContributionCoefficientCoefficientMatrices = new DenseMatrix64F[numberOfTorqueCoefficients];
-      copSupportPolygonAinMatrix = new DenseMatrix64F(0, 1);
+      xCoPSupportPolygonAinMatrix = new DenseMatrix64F(0, 1);
+      yCoPSupportPolygonAinMatrix = new DenseMatrix64F(0, 1);
       copSupportPolygonbinMatrix = new DenseMatrix64F(0, 1);
 
       for (int i = 0; i < numberOfTorqueCoefficients; i++)
@@ -148,12 +150,12 @@ public class AngularControlModuleHelper
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> nodeEntry = nodeList.getFirstEntry();
       RecycledLinkedListBuilder<CentroidalMotionSupportPolygon>.RecycledLinkedListEntry<CentroidalMotionSupportPolygon> supportPolygonEntry = supportPolygonList.getFirstEntry();
       double nodeTime;
-      for(int nodeIndex = 0, supportPolygonIndex = 0; nodeIndex < numberOfNodes; nodeIndex++, nodeEntry = nodeEntry.getNext())
+      for (int nodeIndex = 0, supportPolygonIndex = 0; nodeIndex < numberOfNodes; nodeIndex++, nodeEntry = nodeEntry.getNext())
       {
          nodeTime = nodeEntry.element.getTime();
-         for(;supportPolygonIndex < numberOfSupportPolygons; supportPolygonIndex++, supportPolygonEntry = supportPolygonEntry.getNext())
+         for (; supportPolygonIndex < numberOfSupportPolygons; supportPolygonIndex++, supportPolygonEntry = supportPolygonEntry.getNext())
          {
-            if(nodeTime < supportPolygonEntry.element.getStartTime())
+            if (nodeTime < supportPolygonEntry.element.getStartTime())
                break;
             else if (nodeTime > supportPolygonEntry.element.getEndTime())
                continue;
@@ -171,8 +173,9 @@ public class AngularControlModuleHelper
       int numberOfVertices = supportPolygon.getNumberOfVertices();
       if (numberOfVertices == 0)
          return;
-      int existingNumberOfConstraints = copSupportPolygonAinMatrix.getNumRows();
-      copSupportPolygonAinMatrix.reshape(existingNumberOfConstraints + numberOfVertices, numberOfNodes * 2, true);
+      int existingNumberOfConstraints = xCoPSupportPolygonAinMatrix.getNumRows();
+      xCoPSupportPolygonAinMatrix.reshape(existingNumberOfConstraints + numberOfVertices, numberOfNodes, true);
+      yCoPSupportPolygonAinMatrix.reshape(existingNumberOfConstraints + numberOfVertices, numberOfNodes, true);
       copSupportPolygonbinMatrix.reshape(existingNumberOfConstraints + numberOfVertices, 1, true);
       for (int j = 0; j < numberOfVertices - 1; j++)
          setCoPPositionConstraint(numberOfNodes, i, existingNumberOfConstraints, j, supportPolygon.getVertex(j), supportPolygon.getVertex(j + 1));
@@ -185,8 +188,8 @@ public class AngularControlModuleHelper
    {
       double deltaX = vertex2.getX() - vertex1.getX();
       double deltaY = vertex2.getY() - vertex1.getY();
-      copSupportPolygonAinMatrix.set(existingNumberOfConstraints + rowIndex, columnIndex, -deltaY);
-      copSupportPolygonAinMatrix.set(existingNumberOfConstraints + rowIndex, numberOfNodes + columnIndex, deltaX);
+      xCoPSupportPolygonAinMatrix.set(existingNumberOfConstraints + rowIndex, columnIndex, -deltaY);
+      yCoPSupportPolygonAinMatrix.set(existingNumberOfConstraints + rowIndex, columnIndex, deltaX);
       copSupportPolygonbinMatrix.set(existingNumberOfConstraints + rowIndex, -deltaY * vertex1.getX() + deltaX * vertex1.getY());
    }
 
@@ -452,13 +455,113 @@ public class AngularControlModuleHelper
       CommonOps.insert(tempMatrixForCoefficients, coefficientMatrixToSet, rowIndex, 0);
    }
 
-   public DenseMatrix64F getCoPSupportPolygonConstraintAinMatrix()
-   {
-      return copSupportPolygonAinMatrix;
-   }
-
    public DenseMatrix64F getCoPSupportPolygonConstraintbinMatrix()
    {
       return copSupportPolygonbinMatrix;
    }
+
+   public void getConsolidatedCoPSupportPolygonConstraints(DenseMatrix64F coefficientMatrixToSet, DenseMatrix64F biasMatrixToSet)
+   {
+      int numberOfXDecisionVariables = xTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols()
+            + xTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int numberOfYDecisionVariables = yTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols()
+            + yTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int numberOfVariables = numberOfXDecisionVariables + numberOfYDecisionVariables;
+      coefficientMatrixToSet.reshape(xCoPSupportPolygonAinMatrix.getNumRows(), numberOfVariables);
+      coefficientMatrixToSet.zero();
+      int xCoPIndex = xTorquePositionContributionCoefficientBiasMatrices[0].getNumCols();
+      int yCoPIndex = numberOfXDecisionVariables + yTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols();
+      CommonOps.insert(xCoPSupportPolygonAinMatrix, coefficientMatrixToSet, xCoPIndex, 0);
+      CommonOps.insert(yCoPSupportPolygonAinMatrix, coefficientMatrixToSet, yCoPIndex, 0);
+      biasMatrixToSet.set(copSupportPolygonbinMatrix);
+   }
+
+   public void getConsolidatedTorqueConstraints(DenseMatrix64F coefficientMatrixToSet, DenseMatrix64F biasMatrixToSet)
+   {
+      int numberOfConstraints = 0;
+      int numberOfXDecisionVariables = xTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols()
+            + xTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int numberOfYDecisionVariables = yTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols()
+            + yTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int numberOfVariables = numberOfXDecisionVariables + numberOfYDecisionVariables;
+      for (int i = 0; i < 7; i++)
+      {
+         DenseMatrix64F positionCoefficientMatrix = xTorquePositionContributionCoefficientCoefficientMatrices[i];
+         DenseMatrix64F copCoefficientMatrix = xTorqueCoPContributionCoefficientCoefficientMatrices[i];
+         consolidateTorqueCoefficientMatrix(positionCoefficientMatrix, copCoefficientMatrix, tempMatrixForCoefficients);
+         coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables, true);
+         CommonOps.insert(tempMatrixForCoefficients, coefficientMatrixToSet, numberOfConstraints, 0);
+
+         DenseMatrix64F positionBiasMatrix = xTorquePositionContributionCoefficientBiasMatrices[i];
+         //DenseMatrix64F copBiasMatrix = xTorqueCoPContributionCoefficientBiasMatrices[i];
+         biasMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), 1, true);
+         CommonOps.insert(positionBiasMatrix, biasMatrixToSet, numberOfConstraints, 0);
+         numberOfConstraints += positionCoefficientMatrix.getNumRows();
+
+      }
+      for (int i = 0; i < 7; i++)
+      {
+         DenseMatrix64F positionCoefficientMatrix = yTorquePositionContributionCoefficientCoefficientMatrices[i];
+         DenseMatrix64F copCoefficientMatrix = yTorqueCoPContributionCoefficientCoefficientMatrices[i];
+         consolidateTorqueCoefficientMatrix(positionCoefficientMatrix, copCoefficientMatrix, tempMatrixForCoefficients);
+         coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables);
+         CommonOps.insert(tempMatrixForCoefficients, coefficientMatrixToSet, numberOfConstraints, numberOfXDecisionVariables);
+
+         DenseMatrix64F positionBiasMatrix = yTorquePositionContributionCoefficientBiasMatrices[i];
+         //DenseMatrix64F copBiasMatrix = yTorqueCoPContributionCoefficientBiasMatrices[i];
+         biasMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), 1, true);
+         CommonOps.insert(positionBiasMatrix, biasMatrixToSet, numberOfConstraints, 0);
+         numberOfConstraints += positionCoefficientMatrix.getNumRows();
+      }
+      DenseMatrix64F positionCoefficientMatrix = xTorquePositionContributionCoefficientCoefficientMatrices[7];
+      coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables, true);
+      CommonOps.insert(positionCoefficientMatrix, coefficientMatrixToSet, numberOfConstraints, 0);
+
+      DenseMatrix64F positionBiasMatrix = xTorquePositionContributionCoefficientBiasMatrices[7];
+      biasMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), 1, true);
+      CommonOps.insert(positionBiasMatrix, biasMatrixToSet, numberOfConstraints, 0);
+      numberOfConstraints += positionCoefficientMatrix.getNumRows();
+
+      positionCoefficientMatrix = yTorquePositionContributionCoefficientCoefficientMatrices[7];
+      coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables);
+      CommonOps.insert(positionCoefficientMatrix, coefficientMatrixToSet, numberOfConstraints, numberOfXDecisionVariables);
+
+      positionBiasMatrix = yTorquePositionContributionCoefficientBiasMatrices[7];
+      biasMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), 1, true);
+      CommonOps.insert(positionBiasMatrix, biasMatrixToSet, numberOfConstraints, 0);
+      numberOfConstraints += positionCoefficientMatrix.getNumRows();
+   }
+
+   private void consolidateTorqueCoefficientMatrix(DenseMatrix64F positionCoefficientMatrix, DenseMatrix64F copCoefficientMatrix, DenseMatrix64F matrixToSet)
+   {
+      int numberOfForceVariables = positionCoefficientMatrix.getNumCols();
+      int numberOfCoPVariables = copCoefficientMatrix.getNumCols();
+
+      if (positionCoefficientMatrix.getNumRows() != copCoefficientMatrix.getNumRows())
+         throw new RuntimeException("Cannot combine the decision variable and CoP torque contributions due to number of rows mismatch");
+
+      matrixToSet.reshape(positionCoefficientMatrix.getNumRows(), numberOfForceVariables + numberOfCoPVariables);
+      CommonOps.insert(positionCoefficientMatrix, matrixToSet, 0, 0);
+      CommonOps.insert(positionCoefficientMatrix, matrixToSet, 0, numberOfForceVariables);
+   }
+
+   public DenseMatrix64F getXCoPSupportPolygonConstraintAinMatrix()
+   {
+      return xCoPSupportPolygonAinMatrix;
+   }
+
+   public DenseMatrix64F getYCoPSupportPolygonConstraintAinMatrix()
+   {
+      return yCoPSupportPolygonAinMatrix;
+   }
+
+   //   private void consolidateTorqueBiasMatrix(DenseMatrix64F forceBiasMatrix, DenseMatrix64F copBiasMatrix, DenseMatrix64F matrixToSet)
+   //   {
+   //      if (forceBiasMatrix.getNumRows() != copBiasMatrix.getNumRows())
+   //         throw new RuntimeException("Cannot combine the decision variable and CoP torque contributions due to number of rows mismatch");
+   //
+   //      matrixToSet.reshape(forceBiasMatrix.getNumRows(), 1);
+   //      matrixToSet.set(forceBiasMatrix);
+   //      CommonOps.addEquals(matrixToSet, copBiasMatrix);
+   //   }
 }

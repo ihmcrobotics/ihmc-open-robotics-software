@@ -27,6 +27,8 @@ public class LinearControlModuleHelper
    private final DenseMatrix64F[] forceRateCoefficientMatrix = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] forceRateBias = new DenseMatrix64F[numberOfAxis];
 
+   private final DenseMatrix64F[] optimizedPositionValues = new DenseMatrix64F[numberOfAxis];
+   private final DenseMatrix64F[] optimizedVelocityValues = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] optimizedForceValues = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] optimizedForceRateValues = new DenseMatrix64F[numberOfAxis];
    private final DenseMatrix64F[] decisionVariableValues = new DenseMatrix64F[numberOfAxis];
@@ -866,22 +868,8 @@ public class LinearControlModuleHelper
 
    public void setDecisionVariableValues(Axis axis, DenseMatrix64F solutionToSave)
    {
-      //      PrintTools.debug("Axis: " +axis.toString() + " Solution: " + solutionToSave.toString());
       DenseMatrix64F solution = decisionVariableValues[axis.ordinal()];
       solution.set(solutionToSave);
-   }
-
-   public void processDecisionVariables()
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         optimizedForceValues[i].reshape(numberOfNodes, 1);
-         CommonOps.mult(forceCoefficientMatrix[i], decisionVariableValues[i], optimizedForceValues[i]);
-         CommonOps.addEquals(optimizedForceValues[i], forceBias[i]);
-         optimizedForceRateValues[i].reshape(numberOfNodes, 1);
-         CommonOps.mult(forceRateCoefficientMatrix[i], decisionVariableValues[i], optimizedForceRateValues[i]);
-         CommonOps.addEquals(optimizedForceRateValues[i], forceRateBias[i]);
-      }
    }
 
    public DenseMatrix64F[] getOptimizedForceValues()
@@ -918,4 +906,39 @@ public class LinearControlModuleHelper
    {
       return bin[axis.ordinal()];
    }
+
+   public DenseMatrix64F getOptimizedForceValues(Axis axis)
+   {
+      int axisOrdinal = axis.ordinal();
+      compute(optimizedForceValues[axisOrdinal], decisionVariableValues[axisOrdinal], forceCoefficientMatrix[axisOrdinal], forceBias[axisOrdinal]);
+      return optimizedForceValues[axisOrdinal];
+   }
+
+   private void compute(DenseMatrix64F result, DenseMatrix64F soln, DenseMatrix64F coefficients, DenseMatrix64F bias)
+   {
+      CommonOps.mult(coefficients, soln, result);
+      CommonOps.addEquals(result, bias);
+   }
+
+   public DenseMatrix64F getOptimizedForceRateValues(Axis axis)
+   {
+      int axisOrdinal = axis.ordinal();
+      compute(optimizedForceRateValues[axisOrdinal], decisionVariableValues[axisOrdinal], forceRateCoefficientMatrix[axisOrdinal], forceRateBias[axisOrdinal]);
+      return optimizedForceRateValues[axisOrdinal];
+   }
+
+   public DenseMatrix64F getOptimizedVelocityValues(Axis axis)
+   {
+      int axisOrdinal = axis.ordinal();
+      compute(optimizedVelocityValues[axisOrdinal], decisionVariableValues[axisOrdinal], velocityCoefficientMatrix[axisOrdinal], velocityBias[axisOrdinal]);
+      return optimizedVelocityValues[axisOrdinal];
+   }
+
+   public DenseMatrix64F getOptimizedPositionValues(Axis axis)
+   {
+      int axisOrdinal = axis.ordinal();
+      compute(optimizedPositionValues[axisOrdinal], decisionVariableValues[axisOrdinal], positionCoefficientMatrix[axisOrdinal], positionBias[axisOrdinal]);
+      return optimizedPositionValues[axisOrdinal];
+   }
+
 }

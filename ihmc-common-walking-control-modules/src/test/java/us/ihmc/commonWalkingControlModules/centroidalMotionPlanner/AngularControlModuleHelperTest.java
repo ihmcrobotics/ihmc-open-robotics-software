@@ -89,11 +89,14 @@ public class AngularControlModuleHelperTest
       node3.setTime(1.0);
 
       angularHelper.computeCoPPointConstraints(nodeList, supportPolygonList);
-      DenseMatrix64F Ain = angularHelper.getCoPSupportPolygonConstraintAinMatrix();
+      DenseMatrix64F xAin = angularHelper.getXCoPSupportPolygonConstraintAinMatrix();
+      DenseMatrix64F yAin = angularHelper.getYCoPSupportPolygonConstraintAinMatrix();
       DenseMatrix64F bin = angularHelper.getCoPSupportPolygonConstraintbinMatrix();
-      assertTrue(Ain.getNumRows() == 12);
+      assertTrue(xAin.getNumRows() == 12);
+      assertTrue(yAin.getNumRows() == 12);
       assertTrue(bin.getNumRows() == 12);
-      assertTrue(Ain.getNumCols() == 6);
+      assertTrue(xAin.getNumCols() == 3);
+      assertTrue(yAin.getNumCols() == 3);
       assertTrue(bin.getNumCols() == 1);
 
       double epsilon = Epsilons.ONE_BILLIONTH;

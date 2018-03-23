@@ -48,5 +48,17 @@ public class CentroidalMotionSupportPolygon
    {
       supportPolygonToSet.setIncludingFrame(this.supportPolygon);
    }
+
+   public boolean containsNaN()
+   {
+      return Double.isNaN(startTime) || Double.isNaN(endTime) || supportPolygon.containsNaN();
+   }
+
+   public void set(CentroidalMotionSupportPolygon other)
+   {
+      this.startTime = other.startTime;
+      this.endTime = other.endTime;
+      this.supportPolygon.setIncludingFrame(other.supportPolygon);
+   }
 }
 
