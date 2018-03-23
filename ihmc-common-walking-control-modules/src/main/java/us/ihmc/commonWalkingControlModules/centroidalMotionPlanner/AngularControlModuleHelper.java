@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.convexOptimization.qpOASES.DenseMatrix;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
@@ -554,6 +555,26 @@ public class AngularControlModuleHelper
       return yCoPSupportPolygonAinMatrix;
    }
 
+   public void processLinearObjectives(DenseMatrix64F Hx, DenseMatrix64F fx, DenseMatrix64F Hy, DenseMatrix64F fy, DenseMatrix64F H, DenseMatrix64F f)
+   {
+      int numberOfXDecisionVariables = xTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols()
+            + xTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int numberOfYDecisionVariables = yTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols()
+            + yTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int numberOfVariables = numberOfXDecisionVariables + numberOfYDecisionVariables;
+
+      H.reshape(numberOfVariables, numberOfVariables);
+      f.reshape(numberOfVariables, 1);
+      H.zero();
+      f.zero();
+
+      CommonOps.insert(Hx, H, 0, 0);
+      CommonOps.insert(Hy, H, numberOfXDecisionVariables, numberOfXDecisionVariables);
+
+      CommonOps.insert(fx, f, 0, 0);
+      CommonOps.insert(fy, f, numberOfXDecisionVariables, 0);
+   }
+
    public void processLinearConstraints(DenseMatrix64F Ax, DenseMatrix64F bx, DenseMatrix64F Ay, DenseMatrix64F by, DenseMatrix64F consolidatedA,
                                         DenseMatrix64F consolidatedB)
    {
@@ -573,6 +594,40 @@ public class AngularControlModuleHelper
       consolidatedB.zero();
       CommonOps.insert(bx, consolidatedB, 0, 0);
       CommonOps.insert(by, consolidatedB, bx.getNumRows(), 0);
+   }
+
+   private final DenseMatrix64F yetAnotherTempMatrix = new DenseMatrix64F(0, 1);
+
+   public void processLinearBounds(DenseMatrix64F xLowerBounds, DenseMatrix64F xUpperBounds, DenseMatrix64F yLowerBounds, DenseMatrix64F yUpperBounds,
+                                   DenseMatrix64F A, DenseMatrix64F b)
+   {
+      int numberOfXDecisionVariables = xTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols()
+            + xTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int numberOfYDecisionVariables = yTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols()
+            + yTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int numberOfVariables = numberOfXDecisionVariables + numberOfYDecisionVariables;
+      int numberOfXConstraints = xLowerBounds.getNumRows() + xUpperBounds.getNumRows();
+      int numberOfYConstraints = yLowerBounds.getNumRows() + yUpperBounds.getNumRows();
+      int numberOfConstraints = numberOfXConstraints + numberOfYConstraints;
+      A.reshape(numberOfConstraints, numberOfVariables);
+      b.reshape(numberOfConstraints, numberOfVariables);
+
+      yetAnotherTempMatrix.reshape(numberOfXConstraints, numberOfXConstraints);
+      CommonOps.setIdentity(yetAnotherTempMatrix);
+      CommonOps.insert(yetAnotherTempMatrix, A, 0, 0);
+      CommonOps.insert(xUpperBounds, b, 0, 0);
+      CommonOps.scale(-1.0, yetAnotherTempMatrix);
+      CommonOps.insert(yetAnotherTempMatrix, A, xUpperBounds.getNumRows(), 0);
+      CommonOps.insert(xLowerBounds, b, xUpperBounds.getNumRows(), 0);
+      
+      
+      yetAnotherTempMatrix.reshape(numberOfYConstraints, numberOfYConstraints);
+      CommonOps.setIdentity(yetAnotherTempMatrix);
+      CommonOps.insert(yetAnotherTempMatrix, A, numberOfXConstraints, numberOfXDecisionVariables);
+      CommonOps.insert(yUpperBounds, b, numberOfXConstraints, 0);
+      CommonOps.scale(-1.0, yetAnotherTempMatrix);
+      CommonOps.insert(yetAnotherTempMatrix, A, numberOfXConstraints + yUpperBounds.getNumRows(), 0);
+      CommonOps.insert(yLowerBounds, b, numberOfXConstraints + yUpperBounds.getNumRows(), 0);
    }
 
    //   private void consolidateTorqueBiasMatrix(DenseMatrix64F forceBiasMatrix, DenseMatrix64F copBiasMatrix, DenseMatrix64F matrixToSet)
