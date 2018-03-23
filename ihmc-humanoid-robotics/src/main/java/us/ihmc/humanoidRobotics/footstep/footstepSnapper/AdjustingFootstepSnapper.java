@@ -129,7 +129,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints().size() > 0){
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
-      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints().toArray());
+      footstep.setPredictedContactPoints(originalFootstep.getPredictedContactPoints());
       footstep.setFootstepType(type);
       FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);

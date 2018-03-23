@@ -1,7 +1,7 @@
 package us.ihmc.communication.packets;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 /**
  *
@@ -12,7 +12,7 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
    public TIntArrayList boundingBoxYCoordinates = new TIntArrayList();
    public TIntArrayList boundingBoxWidths = new TIntArrayList();
    public TIntArrayList boundingBoxHeights = new TIntArrayList();
-   public PreallocatedList<StringBuilder> labels = new PreallocatedList<>(StringBuilder.class, StringBuilder::new, 10);
+   public RecyclingArrayListPubSub<StringBuilder> labels = new RecyclingArrayListPubSub<>(StringBuilder.class, StringBuilder::new, 10);
 
    public BoundingBoxesPacket()
    {

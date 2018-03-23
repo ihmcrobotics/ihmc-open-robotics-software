@@ -4,7 +4,7 @@ import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
 {
@@ -12,7 +12,7 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
    //   public static final byte VALID_UNCHANGED_STEP = 1;
    //   public static final byte VALID_SNAPPED_STEP = 2;
    //   public static final byte BAD_STEP = 3;
-   public PreallocatedList<FootstepDataMessage> footstepData = new PreallocatedList<>(FootstepDataMessage.class, FootstepDataMessage::new, 10);
+   public RecyclingArrayListPubSub<FootstepDataMessage> footstepData = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 10);
    public TIntArrayList footstepOrder = new TIntArrayList();
    public TByteArrayList flag = new TByteArrayList();
 
@@ -30,7 +30,7 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
       setPacketInformation(other);
    }
 
-   public PreallocatedList<FootstepDataMessage> getFootstepData()
+   public RecyclingArrayListPubSub<FootstepDataMessage> getFootstepData()
    {
       return this.footstepData;
    }

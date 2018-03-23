@@ -14,7 +14,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -104,7 +103,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
       backwardFootstepList.clear();
 
       ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<>();
-      PreallocatedList<FootstepDataMessage> dataList = forwardFootstepList.getDataList();
+      List<FootstepDataMessage> dataList = forwardFootstepList.getDataList();
       for (int i = 0; i < dataList.size(); i++)
       {
          FootstepDataMessage step = dataList.get(i);

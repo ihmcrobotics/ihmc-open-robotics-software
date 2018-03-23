@@ -2,7 +2,7 @@ package us.ihmc.communication.packets;
 
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
@@ -11,7 +11,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    public Point3D32 regionOrigin;
    public Vector3D32 regionNormal;
    public Polygon2DMessage concaveHull = new Polygon2DMessage();
-   public PreallocatedList<Polygon2DMessage> convexPolygons = new PreallocatedList<>(Polygon2DMessage.class, Polygon2DMessage::new, 20);
+   public RecyclingArrayListPubSub<Polygon2DMessage> convexPolygons = new RecyclingArrayListPubSub<>(Polygon2DMessage.class, Polygon2DMessage::new, 20);
 
    public PlanarRegionMessage()
    {
@@ -58,7 +58,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
       return concaveHull;
    }
 
-   public PreallocatedList<Polygon2DMessage> getConvexPolygons()
+   public RecyclingArrayListPubSub<Polygon2DMessage> getConvexPolygons()
    {
       return convexPolygons;
    }

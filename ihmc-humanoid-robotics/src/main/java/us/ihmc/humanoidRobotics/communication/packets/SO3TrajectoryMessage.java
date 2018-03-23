@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.util.List;
+
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
@@ -14,7 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -23,7 +25,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame to define what frame the points are expressed in")
-   public PreallocatedList<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = new PreallocatedList<>(SO3TrajectoryPointMessage.class, SO3TrajectoryPointMessage::new, 2000);
+   public RecyclingArrayListPubSub<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = new RecyclingArrayListPubSub<>(SO3TrajectoryPointMessage.class, SO3TrajectoryPointMessage::new, 2000);
 
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
@@ -65,7 +67,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, trajectoryPointListToPack.getReferenceFrame());
 
-      PreallocatedList<SO3TrajectoryPointMessage> trajectoryPointMessages = getTrajectoryPoints();
+      List<SO3TrajectoryPointMessage> trajectoryPointMessages = getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
@@ -176,7 +178,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
       return taskspaceTrajectoryPoints.size();
    }
 
-   public final PreallocatedList<SO3TrajectoryPointMessage> getTrajectoryPoints()
+   public final RecyclingArrayListPubSub<SO3TrajectoryPointMessage> getTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints;
    }

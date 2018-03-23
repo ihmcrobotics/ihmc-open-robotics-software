@@ -38,7 +38,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.ros.msgToPacket.converter.CustomFieldConversions;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
@@ -337,27 +336,30 @@ public class IHMCROSTranslationRuntimeTools
       List<Point2dRosMessage> predictedContatcPointsRos = new ArrayList<>();
       if (footstep.predictedContactPoints != null)
       {
-         for (Point2D predictedContactPoint : footstep.predictedContactPoints.toArray())
+         List<Point2D> predictedContactPoints = footstep.predictedContactPoints;
+         for (int i = 0; i < predictedContactPoints.size(); i++)
          {
-            predictedContatcPointsRos.add(GenericROSTranslationTools.convertPoint2d(predictedContactPoint));
+            predictedContatcPointsRos.add(GenericROSTranslationTools.convertPoint2d(predictedContactPoints.get(i)));
          }
       }
 
       List<Point> positionWaypoints = new ArrayList<>();
       if (footstep.getCustomPositionWaypoints() != null)
       {
-         for (Point3D trajectoryWaypoint : footstep.getCustomPositionWaypoints().toArray())
+         List<Point3D> customPositionWaypoints = footstep.getCustomPositionWaypoints();
+         for (int i = 0; i < customPositionWaypoints.size(); i++)
          {
-            positionWaypoints.add(GenericROSTranslationTools.convertPoint3D(trajectoryWaypoint));
+            positionWaypoints.add(GenericROSTranslationTools.convertPoint3D(customPositionWaypoints.get(i)));
          }
       }
 
       List<SE3TrajectoryPointRosMessage> rosSwingTrajectory = new ArrayList<>();
-      for (SE3TrajectoryPointMessage se3TrajectoryPointMessage : footstep.swingTrajectory.toArray())
+      List<SE3TrajectoryPointMessage> swingTrajectory = footstep.swingTrajectory;
+      for (int i = 0; i < swingTrajectory.size(); i++)
       {
          try
          {
-            rosSwingTrajectory.add((SE3TrajectoryPointRosMessage) convertToRosMessage(se3TrajectoryPointMessage));
+            rosSwingTrajectory.add((SE3TrajectoryPointRosMessage) convertToRosMessage(swingTrajectory.get(i)));
          }
          catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e)
          {
@@ -396,7 +398,7 @@ public class IHMCROSTranslationRuntimeTools
       }
 
       List<FootstepDataRosMessage> convertedFootsteps = new ArrayList<>();
-      PreallocatedList<FootstepDataMessage> footstepDataList = footstepList.footstepDataList;
+      List<FootstepDataMessage> footstepDataList = footstepList.footstepDataList;
       for (int i = 0; i < footstepDataList.size(); i++)
       {
          FootstepDataMessage footstepDataMessage = footstepDataList.get(i);

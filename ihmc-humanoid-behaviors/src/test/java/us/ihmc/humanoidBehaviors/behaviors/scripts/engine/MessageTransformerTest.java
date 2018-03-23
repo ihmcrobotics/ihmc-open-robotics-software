@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -23,7 +24,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.idl.PreallocatedList;
 
 public class MessageTransformerTest
 {
@@ -111,8 +111,12 @@ public class MessageTransformerTest
       FootstepDataMessage expected = new FootstepDataMessage(original);
       expected.location.applyTransform(transform);
       expected.orientation.applyTransform(transform);
-      for (Point3D waypoint : expected.positionWaypoints.toArray())
+      List<Point3D> positionWaypoints = expected.positionWaypoints;
+      for (int i = 0; i < positionWaypoints.size(); i++)
+      {
+         Point3D waypoint = positionWaypoints.get(i);
          waypoint.applyTransform(transform);
+      }
 
       FootstepDataMessage actual = new FootstepDataMessage(original);
       MessageTransformer.transform(actual, transform);
@@ -130,13 +134,13 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       FootstepDataListMessage expected = new FootstepDataListMessage(original);
-      PreallocatedList<FootstepDataMessage> footstepDataList = expected.footstepDataList;
+      List<FootstepDataMessage> footstepDataList = expected.footstepDataList;
       for (int i = 0; i < footstepDataList.size(); i++)
       {
          FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
          footstepDataMessage.location.applyTransform(transform);
          footstepDataMessage.orientation.applyTransform(transform);
-         for (Point3D waypoint : footstepDataMessage.positionWaypoints.toArray())
+         for (Point3D waypoint : footstepDataMessage.positionWaypoints)
             waypoint.applyTransform(transform);
       }
 

@@ -1,12 +1,12 @@
 package us.ihmc.communication.packets;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class DetectedFacesPacket extends Packet<DetectedFacesPacket>
 {
-   public PreallocatedList<StringBuilder> ids = new PreallocatedList<>(StringBuilder.class, StringBuilder::new, 10);
-   public PreallocatedList<Point3D> positions = new PreallocatedList<>(Point3D.class, Point3D::new, 10);
+   public RecyclingArrayListPubSub<StringBuilder> ids = new RecyclingArrayListPubSub<>(StringBuilder.class, StringBuilder::new, 10);
+   public RecyclingArrayListPubSub<Point3D> positions = new RecyclingArrayListPubSub<>(Point3D.class, Point3D::new, 10);
 
    public DetectedFacesPacket()
    {
@@ -20,12 +20,12 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket>
       setPacketInformation(other);
    }
 
-   public PreallocatedList<StringBuilder> getIds()
+   public RecyclingArrayListPubSub<StringBuilder> getIds()
    {
       return ids;
    }
 
-   public PreallocatedList<Point3D> getPositions()
+   public RecyclingArrayListPubSub<Point3D> getPositions()
    {
       return positions;
    }

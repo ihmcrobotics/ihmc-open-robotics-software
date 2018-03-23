@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 {
@@ -14,7 +14,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    public double thetaStart;
    public double maxSuboptimality = 1;
 
-   public PreallocatedList<FootstepDataMessage> goals = new PreallocatedList<>(FootstepDataMessage.class, FootstepDataMessage::new, 20);
+   public RecyclingArrayListPubSub<FootstepDataMessage> goals = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 20);
 
    public byte footstepPlanRequestType;
 

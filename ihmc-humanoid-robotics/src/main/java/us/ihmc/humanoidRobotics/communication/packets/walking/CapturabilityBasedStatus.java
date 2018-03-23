@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -19,8 +19,8 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
    public Point3D centerOfMass = new Point3D();
 
-   public PreallocatedList<Point2D> leftFootSupportPolygon = new PreallocatedList<>(Point2D.class, Point2D::new, MAXIMUM_NUMBER_OF_VERTICES);
-   public PreallocatedList<Point2D> rightFootSupportPolygon = new PreallocatedList<>(Point2D.class, Point2D::new, MAXIMUM_NUMBER_OF_VERTICES);
+   public RecyclingArrayListPubSub<Point2D> leftFootSupportPolygon = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, MAXIMUM_NUMBER_OF_VERTICES);
+   public RecyclingArrayListPubSub<Point2D> rightFootSupportPolygon = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, MAXIMUM_NUMBER_OF_VERTICES);
 
    public CapturabilityBasedStatus()
    {
@@ -81,9 +81,9 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
    public FrameConvexPolygon2d getFootSupportPolygon(RobotSide robotSide)
    {
       if (robotSide == RobotSide.LEFT && leftFootSupportPolygon.size() > 0)
-         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), leftFootSupportPolygon.toArray());
+         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), leftFootSupportPolygon);
       else if (rightFootSupportPolygon != null)
-         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), rightFootSupportPolygon.toArray());
+         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), rightFootSupportPolygon);
       else
          return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame());
    }

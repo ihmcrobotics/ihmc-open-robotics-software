@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.util.List;
+
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
@@ -14,7 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
@@ -23,7 +25,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
-   public PreallocatedList<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = new PreallocatedList<>(SE3TrajectoryPointMessage.class, SE3TrajectoryPointMessage::new, 2000);
+   public RecyclingArrayListPubSub<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = new RecyclingArrayListPubSub<>(SE3TrajectoryPointMessage.class, SE3TrajectoryPointMessage::new, 2000);
    @RosExportedField(documentation = "The selection matrix for each axis of the angular part.")
    public SelectionMatrix3DMessage angularSelectionMatrix;
    @RosExportedField(documentation = "The selection matrix for each axis of the linear part.")
@@ -100,7 +102,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
    public void getTrajectoryPoints(FrameSE3TrajectoryPointList trajectoryPointListToPack)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, trajectoryPointListToPack.getReferenceFrame());
-      PreallocatedList<SE3TrajectoryPointMessage> trajectoryPointMessages = getTrajectoryPoints();
+      List<SE3TrajectoryPointMessage> trajectoryPointMessages = getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
@@ -222,7 +224,7 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
       return taskspaceTrajectoryPoints.size();
    }
 
-   public final PreallocatedList<SE3TrajectoryPointMessage> getTrajectoryPoints()
+   public final RecyclingArrayListPubSub<SE3TrajectoryPointMessage> getTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints;
    }

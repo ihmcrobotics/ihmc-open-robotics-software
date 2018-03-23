@@ -3,6 +3,7 @@ package us.ihmc.avatar.obstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
@@ -35,7 +36,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnapping
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.quadTree.Box;
@@ -151,7 +151,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       Point2D boundingBoxMin = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       Point2D boundingBoxMax = new Point2D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 
-      PreallocatedList<FootstepDataMessage> dataList = corruptedFootstepDataList.getDataList();
+      List<FootstepDataMessage> dataList = corruptedFootstepDataList.getDataList();
       for (int i = 0; i < dataList.size(); i++)
       {
          FootstepDataMessage footstepData = dataList.get(i);
@@ -216,7 +216,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       if (!VISUALIZE)
          return;
 
-      PreallocatedList<FootstepDataMessage> dataList = corruptedFootstepDataList.getDataList();
+      List<FootstepDataMessage> dataList = corruptedFootstepDataList.getDataList();
       for (int i = 0; i < dataList.size(); i++)
       {
          FootstepDataMessage footstepData = dataList.get(i);

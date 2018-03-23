@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -23,7 +23,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanReques
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
-import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -68,7 +67,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
    private FootstepDataMessage currentLocation;
    private FootstepDataMessage predictedLocation;
    private FootstepPathPlanPacket currentPlan;
-   private PreallocatedList<FootstepDataMessage> stepsRequested;
+   private List<FootstepDataMessage> stepsRequested;
    private int expectedIndex = 0;
    private RobotSide lastSide = null;
 
