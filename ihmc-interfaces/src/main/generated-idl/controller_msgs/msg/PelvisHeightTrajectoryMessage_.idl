@@ -27,7 +27,7 @@ module controller_msgs
          * will keep the height manager in user mode while walking.
          * If this is false the height manager will switch back to controller mode when walking.
          */
-        boolean enable_user_pelvis_height_control_during_walking;
+        boolean enable_user_pelvis_control_during_walking;
         /**
          * The position trajectory information.
          */

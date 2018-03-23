@@ -29,7 +29,7 @@ module controller_msgs
         /**
          * Sets the pose of the contact frame in the frame of the end effector body.
          */
-        geometry_msgs::msg::dds::Pose body_frame_to_control_frame;
+        geometry_msgs::msg::dds::Pose body_frame_to_contact_frame;
         /**
          * Sets the contact normal used by the controller to load the contact point.
          */
