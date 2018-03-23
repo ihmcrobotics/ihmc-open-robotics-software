@@ -65,11 +65,18 @@ task generateMessages {
       delete("src/main/generated-java")
       delete("build/tmp/generateMessages")
 
+      def foundDependency = false
       copy {
          configurations.compile.findAll { it.name.contains("ros2-common-interfaces") }.each {
             from zipTree(it)
+            foundDependency = true
          }
          into file("build/tmp/generateMessages/ros2-common-interfaces")
+      }
+
+      if (!foundDependency)
+      {
+         throw new GradleException("Could not find ros2-common-interfaces in configurations.compile!")
       }
 
       def generator = new us.ihmc.ros2.rosidl.RosInterfaceGenerator();
