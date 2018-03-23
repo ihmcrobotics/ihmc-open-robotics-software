@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -70,10 +69,10 @@ public class PlanarRegionMessageConverter
       }
 
       List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
-      PreallocatedList<Polygon2DMessage> convexPolygonsMessage = planarRegionMessage.getConvexPolygons();
+      List<Polygon2DMessage> convexPolygonsMessage = planarRegionMessage.getConvexPolygons();
       for (int polygonIndex = 0; polygonIndex < convexPolygonsMessage.size(); polygonIndex++)
       {
-         ConvexPolygon2D convexPolygon = new ConvexPolygon2D(convexPolygonsMessage.get(polygonIndex).getVertices().toArray());
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D(convexPolygonsMessage.get(polygonIndex).getVertices());
          convexPolygons.add(convexPolygon);
       }
 
@@ -95,7 +94,7 @@ public class PlanarRegionMessageConverter
    public static PlanarRegionsList convertToPlanarRegionsList(PlanarRegionsListMessage planarRegionsListMessage)
    {
       List<PlanarRegion> planarRegions = new ArrayList<>();
-      PreallocatedList<PlanarRegionMessage> planarRegionMessages = planarRegionsListMessage.getPlanarRegions();
+      List<PlanarRegionMessage> planarRegionMessages = planarRegionsListMessage.getPlanarRegions();
 
       for (int regionIndex = 0; regionIndex < planarRegionMessages.size(); regionIndex++)
          planarRegions.add(convertToPlanarRegion(planarRegionMessages.get(regionIndex)));

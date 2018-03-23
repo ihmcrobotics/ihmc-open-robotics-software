@@ -6,13 +6,13 @@ import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 @RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/jointspace_trajectory")
 public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMessage>
 {
    @RosExportedField(documentation = "List of points in the trajectory.")
-   public PreallocatedList<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = new PreallocatedList<>(OneDoFJointTrajectoryMessage.class, OneDoFJointTrajectoryMessage::new, 10);
+   public RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = new RecyclingArrayListPubSub<>(OneDoFJointTrajectoryMessage.class, OneDoFJointTrajectoryMessage::new, 10);
    @RosExportedField(documentation = "Properties for queueing trajectories.")
    public QueueableMessage queueingProperties = new QueueableMessage();
 
@@ -93,7 +93,7 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
       return jointTrajectoryMessages.get(jointIndex).getNumberOfTrajectoryPoints();
    }
 
-   public PreallocatedList<OneDoFJointTrajectoryMessage> getTrajectoryPointLists()
+   public RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> getTrajectoryPointLists()
    {
       return jointTrajectoryMessages;
    }
@@ -131,7 +131,7 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
       MessageTools.copyData(jointTrajectoryMessages, this.jointTrajectoryMessages);
    }
 
-   public PreallocatedList<OneDoFJointTrajectoryMessage> getJointTrajectoryMessages()
+   public RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> getJointTrajectoryMessages()
    {
       return jointTrajectoryMessages;
    }

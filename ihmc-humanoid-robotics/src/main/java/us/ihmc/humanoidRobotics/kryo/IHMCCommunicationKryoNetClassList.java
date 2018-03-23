@@ -189,8 +189,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueM
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestMessage;
-import us.ihmc.humanoidRobotics.communication.util.MessageTrimmingTools;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -208,7 +207,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(TLongArrayList.class);
       registerPacketField(TFloatArrayList.class);
       registerPacketField(TByteArrayList.class);
-      registerPacketField(PreallocatedList.class);
+      registerPacketField(RecyclingArrayListPubSub.class);
 
       registerPacketClass(Packet.class);
 
@@ -557,12 +556,5 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketClass(WholeBodyTrajectoryToolboxOutputStatus.class);
       registerPacketField(KinematicsToolboxOutputStatus[].class);
-   }
-
-   @Override
-   public void registerPacketClass(Class<?> clazz)
-   {
-      PacketTrimmer<?> packetTrimmer = MessageTrimmingTools.classToPacketTrimmerMap.get(clazz);
-      super.registerPacketClass(clazz, packetTrimmer);
    }
 }

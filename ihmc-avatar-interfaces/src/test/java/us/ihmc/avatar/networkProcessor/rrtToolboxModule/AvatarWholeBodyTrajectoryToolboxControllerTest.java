@@ -59,7 +59,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTraj
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools.FunctionTrajectory;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxOutputStatus;
-import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotController.RobotController;
@@ -401,7 +400,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
    protected void runTrajectoryTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
    {
-      PreallocatedList<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
+      List<WaypointBasedTrajectoryMessage> endEffectorTrajectories = message.getEndEffectorTrajectories();
       double t0 = Double.POSITIVE_INFINITY;
       double tf = Double.NEGATIVE_INFINITY;
 
@@ -451,7 +450,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
    protected void runReachingTest(WholeBodyTrajectoryToolboxMessage message, int maxNumberOfIterations) throws UnreasonableAccelerationException
    {
-      PreallocatedList<ReachingManifoldMessage> reachingManifolds = message.getReachingManifolds();
+      List<ReachingManifoldMessage> reachingManifolds = message.getReachingManifolds();
       if (reachingManifolds != null)
       {
          for (int i = 0; i < reachingManifolds.size(); i++)
@@ -489,7 +488,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
 
    public void trackingTrajectoryWithOutput(WholeBodyTrajectoryToolboxMessage message, WholeBodyTrajectoryToolboxOutputStatus solution)
    {
-      PreallocatedList<WaypointBasedTrajectoryMessage> wayPointBasedTrajectoryMessages = message.getEndEffectorTrajectories();
+      List<WaypointBasedTrajectoryMessage> wayPointBasedTrajectoryMessages = message.getEndEffectorTrajectories();
 
       // for every configurations in solution.
       int numberOfConfigurations = solution.getRobotConfigurations().size();
@@ -560,7 +559,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       return null;
    }
 
-   private RigidBodyExplorationConfigurationMessage getRigidBodyExplorationConfigurationMessageHasSameHashCode(PreallocatedList<RigidBodyExplorationConfigurationMessage> rigidBodyExplorationConfigurationMessages,
+   private RigidBodyExplorationConfigurationMessage getRigidBodyExplorationConfigurationMessageHasSameHashCode(List<RigidBodyExplorationConfigurationMessage> rigidBodyExplorationConfigurationMessages,
                                                                                                                WaypointBasedTrajectoryMessage trajectory)
    {
       for (int i = 0; i < rigidBodyExplorationConfigurationMessages.size(); i++)

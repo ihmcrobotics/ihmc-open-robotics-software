@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
@@ -45,7 +45,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public PreallocatedList<Point2D> predictedContactPoints = new PreallocatedList<>(Point2D.class, Point2D::new, 10);
+   public RecyclingArrayListPubSub<Point2D> predictedContactPoints = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 10);
 
    @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.")
    public byte trajectoryType = TrajectoryType.DEFAULT.toByte();
@@ -55,11 +55,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    @RosExportedField(documentation = "In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The waypoints define sole positions."
          + "The controller will compute times and velocities at the waypoints. This is a convinient way to shape the trajectory of the swing. If full control over the swing"
          + "trajectory is desired use the trajectory type WAYPOINTS instead. The position waypoints are expected in the trajectory frame.")
-   public PreallocatedList<Point3D> positionWaypoints = new PreallocatedList<>(Point3D.class, Point3D::new, 2);
+   public RecyclingArrayListPubSub<Point3D> positionWaypoints = new RecyclingArrayListPubSub<>(Point3D.class, Point3D::new, 2);
    @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, swing waypoints can be specified here. The waypoints do not include the"
          + "start point (which is set to the current foot state at lift-off) and the touch down point (which is specified by the location and orientation fields)."
          + "All waypoints are for the sole frame and expressed in the trajectory frame. The maximum number of points can be found in the Footstep class.")
-   public PreallocatedList<SE3TrajectoryPointMessage> swingTrajectory = new PreallocatedList<>(SE3TrajectoryPointMessage.class, SE3TrajectoryPointMessage::new,
+   public RecyclingArrayListPubSub<SE3TrajectoryPointMessage> swingTrajectory = new RecyclingArrayListPubSub<>(SE3TrajectoryPointMessage.class, SE3TrajectoryPointMessage::new,
                                                                                                50);
    @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, this value can be used to specify the trajectory blend duration "
          + " in seconds. If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning "
@@ -126,7 +126,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       setPacketInformation(other);
    }
 
-   public PreallocatedList<Point2D> getPredictedContactPoints()
+   public RecyclingArrayListPubSub<Point2D> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
@@ -210,7 +210,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       this.trajectoryType = trajectoryType;
    }
 
-   public PreallocatedList<Point3D> getCustomPositionWaypoints()
+   public RecyclingArrayListPubSub<Point3D> getCustomPositionWaypoints()
    {
       return positionWaypoints;
    }
@@ -220,7 +220,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       MessageTools.copyData(trajectoryWaypoints, this.positionWaypoints);
    }
 
-   public PreallocatedList<SE3TrajectoryPointMessage> getSwingTrajectory()
+   public RecyclingArrayListPubSub<SE3TrajectoryPointMessage> getSwingTrajectory()
    {
       return swingTrajectory;
    }

@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -467,7 +467,7 @@ public class MessageTools
 
    /**
     * Performs a deep copy of the data from {@code source} to {@code destination} after calling
-    * {@link PreallocatedList#clear()} on {@code destination}.
+    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
     * 
     * @param source the list containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
@@ -476,7 +476,7 @@ public class MessageTools
     *            {@code StringBuilder}, {@code Settable<T>}.
     */
    @SuppressWarnings("unchecked")
-   public static <T> void copyData(PreallocatedList<T> source, PreallocatedList<T> destination)
+   public static <T> void copyData(List<T> source, RecyclingArrayListPubSub<T> destination)
    {
       destination.clear();
 
@@ -487,7 +487,7 @@ public class MessageTools
 
       if (firstElement instanceof Settable)
       {
-         destination.resetQuick();
+         destination.clear();
 
          for (int i = 0; i < source.size(); i++)
          {
@@ -496,7 +496,7 @@ public class MessageTools
       }
       else if (firstElement instanceof StringBuilder)
       {
-         destination.resetQuick();
+         destination.clear();
 
          for (int i = 0; i < source.size(); i++)
          {
@@ -508,47 +508,19 @@ public class MessageTools
       else
       {
          throw new IllegalArgumentException(MessageTools.class.getSimpleName() + ".copyData(...) can only be used with "
-               + PreallocatedList.class.getSimpleName() + "s declared with either of the following types: Enum, StringBuilder, and"
+               + RecyclingArrayListPubSub.class.getSimpleName() + "s declared with either of the following types: Enum, StringBuilder, and"
                + Settable.class.getSimpleName());
       }
    }
 
    /**
     * Copies data from {@code source} to {@code destination} after calling
-    * {@link PreallocatedList#clear()} on {@code destination}.
-    * 
-    * @param source the list containing the data to copy. Not modified.
-    * @param destination the list to copy the data into. Modified.
-    */
-   public static <T extends Settable<T>> void copyData(List<T> source, PreallocatedList<T> destination)
-   {
-      destination.clear();
-
-      if (source == null)
-         return;
-
-      try
-      {
-         for (int i = 0; i < source.size(); i++)
-         {
-            destination.add().set(source.get(i));
-         }
-      }
-      catch (ArrayIndexOutOfBoundsException e)
-      {
-         PrintTools.error("Caught exception while copying data from list of size: " + source.size());
-         throw e;
-      }
-   }
-
-   /**
-    * Copies data from {@code source} to {@code destination} after calling
-    * {@link PreallocatedList#clear()} on {@code destination}.
+    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
     * 
     * @param source the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
-   public static <T extends Settable<T>> void copyData(T[] source, PreallocatedList<T> destination)
+   public static <T extends Settable<T>> void copyData(T[] source, RecyclingArrayListPubSub<T> destination)
    {
       destination.clear();
 
@@ -571,12 +543,12 @@ public class MessageTools
 
    /**
     * Copies data from {@code source} to {@code destination} after calling
-    * {@link PreallocatedList#clear()} on {@code destination}.
+    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
     * 
     * @param source the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
-   public static void copyData(String[] source, PreallocatedList<StringBuilder> destination)
+   public static void copyData(String[] source, RecyclingArrayListPubSub<StringBuilder> destination)
    {
       destination.clear();
 
@@ -593,12 +565,12 @@ public class MessageTools
 
    /**
     * Copies data from {@code source} to {@code destination} after calling
-    * {@link PreallocatedList#clear()} on {@code destination}.
+    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
     * 
     * @param source the array containing the data to copy. Not modified.
     * @param destination the list to copy the data into. Modified.
     */
-   public static void copyData(StringBuilder[] source, PreallocatedList<StringBuilder> destination)
+   public static void copyData(StringBuilder[] source, RecyclingArrayListPubSub<StringBuilder> destination)
    {
       destination.clear();
 
@@ -613,7 +585,7 @@ public class MessageTools
       }
    }
 
-   public static <T> List<T> toList(PreallocatedList<T> original)
+   public static <T> List<T> toList(RecyclingArrayListPubSub<T> original)
    {
       List<T> list = new ArrayList<>();
       for (int i = 0; i < original.size(); i++)
@@ -621,7 +593,7 @@ public class MessageTools
       return list;
    }
 
-   public static <T extends EpsilonComparable<T>> boolean epsilonEquals(PreallocatedList<T> listOne, PreallocatedList<T> listTwo, double epsilon)
+   public static <T extends EpsilonComparable<T>> boolean epsilonEquals(RecyclingArrayListPubSub<T> listOne, RecyclingArrayListPubSub<T> listTwo, double epsilon)
    {
       if (listOne.size() != listTwo.size())
          return false;

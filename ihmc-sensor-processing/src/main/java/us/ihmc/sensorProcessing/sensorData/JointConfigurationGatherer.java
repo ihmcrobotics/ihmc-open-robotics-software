@@ -6,7 +6,7 @@ import java.util.Arrays;
 import us.ihmc.communication.packets.SpatialVectorMessage;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -101,7 +101,7 @@ public class JointConfigurationGatherer
       jointConfigurationData.setTimestamp(timestamp);
       jointConfigurationData.setSensorHeadPPSTimestamp(sensorHeadPPSTimestamp);
 
-      PreallocatedList<SpatialVectorMessage> momentAndForceDataAllForceSensors = jointConfigurationData.momentAndForceDataAllForceSensors;
+      RecyclingArrayListPubSub<SpatialVectorMessage> momentAndForceDataAllForceSensors = jointConfigurationData.momentAndForceDataAllForceSensors;
       momentAndForceDataAllForceSensors.clear();
 
       for (int sensorNumber = 0; sensorNumber < getNumberOfForceSensors(); sensorNumber++)

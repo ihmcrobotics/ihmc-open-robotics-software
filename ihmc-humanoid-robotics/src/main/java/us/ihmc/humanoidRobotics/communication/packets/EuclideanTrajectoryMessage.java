@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -23,7 +23,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage>
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
-   public PreallocatedList<EuclideanTrajectoryPointMessage> taskspaceTrajectoryPoints = new PreallocatedList<>(EuclideanTrajectoryPointMessage.class, EuclideanTrajectoryPointMessage::new, 2000);
+   public RecyclingArrayListPubSub<EuclideanTrajectoryPointMessage> taskspaceTrajectoryPoints = new RecyclingArrayListPubSub<>(EuclideanTrajectoryPointMessage.class, EuclideanTrajectoryPointMessage::new, 2000);
 
    @RosExportedField(documentation = "The selection matrix for each axis.")
    public SelectionMatrix3DMessage selectionMatrix = new SelectionMatrix3DMessage();
@@ -92,7 +92,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
    public void getTrajectoryPoints(FrameEuclideanTrajectoryPointList trajectoryPointListToPack)
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, trajectoryPointListToPack.getReferenceFrame());
-      PreallocatedList<EuclideanTrajectoryPointMessage> trajectoryPointMessages = getTrajectoryPoints();
+      RecyclingArrayListPubSub<EuclideanTrajectoryPointMessage> trajectoryPointMessages = getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
@@ -201,7 +201,7 @@ public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectory
     * 
     * @return
     */
-   public final PreallocatedList<EuclideanTrajectoryPointMessage> getTrajectoryPoints()
+   public final RecyclingArrayListPubSub<EuclideanTrajectoryPointMessage> getTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints;
    }

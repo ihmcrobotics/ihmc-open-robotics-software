@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
@@ -40,7 +41,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
@@ -299,7 +300,7 @@ public class DesiredFootstepTest
       netClassList.registerPacketField(FootstepDataMessage.class);
       netClassList.registerPacketField(FootstepDataMessage[].class);
       netClassList.registerPacketField(Class.class);
-      netClassList.registerPacketField(PreallocatedList.class);
+      netClassList.registerPacketField(RecyclingArrayListPubSub.class);
       netClassList.registerPacketField(SE3TrajectoryPointMessage.class);
       netClassList.registerPacketField(SE3TrajectoryPointMessage[].class);
       netClassList.registerPacketField(QueueableMessage.class);
@@ -438,18 +439,18 @@ public class DesiredFootstepTest
       public void receivedPacket(FootstepDataListMessage packet)
       {
          boolean adjustable = packet.areFootstepsAdjustable;
-         PreallocatedList<FootstepDataMessage> footstepDataList = packet.footstepDataList;
+         List<FootstepDataMessage> footstepDataList = packet.footstepDataList;
          for (int i = 0; i < footstepDataList.size(); i++)
          {
             FootstepDataMessage footstepData = footstepDataList.get(i);
             FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
             Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable);
 
-            PreallocatedList<Point2D> contactPoints = footstepData.getPredictedContactPoints();
+            List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
             if (contactPoints != null && contactPoints.isEmpty())
                footstep.setPredictedContactPoints((Point2DReadOnly[]) null);
             else
-               footstep.setPredictedContactPoints(contactPoints.toArray());
+               footstep.setPredictedContactPoints(contactPoints);
                
             footstep.setTrajectoryType(TrajectoryType.fromByte(footstepData.getTrajectoryType()));
             footstep.setSwingHeight(footstepData.getSwingHeight());

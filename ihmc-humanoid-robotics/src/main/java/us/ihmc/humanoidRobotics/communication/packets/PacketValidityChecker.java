@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.util.List;
+
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
@@ -29,7 +31,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -105,7 +106,7 @@ public abstract class PacketValidityChecker
       if (trajectoryType == TrajectoryType.WAYPOINTS)
       {
          String messageClassName = message.getClass().getSimpleName();
-         PreallocatedList<SE3TrajectoryPointMessage> swingTrajectory = message.getSwingTrajectory();
+         List<SE3TrajectoryPointMessage> swingTrajectory = message.getSwingTrajectory();
 
          if (swingTrajectory == null)
          {
@@ -158,7 +159,7 @@ public abstract class PacketValidityChecker
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
          String messageClassName = message.getClass().getSimpleName();
-         PreallocatedList<Point3D> positionWaypoints = message.getCustomPositionWaypoints();
+         List<Point3D> positionWaypoints = message.getCustomPositionWaypoints();
          if (positionWaypoints == null)
          {
             String errorMessage = messageClassName + "'s type is custom but no position waypoints were specified.";

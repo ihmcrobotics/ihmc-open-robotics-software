@@ -4,7 +4,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTrajectoryToolboxOutputStatus>
 {
@@ -20,7 +20,7 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
    public int planningResult = 0;
 
    public TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
-   public PreallocatedList<KinematicsToolboxOutputStatus> robotConfigurations = new PreallocatedList<>(KinematicsToolboxOutputStatus.class,
+   public RecyclingArrayListPubSub<KinematicsToolboxOutputStatus> robotConfigurations = new RecyclingArrayListPubSub<>(KinematicsToolboxOutputStatus.class,
                                                                                                        KinematicsToolboxOutputStatus::new, 50);
 
    public WholeBodyTrajectoryToolboxOutputStatus()
@@ -53,7 +53,7 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       this.planningResult = planningResult;
    }
 
-   public PreallocatedList<KinematicsToolboxOutputStatus> getRobotConfigurations()
+   public RecyclingArrayListPubSub<KinematicsToolboxOutputStatus> getRobotConfigurations()
    {
       return robotConfigurations;
    }

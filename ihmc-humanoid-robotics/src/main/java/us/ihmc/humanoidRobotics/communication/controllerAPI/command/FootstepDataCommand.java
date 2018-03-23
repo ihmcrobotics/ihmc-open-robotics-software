@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -13,7 +13,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -78,7 +77,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       position.setIncludingFrame(worldFrame, message.getLocation());
       orientation.setIncludingFrame(worldFrame, message.getOrientation());
 
-      PreallocatedList<Point3D> originalPositionWaypointList = message.getCustomPositionWaypoints();
+      List<Point3D> originalPositionWaypointList = message.getCustomPositionWaypoints();
       customPositionWaypoints.clear();
       if (originalPositionWaypointList != null)
       {
@@ -86,7 +85,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
             customPositionWaypoints.add().setIncludingFrame(trajectoryFrame, originalPositionWaypointList.get(i));
       }
 
-      PreallocatedList<SE3TrajectoryPointMessage> messageSwingTrajectory = message.getSwingTrajectory();
+      List<SE3TrajectoryPointMessage> messageSwingTrajectory = message.getSwingTrajectory();
       swingTrajectory.clear();
       if (messageSwingTrajectory != null)
       {
@@ -98,7 +97,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
          }
       }
 
-      PreallocatedList<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
+      List<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
       {

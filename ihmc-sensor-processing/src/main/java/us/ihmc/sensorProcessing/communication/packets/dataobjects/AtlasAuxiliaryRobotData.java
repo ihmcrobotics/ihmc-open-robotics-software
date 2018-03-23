@@ -7,7 +7,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 /**
  *
@@ -21,8 +21,8 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 
    public TLongArrayList rawImuTimestamps = new TLongArrayList();
    public TLongArrayList rawImuPacketCounts = new TLongArrayList();
-   public PreallocatedList<Vector3D32> rawImuRates = new PreallocatedList<>(Vector3D32.class, Vector3D32::new, 15);
-   public PreallocatedList<Vector3D32> rawImuDeltas = new PreallocatedList<>(Vector3D32.class, Vector3D32::new, 15);
+   public RecyclingArrayListPubSub<Vector3D32> rawImuRates = new RecyclingArrayListPubSub<>(Vector3D32.class, Vector3D32::new, 15);
+   public RecyclingArrayListPubSub<Vector3D32> rawImuDeltas = new RecyclingArrayListPubSub<>(Vector3D32.class, Vector3D32::new, 15);
 
    public boolean batteryCharging;
    public float batteryVoltage;

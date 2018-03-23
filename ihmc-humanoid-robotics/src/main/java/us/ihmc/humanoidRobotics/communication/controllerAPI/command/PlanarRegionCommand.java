@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.List;
+
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PlanarRegionMessage;
 import us.ihmc.communication.packets.Polygon2DMessage;
@@ -9,7 +11,6 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
@@ -57,7 +58,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       for (int i = 0; i < concaveHullMessage.getVertices().size(); i++)
          concaveHullsVertices.add().set(concaveHullMessage.getVertices().get(i));
 
-      PreallocatedList<Polygon2DMessage> convexPolygonsMessage = message.getConvexPolygons();
+      List<Polygon2DMessage> convexPolygonsMessage = message.getConvexPolygons();
       convexPolygons.clear();
       for (int i = 0; i < convexPolygonsMessage.size(); i++)
       {

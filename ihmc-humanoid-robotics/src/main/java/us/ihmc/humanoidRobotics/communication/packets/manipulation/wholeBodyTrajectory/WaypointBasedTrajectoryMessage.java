@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
@@ -24,7 +24,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
     */
    public long endEffectorNameBasedHashCode;
    public TDoubleArrayList waypointTimes = new TDoubleArrayList();
-   public PreallocatedList<Pose3D> waypoints = new PreallocatedList<>(Pose3D.class, Pose3D::new, 50);
+   public RecyclingArrayListPubSub<Pose3D> waypoints = new RecyclingArrayListPubSub<>(Pose3D.class, Pose3D::new, 50);
    public SelectionMatrix3DMessage angularSelectionMatrix = new SelectionMatrix3DMessage();
    public SelectionMatrix3DMessage linearSelectionMatrix = new SelectionMatrix3DMessage();
    /**
@@ -267,7 +267,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       return waypoints.get(i);
    }
 
-   public PreallocatedList<Pose3D> getWaypoints()
+   public RecyclingArrayListPubSub<Pose3D> getWaypoints()
    {
       return waypoints;
    }

@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.heightQuadTree;
 
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage>
 {
@@ -10,7 +10,7 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage>
    public float resolution = Float.NaN;
    public float sizeX = Float.NaN;
    public float sizeY = Float.NaN;
-   public PreallocatedList<HeightQuadTreeLeafMessage> leaves = new PreallocatedList<>(HeightQuadTreeLeafMessage.class, HeightQuadTreeLeafMessage::new, 1000);
+   public RecyclingArrayListPubSub<HeightQuadTreeLeafMessage> leaves = new RecyclingArrayListPubSub<>(HeightQuadTreeLeafMessage.class, HeightQuadTreeLeafMessage::new, 1000);
 
    public HeightQuadTreeMessage()
    {
