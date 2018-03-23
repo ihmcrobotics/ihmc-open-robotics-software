@@ -266,7 +266,8 @@ public class MovingBaseRobotArmController implements RobotController
       FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
       sineGenerator.compute(yoTime.getDoubleValue());
       sineGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      basePointCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      basePointCommand.set(desiredPosition, desiredLinearVelocity);
+      basePointCommand.setFeedForwardAction(feedForwardLinearAcceleration);
    }
 
    public void updateHandFeedbackCommands()
