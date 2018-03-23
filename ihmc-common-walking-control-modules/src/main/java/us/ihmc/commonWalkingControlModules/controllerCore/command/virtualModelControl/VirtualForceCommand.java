@@ -5,6 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -86,6 +87,24 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
       controlFramePose.setIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
       desiredLinearForce.set(other.desiredLinearForce);
+   }
+
+   /**
+    * Copies all the fields of the given {@link SpatialAccelerationCommand} into this except for the
+    * spatial acceleration or the weights.
+    *
+    * @param command the command to copy the properties from. Not modified.
+    */
+   public void setProperties(SpatialAccelerationCommand command)
+   {
+      command.getLinearSelectionMatrix(selectionMatrix);
+      base = command.getBase();
+      endEffector = command.getEndEffector();
+      baseName = command.getBaseName();
+      endEffectorName = command.getEndEffectorName();
+
+      command.getControlFramePoseIncludingFrame(controlFramePose);
+      controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
    }
 
    /**
