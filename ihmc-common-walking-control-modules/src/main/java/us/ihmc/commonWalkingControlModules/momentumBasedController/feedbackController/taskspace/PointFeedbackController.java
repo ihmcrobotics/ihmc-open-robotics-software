@@ -145,9 +145,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
          if (toolbox.isEnableVirtualModelControlModule())
          {
             yoDesiredLinearForce = feedbackControllerToolbox.getDataVector(endEffector, DESIRED, LINEAR_FORCE, isEnabled);
-            yoFeedbackLinearForce = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, LINEAR_ACCELERATION, isEnabled);
+            yoFeedbackLinearForce = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, LINEAR_FORCE, isEnabled);
             rateLimitedFeedbackLinearForce = feedbackControllerToolbox
-                  .getRateLimitedDataVector(endEffector, FEEDBACK, LINEAR_ACCELERATION, dt, maximumRate, isEnabled);
+                  .getRateLimitedDataVector(endEffector, FEEDBACK, LINEAR_FORCE, dt, maximumRate, isEnabled);
          }
          else
          {
