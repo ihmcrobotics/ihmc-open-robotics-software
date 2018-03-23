@@ -66,11 +66,6 @@ public class ParameterSavingNode extends HBox
       }
    }
 
-   public File getActiveFile()
-   {
-      return activeFile;
-   }
-
    public void setRegistries(List<GuiRegistry> registries)
    {
       this.registries = registries;
@@ -183,7 +178,7 @@ public class ParameterSavingNode extends HBox
     *
     * @return the most-recently-used file.
     */
-   private File getDefaultFilePath()
+   public File getDefaultFilePath()
    {
       Preferences prefs = Preferences.userNodeForPackage(ParameterSavingNode.class);
       String filePath = prefs.get("filePath", null);
