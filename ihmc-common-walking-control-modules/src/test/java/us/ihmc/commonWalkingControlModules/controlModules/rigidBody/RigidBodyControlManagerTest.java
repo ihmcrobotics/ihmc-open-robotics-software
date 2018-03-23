@@ -200,8 +200,9 @@ public class RigidBodyControlManagerTest
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
          assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
-         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
+         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
+         taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
 
          initialPosition.checkReferenceFrameMatch(desiredPosition);
          EuclidCoreTestTools.assertTuple3DEquals(initialPosition, desiredPosition, epsilon);
@@ -218,8 +219,9 @@ public class RigidBodyControlManagerTest
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
          assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
-         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
+         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
+         taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
 
          initialPosition.checkReferenceFrameMatch(desiredPosition);
          EuclidCoreTestTools.assertTuple3DEquals(position, desiredPosition, epsilon);
@@ -443,8 +445,9 @@ public class RigidBodyControlManagerTest
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
          assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
-         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
+         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
+         taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
 
          initialPosition.checkReferenceFrameMatch(desiredPosition);
          EuclidCoreTestTools.assertTuple3DEquals(initialPosition, desiredPosition, epsilon);
@@ -467,8 +470,9 @@ public class RigidBodyControlManagerTest
          SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
 
          assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
-         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
+         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
+         taskspaceCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
 
          initialPosition.checkReferenceFrameMatch(desiredPosition);
          EuclidCoreTestTools.assertTuple3DEquals(position, desiredPosition, epsilon);

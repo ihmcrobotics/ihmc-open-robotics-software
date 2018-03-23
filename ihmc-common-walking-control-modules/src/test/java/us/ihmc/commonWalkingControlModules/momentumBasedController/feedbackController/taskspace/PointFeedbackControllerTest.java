@@ -330,7 +330,8 @@ public final class PointFeedbackControllerTest
          spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
 
          pointFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-         spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
+         spatialFeedbackControlCommand.setFeedForwardLinearAction(feedForwardLinearAcceleration);
 
          spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
          pointFeedbackController.submitFeedbackControlCommand(pointFeedbackControlCommand);
