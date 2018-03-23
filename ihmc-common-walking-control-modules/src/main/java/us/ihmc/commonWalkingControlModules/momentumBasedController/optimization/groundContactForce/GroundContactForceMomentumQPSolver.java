@@ -156,7 +156,7 @@ public class GroundContactForceMomentumQPSolver
 
    public void setRhoRegularizationWeight(DenseMatrix64F weight)
    {
-      CommonOps.insert(weight, regularizationMatrix, 0, 0);
+      CommonOps.insert(weight, regularizationMatrix, momentumSize, momentumSize);
    }
 
    public void setUseWarmStart(boolean useWarmStart)
