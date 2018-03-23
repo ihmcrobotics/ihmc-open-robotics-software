@@ -75,8 +75,9 @@ public class HexapodBodySpatialManager
       desiredPosition.setToZero(body.getBodyFixedFrame());
       desiredOrientation.setToZero(body.getBodyFixedFrame());
 
-      spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
-      spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
 
       yoDesiredBodyOrientation.set(desiredOrientation);
       yoDesiredBodyPosition.set(desiredPosition);
@@ -104,8 +105,9 @@ public class HexapodBodySpatialManager
       yoDesiredBodyOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
       desiredAngularVelocity.setIncludingFrame(yoDesiredBodyAngularVelocity);
 
-      spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      spatialFeedbackCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackCommand.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
    }
 
  /**

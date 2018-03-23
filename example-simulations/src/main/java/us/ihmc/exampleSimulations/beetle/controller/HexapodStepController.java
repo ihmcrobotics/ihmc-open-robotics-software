@@ -271,7 +271,8 @@ public class HexapodStepController
       currentPositions.get(robotSextant).set(currentPosition);
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = spatialFeedbackControlCommands.get(robotSextant);
-      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.setFeedForwardLinearAction(feedForwardLinearAcceleration);
       feedbackControlCommandList.addCommand(spatialFeedbackControlCommand);
 
       PlaneContactStateCommand contactState = contactStateUpdaters.get(robotSextant).getNotInContactState();
