@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.Skully;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.parameters.XmlParameterReader;
@@ -67,18 +68,11 @@ public class ParameterLoaderHelper
       int parametersInXMLWithoutMatch = parametersInXML - loadedParameters;
       if (parametersInXMLWithoutMatch != 0)
       {
-         PrintTools.warn("Skully says he discovered a mysterious value:\n" +
-               "   'I think something is off in your parameter file.'\n" +
-               "       ,----._\n" +
-               "      )\\___/  \\\n" +
-               "     /__, ,__,(|\n" +
-               "     |.d/ \\b. _/\n" +
-               "      \\/''  \\||\n" +
-               "       '+++'//\n" +
-               "       `-.-'\n" +
-               "   Parameters in registry: " + parametersInRegistry + "\n" +
-               "   Parameters using their default value: " + defaults + "\n" +
-               "   Parameters in XML with no match: " + parametersInXMLWithoutMatch);
+         String message = "I think something is off in your parameter file.";
+         String additionalInfo = "Parameters in registry: " + parametersInRegistry + "\n" +
+                                 "Parameters using their default value: " + defaults + "\n" +
+                                 "Parameters in XML with no match: " + parametersInXMLWithoutMatch;
+         Skully.say(message, additionalInfo);
       }
    }
 }
