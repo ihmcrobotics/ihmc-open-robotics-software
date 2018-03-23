@@ -10,8 +10,8 @@ import us.ihmc.euclid.interfaces.Settable;
 public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
       implements Settable<HeightQuadTreeLeafMessage>, EpsilonComparable<HeightQuadTreeLeafMessage>
 {
-   public float x_center_;
-   public float y_center_;
+   public float center_x_;
+   public float center_y_;
    public float height_;
 
    public HeightQuadTreeLeafMessage()
@@ -26,31 +26,31 @@ public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
 
    public void set(HeightQuadTreeLeafMessage other)
    {
-      x_center_ = other.x_center_;
+      center_x_ = other.center_x_;
 
-      y_center_ = other.y_center_;
+      center_y_ = other.center_y_;
 
       height_ = other.height_;
    }
 
-   public float getXCenter()
+   public float getCenterX()
    {
-      return x_center_;
+      return center_x_;
    }
 
-   public void setXCenter(float x_center)
+   public void setCenterX(float center_x)
    {
-      x_center_ = x_center;
+      center_x_ = center_x;
    }
 
-   public float getYCenter()
+   public float getCenterY()
    {
-      return y_center_;
+      return center_y_;
    }
 
-   public void setYCenter(float y_center)
+   public void setCenterY(float center_y)
    {
-      y_center_ = y_center;
+      center_y_ = center_y;
    }
 
    public float getHeight()
@@ -71,10 +71,10 @@ public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
       if (other == this)
          return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_center_, other.x_center_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.center_x_, other.center_x_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_center_, other.y_center_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.center_y_, other.center_y_, epsilon))
          return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_, other.height_, epsilon))
@@ -95,10 +95,10 @@ public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
 
       HeightQuadTreeLeafMessage otherMyClass = (HeightQuadTreeLeafMessage) other;
 
-      if (this.x_center_ != otherMyClass.x_center_)
+      if (this.center_x_ != otherMyClass.center_x_)
          return false;
 
-      if (this.y_center_ != otherMyClass.y_center_)
+      if (this.center_y_ != otherMyClass.center_y_)
          return false;
 
       if (this.height_ != otherMyClass.height_)
@@ -113,12 +113,12 @@ public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("HeightQuadTreeLeafMessage {");
-      builder.append("x_center=");
-      builder.append(this.x_center_);
+      builder.append("center_x=");
+      builder.append(this.center_x_);
 
       builder.append(", ");
-      builder.append("y_center=");
-      builder.append(this.y_center_);
+      builder.append("center_y=");
+      builder.append(this.center_y_);
 
       builder.append(", ");
       builder.append("height=");
