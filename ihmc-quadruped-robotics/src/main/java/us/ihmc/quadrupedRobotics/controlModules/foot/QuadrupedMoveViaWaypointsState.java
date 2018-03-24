@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionControllerSetpoints;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -27,12 +28,18 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
 
    private final QuadrupedFootControlModuleParameters parameters;
 
+   private final QuadrupedSolePositionController solePositionController;
+   private final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
+
    private double taskStartTime;
 
    public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,
                                          QuadrupedSolePositionController solePositionController, YoVariableRegistry parentRegistry)
    {
-      super(robotQuadrant, controllerToolbox, solePositionController);
+      super(robotQuadrant, controllerToolbox);
+
+      this.solePositionController = solePositionController;
+      solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
       this.bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       this.soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
