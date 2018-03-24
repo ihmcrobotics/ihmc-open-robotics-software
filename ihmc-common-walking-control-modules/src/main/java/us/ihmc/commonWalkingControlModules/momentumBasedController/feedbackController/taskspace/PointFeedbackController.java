@@ -295,8 +295,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    @Override
    public void computeVirtualModelControl()
    {
-      computeInverseDynamics();
-
       if (!isEnabled())
          return;
 
