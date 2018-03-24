@@ -115,4 +115,10 @@ public class EnumTuner extends HBox implements InputNode
          return duplicate;
       }
    }
+
+   @Override
+   public Node getFullInputNode()
+   {
+      return this;
+   }
 }
