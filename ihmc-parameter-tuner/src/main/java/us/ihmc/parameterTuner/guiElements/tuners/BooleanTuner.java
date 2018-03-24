@@ -54,4 +54,10 @@ public class BooleanTuner extends HBox implements InputNode
       value.selectedProperty().addListener((observable, oldValue, newValue) -> duplicate.setSelected(newValue));
       return duplicate;
    }
+
+   @Override
+   public Node getFullInputNode()
+   {
+      return this;
+   }
 }

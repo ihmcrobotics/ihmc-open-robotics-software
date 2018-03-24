@@ -90,4 +90,10 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
       duplicate.setPrefWidth(width);
       return duplicate;
    }
+
+   @Override
+   public Node getFullInputNode()
+   {
+      return this;
+   }
 }
