@@ -5,8 +5,9 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class LinearControlModuleHelper
@@ -16,6 +17,8 @@ public class LinearControlModuleHelper
    static final int positionCoefficients = velocityCoefficients + 1;
    static final int defaultNumberOfNodes = 100;
    static final int numberOfAxis = Axis.values.length;
+   static final Axis[] angularAxisValues = {Axis.X, Axis.Y};
+   static final int numberOfAngularAxis = angularAxisValues.length;
 
    private final DenseMatrix64F deltaT = new DenseMatrix64F(defaultNumberOfNodes - 1, 1);
    private final DenseMatrix64F[] positionCoefficientMatrix = new DenseMatrix64F[numberOfAxis];
@@ -48,6 +51,7 @@ public class LinearControlModuleHelper
 
    private int numberOfNodes;
    private final int[] numberOfDecisionVariables = new int[numberOfAxis];
+   private final int[] numberOfCoPDecisionVariables = new int[numberOfAngularAxis];
 
    private final Vector3D gravity = new Vector3D();
    private final double robotMass;
@@ -56,7 +60,7 @@ public class LinearControlModuleHelper
    private final Vector3D maxForceRate = new Vector3D();
    private final Vector3D minForceRate = new Vector3D();
 
-   private RecycledLinkedListBuilder<CentroidalMotionNode> nodeList;
+   private final ConvexPolygon2D tempConvexPolygon = new ConvexPolygon2D();
 
    public LinearControlModuleHelper(CentroidalMotionPlannerParameters parameters)
    {
@@ -72,6 +76,8 @@ public class LinearControlModuleHelper
          forceBias[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
          forceRateCoefficientMatrix[i] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfDecisionVariables);
          forceRateBias[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
+         optimizedPositionValues[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
+         optimizedVelocityValues[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
          optimizedForceValues[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
          optimizedForceRateValues[i] = new DenseMatrix64F(defaultNumberOfNodes, 1);
          decisionVariableValues[i] = new DenseMatrix64F(defaultNumberOfDecisionVariables, 1);
@@ -188,9 +194,7 @@ public class LinearControlModuleHelper
       CentroidalMotionNode node = entry.element;
       double previousNodeTime = node.getTime();
       for (Axis axis : Axis.values)
-      {
          numberOfDecisionVariables[axis.ordinal()] = getNumberOfDecisionVariables(node, axis);
-      }
 
       entry = entry.getNext();
       for (int i = 0; entry != null; i++, entry = entry.getNext())
@@ -200,10 +204,7 @@ public class LinearControlModuleHelper
          deltaT.set(i, 0, nodeTime - previousNodeTime);
          previousNodeTime = nodeTime;
          for (Axis axis : Axis.values)
-         {
-            int axisOrdinal = axis.ordinal();
-            numberOfDecisionVariables[axisOrdinal] += getNumberOfDecisionVariables(node, axis);
-         }
+            numberOfDecisionVariables[axis.ordinal()] += getNumberOfDecisionVariables(node, axis);
       }
    }
 
@@ -874,11 +875,17 @@ public class LinearControlModuleHelper
 
    public DenseMatrix64F[] getOptimizedForceValues()
    {
+      getOptimizedForceValues(Axis.X);
+      getOptimizedForceValues(Axis.Y);
+      getOptimizedForceValues(Axis.Z);
       return optimizedForceValues;
    }
 
    public DenseMatrix64F[] getOptimizedForceRateValues()
    {
+      getOptimizedForceRateValues(Axis.X);
+      getOptimizedForceRateValues(Axis.Y);
+      getOptimizedForceRateValues(Axis.Z);
       return optimizedForceRateValues;
    }
 
@@ -916,6 +923,7 @@ public class LinearControlModuleHelper
 
    private void compute(DenseMatrix64F result, DenseMatrix64F soln, DenseMatrix64F coefficients, DenseMatrix64F bias)
    {
+      result.reshape(coefficients.getNumRows(), soln.getNumCols());
       CommonOps.mult(coefficients, soln, result);
       CommonOps.addEquals(result, bias);
    }
@@ -939,6 +947,22 @@ public class LinearControlModuleHelper
       int axisOrdinal = axis.ordinal();
       compute(optimizedPositionValues[axisOrdinal], decisionVariableValues[axisOrdinal], positionCoefficientMatrix[axisOrdinal], positionBias[axisOrdinal]);
       return optimizedPositionValues[axisOrdinal];
+   }
+
+   public DenseMatrix64F[] getOptimizedPositionValues()
+   {
+      getOptimizedPositionValues(Axis.X);
+      getOptimizedPositionValues(Axis.Y);
+      getOptimizedPositionValues(Axis.Z);
+      return optimizedPositionValues;
+   }
+
+   public DenseMatrix64F[] getOptimizedVelocityValues()
+   {
+      getOptimizedVelocityValues(Axis.X);
+      getOptimizedVelocityValues(Axis.Y);
+      getOptimizedVelocityValues(Axis.Z);
+      return optimizedVelocityValues;
    }
 
 }

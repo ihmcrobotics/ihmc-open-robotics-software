@@ -24,10 +24,10 @@ public class CentroidalXYAxisOptimizationControlModule
    // Variables to store results for runtime
    private final JavaQuadProgSolver qpSolver;
    private final DenseMatrix64F qpSolution;
-   private final DenseMatrix64F axisQPSolution;
-
-   private int numberOfXAxisDecisionVariables;
-   private int numberOfYAxisDecisionVariables;
+   private final DenseMatrix64F xQPSolution;
+   private final DenseMatrix64F yQPSolution;
+   private final DenseMatrix64F xCoPSolution;
+   private final DenseMatrix64F yCoPSolution;
 
    private final DenseMatrix64F tempMatrix1 = new DenseMatrix64F(0, 1);
    private final DenseMatrix64F tempMatrix2 = new DenseMatrix64F(0, 1);
@@ -49,9 +49,12 @@ public class CentroidalXYAxisOptimizationControlModule
       solverInput_bin = new DenseMatrix64F(0, 1);
 
       qpSolver = new JavaQuadProgSolver();
-      qpSolver.setConvergenceThreshold(parameters.getOptimizationConvergenceThreshold());
+      qpSolver.setConvergenceThreshold(1e-14);
       qpSolution = new DenseMatrix64F(0, 1);
-      axisQPSolution = new DenseMatrix64F(0, 1);
+      xQPSolution = new DenseMatrix64F(0, 1);
+      yQPSolution = new DenseMatrix64F(0, 1);
+      xCoPSolution = new DenseMatrix64F(0, 1);
+      yCoPSolution = new DenseMatrix64F(0, 1);
       reset();
    }
 
@@ -63,14 +66,17 @@ public class CentroidalXYAxisOptimizationControlModule
    public void compute()
    {
       setQPInputMatrices();
+      qpSolver.resetActiveConstraints();
+      qpSolver.clear();
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
-      qpSolver.setLowerBounds(solverInput_lb);
-      qpSolver.setUpperBounds(solverInput_ub);
+      //qpSolver.setLowerBounds(solverInput_lb);
+      //qpSolver.setUpperBounds(solverInput_ub);
       try
       {
-         qpSolver.solve(qpSolution);
+         int numberOfIterations = qpSolver.solve(qpSolution);
+         PrintTools.debug("QP solved in " + numberOfIterations);
       }
       catch (RuntimeException exception)
       {
@@ -81,16 +87,18 @@ public class CentroidalXYAxisOptimizationControlModule
 
    private void submitQPSolution()
    {
-      axisQPSolution.reshape(numberOfXAxisDecisionVariables, 1);
-      CommonOps.extract(qpSolution, 0, numberOfXAxisDecisionVariables, 0, 1, axisQPSolution, 0, 0);
-      linearHelper.setDecisionVariableValues(Axis.X, axisQPSolution);
-
-      axisQPSolution.reshape(numberOfYAxisDecisionVariables, 1);
-      CommonOps.extract(qpSolution, numberOfXAxisDecisionVariables, numberOfXAxisDecisionVariables + numberOfYAxisDecisionVariables, 0, 1, axisQPSolution, 0,
-                        0);
-      linearHelper.setDecisionVariableValues(Axis.Y, axisQPSolution);
-
+      PrintTools.debug(qpSolution.toString());
+      angularHelper.processQPSolution(qpSolution, xQPSolution, yQPSolution, xCoPSolution, yCoPSolution);
+      linearHelper.setDecisionVariableValues(Axis.X, xQPSolution);
+      linearHelper.setDecisionVariableValues(Axis.Y, yQPSolution);
+      PrintTools.debug("Fx:" + xQPSolution.toString());
+      PrintTools.debug("Fy:" + yQPSolution.toString());
+      for(int i = 0; i < xCoPSolution.getNumRows(); i++)
+         PrintTools.debug("CoP" + i + ": (" + xCoPSolution.get(i) + ", " + yCoPSolution.get(i) + ")");
    }
+
+   private final DenseMatrix64F tempMatrix3 = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F tempMatrix4 = new DenseMatrix64F(0, 1);
 
    private void setQPInputMatrices()
    {
@@ -108,11 +116,22 @@ public class CentroidalXYAxisOptimizationControlModule
       DenseMatrix64F ybeq = linearHelper.getConstraintbeqMatrix(yAxis);
       angularHelper.processLinearConstraints(xAeq, xbeq, yAeq, ybeq, solverInput_Aeq, solverInput_beq);
       angularHelper.getConsolidatedTorqueConstraints(tempMatrix1, tempMatrix2);
-      CommonOps.scale(-1.0, tempMatrix2);
-      int indexToInsertTorqueConstrains = solverInput_Aeq.getNumRows();
-      solverInput_Aeq.reshape(indexToInsertTorqueConstrains + tempMatrix1.getNumRows(), solverInput_Aeq.getNumCols());
-      CommonOps.insert(tempMatrix1, solverInput_Aeq, indexToInsertTorqueConstrains, 0);
-      CommonOps.insert(tempMatrix2, solverInput_beq, indexToInsertTorqueConstrains, 0);
+      tempMatrix3.reshape(tempMatrix1.getNumRows(), tempMatrix1.getNumRows());
+      CommonOps.setIdentity(tempMatrix3);
+      CommonOps.scale(50.0, tempMatrix3);
+      tempMatrix4.reshape(tempMatrix1.getNumCols(), tempMatrix1.getNumRows());
+      CommonOps.multTransA(tempMatrix1, tempMatrix3, tempMatrix4);
+      CommonOps.multAdd(tempMatrix4, tempMatrix1, solverInput_H);
+      CommonOps.multAdd(tempMatrix4, tempMatrix2, solverInput_f);
+
+      angularHelper.getCoPRegularization(tempMatrix1, 0.00001);
+      CommonOps.addEquals(solverInput_H, tempMatrix1);
+
+      //int indexToInsertTorqueConstrains = solverInput_Aeq.getNumRows();
+      //solverInput_Aeq.reshape(indexToInsertTorqueConstrains + tempMatrix1.getNumRows(), solverInput_Aeq.getNumCols(), true);
+      //solverInput_beq.reshape(indexToInsertTorqueConstrains + tempMatrix1.getNumRows(), 1, true);
+      //CommonOps.insert(tempMatrix1, solverInput_Aeq, indexToInsertTorqueConstrains, 0);
+      //CommonOps.insert(tempMatrix2, solverInput_beq, indexToInsertTorqueConstrains, 0);
 
       DenseMatrix64F xAin = linearHelper.getConstraintAinMatrix(xAxis);
       DenseMatrix64F xbin = linearHelper.getConstraintbinMatrix(xAxis);
@@ -125,7 +144,6 @@ public class CentroidalXYAxisOptimizationControlModule
       solverInput_bin.reshape(indexToInsertCoPConstraints + tempMatrix1.getNumRows(), 1, true);
       CommonOps.insert(tempMatrix1, solverInput_Ain, indexToInsertCoPConstraints, 0);
       CommonOps.insert(tempMatrix2, solverInput_bin, indexToInsertCoPConstraints, 0);
-      
       DenseMatrix64F xUb = linearHelper.getDecisionVariableUpperBoundMatrix(xAxis);
       DenseMatrix64F yUb = linearHelper.getDecisionVariableUpperBoundMatrix(yAxis);
       DenseMatrix64F xLb = linearHelper.getDecisionVariableLowerBoundMatrix(xAxis);
@@ -136,7 +154,5 @@ public class CentroidalXYAxisOptimizationControlModule
       solverInput_bin.reshape(indexToInsertBoundConstraints + tempMatrix1.getNumRows(), 1, true);
       CommonOps.insert(tempMatrix1, solverInput_Ain, indexToInsertBoundConstraints, 0);
       CommonOps.insert(tempMatrix2, solverInput_bin, indexToInsertBoundConstraints, 0);
-      
-
    }
 }

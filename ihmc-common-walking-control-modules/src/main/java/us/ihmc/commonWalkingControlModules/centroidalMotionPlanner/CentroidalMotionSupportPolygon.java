@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
@@ -59,6 +60,11 @@ public class CentroidalMotionSupportPolygon
       this.startTime = other.startTime;
       this.endTime = other.endTime;
       this.supportPolygon.setIncludingFrame(other.supportPolygon);
+   }
+
+   public void getSupportPolygon(ConvexPolygon2D tempConvexPolygon)
+   {
+      tempConvexPolygon.set(this.supportPolygon.getConvexPolygon2d());
    }
 }
 

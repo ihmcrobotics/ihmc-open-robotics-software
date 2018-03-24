@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
 import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -46,6 +47,9 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    private final FrameVector3D linearVelocityWeight;
    private final FrameVector3D linearVelocityMax;
    private final FrameVector3D linearVelocityMin;
+
+   private final FramePoint2D centerOfPressure;
+   private final VectorEnum<EffortVariableConstraintType> centerOfPressureConstraintType = new VectorEnum<>();
 
    private final FrameVector3D torque;
    private final VectorEnum<DependentVariableConstraintType> torqueConstraintType = new VectorEnum<>();
@@ -96,6 +100,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       torque = new FrameVector3D(referenceFrame);
       torqueWeight = new FrameVector3D(referenceFrame);
 
+      centerOfPressure = new FramePoint2D(referenceFrame);
       reset();
    }
 
@@ -134,6 +139,9 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       torque.setToNaN();
       torqueWeight.setToNaN();
       torqueConstraintType.setXYZ(DependentVariableConstraintType.IGNORE);
+
+      centerOfPressure.setToNaN();
+      centerOfPressureConstraintType.setToNull();
    }
 
    public void setTime(double time)
@@ -532,6 +540,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       torque.changeFrame(desiredFrame);
       torqueWeight.changeFrame(desiredFrame);
 
+      centerOfPressure.changeFrame(desiredFrame);
       referenceFrame = desiredFrame;
    }
 
@@ -571,6 +580,9 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.torque.setIncludingFrame(other.torque);
       this.torqueWeight.setIncludingFrame(other.torqueWeight);
       this.torqueConstraintType.set(other.torqueConstraintType);
+      
+      this.centerOfPressure.setIncludingFrame(other.centerOfPressure);
+      this.centerOfPressureConstraintType.set(other.centerOfPressureConstraintType);
    }
 
    public EffortVariableConstraintType getXForceConstraintType()
@@ -726,5 +738,25 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public String toString()
    {
       return "Max position: " + this.positionMax.toString() + ", Min position: " + this.positionMin.toString();
+   }
+
+   public void setCoPConstraint(FramePoint2D desiredCoP)
+   {
+      this.centerOfPressure.setIncludingFrame(desiredCoP);
+   }
+
+   public double getCoPX()
+   {
+      return centerOfPressure.getX();
+   }
+
+   public double getCoPY()
+   {
+      return centerOfPressure.getY();
+   }
+
+   public EffortVariableConstraintType getCoPConstraintType(Axis axis)
+   {
+      return centerOfPressureConstraintType.getElement(axis);
    }
 }

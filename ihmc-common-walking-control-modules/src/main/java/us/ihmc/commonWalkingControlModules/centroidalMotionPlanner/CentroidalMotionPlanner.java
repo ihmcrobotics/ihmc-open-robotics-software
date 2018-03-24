@@ -179,6 +179,8 @@ public class CentroidalMotionPlanner
       angularHelper.computeYTorqueCoefficientsInTermsOfXDecisionVariables(xPositionCoefficientMatrix, xPositionBiasMatrix, xVelocityCoefficientMatrix,
                                                                           xVelocityBiasMatrix, xForceCoefficientMatrix, xForceBiasMatrix,
                                                                           xForceRateCoefficientMatrix, xForceRateBiasMatrix, deltaTMatrix);
+      angularHelper.computeXTorqueContributionFromCoP(linearHelper.getNumberOfNodes());
+      angularHelper.computeYTorqueContributionFromCoP(linearHelper.getNumberOfNodes());
       angularHelper.computeCoPPointConstraints(nodeList, supportPolygonList);
       transversePlaneControlModule.compute();
    }
@@ -241,5 +243,15 @@ public class CentroidalMotionPlanner
          tempInitialForceRate.set(tempFinalForceRate);
          entry = nextEntry;
       }
+   }
+
+   public DenseMatrix64F[] getOptimizedPositionValues()
+   {
+      return linearHelper.getOptimizedPositionValues();
+   }
+
+   public DenseMatrix64F[] getOptimizedVelocityValues()
+   {
+      return linearHelper.getOptimizedVelocityValues();
    }
 }

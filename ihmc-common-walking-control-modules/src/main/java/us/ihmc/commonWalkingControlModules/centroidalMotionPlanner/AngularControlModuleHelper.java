@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.qpOASES.DenseMatrix;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -146,19 +147,18 @@ public class AngularControlModuleHelper
                                           RecycledLinkedListBuilder<CentroidalMotionSupportPolygon> supportPolygonList)
    {
       int numberOfNodes = nodeList.getSize();
-      int numberOfSupportPolygons = supportPolygonList.getSize();
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> nodeEntry = nodeList.getFirstEntry();
       RecycledLinkedListBuilder<CentroidalMotionSupportPolygon>.RecycledLinkedListEntry<CentroidalMotionSupportPolygon> supportPolygonEntry = supportPolygonList.getFirstEntry();
       double nodeTime;
-      for (int nodeIndex = 0, supportPolygonIndex = 0; nodeIndex < numberOfNodes; nodeIndex++, nodeEntry = nodeEntry.getNext())
+      for (int nodeIndex = 0; nodeIndex < numberOfNodes; nodeIndex++, nodeEntry = nodeEntry.getNext())
       {
          nodeTime = nodeEntry.element.getTime();
-         for (; supportPolygonIndex < numberOfSupportPolygons; supportPolygonIndex++, supportPolygonEntry = supportPolygonEntry.getNext())
+         for (supportPolygonEntry = supportPolygonList.getFirstEntry(); supportPolygonEntry != null; supportPolygonEntry = supportPolygonEntry.getNext())
          {
             if (nodeTime < supportPolygonEntry.element.getStartTime())
-               break;
-            else if (nodeTime > supportPolygonEntry.element.getEndTime())
                continue;
+            else if (nodeTime > supportPolygonEntry.element.getEndTime())
+               supportPolygonEntry = supportPolygonEntry.getNext();
             else
             {
                supportPolygonEntry.element.getSupportPolygon(tempSupportPolygon);
@@ -348,7 +348,6 @@ public class AngularControlModuleHelper
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
          setCoefficientT0(torqueCoefficientBiasMatrix[0], i, az, bz, cz, dz, vz, pz, deltaTi, tempForceCoefficient1, tempForceCoefficient2,
                           tempForceRateCoefficient1, tempForceRateCoefficient2, tempVelocityCoefficient, tempPositionCoefficient);
-
       }
    }
 
@@ -356,6 +355,7 @@ public class AngularControlModuleHelper
                                  double detlaTi, DenseMatrix64F f0, DenseMatrix64F f1, DenseMatrix64F m0, DenseMatrix64F m1, DenseMatrix64F v0,
                                  DenseMatrix64F p0)
    {
+      tempMatrixForCoefficients.reshape(1, f0.getNumCols());
       tempMatrixForCoefficients.zero();
       CommonOps.addEquals(tempMatrixForCoefficients, (pz), f0);
       CommonOps.addEquals(tempMatrixForCoefficients, -dz, p0);
@@ -366,6 +366,7 @@ public class AngularControlModuleHelper
                                  double deltaTi, DenseMatrix64F f0, DenseMatrix64F f1, DenseMatrix64F m0, DenseMatrix64F m1, DenseMatrix64F v0,
                                  DenseMatrix64F p0)
    {
+      tempMatrixForCoefficients.reshape(1, f0.getNumCols());
       tempMatrixForCoefficients.zero();
       CommonOps.addEquals(tempMatrixForCoefficients, (vz * deltaTi), f0);
       CommonOps.addEquals(tempMatrixForCoefficients, (pz) * deltaTi, m0);
@@ -378,6 +379,7 @@ public class AngularControlModuleHelper
                                  double deltaTi, DenseMatrix64F f0, DenseMatrix64F f1, DenseMatrix64F m0, DenseMatrix64F m1, DenseMatrix64F v0,
                                  DenseMatrix64F p0)
    {
+      tempMatrixForCoefficients.reshape(1, f0.getNumCols());
       tempMatrixForCoefficients.zero();
       CommonOps.addEquals(tempMatrixForCoefficients, (-3.0 * pz), f0);
       CommonOps.addEquals(tempMatrixForCoefficients, (3.0 * pz), f1);
@@ -392,6 +394,7 @@ public class AngularControlModuleHelper
                                  double deltaTi, DenseMatrix64F f0, DenseMatrix64F f1, DenseMatrix64F m0, DenseMatrix64F m1, DenseMatrix64F v0,
                                  DenseMatrix64F p0)
    {
+      tempMatrixForCoefficients.reshape(1, f0.getNumCols());
       tempMatrixForCoefficients.zero();
       CommonOps.addEquals(tempMatrixForCoefficients, (2 * pz - 3 * deltaTi * vz - deltaTi * deltaTi * cz / (3.0 * robotMass)), f0);
       CommonOps.addEquals(tempMatrixForCoefficients, (-2.0 * pz + 3 * deltaTi * vz), f1);
@@ -406,6 +409,7 @@ public class AngularControlModuleHelper
                                  double deltaTi, DenseMatrix64F f0, DenseMatrix64F f1, DenseMatrix64F m0, DenseMatrix64F m1, DenseMatrix64F v0,
                                  DenseMatrix64F p0)
    {
+      tempMatrixForCoefficients.reshape(1, f0.getNumCols());
       tempMatrixForCoefficients.zero();
       CommonOps.addEquals(tempMatrixForCoefficients,
                           (2.0 * deltaTi * vz - 5.0 * bz * deltaTi * deltaTi / (12.0 * robotMass) - 15 * dz * deltaTi * deltaTi / (12.0 * robotMass)), f0);
@@ -421,6 +425,7 @@ public class AngularControlModuleHelper
                                  DenseMatrix64F p0)
    {
       double timeMultiplier = deltaTi * deltaTi / (60.0 * robotMass);
+      tempMatrixForCoefficients.reshape(1, f0.getNumCols());
       tempMatrixForCoefficients.zero();
       CommonOps.addEquals(tempMatrixForCoefficients, (-27 * az + 54.0 * dz - 15 * cz) * timeMultiplier, f0);
       CommonOps.addEquals(tempMatrixForCoefficients, (-54 * dz + 15 * cz) * timeMultiplier, f1);
@@ -434,6 +439,7 @@ public class AngularControlModuleHelper
                                  DenseMatrix64F p0)
    {
       double timeMultiplier = deltaTi * deltaTi * 7.0 / (60.0 * robotMass);
+      tempMatrixForCoefficients.reshape(1, f0.getNumCols());
       tempMatrixForCoefficients.zero();
       CommonOps.addEquals(tempMatrixForCoefficients, 2.0 * cz * timeMultiplier, f0);
       CommonOps.addEquals(tempMatrixForCoefficients, -2.0 * cz * timeMultiplier, f1);
@@ -447,6 +453,7 @@ public class AngularControlModuleHelper
                                  DenseMatrix64F p0)
    {
       double timeMultiplier = deltaTi * deltaTi / (30.0 * robotMass);
+      tempMatrixForCoefficients.reshape(1, f0.getNumCols());
       tempMatrixForCoefficients.zero();
       CommonOps.addEquals(tempMatrixForCoefficients, (2.0 * bz + 3.0 * az) * timeMultiplier, f0);
       CommonOps.addEquals(tempMatrixForCoefficients, (-2.0 * bz - 3.0 * az) * timeMultiplier, f1);
@@ -469,10 +476,10 @@ public class AngularControlModuleHelper
       int numberOfVariables = numberOfXDecisionVariables + numberOfYDecisionVariables;
       coefficientMatrixToSet.reshape(xCoPSupportPolygonAinMatrix.getNumRows(), numberOfVariables);
       coefficientMatrixToSet.zero();
-      int xCoPIndex = xTorquePositionContributionCoefficientBiasMatrices[0].getNumCols();
+      int xCoPIndex = xTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols();
       int yCoPIndex = numberOfXDecisionVariables + yTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols();
-      CommonOps.insert(xCoPSupportPolygonAinMatrix, coefficientMatrixToSet, xCoPIndex, 0);
-      CommonOps.insert(yCoPSupportPolygonAinMatrix, coefficientMatrixToSet, yCoPIndex, 0);
+      CommonOps.insert(xCoPSupportPolygonAinMatrix, coefficientMatrixToSet, 0, xCoPIndex);
+      CommonOps.insert(yCoPSupportPolygonAinMatrix, coefficientMatrixToSet, 0, yCoPIndex);
       biasMatrixToSet.set(copSupportPolygonbinMatrix);
    }
 
@@ -487,7 +494,7 @@ public class AngularControlModuleHelper
       for (int i = 0; i < 7; i++)
       {
          DenseMatrix64F positionCoefficientMatrix = xTorquePositionContributionCoefficientCoefficientMatrices[i];
-         DenseMatrix64F copCoefficientMatrix = xTorqueCoPContributionCoefficientCoefficientMatrices[i];
+         DenseMatrix64F copCoefficientMatrix = yTorqueCoPContributionCoefficientCoefficientMatrices[i];
          consolidateTorqueCoefficientMatrix(positionCoefficientMatrix, copCoefficientMatrix, tempMatrixForCoefficients);
          coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables, true);
          CommonOps.insert(tempMatrixForCoefficients, coefficientMatrixToSet, numberOfConstraints, 0);
@@ -497,14 +504,23 @@ public class AngularControlModuleHelper
          biasMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), 1, true);
          CommonOps.insert(positionBiasMatrix, biasMatrixToSet, numberOfConstraints, 0);
          numberOfConstraints += positionCoefficientMatrix.getNumRows();
+      }
+      {
+         DenseMatrix64F positionCoefficientMatrix = xTorquePositionContributionCoefficientCoefficientMatrices[7];
+         coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables, true);
+         CommonOps.insert(positionCoefficientMatrix, coefficientMatrixToSet, numberOfConstraints, 0);
 
+         DenseMatrix64F positionBiasMatrix = xTorquePositionContributionCoefficientBiasMatrices[7];
+         biasMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), 1, true);
+         CommonOps.insert(positionBiasMatrix, biasMatrixToSet, numberOfConstraints, 0);
+         numberOfConstraints += positionCoefficientMatrix.getNumRows();
       }
       for (int i = 0; i < 7; i++)
       {
          DenseMatrix64F positionCoefficientMatrix = yTorquePositionContributionCoefficientCoefficientMatrices[i];
-         DenseMatrix64F copCoefficientMatrix = yTorqueCoPContributionCoefficientCoefficientMatrices[i];
+         DenseMatrix64F copCoefficientMatrix = xTorqueCoPContributionCoefficientCoefficientMatrices[i];
          consolidateTorqueCoefficientMatrix(positionCoefficientMatrix, copCoefficientMatrix, tempMatrixForCoefficients);
-         coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables);
+         coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables, true);
          CommonOps.insert(tempMatrixForCoefficients, coefficientMatrixToSet, numberOfConstraints, numberOfXDecisionVariables);
 
          DenseMatrix64F positionBiasMatrix = yTorquePositionContributionCoefficientBiasMatrices[i];
@@ -513,23 +529,17 @@ public class AngularControlModuleHelper
          CommonOps.insert(positionBiasMatrix, biasMatrixToSet, numberOfConstraints, 0);
          numberOfConstraints += positionCoefficientMatrix.getNumRows();
       }
-      DenseMatrix64F positionCoefficientMatrix = xTorquePositionContributionCoefficientCoefficientMatrices[7];
-      coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables, true);
-      CommonOps.insert(positionCoefficientMatrix, coefficientMatrixToSet, numberOfConstraints, 0);
+      {
+         DenseMatrix64F positionCoefficientMatrix = yTorquePositionContributionCoefficientCoefficientMatrices[7];
+         coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables, true);
+         CommonOps.insert(positionCoefficientMatrix, coefficientMatrixToSet, numberOfConstraints, numberOfXDecisionVariables);
 
-      DenseMatrix64F positionBiasMatrix = xTorquePositionContributionCoefficientBiasMatrices[7];
-      biasMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), 1, true);
-      CommonOps.insert(positionBiasMatrix, biasMatrixToSet, numberOfConstraints, 0);
-      numberOfConstraints += positionCoefficientMatrix.getNumRows();
+         DenseMatrix64F positionBiasMatrix = yTorquePositionContributionCoefficientBiasMatrices[7];
+         biasMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), 1, true);
+         CommonOps.insert(positionBiasMatrix, biasMatrixToSet, numberOfConstraints, 0);
+         numberOfConstraints += positionCoefficientMatrix.getNumRows();
 
-      positionCoefficientMatrix = yTorquePositionContributionCoefficientCoefficientMatrices[7];
-      coefficientMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), numberOfVariables);
-      CommonOps.insert(positionCoefficientMatrix, coefficientMatrixToSet, numberOfConstraints, numberOfXDecisionVariables);
-
-      positionBiasMatrix = yTorquePositionContributionCoefficientBiasMatrices[7];
-      biasMatrixToSet.reshape(numberOfConstraints + positionCoefficientMatrix.getNumRows(), 1, true);
-      CommonOps.insert(positionBiasMatrix, biasMatrixToSet, numberOfConstraints, 0);
-      numberOfConstraints += positionCoefficientMatrix.getNumRows();
+      }
    }
 
    private void consolidateTorqueCoefficientMatrix(DenseMatrix64F positionCoefficientMatrix, DenseMatrix64F copCoefficientMatrix, DenseMatrix64F matrixToSet)
@@ -540,9 +550,9 @@ public class AngularControlModuleHelper
       if (positionCoefficientMatrix.getNumRows() != copCoefficientMatrix.getNumRows())
          throw new RuntimeException("Cannot combine the decision variable and CoP torque contributions due to number of rows mismatch");
 
-      matrixToSet.reshape(positionCoefficientMatrix.getNumRows(), numberOfForceVariables + numberOfCoPVariables);
+      matrixToSet.reshape(positionCoefficientMatrix.getNumRows(), numberOfForceVariables + numberOfCoPVariables, true);
       CommonOps.insert(positionCoefficientMatrix, matrixToSet, 0, 0);
-      CommonOps.insert(positionCoefficientMatrix, matrixToSet, 0, numberOfForceVariables);
+      CommonOps.insert(copCoefficientMatrix, matrixToSet, 0, numberOfForceVariables);
    }
 
    public DenseMatrix64F getXCoPSupportPolygonConstraintAinMatrix()
@@ -610,24 +620,70 @@ public class AngularControlModuleHelper
       int numberOfYConstraints = yLowerBounds.getNumRows() + yUpperBounds.getNumRows();
       int numberOfConstraints = numberOfXConstraints + numberOfYConstraints;
       A.reshape(numberOfConstraints, numberOfVariables);
-      b.reshape(numberOfConstraints, numberOfVariables);
-
-      yetAnotherTempMatrix.reshape(numberOfXConstraints, numberOfXConstraints);
+      b.reshape(numberOfConstraints, 1);
+      A.zero();
+      b.zero();
+      yetAnotherTempMatrix.reshape(xUpperBounds.getNumRows(), xUpperBounds.getNumRows());
       CommonOps.setIdentity(yetAnotherTempMatrix);
       CommonOps.insert(yetAnotherTempMatrix, A, 0, 0);
       CommonOps.insert(xUpperBounds, b, 0, 0);
+
       CommonOps.scale(-1.0, yetAnotherTempMatrix);
       CommonOps.insert(yetAnotherTempMatrix, A, xUpperBounds.getNumRows(), 0);
+      CommonOps.scale(-1.0, xLowerBounds);
       CommonOps.insert(xLowerBounds, b, xUpperBounds.getNumRows(), 0);
-      
-      
-      yetAnotherTempMatrix.reshape(numberOfYConstraints, numberOfYConstraints);
+
+      yetAnotherTempMatrix.reshape(yUpperBounds.getNumRows(), yUpperBounds.getNumRows());
       CommonOps.setIdentity(yetAnotherTempMatrix);
       CommonOps.insert(yetAnotherTempMatrix, A, numberOfXConstraints, numberOfXDecisionVariables);
       CommonOps.insert(yUpperBounds, b, numberOfXConstraints, 0);
+
       CommonOps.scale(-1.0, yetAnotherTempMatrix);
-      CommonOps.insert(yetAnotherTempMatrix, A, numberOfXConstraints + yUpperBounds.getNumRows(), 0);
+      CommonOps.insert(yetAnotherTempMatrix, A, numberOfXConstraints + yUpperBounds.getNumRows(), numberOfXDecisionVariables);
+      CommonOps.scale(-1.0, yLowerBounds);
       CommonOps.insert(yLowerBounds, b, numberOfXConstraints + yUpperBounds.getNumRows(), 0);
+   }
+
+   public void processQPSolution(DenseMatrix64F qpSolution, DenseMatrix64F xQPSolution, DenseMatrix64F yQPSolution, DenseMatrix64F xCoPSolution,
+                                 DenseMatrix64F yCoPSolution)
+   {
+      int xForceVariables = xTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int xCoPVariables = xTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int yForceVariables = yTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int yCoPVariables = yTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int xVariables = xForceVariables + xCoPVariables;
+      int yVariables = yForceVariables + yCoPVariables;
+      xQPSolution.reshape(xForceVariables, 1);
+      yQPSolution.reshape(yForceVariables, 1);
+      xCoPSolution.reshape(xCoPVariables, 1);
+      yCoPSolution.reshape(yCoPVariables, 1);
+
+      CommonOps.extract(qpSolution, 0, xForceVariables, 0, 1, xQPSolution, 0, 0);
+      CommonOps.extract(qpSolution, xForceVariables, xVariables, 0, 1, xCoPSolution, 0, 0);
+      CommonOps.extract(qpSolution, xVariables, xVariables + yForceVariables, 0, 1, yQPSolution, 0, 0);
+      CommonOps.extract(qpSolution, xVariables + yForceVariables, xVariables + yVariables, 0, 1, yCoPSolution, 0, 0);
+   }
+
+   public void getCoPRegularization(DenseMatrix64F regularizationH, double regularizationWeight)
+   {
+      int xForceVariables = xTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int xCoPVariables = xTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int yForceVariables = yTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int yCoPVariables = yTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int xVariables = xForceVariables + xCoPVariables;
+      int yVariables = yForceVariables + yCoPVariables;
+
+      int numberOfVariables = xVariables + yVariables;
+      regularizationH.reshape(numberOfVariables, numberOfVariables);
+      regularizationH.zero();
+      tempMatrixForCoefficients.reshape(xCoPVariables, xCoPVariables);
+      CommonOps.setIdentity(tempMatrixForCoefficients);
+      CommonOps.scale(regularizationWeight, tempMatrixForCoefficients);
+      CommonOps.insert(tempMatrixForCoefficients, regularizationH, xForceVariables, xForceVariables);
+      tempMatrixForCoefficients.reshape(yCoPVariables, yCoPVariables);
+      CommonOps.setIdentity(tempMatrixForCoefficients);
+      CommonOps.scale(regularizationWeight, tempMatrixForCoefficients);
+      CommonOps.insert(tempMatrixForCoefficients, regularizationH, xVariables + yForceVariables, xVariables + yForceVariables);
    }
 
    //   private void consolidateTorqueBiasMatrix(DenseMatrix64F forceBiasMatrix, DenseMatrix64F copBiasMatrix, DenseMatrix64F matrixToSet)
