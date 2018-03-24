@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
@@ -13,8 +14,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
 {
-   protected final QuadrupedSolePositionController solePositionController;
-   protected final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
+
 
    protected final FrameVector3D initialSoleForces = new FrameVector3D();
 
@@ -25,13 +25,10 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
    protected final QuadrupedForceControllerToolbox controllerToolbox;
    protected final RobotQuadrant robotQuadrant;
 
-   public QuadrupedUnconstrainedFootState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,
-                                          QuadrupedSolePositionController solePositionController)
+   public QuadrupedUnconstrainedFootState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox)
    {
       this.robotQuadrant = robotQuadrant;
-      this.solePositionController = solePositionController;
       this.controllerToolbox = controllerToolbox;
-      solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
       FullQuadrupedRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       virtualForceCommand.set(fullRobotModel.getBody(), fullRobotModel.getFoot(robotQuadrant));
@@ -53,7 +50,7 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
    }
 
    @Override
-   public SpatialFeedbackControlCommand getFeedbackControlCommand()
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return null;
    }
