@@ -742,6 +742,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
 
    public void setCoPConstraint(FramePoint2D desiredCoP)
    {
+      this.centerOfPressureConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
       this.centerOfPressure.setIncludingFrame(desiredCoP);
    }
 
@@ -758,5 +759,10 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public EffortVariableConstraintType getCoPConstraintType(Axis axis)
    {
       return centerOfPressureConstraintType.getElement(axis);
+   }
+
+   public double getCoPElement(Axis axis)
+   {
+      return centerOfPressure.getElement(axis.ordinal());
    }
 }

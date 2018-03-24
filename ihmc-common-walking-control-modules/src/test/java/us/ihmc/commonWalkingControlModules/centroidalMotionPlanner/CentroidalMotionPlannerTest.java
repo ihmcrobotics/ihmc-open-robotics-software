@@ -143,6 +143,12 @@ public class CentroidalMotionPlannerTest
       CentroidalMotionNode node1 = new CentroidalMotionNode();
       CentroidalMotionNode node2 = new CentroidalMotionNode();
       CentroidalMotionNode node3 = new CentroidalMotionNode();
+      CentroidalMotionNode node4 = new CentroidalMotionNode();
+      CentroidalMotionNode node5 = new CentroidalMotionNode();
+      CentroidalMotionNode node6 = new CentroidalMotionNode();
+      CentroidalMotionNode node7 = new CentroidalMotionNode();
+      CentroidalMotionNode node8 = new CentroidalMotionNode();
+      CentroidalMotionNode node9 = new CentroidalMotionNode();
       double gravityZ = -9.81;
       double forceZValue = -1.0 * gravityZ;
       node1.setTime(0.0);
@@ -152,21 +158,51 @@ public class CentroidalMotionPlannerTest
       node1.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
       node1.setCoPConstraint(new FramePoint2D(worldFrame, 0.0, 0.0));
 
-      node2.setTime(0.4);
+      node2.setTime(0.1);
       node2.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
       node2.setForceRateObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
 
-      node3.setTime(0.8);
-      node3.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
-      node3.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
-      node3.setPositionConstraint(new FramePoint3D(worldFrame, 0.04, 0.0, 0.85)); //, new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
-      node3.setLinearVelocityConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0)); //, new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
+      node3.setTime(0.2);
+      node3.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+      node3.setForceRateObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+
+      node4.setTime(0.3);
+      node4.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+      node4.setForceRateObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+
+      node5.setTime(0.4);
+      node5.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+      node5.setForceRateObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+
+      node6.setTime(0.1);
+      node6.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+      node6.setForceRateObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+
+      node7.setTime(0.2);
+      node7.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+      node7.setForceRateObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+
+      node8.setTime(0.3);
+      node8.setForceObjective(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+      node8.setForceRateObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 0.0001, 0.0001, 0.0001));
+
+      node9.setTime(0.8);
+      node9.setForceConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, forceZValue));
+      node9.setForceRateConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0));
+      node9.setPositionConstraint(new FramePoint3D(worldFrame, 0.04, 0.0, 0.85)); //, new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
+      node9.setLinearVelocityConstraint(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0)); //, new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
 
       CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters);
       motionPlanner.reset();
       motionPlanner.submitNode(node1);
       motionPlanner.submitNode(node2);
       motionPlanner.submitNode(node3);
+      motionPlanner.submitNode(node4);
+      motionPlanner.submitNode(node5);
+      motionPlanner.submitNode(node6);
+      motionPlanner.submitNode(node7);
+      motionPlanner.submitNode(node8);
+      motionPlanner.submitNode(node9);
 
       CentroidalMotionSupportPolygon supportPolygon = new CentroidalMotionSupportPolygon();
       supportPolygon.setStartTime(0.0);
@@ -186,7 +222,7 @@ public class CentroidalMotionPlannerTest
       motionPlanner.submitSupportPolygon(supportPolygon);
 
       RecycledLinkedListBuilder<CentroidalMotionNode> nodeList = motionPlanner.getNodeList();
-      assertTrue(nodeList.getSize() == 3);
+      assertTrue(nodeList.getSize() == 9);
 
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry = nodeList.getFirstEntry();
       assertTrue("Node time: " + entry.element.getTime(), node1.getTime() == entry.element.getTime());
@@ -196,14 +232,18 @@ public class CentroidalMotionPlannerTest
       motionPlanner.compute();
       ForceTrajectory force = motionPlanner.getForceProfile();
       assertTrue(force != null);
-      assertTrue(force.getNumberOfSegments() == 2);
+      assertTrue(force.getNumberOfSegments() == 8);
       DenseMatrix64F[] positionValues = motionPlanner.getOptimizedPositionValues();
       DenseMatrix64F[] velocityValues = motionPlanner.getOptimizedVelocityValues();
+      DenseMatrix64F[] forceValues = motionPlanner.getOptimizedForceValues();
       PrintTools.debug(positionValues[0].toString());
       PrintTools.debug(positionValues[1].toString());
       PrintTools.debug(positionValues[2].toString());
       PrintTools.debug(velocityValues[0].toString());
       PrintTools.debug(velocityValues[1].toString());
       PrintTools.debug(velocityValues[2].toString());
+      PrintTools.debug(forceValues[0].toString());
+      PrintTools.debug(forceValues[1].toString());
+      PrintTools.debug(forceValues[2].toString());
    }
 }

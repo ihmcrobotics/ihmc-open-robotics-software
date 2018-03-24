@@ -93,7 +93,7 @@ public class CentroidalXYAxisOptimizationControlModule
       linearHelper.setDecisionVariableValues(Axis.Y, yQPSolution);
       PrintTools.debug("Fx:" + xQPSolution.toString());
       PrintTools.debug("Fy:" + yQPSolution.toString());
-      for(int i = 0; i < xCoPSolution.getNumRows(); i++)
+      for (int i = 0; i < xCoPSolution.getNumRows(); i++)
          PrintTools.debug("CoP" + i + ": (" + xCoPSolution.get(i) + ", " + yCoPSolution.get(i) + ")");
    }
 
@@ -115,6 +115,14 @@ public class CentroidalXYAxisOptimizationControlModule
       DenseMatrix64F yAeq = linearHelper.getConstraintAeqMatrix(yAxis);
       DenseMatrix64F ybeq = linearHelper.getConstraintbeqMatrix(yAxis);
       angularHelper.processLinearConstraints(xAeq, xbeq, yAeq, ybeq, solverInput_Aeq, solverInput_beq);
+      angularHelper.getCoPLocationConstraints(tempMatrix1, tempMatrix2);
+      int indexToInsertAt = solverInput_Aeq.getNumRows();
+      int numberToInsert = tempMatrix1.getNumRows();
+      solverInput_Aeq.reshape(indexToInsertAt + numberToInsert, solverInput_Aeq.getNumCols(), true);
+      CommonOps.insert(tempMatrix1, solverInput_Aeq, indexToInsertAt, 0);
+      solverInput_beq.reshape(indexToInsertAt + numberToInsert, 1, true);
+      CommonOps.insert(tempMatrix2, solverInput_beq, indexToInsertAt, 0);
+      
       angularHelper.getConsolidatedTorqueConstraints(tempMatrix1, tempMatrix2);
       tempMatrix3.reshape(tempMatrix1.getNumRows(), tempMatrix1.getNumRows());
       CommonOps.setIdentity(tempMatrix3);

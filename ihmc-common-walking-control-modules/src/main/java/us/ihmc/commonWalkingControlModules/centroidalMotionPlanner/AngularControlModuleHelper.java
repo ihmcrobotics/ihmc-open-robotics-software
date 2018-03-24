@@ -3,8 +3,7 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commons.PrintTools;
-import us.ihmc.convexOptimization.qpOASES.DenseMatrix;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
@@ -29,6 +28,8 @@ public class AngularControlModuleHelper
    private final DenseMatrix64F[] yTorqueCoPContributionCoefficientCoefficientMatrices;
    private final DenseMatrix64F xCoPSupportPolygonAinMatrix;
    private final DenseMatrix64F yCoPSupportPolygonAinMatrix;
+   private final DenseMatrix64F[] copSupportPolygonAeqMatrix = new DenseMatrix64F[LinearControlModuleHelper.numberOfAngularAxis];
+   private final DenseMatrix64F[] copSupportPolygonbeqMatrix = new DenseMatrix64F[LinearControlModuleHelper.numberOfAngularAxis];
    private final DenseMatrix64F copSupportPolygonbinMatrix;
 
    private final double robotMass;
@@ -52,6 +53,12 @@ public class AngularControlModuleHelper
       xCoPSupportPolygonAinMatrix = new DenseMatrix64F(0, 1);
       yCoPSupportPolygonAinMatrix = new DenseMatrix64F(0, 1);
       copSupportPolygonbinMatrix = new DenseMatrix64F(0, 1);
+
+      for (Axis axis : LinearControlModuleHelper.angularAxisValues)
+      {
+         copSupportPolygonAeqMatrix[axis.ordinal()] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes);
+         copSupportPolygonbeqMatrix[axis.ordinal()] = new DenseMatrix64F(defaultNumberOfNodes, 1);
+      }
 
       for (int i = 0; i < numberOfTorqueCoefficients; i++)
       {
@@ -216,6 +223,68 @@ public class AngularControlModuleHelper
          setCoPCoefficientT1(torqueCoefficientCoefficientMatrix[1], i, az, bz, cz, dz);
          setCoPCoefficientT0(torqueCoefficientCoefficientMatrix[0], i, az, bz, cz, dz);
       }
+   }
+
+   public void setCoPEqualityConstraints(RecycledLinkedListBuilder<CentroidalMotionNode> nodeList)
+   {
+      RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry = nodeList.getFirstEntry();
+      int nodeIndex = 0;
+      for (Axis axis : LinearControlModuleHelper.angularAxisValues)
+      {
+         copSupportPolygonAeqMatrix[axis.ordinal()].reshape(0, nodeList.getSize());
+         copSupportPolygonbeqMatrix[axis.ordinal()].reshape(0, 1);
+      }
+      for (; entry != null; nodeIndex++, entry = entry.getNext())
+      {
+         CentroidalMotionNode node = entry.element;
+         for (Axis axis : LinearControlModuleHelper.angularAxisValues)
+         {
+            int axisOrdinal = axis.ordinal();
+            EffortVariableConstraintType constraintType = node.getCoPConstraintType(axis);
+            DenseMatrix64F axisCoPAeqMatrix = copSupportPolygonAeqMatrix[axisOrdinal];
+            DenseMatrix64F axisCoPbeqMatrix = copSupportPolygonbeqMatrix[axisOrdinal];
+            if(constraintType == EffortVariableConstraintType.EQUALITY)
+               constraintCoPValue(nodeIndex, node.getCoPElement(axis), axisCoPAeqMatrix, axisCoPbeqMatrix);
+         }
+      }
+   }
+
+   private void constraintCoPValue(int nodeIndex, double copValue, DenseMatrix64F axisCoPAeqMatrix, DenseMatrix64F axisCoPbeqMatrix)
+   {
+      int indexToInsertConstraintAt = axisCoPAeqMatrix.getNumRows();
+      axisCoPAeqMatrix.reshape(indexToInsertConstraintAt + 1, axisCoPAeqMatrix.numCols, true);
+      axisCoPbeqMatrix.reshape(indexToInsertConstraintAt + 1, 1, true);
+      tempMatrixForCoefficients.reshape(1, axisCoPAeqMatrix.numCols);
+      tempMatrixForCoefficients.zero();
+      tempMatrixForCoefficients.set(indexToInsertConstraintAt, nodeIndex, 1.0);
+      CommonOps.insert(tempMatrixForCoefficients, axisCoPAeqMatrix, indexToInsertConstraintAt, 0);
+      axisCoPbeqMatrix.set(indexToInsertConstraintAt, 0, copValue);
+   }
+
+   public void getCoPLocationConstraints(DenseMatrix64F Aeq, DenseMatrix64F beq)
+   {
+      int xForceVariables = xTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int xCoPVariables = xTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int yForceVariables = yTorquePositionContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int yCoPVariables = yTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
+      int xVariables = xForceVariables + xCoPVariables;
+      int yVariables = yForceVariables + yCoPVariables;
+      
+      DenseMatrix64F xCoPAeqMatrix = copSupportPolygonAeqMatrix[Axis.X.ordinal()];
+      DenseMatrix64F yCoPAeqMatrix = copSupportPolygonAeqMatrix[Axis.Y.ordinal()];
+      DenseMatrix64F xCoPbeqMatrix = copSupportPolygonbeqMatrix[Axis.X.ordinal()];
+      DenseMatrix64F yCoPbeqMatrix = copSupportPolygonbeqMatrix[Axis.Y.ordinal()];
+      int numberOfXEqualityConstraints = xCoPAeqMatrix.getNumRows();
+      int numberOfYEqualityConstraints = yCoPAeqMatrix.getNumRows();
+      
+      Aeq.reshape(numberOfXEqualityConstraints + numberOfYEqualityConstraints, xVariables + yVariables);
+      Aeq.zero();
+      beq.reshape(numberOfXEqualityConstraints + numberOfYEqualityConstraints, 1);
+      beq.zero();
+      CommonOps.insert(xCoPAeqMatrix, Aeq, 0, xForceVariables);
+      CommonOps.insert(xCoPbeqMatrix, beq, 0, 0);
+      CommonOps.insert(yCoPAeqMatrix, Aeq, numberOfXEqualityConstraints, xVariables + yForceVariables);
+      CommonOps.insert(yCoPbeqMatrix, beq, numberOfXEqualityConstraints, 0);
    }
 
    public void setCoPCoefficientT6(DenseMatrix64F coefficientMatrixToSet, int rowIndex, double az, double bz, double cz, double dz)
