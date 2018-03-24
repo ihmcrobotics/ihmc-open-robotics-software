@@ -1,7 +1,6 @@
 package us.ihmc.parameterTuner.guiElements.tuners;
 
 import javafx.application.Platform;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
@@ -52,7 +51,6 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    {
       setSpacing(10.0);
       setAlignment(Pos.CENTER_LEFT);
-      setPadding(new Insets(0.0, 5.0, 5.0, 5.0));
       HBox.setHgrow(slider, Priority.ALWAYS);
 
       getChildren().add(new Text("Value"));

@@ -8,15 +8,20 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
-import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.Separator;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 public class TuningBoxManager
 {
+   private static final double buttonSize = 12.0;
+   private final Image image;
+
    private final VBox tuningBox;
 
    private final List<String> parametersBeingTuned = new ArrayList<>();
@@ -27,6 +32,7 @@ public class TuningBoxManager
    public TuningBoxManager(VBox tuningBox)
    {
       this.tuningBox = tuningBox;
+      image = new Image(TuningBoxManager.class.getResourceAsStream("/close.png"));
    }
 
    public void handleNewParameter(String uniqueName)
@@ -43,7 +49,11 @@ public class TuningBoxManager
          return;
       }
 
-      Button remove = new Button("Remove");
+      Button remove = new Button(null);
+      ImageView graphic = new ImageView(image);
+      graphic.setFitWidth(buttonSize);
+      graphic.setFitHeight(buttonSize);
+      remove.setGraphic(graphic);
       removeButtons.put(uniqueName, remove);
       remove.setOnAction(event -> {
          parametersBeingTuned.remove(uniqueName);
@@ -67,9 +77,11 @@ public class TuningBoxManager
       tuningBox.getChildren().clear();
       parametersBeingTuned.forEach(uniqueName ->
       {
-         tuningBox.getChildren().add(tunerMap.get(uniqueName));
-         tuningBox.getChildren().add(removeButtons.get(uniqueName));
-         tuningBox.getChildren().add(new Separator(Orientation.HORIZONTAL));
+         HBox box = new HBox(10.0);
+         box.setAlignment(Pos.CENTER_LEFT);
+         box.getChildren().add(removeButtons.get(uniqueName));
+         box.getChildren().add(tunerMap.get(uniqueName));
+         tuningBox.getChildren().add(box);
       });
    }
 

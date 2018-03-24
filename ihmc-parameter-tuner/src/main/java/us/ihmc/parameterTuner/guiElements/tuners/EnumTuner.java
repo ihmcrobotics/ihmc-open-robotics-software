@@ -3,7 +3,6 @@ package us.ihmc.parameterTuner.guiElements.tuners;
 import gnu.trove.map.TObjectIntMap;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
@@ -38,7 +37,6 @@ public class EnumTuner extends HBox implements InputNode
       setMaxHeight(Double.NEGATIVE_INFINITY);
       setMaxWidth(Double.NEGATIVE_INFINITY);
       setPrefWidth(800.0);
-      setPadding(new Insets(0.0, 5.0, 5.0, 5.0));
       getChildren().add(new Text("Value"));
    }
 

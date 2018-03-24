@@ -2,7 +2,6 @@ package us.ihmc.parameterTuner.guiElements.tuners;
 
 import org.apache.commons.lang3.StringUtils;
 
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
@@ -70,11 +69,9 @@ public class Tuner extends VBox
    private void setupNode(GuiParameter parameter)
    {
       Tooltip tooltip = new Tooltip(StringUtils.replaceAll(parameter.getUniqueName(), GuiElement.SEPERATOR, "\n"));
-      Tooltip.install(name, tooltip);
+      Tooltip.install(descriptionPane, tooltip);
       ContextMenu contextMenu = new ContextMenu();
       descriptionPane.setContextMenu(contextMenu);
-
-      setSpacing(10.0);
 
       HBox.setHgrow(this, Priority.ALWAYS);
       HBox.setHgrow(name, Priority.ALWAYS);
@@ -83,30 +80,26 @@ public class Tuner extends VBox
       HBox parameterDescriptionBox = new HBox();
       parameterDescriptionBox.setSpacing(10.0);
       parameterDescriptionBox.setAlignment(Pos.CENTER_LEFT);
-      parameterDescriptionBox.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
       parameterDescriptionBox.getChildren().add(new Text("Description"));
       parameterDescriptionBox.getChildren().add(description);
       HBox.setHgrow(parameterDescriptionBox, Priority.ALWAYS);
 
       VBox extendedOptionsBox = new VBox();
       extendedOptionsBox.setSpacing(10.0);
-      extendedOptionsBox.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
       extendedOptionsBox.getChildren().add(parameterDescriptionBox);
       extendedOptionsBox.getChildren().add(inputNode.getFullInputNode());
 
       HBox dropdownGraphic = new HBox();
       dropdownGraphic.setSpacing(10.0);
       dropdownGraphic.setAlignment(Pos.CENTER_LEFT);
-      dropdownGraphic.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
       dropdownGraphic.getChildren().add(name);
       Region spacer = new Region();
       HBox.setHgrow(spacer, Priority.ALWAYS);
       dropdownGraphic.getChildren().add(spacer);
       dropdownGraphic.getChildren().add(inputNode.getSimpleInputNode(120.0, 20.0));
-      dropdownGraphic.minWidthProperty().bind(descriptionPane.widthProperty().subtract(45));
+      dropdownGraphic.minWidthProperty().bind(descriptionPane.widthProperty().subtract(40));
 
       descriptionPane.setContent(extendedOptionsBox);
-      descriptionPane.setPadding(new Insets(5.0, 5.0, 0.0, 5.0));
       descriptionPane.setAlignment(Pos.CENTER_LEFT);
       descriptionPane.setGraphic(dropdownGraphic);
       descriptionPane.setExpanded(false);
