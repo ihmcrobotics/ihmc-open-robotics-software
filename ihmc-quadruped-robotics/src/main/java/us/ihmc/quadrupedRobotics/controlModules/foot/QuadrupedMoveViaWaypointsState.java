@@ -1,7 +1,9 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
@@ -9,13 +11,13 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionC
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootState
 {
    // Yo variables
-   private final YoVariableRegistry registry;
    private final YoDouble robotTime;
 
    // SoleWaypoint variables
@@ -31,10 +33,12 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
    private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
 
+   private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
+
    private double taskStartTime;
 
    public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,
-                                         QuadrupedSolePositionController solePositionController, YoVariableRegistry parentRegistry)
+                                         QuadrupedSolePositionController solePositionController, YoVariableRegistry registry)
    {
       super(robotQuadrant, controllerToolbox);
 
@@ -46,12 +50,16 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
       this.parameters = controllerToolbox.getFootControlModuleParameters();
       robotTime = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
-      registry = new YoVariableRegistry(robotQuadrant.getShortName() + getClass().getSimpleName());
-
       // Create waypoint trajectory
       quadrupedWaypointsPositionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(robotQuadrant.getCamelCaseName() + "SoleTrajectory",
                                                                                                        bodyFrame, registry);
-      parentRegistry.addChild(registry);
+
+      RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotQuadrant);
+      FramePoint3D currentPosition = new FramePoint3D(soleFrame);
+      currentPosition.changeFrame(foot.getBodyFixedFrame());
+
+      feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getBody(), foot);
+      feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
    }
 
    public void handleWaypointList(QuadrupedSoleWaypointList quadrupedSoleWaypointList)
@@ -113,9 +121,14 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
          quadrupedWaypointsPositionTrajectoryGenerator.getPosition(solePositionControllerSetpoints.getSolePosition());
          solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
          solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
-         solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant));
+         solePositionController
+               .compute(soleForceCommand, solePositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant));
 
          virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
+
+         feedbackControlCommand.set(solePositionControllerSetpoints.getSolePosition(), solePositionControllerSetpoints.getSoleLinearVelocity());
+         feedbackControlCommand.setFeedForwardAction(initialSoleForces);
+         feedbackControlCommand.setGains(parameters.getSolePositionGains());
 
          super.doControl();
 
@@ -142,13 +155,35 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
       quadrupedWaypointsPositionTrajectoryGenerator.clear();
       for (int i = 0; i < quadrupedSoleWaypointList.size(); ++i)
       {
-         quadrupedWaypointsPositionTrajectoryGenerator.appendWaypoint(quadrupedSoleWaypointList.get(i).getTime(),
-                                                                      quadrupedSoleWaypointList.get(i).getPosition(),
-                                                                      quadrupedSoleWaypointList.get(i).getVelocity());
+         quadrupedWaypointsPositionTrajectoryGenerator
+               .appendWaypoint(quadrupedSoleWaypointList.get(i).getTime(), quadrupedSoleWaypointList.get(i).getPosition(),
+                               quadrupedSoleWaypointList.get(i).getVelocity());
       }
       if (quadrupedSoleWaypointList.size() > 0)
       {
          quadrupedWaypointsPositionTrajectoryGenerator.initialize();
       }
+   }
+
+   @Override
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
+
+      if (currentTrajectoryTime > quadrupedSoleWaypointList.getFinalTime())
+         return virtualForceCommand;
+      else
+         return null;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
+
+      if (currentTrajectoryTime > quadrupedSoleWaypointList.getFinalTime())
+         return null;
+      else
+         return feedbackControlCommand;
    }
 }
