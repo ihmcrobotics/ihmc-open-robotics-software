@@ -8,8 +8,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionControllerSetpoints;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -17,41 +15,39 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
+public class QuadrupedHoldPositionState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    // YoVariables
+   protected final QuadrupedForceControllerToolbox controllerToolbox;
+   protected final RobotQuadrant robotQuadrant;
+
    private final YoDouble timestamp;
    private double initialTime;
 
    private final BooleanParameter useSoleForceFeedForwardParameter;
    private final DoubleParameter feedForwardRampTimeParameter;
 
-   private final ReferenceFrame bodyFrame;
    private final ReferenceFrame soleFrame;
    private final QuadrupedFootControlModuleParameters parameters;
 
-   private final QuadrupedSolePositionController solePositionController;
-   private final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
+   private final FrameVector3D initialSoleForces = new FrameVector3D();
+
+   private final FramePoint3D desiredFootPosition = new FramePoint3D();
+   private final FrameVector3D desiredFootVelocity = new FrameVector3D();
+   private final FrameVector3D desiredFeedForwardForce = new FrameVector3D();
 
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
-   private final FrameVector3D soleLinearVelocityEstimate;
-
-   public QuadrupedHoldPositionState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,
-                                     QuadrupedSolePositionController solePositionController, YoVariableRegistry registry)
+   public QuadrupedHoldPositionState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
-      super(robotQuadrant, controllerToolbox);
+      this.robotQuadrant = robotQuadrant;
+      this.controllerToolbox = controllerToolbox;
 
-      this.solePositionController = solePositionController;
-      solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
-
-      bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
       parameters = controllerToolbox.getFootControlModuleParameters();
       timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
-      soleLinearVelocityEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant);
 
       RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotQuadrant);
       FramePoint3D currentPosition = new FramePoint3D(soleFrame);
@@ -67,17 +63,12 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
    @Override
    public void onEntry()
    {
-      super.onEntry();
+      controllerToolbox.getFootContactState(robotQuadrant).clear();
 
       initialTime = timestamp.getDoubleValue();
 
-      solePositionController.reset();
-      solePositionController.getGains().set(parameters.getSolePositionGains());
-
-      solePositionControllerSetpoints.initialize(soleFrame);
-      FramePoint3D solePositionSetpoint = solePositionControllerSetpoints.getSolePosition();
-      solePositionSetpoint.setToZero(soleFrame);
-      solePositionSetpoint.changeFrame(worldFrame);
+      desiredFootPosition.setToZero(soleFrame);
+      desiredFootPosition.changeFrame(worldFrame);
 
       FrameVector3DReadOnly forceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
       initialSoleForces.setIncludingFrame(forceEstimate);
@@ -87,30 +78,19 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
    @Override
    public void doAction(double timeInState)
    {
-      solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
-      solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
-      solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, soleLinearVelocityEstimate);
-
-      solePositionControllerSetpoints.getSolePosition().changeFrame(worldFrame);
-      solePositionControllerSetpoints.getSoleLinearVelocity().changeFrame(worldFrame);
-
-      feedbackControlCommand.set(solePositionControllerSetpoints.getSolePosition(), solePositionControllerSetpoints.getSoleLinearVelocity());
-      feedbackControlCommand.setFeedForwardAction(initialSoleForces);
-      feedbackControlCommand.setGains(parameters.getSolePositionGains());
-
-      virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
+      desiredFootVelocity.setToZero();
+      desiredFeedForwardForce.setIncludingFrame(initialSoleForces);
 
       double currentTime = timestamp.getDoubleValue();
       if (useSoleForceFeedForwardParameter.getValue())
       {
          double rampMultiplier = 1.0 - Math.min(1.0, (currentTime - initialTime) / feedForwardRampTimeParameter.getValue());
-         FrameVector3D feedforward = solePositionControllerSetpoints.getSoleForceFeedforward();
-         feedforward.set(initialSoleForces);
-         feedforward.scale(rampMultiplier);
+         desiredFeedForwardForce.scale(rampMultiplier);
       }
-      solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, soleLinearVelocityEstimate);
 
-      super.doControl();
+      feedbackControlCommand.set(desiredFootPosition, desiredFootVelocity);
+      feedbackControlCommand.setFeedForwardAction(desiredFeedForwardForce);
+      feedbackControlCommand.setGains(parameters.getSolePositionGains());
    }
 
    @Override
@@ -122,7 +102,6 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
    @Override
    public void onExit()
    {
-      soleForceCommand.setToZero();
    }
 
    @Override

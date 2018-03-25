@@ -40,16 +40,4 @@ public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
    public void doControl()
    {
    }
-
-   @Override
-   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
-   {
-      return virtualForceCommand;
-   }
-
-   @Override
-   public FeedbackControlCommand<?> getFeedbackControlCommand()
-   {
-      return null;
-   }
 }
