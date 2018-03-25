@@ -19,6 +19,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    // YoVariables
    private final YoDouble timestamp;
    private double initialTime;
@@ -75,11 +77,11 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
       solePositionControllerSetpoints.initialize(soleFrame);
       FramePoint3D solePositionSetpoint = solePositionControllerSetpoints.getSolePosition();
       solePositionSetpoint.setToZero(soleFrame);
-      solePositionSetpoint.changeFrame(bodyFrame);
+      solePositionSetpoint.changeFrame(worldFrame);
 
       FrameVector3DReadOnly forceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
       initialSoleForces.setIncludingFrame(forceEstimate);
-      initialSoleForces.changeFrame(bodyFrame);
+      initialSoleForces.changeFrame(worldFrame);
    }
 
    @Override
@@ -88,6 +90,9 @@ public class QuadrupedHoldPositionState extends QuadrupedUnconstrainedFootState
       solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
       solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
       solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, soleLinearVelocityEstimate);
+
+      solePositionControllerSetpoints.getSolePosition().changeFrame(worldFrame);
+      solePositionControllerSetpoints.getSoleLinearVelocity().changeFrame(worldFrame);
 
       feedbackControlCommand.set(solePositionControllerSetpoints.getSolePosition(), solePositionControllerSetpoints.getSoleLinearVelocity());
       feedbackControlCommand.setFeedForwardAction(initialSoleForces);
