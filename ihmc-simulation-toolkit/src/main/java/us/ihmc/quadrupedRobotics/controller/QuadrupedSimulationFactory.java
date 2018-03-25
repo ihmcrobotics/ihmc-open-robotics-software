@@ -23,10 +23,8 @@ import us.ihmc.quadrupedRobotics.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
-import us.ihmc.quadrupedRobotics.controller.forceDevelopment.QuadrupedForceDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerManager;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.quadrupedRobotics.controller.positionDevelopment.QuadrupedPositionDevelopmentControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
@@ -290,7 +288,7 @@ public class QuadrupedSimulationFactory
 
    private void createInverseKinematicsCalculator()
    {
-      if (controlMode.get() == QuadrupedControlMode.POSITION || controlMode.get() == QuadrupedControlMode.POSITION_DEV)
+      if (controlMode.get() == QuadrupedControlMode.POSITION)
       {
          legInverseKinematicsCalculator = new QuadrupedInverseKinematicsCalculators(modelFactory.get(), jointDesiredOutputList.get(), physicalProperties.get(),
                                                                                     fullRobotModel.get(), referenceFrames.get(),
@@ -314,17 +312,10 @@ public class QuadrupedSimulationFactory
          else
             controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties.get());
          break;
-      case FORCE_DEV:
-         controllerManager = new QuadrupedForceDevelopmentControllerManager(runtimeEnvironment, physicalProperties.get());
-         break;
       case POSITION:
          controllerManager = new QuadrupedPositionControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
                                                                     initialPositionParameters.get(), positionBasedCrawlControllerParameters.get(),
                                                                     legInverseKinematicsCalculator);
-         break;
-      case POSITION_DEV:
-         controllerManager = new QuadrupedPositionDevelopmentControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
-                                                                               initialPositionParameters.get(), legInverseKinematicsCalculator);
          break;
       default:
          controllerManager = null;
