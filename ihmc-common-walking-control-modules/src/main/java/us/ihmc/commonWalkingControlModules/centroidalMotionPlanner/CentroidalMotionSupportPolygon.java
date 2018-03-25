@@ -66,5 +66,12 @@ public class CentroidalMotionSupportPolygon
    {
       tempConvexPolygon.set(this.supportPolygon.getConvexPolygon2d());
    }
+
+   public void reset()
+   {
+      startTime = Double.NaN;
+      endTime = Double.NaN;
+      supportPolygon.clear();
+   }
 }
 

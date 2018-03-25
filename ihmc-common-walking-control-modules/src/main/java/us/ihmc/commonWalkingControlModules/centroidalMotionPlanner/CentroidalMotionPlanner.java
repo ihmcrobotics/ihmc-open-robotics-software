@@ -2,8 +2,12 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.WalkingTrajectoryType;
+import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.CoPTrajectory;
+import us.ihmc.commonWalkingControlModules.configurations.CoPSplineType;
 import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -32,10 +36,12 @@ public class CentroidalMotionPlanner
    private final CentroidalZAxisOptimizationControlModule heightControlModule;
    private final CentroidalXYAxisOptimizationControlModule transversePlaneControlModule;
    private final ForceTrajectory forceTrajectory;
+   private final CoPTrajectory copTrajectory;
 
    private final FrameTrajectory3D tempTrajectory;
    private final FrameVector3D tempInitialForce = new FrameVector3D(), tempInitialForceRate = new FrameVector3D();
    private final FrameVector3D tempFinalForce = new FrameVector3D(), tempFinalForceRate = new FrameVector3D();
+   private final FramePoint3D tempInitialCoPPoint = new FramePoint3D(), tempFinalCoPPoint = new FramePoint3D();
 
    public CentroidalMotionPlanner(CentroidalMotionPlannerParameters parameters)
    {
@@ -49,7 +55,7 @@ public class CentroidalMotionPlanner
       this.heightControlModule = new CentroidalZAxisOptimizationControlModule(linearHelper, parameters);
       this.transversePlaneControlModule = new CentroidalXYAxisOptimizationControlModule(linearHelper, angularHelper, parameters);
       this.forceTrajectory = new ForceTrajectory(100, LinearControlModuleHelper.forceCoefficients);
-
+      this.copTrajectory = new CoPTrajectory(CoPSplineType.CUBIC, 100, WalkingTrajectoryType.TRANSFER);
       this.tempTrajectory = new FrameTrajectory3D(LinearControlModuleHelper.forceCoefficients, plannerFrame);
       reset();
    }
@@ -62,6 +68,7 @@ public class CentroidalMotionPlanner
       heightControlModule.reset();
       transversePlaneControlModule.reset();
       forceTrajectory.reset();
+      copTrajectory.reset();
    }
 
    public boolean submitSupportPolygon(CentroidalMotionSupportPolygon supportPolygonToAdd)
@@ -83,27 +90,29 @@ public class CentroidalMotionPlanner
          supportPolygonList.insertAtEnd().element.set(supportPolygonToAdd);
       else
       {
-         RecycledLinkedListBuilder<CentroidalMotionSupportPolygon>.RecycledLinkedListEntry<CentroidalMotionSupportPolygon> previousPolygon = getPolygonBefore(startTime, endTime);
-         if(previousPolygon == null)
+         RecycledLinkedListBuilder<CentroidalMotionSupportPolygon>.RecycledLinkedListEntry<CentroidalMotionSupportPolygon> previousPolygon = getPolygonBefore(startTime,
+                                                                                                                                                              endTime);
+         if (previousPolygon == null)
             return false;
-         else 
+         else
             supportPolygonList.insertAfter(previousPolygon).element.set(supportPolygonToAdd);
       }
       return true;
    }
-   
-   private RecycledLinkedListBuilder<CentroidalMotionSupportPolygon>.RecycledLinkedListEntry<CentroidalMotionSupportPolygon> getPolygonBefore(double startTime, double endTime)
+
+   private RecycledLinkedListBuilder<CentroidalMotionSupportPolygon>.RecycledLinkedListEntry<CentroidalMotionSupportPolygon> getPolygonBefore(double startTime,
+                                                                                                                                              double endTime)
    {
       RecycledLinkedListBuilder<CentroidalMotionSupportPolygon>.RecycledLinkedListEntry<CentroidalMotionSupportPolygon> supportPolygon = supportPolygonList.getFirstEntry();
       for (int i = 0; i < supportPolygonList.getSize(); i++)
       {
          if (supportPolygon.element.getEndTime() <= startTime)
          {
-            if(supportPolygon.getNext() == null)
+            if (supportPolygon.getNext() == null)
                return supportPolygon;
             else if (supportPolygon.getNext().element.getStartTime() >= endTime)
                return supportPolygon;
-            else  // There is an overlap between the times and the existing polygons
+            else // There is an overlap between the times and the existing polygons
                return null;
          }
          supportPolygon = supportPolygon.getNext();
@@ -242,6 +251,32 @@ public class CentroidalMotionPlanner
 
          tempInitialForce.set(tempFinalForce);
          tempInitialForceRate.set(tempFinalForceRate);
+         entry = nextEntry;
+      }
+   }
+
+   public CoPTrajectory getCoPProfile()
+   {
+      packCoPTrajectory();
+      return copTrajectory;
+   }
+
+   private void packCoPTrajectory()
+   {
+      copTrajectory.reset();
+      DenseMatrix64F[] copValues = angularHelper.getOptimizedCoPValues();
+      RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry = nodeList.getFirstEntry();
+      tempInitialCoPPoint.set(plannerFrame, copValues[0].get(0, 0), copValues[1].get(0, 0), 0.0);
+      for (int index = 1; entry.getNext() != null; index++)
+      {
+         RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> nextEntry = entry.getNext();
+         double t0 = entry.element.getTime();
+         double tF = nextEntry.element.getTime();
+         tempFinalCoPPoint.set(plannerFrame, copValues[0].get(index, 0), copValues[1].get(index, 0), 0.0);
+
+         copTrajectory.setNextSegment(t0, tF, tempInitialCoPPoint, tempFinalCoPPoint);
+
+         tempInitialCoPPoint.setIncludingFrame(tempFinalCoPPoint);
          entry = nextEntry;
       }
    }

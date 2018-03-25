@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -30,6 +31,7 @@ public class AngularControlModuleHelper
    private final DenseMatrix64F yCoPSupportPolygonAinMatrix;
    private final DenseMatrix64F[] copSupportPolygonAeqMatrix = new DenseMatrix64F[LinearControlModuleHelper.numberOfAngularAxis];
    private final DenseMatrix64F[] copSupportPolygonbeqMatrix = new DenseMatrix64F[LinearControlModuleHelper.numberOfAngularAxis];
+   private final DenseMatrix64F[] copSolution = new DenseMatrix64F[LinearControlModuleHelper.numberOfAngularAxis];
    private final DenseMatrix64F copSupportPolygonbinMatrix;
 
    private final double robotMass;
@@ -58,6 +60,7 @@ public class AngularControlModuleHelper
       {
          copSupportPolygonAeqMatrix[axis.ordinal()] = new DenseMatrix64F(defaultNumberOfNodes, defaultNumberOfNodes);
          copSupportPolygonbeqMatrix[axis.ordinal()] = new DenseMatrix64F(defaultNumberOfNodes, 1);
+         copSolution[axis.ordinal()] = new DenseMatrix64F(defaultNumberOfNodes, 1);
       }
 
       for (int i = 0; i < numberOfTorqueCoefficients; i++)
@@ -165,10 +168,11 @@ public class AngularControlModuleHelper
             if (nodeTime < supportPolygonEntry.element.getStartTime())
                continue;
             else if (nodeTime > supportPolygonEntry.element.getEndTime())
-               supportPolygonEntry = supportPolygonEntry.getNext();
+               continue; //supportPolygonEntry = supportPolygonEntry.getNext();
             else
             {
                supportPolygonEntry.element.getSupportPolygon(tempSupportPolygon);
+               PrintTools.debug("Constraining node " + nodeIndex + " to polygon " + tempSupportPolygon.toString());
                setCoPConstraintsForSupportPolygon(numberOfNodes, nodeIndex, tempSupportPolygon);
             }
          }
@@ -254,9 +258,9 @@ public class AngularControlModuleHelper
       int indexToInsertConstraintAt = axisCoPAeqMatrix.getNumRows();
       axisCoPAeqMatrix.reshape(indexToInsertConstraintAt + 1, axisCoPAeqMatrix.numCols, true);
       axisCoPbeqMatrix.reshape(indexToInsertConstraintAt + 1, 1, true);
-      tempMatrixForCoefficients.reshape(1, axisCoPAeqMatrix.numCols);
+      tempMatrixForCoefficients.reshape(1, axisCoPAeqMatrix.getNumCols());
       tempMatrixForCoefficients.zero();
-      tempMatrixForCoefficients.set(indexToInsertConstraintAt, nodeIndex, 1.0);
+      tempMatrixForCoefficients.set(0, nodeIndex, 1.0);
       CommonOps.insert(tempMatrixForCoefficients, axisCoPAeqMatrix, indexToInsertConstraintAt, 0);
       axisCoPbeqMatrix.set(indexToInsertConstraintAt, 0, copValue);
    }
@@ -753,6 +757,16 @@ public class AngularControlModuleHelper
       CommonOps.setIdentity(tempMatrixForCoefficients);
       CommonOps.scale(regularizationWeight, tempMatrixForCoefficients);
       CommonOps.insert(tempMatrixForCoefficients, regularizationH, xVariables + yForceVariables, xVariables + yForceVariables);
+   }
+   public void setDecisionVariables(DenseMatrix64F xCoPSolution, DenseMatrix64F yCoPSolution)
+   {
+      copSolution[0].set(xCoPSolution);
+      copSolution[1].set(yCoPSolution);
+   }
+
+   public DenseMatrix64F[] getOptimizedCoPValues()
+   {
+      return copSolution;
    }
 
    //   private void consolidateTorqueBiasMatrix(DenseMatrix64F forceBiasMatrix, DenseMatrix64F copBiasMatrix, DenseMatrix64F matrixToSet)

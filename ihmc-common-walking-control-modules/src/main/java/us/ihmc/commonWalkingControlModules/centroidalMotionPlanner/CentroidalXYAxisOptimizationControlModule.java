@@ -87,12 +87,13 @@ public class CentroidalXYAxisOptimizationControlModule
 
    private void submitQPSolution()
    {
-      PrintTools.debug(qpSolution.toString());
+      //PrintTools.debug(qpSolution.toString());
       angularHelper.processQPSolution(qpSolution, xQPSolution, yQPSolution, xCoPSolution, yCoPSolution);
       linearHelper.setDecisionVariableValues(Axis.X, xQPSolution);
       linearHelper.setDecisionVariableValues(Axis.Y, yQPSolution);
-      PrintTools.debug("Fx:" + xQPSolution.toString());
-      PrintTools.debug("Fy:" + yQPSolution.toString());
+      angularHelper.setDecisionVariables(xCoPSolution, yCoPSolution);
+      //PrintTools.debug("Fx:" + xQPSolution.toString());
+      //PrintTools.debug("Fy:" + yQPSolution.toString());
       for (int i = 0; i < xCoPSolution.getNumRows(); i++)
          PrintTools.debug("CoP" + i + ": (" + xCoPSolution.get(i) + ", " + yCoPSolution.get(i) + ")");
    }
@@ -122,7 +123,7 @@ public class CentroidalXYAxisOptimizationControlModule
       CommonOps.insert(tempMatrix1, solverInput_Aeq, indexToInsertAt, 0);
       solverInput_beq.reshape(indexToInsertAt + numberToInsert, 1, true);
       CommonOps.insert(tempMatrix2, solverInput_beq, indexToInsertAt, 0);
-      
+
       angularHelper.getConsolidatedTorqueConstraints(tempMatrix1, tempMatrix2);
       tempMatrix3.reshape(tempMatrix1.getNumRows(), tempMatrix1.getNumRows());
       CommonOps.setIdentity(tempMatrix3);
