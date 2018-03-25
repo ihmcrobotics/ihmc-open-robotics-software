@@ -14,8 +14,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public abstract class QuadrupedUnconstrainedFootState extends QuadrupedFootState
 {
-
-
    protected final FrameVector3D initialSoleForces = new FrameVector3D();
 
    protected final FrameVector3D desiredLinearAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame());

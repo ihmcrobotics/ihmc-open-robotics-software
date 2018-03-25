@@ -35,7 +35,6 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameVector3D desiredVelocity = new FrameVector3D();
-   private final FramePoint3D currentPosition = new FramePoint3D();
 
    private final QuadrupedFootControlModuleParameters parameters;
 
@@ -73,7 +72,7 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
                                                           QuadrupedFootControlModuleParameters.getDefaultTouchdownTriggerWindow());
 
       RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotQuadrant);
-      currentPosition.setToZero(soleFrame);
+      FramePoint3D currentPosition = new FramePoint3D(soleFrame);
       currentPosition.changeFrame(foot.getBodyFixedFrame());
 
       feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getBody(), foot);
