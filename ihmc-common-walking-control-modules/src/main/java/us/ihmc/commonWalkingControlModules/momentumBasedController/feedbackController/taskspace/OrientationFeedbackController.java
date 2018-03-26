@@ -214,7 +214,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       gains.set(command.getGains());
       command.getSpatialAccelerationCommand().getSelectionMatrix(selectionMatrix);
       angularGainsFrame = command.getAngularGainsFrame();
-      command.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      command.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
+      command.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration);
 
       yoDesiredOrientation.setAndMatchFrame(desiredOrientation);
       desiredOrientation.get(yoDesiredRotationVector);

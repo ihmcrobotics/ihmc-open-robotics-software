@@ -264,20 +264,23 @@ public class FixedBaseRobotArmController implements RobotController
       handPointCommand.setWeightForSolver(handWeight.getDoubleValue());
       handPointCommand.setGains(handPositionGains);
       handPointCommand.setSelectionMatrix(computeLinearSelectionMatrix());
-      handPointCommand.set(position, linearVelocity, linearAcceleration);
+      handPointCommand.set(position, linearVelocity);
+      handPointCommand.setFeedForwardAction(linearAcceleration);
 
       handOrientationCommand.setWeightForSolver(handWeight.getDoubleValue());
       handOrientationCommand.setGains(handOrientationGains);
       handOrientationCommand.setSelectionMatrix(computeAngularSelectionMatrix());
-      handOrientationCommand.set(orientation, angularVelocity, angularAcceleration);
+      handOrientationCommand.set(orientation, angularVelocity);
+      handOrientationCommand.setFeedForwardAction(angularAcceleration);
 
       handSpatialCommand.setControlFrameFixedInEndEffector(controlFramePose);
       handSpatialCommand.setWeightForSolver(handWeight.getDoubleValue());
       handSpatialCommand.setPositionGains(handPositionGains);
       handSpatialCommand.setOrientationGains(handOrientationGains);
       handSpatialCommand.setSelectionMatrix(computeSpatialSelectionMatrix());
-      handSpatialCommand.set(position, linearVelocity, linearAcceleration);
-      handSpatialCommand.set(orientation, angularVelocity, angularAcceleration);
+      handSpatialCommand.set(position, linearVelocity);
+      handSpatialCommand.set(orientation, angularVelocity);
+      handSpatialCommand.changeFrameAndSetFeedForward(angularAcceleration, linearAcceleration);
    }
 
    public void updateTrajectory()

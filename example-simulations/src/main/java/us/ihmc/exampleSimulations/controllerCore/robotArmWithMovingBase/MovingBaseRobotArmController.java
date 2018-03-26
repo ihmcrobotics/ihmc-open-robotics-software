@@ -266,7 +266,8 @@ public class MovingBaseRobotArmController implements RobotController
       FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
       sineGenerator.compute(yoTime.getDoubleValue());
       sineGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      basePointCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      basePointCommand.set(desiredPosition, desiredLinearVelocity);
+      basePointCommand.setFeedForwardAction(feedForwardLinearAcceleration);
    }
 
    public void updateHandFeedbackCommands()
@@ -283,8 +284,9 @@ public class MovingBaseRobotArmController implements RobotController
       handSpatialCommand.setOrientationGains(handOrientationGains);
       handSpatialCommand.setSelectionMatrix(computeSpatialSelectionMatrix());
       handSpatialCommand.setControlBaseFrame(trajectory.getCurrentReferenceFrame());
-      handSpatialCommand.changeFrameAndSet(position, linearVelocity, linearAcceleration);
-      handSpatialCommand.changeFrameAndSet(orientation, angularVelocity, angularAcceleration);
+      handSpatialCommand.changeFrameAndSet(position, linearVelocity);
+      handSpatialCommand.changeFrameAndSet(orientation, angularVelocity);
+      handSpatialCommand.changeFrameAndSetFeedForward(angularAcceleration, linearAcceleration);
    }
 
    public void updateHandTrajectory()
