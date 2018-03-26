@@ -80,9 +80,4 @@ public class QuadrupedControlManagerFactory
 
       return ret;
    }
-
-   public QuadrupedSolePositionController getOrCreateSolePositionController(RobotQuadrant robotQuadrant)
-   {
-      return getOrCreateFeetManager().getSolePositionController(robotQuadrant);
-   }
 }
