@@ -14,7 +14,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    public double thetaStart;
    public double maxSuboptimality = 1;
 
-   public RecyclingArrayListPubSub<FootstepDataMessage> goals = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 20);
+   public RecyclingArrayListPubSub<FootstepDataMessage> goals = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 5);
 
    public byte footstepPlanRequestType;
 

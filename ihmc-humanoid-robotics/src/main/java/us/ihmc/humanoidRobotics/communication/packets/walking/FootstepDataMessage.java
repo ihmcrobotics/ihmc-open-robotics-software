@@ -45,7 +45,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public RecyclingArrayListPubSub<Point2D> predictedContactPoints = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 10);
+   public RecyclingArrayListPubSub<Point2D> predictedContactPoints = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 4);
 
    @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.")
    public byte trajectoryType = TrajectoryType.DEFAULT.toByte();
@@ -60,7 +60,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
          + "start point (which is set to the current foot state at lift-off) and the touch down point (which is specified by the location and orientation fields)."
          + "All waypoints are for the sole frame and expressed in the trajectory frame. The maximum number of points can be found in the Footstep class.")
    public RecyclingArrayListPubSub<SE3TrajectoryPointMessage> swingTrajectory = new RecyclingArrayListPubSub<>(SE3TrajectoryPointMessage.class, SE3TrajectoryPointMessage::new,
-                                                                                               50);
+                                                                                               5);
    @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, this value can be used to specify the trajectory blend duration "
          + " in seconds. If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning "
          + " the desired blend duration) will be adjusted to account for the initial error between the actual and expected position and orientation of the "

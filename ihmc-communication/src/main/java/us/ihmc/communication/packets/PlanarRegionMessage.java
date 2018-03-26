@@ -11,7 +11,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
    public Point3D32 regionOrigin;
    public Vector3D32 regionNormal;
    public Polygon2DMessage concaveHull = new Polygon2DMessage();
-   public RecyclingArrayListPubSub<Polygon2DMessage> convexPolygons = new RecyclingArrayListPubSub<>(Polygon2DMessage.class, Polygon2DMessage::new, 20);
+   public RecyclingArrayListPubSub<Polygon2DMessage> convexPolygons = new RecyclingArrayListPubSub<>(Polygon2DMessage.class, Polygon2DMessage::new, 5);
 
    public PlanarRegionMessage()
    {

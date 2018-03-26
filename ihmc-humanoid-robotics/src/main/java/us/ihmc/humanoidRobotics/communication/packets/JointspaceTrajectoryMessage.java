@@ -12,7 +12,7 @@ import us.ihmc.idl.RecyclingArrayListPubSub;
 public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMessage>
 {
    @RosExportedField(documentation = "List of points in the trajectory.")
-   public RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = new RecyclingArrayListPubSub<>(OneDoFJointTrajectoryMessage.class, OneDoFJointTrajectoryMessage::new, 10);
+   public RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = new RecyclingArrayListPubSub<>(OneDoFJointTrajectoryMessage.class, OneDoFJointTrajectoryMessage::new, 5);
    @RosExportedField(documentation = "Properties for queueing trajectories.")
    public QueueableMessage queueingProperties = new QueueableMessage();
 

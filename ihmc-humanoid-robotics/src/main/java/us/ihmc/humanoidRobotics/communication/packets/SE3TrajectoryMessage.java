@@ -25,7 +25,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
-   public RecyclingArrayListPubSub<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = new RecyclingArrayListPubSub<>(SE3TrajectoryPointMessage.class, SE3TrajectoryPointMessage::new, 2000);
+   public RecyclingArrayListPubSub<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = new RecyclingArrayListPubSub<>(SE3TrajectoryPointMessage.class, SE3TrajectoryPointMessage::new, 5);
    @RosExportedField(documentation = "The selection matrix for each axis of the angular part.")
    public SelectionMatrix3DMessage angularSelectionMatrix;
    @RosExportedField(documentation = "The selection matrix for each axis of the linear part.")

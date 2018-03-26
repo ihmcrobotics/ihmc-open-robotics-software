@@ -33,7 +33,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public RecyclingArrayListPubSub<Point2D> predictedContactPoints = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 10);
+   public RecyclingArrayListPubSub<Point2D> predictedContactPoints = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 4);
 
    @RosExportedField(documentation = "The time to delay this command on the controller side before being executed.")
    public double executionDelayTime;

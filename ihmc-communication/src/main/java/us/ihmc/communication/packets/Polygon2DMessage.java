@@ -5,7 +5,7 @@ import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class Polygon2DMessage extends Packet<Polygon2DMessage>
 {
-   public RecyclingArrayListPubSub<Point2D32> vertices = new RecyclingArrayListPubSub<>(Point2D32.class, Point2D32::new, 100);
+   public RecyclingArrayListPubSub<Point2D32> vertices = new RecyclingArrayListPubSub<>(Point2D32.class, Point2D32::new, 10);
 
    public Polygon2DMessage()
    {

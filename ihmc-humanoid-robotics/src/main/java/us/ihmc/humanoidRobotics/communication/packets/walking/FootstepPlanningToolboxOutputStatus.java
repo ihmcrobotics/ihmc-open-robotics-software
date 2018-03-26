@@ -26,7 +26,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public PlanarRegionsListMessage planarRegionsListMessage = null;
 
    // body path planner fields
-   public RecyclingArrayListPubSub<Point2D> bodyPath = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 50);
+   public RecyclingArrayListPubSub<Point2D> bodyPath = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 5);
    public Pose2D lowLevelPlannerGoal;
 
    public FootstepPlanningToolboxOutputStatus()
