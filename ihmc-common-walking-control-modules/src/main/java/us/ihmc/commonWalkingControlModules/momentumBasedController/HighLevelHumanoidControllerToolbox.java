@@ -165,7 +165,6 @@ public class HighLevelHumanoidControllerToolbox
                                              YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 

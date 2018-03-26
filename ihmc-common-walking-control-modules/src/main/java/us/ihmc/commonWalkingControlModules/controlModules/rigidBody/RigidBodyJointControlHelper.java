@@ -102,6 +102,7 @@ public class RigidBodyJointControlHelper
          }
          else
          {
+            PrintTools.debug("Clearing weights for " + joint.getName());
             defaultWeights.clear();
             hasWeights.set(false);
             return;
@@ -160,7 +161,7 @@ public class RigidBodyJointControlHelper
    {
       if (!hasGains.getBooleanValue() || !hasWeights.getBooleanValue())
       {
-         PrintTools.warn(warningPrefix + "Can not send joint trajectory commands. Do not have all weights and gains set.");
+         PrintTools.warn(warningPrefix + "Can not send joint trajectory commands. Do not have all weights and gains set." + hasGains.getBooleanValue() + " " + hasWeights.getBooleanValue());
          throw new RuntimeException(warningPrefix + "Has no gains or weights.");
       }
 

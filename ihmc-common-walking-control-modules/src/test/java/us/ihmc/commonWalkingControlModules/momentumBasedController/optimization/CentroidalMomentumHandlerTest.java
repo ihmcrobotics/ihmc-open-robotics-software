@@ -47,7 +47,7 @@ public class CentroidalMomentumHandlerTest
          centroidalMomentumHandler.compute();
          centerOfMassJacobian.compute();
 
-         centroidalMomentumHandler.getCenterOfMassVelocity(actualCenterOfMassVelocity);
+         centroidalMomentumHandler.getCenterOfMassLinearVelocity(actualCenterOfMassVelocity);
          centerOfMassJacobian.getCenterOfMassVelocity(expectedCenterOfMassVelocity);
 
          actualCenterOfMassVelocity.changeFrame(worldFrame);
@@ -80,7 +80,7 @@ public class CentroidalMomentumHandlerTest
          centroidalMomentumHandler.compute();
          centerOfMassJacobian.compute();
 
-         centroidalMomentumHandler.getCenterOfMassVelocity(actualCenterOfMassVelocity);
+         centroidalMomentumHandler.getCenterOfMassLinearVelocity(actualCenterOfMassVelocity);
          centerOfMassJacobian.getCenterOfMassVelocity(expectedCenterOfMassVelocity);
 
          actualCenterOfMassVelocity.changeFrame(worldFrame);

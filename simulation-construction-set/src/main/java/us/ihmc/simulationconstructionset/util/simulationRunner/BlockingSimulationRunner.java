@@ -262,6 +262,8 @@ public class BlockingSimulationRunner
       YoDouble desiredICPX = (YoDouble) scs.getVariable("desiredICPX");
       YoDouble desiredICPY = (YoDouble) scs.getVariable("desiredICPY");
 
+      if(desiredICPX == null || desiredICPY == null)
+         return;
       desiredICPX.addVariableChangedListener(new VariableChangedListener()
       {
          @Override

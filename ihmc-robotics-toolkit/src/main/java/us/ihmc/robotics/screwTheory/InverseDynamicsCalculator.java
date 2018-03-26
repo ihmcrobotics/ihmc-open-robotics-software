@@ -58,7 +58,6 @@ public class InverseDynamicsCalculator
       this.rootBody = spatialAccelerationCalculator.getRootBody();
       this.jointsToIgnore = new ArrayList<InverseDynamicsJoint>(jointsToIgnore);
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
-
       this.doVelocityTerms = spatialAccelerationCalculator.areVelocitiesConsidered();
 
       populateMapsAndLists();

@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;

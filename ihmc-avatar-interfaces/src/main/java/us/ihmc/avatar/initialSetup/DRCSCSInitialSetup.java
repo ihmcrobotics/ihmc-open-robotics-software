@@ -26,7 +26,7 @@ public class DRCSCSInitialSetup
    private double groundAlphaSlip = Double.NaN;
 
    private int simulationDataBufferSize = 16000;
-   private Vector3D gravity = new Vector3D(0.0, 0.0, -9.81);
+   private Vector3D gravity;
    private boolean runMultiThreaded = true;
 
    private boolean usePerfectSensors = false;
@@ -38,6 +38,7 @@ public class DRCSCSInitialSetup
 
    public DRCSCSInitialSetup(GroundProfile3D groundProfile, double simulateDT)
    {
+      this.gravity = CommonAvatarEnvironmentInterface.defaultGravity;
       this.groundProfile3D = groundProfile;
       this.simulateDT = simulateDT;
    }
@@ -45,7 +46,7 @@ public class DRCSCSInitialSetup
    public DRCSCSInitialSetup(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, double simulateDT)
    {
       TerrainObject3D terrainObject3D = commonAvatarEnvironmentInterface.getTerrainObject3D();
-
+      this.gravity = commonAvatarEnvironmentInterface.getGravityVectorWorldFrame();
       this.groundProfile3D = terrainObject3D;
       this.simulateDT = simulateDT;
    }

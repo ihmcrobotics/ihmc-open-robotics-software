@@ -132,15 +132,20 @@ public class ICPControlPolygons
       // FIXME: Assumes the individual feet polygons are disjoint for faster computation. Will crash if the feet overlap.
       // If in single support, then the support polygon is just the foot polygon of the supporting foot.
       if (neitherFootIsSupportingFoot)
-         throw new RuntimeException("neither foot is a supporting foot!");
-
-      if (inDoubleSupport)
       {
-         controlPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footControlPolygonsInMidFeetZUp.get(RobotSide.LEFT), footControlPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+         controlPolygonInMidFeetZUp.clear();
+         //throw new RuntimeException("neither foot is a supporting foot!");
       }
       else
       {
-         controlPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footControlPolygonsInMidFeetZUp.get(supportSide));
+         if (inDoubleSupport)
+         {
+            controlPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footControlPolygonsInMidFeetZUp.get(RobotSide.LEFT), footControlPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+         }
+         else
+         {
+            controlPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footControlPolygonsInMidFeetZUp.get(supportSide));
+         }
       }
 
       controlPolygonInWorld.setIncludingFrameAndUpdate(controlPolygonInMidFeetZUp);

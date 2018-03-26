@@ -18,6 +18,7 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage>
    public static final byte WALKING = 5;
    public static final byte DIAGNOSTICS = 6;
    public static final byte CALIBRATION = 7;
+   public static final byte JUMPING = 8;
 
    @RosExportedField(documentation = "The enum value of the current high level state of the robot.")
    public byte highLevelControllerName;

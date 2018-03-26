@@ -308,7 +308,14 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
       pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
       // Do nothing for the orientation since the IMU is trusted
    }
-
+   
+   public void initializeEstimatorToActual(Tuple3DReadOnly initialCoMPosition, Tuple3DReadOnly initialCoMVelocity, QuaternionReadOnly initialOrientation, Tuple3DReadOnly iniitalAngularVelocity)
+   {
+      pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
+      //Do nothing for the orientation since the IMU is trusted 
+      pelvisLinearStateUpdater.initializeCoMVelocityToActual(initialCoMVelocity);
+   }
+   
    @Override
    public YoVariableRegistry getYoVariableRegistry()
    {

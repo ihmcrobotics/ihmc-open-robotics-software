@@ -81,7 +81,7 @@ public final class PointFeedbackControllerTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(getClass().getSimpleName(), controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
                                                                             registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
@@ -170,7 +170,7 @@ public final class PointFeedbackControllerTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(getClass().getSimpleName(), controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
                                                                             registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
@@ -279,7 +279,7 @@ public final class PointFeedbackControllerTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(getClass().getSimpleName(), controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null, null,
                                                                             registry);
       toolbox.setupForInverseDynamicsSolver(null);
       // Making the controllers to run with different instances of the toolbox so they don't share variables.

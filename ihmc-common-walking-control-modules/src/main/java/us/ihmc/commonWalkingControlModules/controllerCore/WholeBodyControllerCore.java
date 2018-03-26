@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLow
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -325,6 +326,8 @@ public class WholeBodyControllerCore
 
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
+      //for(OneDoFJoint joint: controlledOneDoFJoints)
+      //   yoLowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(joint, 0.0);
       return yoLowLevelOneDoFJointDesiredDataHolder;
    }
 

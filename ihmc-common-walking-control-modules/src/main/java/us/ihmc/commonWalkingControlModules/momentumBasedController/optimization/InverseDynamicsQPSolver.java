@@ -1,8 +1,10 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
 import org.ejml.data.DenseMatrix64F;
+
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -257,7 +259,7 @@ public class InverseDynamicsQPSolver
       // J^T W
       tempJtW.reshape(numberOfDoFs, taskSize);
       CommonOps.transpose(taskJ, tempJtW);
-
+      
       addMotionTaskInternal(taskWeight, tempJtW, taskJ, taskObjective);
    }
 
@@ -354,6 +356,7 @@ public class InverseDynamicsQPSolver
 
       // Compute: f += - J^T W Objective
       CommonOps.multAdd(-1.0, tempJtW, torqueObjective, solverInput_f);
+
    }
 
    public void addTorqueMinimizationObjective(DenseMatrix64F torqueQddotJacobian, DenseMatrix64F torqueRhoJacobian, DenseMatrix64F torqueObjective)
@@ -388,6 +391,7 @@ public class InverseDynamicsQPSolver
     *           robot is holding.
     * @param gravityWrench refers to W<sub>gravity</sub> in the equation. It the wrench induced by
     *           the wieght of the robot.
+    * @param comAcceleration the acceleration of the center of mass 
     */
    public void setupWrenchesEquilibriumConstraint(DenseMatrix64F centroidalMomentumMatrix, DenseMatrix64F rhoJacobian, DenseMatrix64F convectiveTerm,
                                                   DenseMatrix64F additionalExternalWrench, DenseMatrix64F gravityWrench)
@@ -489,7 +493,7 @@ public class InverseDynamicsQPSolver
          throw new RuntimeException("The wrench equilibrium constraint has to be setup before calling solve().");
 
       addRegularization();
-
+      
       numberOfEqualityConstraints.set(solverInput_Aeq.getNumRows());
       numberOfInequalityConstraints.set(solverInput_Ain.getNumRows());
       numberOfConstraints.set(solverInput_Aeq.getNumRows() + solverInput_Ain.getNumRows());
@@ -541,7 +545,6 @@ public class InverseDynamicsQPSolver
             wrenchEquilibriumForceError.setZ(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
          }
       }
-
       solverInput_H_previous.set(solverInput_H);
       solverInput_f_previous.set(solverInput_f);
 

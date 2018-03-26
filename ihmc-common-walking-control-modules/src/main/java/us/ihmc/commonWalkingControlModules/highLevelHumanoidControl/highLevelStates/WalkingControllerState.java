@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import com.google.common.base.CaseFormat;
+
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -30,6 +32,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class WalkingControllerState extends HighLevelControllerState
 {
    private final static HighLevelControllerName controllerState = HighLevelControllerName.WALKING;
+   private static final String namePrefix = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, controllerState.toString());
 
    private final WholeBodyControllerCore controllerCore;
    private final WalkingHighLevelHumanoidController walkingController;
@@ -59,7 +62,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(namePrefix, controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
                                                                             jointsToOptimizeFor, centerOfMassFrame,
                                                                             walkingControllerParameters.getMomentumOptimizationSettings(),
                                                                             controllerToolbox.getYoGraphicsListRegistry(), registry);

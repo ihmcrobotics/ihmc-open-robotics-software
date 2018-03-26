@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 
 /**
  * Class represents the spatial acceleration of a rigid body. A spatial acceleration is the

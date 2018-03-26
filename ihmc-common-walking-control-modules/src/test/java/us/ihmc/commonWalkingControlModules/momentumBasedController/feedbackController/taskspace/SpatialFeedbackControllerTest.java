@@ -79,7 +79,7 @@ public final class SpatialFeedbackControllerTest
       double controlDT = 0.004;
 
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(getClass().getSimpleName(), controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null,
                                                                             null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
@@ -184,7 +184,7 @@ public final class SpatialFeedbackControllerTest
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(getClass().getSimpleName(), controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, null,
                                                                             null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);

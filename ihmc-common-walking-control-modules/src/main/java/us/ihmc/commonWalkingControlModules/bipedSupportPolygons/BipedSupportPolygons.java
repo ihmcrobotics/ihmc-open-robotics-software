@@ -48,7 +48,8 @@ public class BipedSupportPolygons
    private final ExecutionTimer timer = new ExecutionTimer(getClass().getSimpleName() + "Timer", registry);
 
    public BipedSupportPolygons(SideDependentList<ReferenceFrame> ankleZUpFrames, ReferenceFrame midFeetZUpFrame,
-         SideDependentList<ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                               SideDependentList<ReferenceFrame> soleZUpFrames, YoVariableRegistry parentRegistry,
+                               YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.ankleZUpFrames = ankleZUpFrames;
       this.midFeetZUp = midFeetZUpFrame;
@@ -70,9 +71,11 @@ public class BipedSupportPolygons
          footPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2d());
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         YoFrameConvexPolygon2d footPolygonViz = new YoFrameConvexPolygon2d(robotSidePrefix + "FootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
+         YoFrameConvexPolygon2d footPolygonViz = new YoFrameConvexPolygon2d(robotSidePrefix + "FootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot,
+                                                                            registry);
          footPolygonsViz.put(robotSide, footPolygonViz);
-         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon", footPolygonViz, defaultFeetColors.get(robotSide), false);
+         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon", footPolygonViz,
+                                                                       defaultFeetColors.get(robotSide), false);
          artifactList.add(footPolygonArtifact);
       }
 
@@ -154,17 +157,21 @@ public class BipedSupportPolygons
       // FIXME: Assumes the individual feet polygons are disjoint for faster computation. Will crash if the feet overlap.
       // If in single support, then the support polygon is just the foot polygon of the supporting foot.
       if (neitherFootIsSupportingFoot)
-         throw new RuntimeException("neither foot is a supporting foot!");
-
-      if (inDoubleSupport)
       {
-         supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+         supportPolygonInMidFeetZUp.clear();
+         //throw new RuntimeException("neither foot is a supporting foot!");
       }
       else
       {
-         supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footPolygonsInMidFeetZUp.get(supportSide));
+         if (inDoubleSupport)
+         {
+            supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footPolygonsInMidFeetZUp.get(RobotSide.LEFT), footPolygonsInMidFeetZUp.get(RobotSide.RIGHT));
+         }
+         else
+         {
+            supportPolygonInMidFeetZUp.setIncludingFrameAndUpdate(footPolygonsInMidFeetZUp.get(supportSide));
+         }
       }
-
       supportPolygonInWorld.setIncludingFrameAndUpdate(supportPolygonInMidFeetZUp);
       supportPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
    }

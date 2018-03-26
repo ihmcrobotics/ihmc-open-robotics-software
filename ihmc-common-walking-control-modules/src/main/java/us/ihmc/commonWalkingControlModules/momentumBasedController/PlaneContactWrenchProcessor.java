@@ -30,6 +30,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 public class PlaneContactWrenchProcessor
 {
    private final static boolean VISUALIZE = false;
+   private final String namePrefix;
 
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
    private final CenterOfPressureResolver centerOfPressureResolver = new CenterOfPressureResolver();
@@ -45,9 +46,10 @@ public class PlaneContactWrenchProcessor
 
    private final CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;
 
-   public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public PlaneContactWrenchProcessor(String namePrefix, List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
+      this.namePrefix = namePrefix + "PLaneContactWrenchProcessor";
       Map<RigidBody, ReferenceFrame> soleFrames = new HashMap<>();
 
       this.contactablePlaneBodies = contactablePlaneBodies;
@@ -55,7 +57,7 @@ public class PlaneContactWrenchProcessor
       {
          soleFrames.put(contactableBody.getRigidBody(), contactableBody.getSoleFrame());
 
-         String name = contactableBody.getSoleFrame().getName();
+         String name = this.namePrefix + contactableBody.getSoleFrame().getName();
          YoDouble forceMagnitude = new YoDouble(name + "ForceMagnitude", registry);
          groundReactionForceMagnitudes.put(contactableBody, forceMagnitude);
 

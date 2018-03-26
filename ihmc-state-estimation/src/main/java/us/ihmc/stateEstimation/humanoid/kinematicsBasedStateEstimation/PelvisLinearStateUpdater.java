@@ -123,12 +123,14 @@ public class PelvisLinearStateUpdater
 
    private final FloatingInverseDynamicsJoint rootJoint;
 
-   private boolean initializeToActual = false;
+   private boolean initializePositionToActual = false;
+   private boolean initializeVelocityToActual = false;
 
    // Temporary variables
    private final FramePoint3D rootJointPosition = new FramePoint3D(worldFrame);
    private final FrameVector3D rootJointVelocity = new FrameVector3D(worldFrame);
    private final FramePoint3D centerOfMassPosition = new FramePoint3D(worldFrame);
+   private final FramePoint3D centerOfMassVelocity = new FramePoint3D(worldFrame);
    private final FrameVector3D centerOfMassVelocityUsingPelvisIMUAndKinematics = new FrameVector3D(worldFrame);
    private final Vector3D tempRootJointTranslation = new Vector3D();
    private final FrameVector3D tempFrameVector = new FrameVector3D();
@@ -156,7 +158,7 @@ public class PelvisLinearStateUpdater
       rootJointFrame = rootJoint.getFrameAfterJoint();
 
       footFrames = new LinkedHashMap<RigidBody, ReferenceFrame>();
-
+      
       RigidBody elevator = inverseDynamicsStructure.getElevator();
       this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJointFrame);
       this.centerOfMassJacobianWorld = new CenterOfMassJacobian(elevator);
@@ -288,7 +290,7 @@ public class PelvisLinearStateUpdater
       tempCenterOfMassPosition.changeFrame(worldFrame);
       yoInitialCenterOfMassPosition.set(tempCenterOfMassPosition);
 
-      if (!initializeToActual && DRCKinematicsBasedStateEstimator.INITIALIZE_HEIGHT_WITH_FOOT)
+      if (!initializePositionToActual && DRCKinematicsBasedStateEstimator.INITIALIZE_HEIGHT_WITH_FOOT)
       {
          RigidBody foot = feet.get(0);
          footPositionInWorld.setToZero(footFrames.get(foot));
@@ -305,10 +307,15 @@ public class PelvisLinearStateUpdater
       rootJointPosition.set(centerOfMassPosition);
       rootJointPosition.sub(tempFrameVector);
       yoRootJointPosition.set(rootJointPosition);
-      rootJointVelocity.setToZero(worldFrame);
-      yoRootJointVelocity.setToZero();
-
+      //TODO Hacking for now. This should actually be computed from by using the initial robot state to get the relative velocity
+      if(initializeVelocityToActual)
+         rootJointVelocity.setIncludingFrame(centerOfMassVelocity);
+      else
+         rootJointVelocity.setToZero(worldFrame);
+      yoRootJointVelocity.set(rootJointVelocity);
+   
       kinematicsBasedLinearStateCalculator.initialize(rootJointPosition);
+      imuBasedLinearStateCalculator.correctIMULinearVelocity(rootJointVelocity);
    }
 
    public void updateForFrozenState()
@@ -334,7 +341,7 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.updateKinematics();
 
       numberOfEndEffectorsTrusted.set(setTrustedFeetUsingFootSwitches());
-
+      
       if (numberOfEndEffectorsTrusted.getIntegerValue() >= 2)
       {
          switch (slippageCompensatorMode.getEnumValue())
@@ -651,14 +658,21 @@ public class PelvisLinearStateUpdater
 
    public void initializeCoMPositionToActual(Tuple3DReadOnly initialCoMPosition)
    {
-      initializeToActual = true;
+      initializePositionToActual = true;
       centerOfMassPosition.setIncludingFrame(worldFrame, initialCoMPosition);
       yoCenterOfMassPosition.set(initialCoMPosition);
+   }
+   
+   public void initializeCoMVelocityToActual(Tuple3DReadOnly initialComVelocity)
+   {
+      initializeVelocityToActual = true;
+      centerOfMassVelocity.setIncludingFrame(worldFrame, initialComVelocity);
+      yoCenterOfMassVelocity.set(centerOfMassVelocity);
    }
 
    public void initializeCoMPositionToActual(FramePoint3D initialCoMPosition)
    {
-      initializeToActual = true;
+      initializePositionToActual = true;
       centerOfMassPosition.set(initialCoMPosition);
       yoCenterOfMassPosition.set(initialCoMPosition);
    }

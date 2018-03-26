@@ -4,9 +4,12 @@ import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JumpControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.JumpControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -21,8 +24,10 @@ public class HighLevelControllerFactoryHelper
    private EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerFactories;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private HighLevelControlManagerFactory managerFactory;
+   private JumpControlManagerFactory jumpControlManagerFactory;
    private HighLevelControllerParameters highLevelControllerParameters;
    private WalkingControllerParameters walkingControllerParameters;
+   private JumpControllerParameters jumpControllerParameters;
    private ICPTrajectoryPlannerParameters icpPlannerParameters;
    private CommandInputManager commandInputManager;
    private StatusMessageOutputManager statusMessageOutputManager;
@@ -52,10 +57,20 @@ public class HighLevelControllerFactoryHelper
       this.walkingControllerParameters = walkingControllerParameters;
       this.icpPlannerParameters = icpPlannerParameters;
    }
+   
+   public void setJumpControlParameters(JumpControllerParameters jumpControllerParameters)
+   {
+      this.jumpControllerParameters = jumpControllerParameters;
+   }
 
    public void setHighLevelControlManagerFactory(HighLevelControlManagerFactory managerFactory)
    {
       this.managerFactory = managerFactory;
+   }
+   
+   public void setJumpControlManagerFactory(JumpControlManagerFactory jumpControlManagerFactory)
+   {
+      this.jumpControlManagerFactory = jumpControlManagerFactory;
    }
 
    public void setCommandInputManager(CommandInputManager commandInputManager)
@@ -93,6 +108,11 @@ public class HighLevelControllerFactoryHelper
       return managerFactory;
    }
 
+   public JumpControlManagerFactory getJumpControlManagerFactory()
+   {
+      return jumpControlManagerFactory;
+   }
+   
    public HighLevelControllerParameters getHighLevelControllerParameters()
    {
       return highLevelControllerParameters;
@@ -101,6 +121,11 @@ public class HighLevelControllerFactoryHelper
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
+   }
+   
+   public JumpControllerParameters getJumpControllerParameters()
+   {
+      return jumpControllerParameters;
    }
 
    public ICPTrajectoryPlannerParameters getIcpPlannerParameters()

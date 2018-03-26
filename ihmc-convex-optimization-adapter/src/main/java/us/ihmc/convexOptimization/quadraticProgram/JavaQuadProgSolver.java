@@ -9,6 +9,7 @@ import org.ejml.interfaces.decomposition.CholeskyDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
@@ -624,6 +625,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
          if (!Double.isFinite(stepLength))
          { // case (i): no step in primal or dual space, QP is infeasible
             CommonOps.fill(solutionToPack, Double.NaN);
+            PrintTools.debug("Step size not found");
             CommonOps.fill(lagrangeEqualityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
             CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
             CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);

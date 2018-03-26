@@ -14,6 +14,7 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -106,6 +107,10 @@ public class AvatarSimulationFactory
       {
          yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadSchedulerFactory(), robotModel.get().getLogModelProvider(),
                                                  robotModel.get().getLogSettings(), robotModel.get().getEstimatorDT());
+      }
+      else
+      {
+         yoVariableServer = null;
       }
    }
 
@@ -270,8 +275,9 @@ public class AvatarSimulationFactory
 
          Quaternion initialEstimationLinkOrientation = new Quaternion();
          humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D().getRotation(initialEstimationLinkOrientation);
-
-         stateEstimationThread.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
+         Vector3D initialRootVelocity = new Vector3D();
+         humanoidFloatingRootJointRobot.getRootJoint().getVelocity(initialRootVelocity);
+         stateEstimationThread.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation, initialRootVelocity, null);
       }
    }
 
@@ -393,7 +399,10 @@ public class AvatarSimulationFactory
 
    public AvatarSimulation createAvatarSimulation()
    {
-      gravity.setDefaultValue(-9.81);
+      //Setting the value of gravity from SCS to match the environment. TODO fix in case gravity has X or Y components
+      if (!gravity.hasValue())
+         gravity.setDefaultValue(scsInitialSetup.get().getGravity().getZ());
+
       doSlowIntegrationForTorqueOffset.setDefaultValue(false);
       doSmoothJointTorquesAtControllerStateChanges.setDefaultValue(false);
       addActualCMPVisualization.setDefaultValue(true);
