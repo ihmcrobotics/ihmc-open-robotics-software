@@ -30,19 +30,16 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
 
    private final QuadrupedFootControlModuleParameters parameters;
 
-   private final QuadrupedSolePositionController solePositionController;
    private final QuadrupedSolePositionControllerSetpoints solePositionControllerSetpoints;
 
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
    private double taskStartTime;
 
-   public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox,
-                                         QuadrupedSolePositionController solePositionController, YoVariableRegistry registry)
+   public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
       super(robotQuadrant, controllerToolbox);
 
-      this.solePositionController = solePositionController;
       solePositionControllerSetpoints = new QuadrupedSolePositionControllerSetpoints(robotQuadrant);
 
       this.bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
@@ -70,7 +67,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
    public void initialize(boolean useInitialSoleForceAsFeedforwardTerm)
    {
       solePositionControllerSetpoints.initialize(soleFrame);
-      solePositionController.reset();
 
       if (useInitialSoleForceAsFeedforwardTerm)
       {
@@ -91,8 +87,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
    {
       super.onEntry();
 
-      solePositionController.reset();
-      solePositionController.getGains().set(parameters.getSolePositionGains());
       solePositionControllerSetpoints.initialize(soleFrame);
    }
 
@@ -121,10 +115,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
          quadrupedWaypointsPositionTrajectoryGenerator.getPosition(solePositionControllerSetpoints.getSolePosition());
          solePositionControllerSetpoints.getSoleLinearVelocity().setToZero();
          solePositionControllerSetpoints.getSoleForceFeedforward().setIncludingFrame(initialSoleForces);
-         solePositionController
-               .compute(soleForceCommand, solePositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant));
-
-         virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
 
          feedbackControlCommand.set(solePositionControllerSetpoints.getSolePosition(), solePositionControllerSetpoints.getSoleLinearVelocity());
          feedbackControlCommand.setFeedForwardAction(initialSoleForces);
