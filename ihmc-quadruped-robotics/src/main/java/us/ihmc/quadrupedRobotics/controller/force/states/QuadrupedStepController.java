@@ -144,12 +144,8 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
    {
-      if (stepMessageHandler.isDoneWithStepSequence())
-      {
-         return ControllerEvent.DONE;
-      }
       stepStream.process();
 
       // update task space estimates
@@ -202,6 +198,15 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       {
          onTouchDownTriggered.set(false);
          balanceManager.completedStep();
+      }
+   }
+
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
+   {
+      if (stepMessageHandler.isDoneWithStepSequence())
+      {
+         return ControllerEvent.DONE;
       }
       return null;
    }

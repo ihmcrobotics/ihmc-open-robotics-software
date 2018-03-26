@@ -45,6 +45,8 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    private final FramePoint3D swingPositionForVisualization = new FramePoint3D();
    private final BagOfBalls stepSequenceVisualization;
 
+   private boolean triggerSupport;
+
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, QuadrupedSolePositionController solePositionController,
                               YoBoolean stepCommandIsValid, YoQuadrupedTimedStep currentStepCommand, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
@@ -101,6 +103,7 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
       solePositionControllerSetpoints.initialize(soleFrame);
 
       touchdownTrigger.set(false);
+      triggerSupport = false;
    }
 
    private void updateGraphics(double startTime, double endTime)
@@ -119,7 +122,7 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    }
 
    @Override
-   public QuadrupedFootControlModule.FootEvent process()
+   public void doAction(double timeInState)
    {
       double currentTime = timestamp.getDoubleValue();
       double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
@@ -176,12 +179,14 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
          {
             stepTransitionCallback.onTouchDown(robotQuadrant);
          }
-         return QuadrupedFootControlModule.FootEvent.TIMEOUT;
+         triggerSupport = true;
       }
-      else
-      {
-         return null;
-      }
+   }
+
+   @Override
+   public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
+   {
+      return triggerSupport ? QuadrupedFootControlModule.FootEvent.TIMEOUT : null;
    }
 
    @Override
@@ -192,5 +197,6 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
 
       if(createSwingTrajectoryGraphics)
          stepSequenceVisualization.hideAll();
+      triggerSupport = false;
    }
 }

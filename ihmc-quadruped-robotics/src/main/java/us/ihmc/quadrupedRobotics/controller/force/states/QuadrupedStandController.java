@@ -72,7 +72,7 @@ public class QuadrupedStandController implements QuadrupedController
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
    {
       controllerToolbox.update();
       feetManager.updateSupportPolygon();
@@ -90,7 +90,11 @@ public class QuadrupedStandController implements QuadrupedController
       jointSpaceManager.compute();
 
       feetManager.compute();
+   }
 
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
+   {
       return null;
    }
 

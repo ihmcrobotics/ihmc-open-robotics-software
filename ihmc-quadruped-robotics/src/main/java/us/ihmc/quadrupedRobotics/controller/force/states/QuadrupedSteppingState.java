@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -34,14 +36,12 @@ import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachine;
-import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineBuilder;
-import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.extra.EventTrigger;
+import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedSteppingState implements QuadrupedController
 {
@@ -61,8 +61,8 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final QuadrupedControlManagerFactory controlManagerFactory;
 
    private final YoEnum<QuadrupedSteppingRequestedEvent> lastEvent = new YoEnum<>("lastSteppingEvent", registry, QuadrupedSteppingRequestedEvent.class);
-   private final FiniteStateMachine<QuadrupedSteppingStateEnum, ControllerEvent, QuadrupedController> stateMachine;
-   private final FiniteStateMachineYoVariableTrigger<QuadrupedSteppingRequestedEvent> stepTrigger;
+   private final StateMachine<QuadrupedSteppingStateEnum, QuadrupedController> stateMachine;
+   private EventTrigger trigger;
 
    private final QuadrupedSteppingStatePacket quadrupedSteppingStatePacket;
    private final AtomicReference<QuadrupedSteppingRequestedEvent> requestedEvent = new AtomicReference<>();
@@ -135,12 +135,11 @@ public class QuadrupedSteppingState implements QuadrupedController
       this.quadrupedSteppingStatePacket = new QuadrupedSteppingStatePacket();
 
       this.stateMachine = buildStateMachine();
-      this.stepTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "stepTrigger", registry, QuadrupedSteppingRequestedEvent.class);
 
       parentRegistry.addChild(registry);
    }
 
-   private FiniteStateMachine<QuadrupedSteppingStateEnum, ControllerEvent, QuadrupedController> buildStateMachine()
+   private StateMachine<QuadrupedSteppingStateEnum, QuadrupedController> buildStateMachine()
    {
       // Initialize controllers.
       final QuadrupedController standController = new QuadrupedStandController(controllerToolbox, controlManagerFactory, registry);
@@ -148,76 +147,44 @@ public class QuadrupedSteppingState implements QuadrupedController
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(controllerToolbox, controlManagerFactory,
                                                                                                        soleWaypointInputProvider, registry);
 
-      FiniteStateMachineBuilder<QuadrupedSteppingStateEnum, ControllerEvent, QuadrupedController> builder = new FiniteStateMachineBuilder<>(
-            QuadrupedSteppingStateEnum.class, ControllerEvent.class, "steppingState", registry);
+      EventBasedStateMachineFactory<QuadrupedSteppingStateEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedSteppingStateEnum.class);
+      factory.setNamePrefix("stepping").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
+      factory.buildYoEventTrigger("stepTrigger", QuadrupedSteppingRequestedEvent.class);
 
-      builder.addState(QuadrupedSteppingStateEnum.STAND, standController);
-      builder.addState(QuadrupedSteppingStateEnum.STEP, stepController);
-      builder.addState(QuadrupedSteppingStateEnum.XGAIT, stepController);
-      builder.addState(QuadrupedSteppingStateEnum.SOLE_WAYPOINT, soleWaypointController);
+      factory.addState(QuadrupedSteppingStateEnum.STAND, standController);
+      factory.addState(QuadrupedSteppingStateEnum.STEP, stepController);
+      factory.addState(QuadrupedSteppingStateEnum.XGAIT, stepController);
+      factory.addState(QuadrupedSteppingStateEnum.SOLE_WAYPOINT, soleWaypointController);
 
       // Add automatic transitions that lead into the stand state.
-      builder.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.STEP, QuadrupedSteppingStateEnum.STAND);
-      builder.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.XGAIT, QuadrupedSteppingStateEnum.STAND);
+      factory.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.STEP, QuadrupedSteppingStateEnum.STAND);
+      factory.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.XGAIT, QuadrupedSteppingStateEnum.STAND);
 
       // Sole Waypoint events
-      builder.addTransition(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND,
-                            QuadrupedSteppingStateEnum.SOLE_WAYPOINT);
-      builder.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND);
-      builder.addTransition(ControllerEvent.FAIL, QuadrupedSteppingStateEnum.SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND);
+      factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.SOLE_WAYPOINT);
+      factory.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND);
+      factory.addTransition(ControllerEvent.FAIL, QuadrupedSteppingStateEnum.SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND);
 
       // Manually triggered events to transition to main controllers.
-      builder.addTransition(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND,
-                            QuadrupedSteppingStateEnum.STEP);
-      builder.addTransition(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_XGAIT, QuadrupedSteppingStateEnum.STAND,
-                            QuadrupedSteppingStateEnum.XGAIT);
+      factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.STEP);
+      factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.XGAIT);
 
       // Callbacks functions.
-      Runnable standToXGaitCallback = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            stepStreamMultiplexer.selectStepStream(QuadrupedSteppingStateEnum.XGAIT);
-         }
-      };
-      builder.addCallback(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_XGAIT, QuadrupedSteppingStateEnum.STAND,
-                          standToXGaitCallback);
+      Runnable standToXGaitCallback = () -> stepStreamMultiplexer.selectStepStream(QuadrupedSteppingStateEnum.XGAIT);
+      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT, QuadrupedSteppingStateEnum.STAND, standToXGaitCallback);
 
-      Runnable xGaitToStandCallback = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            stepController.halt();
-         }
-      };
-      builder.addCallback(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.XGAIT,
-                          xGaitToStandCallback);
+      Runnable xGaitToStandCallback = () -> stepController.halt();
+      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.XGAIT, xGaitToStandCallback);
 
-      Runnable standToStepCallback = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            stepStreamMultiplexer.selectStepStream(QuadrupedSteppingStateEnum.STEP);
-         }
-      };
-      builder.addCallback(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND,
-                          standToStepCallback);
+      Runnable standToStepCallback = () -> stepStreamMultiplexer.selectStepStream(QuadrupedSteppingStateEnum.STEP);
+      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND, standToStepCallback);
 
-      Runnable stepToStandCallback = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-            stepController.halt();
-         }
-      };
-      builder.addCallback(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.STEP,
-                          stepToStandCallback);
+      Runnable stepToStandCallback = () -> stepController.halt();
+      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.STEP, stepToStandCallback);
 
-      return builder.build(QuadrupedSteppingStateEnum.STAND);
+      trigger = factory.buildEventTrigger();
+
+      return factory.build(QuadrupedSteppingStateEnum.STAND);
    }
 
    @Override
@@ -229,7 +196,7 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
    {
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
@@ -238,24 +205,24 @@ public class QuadrupedSteppingState implements QuadrupedController
       if (reqEvent != null)
       {
          lastEvent.set(reqEvent);
-         stateMachine.trigger(QuadrupedSteppingRequestedEvent.class, reqEvent);
+         trigger.fireEvent(reqEvent);
       }
 
       if (preplannedStepProvider.isStepPlanAvailable())
       {
-         if (stateMachine.getCurrentStateEnum() == QuadrupedSteppingStateEnum.STAND)
+         if (stateMachine.getCurrentStateKey() == QuadrupedSteppingStateEnum.STAND)
          {
             // trigger step event if preplanned steps are available in stand state
             lastEvent.set(QuadrupedSteppingRequestedEvent.REQUEST_STEP);
-            stateMachine.trigger(QuadrupedSteppingRequestedEvent.class, QuadrupedSteppingRequestedEvent.REQUEST_STEP);
+            trigger.fireEvent(QuadrupedSteppingRequestedEvent.REQUEST_STEP);
          }
       }
 
       // update controller state machine
-      stateMachine.process();
+      stateMachine.doActionAndTransition();
 
       // Send state information
-      quadrupedSteppingStatePacket.set(stateMachine.getCurrentStateEnum());
+      quadrupedSteppingStatePacket.set(stateMachine.getCurrentStateKey());
 
       if (runtimeEnvironment.getGlobalDataProducer() != null)
       {
@@ -268,7 +235,11 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
+   }
 
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
+   {
       return null;
    }
 
