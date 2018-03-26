@@ -48,7 +48,7 @@ public class FMSPeterPlanarWalkerController implements RobotController
    {
       for(RobotSide robotSide : RobotSide.values)
       {
-         walkerStateMachine.get(robotSide).getStateMachine().process();
+         walkerStateMachine.get(robotSide).getStateMachine().doActionAndTransition();
       }
    }
 }

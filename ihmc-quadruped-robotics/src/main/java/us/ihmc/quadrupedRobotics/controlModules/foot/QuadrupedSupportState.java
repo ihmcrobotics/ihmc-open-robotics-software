@@ -20,6 +20,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    private final YoBoolean stepCommandIsValid;
    private final YoDouble timestamp;
    private final YoQuadrupedTimedStep currentStepCommand;
+   private boolean triggerSwing;
 
    private final FrameVector3D footNormalContactVector = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
 
@@ -38,10 +39,11 @@ public class QuadrupedSupportState extends QuadrupedFootState
    {
       contactState.setFullyConstrained();
       contactState.setContactNormalVector(footNormalContactVector);
+      triggerSwing = false;
    }
 
    @Override
-   public QuadrupedFootControlModule.FootEvent process()
+   public void doAction(double timeInState)
    {
       // trigger swing phase
       if (stepCommandIsValid.getBooleanValue() && currentStepCommand.getTimeInterval().intervalContains(timestamp.getDoubleValue()))
@@ -50,15 +52,20 @@ public class QuadrupedSupportState extends QuadrupedFootState
          {
             stepTransitionCallback.onLiftOff(robotQuadrant);
          }
-         return QuadrupedFootControlModule.FootEvent.TIMEOUT;
+         triggerSwing = true;
       }
+   }
 
-      return null;
+   @Override
+   public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
+   {
+      return triggerSwing ? QuadrupedFootControlModule.FootEvent.TIMEOUT : null;
    }
 
    @Override
    public void onExit()
    {
+      triggerSwing = false;
    }
 
    @Override

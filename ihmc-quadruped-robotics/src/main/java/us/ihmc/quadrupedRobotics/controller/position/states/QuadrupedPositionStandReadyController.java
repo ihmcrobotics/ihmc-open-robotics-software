@@ -35,7 +35,12 @@ public class QuadrupedPositionStandReadyController implements QuadrupedControlle
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
+   {
+   }
+
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
    {
       return null;
    }
