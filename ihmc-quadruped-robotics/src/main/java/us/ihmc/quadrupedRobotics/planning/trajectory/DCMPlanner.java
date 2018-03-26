@@ -19,7 +19,6 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +31,6 @@ public class DCMPlanner
    private static final double POINT_SIZE = 0.005;
 
    private static final int STEP_SEQUENCE_CAPACITY = 50;
-   private static final int NUMBER_OF_STEPS_TO_CONSIDER = 8;
 
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstantCopTrajectory;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
@@ -47,7 +45,6 @@ public class DCMPlanner
 
    private final YoDouble robotTimestamp;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
-   private final YoInteger numberOfStepsToConsider = new YoInteger("plannerNumberOfStepsToConsider", registry);
 
    private final YoBoolean isStanding = new YoBoolean("isStanding", registry);
 
@@ -65,8 +62,6 @@ public class DCMPlanner
       this.dcmTransitionTrajectory = new FrameTrajectory3D(6, supportFrame);
       dcmTrajectory = new PiecewiseReverseDcmTrajectory(STEP_SEQUENCE_CAPACITY, gravity, nominalHeight, registry);
       piecewiseConstantCopTrajectory = new QuadrupedPiecewiseConstantCopTrajectory(2 * STEP_SEQUENCE_CAPACITY, registry);
-
-      numberOfStepsToConsider.set(NUMBER_OF_STEPS_TO_CONSIDER);
 
       parentRegistry.addChild(registry);
 
@@ -99,10 +94,9 @@ public class DCMPlanner
       this.comHeight.set(comHeight);
    }
 
-   public void addStepsToSequence(List<? extends QuadrupedTimedStep> steps)
+   public void addStepToSequence(QuadrupedTimedStep step)
    {
-      for (int i = 0; i < Math.min(steps.size(), numberOfStepsToConsider.getValue()); i++)
-         stepSequence.add(steps.get(i));
+      stepSequence.add(step);
    }
 
    public void initializeForStanding()
