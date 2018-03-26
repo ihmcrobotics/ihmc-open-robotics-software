@@ -8,6 +8,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class NetClassList
 {
@@ -86,6 +87,8 @@ public class NetClassList
 
    public void registerWithKryo(Kryo kryo)
    {
+      kryo.addDefaultSerializer(RecyclingArrayListPubSub.class, RecyclingArrayListPubSubSerializer.class);
+
       for (Class<?> clazz : getPacketClassList())
       {
          kryo.register(clazz);
