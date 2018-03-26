@@ -115,6 +115,7 @@ public class DCMPlanner
    {
       isStanding.set(false);
 
+      timedContactSequence.initialize();
       double currentTime = robotTimestamp.getDoubleValue();
       boolean isCurrentPlanValid = stepSequence.get(numberOfStepsInPlanner.getIntegerValue() - 1).getTimeInterval().getEndTime() > currentTime;
 
