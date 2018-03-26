@@ -51,11 +51,6 @@ public class QuadrupedFeetManager
       parentRegistry.addChild(registry);
    }
 
-   public QuadrupedSolePositionController getSolePositionController(RobotQuadrant robotQuadrant)
-   {
-      return footControlModules.get(robotQuadrant).getSolePositionController();
-   }
-
    public void updateSupportPolygon()
    {
       contactPoints.clear();
