@@ -1,91 +1,103 @@
 package us.ihmc.robotDataLogger;
-/**
-* 
-* Definition of the class "VariableChangeRequest" defined in VariableChangeRequest.idl. 
-*
-* This file was automatically generated from VariableChangeRequest.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit VariableChangeRequest.idl instead.
-*
-*/
-public class VariableChangeRequest
+
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
+public class VariableChangeRequest extends Packet<VariableChangeRequest> implements Settable<VariableChangeRequest>, EpsilonComparable<VariableChangeRequest>
 {
-    public VariableChangeRequest()
-    {
-        
-        
-    }
+   public int variableID_;
+   public double requestedValue_;
 
-    public void set(VariableChangeRequest other)
-    {
-        	variableID_ = other.variableID_;
-        	requestedValue_ = other.requestedValue_;
+   public VariableChangeRequest()
+   {
 
-    }
+   }
 
-    public void setVariableID(int variableID)
-    {
-        variableID_ = variableID;
-    }
+   public VariableChangeRequest(VariableChangeRequest other)
+   {
+      set(other);
+   }
 
-    public int getVariableID()
-    {
-        return variableID_;
-    }
+   public void set(VariableChangeRequest other)
+   {
+      variableID_ = other.variableID_;
 
-        
-    public void setRequestedValue(double requestedValue)
-    {
-        requestedValue_ = requestedValue;
-    }
+      requestedValue_ = other.requestedValue_;
+   }
 
-    public double getRequestedValue()
-    {
-        return requestedValue_;
-    }
+   public int getVariableID()
+   {
+      return variableID_;
+   }
 
-        
+   public void setVariableID(int variableID)
+   {
+      variableID_ = variableID;
+   }
 
+   public double getRequestedValue()
+   {
+      return requestedValue_;
+   }
 
+   public void setRequestedValue(double requestedValue)
+   {
+      requestedValue_ = requestedValue;
+   }
 
+   @Override
+   public boolean epsilonEquals(VariableChangeRequest other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
 
-    @Override
-    public boolean equals(java.lang.Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof VariableChangeRequest)) return false;
-        VariableChangeRequest otherMyClass = (VariableChangeRequest)other;
-        boolean returnedValue = true;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.variableID_, other.variableID_, epsilon))
+         return false;
 
-        returnedValue &= this.variableID_ == otherMyClass.variableID_;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requestedValue_, other.requestedValue_, epsilon))
+         return false;
 
-                
-        returnedValue &= this.requestedValue_ == otherMyClass.requestedValue_;
+      return true;
+   }
 
-                
+   @Override
+   public boolean equals(Object other)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+      if (!(other instanceof VariableChangeRequest))
+         return false;
 
-        return returnedValue;
-    }
-    
-     @Override
-    public java.lang.String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("VariableChangeRequest {");
-        builder.append("variableID=");
-        builder.append(this.variableID_);
+      VariableChangeRequest otherMyClass = (VariableChangeRequest) other;
 
-                builder.append(", ");
-        builder.append("requestedValue=");
-        builder.append(this.requestedValue_);
+      if (this.variableID_ != otherMyClass.variableID_)
+         return false;
 
-                
-        builder.append("}");
-		return builder.toString();
-    }
+      if (this.requestedValue_ != otherMyClass.requestedValue_)
+         return false;
 
-    private int variableID_; 
-    private double requestedValue_; 
+      return true;
+   }
 
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("VariableChangeRequest {");
+      builder.append("variableID=");
+      builder.append(this.variableID_);
+
+      builder.append(", ");
+      builder.append("requestedValue=");
+      builder.append(this.requestedValue_);
+
+      builder.append("}");
+      return builder.toString();
+   }
 }

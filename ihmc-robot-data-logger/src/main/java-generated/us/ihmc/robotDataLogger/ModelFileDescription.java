@@ -1,199 +1,231 @@
 package us.ihmc.robotDataLogger;
-/**
-* 
-* Definition of the class "ModelFileDescription" defined in Announcement.idl. 
-*
-* This file was automatically generated from Announcement.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit Announcement.idl instead.
-*
-*/
-public class ModelFileDescription
+
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
+public class ModelFileDescription extends Packet<ModelFileDescription> implements Settable<ModelFileDescription>, EpsilonComparable<ModelFileDescription>
 {
-    public ModelFileDescription()
-    {
-        	name_ = new java.lang.StringBuilder(255); 
-        	modelLoaderClass_ = new java.lang.StringBuilder(255); 
-        	resourceDirectories_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (255, "type_d");           
-        
-    }
+   public boolean has_model_;
+   public java.lang.StringBuilder name_;
+   public java.lang.StringBuilder modelLoaderClass_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder resourceDirectories_;
+   public int modelFileSize_;
+   public boolean hasResourceZip_;
+   public int resourceZipSize_;
 
-    public void set(ModelFileDescription other)
-    {
-        	hasModel_ = other.hasModel_;
-        	name_.setLength(0);
-        	name_.append(other.name_);
-        	modelLoaderClass_.setLength(0);
-        	modelLoaderClass_.append(other.modelLoaderClass_);
-            resourceDirectories_.set(other.resourceDirectories_);	modelFileSize_ = other.modelFileSize_;
-        	hasResourceZip_ = other.hasResourceZip_;
-        	resourceZipSize_ = other.resourceZipSize_;
+   public ModelFileDescription()
+   {
 
-    }
+      name_ = new java.lang.StringBuilder(255);
 
-    public void setHasModel(boolean hasModel)
-    {
-        hasModel_ = hasModel;
-    }
+      modelLoaderClass_ = new java.lang.StringBuilder(255);
 
-    public boolean getHasModel()
-    {
-        return hasModel_;
-    }
+      resourceDirectories_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder(255, "type_d");
+   }
 
-        
-        public void setName(String name)
-        {
-        	name_.setLength(0);
-        	name_.append(name);
-        }
-        
-        public java.lang.String getNameAsString()
-        {
-        	return getName().toString();
-        }
+   public ModelFileDescription(ModelFileDescription other)
+   {
+      set(other);
+   }
 
-    public java.lang.StringBuilder getName()
-    {
-        return name_;
-    }
+   public void set(ModelFileDescription other)
+   {
+      has_model_ = other.has_model_;
 
-        
-        public void setModelLoaderClass(String modelLoaderClass)
-        {
-        	modelLoaderClass_.setLength(0);
-        	modelLoaderClass_.append(modelLoaderClass);
-        }
-        
-        public java.lang.String getModelLoaderClassAsString()
-        {
-        	return getModelLoaderClass().toString();
-        }
+      name_.setLength(0);
+      name_.append(other.name_);
 
-    public java.lang.StringBuilder getModelLoaderClass()
-    {
-        return modelLoaderClass_;
-    }
+      modelLoaderClass_.setLength(0);
+      modelLoaderClass_.append(other.modelLoaderClass_);
 
-        
+      resourceDirectories_.set(other.resourceDirectories_);
+      modelFileSize_ = other.modelFileSize_;
 
-    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getResourceDirectories()
-    {
-        return resourceDirectories_;
-    }
+      hasResourceZip_ = other.hasResourceZip_;
 
-        
-    public void setModelFileSize(int modelFileSize)
-    {
-        modelFileSize_ = modelFileSize;
-    }
+      resourceZipSize_ = other.resourceZipSize_;
+   }
 
-    public int getModelFileSize()
-    {
-        return modelFileSize_;
-    }
+   public boolean getHasModel()
+   {
+      return has_model_;
+   }
 
-        
-    public void setHasResourceZip(boolean hasResourceZip)
-    {
-        hasResourceZip_ = hasResourceZip;
-    }
+   public void setHasModel(boolean has_model)
+   {
+      has_model_ = has_model;
+   }
 
-    public boolean getHasResourceZip()
-    {
-        return hasResourceZip_;
-    }
+   public java.lang.String getNameAsString()
+   {
+      return getName().toString();
+   }
 
-        
-    public void setResourceZipSize(int resourceZipSize)
-    {
-        resourceZipSize_ = resourceZipSize;
-    }
+   public java.lang.StringBuilder getName()
+   {
+      return name_;
+   }
 
-    public int getResourceZipSize()
-    {
-        return resourceZipSize_;
-    }
+   public void setName(java.lang.String name)
+   {
+      name_.setLength(0);
+      name_.append(name);
+   }
 
-        
+   public java.lang.String getModelLoaderClassAsString()
+   {
+      return getModelLoaderClass().toString();
+   }
 
+   public java.lang.StringBuilder getModelLoaderClass()
+   {
+      return modelLoaderClass_;
+   }
 
+   public void setModelLoaderClass(java.lang.String modelLoaderClass)
+   {
+      modelLoaderClass_.setLength(0);
+      modelLoaderClass_.append(modelLoaderClass);
+   }
 
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder getResourceDirectories()
+   {
+      return resourceDirectories_;
+   }
 
-    @Override
-    public boolean equals(java.lang.Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof ModelFileDescription)) return false;
-        ModelFileDescription otherMyClass = (ModelFileDescription)other;
-        boolean returnedValue = true;
+   public int getModelFileSize()
+   {
+      return modelFileSize_;
+   }
 
-        returnedValue &= this.hasModel_ == otherMyClass.hasModel_;
+   public void setModelFileSize(int modelFileSize)
+   {
+      modelFileSize_ = modelFileSize;
+   }
 
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.modelLoaderClass_, otherMyClass.modelLoaderClass_);
-                
-        returnedValue &= this.resourceDirectories_.equals(otherMyClass.resourceDirectories_);
-                
-        returnedValue &= this.modelFileSize_ == otherMyClass.modelFileSize_;
+   public boolean getHasResourceZip()
+   {
+      return hasResourceZip_;
+   }
 
-                
-        returnedValue &= this.hasResourceZip_ == otherMyClass.hasResourceZip_;
+   public void setHasResourceZip(boolean hasResourceZip)
+   {
+      hasResourceZip_ = hasResourceZip;
+   }
 
-                
-        returnedValue &= this.resourceZipSize_ == otherMyClass.resourceZipSize_;
+   public int getResourceZipSize()
+   {
+      return resourceZipSize_;
+   }
 
-                
+   public void setResourceZipSize(int resourceZipSize)
+   {
+      resourceZipSize_ = resourceZipSize;
+   }
 
-        return returnedValue;
-    }
-    
-     @Override
-    public java.lang.String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("ModelFileDescription {");
-        builder.append("hasModel=");
-        builder.append(this.hasModel_);
+   @Override
+   public boolean epsilonEquals(ModelFileDescription other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
 
-                builder.append(", ");
-        builder.append("name=");
-        builder.append(this.name_);
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_model_, other.has_model_, epsilon))
+         return false;
 
-                builder.append(", ");
-        builder.append("modelLoaderClass=");
-        builder.append(this.modelLoaderClass_);
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon))
+         return false;
 
-                builder.append(", ");
-        builder.append("resourceDirectories=");
-        builder.append(this.resourceDirectories_);
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.modelLoaderClass_, other.modelLoaderClass_, epsilon))
+         return false;
 
-                builder.append(", ");
-        builder.append("modelFileSize=");
-        builder.append(this.modelFileSize_);
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.resourceDirectories_, other.resourceDirectories_, epsilon))
+         return false;
 
-                builder.append(", ");
-        builder.append("hasResourceZip=");
-        builder.append(this.hasResourceZip_);
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.modelFileSize_, other.modelFileSize_, epsilon))
+         return false;
 
-                builder.append(", ");
-        builder.append("resourceZipSize=");
-        builder.append(this.resourceZipSize_);
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hasResourceZip_, other.hasResourceZip_, epsilon))
+         return false;
 
-                
-        builder.append("}");
-		return builder.toString();
-    }
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.resourceZipSize_, other.resourceZipSize_, epsilon))
+         return false;
 
-    private boolean hasModel_; 
-    private java.lang.StringBuilder name_; 
-    private java.lang.StringBuilder modelLoaderClass_; 
-    private us.ihmc.idl.IDLSequence.StringBuilderHolder  resourceDirectories_; 
-    private int modelFileSize_; 
-    private boolean hasResourceZip_; 
-    private int resourceZipSize_; 
+      return true;
+   }
 
+   @Override
+   public boolean equals(Object other)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+      if (!(other instanceof ModelFileDescription))
+         return false;
+
+      ModelFileDescription otherMyClass = (ModelFileDescription) other;
+
+      if (this.has_model_ != otherMyClass.has_model_)
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.modelLoaderClass_, otherMyClass.modelLoaderClass_))
+         return false;
+
+      if (!this.resourceDirectories_.equals(otherMyClass.resourceDirectories_))
+         return false;
+
+      if (this.modelFileSize_ != otherMyClass.modelFileSize_)
+         return false;
+
+      if (this.hasResourceZip_ != otherMyClass.hasResourceZip_)
+         return false;
+
+      if (this.resourceZipSize_ != otherMyClass.resourceZipSize_)
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("ModelFileDescription {");
+      builder.append("has_model=");
+      builder.append(this.has_model_);
+
+      builder.append(", ");
+      builder.append("name=");
+      builder.append(this.name_);
+
+      builder.append(", ");
+      builder.append("modelLoaderClass=");
+      builder.append(this.modelLoaderClass_);
+
+      builder.append(", ");
+      builder.append("resourceDirectories=");
+      builder.append(this.resourceDirectories_);
+
+      builder.append(", ");
+      builder.append("modelFileSize=");
+      builder.append(this.modelFileSize_);
+
+      builder.append(", ");
+      builder.append("hasResourceZip=");
+      builder.append(this.hasResourceZip_);
+
+      builder.append(", ");
+      builder.append("resourceZipSize=");
+      builder.append(this.resourceZipSize_);
+
+      builder.append("}");
+      return builder.toString();
+   }
 }
