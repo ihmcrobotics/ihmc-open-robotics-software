@@ -9,8 +9,8 @@ buildscript {
    }
    dependencies {
       classpath "us.ihmc:ihmc-build:0.12.10"
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.5.5-alpha"
-//      classpath "us.ihmc:ihmc-pub-sub-generator:0.3.7"
+      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.5.7-alpha"
+//      classpath "us.ihmc:ihmc-pub-sub-generator:0.6.5-alpha"
       classpath "org.ajoberstar:grgit:2.1.0"
       classpath "com.bmuschko:gradle-docker-plugin:3.2.5"
    }
@@ -39,25 +39,23 @@ testSuites {
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.5'
-   compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.6.3-alpha'
-   compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.5.5-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-pub-sub', version: '0.6.5-alpha'
+   compile group: 'us.ihmc', name: 'ros2-common-interfaces', version: '0.5.7-alpha'
 }
 
 testDependencies {
-   compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.5.5-alpha'
+   compile group: 'us.ihmc', name: 'ihmc-ros2-library', version: '0.5.7-alpha'
 }
 
 generatorDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
-   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.5.5-alpha"
+   compile group: "us.ihmc", name: "ros2-msg-to-pubsub-generator", version: "0.5.7-alpha"
 }
 
 task buildImage(type: com.bmuschko.gradle.docker.tasks.image.DockerBuildImage) {
    inputDir = file("src/generator/docker")
    tag = "ihmc/ros1-bridge-build"
 }
-
-import java.nio.file.Paths
 
 task generateMessages {
    doFirst {
