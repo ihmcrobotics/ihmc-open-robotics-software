@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -14,7 +15,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootState
+public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -31,6 +32,13 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
 
    private final QuadrupedFootControlModuleParameters parameters;
 
+   private final FrameVector3D initialSoleForces = new FrameVector3D();
+
+   private final VirtualForceCommand virtualForceCommand = new VirtualForceCommand();
+
+   private final QuadrupedForceControllerToolbox controllerToolbox;
+   private final RobotQuadrant robotQuadrant;
+
    private final FramePoint3D desiredFootPosition = new FramePoint3D();
    private final FrameVector3D desiredFootVelocity = new FrameVector3D();
 
@@ -40,7 +48,8 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
 
    public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
-      super(robotQuadrant, controllerToolbox);
+      this.robotQuadrant = robotQuadrant;
+      this.controllerToolbox = controllerToolbox;
 
       this.bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       this.soleFrame = controllerToolbox.getSoleReferenceFrame(robotQuadrant);
@@ -104,8 +113,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
          desiredFootVelocity.setToZero(worldFrame);
 
          virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
-
-         super.doControl();
       }
       else
       {
@@ -116,8 +123,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedUnconstrainedFootSt
          feedbackControlCommand.set(desiredFootPosition, desiredFootVelocity);
          feedbackControlCommand.setFeedForwardAction(initialSoleForces);
          feedbackControlCommand.setGains(parameters.getSolePositionGains());
-
-         super.doControl();
 
          if (waypointCallback != null)
             waypointCallback.isDoneMoving(false);

@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -12,7 +12,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
@@ -23,7 +22,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
+public class QuadrupedSwingState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean createSwingTrajectoryGraphics = false;
@@ -42,9 +41,13 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    private final YoDouble timestamp;
    private final YoQuadrupedTimedStep currentStepCommand;
 
+   private final VirtualForceCommand virtualForceCommand = new VirtualForceCommand();
    private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
 
    private final ReferenceFrame soleFrame;
+
+   private final QuadrupedForceControllerToolbox controllerToolbox;
+   private final RobotQuadrant robotQuadrant;
 
    // graphics
    private static final int pointsPerSecondOfSwingTime = 70;
@@ -57,7 +60,8 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, YoBoolean stepCommandIsValid,
                               YoQuadrupedTimedStep currentStepCommand, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
-      super(robotQuadrant, controllerToolbox);
+      this.robotQuadrant = robotQuadrant;
+      this.controllerToolbox = controllerToolbox;
 
       this.stepCommandIsValid = stepCommandIsValid;
       this.timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
@@ -93,7 +97,7 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    @Override
    public void onEntry()
    {
-      super.onEntry();
+      controllerToolbox.getFootContactState(robotQuadrant).clear();
 
       // initialize swing trajectory
       double groundClearance = currentStepCommand.getGroundClearance();
@@ -179,8 +183,6 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
 
       if (createSwingTrajectoryGraphics)
          updateGraphics(currentTime, currentStepCommand.getTimeInterval().getEndTime());
-
-      super.doControl();
 
       // Trigger support phase.
       if (currentTime >= touchDownTime)
