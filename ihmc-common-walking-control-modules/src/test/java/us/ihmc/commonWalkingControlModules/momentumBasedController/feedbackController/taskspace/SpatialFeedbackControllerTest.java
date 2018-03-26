@@ -92,8 +92,9 @@ public final class SpatialFeedbackControllerTest
       gains.getOrientationGains().setProportialAndDerivativeGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
-      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.setFeedForwardAction(new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 
@@ -197,8 +198,9 @@ public final class SpatialFeedbackControllerTest
       gains.getOrientationGains().setProportialAndDerivativeGains(100.0, 50.0);
       spatialFeedbackControlCommand.setGains(gains);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedPointToControl);
-      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
-      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.set(desiredPosition, new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.set(desiredOrientation, new FrameVector3D(worldFrame));
+      spatialFeedbackControlCommand.setFeedForwardAction(new FrameVector3D(worldFrame), new FrameVector3D(worldFrame));
       spatialFeedbackController.submitFeedbackControlCommand(spatialFeedbackControlCommand);
       spatialFeedbackController.setEnabled(true);
 
