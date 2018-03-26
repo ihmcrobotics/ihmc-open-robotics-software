@@ -38,8 +38,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
 
    public Vector3D32 pelvisLinearAcceleration = new Vector3D32();
    //   public DenseMatrix64F[] momentAndForceDataAllForceSensors;
-   public RecyclingArrayListPubSub<SpatialVectorMessage> momentAndForceDataAllForceSensors = new RecyclingArrayListPubSub<>(SpatialVectorMessage.class, SpatialVectorMessage::new, 50);
-   public RecyclingArrayListPubSub<IMUPacket> imuSensorData = new RecyclingArrayListPubSub<>(IMUPacket.class, IMUPacket::new, 10);
+   public RecyclingArrayListPubSub<SpatialVectorMessage> momentAndForceDataAllForceSensors = new RecyclingArrayListPubSub<>(SpatialVectorMessage.class, SpatialVectorMessage::new, 2);
+   public RecyclingArrayListPubSub<IMUPacket> imuSensorData = new RecyclingArrayListPubSub<>(IMUPacket.class, IMUPacket::new, 1);
    public byte robotMotionStatus;
 
    public int lastReceivedPacketTypeID;

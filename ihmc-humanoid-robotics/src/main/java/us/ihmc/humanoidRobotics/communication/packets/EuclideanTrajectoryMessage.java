@@ -23,7 +23,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public final class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage>
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory.")
-   public RecyclingArrayListPubSub<EuclideanTrajectoryPointMessage> taskspaceTrajectoryPoints = new RecyclingArrayListPubSub<>(EuclideanTrajectoryPointMessage.class, EuclideanTrajectoryPointMessage::new, 2000);
+   public RecyclingArrayListPubSub<EuclideanTrajectoryPointMessage> taskspaceTrajectoryPoints = new RecyclingArrayListPubSub<>(EuclideanTrajectoryPointMessage.class, EuclideanTrajectoryPointMessage::new, 5);
 
    @RosExportedField(documentation = "The selection matrix for each axis.")
    public SelectionMatrix3DMessage selectionMatrix = new SelectionMatrix3DMessage();

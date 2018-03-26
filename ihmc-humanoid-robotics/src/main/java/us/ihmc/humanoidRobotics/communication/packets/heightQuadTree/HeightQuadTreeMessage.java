@@ -10,7 +10,7 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage>
    public float resolution = Float.NaN;
    public float sizeX = Float.NaN;
    public float sizeY = Float.NaN;
-   public RecyclingArrayListPubSub<HeightQuadTreeLeafMessage> leaves = new RecyclingArrayListPubSub<>(HeightQuadTreeLeafMessage.class, HeightQuadTreeLeafMessage::new, 1000);
+   public RecyclingArrayListPubSub<HeightQuadTreeLeafMessage> leaves = new RecyclingArrayListPubSub<>(HeightQuadTreeLeafMessage.class, HeightQuadTreeLeafMessage::new, 100);
 
    public HeightQuadTreeMessage()
    {

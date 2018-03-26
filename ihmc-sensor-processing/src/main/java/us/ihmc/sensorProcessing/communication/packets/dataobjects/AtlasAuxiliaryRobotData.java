@@ -21,8 +21,8 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 
    public TLongArrayList rawImuTimestamps = new TLongArrayList();
    public TLongArrayList rawImuPacketCounts = new TLongArrayList();
-   public RecyclingArrayListPubSub<Vector3D32> rawImuRates = new RecyclingArrayListPubSub<>(Vector3D32.class, Vector3D32::new, 15);
-   public RecyclingArrayListPubSub<Vector3D32> rawImuDeltas = new RecyclingArrayListPubSub<>(Vector3D32.class, Vector3D32::new, 15);
+   public RecyclingArrayListPubSub<Vector3D32> rawImuRates = new RecyclingArrayListPubSub<>(Vector3D32.class, Vector3D32::new, 1);
+   public RecyclingArrayListPubSub<Vector3D32> rawImuDeltas = new RecyclingArrayListPubSub<>(Vector3D32.class, Vector3D32::new, 1);
 
    public boolean batteryCharging;
    public float batteryVoltage;

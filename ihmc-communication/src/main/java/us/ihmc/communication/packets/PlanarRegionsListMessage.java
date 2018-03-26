@@ -5,7 +5,7 @@ import us.ihmc.idl.RecyclingArrayListPubSub;
 // FIXME Refactor to hold onto a single vertex buffer.
 public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage>
 {
-   public RecyclingArrayListPubSub<PlanarRegionMessage> planarRegions = new RecyclingArrayListPubSub<>(PlanarRegionMessage.class, PlanarRegionMessage::new, 500);
+   public RecyclingArrayListPubSub<PlanarRegionMessage> planarRegions = new RecyclingArrayListPubSub<>(PlanarRegionMessage.class, PlanarRegionMessage::new, 10);
 
    public PlanarRegionsListMessage()
    {

@@ -10,8 +10,8 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
 
    public boolean goalsValid;
    public FootstepDataMessage start;
-   public RecyclingArrayListPubSub<FootstepDataMessage> originalGoals = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 30);
-   public RecyclingArrayListPubSub<FootstepDataMessage> pathPlan = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 30);
+   public RecyclingArrayListPubSub<FootstepDataMessage> originalGoals = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 5);
+   public RecyclingArrayListPubSub<FootstepDataMessage> pathPlan = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 5);
    public TIntArrayList footstepUnknown = new TIntArrayList(); // TODO change back to boolean list with moving to DDS
    public double subOptimality;
    public double pathCost = Double.POSITIVE_INFINITY;
