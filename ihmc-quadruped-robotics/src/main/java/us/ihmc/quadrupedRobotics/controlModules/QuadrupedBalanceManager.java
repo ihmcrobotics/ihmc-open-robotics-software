@@ -204,11 +204,6 @@ public class QuadrupedBalanceManager
       dcmPlanner.clearStepSequence();
    }
 
-   public void addStepToSequence(QuadrupedTimedStep step)
-   {
-      dcmPlanner.addStepToSequence(step);
-   }
-
    public void addStepsToSequence(List<? extends QuadrupedTimedStep> steps)
    {
       dcmPlanner.addStepsToSequence(steps);
