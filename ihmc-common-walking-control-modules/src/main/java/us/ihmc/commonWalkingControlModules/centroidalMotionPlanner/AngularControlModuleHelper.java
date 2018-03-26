@@ -172,7 +172,7 @@ public class AngularControlModuleHelper
             else
             {
                supportPolygonEntry.element.getSupportPolygon(tempSupportPolygon);
-               PrintTools.debug("Constraining node " + nodeIndex + " to polygon " + tempSupportPolygon.toString());
+               PrintTools.debug("Constraining node " + nodeIndex + "Time: " + nodeEntry.element.getTime() + " to polygon " + tempSupportPolygon.toString());
                setCoPConstraintsForSupportPolygon(numberOfNodes, nodeIndex, tempSupportPolygon);
             }
          }
@@ -247,7 +247,7 @@ public class AngularControlModuleHelper
             EffortVariableConstraintType constraintType = node.getCoPConstraintType(axis);
             DenseMatrix64F axisCoPAeqMatrix = copSupportPolygonAeqMatrix[axisOrdinal];
             DenseMatrix64F axisCoPbeqMatrix = copSupportPolygonbeqMatrix[axisOrdinal];
-            if(constraintType == EffortVariableConstraintType.EQUALITY)
+            if (constraintType == EffortVariableConstraintType.EQUALITY)
                constraintCoPValue(nodeIndex, node.getCoPElement(axis), axisCoPAeqMatrix, axisCoPbeqMatrix);
          }
       }
@@ -273,14 +273,14 @@ public class AngularControlModuleHelper
       int yCoPVariables = yTorqueCoPContributionCoefficientCoefficientMatrices[0].getNumCols();
       int xVariables = xForceVariables + xCoPVariables;
       int yVariables = yForceVariables + yCoPVariables;
-      
+
       DenseMatrix64F xCoPAeqMatrix = copSupportPolygonAeqMatrix[Axis.X.ordinal()];
       DenseMatrix64F yCoPAeqMatrix = copSupportPolygonAeqMatrix[Axis.Y.ordinal()];
       DenseMatrix64F xCoPbeqMatrix = copSupportPolygonbeqMatrix[Axis.X.ordinal()];
       DenseMatrix64F yCoPbeqMatrix = copSupportPolygonbeqMatrix[Axis.Y.ordinal()];
       int numberOfXEqualityConstraints = xCoPAeqMatrix.getNumRows();
       int numberOfYEqualityConstraints = yCoPAeqMatrix.getNumRows();
-      
+
       Aeq.reshape(numberOfXEqualityConstraints + numberOfYEqualityConstraints, xVariables + yVariables);
       Aeq.zero();
       beq.reshape(numberOfXEqualityConstraints + numberOfYEqualityConstraints, 1);
@@ -758,6 +758,7 @@ public class AngularControlModuleHelper
       CommonOps.scale(regularizationWeight, tempMatrixForCoefficients);
       CommonOps.insert(tempMatrixForCoefficients, regularizationH, xVariables + yForceVariables, xVariables + yForceVariables);
    }
+
    public void setDecisionVariables(DenseMatrix64F xCoPSolution, DenseMatrix64F yCoPSolution)
    {
       copSolution[0].set(xCoPSolution);

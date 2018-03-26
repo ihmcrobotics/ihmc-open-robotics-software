@@ -127,13 +127,13 @@ public class CentroidalXYAxisOptimizationControlModule
       angularHelper.getConsolidatedTorqueConstraints(tempMatrix1, tempMatrix2);
       tempMatrix3.reshape(tempMatrix1.getNumRows(), tempMatrix1.getNumRows());
       CommonOps.setIdentity(tempMatrix3);
-      CommonOps.scale(50.0, tempMatrix3);
+      CommonOps.scale(20.0, tempMatrix3);
       tempMatrix4.reshape(tempMatrix1.getNumCols(), tempMatrix1.getNumRows());
       CommonOps.multTransA(tempMatrix1, tempMatrix3, tempMatrix4);
       CommonOps.multAdd(tempMatrix4, tempMatrix1, solverInput_H);
       CommonOps.multAdd(tempMatrix4, tempMatrix2, solverInput_f);
 
-      angularHelper.getCoPRegularization(tempMatrix1, 0.00001);
+      angularHelper.getCoPRegularization(tempMatrix1, 0.001);
       CommonOps.addEquals(solverInput_H, tempMatrix1);
 
       //int indexToInsertTorqueConstrains = solverInput_Aeq.getNumRows();
@@ -153,6 +153,7 @@ public class CentroidalXYAxisOptimizationControlModule
       solverInput_bin.reshape(indexToInsertCoPConstraints + tempMatrix1.getNumRows(), 1, true);
       CommonOps.insert(tempMatrix1, solverInput_Ain, indexToInsertCoPConstraints, 0);
       CommonOps.insert(tempMatrix2, solverInput_bin, indexToInsertCoPConstraints, 0);
+      
       DenseMatrix64F xUb = linearHelper.getDecisionVariableUpperBoundMatrix(xAxis);
       DenseMatrix64F yUb = linearHelper.getDecisionVariableUpperBoundMatrix(yAxis);
       DenseMatrix64F xLb = linearHelper.getDecisionVariableLowerBoundMatrix(xAxis);
@@ -163,5 +164,6 @@ public class CentroidalXYAxisOptimizationControlModule
       solverInput_bin.reshape(indexToInsertBoundConstraints + tempMatrix1.getNumRows(), 1, true);
       CommonOps.insert(tempMatrix1, solverInput_Ain, indexToInsertBoundConstraints, 0);
       CommonOps.insert(tempMatrix2, solverInput_bin, indexToInsertBoundConstraints, 0);
+      
    }
 }

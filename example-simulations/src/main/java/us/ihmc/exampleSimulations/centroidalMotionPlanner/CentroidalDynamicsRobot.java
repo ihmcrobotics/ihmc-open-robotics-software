@@ -462,9 +462,12 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       private final FramePoint3D maxPosition = new FramePoint3D();
       private final FramePoint3D minPosition = new FramePoint3D();
       private final FramePoint3D initialPosition = new FramePoint3D();
+      private final FramePoint3D launchPosition = new FramePoint3D();
+      private final FramePoint3D landPosition = new FramePoint3D();
       private final FrameVector3D initialVelocity = new FrameVector3D();
       private final FrameVector3D launchVelocity = new FrameVector3D();
       private final FrameVector3D launchVelocityWeight = new FrameVector3D();
+      private final VectorEnum<DependentVariableConstraintType> launchVelocityConstraintType = new VectorEnum<>();
       private final FramePoint3D intermediatePosition = new FramePoint3D();
       private final FrameVector3D intermediateVelocity = new FrameVector3D();
       private final FramePoint3D finalPosition = new FramePoint3D();
@@ -557,32 +560,32 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          zeroForceConstraint.set(worldFrame, 0.0, 0.0, 0.0);
          minPosition.set(worldFrame, -0.1, -0.1, -0.75);
          maxPosition.set(worldFrame, 0.1, 0.1, 0.10);
+         
          initialForceConstraint.set(worldFrame, 0.0, 0.0, -robotMass * gravity.getZ());
          initialForceRateConstraint.set(worldFrame, 0.0, 0.0, 0.0);
+         
          finalForceConstraint.set(worldFrame, 0.0, 0.0, -robotMass * gravity.getZ());
          finalForceRateConstraint.set(worldFrame, 0.0, 0.0, 0.0);
 
          initialPosition.set(worldFrame, 0.0, 0.0, 0.0);
          initialCoP.set(worldFrame, 0.0, 0.0);
-
-         //initialPosition.subZ(robotHeight);
-         intermediatePosition.set(worldFrame, 0.0, 0.0, 0.05);
-         finalPosition.set(worldFrame, 1.0, 0.0, 0.0);
-         finalCoP.set(worldFrame, 1.0, 0.0);
-
          initialVelocity.set(worldFrame, linearVelocity);
-         intermediateVelocity.set(worldFrame, 0.0, 0.0, 0.0);
-         finalVelocity.set(worldFrame, 0.0, 0.0, 0.0);
+
+         launchPosition.set(worldFrame, 0.4, 0.0, 0.0);
          launchVelocity.set(worldFrame, 0.5, 0.0, 0.0);
          launchVelocityWeight.set(worldFrame, 1.0, Double.NaN, Double.NaN);
-
+         launchVelocityConstraintType.set(DependentVariableConstraintType.OBJECTIVE, DependentVariableConstraintType.IGNORE, DependentVariableConstraintType.IGNORE);
+         
+         finalPosition.set(worldFrame, 1.0, 0.0, 0.0);
+         finalPositionWeight.set(worldFrame, 1.0, 1.0, 1.0);
          finalPositionConstraintType.set(DependentVariableConstraintType.EQUALITY, DependentVariableConstraintType.EQUALITY,
                                          DependentVariableConstraintType.EQUALITY);
-         finalPositionWeight.set(worldFrame, 100.0, 1.0, 1.0);
+         finalCoP.set(worldFrame, 1.0, 0.0);
+         finalVelocity.set(worldFrame, 0.0, 0.0, 0.0);
 
          motionPlannerNode.clear();
          motionPlanner.reset();
-         
+
          CentroidalMotionSupportPolygon supportPolygonNode = new CentroidalMotionSupportPolygon();
          supportPolygonNode.setStartTime(0.0 * defaultPlanningTime);
          supportPolygonNode.setEndTime(0.45 * defaultPlanningTime);
@@ -596,7 +599,6 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          pointForPolygon.set(0.05, -0.05);
          supportPolygon.addVertex(pointForPolygon);
          supportPolygon.update();
-         PrintTools.debug("Support polygon 1" + supportPolygon.toString());
          supportPolygonNode.setSupportPolygon(supportPolygon);
          motionPlanner.submitSupportPolygon(supportPolygonNode);
 
@@ -613,7 +615,6 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          pointForPolygon.set(1.05, -0.05);
          supportPolygon.addVertex(pointForPolygon);
          supportPolygon.update();
-         PrintTools.debug("Support polygon 1" + supportPolygon.toString());
          supportPolygonNode.setSupportPolygon(supportPolygon);
          motionPlanner.submitSupportPolygon(supportPolygonNode);
 
@@ -659,8 +660,9 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          node.setTime(defaultPlanningTime * 0.45);
          node.setForceConstraint(zeroForceConstraint);
          node.setForceRateConstraint(initialForceRateConstraint);
-         node.setLinearVelocityObjective(launchVelocity, launchVelocityWeight);
-         node.setPositionInequalities(maxPosition, minPosition);
+         node.setLinearVelocityObjective(launchVelocity, launchVelocityWeight, launchVelocityConstraintType);
+         node.setPositionObjective(launchPosition, positionWeight, maxPosition, minPosition);
+         //node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
 
          node.reset();
@@ -674,7 +676,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          node.setTime(defaultPlanningTime * 0.55);
          node.setForceConstraint(zeroForceConstraint);
          node.setForceRateConstraint(finalForceRateConstraint);
-         node.setPositionInequalities(maxPosition, minPosition);
+         node.setPositionObjective(landPosition, positionWeight, maxPosition, minPosition);
          motionPlanner.submitNode(node);
 
          node.reset();
@@ -711,7 +713,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          node.setForceRateConstraint(finalForceRateConstraint);
          node.setPosition(finalPosition, finalPositionConstraintType, finalPositionWeight);
          node.setLinearVelocityConstraint(finalVelocity);
-         node.setCoPConstraint(finalCoP);
+         //node.setCoPConstraint(finalCoP);
          motionPlanner.submitNode(node);
 
          motionPlanner.compute();

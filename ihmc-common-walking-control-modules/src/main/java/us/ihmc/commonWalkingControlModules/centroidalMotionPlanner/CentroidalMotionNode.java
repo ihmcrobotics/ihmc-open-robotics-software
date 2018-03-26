@@ -406,6 +406,15 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.linearVelocityMin.setToNaN();
    }
 
+   public void setLinearVelocityObjective(FrameVector3D desiredLinearVelocity, FrameVector3D linearVelocityWeight, VectorEnum<DependentVariableConstraintType> constraintType)
+   {
+      setLinearVelocityInternal(desiredLinearVelocity);
+      this.linearVelocityConstraintType.set(constraintType);
+      setLinearVelocityWeightInternal(linearVelocityWeight);
+      this.linearVelocityMax.setToNaN();
+      this.linearVelocityMin.setToNaN();
+   }
+
    public void setLinearVelocityInequalitiesForObjective(FrameVector3D maxLinearVelocity, FrameVector3D minLinearVelocity)
    {
       setLinearVelocityMaxInternal(maxLinearVelocity);

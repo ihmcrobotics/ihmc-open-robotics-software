@@ -9,6 +9,7 @@ import org.ejml.interfaces.decomposition.CholeskyDecomposition;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
@@ -463,6 +464,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
                   CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
                   CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
                   CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+                  PrintTools.debug("Exiting since constraints are lineary dependent");
                   return numberOfIterations - 1;
                }
             }
@@ -523,6 +525,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
                CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
                CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
                CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+               PrintTools.debug("Exiting since constraints are lineary dependent");
                return numberOfIterations - 1;
             }
          }
@@ -548,6 +551,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
                // the sum of all the constraint violations is negligible, so we are finished
                partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack, lagrangeLowerBoundMultipliersToPack,
                                             lagrangeUpperBoundMultipliersToPack);
+               PrintTools.debug("Exiting since solution found");
                return numberOfIterations;
             }
 
@@ -574,12 +578,14 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
                   CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
                   CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
                   CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+                  PrintTools.debug("Exiting since solution infeasible");
                   return numberOfIterations;
                }
                else
                { // we don't have any violations in the inactive set, so the current solution is valid, by assuming that the active set is satisfied
                   partitionLagrangeMultipliers(lagrangeEqualityConstraintMultipliersToPack, lagrangeInequalityConstraintMultipliersToPack,
                                                lagrangeLowerBoundMultipliersToPack, lagrangeUpperBoundMultipliersToPack);
+                  PrintTools.debug("Exiting since solution found");
                   return numberOfIterations;
                }
             }
@@ -628,6 +634,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
             CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
             CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
             CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+            PrintTools.debug("No step in primal or dual space");
             return numberOfIterations;
          }
          else if (!Double.isFinite(fullStepLength))
@@ -653,6 +660,7 @@ public class JavaQuadProgSolver extends AbstractSimpleActiveSetQPSolver
       CommonOps.fill(lagrangeInequalityConstraintMultipliersToPack, Double.POSITIVE_INFINITY);
       CommonOps.fill(lagrangeLowerBoundMultipliersToPack, Double.POSITIVE_INFINITY);
       CommonOps.fill(lagrangeUpperBoundMultipliersToPack, Double.POSITIVE_INFINITY);
+      PrintTools.debug("Exiting on iterations");
       return numberOfIterations - 1;
    }
 
