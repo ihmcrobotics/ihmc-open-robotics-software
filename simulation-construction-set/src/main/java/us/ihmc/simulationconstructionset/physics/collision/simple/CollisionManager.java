@@ -33,12 +33,8 @@ public class CollisionManager
    private final static double collisionBallRadius = 0.01;
    private final int numberOfVectorsToCreate = 1000;
 
-   private TerrainObject3D environmentObject;
-
-   private Robot environmentRobot;
-   private Joint environmentRobotRootJoint;
-   private Link environmentStaticLink;
-
+   private final TerrainObject3D environmentObject;
+   
    public CollisionManager(CollisionHandler collisionHandler)
    {
       this(null, collisionHandler);
@@ -74,6 +70,9 @@ public class CollisionManager
 
    public void setUpEnvironment()
    {
+      Robot environmentRobot;
+      Joint environmentRobotRootJoint;
+      Link environmentStaticLink;
       environmentRobot = new Robot("environmentRobot");
       environmentRobotRootJoint = new RigidJoint("envRootJoint", new Vector3D(), environmentRobot);
       environmentStaticLink = new Link("environmentLink");
@@ -106,8 +105,9 @@ public class CollisionManager
       CollisionShapeFactory collisionShapeFactory = collisionDetector.getShapeFactory();
       collisionShapeFactory.setMargin(collisionDetectorMargin);
 
-      for (Robot robot : robots)
+      for (int i = 0; i < robots.length; i++)
       {
+         Robot robot = robots[i];
          createCollisionShapesFromLinks(robot, collisionShapeFactory, collisionHandler, robot.getRobotsYoVariableRegistry());
       }
 
@@ -133,8 +133,9 @@ public class CollisionManager
                                                       YoVariableRegistry registry)
    {
       ArrayList<Joint> rootJoints = robot.getRootJoints();
-      for (Joint rootJoint : rootJoints)
+      for (int i = 0; i < rootJoints.size(); i++)
       {
+         Joint rootJoint = rootJoints.get(i);
          createCollisionShapesFromLinksRecursively(rootJoint, collisionShapeFactory, collisionHandler, registry);
       }
    }
@@ -160,8 +161,9 @@ public class CollisionManager
       }
 
       ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
-      for (Joint childJoint : childrenJoints)
+      for (int i = 0; i < childrenJoints.size(); i++)
       {
+         Joint childJoint = childrenJoints.get(i);
          createCollisionShapesFromLinksRecursively(childJoint, collisionShapeFactory, collisionHandler, registry);
       }
    }
