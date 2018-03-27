@@ -11,7 +11,7 @@
       <source>0</source>
       <taskspaceTrajectoryPoints>
         <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
-        <values class="us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage-array">
+        <values>
           <us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
@@ -40,8 +40,7 @@
             </angularVelocity>
           </us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
         </values>
-        <pos>0</pos>
-        <isEnum>false</isEnum>
+        <size>1</size>
       </taskspaceTrajectoryPoints>
       <frameInformation>
         <uniqueId>0</uniqueId>
