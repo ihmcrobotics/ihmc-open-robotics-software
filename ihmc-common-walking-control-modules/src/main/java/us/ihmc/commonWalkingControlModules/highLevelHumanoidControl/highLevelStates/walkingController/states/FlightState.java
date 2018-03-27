@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensa
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -48,7 +49,6 @@ public class FlightState extends AbstractJumpingState
    @Override
    public void doAction()
    {
-      updateManagerState();
       wholeBodyMomentumManager.compute();
       gravityCompensationManager.compute();
       for (RobotSide side : RobotSide.values)
@@ -69,16 +69,18 @@ public class FlightState extends AbstractJumpingState
    @Override
    public void doTransitionIntoAction()
    {
+      updateManagerState();
+      PrintTools.debug("Transitioning to flight");
       controllerToolbox.clearContacts();
       for (RobotSide side : RobotSide.values)
       {
          RigidBodyControlManager handManager = handManagers.get(side);
          handManager.holdInTaskspace();
          RigidBodyControlManager footManger = footManagers.get(side);
-         footManger.holdInTaskspace();
+         footManger.holdInJointspace();
       }
-      headManager.holdInTaskspace();
-      chestManager.holdInTaskspace();
+      headManager.holdInJointspace();
+      chestManager.holdInJointspace();
    }
 
    @Override

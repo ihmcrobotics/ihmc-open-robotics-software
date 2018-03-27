@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -420,10 +421,11 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     */
    public void changeFrameAndSet(FramePoint3D desiredPosition, FrameVector3D desiredLinearVelocity, FrameVector3D feedForwardLinearAcceleration)
    {
+      //PrintTools.debug("In command setter before frame change: " + desiredPosition.toString() + " " + desiredLinearVelocity.toString());
       desiredPosition.changeFrame(worldFrame);
       desiredLinearVelocity.changeFrame(worldFrame);
       feedForwardLinearAcceleration.changeFrame(worldFrame);
-
+      //PrintTools.debug("In command setter after frame change: " + desiredPosition.toString() + " " + desiredLinearVelocity.toString());
       desiredPositionInWorld.set(desiredPosition);
       desiredLinearVelocityInWorld.set(desiredLinearVelocity);
       feedForwardLinearAccelerationInWorld.set(feedForwardLinearAcceleration);

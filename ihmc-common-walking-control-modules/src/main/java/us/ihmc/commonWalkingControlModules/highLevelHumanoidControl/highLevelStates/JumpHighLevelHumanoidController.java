@@ -154,9 +154,9 @@ public class JumpHighLevelHumanoidController
 
    public void doAction()
    {
+      controllerToolbox.update();
       for (RobotSide side : RobotSide.values)
          controllerToolbox.setFootContactStateFree(side);
-      controllerToolbox.update();
       stateMachine.checkTransitionConditions();
       stateMachine.doAction();
       submitControllerCommands();
