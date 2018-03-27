@@ -17,8 +17,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * Generates a feasible momentum command for jumping depending on the state 
- * Should typically determine the distribution of the CoM acceleration relative to the root body 
- * and the world frame 
  * @author Apoorv Shrivastava
  */
 
