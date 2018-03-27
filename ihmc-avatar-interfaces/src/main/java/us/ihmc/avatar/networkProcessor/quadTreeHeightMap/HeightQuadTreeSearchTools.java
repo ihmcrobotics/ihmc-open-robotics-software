@@ -18,10 +18,10 @@ public class HeightQuadTreeSearchTools
       if (node == null)
          return null;
 
-      if (node.hasChildrenArray() && Math.abs(x - node.getCenterX()) < node.getSizeX() && Math.abs(x - node.getCenterY()) < node.getSizeY())
+      if (!node.hasChildrenArray() && Math.abs(x - node.getCenterX()) < node.getSizeX() && Math.abs(y - node.getCenterY()) < node.getSizeY())
          return node;
 
-      if (node.hasChildrenArray() || node.getNumberOfChildren() == 0)
+      if (!node.hasChildrenArray() || node.getNumberOfChildren() == 0)
          return node;
 
       int mortonCode = 0;
@@ -84,7 +84,7 @@ public class HeightQuadTreeSearchTools
 
    public static void doActionOnLeavesRecursively(HeightQuadTreeNode node, NeighborActionRule actionRule)
    {
-      if (node.hasChildrenArray())
+      if (!node.hasChildrenArray())
       {
          actionRule.doActionOnNeighbor(node);
          return;
@@ -213,7 +213,7 @@ public class HeightQuadTreeSearchTools
       double[] currentPositionArray = new double[2];
 
       // Initialization phase -------------------------------------------------------
-      boolean isDone = actionRule.doAction(0.0, currentPosition);
+      boolean isDone = actionRule.doAction(0.0, origin);
 
       if (isDone)
          return;
