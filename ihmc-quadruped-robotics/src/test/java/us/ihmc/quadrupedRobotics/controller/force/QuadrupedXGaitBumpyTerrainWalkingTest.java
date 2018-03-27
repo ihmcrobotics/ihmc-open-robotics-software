@@ -79,7 +79,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       variables.getYoPlanarVelocityInputX().set(0.5);
       variables.getYoPlanarVelocityInputZ().set(0.1);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
+      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 11.0));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.0));
       conductor.simulate();
    }

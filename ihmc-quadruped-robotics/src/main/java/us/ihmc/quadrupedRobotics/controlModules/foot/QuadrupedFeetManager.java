@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -49,11 +48,6 @@ public class QuadrupedFeetManager
       this.toolbox = toolbox;
       graphicsListRegistry.registerArtifact("supportPolygon", supportPolygonVisualizer);
       parentRegistry.addChild(registry);
-   }
-
-   public QuadrupedSolePositionController getSolePositionController(RobotQuadrant robotQuadrant)
-   {
-      return footControlModules.get(robotQuadrant).getSolePositionController();
    }
 
    public void updateSupportPolygon()
