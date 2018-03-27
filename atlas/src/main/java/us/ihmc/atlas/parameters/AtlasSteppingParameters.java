@@ -39,13 +39,13 @@ public class AtlasSteppingParameters implements SteppingParameters
    @Override
    public double getDesiredStepForward()
    {
-      return 0.5 * jointMap.getModelScale();    // 0.35;
+      return 0.5 * jointMap.getModelScale(); // 0.35;
    }
 
    @Override
    public double getMaxStepLength()
    {
-      return 0.6 * jointMap.getModelScale();    // 0.5; //0.35;
+      return 0.6 * jointMap.getModelScale(); // 0.5; //0.35;
    }
 
    @Override
@@ -57,7 +57,7 @@ public class AtlasSteppingParameters implements SteppingParameters
    @Override
    public double getMaxStepWidth()
    {
-      return 0.6 * jointMap.getModelScale();    // 0.4;
+      return 0.6 * jointMap.getModelScale(); // 0.4;
    }
 
    @Override
@@ -100,6 +100,12 @@ public class AtlasSteppingParameters implements SteppingParameters
    public double getMaxAngleTurnInwards()
    {
       return 0;
+   }
+
+   @Override
+   public double getTurningStepWidth()
+   {
+      return 0.25;
    }
 
    @Override
