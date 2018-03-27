@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.flight;
 
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.RootJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -8,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.yoVariables.providers.EnumProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -20,12 +23,12 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  * @author Apoorv Shrivastava
  *
  */
-public class GravityCompensationManager
+public class GravityCompensationManager implements JumpControlManagerInterface
 {
    private final double gravityZ;
    private final JumpControllerParameters jumpControllerParameters;
 
-   private JumpStateEnum jumpState;
+   private EnumProvider<JumpStateEnum> currentState;
 
    private final RootJointAccelerationCommand rootJointAccelerationCommand;
    private final FrameVector3D rootAcceleration;
@@ -42,15 +45,16 @@ public class GravityCompensationManager
       rootJointAccelerationCommand = new RootJointAccelerationCommand(rootFrame, controlFrame, rootFrame);
       rootAcceleration = new FrameVector3D(rootFrame);
    }
-
-   public void updateState(JumpStateEnum jumpStateEnum)
-   {
-      this.jumpState = jumpStateEnum;
+   
+   @Override
+   public void setStateEnumProvider(EnumProvider<JumpStateEnum> stateEnumProvider)
+   {  
+      this.currentState = stateEnumProvider;
    }
 
    public void compute()
    {
-      switch (jumpState)
+      switch (currentState.getValue())
       {
       case STANDING:
          rootAcceleration.set(0.0, 0.0, gravityZ);
@@ -68,8 +72,15 @@ public class GravityCompensationManager
       rootJointAccelerationCommand.setRootJointLinearAcceleration(rootAcceleration);
    }
 
-   public RootJointAccelerationCommand getRootJointAccelerationCommand()
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return rootJointAccelerationCommand;
+   }
+   
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return null;
    }
 }

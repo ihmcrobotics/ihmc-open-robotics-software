@@ -11,8 +11,9 @@ import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.ContactStateManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -26,6 +27,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -71,7 +73,23 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       ParameterTools.extract3DWeightMap("LinearWeight", momentumOptimizationSettings.getTaskspaceLinearWeights(), taskspaceLinearWeightMap, momentumRegistry);
 
       parentRegistry.addChild(momentumRegistry);
-      parentRegistry.addChild(this.registry);
+      parentRegistry.addChild(registry);
+   }
+
+   public FeetJumpManager getOrCreateFeetManager()
+   {
+      if (feetManager != null)
+         return feetManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(FeetManager.class))
+         return null;
+      if (!hasJumpControllerParameters(FeetManager.class))
+         return null;
+      if (!hasMomentumOptimizationSettings(FeetManager.class))
+         return null;
+
+      feetManager = new FeetJumpManager(controllerToolbox, jumpControllerParameters, registry);
+      return feetManager;
    }
 
    public CentroidalMomentumManager getOrCreateCentroidalMomentumManager()

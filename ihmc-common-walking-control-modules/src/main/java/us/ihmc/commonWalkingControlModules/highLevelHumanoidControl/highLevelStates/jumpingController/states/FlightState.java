@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -18,7 +19,7 @@ public class FlightState extends AbstractJumpingState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final CentroidalMomentumManager wholeBodyMomentumManager;
    private final GravityCompensationManager gravityCompensationManager;
-   private final SideDependentList<RigidBodyControlManager> footManagers;
+   private final FeetJumpManager feetManager;
    private final SideDependentList<RigidBodyControlManager> handManagers;
    private final RigidBodyControlManager chestManager;
    private final RigidBodyControlManager headManager;
@@ -26,14 +27,14 @@ public class FlightState extends AbstractJumpingState
 
    public FlightState(WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox,
                       CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
-                      SideDependentList<RigidBodyControlManager> handManagers, SideDependentList<RigidBodyControlManager> feetManagers,
+                      SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager,
                       Map<String, RigidBodyControlManager> bodyManagerMap)
    {
       super(stateEnum);
       this.controllerToolbox = controllerToolbox;
       this.wholeBodyMomentumManager = centroidalMomentumManager;
       this.gravityCompensationManager = gravityCompensationManager;
-      this.footManagers = feetManagers;
+      this.feetManager = feetManager;
       this.handManagers = handManagers;
       this.chestManager = bodyManagerMap.get(controllerToolbox.getFullRobotModel().getChest().getName());
       this.headManager = bodyManagerMap.get(controllerToolbox.getFullRobotModel().getHead().getName());
@@ -54,7 +55,6 @@ public class FlightState extends AbstractJumpingState
       for (RobotSide side : RobotSide.values)
       {
          handManagers.get(side).compute();
-         footManagers.get(side).compute();
       }
       chestManager.compute();
       headManager.compute();
@@ -68,8 +68,6 @@ public class FlightState extends AbstractJumpingState
       {
          RigidBodyControlManager handManager = handManagers.get(side);
          handManager.holdInTaskspace();
-         RigidBodyControlManager footManger = footManagers.get(side);
-         footManger.holdInJointspace();
       }
       headManager.holdInJointspace();
       chestManager.holdInJointspace();

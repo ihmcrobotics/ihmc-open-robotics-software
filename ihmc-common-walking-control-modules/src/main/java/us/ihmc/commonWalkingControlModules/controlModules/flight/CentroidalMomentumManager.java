@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.flight;
 
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -9,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.providers.EnumProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -16,7 +19,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  * @author Apoorv Shrivastava
  */
 
-public class CentroidalMomentumManager
+public class CentroidalMomentumManager implements JumpControlManagerInterface
 {
    private final YoVariableRegistry registry;
 
@@ -37,7 +40,7 @@ public class CentroidalMomentumManager
 
    private final FrameVector3D desiredCoMLinearAcceleration = new FrameVector3D();
    private final FrameVector3D desiredCoMAngularAcceleration = new FrameVector3D();
-   private JumpStateEnum currentState;
+   private EnumProvider<JumpStateEnum> currentState;
    private double totalMass = 0;
 
    public CentroidalMomentumManager(HighLevelHumanoidControllerToolbox controllerToolbox, JumpControllerParameters parameters, YoVariableRegistry registry)
@@ -50,11 +53,6 @@ public class CentroidalMomentumManager
       yoDesiredAngularMomentumRateOfChange = new YoFrameVector(getClass().getSimpleName() + "DesiredAngularMomentumRateOfChange", controlFrame, registry);
       yoDesiredLinearMomentumRateOfChange = new YoFrameVector(getClass().getSimpleName() + "DesiredLinearMomentumRateOfChange", controlFrame, registry);
       setMomentumCommandWeights();
-   }
-
-   public void updateState(JumpStateEnum currentState)
-   {
-      this.currentState = currentState;
    }
 
    public void setOptimizationWeights(Vector3DReadOnly angularMomentumWeight, Vector3DReadOnly linearMomentumWeight)
@@ -82,9 +80,10 @@ public class CentroidalMomentumManager
       momentumCommand.setLinearWeights(linearMomentumWeight);
    }
 
+   @Override
    public void compute()
    {
-      switch (currentState)
+      switch (currentState.getValue())
       {
       case STANDING:
          desiredLinearMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
@@ -115,13 +114,26 @@ public class CentroidalMomentumManager
       }
    }
 
-   public MomentumRateCommand getMomentumRateCommand()
-   {
-      return momentumCommand;
-   }
-
    public void setTotalRobotMass(double totalRobotMass)
    {
       this.totalMass = totalRobotMass;
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return momentumCommand;
+   }
+   
+   @Override
+   public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return null;
+   }
+   
+   @Override
+   public void setStateEnumProvider(EnumProvider<JumpStateEnum> stateEnumProvider)
+   {
+      this.currentState = stateEnumProvider;
    }
 }
