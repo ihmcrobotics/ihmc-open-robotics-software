@@ -1,13 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.flight;
 
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JumpHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -23,7 +19,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class CentroidalMomentumManager
 {
    private final YoVariableRegistry registry;
-
+   
    private final double gravityZ;
    private final ReferenceFrame controlFrame;
    private final ReferenceFrame comFrame;
@@ -36,7 +32,6 @@ public class CentroidalMomentumManager
    
    private final YoFrameVector yoDesiredLinearMomentumRateOfChange;
    private final YoFrameVector yoDesiredAngularMomentumRateOfChange;
-   
    
    private final MomentumRateCommand momentumCommand;
 

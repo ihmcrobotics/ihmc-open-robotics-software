@@ -70,7 +70,6 @@ public class FlightState extends AbstractJumpingState
    public void doTransitionIntoAction()
    {
       updateManagerState();
-      PrintTools.debug("Transitioning to flight");
       controllerToolbox.clearContacts();
       for (RobotSide side : RobotSide.values)
       {

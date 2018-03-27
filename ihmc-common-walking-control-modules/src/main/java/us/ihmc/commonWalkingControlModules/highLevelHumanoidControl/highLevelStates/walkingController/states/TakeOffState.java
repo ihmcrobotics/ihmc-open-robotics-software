@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 public class TakeOffState extends AbstractJumpingState
 {
    private static final JumpStateEnum stateEnum = JumpStateEnum.TAKE_OFF;
-   
+
    public TakeOffState()
    {
       super(stateEnum);
@@ -37,5 +37,4 @@ public class TakeOffState extends AbstractJumpingState
       // TODO Auto-generated method stub
 
    }
-
 }
