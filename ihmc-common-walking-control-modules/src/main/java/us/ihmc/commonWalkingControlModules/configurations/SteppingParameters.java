@@ -34,6 +34,11 @@ public interface SteppingParameters extends FootstepParameters
       return 0.1;
    }
 
+   public default double getTurningStepWidth()
+   {
+      return 0.2;
+   }
+
    /**
     * Returns the maximum angle the foot can turn outwards in a step.
     */
