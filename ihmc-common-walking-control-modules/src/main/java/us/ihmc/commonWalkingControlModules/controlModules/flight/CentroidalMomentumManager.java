@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.flight;
 
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.JumpStateEnum;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class CentroidalMomentumManager
 {
    private final YoVariableRegistry registry;
-   
+
    private final double gravityZ;
    private final ReferenceFrame controlFrame;
    private final ReferenceFrame comFrame;
@@ -29,10 +29,10 @@ public class CentroidalMomentumManager
 
    private final FrameVector3D desiredLinearMomentumRateOfChange = new FrameVector3D();
    private final FrameVector3D desiredAngularMomentumRateOfChange = new FrameVector3D();
-   
+
    private final YoFrameVector yoDesiredLinearMomentumRateOfChange;
    private final YoFrameVector yoDesiredAngularMomentumRateOfChange;
-   
+
    private final MomentumRateCommand momentumCommand;
 
    private final FrameVector3D desiredCoMLinearAcceleration = new FrameVector3D();
@@ -47,7 +47,7 @@ public class CentroidalMomentumManager
       gravityZ = controllerToolbox.getGravityZ();
       comFrame = controllerToolbox.getCenterOfMassFrame();
       momentumCommand = new MomentumRateCommand();
-      yoDesiredAngularMomentumRateOfChange = new YoFrameVector(getClass().getSimpleName() +  "DesiredAngularMomentumRateOfChange", controlFrame, registry);
+      yoDesiredAngularMomentumRateOfChange = new YoFrameVector(getClass().getSimpleName() + "DesiredAngularMomentumRateOfChange", controlFrame, registry);
       yoDesiredLinearMomentumRateOfChange = new YoFrameVector(getClass().getSimpleName() + "DesiredLinearMomentumRateOfChange", controlFrame, registry);
       setMomentumCommandWeights();
    }
@@ -84,18 +84,38 @@ public class CentroidalMomentumManager
 
    public void compute()
    {
-      //FIXME This is a hack to confirm that the controller core is working. This should be based on the controller state. Currently hacked to work with flight controller
-      desiredLinearMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, -gravityZ * totalMass);
-      desiredAngularMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
-      momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
-      yoDesiredAngularMomentumRateOfChange.set(desiredAngularMomentumRateOfChange);
-      yoDesiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
-      setOptimizationWeights(50.0, 2.0);
-      setMomentumCommandWeights();
-      momentumCommand.setSelectionMatrixToIdentity();
+      switch (currentState)
+      {
+      case STANDING:
+         desiredLinearMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
+         desiredAngularMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
+         momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
+         yoDesiredAngularMomentumRateOfChange.set(desiredAngularMomentumRateOfChange);
+         yoDesiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
+         setOptimizationWeights(50.0, 2.0);
+         setMomentumCommandWeights();
+         momentumCommand.setSelectionMatrixForLinearControl();
+         break;
+      case TAKE_OFF:
+         throw new RuntimeException("Unimplemented");
+      case FLIGHT:
+         desiredLinearMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, -gravityZ * totalMass);
+         desiredAngularMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
+         momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
+         yoDesiredAngularMomentumRateOfChange.set(desiredAngularMomentumRateOfChange);
+         yoDesiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
+         setOptimizationWeights(50.0, 2.0);
+         setMomentumCommandWeights();
+         momentumCommand.setSelectionMatrixForLinearControl();
+         break;
+      case LANDING:
+         throw new RuntimeException("Unimplemented");
+      default:
+         throw new RuntimeException("Invalid jump state for centroidal momentum computation");
+      }
    }
-   
-    public MomentumRateCommand getMomentumRateCommand()
+
+   public MomentumRateCommand getMomentumRateCommand()
    {
       return momentumCommand;
    }

@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states;
 
 /**
  * Defines states for the {@code JumpingHighLevelHumanoidController} 
@@ -7,6 +7,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
  */
 public enum JumpStateEnum
 {
+   STANDING,
    /**
     * Generates the required momentum for the robot to take flight
     */

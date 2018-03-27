@@ -6,8 +6,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 public class ContactState
 {
    private ContactStateEnum state;
-   private double initialTime;
-   private double finalTime;
+   private double duration;
    private final FrameConvexPolygon2d supportPolygon;
 
    public ContactState()
@@ -24,8 +23,7 @@ public class ContactState
    public void reset()
    {
       state = null;
-      initialTime = Double.NaN;
-      finalTime = Double.NaN;
+      duration = Double.NaN;
       supportPolygon.clear();
    }
 
@@ -44,14 +42,9 @@ public class ContactState
       this.supportPolygon.set(supportPolygonToSet);
    }
 
-   public void setContactStateInitialTime(double initialTime)
+   public void setContactStateDuration(double duration)
    {
-      this.initialTime = initialTime;
-   }
-
-   public void setContactStateFinalTime(double finalTime)
-   {
-      this.finalTime = finalTime;
+      this.duration = duration;
    }
 
    public void getSupportPolygon(FrameConvexPolygon2d supportPolygonToSet)
@@ -64,13 +57,8 @@ public class ContactState
       return state;
    }
 
-   public double getInitialTime()
+   public double getDuration()
    {
-      return initialTime;
-   }
-
-   public double getFinalTime()
-   {
-      return finalTime;
+      return duration;
    }
 }

@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParamete
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.ContactStateManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -42,7 +43,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
    private FeetJumpManager feetManager;
    private CentroidalMomentumManager momentumManager;
    private GravityCompensationManager gravityCompensationManager;
-   //private PlaneContactControlManager planeContactManager;
+   private ContactStateManager contactStateManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
@@ -73,7 +74,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       parentRegistry.addChild(this.registry);
    }
 
-   public CentroidalMomentumManager getOrCreateWholeBodyMomentumManager()
+   public CentroidalMomentumManager getOrCreateCentroidalMomentumManager()
    {
       if (momentumManager != null)
          return momentumManager;
@@ -85,7 +86,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
 
       return momentumManager;
    }
-   
+
    public GravityCompensationManager getOrCreateGravityCompensationManager()
    {
       if (gravityCompensationManager != null)
@@ -98,6 +99,19 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       this.gravityCompensationManager = new GravityCompensationManager(controllerToolbox, jumpControllerParameters, registry);
 
       return gravityCompensationManager;
+   }
+
+   public ContactStateManager getOrCreateContactStateManager()
+   {
+      if (contactStateManager != null)
+         return contactStateManager;
+      if (!hasHighLevelHumanoidControllerToolbox(ContactStateManager.class))
+         return null;
+      if (!hasJumpControllerParameters(ContactStateManager.class))
+         return null;
+
+      this.contactStateManager = new ContactStateManager(controllerToolbox, jumpControllerParameters, registry);
+      return contactStateManager;
    }
 
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody baseBody, ReferenceFrame controlFrame,

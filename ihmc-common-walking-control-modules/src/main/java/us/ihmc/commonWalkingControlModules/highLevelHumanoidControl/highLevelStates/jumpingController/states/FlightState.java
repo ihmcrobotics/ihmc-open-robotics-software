@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states;
 
 import java.util.Map;
 
@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public class FlightState extends AbstractJumpingState
 {
@@ -21,8 +22,7 @@ public class FlightState extends AbstractJumpingState
    private final SideDependentList<RigidBodyControlManager> handManagers;
    private final RigidBodyControlManager chestManager;
    private final RigidBodyControlManager headManager;
-
-   private final WholeBodyControlCoreToolbox controlCoreToolbox;
+   private final SideDependentList<FootSwitchInterface> footSwitches;
 
    public FlightState(WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox,
                       CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
@@ -31,13 +31,13 @@ public class FlightState extends AbstractJumpingState
    {
       super(stateEnum);
       this.controllerToolbox = controllerToolbox;
-      this.controlCoreToolbox = controlCoreToolbox;
       this.wholeBodyMomentumManager = centroidalMomentumManager;
       this.gravityCompensationManager = gravityCompensationManager;
       this.footManagers = feetManagers;
       this.handManagers = handManagers;
       this.chestManager = bodyManagerMap.get(controllerToolbox.getFullRobotModel().getChest().getName());
       this.headManager = bodyManagerMap.get(controllerToolbox.getFullRobotModel().getHead().getName());
+      this.footSwitches = controllerToolbox.getFootSwitches();
    }
 
    @Override
@@ -60,16 +60,9 @@ public class FlightState extends AbstractJumpingState
       headManager.compute();
    }
 
-   private void updateManagerState()
-   {
-      wholeBodyMomentumManager.updateState(stateEnum);
-      gravityCompensationManager.updateState(stateEnum);
-   }
-
    @Override
    public void doTransitionIntoAction()
    {
-      updateManagerState();
       controllerToolbox.clearContacts();
       for (RobotSide side : RobotSide.values)
       {
