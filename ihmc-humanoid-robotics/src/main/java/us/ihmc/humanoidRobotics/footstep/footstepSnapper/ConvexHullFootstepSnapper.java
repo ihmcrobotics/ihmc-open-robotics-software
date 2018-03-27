@@ -288,9 +288,18 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       // good list of points, fit plane;
       Plane3D fittedPlane = new Plane3D();
       double avgSquaredError = planeFitter.fitPlaneToPoints(new Point2D(position.getX(), position.getY()), pointList, fittedPlane);
-      height = fittedPlane.getZOnPlane(position.getX(), position.getY());
 
-      surfaceNormal = fittedPlane.getNormalCopy();
+      if (fittedPlane.containsNaN())
+      {
+         height = Double.NaN;
+         surfaceNormal = new Vector3D();
+         surfaceNormal.setToNaN();
+      }
+      else
+      {
+         height = fittedPlane.getZOnPlane(position.getX(), position.getY());
+         surfaceNormal = fittedPlane.getNormalCopy();
+      }
 
       // check point fit to plane.
       int notOnPlaneCount = 0;
