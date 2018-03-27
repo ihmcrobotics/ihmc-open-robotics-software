@@ -12,7 +12,7 @@
       <source>0</source>
       <taskspaceTrajectoryPoints>
         <clazz>us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage</clazz>
-        <values class="us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage-array">
+        <values>
           <us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
@@ -30,8 +30,7 @@
             </linearVelocity>
           </us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage>
         </values>
-        <pos>0</pos>
-        <isEnum>false</isEnum>
+        <size>1</size>
       </taskspaceTrajectoryPoints>
       <selectionMatrix>
         <uniqueId>0</uniqueId>

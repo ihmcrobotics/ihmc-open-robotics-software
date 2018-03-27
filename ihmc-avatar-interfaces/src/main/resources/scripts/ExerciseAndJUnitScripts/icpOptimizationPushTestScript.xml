@@ -6,7 +6,7 @@
     <source>0</source>
     <footstepDataList>
       <clazz>us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage</clazz>
-      <values class="us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage-array">
+      <values>
         <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
@@ -25,23 +25,20 @@
           </orientation>
           <predictedContactPoints>
             <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values class="us.ihmc.euclid.tuple2D.Point2D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </predictedContactPoints>
           <trajectoryType>0</trajectoryType>
           <swingHeight>0.0</swingHeight>
           <positionWaypoints>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
-            <values class="us.ihmc.euclid.tuple3D.Point3D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </positionWaypoints>
           <swingTrajectory>
             <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
-            <values class="us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </swingTrajectory>
           <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
           <swingDuration>-1.0</swingDuration>
@@ -67,23 +64,20 @@
           </orientation>
           <predictedContactPoints>
             <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values class="us.ihmc.euclid.tuple2D.Point2D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </predictedContactPoints>
           <trajectoryType>0</trajectoryType>
           <swingHeight>0.0</swingHeight>
           <positionWaypoints>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
-            <values class="us.ihmc.euclid.tuple3D.Point3D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </positionWaypoints>
           <swingTrajectory>
             <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
-            <values class="us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </swingTrajectory>
           <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
           <swingDuration>-1.0</swingDuration>
@@ -109,23 +103,20 @@
           </orientation>
           <predictedContactPoints>
             <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values class="us.ihmc.euclid.tuple2D.Point2D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </predictedContactPoints>
           <trajectoryType>0</trajectoryType>
           <swingHeight>0.0</swingHeight>
           <positionWaypoints>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
-            <values class="us.ihmc.euclid.tuple3D.Point3D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </positionWaypoints>
           <swingTrajectory>
             <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
-            <values class="us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </swingTrajectory>
           <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
           <swingDuration>-1.0</swingDuration>
@@ -151,23 +142,20 @@
           </orientation>
           <predictedContactPoints>
             <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values class="us.ihmc.euclid.tuple2D.Point2D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </predictedContactPoints>
           <trajectoryType>0</trajectoryType>
           <swingHeight>0.0</swingHeight>
           <positionWaypoints>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
-            <values class="us.ihmc.euclid.tuple3D.Point3D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </positionWaypoints>
           <swingTrajectory>
             <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
-            <values class="us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </swingTrajectory>
           <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
           <swingDuration>-1.0</swingDuration>
@@ -193,23 +181,20 @@
           </orientation>
           <predictedContactPoints>
             <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values class="us.ihmc.euclid.tuple2D.Point2D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </predictedContactPoints>
           <trajectoryType>0</trajectoryType>
           <swingHeight>0.0</swingHeight>
           <positionWaypoints>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
-            <values class="us.ihmc.euclid.tuple3D.Point3D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </positionWaypoints>
           <swingTrajectory>
             <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
-            <values class="us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </swingTrajectory>
           <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
           <swingDuration>-1.0</swingDuration>
@@ -235,23 +220,20 @@
           </orientation>
           <predictedContactPoints>
             <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values class="us.ihmc.euclid.tuple2D.Point2D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </predictedContactPoints>
           <trajectoryType>0</trajectoryType>
           <swingHeight>0.0</swingHeight>
           <positionWaypoints>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
-            <values class="us.ihmc.euclid.tuple3D.Point3D-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </positionWaypoints>
           <swingTrajectory>
             <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
-            <values class="us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage-array"/>
-            <pos>-1</pos>
-            <isEnum>false</isEnum>
+            <values/>
+            <size>0</size>
           </swingTrajectory>
           <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
           <swingDuration>-1.0</swingDuration>
@@ -260,8 +242,7 @@
           <executionDelayTime>0.0</executionDelayTime>
         </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       </values>
-      <pos>5</pos>
-      <isEnum>false</isEnum>
+      <size>6</size>
     </footstepDataList>
     <executionTiming>0</executionTiming>
     <defaultSwingDuration>0.7</defaultSwingDuration>
