@@ -211,7 +211,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   public void testUnknownStepDownOneFootOnEachStep(double stepDownHeight) throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStep(double stepLength, double stairLength, double stepDownHeight) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -219,9 +219,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double transferTime = 0.2;
 
       int numberOfStepsDown = 5;
-      double stepLength = 0.35;
 
-      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
+      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stairLength, stepDownHeight);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
@@ -368,26 +367,35 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double minStepLength = 0.3;
       double maxStepLength = 0.6;
       double endingStepLength = 0.3;
+      double stepFraction = 0.8;
 
       ArrayList<Double> stepHeights = new ArrayList<>();
       ArrayList<Double> stepLengths = new ArrayList<>();
+      ArrayList<Double> stairLengths = new ArrayList<>();
 
       double previousStepHeight = 0.0;
       boolean didDrop = false;
       for (int i = 0; i < numberOfSteps; i++)
       {
          double maxHeight = Math.min(previousStepHeight + maxStepIncrease, maxStepHeight);
-         double stepLength = RandomNumbers.nextDouble(random, minStepLength, maxStepLength);
-         double stepHeight;
+         double stairLength = RandomNumbers.nextDouble(random, minStepLength, maxStepLength);
+         double stepHeight, stepLength;
          if (didDrop)
+         {
             stepHeight = Math.min(0.0, maxHeight);
+            stepLength = stairLength;
+         }
          else
+         {
             stepHeight = RandomNumbers.nextDouble(random, minStepHeight, maxHeight);
+            stepLength = stepFraction * stairLength;
+         }
 
          previousStepHeight = stepHeight;
 
          stepHeights.add(stepHeight);
          stepLengths.add(stepLength);
+         stairLengths.add(stairLength);
 
          if (didDrop)
             didDrop = false;
@@ -396,7 +404,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       }
 
       double starterLength = 0.35;
-      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, 0.0);
+      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stairLengths, starterLength, 0.0, 0.0);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
@@ -415,6 +423,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       message.setAreFootstepsAdjustable(true);
+      message.setOffsetFootstepsWithExecutionError(true);
       RobotSide robotSide = RobotSide.LEFT;
       // take care of random steps
       for (int stepNumber = 0; stepNumber < numberOfSteps; stepNumber++)
