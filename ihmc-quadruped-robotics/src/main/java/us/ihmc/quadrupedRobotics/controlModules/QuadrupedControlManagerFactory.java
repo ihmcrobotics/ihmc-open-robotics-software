@@ -4,9 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedControlManagerFactory
@@ -79,10 +77,5 @@ public class QuadrupedControlManagerFactory
          ret.addCommand(jointSpaceManager.createFeedbackControlTemplate());
 
       return ret;
-   }
-
-   public QuadrupedSolePositionController getOrCreateSolePositionController(RobotQuadrant robotQuadrant)
-   {
-      return getOrCreateFeetManager().getSolePositionController(robotQuadrant);
    }
 }

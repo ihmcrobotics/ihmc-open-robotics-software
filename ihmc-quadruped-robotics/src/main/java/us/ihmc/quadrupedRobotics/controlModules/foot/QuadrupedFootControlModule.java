@@ -8,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -41,8 +40,6 @@ public class QuadrupedFootControlModule
       REQUEST_SUPPORT, REQUEST_SWING, REQUEST_MOVE_VIA_WAYPOINTS, REQUEST_HOLD
    }
 
-   private final QuadrupedSolePositionController solePositionController;
-
    private final QuadrupedMoveViaWaypointsState moveViaWaypointsState;
    private final EventTrigger eventTrigger;
    private final StateMachine<QuadrupedFootStates, QuadrupedFootState> footStateMachine;
@@ -56,16 +53,13 @@ public class QuadrupedFootControlModule
       this.currentStepCommand = new YoQuadrupedTimedStep(prefix + "CurrentStepCommand", registry);
       this.stepCommandIsValid = new YoBoolean(prefix + "StepCommandIsValid", registry);
 
-      // position controller
-      solePositionController = new QuadrupedSolePositionController(robotQuadrant, controllerToolbox, registry);
-
       // state machine
       QuadrupedSupportState supportState = new QuadrupedSupportState(robotQuadrant, controllerToolbox.getFootContactState(robotQuadrant), stepCommandIsValid,
                                                                      controllerToolbox.getRuntimeEnvironment().getRobotTimestamp(), currentStepCommand);
-      QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, solePositionController, stepCommandIsValid, currentStepCommand,
-                                                               graphicsListRegistry, registry);
-      moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, controllerToolbox, solePositionController, registry);
-      QuadrupedHoldPositionState holdState = new QuadrupedHoldPositionState(robotQuadrant, controllerToolbox, solePositionController, registry);
+      QuadrupedSwingState swingState = new QuadrupedSwingState(robotQuadrant, controllerToolbox, stepCommandIsValid, currentStepCommand, graphicsListRegistry,
+                                                               registry);
+      moveViaWaypointsState = new QuadrupedMoveViaWaypointsState(robotQuadrant, controllerToolbox, registry);
+      QuadrupedHoldPositionState holdState = new QuadrupedHoldPositionState(robotQuadrant, controllerToolbox, registry);
 
       EventBasedStateMachineFactory<QuadrupedFootStates, QuadrupedFootState> factory = new EventBasedStateMachineFactory<>(QuadrupedFootStates.class);
       factory.setNamePrefix(prefix + "QuadrupedFootStates").setRegistry(registry);
@@ -96,11 +90,6 @@ public class QuadrupedFootControlModule
       footStateMachine = factory.build(QuadrupedFootStates.HOLD);
 
       parentRegistry.addChild(registry);
-   }
-
-   public QuadrupedSolePositionController getSolePositionController()
-   {
-      return solePositionController;
    }
 
    public void registerStepTransitionCallback(QuadrupedStepTransitionCallback stepTransitionCallback)
