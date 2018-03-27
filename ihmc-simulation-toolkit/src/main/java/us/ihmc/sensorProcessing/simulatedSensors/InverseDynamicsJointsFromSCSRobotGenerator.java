@@ -229,35 +229,65 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
       }
    }
 
-   public void updateRobotFromInverseDynamicsRobotModel(boolean updateRootJoints, boolean updateDesireds)
+   /**
+    * updates an SCS Robot with the results from the Inverse Dynamics Model
+    * @param updateRootJoints update from Inverse Dynamics Model
+    * @param updateAccelerations
+    * @param useDesiredAcceleration update from Inverse Dynamics Model
+    * @param updatePositions
+    * @param updateVelocities
+    * @param updateTorques
+    * @param useDesiredTorque update from Inverse Dynamics Model
+    */
+   public void updateRobotFromInverseDynamicsRobotModel(boolean updateRootJoints, boolean updateAccelerations, boolean useDesiredAcceleration, boolean updatePositions, boolean updateVelocities, boolean updateTorques, boolean useDesiredTorque)
    {
-      // First update joint angles:
+
       Collection<OneDegreeOfFreedomJoint> pinJoints = scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints(); //pinToRevoluteJointMap.keySet();
       for (OneDegreeOfFreedomJoint pinJoint : pinJoints)
       {
          if (updateRootJoints || (pinJoint.getParentJoint() != null))
          {
             OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint); //pinToRevoluteJointMap.get(pinJoint);
-        // Do I need to create this class ↓ with inverse methods of ↑ this one or it stays the same?
-            //OneDoFJoint revoluteJoint = InverseDynamicsToScsJointMap
 
-            double jointPosition = revoluteJoint.getQ();
-            double jointVelocity = revoluteJoint.getQd();
+            double jointPosition;
+            double jointVelocity;
             double jointAcceleration;
-            if (updateDesireds)
-               jointAcceleration = revoluteJoint.getQddDesired();
-            else
-               jointAcceleration = revoluteJoint.getQdd();
+            double jointTorque;
+            if (updateAccelerations)
+            {
+               if (useDesiredAcceleration)
+                  jointAcceleration = revoluteJoint.getQddDesired();
+               else
+                  jointAcceleration = revoluteJoint.getQdd();
+               pinJoint.setQdd(jointAcceleration);
+            }
 
-            pinJoint.setQ(jointPosition);
-            pinJoint.setQd(jointVelocity);
-            pinJoint.setQdd(jointAcceleration);
+            if (updatePositions)
+            {
+               jointPosition = revoluteJoint.getQ();
+               pinJoint.setQ(jointPosition);
+            }
+
+            if (updateVelocities)
+            {
+               jointVelocity = revoluteJoint.getQd();
+               pinJoint.setQd(jointVelocity);
+            }
+
+            if (updateTorques)
+            {
+               if (useDesiredTorque)
+                  jointTorque = revoluteJoint.getTauMeasured();
+               else
+                  jointTorque = revoluteJoint.getTau();
+               pinJoint.setTau(jointTorque);
+            }
+
          }
       }
 
       if (updateRootJoints)
       {
-         //Don't know what changes to do in here
          Collection<? extends FloatingJoint> floatingJoints = scsToInverseDynamicsJointMap.getFloatingJoints(); //floatingToSixDofToJointMap.keySet();
          for (FloatingJoint floatingJoint : floatingJoints)
          {
@@ -268,9 +298,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          }
       }
 
-      // Then update all the frames. They will be needed for further computation:
       elevator.updateFramesRecursively();
-
 
       if (updateRootJoints)
       {
@@ -278,7 +306,6 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          for (FloatingJoint floatingJoint : floatingJoints)
          {
             FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
-            //                     referenceFrames.updateFrames();
 
             ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
             ReferenceFrame pelvisFrame = sixDoFJoint.getFrameAfterJoint();
@@ -292,9 +319,6 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             sixDoFJoint.setJointTwist(bodyTwist);
             sixDoFJoint.updateFramesRecursively();
 
-            // Acceleration:
-            //Note: To get the acceleration, you can't just changeFrame on the acceleration provided by SCS. Use a  SixDoFJointSpatialAccelerationCalculator instead.
-
             originAcceleration.setToZero(sixDoFJoint.getFrameBeforeJoint());
             angularAcceleration.setToZero(sixDoFJoint.getFrameAfterJoint());
 
@@ -305,7 +329,7 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             spatialAccelerationVector.setToZero(sixDoFJoint.getFrameAfterJoint(), sixDoFJoint.getFrameBeforeJoint(), sixDoFJoint.getFrameAfterJoint());
             spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
 
-            if (updateDesireds)
+            if (updateAccelerations)
                sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
             else
                sixDoFJoint.setAcceleration(spatialAccelerationVector);
