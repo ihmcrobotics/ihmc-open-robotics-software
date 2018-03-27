@@ -48,7 +48,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class GenericROSTranslationTools
 {
@@ -203,9 +203,9 @@ public class GenericROSTranslationTools
             {
                setArrayFromList(rosMessage, ihmcMessage, rosGetter, ihmcField, ihmcMessageFieldType);
             }
-            else if (List.class.isAssignableFrom(rosGetter.getReturnType()) && ihmcMessageFieldType == PreallocatedList.class)
+            else if (List.class.isAssignableFrom(rosGetter.getReturnType()) && ihmcMessageFieldType == RecyclingArrayListPubSub.class)
             {
-               setPreallocatedListFromList(rosMessage, ihmcMessage, rosGetter, ihmcField, ihmcMessageFieldType);
+               setRecyclingArrayListPubSubFromList(rosMessage, ihmcMessage, rosGetter, ihmcField, ihmcMessageFieldType);
             }
             else if (double[].class.isAssignableFrom(rosGetter.getReturnType()) && ihmcMessageFieldType == TDoubleArrayList.class)
             {
@@ -323,13 +323,13 @@ public class GenericROSTranslationTools
    }
 
    @SuppressWarnings({"rawtypes"})
-   private static void setPreallocatedListFromList(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField, Class<?> fieldType)
+   private static void setRecyclingArrayListPubSubFromList(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField, Class<?> fieldType)
          throws IllegalAccessException, InvocationTargetException, ClassNotFoundException, InstantiationException, RosEnumConversionException,
          NoSuchFieldException, IllegalArgumentException, NoSuchMethodException, SecurityException
    {
       List<?> rosValues = (List<?>) rosGetter.invoke(rosMessage);
 
-      PreallocatedList<?> ihmcList = (PreallocatedList<?>) ihmcField.get(ihmcMessage);
+      RecyclingArrayListPubSub<?> ihmcList = (RecyclingArrayListPubSub<?>) ihmcField.get(ihmcMessage);
 
       for (Object rosValue : rosValues)
       {
@@ -514,8 +514,8 @@ public class GenericROSTranslationTools
    private static void setField(Message message, Field field, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
    {
       Method rosSetterForField = getRosSetterForField(message.getClass(), field);
-      if (value instanceof PreallocatedList)
-         value = Arrays.asList(((PreallocatedList<?>) value).toArray());
+      if (value instanceof RecyclingArrayListPubSub)
+         value = Arrays.asList(((RecyclingArrayListPubSub<?>) value).toArray());
       else if (value instanceof TDoubleArrayList)
          value = ((TDoubleArrayList) value).toArray();
       else if (value instanceof TLongArrayList)
@@ -585,7 +585,7 @@ public class GenericROSTranslationTools
    {
       String methodName = getRosSetterNameForField(field);
       Class<?> type = field.getType().isEnum() ? byte.class : field.getType();
-      if (type == PreallocatedList.class)
+      if (type == RecyclingArrayListPubSub.class)
          type = List.class;
       else if (type == TByteArrayList.class)
          type = byte[].class;

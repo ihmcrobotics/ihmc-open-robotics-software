@@ -57,7 +57,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.HEALTH)
@@ -69,7 +69,7 @@ public class PacketCodeQualityTest
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = Integer.MAX_VALUE)
-   public void testPacketsUsePreallocatedListOnly()
+   public void testPacketsUseRecyclingArrayListPubSubOnly()
    { // This test won't fail on Arrays or Lists
       boolean verbose = true;
 
@@ -92,7 +92,7 @@ public class PacketCodeQualityTest
 
                Class<?> typeToCheck = field.getType();
 
-               if (typeToCheck.isArray() || Iterable.class.isAssignableFrom(typeToCheck))
+               if (typeToCheck.isArray() || (Iterable.class.isAssignableFrom(typeToCheck) && !RecyclingArrayListPubSub.class.isAssignableFrom(typeToCheck)))
                {
                   if (!packetTypesWithIterableOrArrayField.containsKey(packetType))
                      packetTypesWithIterableOrArrayField.put(packetType, new ArrayList<>());
@@ -264,7 +264,7 @@ public class PacketCodeQualityTest
 
                Class<?> typeToCheck = field.getType();
 
-               if (PreallocatedList.class.isAssignableFrom(typeToCheck))
+               if (RecyclingArrayListPubSub.class.isAssignableFrom(typeToCheck))
                {
                   Packet packetInstance = packetType.newInstance();
                   Object fieldInstance = field.get(packetInstance);
@@ -759,7 +759,7 @@ public class PacketCodeQualityTest
    private static final Set<Class<?>> thirdPartySerializableClasses = new HashSet<>();
    static
    {
-      thirdPartySerializableClasses.add(PreallocatedList.class);
+      thirdPartySerializableClasses.add(RecyclingArrayListPubSub.class);
       thirdPartySerializableClasses.add(TByteArrayList.class);
       thirdPartySerializableClasses.add(TFloatArrayList.class);
       thirdPartySerializableClasses.add(TDoubleArrayList.class);
