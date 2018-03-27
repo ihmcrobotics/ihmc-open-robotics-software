@@ -54,7 +54,6 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final DoubleParameter[] xGaitEndPhaseShift = new DoubleParameter[2];
 
    private final PacketCommunicator packetCommunicator;
-   private final QuadrupedReferenceFrames referenceFrames;
    private InputValueIntegrator comZ;
 
    private final AtomicBoolean xGaitRequested = new AtomicBoolean();
@@ -63,14 +62,13 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
    private final AtomicLong timestampNanos = new AtomicLong();
 
    public QuadrupedStepTeleopMode(PacketCommunicator packetCommunicator, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
-                                  QuadrupedReferenceFrames referenceFrames, double controlDT, YoVariableRegistry parentRegistry)
+                                  QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.packetCommunicator = packetCommunicator;
-      this.referenceFrames = referenceFrames;
 
       this.comZ = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
-      this.stepStream = new QuadrupedXGaitStepStream(velocityInput, xGaitSettings, referenceFrames, controlDT, timestamp, registry);
+      this.stepStream = new QuadrupedXGaitStepStream(velocityInput, xGaitSettings, referenceFrames, timestamp, registry);
 
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);
       xGaitStepDuration[1] = new DoubleParameter("xGaitStepDurationMode1", registry, 0.33);
