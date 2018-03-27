@@ -14,7 +14,7 @@ import com.thoughtworks.xstream.XStream;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class ScriptFileSaver
 {
@@ -105,9 +105,9 @@ public class ScriptFileSaver
             {
                field.set(copy, createCopyTrimmedToCurrentSize((Packet) field.get(message)));
             }
-            else if (PreallocatedList.class.isAssignableFrom(fieldType))
+            else if (RecyclingArrayListPubSub.class.isAssignableFrom(fieldType))
             {
-               field.set(copy, trimPreallocatedList((PreallocatedList) field.get(message)));
+               field.set(copy, trimRecyclingArrayListPubSub((RecyclingArrayListPubSub) field.get(message)));
             }
          }
 
@@ -121,15 +121,15 @@ public class ScriptFileSaver
    }
 
    @SuppressWarnings({"rawtypes", "unchecked"})
-   private static <T> PreallocatedList<T> trimPreallocatedList(PreallocatedList<T> list)
+   private static <T> RecyclingArrayListPubSub<T> trimRecyclingArrayListPubSub(RecyclingArrayListPubSub<T> list)
          throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
    {
       Field clazzField = list.getClass().getDeclaredField("clazz");
       clazzField.setAccessible(true);
-      PreallocatedList<T> trimmed = new PreallocatedList<>((Class<T>) clazzField.get(list), (Supplier<T>) null, 0);
-      Field posField = list.getClass().getDeclaredField("pos");
-      posField.setAccessible(true);
-      posField.setInt(trimmed, list.size() - 1);
+      RecyclingArrayListPubSub<T> trimmed = new RecyclingArrayListPubSub<>((Class<T>) clazzField.get(list), (Supplier<T>) null, 0);
+      Field sizeField = list.getClass().getDeclaredField("size");
+      sizeField.setAccessible(true);
+      sizeField.setInt(trimmed, list.size());
       Field valuesField = list.getClass().getDeclaredField("values");
       valuesField.setAccessible(true);
       valuesField.set(trimmed, list.toArray());
@@ -139,11 +139,11 @@ public class ScriptFileSaver
       
       if (Packet.class.isAssignableFrom((Class<?>) clazzField.get(list)))
       {
-         Packet[] values = (Packet[]) valuesField.get(trimmed);
+         Object[] values = (Object[]) valuesField.get(trimmed);
 
          for (int i = 0; i < values.length; i++)
          {
-            values[i] = createCopyTrimmedToCurrentSize(values[i]);
+            values[i] = createCopyTrimmedToCurrentSize((Packet) values[i]);
          }
       }
       return trimmed;
