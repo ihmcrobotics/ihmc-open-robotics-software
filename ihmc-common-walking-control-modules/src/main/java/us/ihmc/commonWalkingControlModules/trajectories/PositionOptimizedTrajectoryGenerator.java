@@ -356,9 +356,16 @@ public class PositionOptimizedTrajectoryGenerator
       doOptimizationUpdate();
       isDone.set(time > 1.0);
 
-      if (isDone())
+      if (time < 0.0)
       {
-         desiredPosition.setToZero();
+         desiredPosition.set(initialPosition);
+         desiredVelocity.setToZero();
+         desiredAcceleration.setToZero();
+         return;
+      }
+      if (time > 1.0)
+      {
+         desiredPosition.set(finalPosition);
          desiredVelocity.setToZero();
          desiredAcceleration.setToZero();
          return;
