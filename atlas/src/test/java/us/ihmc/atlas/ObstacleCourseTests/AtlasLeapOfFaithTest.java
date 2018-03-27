@@ -37,7 +37,9 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.08;
-      super.testUnknownStepDownOneFootOnEachStep(stepDownHeight);
+      double stepLength = 0.31;
+      double stairLength = 0.35;
+      super.testUnknownStepDownOneFootOnEachStep(stepLength, stairLength, stepDownHeight);
    }
 
    /** {@inheritDoc} */
@@ -62,6 +64,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
 
    /** {@inheritDoc} */
    @ContinuousIntegrationTest(estimatedDuration = 110.0)
+   @Ignore("Re-enable when planar region constraints are used.")
    @Test(timeout = 230000)
    public void testRandomHeightField() throws SimulationExceededMaximumTimeException
    {
@@ -164,11 +167,5 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
          return true;
       }
 
-   }
-
-   public static void main(String[] args) throws Exception
-   {
-      AtlasLeapOfFaithTest test = new AtlasLeapOfFaithTest();
-      test.testUnknownStepDownOneFootOnEachStep();
    }
 }
