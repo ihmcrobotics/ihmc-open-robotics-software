@@ -1,20 +1,20 @@
 package us.ihmc.pathPlanning.visibilityGraphs.dataStructure;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.commons.math3.util.Precision;
+import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 
 import java.util.Random;
 
-import org.apache.commons.math3.util.Precision;
-import org.junit.Test;
-
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
+import static org.junit.Assert.assertEquals;
 
 public class ConnectionPoint3DTest
 {
    private static final int ITERATIONS = 10000;
    private static final double EPSILON = 1.0e-12;
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 1000)
    public void testRound() throws Exception
    {

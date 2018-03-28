@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoTrajectoryTest
@@ -16,6 +17,7 @@ public class YoTrajectoryTest
       registry.clear();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testGetDerivative()
    {

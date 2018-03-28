@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -16,6 +17,7 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 
 public class MovingZUpFrameTest
 {
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testAgainstFiniteDifferenceWithChainRobot()
    {
@@ -66,6 +68,7 @@ public class MovingZUpFrameTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testConsistencyWithZUpFrameWithChainRobot()
    {
