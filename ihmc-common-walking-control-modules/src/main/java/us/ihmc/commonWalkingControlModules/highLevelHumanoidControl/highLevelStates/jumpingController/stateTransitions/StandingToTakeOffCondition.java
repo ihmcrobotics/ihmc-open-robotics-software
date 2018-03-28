@@ -10,7 +10,7 @@ public class StandingToTakeOffCondition implements StateTransitionCondition, Sta
    @Override
    public boolean checkCondition()
    {
-      return false; //!standingForTheFirstTime;
+      return standingForTheFirstTime;
    }
 
    @Override
