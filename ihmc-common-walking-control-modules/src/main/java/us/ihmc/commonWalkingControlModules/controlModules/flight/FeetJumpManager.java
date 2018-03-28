@@ -8,8 +8,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.providers.EnumProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -21,22 +23,28 @@ public class FeetJumpManager implements JumpControlManagerInterface
    private final SideDependentList<YoPlaneContactState> footContactStates;
    private final SideDependentList<ContactableFoot> contactableFeet;
    private final SideDependentList<JumpFootControlModule> footControlModules;
-
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
+   
    private EnumProvider<JumpStateEnum> currentState;
 
    public FeetJumpManager(HighLevelHumanoidControllerToolbox controllerToolbox, JumpControllerParameters jumpControlParameters, YoVariableRegistry registry)
    {
+      this.controllerToolbox = controllerToolbox;
       this.footSwitches = controllerToolbox.getFootSwitches();
       this.footContactStates = controllerToolbox.getFootContactStates();
       this.contactableFeet = controllerToolbox.getContactableFeet();
       this.inverseDynamicsCommandList = new InverseDynamicsCommandList();
       this.footControlModules = new SideDependentList<>();
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      RigidBody elevator = fullRobotModel.getElevator();
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      
       for (RobotSide robotSide : RobotSide.values)
       {
          YoPlaneContactState footContactState = footContactStates.get(robotSide);
          FootSwitchInterface footSwitch = footSwitches.get(robotSide);
          ContactableFoot contactableFoot = contactableFeet.get(robotSide);
-         JumpFootControlModule footControlModule = new JumpFootControlModule(robotSide, footContactState, footSwitch, contactableFoot, jumpControlParameters,
+         JumpFootControlModule footControlModule = new JumpFootControlModule(robotSide, footContactState, footSwitch, contactableFoot, elevator, pelvis, jumpControlParameters,
                                                                              registry);
          footControlModules.put(robotSide, footControlModule);
       }
@@ -51,6 +59,30 @@ public class FeetJumpManager implements JumpControlManagerInterface
    @Override
    public void compute()
    {
+      switch (currentState.getValue())
+      {
+      case STANDING:
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            controllerToolbox.setFootContactStateFullyConstrained(robotSide);
+            footControlModules.get(robotSide).setToDampedCompliantMode();
+         }
+         break;
+      case TAKE_OFF:
+         for (RobotSide robotSide : RobotSide.values)
+            controllerToolbox.setFootContactStateFullyConstrained(robotSide);
+         break;
+      case FLIGHT:
+         for (RobotSide robotSide : RobotSide.values)
+            controllerToolbox.setFootContactStateFree(robotSide);
+         break;
+      case LANDING:
+         for (RobotSide robotSide : RobotSide.values)
+            controllerToolbox.setFootContactStateFullyConstrained(robotSide);
+         break;
+      default:
+         throw new RuntimeException("Invalid jump state");
+      }
 
    }
 

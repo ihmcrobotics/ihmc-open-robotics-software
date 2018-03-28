@@ -93,7 +93,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
          yoDesiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
          setOptimizationWeights(50.0, 2.0);
          setMomentumCommandWeights();
-         momentumCommand.setSelectionMatrixForLinearControl();
+         momentumCommand.setSelectionMatrixToIdentity();
          break;
       case TAKE_OFF:
          throw new RuntimeException("Unimplemented");

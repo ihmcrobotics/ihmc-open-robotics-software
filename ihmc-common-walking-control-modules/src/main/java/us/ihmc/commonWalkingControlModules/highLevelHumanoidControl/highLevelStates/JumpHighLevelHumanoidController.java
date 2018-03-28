@@ -9,7 +9,6 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
-import us.ihmc.commonWalkingControlModules.controlModules.flight.ContactStateManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpControlManagerInterface;
@@ -68,7 +67,6 @@ public class JumpHighLevelHumanoidController
 
    private final CentroidalMomentumManager centroidalMomentumManager;
    private final GravityCompensationManager gravityCompensationManager;
-   private final ContactStateManager contactStateManager;
 
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
    private final FeetJumpManager feetManager;
@@ -106,8 +104,6 @@ public class JumpHighLevelHumanoidController
       controlManagerList.add(centroidalMomentumManager);
       this.gravityCompensationManager = jumpControlManagerFactory.getOrCreateGravityCompensationManager();
       controlManagerList.add(gravityCompensationManager);
-      this.contactStateManager = jumpControlManagerFactory.getOrCreateContactStateManager();
-      controlManagerList.add(contactStateManager);
       this.feetManager = jumpControlManagerFactory.getOrCreateFeetManager();
       controlManagerList.add(feetManager);
 
