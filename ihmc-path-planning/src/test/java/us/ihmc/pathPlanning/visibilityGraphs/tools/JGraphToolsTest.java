@@ -11,6 +11,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.SimpleWeightedGraph;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -23,6 +24,7 @@ public class JGraphToolsTest
    private static final double EPSILON = 1.0e-12;
 
    @Test(timeout = 10000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    public void testRedundantPathBugTwoStages()
    {
       Random random = new Random(34667);
@@ -73,6 +75,7 @@ public class JGraphToolsTest
    }
 
    @Test(timeout = 10000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    public void testRedundantPathBugRandomNumberOfStages()
    {
       Random random = new Random(34667);
