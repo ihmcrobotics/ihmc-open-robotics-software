@@ -69,11 +69,6 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
             oneJointTrajectoryMessage.getTrajectoryPoints(oneDoFJointTrajectoryCommand);
             oneDoFJointTrajectoryCommand.setWeight(oneJointTrajectoryMessage.getWeight());
          }
-         else
-         {
-            oneDoFJointTrajectoryCommand.clear();
-            oneDoFJointTrajectoryCommand.setWeight(0.0);
-         }
       }
    }
 
