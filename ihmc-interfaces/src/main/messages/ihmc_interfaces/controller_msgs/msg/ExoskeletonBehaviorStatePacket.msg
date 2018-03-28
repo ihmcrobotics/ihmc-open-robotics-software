@@ -1,0 +1,1 @@
+byte exoskeleton_behavior_state
