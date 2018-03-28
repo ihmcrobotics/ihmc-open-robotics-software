@@ -93,7 +93,7 @@ public class CoPPointsInFootTest
       assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(0).getTime(), 0.2, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAddAndSetIncludingFrameWithYoFramePoint()
    {
@@ -111,7 +111,7 @@ public class CoPPointsInFootTest
       assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(1).getTime(), 0.12, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAddAndSetIncludingFrameWithCoPTrajectoryPoint()
    {
@@ -151,7 +151,7 @@ public class CoPPointsInFootTest
       assertTrue(framePointForTesting.getZ() == 6.6);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testChangeFrame()
    {

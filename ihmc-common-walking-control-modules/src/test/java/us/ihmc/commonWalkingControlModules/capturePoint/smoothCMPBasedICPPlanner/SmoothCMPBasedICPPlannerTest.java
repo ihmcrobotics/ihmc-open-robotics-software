@@ -344,7 +344,7 @@ public class SmoothCMPBasedICPPlannerTest
          scs.closeAndDispose();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
    @Test(timeout = 30000)
    public void testForDiscontinuitiesWithoutAngularMomentum()
    {
@@ -353,7 +353,7 @@ public class SmoothCMPBasedICPPlannerTest
       simulate(true, false, true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 2.0)
    @Test(timeout = 30000)
    public void testForDiscontinuitiesWithAngularMomentum()
    {
@@ -362,7 +362,7 @@ public class SmoothCMPBasedICPPlannerTest
       simulate(true, false, true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
    public void testForPlanningConsistencyWithoutAngularMomentum()
    {
@@ -371,7 +371,7 @@ public class SmoothCMPBasedICPPlannerTest
       simulate(false, true, true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.7)
    @Test(timeout = 30000)
    public void testForPlanningConsistencyWithAngularMomentum()
    {

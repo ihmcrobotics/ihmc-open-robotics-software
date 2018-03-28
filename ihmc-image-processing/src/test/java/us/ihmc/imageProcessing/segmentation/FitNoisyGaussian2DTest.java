@@ -58,7 +58,7 @@ public class FitNoisyGaussian2DTest {
     * Test with a few outliers added
     */
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void obviousOutliers() {
       double meanX = 5;

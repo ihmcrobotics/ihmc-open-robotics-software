@@ -22,7 +22,7 @@ public class CentroidalMomentumHandlerTest
    private static final int ITERATIONS = 1000;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testCenterOfMassVelocityChainRobot() throws Exception
    {
@@ -56,7 +56,7 @@ public class CentroidalMomentumHandlerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testCenterOfMassVelocityFloatingBaseRobot() throws Exception
    {

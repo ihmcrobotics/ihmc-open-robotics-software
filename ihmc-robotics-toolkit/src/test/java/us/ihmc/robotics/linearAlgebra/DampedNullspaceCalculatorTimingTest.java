@@ -19,8 +19,8 @@ import static org.junit.Assert.assertEquals;
 
 public class DampedNullspaceCalculatorTimingTest
 {
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 100000000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 16.6)
+   @Test(timeout = 83000)
    public void testTimings()
    {
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());

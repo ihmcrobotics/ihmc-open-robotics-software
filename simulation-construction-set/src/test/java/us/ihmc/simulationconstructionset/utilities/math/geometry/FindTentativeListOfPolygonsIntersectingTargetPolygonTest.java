@@ -283,7 +283,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.4)
+	@ContinuousIntegrationTest(estimatedDuration = 2.5)
 	@Test(timeout=300000)
    public void testFindTentativeListOfPolygonsIntersectingTargetPolygonTiming()
    {

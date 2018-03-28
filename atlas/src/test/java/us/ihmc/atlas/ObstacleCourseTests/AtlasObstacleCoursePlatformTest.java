@@ -40,56 +40,56 @@ public class AtlasObstacleCoursePlatformTest extends DRCObstacleCoursePlatformTe
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 33.9)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 70.8)
+   @Test(timeout = 350000)
    public void testSidestepOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       super.testSidestepOverSmallPlatform();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 40.5)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 65.6)
+   @Test(timeout = 330000)
    public void testSidestepOverSmallWall() throws SimulationExceededMaximumTimeException
    {
       super.testSidestepOverSmallWall();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 26.0)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 38.2)
+   @Test(timeout = 190000)
    public void testWalkingOffOfMediumPlatform() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOffOfMediumPlatform();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 35.4)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 52.7)
+   @Test(timeout = 260000)
    public void testWalkingOffOfMediumPlatformSlowSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOffOfMediumPlatformSlowSteps();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.6)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 38.3)
+   @Test(timeout = 190000)
    public void testWalkingOntoMediumPlatformToesTouching() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOntoMediumPlatformToesTouching();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 40.5)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 54.3)
+   @Test(timeout = 270000)
    public void testWalkingOverSmallPlatform() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOverSmallPlatform();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.7)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 39.9)
+   @Test(timeout = 200000)
    public void testWalkingOverSmallPlatformQuickly() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOverSmallPlatformQuickly();

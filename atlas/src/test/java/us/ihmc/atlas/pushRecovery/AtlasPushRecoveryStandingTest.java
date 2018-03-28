@@ -39,32 +39,32 @@ public class AtlasPushRecoveryStandingTest extends DRCPushRecoveryStandingTest
 	   super.testDoublePushForwardInDoubleSupportAndContinueWalking();
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 80.2)
-   @Test(timeout = 270000)
+	@ContinuousIntegrationTest(estimatedDuration = 68.4)
+   @Test(timeout = 340000)
 	@Override
 	public void testPushBackwardForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
 	{
 	   super.testPushBackwardForwardInDoubleSupportAndContinueWalking();
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 70.2)
-   @Test(timeout = 270000)
+	@ContinuousIntegrationTest(estimatedDuration = 56.4)
+   @Test(timeout = 280000)
 	@Override
 	public void testPushBackwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
 	{
 	   super.testPushBackwardInDoubleSupportAndContinueWalking();
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 53.2)
-   @Test(timeout = 270000)
+	@ContinuousIntegrationTest(estimatedDuration = 39.3)
+   @Test(timeout = 200000)
 	@Override
 	public void testPushForwardInDoubleSupport() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
 	{
 	   super.testPushForwardInDoubleSupport();
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 75.0)
-   @Test(timeout = 270000)
+	@ContinuousIntegrationTest(estimatedDuration = 61.3)
+   @Test(timeout = 310000)
 	@Override
 	public void testPushForwardInDoubleSupportAndContinueWalking() throws SimulationExceededMaximumTimeException, InterruptedException, ControllerFailureException
 	{

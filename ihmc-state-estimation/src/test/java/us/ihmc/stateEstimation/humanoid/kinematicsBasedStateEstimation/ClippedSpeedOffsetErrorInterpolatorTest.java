@@ -314,7 +314,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testMaxTranslationalCorrectionSpeedClip()
    {
@@ -626,8 +626,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 6.7)
-   @Test(timeout = 33000)
+   @ContinuousIntegrationTest(estimatedDuration = 11.4)
+   @Test(timeout = 57000)
    public void testRotationCorrectionIsActuallyDeactivatedWhenAskedTo()
    {
       Random random = new Random();
@@ -702,7 +702,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testErrorRotationCheckIsBehavingProperly()
    {

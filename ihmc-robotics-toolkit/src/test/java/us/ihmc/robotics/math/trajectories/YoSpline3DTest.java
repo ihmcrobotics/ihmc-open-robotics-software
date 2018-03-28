@@ -136,7 +136,7 @@ public class YoSpline3DTest
 	   return spline;
 	}
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testArcLengthMethods()
    {

@@ -280,7 +280,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testSameFinalPoseConstraint()
    {
@@ -415,7 +415,7 @@ public class BlendedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.9)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {

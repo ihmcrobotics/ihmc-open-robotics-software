@@ -279,7 +279,7 @@ public class TrapezoidalVelocityTrajectoryTest
       performTests(trap, t0, x0, v0, xF, vF, vMax, aMax);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testNotEnforcingFinalVelocity()
    {

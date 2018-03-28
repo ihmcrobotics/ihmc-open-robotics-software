@@ -25,32 +25,32 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasPushRecoveryOverCinderBlocksTest extends AvatarPushRecoveryOverCinderBlocksTest
 {
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 72.4)
+   @Test(timeout = 360000)
    public void testNoPushFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testNoPushFlatBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 62.3)
+   @Test(timeout = 310000)
    public void testNoPushForwardWalkOverFlatBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testNoPushForwardWalkOverFlatBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 93.5)
+   @Test(timeout = 470000)
    public void testNoPushTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testNoPushTiltedBlocks();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 62.7)
+   @Test(timeout = 310000)
    public void testNoPushForwardTiltedBlocks() throws SimulationExceededMaximumTimeException
    {
       super.testNoPushForwardTiltedBlocks();

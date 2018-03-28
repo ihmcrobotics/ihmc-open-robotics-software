@@ -79,8 +79,8 @@ public class ICPOptimizationSolutionHandlerTest
       return referenceLocation;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWellWithinDeadband()
    {
       double scale = 0.2;
@@ -88,8 +88,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testALittleWithinDeadband()
    {
       double scale = 0.9;
@@ -97,8 +97,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testJustWithinDeadband()
    {
       double scale = 0.99;
@@ -106,8 +106,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testRightOnDeadband()
    {
       double scale = 1.0;
@@ -115,8 +115,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testJustOutsideDeadband()
    {
       double scale = 1.01;
@@ -124,8 +124,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testALittleOutsideDeadband()
    {
       double scale = 1.05;
@@ -133,8 +133,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWellOutsideDeadband()
    {
       double scale = 1.5;
@@ -142,8 +142,8 @@ public class ICPOptimizationSolutionHandlerTest
       runDeadbandTest(scale, deadbandSize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testWithinDeadbandResolution() throws NoConvergenceException
    {
       double scale = 1.1;
@@ -228,8 +228,8 @@ public class ICPOptimizationSolutionHandlerTest
       assertEquals(0.0, solutionHandler.getFootstepAdjustment().length(), 1e-3);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testOutsideDeadbandResolution() throws NoConvergenceException
    {
       double scale = 1.1;

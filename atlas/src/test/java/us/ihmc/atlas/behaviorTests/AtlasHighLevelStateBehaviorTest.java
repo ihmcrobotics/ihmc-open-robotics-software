@@ -36,16 +36,16 @@ public class AtlasHighLevelStateBehaviorTest extends DRCHighLevelStateBehaviorTe
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 26.3)
-   @Test(timeout = 130000)
+   @ContinuousIntegrationTest(estimatedDuration = 38.8)
+   @Test(timeout = 190000)
    public void testWalkingState() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingState();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 33.0)
-   @Test(timeout = 160000)
+   @ContinuousIntegrationTest(estimatedDuration = 38.5)
+   @Test(timeout = 190000)
    public void testDoNothingBahviourState() throws SimulationExceededMaximumTimeException
    {
       super.testDoNothingBahviourState();

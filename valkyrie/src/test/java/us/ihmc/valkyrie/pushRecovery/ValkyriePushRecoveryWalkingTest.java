@@ -27,47 +27,47 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.VALKYRIE);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 26.7)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 43.4)
+   @Test(timeout = 220000)
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushLeftEarlySwing(700.0);
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 69.5)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 80.7)
+   @Test(timeout = 400000)
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushLeftInitialTransferState();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 69.5)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 72.3)
+   @Test(timeout = 360000)
    public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightInitialTransferState();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 44.5)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 45.4)
+   @Test(timeout = 230000)
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightLateSwing();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 44.5)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 72.6)
+   @Test(timeout = 360000)
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightThenLeftMidSwing(700.0);
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 38.2)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 44.9)
+   @Test(timeout = 220000)
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightTransferState();
@@ -82,8 +82,8 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 29.0)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 44.0)
+   @Test(timeout = 220000)
    public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException
    {
       super.testPushTowardsTheFront();

@@ -26,39 +26,39 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 54.8)
-   @Test(timeout = 160000)
+   @ContinuousIntegrationTest(estimatedDuration = 71.7)
+   @Test(timeout = 360000)
    public void testHeightModeSwitchWhileWalking() throws Exception
    {
       super.testHeightModeSwitchWhileWalking();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 59.9)
-   @Test(timeout = 160000)
+   @ContinuousIntegrationTest(estimatedDuration = 73.1)
+   @Test(timeout = 370000)
    public void testHeightUsingMultipleWaypoints() throws Exception
    {
       super.testHeightUsingMultipleWaypoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 63.1)
-   @Test(timeout = 160000)
+   @ContinuousIntegrationTest(estimatedDuration = 78.4)
+   @Test(timeout = 390000)
    public void testHeightUsingMultipleWaypointsWhileWalking() throws Exception
    {
       super.testHeightUsingMultipleWaypointsWhileWalking();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 160000)
+   @ContinuousIntegrationTest(estimatedDuration = 23.9)
+   @Test(timeout = 120000)
    public void testMultipleWaypoints() throws Exception
    {
       super.testMultipleWaypoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @ContinuousIntegrationTest(estimatedDuration = 32.4)
    @Test(timeout = 160000)
    public void testSingleWaypoint() throws Exception
    {
@@ -66,24 +66,24 @@ public class ValkyrieEndToEndPelvisTrajectoryMessageTest extends EndToEndPelvisT
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 64.7)
-   @Test(timeout = 160000)
+   @ContinuousIntegrationTest(estimatedDuration = 75.3)
+   @Test(timeout = 380000)
    public void testSingleWaypointAndWalk() throws Exception
    {
       super.testSingleWaypointAndWalk();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 24.6)
-   @Test(timeout = 160000)
+   @ContinuousIntegrationTest(estimatedDuration = 29.7)
+   @Test(timeout = 150000)
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 93.8)
+   @Test(timeout = 470000)
    public void testSingleWaypointThenManualChange() throws Exception
    {
       super.testSingleWaypointThenManualChange();

@@ -23,7 +23,7 @@ public class VaryingStairGroundProfileTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void test()
    {

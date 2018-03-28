@@ -139,7 +139,7 @@ public final class PointFeedbackControllerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testConvergenceWithJerryQP() throws Exception
    {
@@ -264,7 +264,7 @@ public final class PointFeedbackControllerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCompareAgainstSpatialController() throws Exception
    {

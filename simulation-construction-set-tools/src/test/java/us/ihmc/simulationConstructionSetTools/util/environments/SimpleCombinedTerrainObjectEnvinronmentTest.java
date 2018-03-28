@@ -21,7 +21,7 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
 {
    private static boolean SHOW_GUI = false;
 
-	@ContinuousIntegrationTest(estimatedDuration = 2.0)
+	@ContinuousIntegrationTest(estimatedDuration = 2.8)
 	@Test(timeout=300000)
    public void testSimpleCombinedTerrainObjectEnvironment()
    {

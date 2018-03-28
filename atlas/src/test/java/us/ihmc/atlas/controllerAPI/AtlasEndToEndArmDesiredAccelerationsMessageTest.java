@@ -28,8 +28,8 @@ public class AtlasEndToEndArmDesiredAccelerationsMessageTest extends EndToEndArm
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.0)
-   @Test(timeout = 40000)
+   @ContinuousIntegrationTest(estimatedDuration = 28.0)
+   @Test(timeout = 140000)
    public void testSimpleCommands() throws Exception
    {
       super.testSimpleCommands();

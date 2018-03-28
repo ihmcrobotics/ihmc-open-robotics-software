@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public class OrientationInterpolationCalculatorTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
 
    /**

@@ -201,7 +201,7 @@ public class BacklashCompensatingVelocityYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.7)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void testBacklashOnlyCrossingZeroConstantPositiveAcceleration2()
    {
@@ -266,7 +266,7 @@ public class BacklashCompensatingVelocityYoVariableTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.6)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void testBacklashOnlyCrossingZeroConstantNegativeAcceleration2()
    {

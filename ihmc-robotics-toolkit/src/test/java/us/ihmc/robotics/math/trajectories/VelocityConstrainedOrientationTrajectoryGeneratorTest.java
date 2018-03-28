@@ -21,7 +21,7 @@ public class VelocityConstrainedOrientationTrajectoryGeneratorTest
 {
    private static boolean DEBUG = true;
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.2)
+   @ContinuousIntegrationTest(estimatedDuration = 1.8)
    @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {

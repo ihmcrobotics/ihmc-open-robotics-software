@@ -19,24 +19,24 @@ public class ValkyrieReferenceFrameHashTest extends ReferenceFrameHashTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 5.0)
-   @Test(timeout = 15000, expected = IllegalArgumentException.class)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 30000, expected = IllegalArgumentException.class)
    public void testAddingTwoFramesWithTheSameNameThrowsException()
    {
       super.testAddingTwoFramesWithTheSameNameThrowsException();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 5.0)
-   @Test(timeout = 15000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
    public void testAllFramesGottenFromFullRobotModelMethodsAreInTheHashList() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       super.testAllFramesGottenFromFullRobotModelMethodsAreInTheHashList();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 5.0)
-   @Test(timeout = 15000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
    public void testAllFramesGottenFromHumanoidReferenceFrameMethodsAreInTheHashList()
          throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
@@ -44,16 +44,16 @@ public class ValkyrieReferenceFrameHashTest extends ReferenceFrameHashTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 5.0)
-   @Test(timeout = 15000)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 30000)
    public void testAllFramesInFullRobotModelMatchHumanoidReferenceFramesThroughHashCode()
    {
       super.testAllFramesInFullRobotModelMatchHumanoidReferenceFramesThroughHashCode();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 5.0)
-   @Test(timeout = 15000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @Test(timeout = 30000)
    public void testGetReferenceFrameFromHashCodeReturnsSameNamedFrames()
    {
       super.testGetReferenceFrameFromHashCodeReturnsSameNamedFrames();

@@ -15,8 +15,8 @@ public class AtlasEndToEndFootstepDataListMessageTest extends EndToEndFootstepDa
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 80000)
+   @ContinuousIntegrationTest(estimatedDuration = 51.3)
+   @Test(timeout = 260000)
    @Override
    public void testQueuing() throws SimulationExceededMaximumTimeException
    {

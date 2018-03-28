@@ -272,7 +272,7 @@ public class LidarScanTest
       }
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testGetAllPoints()
    {

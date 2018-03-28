@@ -18,7 +18,7 @@ public class MinimumJerkTrajectoryTest
       return min + Math.random() * (max - min);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
    public void testRandomInitialFinalConditions()
    {

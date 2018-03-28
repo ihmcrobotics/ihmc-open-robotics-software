@@ -38,7 +38,7 @@ public class EuclidCoreMissingToolsTest
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.123, 100.123, 1000.123), roundedVector, 1e-14);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testProjectRotationOnAxis()
    {

@@ -27,88 +27,88 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 16.3)
-   @Test(timeout = 81000)
+   @ContinuousIntegrationTest(estimatedDuration = 22.5)
+   @Test(timeout = 110000)
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
       super.testControllerFailureKicksIn();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 26.0)
-   @Test(timeout = 130000)
+   @ContinuousIntegrationTest(estimatedDuration = 42.4)
+   @Test(timeout = 210000)
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       super.testLongBackwardPushWhileStanding();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.4)
-   @Test(timeout = 82000)
+   @ContinuousIntegrationTest(estimatedDuration = 32.5)
+   @Test(timeout = 160000)
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       super.testLongBackwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.7)
-   @Test(timeout = 78000)
+   @ContinuousIntegrationTest(estimatedDuration = 32.3)
+   @Test(timeout = 160000)
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       super.testLongForwardPushWhileStanding();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 21.2)
-   @Test(timeout = 86000)
+   @ContinuousIntegrationTest(estimatedDuration = 33.6)
+   @Test(timeout = 170000)
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       super.testLongForwardPushWhileStandingAfterControllerFailureKickedIn();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 36.3)
-   @Test(timeout = 230000)
+   @ContinuousIntegrationTest(estimatedDuration = 51.2)
+   @Test(timeout = 260000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileInSwing();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 110000)
+   @ContinuousIntegrationTest(estimatedDuration = 48.8)
+   @Test(timeout = 240000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileInTransfer();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 33.7)
-   @Test(timeout = 73000)
+   @ContinuousIntegrationTest(estimatedDuration = 45.4)
+   @Test(timeout = 230000)
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileStanding();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 72000)
+   @ContinuousIntegrationTest(estimatedDuration = 48.2)
+   @Test(timeout = 240000)
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileStandingRecoveringAfterControllerFailureKickedIn();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 71000)
+   @ContinuousIntegrationTest(estimatedDuration = 48.3)
+   @Test(timeout = 240000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
       super.testRecoveringWithSwingSpeedUpWhileInSwing();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 23.4)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 35.3)
+   @Test(timeout = 180000)
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
       super.testRecoveryWhileInFlamingoStance();
