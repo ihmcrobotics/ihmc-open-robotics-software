@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -200,7 +201,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints() != null)
+      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints().size() > 0 )
       {
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
@@ -338,7 +339,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       if (!badPlane)
       {
          adjustFootstepWithoutHeightmap(footstep, height, surfaceNormal);
-         footstep.predictedContactPoints = null;
+         footstep.predictedContactPoints.clear();
          return Footstep.FootstepType.FULL_FOOTSTEP;
       }
 
@@ -428,7 +429,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       FootstepDataMessage maxValueFootstep = null;
       double valueOfCurrent;
 
-      ArrayList<? extends Point2DReadOnly> currentPredictedContactPoints;
+      List<Point2D> currentPredictedContactPoints;
       for (HullFace face : faces)
       {
          if (face.getSlopeAngle() > Math.PI / 4)
@@ -447,7 +448,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
             continue;
          }
 
-         currentFaceFootstep.setPredictedContactPoints((ArrayList<Point2D>) currentPredictedContactPoints);
+         currentFaceFootstep.setPredictedContactPoints(currentPredictedContactPoints);
          valueOfCurrent = footstepValueFunction.getFootstepValue(currentFaceFootstep);
 
          if (valueOfCurrent > maxValue)
@@ -468,7 +469,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       // determine the footstep with the highest value, then
       footstep.setLocation(maxValueFootstep.getLocation());
       footstep.setOrientation(maxValueFootstep.getOrientation());
-      footstep.setPredictedContactPoints(maxValueFootstep.getPredictedContactPoints());
+      MessageTools.copyData(maxValueFootstep.getPredictedContactPoints(), footstep.predictedContactPoints);
       return true;
    }
 
@@ -504,7 +505,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       }
    }
 
-   private ArrayList<? extends Point2DReadOnly> getPredictedContactPointsForFootstep(FootstepDataMessage footstepData, List<Point3D> points, double distanceTolerance)
+   private List<Point2D> getPredictedContactPointsForFootstep(FootstepDataMessage footstepData, List<Point3D> points, double distanceTolerance)
    {
       // get the plane of the footstep
       RotationMatrix rotationMatrix = new RotationMatrix();
@@ -565,7 +566,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       }
 
       int cropNumber = 4;
-      ArrayList<? extends Point2DReadOnly> finalSupportPoints;
+      List<Point2D> finalSupportPoints;
       if (cropNumber == 4)
       {
          finalSupportPoints = reduceListOfPointsToFourFootstepBased(supportPoints);
@@ -585,7 +586,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    // class to help with cropping calculations
    public class VertexData implements Comparable<VertexData>
    {
-      Point2DReadOnly position;
+      Point2D position;
       double area;
       double distanceToCentroid;
       VertexData nextVertexData;
@@ -593,7 +594,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
 
       public VertexData(Point2DReadOnly position)
       {
-         this.position = position;
+         this.position = new Point2D(position);
          this.area = 0.0;
          this.distanceToCentroid = 0.0;
       }
@@ -650,7 +651,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       }
    }
 
-   public ArrayList<Point2DReadOnly> reduceListOfPointsByArea(List<? extends Point2DReadOnly> listOfPoints, int maxNumPoints)
+   public List<Point2D> reduceListOfPointsByArea(List<? extends Point2DReadOnly> listOfPoints, int maxNumPoints)
    {
       ConvexPolygon2D supportPolygon = new ConvexPolygon2D(listOfPoints);
       supportPolygon.update();
@@ -682,7 +683,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
          currentNumberOfVertices--;
       }
 
-      ArrayList<Point2DReadOnly> finalListOfSupportPoints = new ArrayList<>();
+      ArrayList<Point2D> finalListOfSupportPoints = new ArrayList<>();
       for (VertexData vertex : verticesOfPolygon)
       {
          finalListOfSupportPoints.add(vertex.position);
@@ -691,7 +692,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       return finalListOfSupportPoints;
    }
 
-   private ArrayList<? extends Point2DReadOnly> reduceListOfPointsToFourFootstepBased(List<? extends Point2DReadOnly> listOfPoints)
+   private List<Point2D> reduceListOfPointsToFourFootstepBased(List<? extends Point2DReadOnly> listOfPoints)
    {
 
       ConvexPolygon2D basePolygon = parameters.getCollisionPolygon();

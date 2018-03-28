@@ -2,11 +2,8 @@ package us.ihmc.communication.packets;
 
 import static us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage.nullEqualsAndEpsilonEquals;
 
-import java.util.Arrays;
-
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
@@ -44,7 +41,7 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
     * center of mass frame.
     * </p>
     */
-   public float[] weights;
+   public WeightMatrix3DMessage weights = new WeightMatrix3DMessage();
 
    public KinematicsToolboxCenterOfMassMessage()
    {
@@ -60,8 +57,7 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
          selectionMatrix = new SelectionMatrix3DMessage();
          selectionMatrix.set(other.selectionMatrix);
       }
-      if (other.weights != null)
-         weights = Arrays.copyOf(other.weights, other.weights.length);
+      weights.set(other.weights);
       setPacketInformation(other);
    }
 
@@ -92,13 +88,6 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       setDesiredPosition(desiredPosition);
    }
 
-   /** Ensures that the array for the weights is initialized. */
-   private void initializeWeight()
-   {
-      if (weights == null)
-         weights = new float[3];
-   }
-
    /**
     * Sets the weight to use for this task.
     * <p>
@@ -110,9 +99,9 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
     */
    public void setWeight(double weight)
    {
-      initializeWeight();
-      for (int i = 0; i < 3; i++)
-         weights[i] = (float) weight;
+      weights.setXWeight(weight);
+      weights.setYWeight(weight);
+      weights.setZWeight(weight);
    }
 
    /**
@@ -189,8 +178,9 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       }
       else
       {
-         for (int i = 0; i < 3; i++)
-            weightVectorToPack.set(i, 0, weights[i]);
+         weightVectorToPack.set(0, 0, weights.getXWeight());
+         weightVectorToPack.set(1, 0, weights.getYWeight());
+         weightVectorToPack.set(2, 0, weights.getZWeight());
       }
    }
 
@@ -219,11 +209,8 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
          return false;
       if (weights != null && other.weights == null)
          return false;
-      for (int i = 0; i < 6; i++)
-      {
-         if (!MathTools.epsilonEquals(weights[i], other.weights[i], epsilon))
-            return false;
-      }
+      if (!weights.epsilonEquals(other.weights, epsilon))
+         return false;
       return true;
    }
 }

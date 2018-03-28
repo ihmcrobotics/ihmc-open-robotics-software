@@ -192,7 +192,7 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
             {
                ThreadTools.sleep(5);
             }
-            BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData());
+            BufferedImage latestUnmodifiedCameraImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
             detect(latestUnmodifiedCameraImage, videoPacket.getPosition(), videoPacket.getOrientation());
          } finally
          {
@@ -242,9 +242,9 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
          DetectionVisualizationPackets coactiveVisualizationPackets = new DetectionVisualizationPackets(boundingBoxes, heatMap);
          detectionResultListeners.forEach(consumer -> consumer.accept(coactiveVisualizationPackets));
 
-         if (boundingBoxes.labels.length > 0)
+         if (boundingBoxes.labels.size() > 0)
          {
-            Rectangle rectangle = new Rectangle(boundingBoxes.boundingBoxXCoordinates[0], boundingBoxes.boundingBoxYCoordinates[0], boundingBoxes.boundingBoxWidths[0], boundingBoxes.boundingBoxHeights[0]);
+            Rectangle rectangle = new Rectangle(boundingBoxes.boundingBoxXCoordinates.get(0), boundingBoxes.boundingBoxYCoordinates.get(0), boundingBoxes.boundingBoxWidths.get(0), boundingBoxes.boundingBoxHeights.get(0));
             double knownWidth = expectedObjectSize.getDoubleValue();
             Point2D_F64 topLeft = new Point2D_F64(rectangle.x, rectangle.y);
             Point2D_F64 bottomRight = new Point2D_F64(rectangle.x + rectangle.width, rectangle.y + rectangle.height);

@@ -1,8 +1,18 @@
 package us.ihmc.communication.packets;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -12,6 +22,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -35,7 +46,7 @@ public class MessageTools
    public static SimulatedLidarScanPacket createSimulatedLidarScanPacket(int sensorId, LidarScanParameters params, float[] ranges)
    {
       SimulatedLidarScanPacket message = new SimulatedLidarScanPacket();
-      message.ranges = ranges;
+      message.ranges.add(ranges);
       message.sensorId = sensorId;
       message.params = new LidarScanParametersMessage();
       message.params.timestamp = params.timestamp;
@@ -58,7 +69,7 @@ public class MessageTools
       message.robotTimestamp = timestamp;
       message.lidarPosition = lidarPosition;
       message.lidarOrientation = lidarOrientation;
-      message.scan = scan;
+      message.scan.add(scan);
       return message;
    }
 
@@ -107,10 +118,8 @@ public class MessageTools
    public static DetectedFacesPacket createDetectedFacesPacket(String[] ids, Point3D[] positions)
    {
       DetectedFacesPacket message = new DetectedFacesPacket();
-      message.ids = new StringBuilder[ids.length];
-      for (int i = 0; i < ids.length; i++)
-         message.ids[i].append(ids[i]);
-      message.positions = positions;
+      copyData(ids, message.ids);
+      copyData(positions, message.positions);
       return message;
    }
 
@@ -252,7 +261,6 @@ public class MessageTools
    public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(OneDoFJoint[] joints)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
-      message.desiredJointAngles = new float[joints.length];
       message.jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(joints);
       return message;
    }
@@ -261,7 +269,6 @@ public class MessageTools
                                                                                    boolean useQDesired)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
-      message.desiredJointAngles = new float[newJointData.length];
       message.jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(newJointData);
       message.setDesiredJointState(rootJoint, newJointData, useQDesired);
       return message;
@@ -270,20 +277,15 @@ public class MessageTools
    public static BoundingBoxesPacket createBoundingBoxesPacket(int[] packedBoxes, String[] labels)
    {
       BoundingBoxesPacket message = new BoundingBoxesPacket();
-      message.labels = new StringBuilder[labels.length];
-      for (int i = 0; i < labels.length; i++)
-         message.labels[i].append(labels[i]);
+      MessageTools.copyData(labels, message.labels);
       int n = packedBoxes.length / 4;
-      message.boundingBoxXCoordinates = new int[n];
-      message.boundingBoxYCoordinates = new int[n];
-      message.boundingBoxWidths = new int[n];
-      message.boundingBoxHeights = new int[n];
+
       for (int i = 0; i < n; i++)
       {
-         message.boundingBoxXCoordinates[i] = packedBoxes[i * 4];
-         message.boundingBoxYCoordinates[i] = packedBoxes[i * 4 + 1];
-         message.boundingBoxWidths[i] = packedBoxes[i * 4 + 2];
-         message.boundingBoxHeights[i] = packedBoxes[i * 4 + 3];
+         message.boundingBoxXCoordinates.add(packedBoxes[i * 4]);
+         message.boundingBoxYCoordinates.add(packedBoxes[i * 4 + 1]);
+         message.boundingBoxWidths.add(packedBoxes[i * 4 + 2]);
+         message.boundingBoxHeights.add(packedBoxes[i * 4 + 3]);
       }
       return message;
    }
@@ -300,8 +302,8 @@ public class MessageTools
    {
       StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
       message.robotTimestamp = timestamp;
-      message.pointCloud = pointCloud;
-      message.colors = colors;
+      message.pointCloud.add(pointCloud);
+      message.colors.add(colors);
       return message;
    }
 
@@ -348,7 +350,7 @@ public class MessageTools
    public static PlanarRegionsListMessage createPlanarRegionsListMessage(List<PlanarRegionMessage> planarRegions)
    {
       PlanarRegionsListMessage message = new PlanarRegionsListMessage();
-      message.planarRegions = planarRegions;
+      copyData(planarRegions, message.planarRegions);
       return message;
    }
 
@@ -361,5 +363,269 @@ public class MessageTools
    {
       return new LidarScanParameters(message.pointsPerSweep, message.scanHeight, message.sweepYawMin, message.sweepYawMax, message.heightPitchMin,
                                      message.heightPitchMax, message.timeIncrement, message.minRange, message.maxRange, message.scanTime, message.timestamp);
+   }
+
+   /**
+    * Copies data from {@code source} to {@code destination} after calling
+    * {@link TByteArrayList#reset()} on {@code destination}.
+    * 
+    * @param source the list containing the data to copy. Not modified.
+    * @param destination the list to copy the data into. Modified.
+    */
+   public static void copyData(TByteArrayList source, TByteArrayList destination)
+   {
+      destination.reset();
+
+      if (source == null)
+         return;
+
+      for (int i = 0; i < source.size(); i++)
+      {
+         destination.add(source.getQuick(i));
+      }
+   }
+
+   /**
+    * Copies data from {@code source} to {@code destination} after calling
+    * {@link TDoubleArrayList#reset()} on {@code destination}.
+    * 
+    * @param source the list containing the data to copy. Not modified.
+    * @param destination the list to copy the data into. Modified.
+    */
+   public static void copyData(TDoubleArrayList source, TDoubleArrayList destination)
+   {
+      destination.reset();
+
+      if (source == null)
+         return;
+
+      for (int i = 0; i < source.size(); i++)
+      {
+         destination.add(source.getQuick(i));
+      }
+   }
+
+   /**
+    * Copies data from {@code source} to {@code destination} after calling
+    * {@link TFloatArrayList#reset()} on {@code destination}.
+    * 
+    * @param source the list containing the data to copy. Not modified.
+    * @param destination the list to copy the data into. Modified.
+    */
+   public static void copyData(TFloatArrayList source, TFloatArrayList destination)
+   {
+      destination.reset();
+
+      if (source == null)
+         return;
+
+      for (int i = 0; i < source.size(); i++)
+      {
+         destination.add(source.getQuick(i));
+      }
+   }
+
+   /**
+    * Copies data from {@code source} to {@code destination} after calling
+    * {@link TIntArrayList#reset()} on {@code destination}.
+    * 
+    * @param source the list containing the data to copy. Not modified.
+    * @param destination the list to copy the data into. Modified.
+    */
+   public static void copyData(TIntArrayList source, TIntArrayList destination)
+   {
+      destination.reset();
+
+      if (source == null)
+         return;
+
+      for (int i = 0; i < source.size(); i++)
+      {
+         destination.add(source.getQuick(i));
+      }
+   }
+
+   /**
+    * Copies data from {@code source} to {@code destination} after calling
+    * {@link TLongArrayList#reset()} on {@code destination}.
+    * 
+    * @param source the list containing the data to copy. Not modified.
+    * @param destination the list to copy the data into. Modified.
+    */
+   public static void copyData(TLongArrayList source, TLongArrayList destination)
+   {
+      destination.reset();
+
+      if (source == null)
+         return;
+
+      for (int i = 0; i < source.size(); i++)
+      {
+         destination.add(source.getQuick(i));
+      }
+   }
+
+   /**
+    * Performs a deep copy of the data from {@code source} to {@code destination} after calling
+    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
+    * 
+    * @param source the list containing the data to copy. Not modified.
+    * @param destination the list to copy the data into. Modified.
+    * @param <T> Should be either {@code Enum}, {@code StringBuilder}, or {@code Settable<T>}.
+    * @throws IllegalArgumentException if the type {@code T} is none of the following: {@code Enum},
+    *            {@code StringBuilder}, {@code Settable<T>}.
+    */
+   @SuppressWarnings("unchecked")
+   public static <T> void copyData(List<T> source, RecyclingArrayListPubSub<T> destination)
+   {
+      destination.clear();
+
+      if (source == null || source.isEmpty())
+         return;
+
+      T firstElement = destination.add();
+
+      if (firstElement instanceof Settable)
+      {
+         destination.clear();
+
+         for (int i = 0; i < source.size(); i++)
+         {
+            ((Settable<T>) destination.add()).set(source.get(i));
+         }
+      }
+      else if (firstElement instanceof StringBuilder)
+      {
+         destination.clear();
+
+         for (int i = 0; i < source.size(); i++)
+         {
+            StringBuilder destinationElement = (StringBuilder) destination.add();
+            destinationElement.setLength(0);
+            destinationElement.append((StringBuilder) source.get(i));
+         }
+      }
+      else
+      {
+         throw new IllegalArgumentException(MessageTools.class.getSimpleName() + ".copyData(...) can only be used with "
+               + RecyclingArrayListPubSub.class.getSimpleName() + "s declared with either of the following types: Enum, StringBuilder, and"
+               + Settable.class.getSimpleName());
+      }
+   }
+
+   /**
+    * Copies data from {@code source} to {@code destination} after calling
+    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
+    * 
+    * @param source the array containing the data to copy. Not modified.
+    * @param destination the list to copy the data into. Modified.
+    */
+   public static <T extends Settable<T>> void copyData(T[] source, RecyclingArrayListPubSub<T> destination)
+   {
+      destination.clear();
+
+      if (source == null)
+         return;
+
+      try
+      {
+         for (int i = 0; i < source.length; i++)
+         {
+            destination.add().set(source[i]);
+         }
+      }
+      catch (ArrayIndexOutOfBoundsException e)
+      {
+         PrintTools.error("Caught exception while copying data from array of length: " + source.length);
+         throw e;
+      }
+   }
+
+   /**
+    * Copies data from {@code source} to {@code destination} after calling
+    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
+    * 
+    * @param source the array containing the data to copy. Not modified.
+    * @param destination the list to copy the data into. Modified.
+    */
+   public static void copyData(String[] source, RecyclingArrayListPubSub<StringBuilder> destination)
+   {
+      destination.clear();
+
+      if (source == null)
+         return;
+
+      for (int i = 0; i < source.length; i++)
+      {
+         StringBuilder destinationElement = destination.add();
+         destinationElement.setLength(0);
+         destinationElement.append(source[i]);
+      }
+   }
+
+   /**
+    * Copies data from {@code source} to {@code destination} after calling
+    * {@link RecyclingArrayListPubSub#clear()} on {@code destination}.
+    * 
+    * @param source the array containing the data to copy. Not modified.
+    * @param destination the list to copy the data into. Modified.
+    */
+   public static void copyData(StringBuilder[] source, RecyclingArrayListPubSub<StringBuilder> destination)
+   {
+      destination.clear();
+
+      if (source == null)
+         return;
+
+      for (int i = 0; i < source.length; i++)
+      {
+         StringBuilder destinationElement = destination.add();
+         destinationElement.setLength(0);
+         destinationElement.append(source[i]);
+      }
+   }
+
+   public static <T> List<T> toList(RecyclingArrayListPubSub<T> original)
+   {
+      List<T> list = new ArrayList<>();
+      for (int i = 0; i < original.size(); i++)
+         list.add(original.get(i));
+      return list;
+   }
+
+   public static <T extends EpsilonComparable<T>> boolean epsilonEquals(RecyclingArrayListPubSub<T> listOne, RecyclingArrayListPubSub<T> listTwo, double epsilon)
+   {
+      if (listOne.size() != listTwo.size())
+         return false;
+      for (int i = 0; i < listOne.size(); i++)
+      {
+         if (!listOne.get(i).epsilonEquals(listTwo.get(i), epsilon))
+            return false;
+      }
+      return true;
+   }
+
+   public static boolean epsilonEquals(TDoubleArrayList listOne, TDoubleArrayList listTwo, double epsilon)
+   {
+      if (listOne.size() != listTwo.size())
+         return false;
+      for (int i = 0; i < listOne.size(); i++)
+      {
+         if (!MathTools.epsilonEquals(listOne.get(i), listTwo.get(i), epsilon))
+            return false;
+      }
+      return true;
+   }
+
+   public static boolean epsilonEquals(TFloatArrayList listOne, TFloatArrayList listTwo, double epsilon)
+   {
+      if (listOne.size() != listTwo.size())
+         return false;
+      for (int i = 0; i < listOne.size(); i++)
+      {
+         if (!MathTools.epsilonEquals(listOne.get(i), listTwo.get(i), epsilon))
+            return false;
+      }
+      return true;
    }
 }

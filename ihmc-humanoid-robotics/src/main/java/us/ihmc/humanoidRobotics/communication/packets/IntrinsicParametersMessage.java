@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Arrays;
-
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 
 public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessage>
@@ -14,7 +14,7 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
    public double skew;
    public double cx;
    public double cy;
-   public double radial[];
+   public TDoubleArrayList radial = new TDoubleArrayList();
    public double t1;
    public double t2;
 
@@ -38,7 +38,7 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
       skew = other.skew;
       cx = other.cx;
       cy = other.cy;
-      radial = Arrays.copyOf(other.radial, other.radial.length);
+      MessageTools.copyData(other.radial, radial);
       t1 = other.t1;
       t2 = other.t2;
    }
@@ -78,7 +78,7 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
       return cy;
    }
 
-   public double[] getRadial()
+   public TDoubleArrayList getRadial()
    {
       return radial;
    }
@@ -130,7 +130,7 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
 
    public void setRadial(double[] radial)
    {
-      this.radial = radial;
+      this.radial.add(radial);
    }
 
    public void setT1(double t1)
@@ -164,13 +164,8 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
          return false;
       if (!MathTools.epsilonEquals(t2, other.t2, epsilon))
          return false;
-      if (radial.length != other.radial.length)
+      if (!MessageTools.epsilonEquals(radial, other.radial, epsilon))
          return false;
-      for (int i = 0; i < radial.length; i++)
-      {
-         if (!MathTools.epsilonEquals(radial[i], other.radial[i], epsilon))
-            return false;
-      }
       return true;
    }
 }

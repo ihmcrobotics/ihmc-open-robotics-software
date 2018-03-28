@@ -329,8 +329,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void updateFootSupportState(boolean isLeftFootInSupport, boolean isRightFootInSupport)
    {
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
-      capturabilityBasedStatus.leftFootSupportPolygonLength = isLeftFootInSupport ? 1 : 0;
-      capturabilityBasedStatus.rightFootSupportPolygonLength = isRightFootInSupport ? 1 : 0;
+      if (isLeftFootInSupport)
+         capturabilityBasedStatus.leftFootSupportPolygon.add();
+      if (isRightFootInSupport)
+         capturabilityBasedStatus.rightFootSupportPolygon.add();
       updateCapturabilityBasedStatus(capturabilityBasedStatus);
    }
 

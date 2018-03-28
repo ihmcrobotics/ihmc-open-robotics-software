@@ -1,11 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
-import java.util.Arrays;
-
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.tools.ArrayTools;
 
 /**
  * Point, Cylinder, Sphere, Box will be converted into this message.
@@ -23,9 +23,9 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
    public Point3D manifoldOriginPosition;
    public Quaternion manifoldOriginOrientation;
 
-   public byte[] manifoldConfigurationSpaceNames;
-   public double[] manifoldLowerLimits;
-   public double[] manifoldUpperLimits;
+   public TByteArrayList manifoldConfigurationSpaceNames = new TByteArrayList();
+   public TDoubleArrayList manifoldLowerLimits = new TDoubleArrayList();
+   public TDoubleArrayList manifoldUpperLimits = new TDoubleArrayList();
 
    public ReachingManifoldMessage()
    {
@@ -38,9 +38,9 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       endEffectorNameBasedHashCode = other.endEffectorNameBasedHashCode;
       manifoldOriginPosition = new Point3D(other.manifoldOriginPosition);
       manifoldOriginOrientation = new Quaternion(other.manifoldOriginOrientation);
-      manifoldConfigurationSpaceNames = Arrays.copyOf(other.manifoldConfigurationSpaceNames, other.manifoldConfigurationSpaceNames.length);
-      manifoldLowerLimits = Arrays.copyOf(other.manifoldLowerLimits, other.manifoldLowerLimits.length);
-      manifoldUpperLimits = Arrays.copyOf(other.manifoldUpperLimits, other.manifoldUpperLimits.length);
+      MessageTools.copyData(other.manifoldConfigurationSpaceNames, manifoldConfigurationSpaceNames);
+      MessageTools.copyData(other.manifoldLowerLimits, manifoldLowerLimits);
+      MessageTools.copyData(other.manifoldUpperLimits, manifoldUpperLimits);
       setPacketInformation(other);
    }
 
@@ -64,16 +64,12 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       if (configurationSpaces.length != lowerLimits.length || configurationSpaces.length != upperLimits.length || lowerLimits.length != upperLimits.length)
          throw new RuntimeException("Inconsistent array lengths: configurationSpaces = " + configurationSpaces.length);
 
-      this.manifoldConfigurationSpaceNames = new byte[configurationSpaces.length];
-      this.manifoldLowerLimits = new double[configurationSpaces.length];
-      this.manifoldUpperLimits = new double[configurationSpaces.length];
-
-      for (int i = 0; i < configurationSpaces.length; i++)
-      {
-         this.manifoldConfigurationSpaceNames[i] = configurationSpaces[i];
-         this.manifoldLowerLimits[i] = lowerLimits[i];
-         this.manifoldUpperLimits[i] = upperLimits[i];
-      }
+      this.manifoldConfigurationSpaceNames.reset();
+      this.manifoldLowerLimits.reset();
+      this.manifoldUpperLimits.reset();
+      this.manifoldConfigurationSpaceNames.add(configurationSpaces);
+      this.manifoldLowerLimits.add(lowerLimits);
+      this.manifoldUpperLimits.add(upperLimits);
    }
 
    @Override
@@ -85,11 +81,11 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
          return false;
       if (!manifoldOriginOrientation.epsilonEquals(other.manifoldOriginOrientation, epsilon))
          return false;
-      if (!Arrays.equals(manifoldConfigurationSpaceNames, other.manifoldConfigurationSpaceNames))
+      if (!manifoldConfigurationSpaceNames.equals(other.manifoldConfigurationSpaceNames))
          return false;
-      if (!ArrayTools.deltaEquals(manifoldLowerLimits, other.manifoldLowerLimits, epsilon))
+      if (!MessageTools.epsilonEquals(manifoldLowerLimits, other.manifoldLowerLimits, epsilon))
          return false;
-      if (!ArrayTools.deltaEquals(manifoldUpperLimits, other.manifoldUpperLimits, epsilon))
+      if (!MessageTools.epsilonEquals(manifoldUpperLimits, other.manifoldUpperLimits, epsilon))
          return false;
       return true;
    }
@@ -113,21 +109,21 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
    {
       if (manifoldConfigurationSpaceNames == null)
          return 0;
-      return manifoldConfigurationSpaceNames.length;
+      return manifoldConfigurationSpaceNames.size();
    }
 
    public byte getDegreeOfManifold(int i)
    {
-      return manifoldConfigurationSpaceNames[i];
+      return manifoldConfigurationSpaceNames.get(i);
    }
 
    public double getUpperLimit(int i)
    {
-      return manifoldUpperLimits[i];
+      return manifoldUpperLimits.get(i);
    }
 
    public double getLowerLimit(int i)
    {
-      return manifoldLowerLimits[i];
+      return manifoldLowerLimits.get(i);
    }
 }

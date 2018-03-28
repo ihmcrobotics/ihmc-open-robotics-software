@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
@@ -267,7 +268,12 @@ public class FootstepListBehavior extends AbstractBehavior
          WalkingControllerParameters walkingControllerParameters)
    {
       ArrayList<Double> footStepLengths = new ArrayList<Double>();
-      footstepDataList.addAll(footStepList.getDataList());
+      List<FootstepDataMessage> dataList = footStepList.getDataList();
+      for (int i = 0; i < dataList.size(); i++)
+      {
+         FootstepDataMessage step = dataList.get(i);
+         footstepDataList.add(step);
+      }
 
       FootstepDataMessage firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
 

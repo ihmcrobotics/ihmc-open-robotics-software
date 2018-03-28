@@ -134,11 +134,11 @@ public class KinematicsToolboxHelper
    static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
                                                        OneDoFJoint[] oneDoFJoints)
    {
-      float[] newJointAngles = robotConfigurationData.getJointAngles();
+      TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
 
-      for (int i = 0; i < newJointAngles.length; i++)
+      for (int i = 0; i < newJointAngles.size(); i++)
       {
-         oneDoFJoints[i].setQ(newJointAngles[i]);
+         oneDoFJoints[i].setQ(newJointAngles.get(i));
          oneDoFJoints[i].setQd(0.0);
       }
 

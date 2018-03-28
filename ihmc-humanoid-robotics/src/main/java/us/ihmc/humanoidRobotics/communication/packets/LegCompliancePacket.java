@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import java.util.Arrays;
-
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -26,7 +26,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
     * gives decent tracking for slow motion and yet still compliant. The numbers in the array
     * correspond to joints HPZ, HPX, HPY, KNY, AKY, AKX, respectively.
     */
-   public float[] maxVelocityDeltas; //values in the order of AtlasJointId.getLegJoints()
+   public TFloatArrayList maxVelocityDeltas = new TFloatArrayList(); //values in the order of AtlasJointId.getLegJoints()
 
    public byte robotSide;
 
@@ -37,7 +37,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
    @Override
    public void set(LegCompliancePacket other)
    {
-      maxVelocityDeltas = Arrays.copyOf(other.maxVelocityDeltas, other.maxVelocityDeltas.length);
+      MessageTools.copyData(other.maxVelocityDeltas, maxVelocityDeltas);
       robotSide = other.robotSide;
       setPacketInformation(other);
    }
@@ -45,10 +45,10 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
    @Override
    public boolean epsilonEquals(LegCompliancePacket other, double epsilon)
    {
-      if (maxVelocityDeltas.length != other.maxVelocityDeltas.length)
+      if (maxVelocityDeltas.size() != other.maxVelocityDeltas.size())
          return false;
-      for (int i = 0; i < maxVelocityDeltas.length; i++)
-         if (!MathTools.epsilonEquals(maxVelocityDeltas[i], other.maxVelocityDeltas[i], epsilon))
+      for (int i = 0; i < maxVelocityDeltas.size(); i++)
+         if (!MathTools.epsilonEquals(maxVelocityDeltas.get(i), other.maxVelocityDeltas.get(i), epsilon))
             return false;
       return true;
    }
@@ -60,9 +60,9 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket>
       s.append("LegCompliancePacket: side " + RobotSide.fromByte(robotSide).name());
 
       s.append(" maxVelocityDeltas ");
-      for (int i = 0; i < maxVelocityDeltas.length; i++)
+      for (int i = 0; i < maxVelocityDeltas.size(); i++)
       {
-         s.append(" " + maxVelocityDeltas[i]);
+         s.append(" " + maxVelocityDeltas.get(i));
       }
       return s.toString();
    }

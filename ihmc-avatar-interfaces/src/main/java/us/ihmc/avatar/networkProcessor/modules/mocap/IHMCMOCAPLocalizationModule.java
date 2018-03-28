@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.modules.mocap;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import gnu.trove.list.array.TFloatArrayList;
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
@@ -241,16 +242,16 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
 
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
 
-      float[] newJointAngles = packet.getJointAngles();
-      float[] newJointVelocities = packet.getJointAngles();
-      float[] newJointTorques = packet.getJointTorques();
+      TFloatArrayList newJointAngles = packet.getJointAngles();
+      TFloatArrayList newJointVelocities = packet.getJointAngles();
+      TFloatArrayList newJointTorques = packet.getJointTorques();
       OneDoFJoint[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
-      for (int i = 0; i < newJointAngles.length; i++)
+      for (int i = 0; i < newJointAngles.size(); i++)
       {
-         oneDoFJoints[i].setQ(newJointAngles[i]);
-         oneDoFJoints[i].setQd(newJointVelocities[i]);
-         oneDoFJoints[i].setTau(newJointTorques[i]);
+         oneDoFJoints[i].setQ(newJointAngles.get(i));
+         oneDoFJoints[i].setQd(newJointVelocities.get(i));
+         oneDoFJoints[i].setTau(newJointTorques.get(i));
       }
 
       pelvisTranslationFromRobotConfigurationData.set(packet.getPelvisTranslation());

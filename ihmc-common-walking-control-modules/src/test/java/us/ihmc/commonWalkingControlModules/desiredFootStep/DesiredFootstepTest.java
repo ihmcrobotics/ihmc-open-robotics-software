@@ -29,15 +29,19 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
@@ -293,8 +297,17 @@ public class DesiredFootstepTest
       netClassList.registerPacketClass(ExecutionMode.class);
       netClassList.registerPacketClass(ExecutionTiming.class);
 
+      netClassList.registerPacketField(FootstepDataMessage.class);
+      netClassList.registerPacketField(FootstepDataMessage[].class);
+      netClassList.registerPacketField(Class.class);
+      netClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      netClassList.registerPacketField(SE3TrajectoryPointMessage.class);
+      netClassList.registerPacketField(SE3TrajectoryPointMessage[].class);
       netClassList.registerPacketField(QueueableMessage.class);
       netClassList.registerPacketField(ArrayList.class);
+      netClassList.registerPacketField(Vector3D.class);
+      netClassList.registerPacketField(Point2D.class);
+      netClassList.registerPacketField(Point2D[].class);
       netClassList.registerPacketField(Point3D.class);
       netClassList.registerPacketField(Point3D[].class);
       netClassList.registerPacketField(Quaternion.class);
@@ -426,14 +439,19 @@ public class DesiredFootstepTest
       public void receivedPacket(FootstepDataListMessage packet)
       {
          boolean adjustable = packet.areFootstepsAdjustable;
-         for (FootstepDataMessage footstepData : packet.footstepDataList)
+         List<FootstepDataMessage> footstepDataList = packet.footstepDataList;
+         for (int i = 0; i < footstepDataList.size(); i++)
          {
-            List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
-            if (contactPoints != null && contactPoints.size() == 0)
-               contactPoints = null;
+            FootstepDataMessage footstepData = footstepDataList.get(i);
             FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
+            Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable);
 
-            Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable, contactPoints);
+            List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
+            if (contactPoints != null && contactPoints.isEmpty())
+               footstep.setPredictedContactPoints((Point2DReadOnly[]) null);
+            else
+               footstep.setPredictedContactPoints(contactPoints);
+               
             footstep.setTrajectoryType(TrajectoryType.fromByte(footstepData.getTrajectoryType()));
             footstep.setSwingHeight(footstepData.getSwingHeight());
             reconstructedFootstepPath.add(footstep);

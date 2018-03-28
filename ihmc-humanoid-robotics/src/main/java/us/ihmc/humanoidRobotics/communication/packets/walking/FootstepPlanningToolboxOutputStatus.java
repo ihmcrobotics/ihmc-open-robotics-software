@@ -1,14 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.ArrayList;
-
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanningToolboxOutputStatus>
@@ -27,9 +26,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public PlanarRegionsListMessage planarRegionsListMessage = null;
 
    // body path planner fields
-   public Point2D[] bodyPath;
+   public RecyclingArrayListPubSub<Point2D> bodyPath = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 5);
    public Pose2D lowLevelPlannerGoal;
-   public Point3D[][] navigableExtrusions;
 
    public FootstepPlanningToolboxOutputStatus()
    {
@@ -48,17 +46,12 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
    public void setBodyPath(Point2D[] bodyPath)
    {
-      this.bodyPath = bodyPath;
+      MessageTools.copyData(bodyPath, this.bodyPath);
    }
 
    public void setLowLevelPlannerGoal(Pose2D lowLevelPlannerGoal)
    {
       this.lowLevelPlannerGoal = lowLevelPlannerGoal;
-   }
-
-   public void setNavigableExtrusions(Point3D[][] navigableExtrusions)
-   {
-      this.navigableExtrusions = navigableExtrusions;
    }
 
    @Override
@@ -75,29 +68,9 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
          return false;
       if (!bothOrNeitherAreNull(bodyPath, other.bodyPath))
          return false;
-      if (!bothOrNeitherAreNull(navigableExtrusions, other.navigableExtrusions))
+
+      if (!MessageTools.epsilonEquals(bodyPath, other.bodyPath, epsilon))
          return false;
-
-      if (bodyPath != null)
-      {
-         for (int i = 0; i < bodyPath.length; i++)
-         {
-            if (!bodyPath[i].epsilonEquals(other.bodyPath[i], epsilon))
-               return false;
-         }
-      }
-
-      if (navigableExtrusions != null)
-      {
-         for (int i = 0; i < navigableExtrusions.length; i++)
-         {
-            for (int j = 0; j < navigableExtrusions[i].length; j++)
-            {
-               if (!navigableExtrusions[i][j].epsilonEquals(other.navigableExtrusions[i][j], epsilon))
-                  return false;
-            }
-         }
-      }
 
       if (!footstepDataList.epsilonEquals(other.footstepDataList, epsilon))
          return false;
@@ -129,14 +102,11 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       footstepPlanningResult = other.footstepPlanningResult;
       footstepDataList.destination = other.footstepDataList.destination;
       footstepDataList.getQueueingProperties().set(other.footstepDataList.getQueueingProperties());
-      footstepDataList.footstepDataList = new ArrayList<>();
-      for (FootstepDataMessage footstepData : other.footstepDataList.footstepDataList)
-         footstepDataList.footstepDataList.add(new FootstepDataMessage(footstepData));
+      footstepDataList.set(other.footstepDataList);
       footstepDataList.defaultSwingDuration = other.footstepDataList.defaultSwingDuration;
       footstepDataList.defaultTransferDuration = other.footstepDataList.defaultTransferDuration;
       footstepDataList.uniqueId = other.footstepDataList.uniqueId;
       planarRegionsListMessage = other.planarRegionsListMessage;
-      navigableExtrusions = other.navigableExtrusions;
       bodyPath = other.bodyPath;
       lowLevelPlannerGoal = other.lowLevelPlannerGoal;
       planId = other.planId;

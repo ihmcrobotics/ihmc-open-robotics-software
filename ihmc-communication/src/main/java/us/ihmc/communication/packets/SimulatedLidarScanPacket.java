@@ -1,12 +1,10 @@
 package us.ihmc.communication.packets;
 
-import java.util.Arrays;
-
-import us.ihmc.commons.MathTools;
+import gnu.trove.list.array.TFloatArrayList;
 
 public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 {
-   public float[] ranges;
+   public TFloatArrayList ranges = new TFloatArrayList();
    public int sensorId;
    public LidarScanParametersMessage params;
 
@@ -17,7 +15,7 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
    @Override
    public void set(SimulatedLidarScanPacket other)
    {
-      ranges = Arrays.copyOf(other.ranges, other.ranges.length);
+      MessageTools.copyData(other.ranges, ranges);
       sensorId = other.sensorId;
       params = other.params;
       setPacketInformation(other);
@@ -26,15 +24,12 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
    @Override
    public boolean epsilonEquals(SimulatedLidarScanPacket other, double epsilon)
    {
-      boolean ret = true;
-      for (int i = 0; i < ranges.length; i++)
-      {
-         ret &= MathTools.epsilonEquals(ranges[i], other.ranges[i], epsilon);
-      }
+      if (!params.equals(other.params))
+         return false;
+      if (!MessageTools.epsilonEquals(ranges, other.ranges, epsilon))
+         return false;
 
-      ret &= params.equals(other.params);
-
-      return ret;
+      return true;
    }
 
    public long getScanStartTime()
@@ -47,7 +42,7 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       return params;
    }
 
-   public float[] getRanges()
+   public TFloatArrayList getRanges()
    {
       return ranges;
    }
@@ -59,6 +54,6 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 
    public int size()
    {
-      return ranges.length;
+      return ranges.size();
    }
 }

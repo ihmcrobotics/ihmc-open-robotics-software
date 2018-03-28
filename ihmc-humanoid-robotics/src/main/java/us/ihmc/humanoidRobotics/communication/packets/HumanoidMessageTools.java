@@ -2,12 +2,12 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
@@ -156,7 +156,7 @@ public class HumanoidMessageTools
    public static DesiredAccelerationsMessage createDesiredAccelerationsMessage(double[] desiredJointAccelerations)
    {
       DesiredAccelerationsMessage message = new DesiredAccelerationsMessage();
-      message.desiredJointAccelerations = desiredJointAccelerations;
+      message.desiredJointAccelerations.add(desiredJointAccelerations);
       return message;
    }
 
@@ -369,17 +369,17 @@ public class HumanoidMessageTools
    public static LegCompliancePacket createLegCompliancePacket(float[] maxVelocityDeltas, RobotSide robotSide)
    {
       LegCompliancePacket message = new LegCompliancePacket();
-      message.maxVelocityDeltas = maxVelocityDeltas;
+      message.maxVelocityDeltas.add(maxVelocityDeltas);
       message.robotSide = robotSide.toByte();
       return message;
    }
 
-   public static SnapFootstepPacket createSnapFootstepPacket(ArrayList<FootstepDataMessage> data, int[] footstepOrder, byte[] flag)
+   public static SnapFootstepPacket createSnapFootstepPacket(List<FootstepDataMessage> data, int[] footstepOrder, byte[] flag)
    {
       SnapFootstepPacket message = new SnapFootstepPacket();
-      message.footstepData = data;
-      message.footstepOrder = footstepOrder;
-      message.flag = flag;
+      MessageTools.copyData(data, message.footstepData);
+      message.footstepOrder.add(footstepOrder);
+      message.flag.add(flag);
       return message;
    }
 
@@ -520,22 +520,22 @@ public class HumanoidMessageTools
          throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length);
 
       message.rigidBodyNameBasedHashCode = rigidBody.getNameBasedHashCode();
-      message.setExplorationConfigurationSpaces(ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore), explorationRangeUpperLimits, explorationRangeLowerLimits);
+      message.setExplorationConfigurationSpaces(ConfigurationSpaceName.toBytes(degreesOfFreedomToExplore), explorationRangeUpperLimits,
+                                                explorationRangeLowerLimits);
 
       return message;
    }
 
-   public static FootstepPathPlanPacket createFootstepPathPlanPacket(boolean goalsValid, FootstepDataMessage start,
-                                                                     ArrayList<FootstepDataMessage> originalGoals,
-                                                                     ArrayList<FootstepDataMessage> ADStarPathPlan, ArrayList<Boolean> footstepUnknown,
+   public static FootstepPathPlanPacket createFootstepPathPlanPacket(boolean goalsValid, FootstepDataMessage start, List<FootstepDataMessage> originalGoals,
+                                                                     List<FootstepDataMessage> ADStarPathPlan, List<Boolean> footstepUnknown,
                                                                      double subOptimality, double cost)
    {
       FootstepPathPlanPacket message = new FootstepPathPlanPacket();
       message.goalsValid = goalsValid;
       message.start = start;
-      message.originalGoals = originalGoals;
-      message.pathPlan = ADStarPathPlan;
-      message.footstepUnknown = footstepUnknown;
+      MessageTools.copyData(originalGoals, message.originalGoals);
+      MessageTools.copyData(ADStarPathPlan, message.pathPlan);
+      footstepUnknown.stream().map(b -> b ? 1 : 0).forEach(message.footstepUnknown::add);
       message.subOptimality = subOptimality;
       message.pathCost = cost;
       return message;
@@ -625,16 +625,13 @@ public class HumanoidMessageTools
    }
 
    public static AdjustFootstepMessage createAdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation,
-                                                                   ArrayList<Point2D> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
+                                                                   List<Point2D> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
    {
       AdjustFootstepMessage message = new AdjustFootstepMessage();
       message.robotSide = robotSide.toByte();
       message.location = location;
       message.orientation = orientation;
-      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         message.predictedContactPoints = null;
-      else
-         message.predictedContactPoints = predictedContactPoints;
+      MessageTools.copyData(predictedContactPoints, message.predictedContactPoints);
       return message;
    }
 
@@ -645,7 +642,7 @@ public class HumanoidMessageTools
    }
 
    public static AdjustFootstepMessage createAdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation,
-                                                                   ArrayList<Point2D> predictedContactPoints)
+                                                                   List<Point2D> predictedContactPoints)
    {
       return createAdjustFootstepMessage(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
@@ -666,27 +663,7 @@ public class HumanoidMessageTools
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       message.location = new Point3D(location);
       message.orientation = new Quaternion(orientation);
-
-      List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
-      if (footstepContactPoints != null)
-      {
-         if (message.predictedContactPoints == null)
-         {
-            message.predictedContactPoints = new ArrayList<>();
-         }
-         else
-         {
-            message.predictedContactPoints.clear();
-         }
-         for (Point2D contactPoint : footstepContactPoints)
-         {
-            message.predictedContactPoints.add(new Point2D(contactPoint));
-         }
-      }
-      else
-      {
-         message.predictedContactPoints = null;
-      }
+      MessageTools.copyData(footstep.getPredictedContactPoints(), message.predictedContactPoints);
       return message;
    }
 
@@ -836,9 +813,9 @@ public class HumanoidMessageTools
    {
       WholeBodyTrajectoryToolboxMessage message = new WholeBodyTrajectoryToolboxMessage();
       message.configuration = configuration;
-      message.endEffectorTrajectories = endEffectorTrajectories;
-      message.reachingManifolds = reachingManifolds;
-      message.explorationConfigurations = explorationConfigurations;
+      MessageTools.copyData(endEffectorTrajectories, message.endEffectorTrajectories);
+      MessageTools.copyData(reachingManifolds, message.reachingManifolds);
+      MessageTools.copyData(explorationConfigurations, message.explorationConfigurations);
       return message;
    }
 
@@ -986,8 +963,7 @@ public class HumanoidMessageTools
    {
       EuclideanTrajectoryMessage message = new EuclideanTrajectoryMessage();
       Vector3D zeroLinearVelocity = new Vector3D();
-      message.taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[] {
-            createEuclideanTrajectoryPointMessage(trajectoryTime, desiredPosition, zeroLinearVelocity)};
+      message.taskspaceTrajectoryPoints.add().set(createEuclideanTrajectoryPointMessage(trajectoryTime, desiredPosition, zeroLinearVelocity));
       message.frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
       return message;
    }
@@ -1013,7 +989,8 @@ public class HumanoidMessageTools
    public static EuclideanTrajectoryMessage createEuclideanTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       EuclideanTrajectoryMessage message = new EuclideanTrajectoryMessage();
-      message.taskspaceTrajectoryPoints = new EuclideanTrajectoryPointMessage[numberOfTrajectoryPoints];
+      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+         message.taskspaceTrajectoryPoints.add();
       return message;
    }
 
@@ -1168,8 +1145,7 @@ public class HumanoidMessageTools
    {
       SO3TrajectoryMessage message = new SO3TrajectoryMessage();
       Vector3D zeroAngularVelocity = new Vector3D();
-      message.taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[] {
-            createSO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
+      message.taskspaceTrajectoryPoints.add().set(createSO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity));
       message.frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
       return message;
    }
@@ -1177,7 +1153,8 @@ public class HumanoidMessageTools
    public static SO3TrajectoryMessage createSO3TrajectoryMessage(int numberOfTrajectoryPoints)
    {
       SO3TrajectoryMessage message = new SO3TrajectoryMessage();
-      message.taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[numberOfTrajectoryPoints];
+      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+         message.taskspaceTrajectoryPoints.add();
       return message;
    }
 
@@ -1216,24 +1193,24 @@ public class HumanoidMessageTools
    }
 
    public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep,
-                                                                           double thetaStart, ArrayList<FootstepDataMessage> goals)
+                                                                           double thetaStart, List<FootstepDataMessage> goals)
    {
       FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
       message.footstepPlanRequestType = requestType.toByte();
       message.startFootstep = startFootstep;
       message.thetaStart = thetaStart;
-      message.goals = goals;
+      MessageTools.copyData(goals, message.goals);
       return message;
    }
 
    public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep,
-                                                                           double thetaStart, ArrayList<FootstepDataMessage> goals, double maxSuboptimality)
+                                                                           double thetaStart, List<FootstepDataMessage> goals, double maxSuboptimality)
    {
       FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
       message.footstepPlanRequestType = requestType.toByte();
       message.startFootstep = startFootstep;
       message.thetaStart = thetaStart;
-      message.goals = goals;
+      MessageTools.copyData(goals, message.goals);
       message.maxSuboptimality = maxSuboptimality;
       return message;
    }
@@ -1242,11 +1219,7 @@ public class HumanoidMessageTools
    {
       HandJointAnglePacket message = new HandJointAnglePacket();
       message.robotSide = robotSide.toByte();
-      if (message.jointAngles == null)
-      {
-         message.jointAngles = new double[jointAngles.length];
-      }
-      System.arraycopy(jointAngles, 0, message.jointAngles, 0, jointAngles.length);
+      message.jointAngles.add(jointAngles);
       message.connected = connected;
       message.calibrated = calibrated;
       return message;
@@ -1313,7 +1286,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static FootstepDataListMessage createFootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double finalTransferDuration)
+   public static FootstepDataListMessage createFootstepDataListMessage(List<FootstepDataMessage> footstepDataList, double finalTransferDuration)
    {
       return createFootstepDataListMessage(footstepDataList, 0.0, 0.0, finalTransferDuration, ExecutionMode.OVERRIDE);
    }
@@ -1327,7 +1300,7 @@ public class HumanoidMessageTools
     * @param defaultTransferDuration
     * @param executionMode
     */
-   public static FootstepDataListMessage createFootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double defaultSwingDuration,
+   public static FootstepDataListMessage createFootstepDataListMessage(List<FootstepDataMessage> footstepDataList, double defaultSwingDuration,
                                                                        double defaultTransferDuration, ExecutionMode executionMode)
    {
       return createFootstepDataListMessage(footstepDataList, defaultSwingDuration, defaultTransferDuration, defaultTransferDuration, executionMode);
@@ -1343,15 +1316,12 @@ public class HumanoidMessageTools
     * @param finalTransferDuration
     * @param executionMode
     */
-   public static FootstepDataListMessage createFootstepDataListMessage(ArrayList<FootstepDataMessage> footstepDataList, double defaultSwingDuration,
+   public static FootstepDataListMessage createFootstepDataListMessage(List<FootstepDataMessage> footstepDataList, double defaultSwingDuration,
                                                                        double defaultTransferDuration, double finalTransferDuration,
                                                                        ExecutionMode executionMode)
    {
       FootstepDataListMessage message = new FootstepDataListMessage();
-      if (footstepDataList != null)
-      {
-         message.footstepDataList = footstepDataList;
-      }
+      MessageTools.copyData(footstepDataList, message.footstepDataList);
       message.defaultSwingDuration = defaultSwingDuration;
       message.defaultTransferDuration = defaultTransferDuration;
       message.finalTransferDuration = finalTransferDuration;
@@ -1431,7 +1401,7 @@ public class HumanoidMessageTools
          message.setDestination(packetDestination);
       message.videoSource = videoSource.toByte();
       message.timeStamp = timeStamp;
-      message.data = data;
+      message.data.add(data);
       message.position = new Point3D(position);
       message.orientation = new Quaternion(orientation);
       message.intrinsicParameters = toIntrinsicParametersMessage(intrinsicParameters);
@@ -1521,9 +1491,8 @@ public class HumanoidMessageTools
    public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions)
    {
       JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
-      message.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[desiredJointPositions.length];
-      for (int jointIndex = 0; jointIndex < message.getNumberOfJoints(); jointIndex++)
-         message.jointTrajectoryMessages[jointIndex] = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
+      for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
+         message.jointTrajectoryMessages.add().set(createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]));
       return message;
    }
 
@@ -1539,12 +1508,11 @@ public class HumanoidMessageTools
    public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] weights)
    {
       JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
-      message.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[desiredJointPositions.length];
-      for (int jointIndex = 0; jointIndex < message.getNumberOfJoints(); jointIndex++)
+      for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
       {
          OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = createOneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
          oneDoFJointTrajectoryMessage.setWeight(weights[jointIndex]);
-         message.jointTrajectoryMessages[jointIndex] = oneDoFJointTrajectoryMessage;
+         message.jointTrajectoryMessages.add().set(oneDoFJointTrajectoryMessage);
       }
       return message;
    }
@@ -1560,7 +1528,8 @@ public class HumanoidMessageTools
    public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(int numberOfJoints)
    {
       JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
-      message.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[numberOfJoints];
+      for (int i = 0; i < numberOfJoints; i++)
+         message.jointTrajectoryMessages.add();
       return message;
    }
 
@@ -1577,9 +1546,8 @@ public class HumanoidMessageTools
    public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(int numberOfJoints, int numberOfTrajectoryPoints)
    {
       JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
-      message.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[numberOfJoints];
       for (int i = 0; i < numberOfJoints; i++)
-         message.jointTrajectoryMessages[i] = createOneDoFJointTrajectoryMessage(numberOfTrajectoryPoints);
+         message.jointTrajectoryMessages.add().set(createOneDoFJointTrajectoryMessage(numberOfTrajectoryPoints));
       return message;
    }
 
@@ -1587,12 +1555,12 @@ public class HumanoidMessageTools
     * Create a message using the given joint trajectory points. Set the id of the message to
     * {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * 
-    * @param jointTrajectory1DListMessages joint trajectory points to be executed.
+    * @param oneDoFJointTrajectoryMessages joint trajectory points to be executed.
     */
-   public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(OneDoFJointTrajectoryMessage[] jointTrajectory1DListMessages)
+   public static JointspaceTrajectoryMessage createJointspaceTrajectoryMessage(OneDoFJointTrajectoryMessage[] oneDoFJointTrajectoryMessages)
    {
       JointspaceTrajectoryMessage message = new JointspaceTrajectoryMessage();
-      message.jointTrajectoryMessages = jointTrajectory1DListMessages;
+      MessageTools.copyData(oneDoFJointTrajectoryMessages, message.jointTrajectoryMessages);
       return message;
    }
 
@@ -1615,12 +1583,11 @@ public class HumanoidMessageTools
    {
       OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
       int numberOfPoints = trajectoryData.getNumberOfTrajectoryPoints();
-      message.trajectoryPoints = new TrajectoryPoint1DMessage[numberOfPoints];
 
       for (int i = 0; i < numberOfPoints; i++)
       {
          SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(i);
-         message.trajectoryPoints[i] = HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryPoint);
+         message.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryPoint));
       }
       return message;
    }
@@ -1634,7 +1601,7 @@ public class HumanoidMessageTools
    public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition)
    {
       OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
-      message.trajectoryPoints = new TrajectoryPoint1DMessage[] {HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryTime, desiredPosition, 0.0)};
+      message.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryTime, desiredPosition, 0.0));
       return message;
    }
 
@@ -1663,7 +1630,8 @@ public class HumanoidMessageTools
    public static OneDoFJointTrajectoryMessage createOneDoFJointTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       OneDoFJointTrajectoryMessage message = new OneDoFJointTrajectoryMessage();
-      message.trajectoryPoints = new TrajectoryPoint1DMessage[numberOfTrajectoryPoints];
+      while (message.trajectoryPoints.size() < numberOfTrajectoryPoints)
+         message.trajectoryPoints.add();
       return message;
    }
 
@@ -1817,8 +1785,8 @@ public class HumanoidMessageTools
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
       Vector3D zeroLinearVelocity = new Vector3D();
       Vector3D zeroAngularVelocity = new Vector3D();
-      message.taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[] {
-            createSE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
+      message.taskspaceTrajectoryPoints.add().set(createSE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity,
+                                                                                  zeroAngularVelocity));
       message.frameInformation.setTrajectoryReferenceFrameId(trajectoryReferenceFrameId);
       return message;
    }
@@ -1832,7 +1800,8 @@ public class HumanoidMessageTools
    public static SE3TrajectoryMessage createSE3TrajectoryMessage(int numberOfTrajectoryPoints)
    {
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
-      message.taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[numberOfTrajectoryPoints];
+      for (int i = 0; i < numberOfTrajectoryPoints; i++)
+         message.taskspaceTrajectoryPoints.add();
       return message;
    }
 
@@ -1920,16 +1889,13 @@ public class HumanoidMessageTools
    }
 
    public static FootstepDataMessage createFootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation,
-                                                               ArrayList<Point2D> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
+                                                               List<Point2D> predictedContactPoints, TrajectoryType trajectoryType, double swingHeight)
    {
       FootstepDataMessage message = new FootstepDataMessage();
       message.robotSide = robotSide.toByte();
       message.location = location;
       message.orientation = orientation;
-      if (predictedContactPoints != null && predictedContactPoints.size() == 0)
-         message.predictedContactPoints = null;
-      else
-         message.predictedContactPoints = predictedContactPoints;
+      MessageTools.copyData(predictedContactPoints, message.predictedContactPoints);
       message.trajectoryType = trajectoryType.toByte();
       message.swingHeight = swingHeight;
       return message;
@@ -1947,40 +1913,18 @@ public class HumanoidMessageTools
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       message.location = new Point3D(location);
       message.orientation = new Quaternion(orientation);
-
-      List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
-      if (footstepContactPoints != null)
-      {
-         if (message.predictedContactPoints == null)
-         {
-            message.predictedContactPoints = new ArrayList<>();
-         }
-         else
-         {
-            message.predictedContactPoints.clear();
-         }
-         for (int i = 0; i < footstepContactPoints.size(); i++)
-         {
-            Point2D point = new Point2D(footstepContactPoints.get(i));
-            message.predictedContactPoints.add(point);
-         }
-      }
-      else
-      {
-         message.predictedContactPoints = null;
-      }
+      MessageTools.copyData(footstep.getPredictedContactPoints(), message.predictedContactPoints);
       message.trajectoryType = footstep.getTrajectoryType().toByte();
       message.swingHeight = footstep.getSwingHeight();
       message.swingTrajectoryBlendDuration = footstep.getSwingTrajectoryBlendDuration();
 
       if (footstep.getCustomPositionWaypoints().size() != 0)
       {
-         message.positionWaypoints = new Point3D[footstep.getCustomPositionWaypoints().size()];
          for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
          {
             FramePoint3D framePoint = footstep.getCustomPositionWaypoints().get(i);
             framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            message.positionWaypoints[i] = new Point3D(framePoint);
+            message.positionWaypoints.add().set(framePoint);
          }
       }
 
@@ -2115,7 +2059,7 @@ public class HumanoidMessageTools
       intrinsicParametersMessage.cx = intrinsicParameters.cx;
       intrinsicParametersMessage.cy = intrinsicParameters.cy;
       if (intrinsicParameters.radial != null)
-         intrinsicParametersMessage.radial = Arrays.copyOf(intrinsicParameters.radial, intrinsicParameters.radial.length);
+         intrinsicParametersMessage.radial.add(intrinsicParameters.radial);
       intrinsicParametersMessage.t1 = intrinsicParameters.t1;
       intrinsicParametersMessage.t2 = intrinsicParameters.t2;
       return intrinsicParametersMessage;
@@ -2131,8 +2075,8 @@ public class HumanoidMessageTools
       intrinsicParameters.skew = message.skew;
       intrinsicParameters.cx = message.cx;
       intrinsicParameters.cy = message.cy;
-      if (message.radial != null)
-         intrinsicParameters.radial = Arrays.copyOf(message.radial, message.radial.length);
+      if (!message.radial.isEmpty())
+         intrinsicParameters.radial = message.radial.toArray();
       intrinsicParameters.t1 = message.t1;
       intrinsicParameters.t2 = message.t2;
       return intrinsicParameters;
