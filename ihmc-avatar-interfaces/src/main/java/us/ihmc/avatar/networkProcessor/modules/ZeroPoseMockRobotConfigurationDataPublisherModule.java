@@ -51,7 +51,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
 
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {
-         IMUPacket imuPacket = robotConfigurationData.getImuPacketForSensor(sensorNumber);
+         IMUPacket imuPacket = robotConfigurationData.imuSensorData.add();
          Vector3D32 linearAcceleration = new Vector3D32();
          Vector3D32 angularVelocity = new Vector3D32();
          Quaternion32 orientation = new Quaternion32();

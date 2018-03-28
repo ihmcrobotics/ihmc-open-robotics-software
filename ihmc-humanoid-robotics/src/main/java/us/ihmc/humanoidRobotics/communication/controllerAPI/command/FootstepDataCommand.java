@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -77,27 +77,27 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       position.setIncludingFrame(worldFrame, message.getLocation());
       orientation.setIncludingFrame(worldFrame, message.getOrientation());
 
-      Point3D[] originalPositionWaypointList = message.getCustomPositionWaypoints();
+      List<Point3D> originalPositionWaypointList = message.getCustomPositionWaypoints();
       customPositionWaypoints.clear();
       if (originalPositionWaypointList != null)
       {
-         for (int i = 0; i < originalPositionWaypointList.length; i++)
-            customPositionWaypoints.add().setIncludingFrame(trajectoryFrame, originalPositionWaypointList[i]);
+         for (int i = 0; i < originalPositionWaypointList.size(); i++)
+            customPositionWaypoints.add().setIncludingFrame(trajectoryFrame, originalPositionWaypointList.get(i));
       }
 
-      SE3TrajectoryPointMessage[] messageSwingTrajectory = message.getSwingTrajectory();
+      List<SE3TrajectoryPointMessage> messageSwingTrajectory = message.getSwingTrajectory();
       swingTrajectory.clear();
       if (messageSwingTrajectory != null)
       {
-         for (int i = 0; i < messageSwingTrajectory.length; i++)
+         for (int i = 0; i < messageSwingTrajectory.size(); i++)
          {
             FrameSE3TrajectoryPoint point = swingTrajectory.add();
             point.setToZero(trajectoryFrame);
-            messageSwingTrajectory[i].packData(point);
+            messageSwingTrajectory.get(i).packData(point);
          }
       }
 
-      ArrayList<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
+      List<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
       {

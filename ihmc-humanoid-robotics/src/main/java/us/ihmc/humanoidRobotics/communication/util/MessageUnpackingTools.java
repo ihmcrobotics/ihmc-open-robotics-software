@@ -66,14 +66,23 @@ public final class MessageUnpackingTools
          @Override
          public void unpackMessage(WholeBodyTrajectoryToolboxMessage multipleMessageHolder, List<Packet<?>> messagesToPack)
          {
-            if (multipleMessageHolder.endEffectorTrajectories != null)
-               messagesToPack.addAll(multipleMessageHolder.endEffectorTrajectories);
-            if (multipleMessageHolder.explorationConfigurations != null)
-               messagesToPack.addAll(multipleMessageHolder.explorationConfigurations);
             if (multipleMessageHolder.configuration != null)
                messagesToPack.add(multipleMessageHolder.configuration);
+            if (multipleMessageHolder.endEffectorTrajectories != null)
+            {
+               for (int i = 0; i < multipleMessageHolder.endEffectorTrajectories.size(); i++)
+                  messagesToPack.add(multipleMessageHolder.endEffectorTrajectories.get(i));
+            }
+            if (multipleMessageHolder.explorationConfigurations != null)
+            {
+               for (int i = 0; i < multipleMessageHolder.explorationConfigurations.size(); i++)
+                  messagesToPack.add(multipleMessageHolder.explorationConfigurations.get(i));
+            }
             if (multipleMessageHolder.reachingManifolds != null)
-               messagesToPack.addAll(multipleMessageHolder.reachingManifolds);
+            {
+               for (int i = 0; i < multipleMessageHolder.reachingManifolds.size(); i++)
+                  messagesToPack.add(multipleMessageHolder.reachingManifolds.get(i));
+            }
          }
       };
    }

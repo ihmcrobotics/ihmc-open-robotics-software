@@ -5,7 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.SpatialVectorMessage;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -176,13 +178,13 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
       }
 
-      float[] newJointAngles = robotConfigurationData.getJointAngles();
-      float[] newJointVelocities = robotConfigurationData.getJointVelocities();
+      TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
+      TFloatArrayList newJointVelocities = robotConfigurationData.getJointVelocities();
 
-      for (int i = 0; i < newJointAngles.length; i++)
+      for (int i = 0; i < newJointAngles.size(); i++)
       {
-         fullRobotModelCache.allJoints[i].setQ(newJointAngles[i]);
-         fullRobotModelCache.allJoints[i].setQd(newJointVelocities[i]);
+         fullRobotModelCache.allJoints[i].setQ(newJointAngles.get(i));
+         fullRobotModelCache.allJoints[i].setQd(newJointVelocities.get(i));
       }
 
       Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
@@ -204,8 +206,9 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       {
          for (int i = 0; i < forceSensorDataHolder.getForceSensorDefinitions().size(); i++)
          {
-            forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i))
-                                 .setWrench(robotConfigurationData.getMomentAndForceVectorForSensor(i));
+            SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.getMomentAndForceVectorForSensor(i);
+            forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i)).setWrench(momentAndForceVectorForSensor.angularPart,
+                                                                                                          momentAndForceVectorForSensor.linearPart);
          }
       }
    }

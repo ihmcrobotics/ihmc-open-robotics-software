@@ -6,6 +6,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -65,7 +66,7 @@ public class HumanoidKinematicsSolver
    {
       RobotConfigurationData configurationData = new RobotConfigurationData();
       configurationData.jointNameHash = kinematicsToolboxOutputStatus.jointNameHash;
-      configurationData.jointAngles = kinematicsToolboxOutputStatus.desiredJointAngles.clone();
+      MessageTools.copyData(kinematicsToolboxOutputStatus.desiredJointAngles, configurationData.jointAngles);
       configurationData.rootTranslation = new Vector3D32(kinematicsToolboxOutputStatus.getPelvisTranslation());
       configurationData.rootOrientation = new Quaternion32(kinematicsToolboxOutputStatus.getPelvisOrientation());
       setInitialConfiguration(configurationData);

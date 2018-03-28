@@ -27,6 +27,12 @@ import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 import org.reflections.Reflections;
 
+import gnu.trove.list.TByteList;
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -49,13 +55,73 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.HEALTH)
 public class PacketCodeQualityTest
 {
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
+
+   @SuppressWarnings("rawtypes")
+   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
+   public void testPacketsUseRecyclingArrayListPubSubOnly()
+   { // This test won't fail on Arrays or Lists
+      boolean verbose = true;
+
+      Reflections reflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      allPacketTypes.removeAll(reaInternalComms);
+      allPacketTypes.remove(MessageOfMessages.class);
+
+      Map<Class<? extends Packet>, List<Class>> packetTypesWithIterableOrArrayField = new HashMap<>();
+
+      for (Class<? extends Packet> packetType : allPacketTypes)
+      {
+         try
+         {
+            Field[] fields = packetType.getDeclaredFields();
+            for (Field field : fields)
+            {
+               if (Modifier.isStatic(field.getModifiers()))
+                  continue;
+
+               Class<?> typeToCheck = field.getType();
+
+               if (typeToCheck.isArray() || (Iterable.class.isAssignableFrom(typeToCheck) && !RecyclingArrayListPubSub.class.isAssignableFrom(typeToCheck)))
+               {
+                  if (!packetTypesWithIterableOrArrayField.containsKey(packetType))
+                     packetTypesWithIterableOrArrayField.put(packetType, new ArrayList<>());
+                  packetTypesWithIterableOrArrayField.get(packetType).add(typeToCheck);
+               }
+
+            }
+         }
+         catch (Exception e)
+         {
+            PrintTools.error("Problem with packet: " + packetType.getSimpleName());
+            e.printStackTrace();
+         }
+      }
+
+      if (verbose)
+      {
+         if (!packetTypesWithIterableOrArrayField.isEmpty())
+         {
+            System.out.println();
+            System.out.println();
+            PrintTools.error("List of packet with illegal field type:");
+            packetTypesWithIterableOrArrayField.entrySet().forEach(type -> PrintTools.error(type.getKey().getSimpleName() + ": "
+                  + type.getValue().stream().map(Class::getSimpleName).collect(Collectors.toList())));
+         }
+      }
+
+      assertTrue("Found illegal field types in Packet sub-types.", packetTypesWithIterableOrArrayField.isEmpty());
+   }
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
@@ -181,7 +247,8 @@ public class PacketCodeQualityTest
       Reflections reflections = new Reflections("us.ihmc");
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
-      allPacketTypes.remove(LocalVideoPacket.class); // That guy is a packet but does not make it to the network. It will stay on Kryo. 
+      allPacketTypes.remove(LocalVideoPacket.class); // That guy is a packet but does not make it to the network. It will stay on Kryo.
+      allPacketTypes.remove(MessageOfMessages.class); // This guy has its own ticket to get converted. 
 
       Map<Class<? extends Packet>, List<Class>> packetTypesWithIllegalFieldTypes = new HashMap<>();
 
@@ -197,6 +264,14 @@ public class PacketCodeQualityTest
 
                Class<?> typeToCheck = field.getType();
 
+               if (RecyclingArrayListPubSub.class.isAssignableFrom(typeToCheck))
+               {
+                  Packet packetInstance = packetType.newInstance();
+                  Object fieldInstance = field.get(packetInstance);
+                  Field clazzField = typeToCheck.getDeclaredField("clazz");
+                  clazzField.setAccessible(true);
+                  typeToCheck = (Class<?>) clazzField.get(fieldInstance);
+               }
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
                if (Packet.class.isAssignableFrom(typeToCheck))
@@ -352,6 +427,7 @@ public class PacketCodeQualityTest
       Set<Field> fieldsToIngore = new HashSet<>();
       fieldsToIngore.add(VideoPacket.class.getField("data"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag"));
+      fieldsToIngore.add(AtlasAuxiliaryRobotData.class.getField("electricJointEnabledArray"));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
@@ -369,7 +445,7 @@ public class PacketCodeQualityTest
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
 
-               boolean isEnum = byte.class == typeToCheck;
+               boolean isEnum = byte.class == typeToCheck || TByteList.class.isAssignableFrom(typeToCheck);
 
                if (isEnum)
                {
@@ -423,6 +499,7 @@ public class PacketCodeQualityTest
       Set<Field> fieldsToIngore = new HashSet<>();
       fieldsToIngore.add(VideoPacket.class.getField("data"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag"));
+      fieldsToIngore.add(AtlasAuxiliaryRobotData.class.getField("electricJointEnabledArray"));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
@@ -441,7 +518,7 @@ public class PacketCodeQualityTest
                Class<?> typeToCheck = field.getType();
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
-               if (byte.class != typeToCheck)
+               if (byte.class != typeToCheck &&  !TByteList.class.isAssignableFrom(typeToCheck))
                   continue;
                String expectedToContainEnumName = field.getName().toLowerCase();
                Set<Entry<String, Class<? extends Enum>>> potentialMatchingEnums = nameToEnumMap.entrySet().stream()
@@ -649,6 +726,9 @@ public class PacketCodeQualityTest
 
    private void checkIfAllFieldsArePublic(Class<?> clazz)
    {
+      if (List.class.isAssignableFrom(clazz))
+         return;
+
       if (thirdPartySerializableClasses.contains(clazz) || allowedEuclidTypes.contains(clazz))
          return;
 
@@ -679,8 +759,12 @@ public class PacketCodeQualityTest
    private static final Set<Class<?>> thirdPartySerializableClasses = new HashSet<>();
    static
    {
-      thirdPartySerializableClasses.add(List.class);
-      thirdPartySerializableClasses.add(ArrayList.class);
+      thirdPartySerializableClasses.add(RecyclingArrayListPubSub.class);
+      thirdPartySerializableClasses.add(TByteArrayList.class);
+      thirdPartySerializableClasses.add(TFloatArrayList.class);
+      thirdPartySerializableClasses.add(TDoubleArrayList.class);
+      thirdPartySerializableClasses.add(TIntArrayList.class);
+      thirdPartySerializableClasses.add(TLongArrayList.class);
       thirdPartySerializableClasses.add(StringBuilder.class);
    }
 

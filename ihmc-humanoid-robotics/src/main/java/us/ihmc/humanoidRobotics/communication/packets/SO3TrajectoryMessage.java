@@ -1,5 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import java.util.List;
+
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
@@ -14,6 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
@@ -22,7 +25,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame to define what frame the points are expressed in")
-   public SO3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
+   public RecyclingArrayListPubSub<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = new RecyclingArrayListPubSub<>(SO3TrajectoryPointMessage.class, SO3TrajectoryPointMessage::new, 5);
 
    @RosExportedField(documentation = "Frame information for this message.")
    public FrameInformation frameInformation = new FrameInformation();
@@ -53,10 +56,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
 
    public SO3TrajectoryMessage(SO3TrajectoryMessage other)
    {
-      taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[other.getNumberOfTrajectoryPoints()];
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-         taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
-
+      MessageTools.copyData(other.taskspaceTrajectoryPoints, taskspaceTrajectoryPoints);
       setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
       frameInformation.set(other.getFrameInformation());
@@ -67,12 +67,12 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, trajectoryPointListToPack.getReferenceFrame());
 
-      SO3TrajectoryPointMessage[] trajectoryPointMessages = getTrajectoryPoints();
-      int numberOfPoints = trajectoryPointMessages.length;
+      List<SO3TrajectoryPointMessage> trajectoryPointMessages = getTrajectoryPoints();
+      int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         SO3TrajectoryPointMessage so3TrajectoryPointMessage = trajectoryPointMessages[i];
+         SO3TrajectoryPointMessage so3TrajectoryPointMessage = trajectoryPointMessages.get(i);
          trajectoryPointListToPack.addTrajectoryPoint(so3TrajectoryPointMessage.time, so3TrajectoryPointMessage.orientation,
                                                       so3TrajectoryPointMessage.angularVelocity);
       }
@@ -80,10 +80,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
 
    public void set(SO3TrajectoryMessage other)
    {
-      if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
-         throw new RuntimeException("Must the same number of waypoints.");
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-         taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
+      MessageTools.copyData(other.taskspaceTrajectoryPoints, taskspaceTrajectoryPoints);
       frameInformation.set(other.getFrameInformation());
       queueingProperties.set(other.queueingProperties);
    }
@@ -104,7 +101,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createSO3TrajectoryPointMessage(time, orientation, angularVelocity);
+      taskspaceTrajectoryPoints.get(trajectoryPointIndex).set(HumanoidMessageTools.createSO3TrajectoryPointMessage(time, orientation, angularVelocity));
    }
 
    /**
@@ -123,7 +120,7 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
    {
       FrameInformation.checkIfDataFrameIdsMatch(frameInformation, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
-      taskspaceTrajectoryPoints[trajectoryPointIndex] = HumanoidMessageTools.createSO3TrajectoryPointMessage(time, orientation, angularVelocity);
+      taskspaceTrajectoryPoints.get(trajectoryPointIndex).set(HumanoidMessageTools.createSO3TrajectoryPointMessage(time, orientation, angularVelocity));
    }
 
    /**
@@ -178,10 +175,10 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
 
    public final int getNumberOfTrajectoryPoints()
    {
-      return taskspaceTrajectoryPoints.length;
+      return taskspaceTrajectoryPoints.size();
    }
 
-   public final SO3TrajectoryPointMessage[] getTrajectoryPoints()
+   public final RecyclingArrayListPubSub<SO3TrajectoryPointMessage> getTrajectoryPoints()
    {
       return taskspaceTrajectoryPoints;
    }
@@ -189,12 +186,12 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
    public final SO3TrajectoryPointMessage getTrajectoryPoint(int trajectoryPointIndex)
    {
       rangeCheck(trajectoryPointIndex);
-      return taskspaceTrajectoryPoints[trajectoryPointIndex];
+      return taskspaceTrajectoryPoints.get(trajectoryPointIndex);
    }
 
    public final SO3TrajectoryPointMessage getLastTrajectoryPoint()
    {
-      return taskspaceTrajectoryPoints[taskspaceTrajectoryPoints.length - 1];
+      return taskspaceTrajectoryPoints.getLast();
    }
 
    public final double getTrajectoryTime()
@@ -301,14 +298,8 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
       if (!frameInformation.epsilonEquals(other.frameInformation, epsilon))
          return false;
 
-      if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
+      if (!MessageTools.epsilonEquals(taskspaceTrajectoryPoints, other.taskspaceTrajectoryPoints, epsilon))
          return false;
-
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
-      {
-         if (!taskspaceTrajectoryPoints[i].epsilonEquals(other.taskspaceTrajectoryPoints[i], epsilon))
-            return false;
-      }
 
       if (selectionMatrix == null ^ other.selectionMatrix == null)
          return false;

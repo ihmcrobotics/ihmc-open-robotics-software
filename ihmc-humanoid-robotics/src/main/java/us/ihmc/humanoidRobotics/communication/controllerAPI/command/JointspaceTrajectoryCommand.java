@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.List;
 import java.util.Random;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
@@ -57,12 +58,12 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
       }
    }
 
-   private void set(OneDoFJointTrajectoryMessage[] trajectoryPointListArray)
+   private void set(List<OneDoFJointTrajectoryMessage> trajectoryPointListArray)
    {
-      for (int i = 0; i < trajectoryPointListArray.length; i++)
+      for (int i = 0; i < trajectoryPointListArray.size(); i++)
       {
          OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = jointTrajectoryInputs.add();
-         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray[i];
+         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray.get(i);
          if (oneJointTrajectoryMessage != null)
          {
             oneJointTrajectoryMessage.getTrajectoryPoints(oneDoFJointTrajectoryCommand);

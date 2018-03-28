@@ -198,9 +198,9 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          }
          if (rosMainNode.isStarted())
          {
-            float[] jointAngles = robotConfigurationData.getJointAngles();
-            float[] jointVelocities = robotConfigurationData.getJointVelocities();
-            float[] jointTorques = robotConfigurationData.getJointTorques();
+            float[] jointAngles = robotConfigurationData.getJointAngles().toArray();
+            float[] jointVelocities = robotConfigurationData.getJointVelocities().toArray();
+            float[] jointTorques = robotConfigurationData.getJointTorques().toArray();
 
             long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(robotConfigurationData.getTimestamp());
             Time t = Time.fromNano(timeStamp);
@@ -223,12 +223,18 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
             for (RobotSide robotSide : RobotSide.values())
             {
-               footForceSensorWrenches.put(robotSide, robotConfigurationData.getMomentAndForceVectorForSensor(feetForceSensorIndexes.get(robotSide)));
+               float[] arrayToPublish = new float[6];
+               robotConfigurationData.getMomentAndForceVectorForSensor(feetForceSensorIndexes.get(robotSide)).angularPart.get(0, arrayToPublish);
+               robotConfigurationData.getMomentAndForceVectorForSensor(feetForceSensorIndexes.get(robotSide)).linearPart.get(3, arrayToPublish);
+               footForceSensorWrenches.put(robotSide, arrayToPublish);
                footForceSensorPublishers.get(robotSide).publish(timeStamp, footForceSensorWrenches.get(robotSide));
 
                if(!handForceSensorIndexes.isEmpty())
                {
-                  wristForceSensorWrenches.put(robotSide, robotConfigurationData.getMomentAndForceVectorForSensor(handForceSensorIndexes.get(robotSide)));
+                  arrayToPublish = new float[6];
+                  robotConfigurationData.getMomentAndForceVectorForSensor(handForceSensorIndexes.get(robotSide)).angularPart.get(0, arrayToPublish);
+                  robotConfigurationData.getMomentAndForceVectorForSensor(handForceSensorIndexes.get(robotSide)).linearPart.get(3, arrayToPublish);
+                  wristForceSensorWrenches.put(robotSide, arrayToPublish);
                   wristForceSensorPublishers.get(robotSide).publish(timeStamp, wristForceSensorWrenches.get(robotSide));
                }
             }

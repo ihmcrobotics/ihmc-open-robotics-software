@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.SpatialVectorMessage;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
@@ -73,10 +75,10 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
             throw new RuntimeException("Joint names do not match for RobotConfigurationData");
          }
 
-         float[] newJointAngles = robotConfigurationData.getJointAngles();
-         for (int i = 0; i < newJointAngles.length; i++)
+         TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
+         for (int i = 0; i < newJointAngles.size(); i++)
          {
-            allJoints[i].setQ(newJointAngles[i]);
+            allJoints[i].setQ(newJointAngles.get(i));
          }
 
          Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
@@ -92,8 +94,9 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
          {
             for (int i = 0; i < forceSensorDataHolder.getForceSensorDefinitions().size(); i++)
             {
-               forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i))
-                     .setWrench(robotConfigurationData.getMomentAndForceVectorForSensor(i));
+               SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.getMomentAndForceVectorForSensor(i);
+               forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i)).setWrench(momentAndForceVectorForSensor.angularPart,
+                                                                                                             momentAndForceVectorForSensor.linearPart);
             }
          }
          for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)

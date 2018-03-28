@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -39,8 +40,9 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       HandTrajectoryMessage expected = new HandTrajectoryMessage(original);
-      for (SE3TrajectoryPointMessage trajectoryPoint : expected.se3Trajectory.taskspaceTrajectoryPoints)
+      for (int i = 0; i < expected.se3Trajectory.taskspaceTrajectoryPoints.size(); i++)
       {
+         SE3TrajectoryPointMessage trajectoryPoint = expected.se3Trajectory.taskspaceTrajectoryPoints.get(i);
          trajectoryPoint.position.applyTransform(transform);
          trajectoryPoint.orientation.applyTransform(transform);
          trajectoryPoint.linearVelocity.applyTransform(transform);
@@ -64,8 +66,9 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       PelvisHeightTrajectoryMessage expected = new PelvisHeightTrajectoryMessage(original);
-      for (EuclideanTrajectoryPointMessage trajectoryPoint : expected.euclideanTrajectory.taskspaceTrajectoryPoints)
+      for (int i = 0; i < expected.euclideanTrajectory.taskspaceTrajectoryPoints.size(); i++)
       {
+         EuclideanTrajectoryPointMessage trajectoryPoint = expected.euclideanTrajectory.taskspaceTrajectoryPoints.get(i);
          trajectoryPoint.position.applyTransform(transform);
          trajectoryPoint.linearVelocity.applyTransform(transform);
       }
@@ -108,8 +111,12 @@ public class MessageTransformerTest
       FootstepDataMessage expected = new FootstepDataMessage(original);
       expected.location.applyTransform(transform);
       expected.orientation.applyTransform(transform);
-      for (Point3D waypoint : expected.positionWaypoints)
+      List<Point3D> positionWaypoints = expected.positionWaypoints;
+      for (int i = 0; i < positionWaypoints.size(); i++)
+      {
+         Point3D waypoint = positionWaypoints.get(i);
          waypoint.applyTransform(transform);
+      }
 
       FootstepDataMessage actual = new FootstepDataMessage(original);
       MessageTransformer.transform(actual, transform);
@@ -127,8 +134,10 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       FootstepDataListMessage expected = new FootstepDataListMessage(original);
-      for (FootstepDataMessage footstepDataMessage : expected.footstepDataList)
+      List<FootstepDataMessage> footstepDataList = expected.footstepDataList;
+      for (int i = 0; i < footstepDataList.size(); i++)
       {
+         FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
          footstepDataMessage.location.applyTransform(transform);
          footstepDataMessage.orientation.applyTransform(transform);
          for (Point3D waypoint : footstepDataMessage.positionWaypoints)

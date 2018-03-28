@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.communication.packets.ExecutionTiming;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -51,7 +51,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       trustHeightOfFootsteps = message.trustHeightOfFootsteps;
       areFootstepsAdjustable = message.areFootstepsAdjustable;
       offsetFootstepsWithExecutionError = message.isOffsetFootstepsWithExecutionError();
-      ArrayList<FootstepDataMessage> dataList = message.getDataList();
+      List<FootstepDataMessage> dataList = message.getDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       if (dataList != null)
       {
