@@ -46,9 +46,9 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    /** Used to schedule status message sending. */
    private final PeriodicThreadScheduler scheduler;
    /** Used to filter messages coming in. */
-   private final AtomicReference<MessageFilter> messageFilter = new AtomicReference<>(message -> true);
+   private final AtomicReference<MessageFilter> messageFilter;
    /** Used to filter messages coming in and report an error. */
-   private final AtomicReference<MessageValidator> messageValidator = new AtomicReference<>(message -> null);
+   private final AtomicReference<MessageValidator> messageValidator;
 
    /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends Packet<?>>> listOfSupportedStatusMessages;
@@ -71,6 +71,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       this.packetCommunicator = packetCommunicator;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
       listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
+      messageFilter = new AtomicReference<>(message -> true);
+      messageValidator = new AtomicReference<>(message -> null);
 
       if (packetCommunicator == null)
       {
