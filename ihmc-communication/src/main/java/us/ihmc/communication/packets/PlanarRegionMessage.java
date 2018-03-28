@@ -8,8 +8,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
 {
    public int regionId = PlanarRegion.NO_REGION_ID;
-   public Point3D32 regionOrigin;
-   public Vector3D32 regionNormal;
+   public Point3D32 regionOrigin = new Point3D32();
+   public Vector3D32 regionNormal = new Vector3D32();
    public Polygon2DMessage concaveHull = new Polygon2DMessage();
    public RecyclingArrayListPubSub<Polygon2DMessage> convexPolygons = new RecyclingArrayListPubSub<>(Polygon2DMessage.class, Polygon2DMessage::new, 5);
 

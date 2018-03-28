@@ -7,7 +7,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
 {
    public int numberOfInitialGuesses = -1;
    public int maximumExpansionSize = -1;
-   public KinematicsToolboxOutputStatus initialConfiguration = null;
+   public KinematicsToolboxOutputStatus initialConfiguration = new KinematicsToolboxOutputStatus();
 
    public WholeBodyTrajectoryToolboxConfigurationMessage()
    {

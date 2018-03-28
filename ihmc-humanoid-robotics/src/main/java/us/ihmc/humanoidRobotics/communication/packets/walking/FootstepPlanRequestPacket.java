@@ -10,7 +10,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_STOP_SEARCH = 1;
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_UPDATE_START = 2;
 
-   public FootstepDataMessage startFootstep;
+   public FootstepDataMessage startFootstep = new FootstepDataMessage();
    public double thetaStart;
    public double maxSuboptimality = 1;
 
@@ -26,7 +26,6 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    @Override
    public void set(FootstepPlanRequestPacket other)
    {
-      startFootstep = new FootstepDataMessage();
       startFootstep.set(other.startFootstep);
       thetaStart = other.thetaStart;
       maxSuboptimality = other.maxSuboptimality;
@@ -47,13 +46,8 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
          return false;
       if (!this.startFootstep.epsilonEquals(other.startFootstep, epsilon))
          return false;
-      if (this.goals.size() != other.goals.size())
+      if (!MessageTools.epsilonEquals(goals, other.goals, epsilon))
          return false;
-      for (int i = 0; i < goals.size(); i++)
-      {
-         if (!goals.get(i).epsilonEquals(other.goals.get(i), epsilon))
-            return false;
-      }
       return true;
    }
 }

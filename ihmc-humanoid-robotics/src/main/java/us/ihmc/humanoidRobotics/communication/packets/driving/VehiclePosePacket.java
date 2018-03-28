@@ -9,8 +9,8 @@ import us.ihmc.robotics.geometry.RotationTools;
 
 public class VehiclePosePacket extends Packet<VehiclePosePacket>
 {
-   public Point3D position;
-   public Quaternion orientation;
+   public Point3D position = new Point3D();
+   public Quaternion orientation = new Quaternion();
 
    public int index = 0;
 
