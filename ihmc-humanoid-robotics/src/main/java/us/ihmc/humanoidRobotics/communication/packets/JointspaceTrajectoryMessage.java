@@ -118,7 +118,7 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
       for (int i = 0; i < getNumberOfJoints(); i++)
       {
          OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointTrajectoryMessages.get(i);
-         if(oneDoFJointTrajectoryMessage != null)
+         if(oneDoFJointTrajectoryMessage != null && oneDoFJointTrajectoryMessage.getNumberOfTrajectoryPoints() > 0)
          {
             trajectoryTime = Math.max(trajectoryTime, oneDoFJointTrajectoryMessage.getLastTrajectoryPoint().time);
          }
