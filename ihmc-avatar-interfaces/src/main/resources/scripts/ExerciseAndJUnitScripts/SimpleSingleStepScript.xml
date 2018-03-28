@@ -30,14 +30,13 @@
           </predictedContactPoints>
           <trajectoryType>0</trajectoryType>
           <swingHeight>0.0</swingHeight>
-          <positionWaypoints>
+          <customPositionWaypoints>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </positionWaypoints>
+          </customPositionWaypoints>
           <swingTrajectory>
             <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
-
             <values/>
             <size>0</size>
           </swingTrajectory>
