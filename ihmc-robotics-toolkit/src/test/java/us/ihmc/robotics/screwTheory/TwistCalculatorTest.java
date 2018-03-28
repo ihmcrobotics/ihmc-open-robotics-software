@@ -27,7 +27,7 @@ public class TwistCalculatorTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.01)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithChainComposedOfPrismaticJoints() throws Exception
    {
@@ -64,7 +64,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.01)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithChainComposedOfRevoluteJointsAssertAngularVelocityOnly() throws Exception
    {
@@ -103,7 +103,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.02)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWithTreeComposedOfPrismaticJoints() throws Exception
    {
@@ -193,7 +193,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.01)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithChainRobotAgainstFiniteDifference() throws Exception
    {
@@ -239,7 +239,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.03)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWithTreeRobotAgainstFiniteDifference() throws Exception
    {
@@ -285,7 +285,7 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.05)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testWithFloatingJointRobotAgainstFiniteDifference() throws Exception
    {
@@ -362,8 +362,8 @@ public class TwistCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.4)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 6.4)
+   @Test(timeout = 32000)
    public void testRelativeTwistWithFloatingJointRobotAgainstFiniteDifference() throws Exception
    {
       Random random = new Random(435345L);

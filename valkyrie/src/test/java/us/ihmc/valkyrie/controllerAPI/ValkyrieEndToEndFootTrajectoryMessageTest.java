@@ -14,48 +14,48 @@ public class ValkyrieEndToEndFootTrajectoryMessageTest extends EndToEndFootTraje
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 
-   @ContinuousIntegrationTest(estimatedDuration = 40.0)
-   @Test(timeout = 400000)
+   @ContinuousIntegrationTest(estimatedDuration = 21.9)
+   @Test(timeout = 110000)
    @Override
    public void testCustomControlPoint() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlPoint();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 400000)
+   @ContinuousIntegrationTest(estimatedDuration = 70.0)
+   @Test(timeout = 350000)
    @Override
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleWaypoint();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 80.5)
-   @Test(timeout = 400000)
+   @ContinuousIntegrationTest(estimatedDuration = 77.7)
+   @Test(timeout = 390000)
    @Override
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
       super.testMultipleTrajectoryPoints();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 90.0)
-   @Test(timeout = 400000)
+   @ContinuousIntegrationTest(estimatedDuration = 88.2)
+   @Test(timeout = 440000)
    @Override
    public void testQueuedMessages() throws SimulationExceededMaximumTimeException
    {
       super.testQueuedMessages();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 70.0)
-   @Test(timeout = 400000)
+   @ContinuousIntegrationTest(estimatedDuration = 78.6)
+   @Test(timeout = 390000)
    @Override
    public void testQueueStoppedWithOverrideMessage() throws SimulationExceededMaximumTimeException
    {
       super.testQueueStoppedWithOverrideMessage();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 400000)
+   @ContinuousIntegrationTest(estimatedDuration = 60.5)
+   @Test(timeout = 300000)
    @Override
    public void testQueueWithWrongPreviousId() throws SimulationExceededMaximumTimeException
    {

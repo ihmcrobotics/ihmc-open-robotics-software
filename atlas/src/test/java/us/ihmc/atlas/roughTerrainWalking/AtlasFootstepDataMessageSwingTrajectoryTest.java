@@ -15,8 +15,8 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasFootstepDataMessageSwingTrajectoryTest extends AvatarFootstepDataMessageSwingTrajectoryTest
 {
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 29.1)
+   @Test(timeout = 150000)
    public void testSwingTrajectoryInWorld() throws SimulationExceededMaximumTimeException
    {
       super.testSwingTrajectoryInWorld();

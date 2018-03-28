@@ -101,7 +101,7 @@ public class DesiredFootstepTest
       compareFootstepsSentWithReceived(sentFootsteps, receivedFootsteps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.4)
+   @ContinuousIntegrationTest(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testPassingFootstepPath() throws IOException
    {
@@ -172,7 +172,7 @@ public class DesiredFootstepTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.6)
+   @ContinuousIntegrationTest(estimatedDuration = 2.4)
    @Test(timeout = 30000)
    public void testPassingFootstepPathAndPauseCommands() throws IOException
    {
@@ -243,7 +243,7 @@ public class DesiredFootstepTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.6)
+   @ContinuousIntegrationTest(estimatedDuration = 1.4)
    @Test(timeout = 30000)
    public void testPassingFootstepStatus() throws IOException
    {

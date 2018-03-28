@@ -90,7 +90,7 @@ public class ReflectionSimulationComparerTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.8)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testTwoRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      
@@ -131,7 +131,7 @@ public class ReflectionSimulationComparerTest
       return robot0;
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.8)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout = 30000)
    public void testTwoNonRewindableSimulationsWithAScript() throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException, UnreasonableAccelerationException
    {      

@@ -25,7 +25,7 @@ public class AtlasDrivingInitialSetupTest
 {
    private static final AtlasRobotVersion version = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
    
-	@ContinuousIntegrationTest(estimatedDuration = 1.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testLoadFile()
    {

@@ -83,7 +83,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testCompareWithStraightLinePoseTrajectoryGeneratorPositionOnly()
    {
@@ -251,7 +251,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
     * 
     **/
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testPositionAndVelocityConsistencyWithInitialAndFinalVelocity()
    {

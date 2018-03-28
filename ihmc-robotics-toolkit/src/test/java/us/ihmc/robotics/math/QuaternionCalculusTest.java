@@ -261,7 +261,7 @@ public class QuaternionCalculusTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testInterpolateAgainstQuat4d() throws Exception
    {

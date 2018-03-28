@@ -28,16 +28,16 @@ public class AtlasEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndPelv
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 15.2)
-   @Test(timeout = 50000)
+   @ContinuousIntegrationTest(estimatedDuration = 35.2)
+   @Test(timeout = 180000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 15.2)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 24.9)
+   @Test(timeout = 120000)
    public void testSingleWaypointInUserMode() throws Exception
    {
       super.testSingleWaypointInUserMode();

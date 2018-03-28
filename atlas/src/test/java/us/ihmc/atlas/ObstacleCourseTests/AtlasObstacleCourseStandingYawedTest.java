@@ -30,8 +30,8 @@ public class AtlasObstacleCourseStandingYawedTest extends DRCObstacleCourseStand
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.4)
-   @Test(timeout = 60000)
+   @ContinuousIntegrationTest(estimatedDuration = 19.1)
+   @Test(timeout = 96000)
    public void testStandingYawed() throws SimulationExceededMaximumTimeException
    {
       super.testStandingYawed();

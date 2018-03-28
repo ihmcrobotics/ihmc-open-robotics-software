@@ -82,7 +82,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
       assertAAndADotV(random, joints, elevator, robot, numberOfJoints);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void floatingChainTest() throws UnreasonableAccelerationException
    {

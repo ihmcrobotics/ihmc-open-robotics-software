@@ -34,8 +34,8 @@ public class SkippyTest
       assertTrue(skippySimulation.run(10.0));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 6.2)
+   @Test(timeout = 31000)
    public void testRecoveringFromPush() throws SimulationExceededMaximumTimeException
    {
       double pushDuration = 0.03;

@@ -110,7 +110,7 @@ public class PlanarRegionTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testIsPointOnOrSlightlyAbove()
    {
@@ -145,7 +145,7 @@ public class PlanarRegionTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testIsPointOnOrSlightlyBelow()
    {

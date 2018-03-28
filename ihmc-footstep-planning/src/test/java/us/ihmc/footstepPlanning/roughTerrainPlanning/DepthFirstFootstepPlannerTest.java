@@ -32,8 +32,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    private static final boolean showPlannerVisualizer = false;
 
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
+   @Test(timeout = 50000)
    public void testOnStairCase()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -46,8 +46,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
+   @Test(timeout = 50000)
    public void testSimpleStepOnBox()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -56,8 +56,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testSimpleStepOnBox(true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
+   @Test(timeout = 50000)
    public void testSimpleStepOnBoxTwo()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -67,8 +67,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
+   @Test(timeout = 50000)
    public void testRandomEnvironment()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -78,8 +78,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.3)
+   @Test(timeout = 52000)
    public void testSimpleGaps()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -89,8 +89,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.1)
+   @Test(timeout = 50000)
    public void testOverCinderBlockField()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -99,8 +99,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testOverCinderBlockField(true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
+   @Test(timeout = 50000)
    public void testStepAfterPitchedUp()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -109,8 +109,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testCompareAfterPitchedStep(!visualize, true);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
+   @Test(timeout = 50000)
    public void testStepAfterPitchedDown()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -119,8 +119,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
       super.testCompareAfterPitchedStep(!visualize, false);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
+   @Test(timeout = 50000)
    public void testStepBeforeGap()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
@@ -130,8 +130,8 @@ public class DepthFirstFootstepPlannerTest extends FootstepPlannerOnRoughTerrain
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 10000.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test(timeout = 75000)
    public void testWalkingAroundBox()
    {
       planner.setMaximumNumberOfNodesToExpand(Integer.MAX_VALUE);
