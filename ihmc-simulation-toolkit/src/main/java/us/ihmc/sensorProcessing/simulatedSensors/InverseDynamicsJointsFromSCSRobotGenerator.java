@@ -8,7 +8,9 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -292,53 +294,35 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          for (FloatingJoint floatingJoint : floatingJoints)
          {
             FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint); //floatingToSixDofToJointMap.get(floatingJoint);
+            RigidBodyTransform rotationAndTranslation = new RigidBodyTransform();
             if (updatePositions)
             {
-               floatingJoint.getTransformToWorld(positionAndRotation);
-               sixDoFJoint.setPositionAndRotation(positionAndRotation);
+               sixDoFJoint.getJointTransform3D(rotationAndTranslation);
+               floatingJoint.setRotationAndTranslation(rotationAndTranslation);
             }
-         }
-      }
 
-      elevator.updateFramesRecursively();
-
-      if (updateRootJoints)
-      {
-         Collection<? extends FloatingJoint> floatingJoints = scsToInverseDynamicsJointMap.getFloatingJoints();
-         for (FloatingJoint floatingJoint : floatingJoints)
-         {
-            FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint);
-
-            ReferenceFrame elevatorFrame = sixDoFJoint.getFrameBeforeJoint();
             ReferenceFrame pelvisFrame = sixDoFJoint.getFrameAfterJoint();
 
-            floatingJoint.getVelocity(linearVelocity);
-            linearVelocity.changeFrame(pelvisFrame);
-
-            floatingJoint.getAngularVelocity(angularVelocity, pelvisFrame);
-
-            Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity, angularVelocity);
             if (updateVelocities)
             {
-               sixDoFJoint.setJointTwist(bodyTwist);
-               sixDoFJoint.updateFramesRecursively();
+               linearVelocity.setIncludingFrame(pelvisFrame, sixDoFJoint.getLinearVelocityForReading());
+               linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+               floatingJoint.setVelocity(linearVelocity);
+               floatingJoint.setAngularVelocityInBody(sixDoFJoint.getAngularVelocityForReading());
             }
-            originAcceleration.setToZero(sixDoFJoint.getFrameBeforeJoint());
-            angularAcceleration.setToZero(sixDoFJoint.getFrameAfterJoint());
-
-            floatingJoint.getLinearAccelerationInWorld(originAcceleration);
-            floatingJoint.getAngularAccelerationInBody(angularAcceleration);
-            originAcceleration.changeFrame(sixDoFJoint.getFrameBeforeJoint());
-
-            spatialAccelerationVector.setToZero(sixDoFJoint.getFrameAfterJoint(), sixDoFJoint.getFrameBeforeJoint(), sixDoFJoint.getFrameAfterJoint());
-            spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
-
 
             if (updateAccelerations)
-               sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
-            else
-               sixDoFJoint.setAcceleration(spatialAccelerationVector);
-
+            {
+               if (useDesiredAcceleration)
+                  sixDoFJoint.getDesiredJointAcceleration(spatialAccelerationVector);
+               else
+                  sixDoFJoint.getJointAcceleration(spatialAccelerationVector);
+               spatialAccelerationVector.getLinearPart(originAcceleration);
+               originAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+               floatingJoint.setAcceleration(originAcceleration);
+               spatialAccelerationVector.getAngularPart(angularAcceleration);
+               floatingJoint.setAngularAccelerationInBody(angularAcceleration);
+            }
          }
       }
    }
