@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 
 public class StampedPosePacket extends Packet<StampedPosePacket>
 {
-   public Pose3D pose;
+   public Pose3D pose = new Pose3D();
    public long timeStamp;
    public double confidenceFactor;
    public StringBuilder frameId = new StringBuilder();

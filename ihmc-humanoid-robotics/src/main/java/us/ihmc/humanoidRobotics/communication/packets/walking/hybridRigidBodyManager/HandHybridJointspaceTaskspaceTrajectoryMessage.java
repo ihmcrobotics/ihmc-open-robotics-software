@@ -18,9 +18,9 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public byte robotSide;
    @RosExportedField(documentation = "The taskspace trajectory information.")
-   public SE3TrajectoryMessage taskspaceTrajectoryMessage;
+   public SE3TrajectoryMessage taskspaceTrajectoryMessage = new SE3TrajectoryMessage();
    @RosExportedField(documentation = "The jointspace trajectory information.")
-   public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
+   public JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
 
    /**
     * Empty constructor for serialization.

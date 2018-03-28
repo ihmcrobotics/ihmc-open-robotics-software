@@ -6,7 +6,7 @@ import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajectoryToolboxMessage>
 {
-   public WholeBodyTrajectoryToolboxConfigurationMessage configuration;
+   public WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
    public RecyclingArrayListPubSub<WaypointBasedTrajectoryMessage> endEffectorTrajectories = new RecyclingArrayListPubSub<>(WaypointBasedTrajectoryMessage.class, WaypointBasedTrajectoryMessage::new, 10);
    public RecyclingArrayListPubSub<RigidBodyExplorationConfigurationMessage> explorationConfigurations = new RecyclingArrayListPubSub<>(RigidBodyExplorationConfigurationMessage.class, RigidBodyExplorationConfigurationMessage::new, 10);
    public RecyclingArrayListPubSub<ReachingManifoldMessage> reachingManifolds = new RecyclingArrayListPubSub<>(ReachingManifoldMessage.class, ReachingManifoldMessage::new, 10);

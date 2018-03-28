@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Arrays;
-import java.util.List;
 
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
@@ -24,9 +23,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
    public byte robotSide;
    @RosExportedField(documentation = "Specifies the adjusted position of the footstep. It is expressed in world frame.")
-   public Point3D location;
+   public Point3D location = new Point3D();
    @RosExportedField(documentation = "Specifies the adjusted orientation of the footstep. It is expressed in world frame.")
-   public Quaternion orientation;
+   public Quaternion orientation = new Quaternion();
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
          + "the world. A value of null or an empty list will default to keep the contact points used for the original footstep. Contact points  are expressed in sole frame. This ordering does not matter.\n"
