@@ -11,9 +11,11 @@ import java.util.Set;
 import org.junit.Test;
 
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class IHMCCommunicationKryoNetClassListTest
 {
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAllClassesRegisteredArePackets()
    {
@@ -26,6 +28,7 @@ public class IHMCCommunicationKryoNetClassListTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAllPacketFieldsAreRegistered()
    {

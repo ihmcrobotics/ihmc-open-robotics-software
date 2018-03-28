@@ -7,12 +7,14 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ExpandingPolytopeSilhouetteConstructorTest
 {
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSilhouetteConstructorWithTetrahedron()
    {
@@ -64,6 +66,7 @@ public class ExpandingPolytopeSilhouetteConstructorTest
       assertEquals(0, edge.getEdgeIndex());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSilhouetteConstructorWithIcoSphere()
    {
