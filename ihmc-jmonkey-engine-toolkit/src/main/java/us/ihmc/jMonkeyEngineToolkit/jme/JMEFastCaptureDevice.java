@@ -472,7 +472,11 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    public float getDepth(float zDepth) {
       float far = viewport.getCamera().getFrustumFar();
       float near = viewport.getCamera().getFrustumNear();
+            
+      zDepth = zDepth * 2f - 1f;
       return 2f * near * far / (far + near - zDepth * (far - near));
+	   
+	   
    }
    
    public void convertRGBD(float nearClip, float farClip)
@@ -487,10 +491,12 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
       FloatBuffer depthBuffer = imageBuffer.asFloatBuffer();
 
      
-      float m00 = viewport.getCamera().getFrustumRight() - viewport.getCamera().getFrustumLeft()  / (2f * viewport.getCamera().getFrustumNear());
-      float m11 = viewport.getCamera().getFrustumTop() - viewport.getCamera().getFrustumBottom() / (2f * viewport.getCamera().getFrustumNear());
+      float m00 = (viewport.getCamera().getFrustumRight() - viewport.getCamera().getFrustumLeft())  / (2f * viewport.getCamera().getFrustumNear());
+      float m11 = (viewport.getCamera().getFrustumTop() - viewport.getCamera().getFrustumBottom()) / (2f * viewport.getCamera().getFrustumNear());
+      
       
       depthImage.setTransform2D(m00, m11);
+      
       
       for (int y = 0; y < height; y++)
       {
@@ -501,6 +507,7 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
             byte b1 = cpuArray[upperHalfPtrAlpha + 0];
             byte g1 = cpuArray[upperHalfPtrAlpha + 1];
             byte r1 = cpuArray[upperHalfPtrAlpha + 2];
+            
 
             
             float rawDepth = depthBuffer.get();
