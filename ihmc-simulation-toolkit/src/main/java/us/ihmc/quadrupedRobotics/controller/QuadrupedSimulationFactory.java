@@ -125,6 +125,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
    private final OptionalFactoryField<QuadrupedForceControllerEnum> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
+   private final OptionalFactoryField<Boolean> useLocalCommunicator = new OptionalFactoryField<>("useLocalCommunicator");
 
    // TO CONSTRUCT
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -254,10 +255,17 @@ public class QuadrupedSimulationFactory
       {
          try
          {
-            packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList.get());
+            if(useLocalCommunicator.get())
+            {
+               packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList.get());
+            }
+            else
+            {
+               packetCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.CONTROLLER_PORT, netClassList.get());
+            }
+
             packetCommunicator.connect();
-         }
-         catch (BindException bindException)
+         }         catch (BindException bindException)
          {
             PrintTools.error(this, bindException.getMessage());
             PrintTools.warn(this, "Continuing without networking");
@@ -434,6 +442,7 @@ public class QuadrupedSimulationFactory
       groundContactModelType.setDefaultValue(QuadrupedGroundContactModelType.FLAT);
       usePushRobotController.setDefaultValue(false);
       footSwitchType.setDefaultValue(FootSwitchType.TouchdownBased);
+      useLocalCommunicator.setDefaultValue(false);
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -671,5 +680,10 @@ public class QuadrupedSimulationFactory
    public void setInitialForceControlState(QuadrupedForceControllerEnum initialForceControlState)
    {
       this.initialForceControlState.set(initialForceControlState);
+   }
+
+   public void setUseLocalCommunicator(boolean useLocalCommunicator)
+   {
+      this.useLocalCommunicator.set(useLocalCommunicator);
    }
 }
