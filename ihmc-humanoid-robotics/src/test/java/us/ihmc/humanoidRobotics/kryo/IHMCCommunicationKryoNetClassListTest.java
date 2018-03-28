@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.PreallocatedList;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class IHMCCommunicationKryoNetClassListTest
 {
@@ -101,6 +102,8 @@ public class IHMCCommunicationKryoNetClassListTest
       if (Enum.class.isAssignableFrom(typeToCheck))
          return;
       if (ArrayList.class.isAssignableFrom(typeToCheck))
+         return;
+      if (RecyclingArrayListPubSub.class.isAssignableFrom(typeToCheck))
          return;
 
       for (Field subField : typeToCheck.getDeclaredFields())
