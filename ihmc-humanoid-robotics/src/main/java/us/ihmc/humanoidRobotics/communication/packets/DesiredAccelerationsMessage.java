@@ -20,7 +20,6 @@ public final class DesiredAccelerationsMessage extends Packet<DesiredAcceleratio
 
    public DesiredAccelerationsMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override
@@ -53,7 +52,7 @@ public final class DesiredAccelerationsMessage extends Packet<DesiredAcceleratio
    @Override
    public String validateMessage()
    {
-      return PacketValidityChecker.validateDesiredAccelerationsMessage(this, true);
+      return PacketValidityChecker.validateDesiredAccelerationsMessage(this);
    }
 
    @Override

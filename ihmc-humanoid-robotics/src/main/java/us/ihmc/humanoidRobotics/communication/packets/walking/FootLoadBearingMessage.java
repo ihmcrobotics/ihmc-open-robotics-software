@@ -30,7 +30,6 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
     */
    public FootLoadBearingMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override

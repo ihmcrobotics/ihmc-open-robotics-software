@@ -24,7 +24,6 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
     */
    public PelvisOrientationTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -35,7 +34,6 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
    public PelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)
    {
       so3Trajectory = new SO3TrajectoryMessage(pelvisOrientationTrajectoryMessage.so3Trajectory);
-      setUniqueId(pelvisOrientationTrajectoryMessage.getUniqueId());
       setDestination(pelvisOrientationTrajectoryMessage.getDestination());
    }
 
@@ -55,14 +53,6 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
       so3Trajectory = new SO3TrajectoryMessage(other.so3Trajectory);
       enableUserPelvisControlDuringWalking = other.enableUserPelvisControlDuringWalking;
       setPacketInformation(other);
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (so3Trajectory != null)
-         so3Trajectory.setUniqueId(uniqueId);
    }
 
    public SO3TrajectoryMessage getSo3Trajectory()

@@ -39,8 +39,6 @@ public final class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage>
 
    public SE3TrajectoryMessage()
    {
-      super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public SE3TrajectoryMessage(SE3TrajectoryMessage other)

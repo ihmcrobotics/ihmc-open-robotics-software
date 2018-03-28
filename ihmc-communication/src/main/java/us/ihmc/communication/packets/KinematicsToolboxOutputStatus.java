@@ -36,7 +36,6 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       desiredRootTranslation.set(other.desiredRootTranslation);
       desiredRootOrientation.set(other.desiredRootOrientation);
 
-      uniqueId = other.uniqueId;
       destination = other.destination;
       solutionQuality = other.solutionQuality;
       setPacketInformation(other);

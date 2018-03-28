@@ -33,7 +33,7 @@ float64 swing_height
 # This is a convinient way to shape the trajectory of the swing. If full control over the
 # swingtrajectory is desired use the trajectory type WAYPOINTS instead. The position waypoints are
 # expected in the trajectory frame.
-geometry_msgs/Point[] position_waypoints
+geometry_msgs/Point[] custom_position_waypoints
 
 # In case the trajectory type is set to WAYPOINTS, swing waypoints can be specified here. The
 # waypoints do not include thestart point (which is set to the current foot state at lift-off) and the

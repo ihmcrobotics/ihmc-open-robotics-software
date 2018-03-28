@@ -23,8 +23,6 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
     */
    public ChestHybridJointspaceTaskspaceTrajectoryMessage()
    {
-      super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**

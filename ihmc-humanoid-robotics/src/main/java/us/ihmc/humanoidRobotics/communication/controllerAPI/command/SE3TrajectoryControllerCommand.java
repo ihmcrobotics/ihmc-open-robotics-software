@@ -121,7 +121,7 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
          trajectoryPointList.addTrajectoryPoint(se3TrajectoryPointMessage.time, se3TrajectoryPointMessage.position, se3TrajectoryPointMessage.orientation,
                                                 se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
       }
-      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
+      setQueueableCommandVariables(message.getQueueingProperties());
       selectionMatrix.resetSelection();
       selectionMatrix.setAngularAxisSelection(message.angularSelectionMatrix.xSelected, message.angularSelectionMatrix.ySelected, message.angularSelectionMatrix.zSelected);
       selectionMatrix.setLinearAxisSelection(message.linearSelectionMatrix.xSelected, message.linearSelectionMatrix.ySelected, message.linearSelectionMatrix.zSelected);

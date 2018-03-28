@@ -20,7 +20,6 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
 
    public IntrinsicParametersMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public IntrinsicParametersMessage(IntrinsicParametersMessage other)
