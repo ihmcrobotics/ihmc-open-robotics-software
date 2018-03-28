@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
@@ -99,6 +100,8 @@ public class QuadrupedNetClassList extends IHMCCommunicationKryoNetClassList
       registerPacketField(Vector3D.class);
       registerPacketField(Double.class);
       registerPacketField(Object[].class);
-      
+
+      registerPacketClass(QuadrupedSteppingStatePacket.class);
+      registerPacketField(QuadrupedSteppingStateEnum.class);
    }
 }

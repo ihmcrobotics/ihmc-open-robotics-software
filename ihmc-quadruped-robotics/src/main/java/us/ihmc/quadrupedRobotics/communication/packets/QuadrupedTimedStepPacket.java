@@ -28,9 +28,16 @@ public class QuadrupedTimedStepPacket extends Packet<QuadrupedTimedStepPacket>
       this(steps, true);
    }
 
-   public QuadrupedTimedStepPacket(List<QuadrupedTimedStep> steps, boolean isExpressedInAbsoluteTime)
+   public QuadrupedTimedStepPacket(List<? extends QuadrupedTimedStep> steps, boolean isExpressedInAbsoluteTime)
    {
-      this.steps = new ArrayList<>(steps);
+      this.steps = new ArrayList<>(steps.size());
+      for (int i = 0; i < steps.size(); i++)
+      {
+         QuadrupedTimedStep step = new QuadrupedTimedStep();
+         step.set(steps.get(i));
+         this.steps.add(step);
+      }
+
       this.isExpressedInAbsoluteTime = isExpressedInAbsoluteTime;
       setDestination(PacketDestination.CONTROLLER);
    }
