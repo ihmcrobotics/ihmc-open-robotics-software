@@ -211,7 +211,6 @@ public class HumanoidMessageTools
       ArmTrajectoryMessage message = new ArmTrajectoryMessage();
       message.jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
       message.robotSide = robotSide.toByte();
-      message.setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
       return message;
    }
 
@@ -1221,8 +1220,6 @@ public class HumanoidMessageTools
       message.defaultSwingDuration = defaultSwingDuration;
       message.defaultTransferDuration = defaultTransferDuration;
       message.finalTransferDuration = finalTransferDuration;
-      message.queueingProperties.setExecutionMode(executionMode.toByte());
-      message.queueingProperties.setPreviousMessageId(Packet.VALID_MESSAGE_DEFAULT_ID);
       return message;
    }
 
@@ -1255,8 +1252,6 @@ public class HumanoidMessageTools
       message.defaultSwingDuration = defaultSwingDuration;
       message.defaultTransferDuration = defaultTransferDuration;
       message.finalTransferDuration = finalTransferDuration;
-      message.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      message.queueingProperties.setPreviousMessageId(Packet.VALID_MESSAGE_DEFAULT_ID);
       return message;
    }
 
@@ -1533,7 +1528,6 @@ public class HumanoidMessageTools
    {
       SpineTrajectoryMessage message = new SpineTrajectoryMessage();
       message.jointspaceTrajectory = new JointspaceTrajectoryMessage(jointspaceTrajectoryMessage);
-      message.setUniqueId(jointspaceTrajectoryMessage.getUniqueId());
       return message;
    }
 

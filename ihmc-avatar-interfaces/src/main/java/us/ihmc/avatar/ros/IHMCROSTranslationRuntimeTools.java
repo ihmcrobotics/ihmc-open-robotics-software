@@ -169,10 +169,10 @@ public class IHMCROSTranslationRuntimeTools
          predictedContactPoints.add(GenericROSTranslationTools.convertPoint2DRos(point2dRosMessage));
       }
 
-      Point3D[] trajectoryWaypoints = new Point3D[message.getPositionWaypoints().size()];
-      for (int i = 0; i < message.getPositionWaypoints().size(); i++)
+      Point3D[] trajectoryWaypoints = new Point3D[message.getCustomPositionWaypoints().size()];
+      for (int i = 0; i < message.getCustomPositionWaypoints().size(); i++)
       {
-         trajectoryWaypoints[i] = new Point3D(GenericROSTranslationTools.convertPoint(message.getPositionWaypoints().get(i)));
+         trajectoryWaypoints[i] = new Point3D(GenericROSTranslationTools.convertPoint(message.getCustomPositionWaypoints().get(i)));
       }
 
       for (SE3TrajectoryPointRosMessage rosTrajectoryPoint : message.getSwingTrajectory())
@@ -255,61 +255,52 @@ public class IHMCROSTranslationRuntimeTools
       if (wholeBodyTrajectoryMessage.getChestTrajectoryMessage() == null)
       {
          ChestTrajectoryMessage component = new ChestTrajectoryMessage();
-         component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setChestTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getLeftArmTrajectoryMessage() == null)
       {
          ArmTrajectoryMessage component = new ArmTrajectoryMessage();
          component.robotSide = RobotSide.LEFT.toByte();
-         component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setLeftArmTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getRightArmTrajectoryMessage() == null)
       {
          ArmTrajectoryMessage component = new ArmTrajectoryMessage();
          component.robotSide = RobotSide.RIGHT.toByte();
-         component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setRightArmTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage() == null)
       {
          PelvisTrajectoryMessage component = new PelvisTrajectoryMessage();
-         component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getLeftFootTrajectoryMessage() == null)
       {
          FootTrajectoryMessage component = new FootTrajectoryMessage();
          component.robotSide = RobotSide.LEFT.toByte();
-         component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setLeftFootTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getRightFootTrajectoryMessage() == null)
       {
          FootTrajectoryMessage component = new FootTrajectoryMessage();
          component.robotSide = RobotSide.RIGHT.toByte();
-         component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setRightFootTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getLeftHandTrajectoryMessage() == null)
       {
          HandTrajectoryMessage component = new HandTrajectoryMessage();
          component.robotSide = RobotSide.LEFT.toByte();
-         component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setLeftHandTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getRightHandTrajectoryMessage() == null)
       {
          HandTrajectoryMessage component = new HandTrajectoryMessage();
          component.robotSide = RobotSide.RIGHT.toByte();
-         component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setRightHandTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getHeadTrajectoryMessage() == null)
       {
          HeadTrajectoryMessage component = new HeadTrajectoryMessage();
-         component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setHeadTrajectoryMessage(component);
       }
    }
@@ -369,7 +360,7 @@ public class IHMCROSTranslationRuntimeTools
       message.setSwingTrajectory(rosSwingTrajectory);
 
       message.setPredictedContactPoints(predictedContatcPointsRos);
-      message.setPositionWaypoints(positionWaypoints);
+      message.setCustomPositionWaypoints(positionWaypoints);
 
       return message;
    }

@@ -150,11 +150,6 @@ public class CommandInputManager
          PrintTools.warn(this, printStatementPrefix + "Received a null message, ignored.");
          return;
       }
-      if (message.getUniqueId() == Packet.INVALID_MESSAGE_ID)
-      {
-         PrintTools.warn(this, printStatementPrefix + "Received a message with an invalid id, ignored. Message class: " + message.getClass().getSimpleName());
-         return;
-      }
 
       ConcurrentRingBuffer<? extends Command<?, ?>> buffer = messageClassToBufferMap.get(message.getClass());
       if (buffer == null)

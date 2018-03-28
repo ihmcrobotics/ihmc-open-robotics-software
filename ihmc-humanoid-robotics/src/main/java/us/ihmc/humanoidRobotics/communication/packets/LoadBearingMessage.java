@@ -22,7 +22,6 @@ public final class LoadBearingMessage extends Packet<LoadBearingMessage>
 
    public LoadBearingMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override

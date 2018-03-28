@@ -454,8 +454,6 @@ public class FollowFiducialBehavior extends AbstractBehavior
          footstepDataListMessage.footstepDataList.add().set(firstFootstepMessage);
       }
 
-      footstepDataListMessage.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      footstepDataListMessage.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
       return footstepDataListMessage;
    }
 

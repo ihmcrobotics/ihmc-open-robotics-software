@@ -69,14 +69,6 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       return loadBearingMessage;
    }
 
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (loadBearingMessage != null)
-         loadBearingMessage.setUniqueId(uniqueId);
-   }
-
    /**
     * returns the amount of time this command is delayed on the controller side before executing
     * 

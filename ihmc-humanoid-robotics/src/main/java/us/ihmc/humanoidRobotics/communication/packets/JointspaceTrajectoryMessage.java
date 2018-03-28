@@ -32,7 +32,6 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
     */
    public JointspaceTrajectoryMessage(JointspaceTrajectoryMessage other)
    {
-      setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
       queueingProperties.set(other.queueingProperties);
       MessageTools.copyData(other.jointTrajectoryMessages, jointTrajectoryMessages);

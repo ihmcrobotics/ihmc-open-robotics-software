@@ -280,8 +280,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
 
          ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame, pelvisZUpFrame);
-         chestTrajectoryMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-         chestTrajectoryMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
 
          WeightMatrix3D weightMatrix = new WeightMatrix3D();
 
@@ -305,8 +303,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
 
       ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, desiredOrientation, pelvisZUpFrame, pelvisZUpFrame);
-      chestTrajectoryMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      chestTrajectoryMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
 
       WeightMatrix3D weightMatrix = new WeightMatrix3D();
 
@@ -784,7 +780,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(pelvisZUpFrame));
          so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
 
-         chestTrajectoryMessage.setUniqueId(id);
+         so3Trajectory.getQueueingProperties().setMessageId(id);
          if (messageIndex > 0)
          {
             so3Trajectory.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
@@ -909,7 +905,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          SO3TrajectoryMessage so3Trajectory = chestTrajectoryMessage.getSo3Trajectory();
          so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(pelvisZUpFrame));
          so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
-         chestTrajectoryMessage.setUniqueId(id);
+         so3Trajectory.getQueueingProperties().setMessageId(id);
          if (messageIndex > 0)
          {
             long previousMessageId = id - 1;
@@ -1158,7 +1154,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(pelvisZUpFrame));
          so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
 
-         chestTrajectoryMessage.setUniqueId(id);
+         so3Trajectory.getQueueingProperties().setMessageId(id);
          if (messageIndex > 0)
          {
             so3Trajectory.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());

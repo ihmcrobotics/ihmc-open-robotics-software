@@ -165,7 +165,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
          for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
-            armTrajectoryMessage.setUniqueId(id);
+            armTrajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
 
             if (messageIndex > 0)
             {
@@ -269,8 +269,6 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
          robotSide = robotSide.getOppositeSide();
          previousFootStep = footStep;
       }
-      footsteps.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      footsteps.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
 
       return footsteps;
    }

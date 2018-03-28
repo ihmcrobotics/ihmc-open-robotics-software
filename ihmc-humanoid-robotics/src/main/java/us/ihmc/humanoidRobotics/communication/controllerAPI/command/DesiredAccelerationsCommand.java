@@ -26,7 +26,7 @@ public final class DesiredAccelerationsCommand extends QueueableCommand<DesiredA
       {
          desiredJointAccelerations.add(message.desiredJointAccelerations.get(i));
       }
-      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
+      setQueueableCommandVariables(message.getQueueingProperties());
    }
 
    @Override

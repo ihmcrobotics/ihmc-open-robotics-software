@@ -533,7 +533,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(CommonReferenceFrameIds.CHEST_FRAME.getHashId());
          handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
-         handTrajectoryMessage.setUniqueId(id);
+         handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setMessageId(id);
+
          if (messageIndex > 0)
          {
             handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
@@ -721,7 +722,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             handTrajectoryMessage.setRobotSide(robotSide.toByte());
             handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
             handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
-            handTrajectoryMessage.setUniqueId(id);
+            handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setMessageId(id);
+
             if (messageIndex > 0)
             {
                long previousMessageId = id - 1;
@@ -840,7 +842,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          {
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
             handTrajectoryMessage.setRobotSide(robotSide.toByte());
-            handTrajectoryMessage.setUniqueId(id);
+            handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setMessageId(id);
 
             if (messageIndex > 0)
             {

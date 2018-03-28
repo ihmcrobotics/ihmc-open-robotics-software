@@ -137,8 +137,6 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
       footsteps.footstepDataList.add().set(footstep);
       footsteps.footstepDataList.add().set(nextFootstep);
       footsteps.footstepDataList.add().set(nextNextFootstep);
-      footsteps.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      footsteps.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
 
       return footsteps;
    }

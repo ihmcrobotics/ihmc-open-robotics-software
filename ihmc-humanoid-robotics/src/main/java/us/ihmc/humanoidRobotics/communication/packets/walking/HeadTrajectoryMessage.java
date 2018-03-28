@@ -34,7 +34,6 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
    public HeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
    {
       so3Trajectory = new SO3TrajectoryMessage(headTrajectoryMessage.so3Trajectory);
-      setUniqueId(headTrajectoryMessage.getUniqueId());
       setDestination(headTrajectoryMessage.getDestination());
    }
 
@@ -44,14 +43,6 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
       so3Trajectory = new SO3TrajectoryMessage();
       so3Trajectory.set(other.so3Trajectory);
       setPacketInformation(other);
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (so3Trajectory != null)
-         so3Trajectory.setUniqueId(uniqueId);
    }
 
    public void setSo3Trajectory(SO3TrajectoryMessage so3Trajectory)

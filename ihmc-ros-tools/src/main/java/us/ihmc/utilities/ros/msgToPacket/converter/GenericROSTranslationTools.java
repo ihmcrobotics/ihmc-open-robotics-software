@@ -322,7 +322,6 @@ public class GenericROSTranslationTools
       ihmcField.set(ihmcMessage, new TByteArrayList(rosValues));
    }
 
-   @SuppressWarnings({"rawtypes"})
    private static void setRecyclingArrayListPubSubFromList(Message rosMessage, Packet<?> ihmcMessage, Method rosGetter, Field ihmcField, Class<?> fieldType)
          throws IllegalAccessException, InvocationTargetException, ClassNotFoundException, InstantiationException, RosEnumConversionException,
          NoSuchFieldException, IllegalArgumentException, NoSuchMethodException, SecurityException
@@ -746,6 +745,26 @@ public class GenericROSTranslationTools
       else if (Enum.class.isAssignableFrom(javaType))
       {
          return "uint8";
+      }
+      else if (TDoubleArrayList.class.isAssignableFrom(javaType))
+      {
+         return getRosTypeForJavaType(field, double[].class);
+      }
+      else if (TFloatArrayList.class.isAssignableFrom(javaType))
+      {
+         return getRosTypeForJavaType(field, float[].class);
+      }
+      else if (TIntArrayList.class.isAssignableFrom(javaType))
+      {
+         return getRosTypeForJavaType(field, int[].class);
+      }
+      else if (TByteArrayList.class.isAssignableFrom(javaType))
+      {
+         return getRosTypeForJavaType(field, byte[].class);
+      }
+      else if (TLongArrayList.class.isAssignableFrom(javaType))
+      {
+         return getRosTypeForJavaType(field, long[].class);
       }
       else if (Collection.class.isAssignableFrom(javaType))
       {

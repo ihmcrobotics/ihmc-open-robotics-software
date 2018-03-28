@@ -58,7 +58,7 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
          for (int i = 0; i < dataList.size(); i++)
             footsteps.add().set(worldFrame, dataList.get(i));
       }
-      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
+      setQueueableCommandVariables(message.getQueueingProperties());
    }
 
    @Override

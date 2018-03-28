@@ -287,7 +287,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
       {
          ArmTrajectoryMessage trajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
-         trajectoryMessage.setUniqueId(id);
+         trajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
          if (messageIndex > 0)
          {
             trajectoryMessage.jointspaceTrajectory.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
@@ -412,7 +412,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
-            armTrajectoryMessage.setUniqueId(id);
+            armTrajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
             if (messageIndex > 0)
             {
                long previousMessageId = id - 1;
@@ -522,7 +522,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
          {
             ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
-            armTrajectoryMessage.setUniqueId(id);
+            armTrajectoryMessage.jointspaceTrajectory.getQueueingProperties().setMessageId(id);
             if (messageIndex > 0)
             {
                armTrajectoryMessage.jointspaceTrajectory.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
