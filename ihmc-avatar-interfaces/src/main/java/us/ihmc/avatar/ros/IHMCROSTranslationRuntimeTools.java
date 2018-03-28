@@ -169,10 +169,10 @@ public class IHMCROSTranslationRuntimeTools
          predictedContactPoints.add(GenericROSTranslationTools.convertPoint2DRos(point2dRosMessage));
       }
 
-      Point3D[] trajectoryWaypoints = new Point3D[message.getPositionWaypoints().size()];
-      for (int i = 0; i < message.getPositionWaypoints().size(); i++)
+      Point3D[] trajectoryWaypoints = new Point3D[message.getCustomPositionWaypoints().size()];
+      for (int i = 0; i < message.getCustomPositionWaypoints().size(); i++)
       {
-         trajectoryWaypoints[i] = new Point3D(GenericROSTranslationTools.convertPoint(message.getPositionWaypoints().get(i)));
+         trajectoryWaypoints[i] = new Point3D(GenericROSTranslationTools.convertPoint(message.getCustomPositionWaypoints().get(i)));
       }
 
       for (SE3TrajectoryPointRosMessage rosTrajectoryPoint : message.getSwingTrajectory())
@@ -360,7 +360,7 @@ public class IHMCROSTranslationRuntimeTools
       message.setSwingTrajectory(rosSwingTrajectory);
 
       message.setPredictedContactPoints(predictedContatcPointsRos);
-      message.setPositionWaypoints(positionWaypoints);
+      message.setCustomPositionWaypoints(positionWaypoints);
 
       return message;
    }
