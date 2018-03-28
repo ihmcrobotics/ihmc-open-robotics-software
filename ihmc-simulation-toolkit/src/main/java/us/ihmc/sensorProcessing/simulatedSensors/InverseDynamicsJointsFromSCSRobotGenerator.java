@@ -232,12 +232,12 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    /**
     * updates an SCS Robot with the results from the Inverse Dynamics Model
     * @param updateRootJoints update from Inverse Dynamics Model
-    * @param updateAccelerations
-    * @param useDesiredAcceleration update from Inverse Dynamics Model
-    * @param updatePositions
-    * @param updateVelocities
-    * @param updateTorques
-    * @param useDesiredTorque update from Inverse Dynamics Model
+    * @param updateAccelerations update from Inverse Dynamics Model
+    * @param useDesiredAcceleration should SCS robot acceleration should be updated from the Inverse Dynamics Model
+    * @param updatePositions update from Inverse Dynamics Model
+    * @param updateVelocities update from Inverse Dynamics Model
+    * @param updateTorques update from Inverse Dynamics Model
+    * @param useDesiredTorque should torques be copied to the SCS Robot
     */
    public void updateRobotFromInverseDynamicsRobotModel(boolean updateRootJoints, boolean updateAccelerations, boolean useDesiredAcceleration, boolean updatePositions, boolean updateVelocities, boolean updateTorques, boolean useDesiredTorque)
    {
@@ -292,9 +292,11 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          for (FloatingJoint floatingJoint : floatingJoints)
          {
             FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint); //floatingToSixDofToJointMap.get(floatingJoint);
-
-            floatingJoint.getTransformToWorld(positionAndRotation);
-            sixDoFJoint.setPositionAndRotation(positionAndRotation);
+            if (updatePositions)
+            {
+               floatingJoint.getTransformToWorld(positionAndRotation);
+               sixDoFJoint.setPositionAndRotation(positionAndRotation);
+            }
          }
       }
 
@@ -316,9 +318,11 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             floatingJoint.getAngularVelocity(angularVelocity, pelvisFrame);
 
             Twist bodyTwist = new Twist(pelvisFrame, elevatorFrame, pelvisFrame, linearVelocity, angularVelocity);
-            sixDoFJoint.setJointTwist(bodyTwist);
-            sixDoFJoint.updateFramesRecursively();
-
+            if (updateVelocities)
+            {
+               sixDoFJoint.setJointTwist(bodyTwist);
+               sixDoFJoint.updateFramesRecursively();
+            }
             originAcceleration.setToZero(sixDoFJoint.getFrameBeforeJoint());
             angularAcceleration.setToZero(sixDoFJoint.getFrameAfterJoint());
 
@@ -329,10 +333,12 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             spatialAccelerationVector.setToZero(sixDoFJoint.getFrameAfterJoint(), sixDoFJoint.getFrameBeforeJoint(), sixDoFJoint.getFrameAfterJoint());
             spatialAccelerationVector.setBasedOnOriginAcceleration(angularAcceleration, originAcceleration, bodyTwist);
 
+
             if (updateAccelerations)
                sixDoFJoint.setDesiredAcceleration(spatialAccelerationVector);
             else
                sixDoFJoint.setAcceleration(spatialAccelerationVector);
+
          }
       }
    }
