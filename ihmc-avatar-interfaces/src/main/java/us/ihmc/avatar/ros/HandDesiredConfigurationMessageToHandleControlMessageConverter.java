@@ -8,7 +8,7 @@ public class HandDesiredConfigurationMessageToHandleControlMessageConverter
 {
    public static void convertHandDesiredConfigurationMessage(HandDesiredConfigurationMessage ihmcMessage, HandleControl message)
    {
-      switch (HandConfiguration.fromByte(ihmcMessage.getHandDesiredConfiguration()))
+      switch (HandConfiguration.fromByte(ihmcMessage.getDesiredHandConfiguration()))
       {
          case CLOSE :
             message.setType(new int[] {2, 2, 2, 2, 2});

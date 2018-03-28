@@ -83,8 +83,8 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
    public void set(PelvisHeightTrajectoryMessage message)
    {
       euclideanTrajectory.set(message.euclideanTrajectory);
-      enableUserPelvisControl = message.isEnableUserPelvisControl();
-      enableUserPelvisControlDuringWalking = message.isEnableUserPelvisControlDuringWalking();
+      enableUserPelvisControl = message.getEnableUserPelvisControl();
+      enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
    }
 
    /**
@@ -98,16 +98,16 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
    {
       clear(dataFrame);
       set(message);
-      enableUserPelvisControl = message.isEnableUserPelvisControl();
-      enableUserPelvisControlDuringWalking = message.isEnableUserPelvisControlDuringWalking();
+      enableUserPelvisControl = message.getEnableUserPelvisControl();
+      enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisHeightTrajectoryMessage message)
    {
       euclideanTrajectory.set(resolver, message.euclideanTrajectory);
-      enableUserPelvisControl = message.isEnableUserPelvisControl();
-      enableUserPelvisControlDuringWalking = message.isEnableUserPelvisControlDuringWalking();
+      enableUserPelvisControl = message.getEnableUserPelvisControl();
+      enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
    }
 
    /**

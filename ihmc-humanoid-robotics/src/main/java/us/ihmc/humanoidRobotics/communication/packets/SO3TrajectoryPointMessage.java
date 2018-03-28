@@ -8,10 +8,8 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 @RosMessagePacket(documentation =
@@ -67,9 +65,9 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       this.time = time;
    }
 
-   public void getOrientation(QuaternionBasics orientationToPack)
+   public QuaternionReadOnly getOrientation()
    {
-      orientationToPack.set(orientation);
+      return orientation;
    }
 
    public void setOrientation(QuaternionReadOnly orientation)
@@ -77,9 +75,9 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       this.orientation.set(orientation);
    }
 
-   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
+   public Vector3DReadOnly getAngularVelocity()
    {
-      angularVelocityToPack.set(angularVelocity);
+      return angularVelocity;
    }
 
    public void setAngularVelocity(Vector3DReadOnly angularVelocity)

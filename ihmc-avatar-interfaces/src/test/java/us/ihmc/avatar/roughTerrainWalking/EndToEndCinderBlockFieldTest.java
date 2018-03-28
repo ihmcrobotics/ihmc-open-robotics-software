@@ -89,7 +89,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = simulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      success = simulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.footstepDataList.size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
    }
@@ -116,7 +116,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
             cinderBlockPose.get(location, orientation);
             location.setZ(location.getZ() + zOffset);
             FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
-            footsteps.add(footstep);
+            footsteps.footstepDataList.add().set(footstep);
          }
       }
 

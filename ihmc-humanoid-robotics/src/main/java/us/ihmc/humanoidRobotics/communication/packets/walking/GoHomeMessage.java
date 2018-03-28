@@ -41,7 +41,7 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
       setPacketInformation(other);
    }
 
-   public byte getBodyPart()
+   public byte getHumanoidBodyPart()
    {
       return humanoidBodyPart;
    }

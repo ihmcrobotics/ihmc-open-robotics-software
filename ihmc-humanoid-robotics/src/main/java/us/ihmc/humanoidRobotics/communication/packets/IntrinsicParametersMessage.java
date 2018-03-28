@@ -128,11 +128,6 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
       this.cy = cy;
    }
 
-   public void setRadial(double[] radial)
-   {
-      this.radial.add(radial);
-   }
-
    public void setT1(double t1)
    {
       this.t1 = t1;

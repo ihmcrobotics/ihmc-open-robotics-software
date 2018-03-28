@@ -23,19 +23,14 @@ public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegions
       setPacketInformation(other);
    }
 
-   public byte getRequestType()
+   public byte getPlanarRegionsRequestType()
    {
       return planarRegionsRequestType;
    }
 
-   public void setRequestType(byte requestType)
+   public void setPlanarRegionsRequestType(byte requestType)
    {
       this.planarRegionsRequestType = requestType;
-   }
-
-   public boolean hasBoundingBox()
-   {
-      return boundingBoxInWorldForRequest != null;
    }
 
    public BoundingBox3DMessage getBoundingBoxInWorldForRequest()

@@ -195,7 +195,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
       if (next != null)
       {
-         next.set(messageClass, errorMessage);
+         next.setPacketClassSimpleName(messageClass.getSimpleName());
+         next.setErrorMessage(errorMessage);
          buffer.commit();
       }
 

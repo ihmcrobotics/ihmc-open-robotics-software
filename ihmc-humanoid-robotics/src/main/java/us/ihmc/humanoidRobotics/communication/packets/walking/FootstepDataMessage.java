@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Arrays;
-import java.util.List;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -12,10 +11,8 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
@@ -55,7 +52,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    @RosExportedField(documentation = "In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The waypoints define sole positions."
          + "The controller will compute times and velocities at the waypoints. This is a convinient way to shape the trajectory of the swing. If full control over the swing"
          + "trajectory is desired use the trajectory type WAYPOINTS instead. The position waypoints are expected in the trajectory frame.")
-   public RecyclingArrayListPubSub<Point3D> positionWaypoints = new RecyclingArrayListPubSub<>(Point3D.class, Point3D::new, 2);
+   public RecyclingArrayListPubSub<Point3D> customPositionWaypoints = new RecyclingArrayListPubSub<>(Point3D.class, Point3D::new, 2);
    @RosExportedField(documentation = "In case the trajectory type is set to WAYPOINTS, swing waypoints can be specified here. The waypoints do not include the"
          + "start point (which is set to the current foot state at lift-off) and the touch down point (which is specified by the location and orientation fields)."
          + "All waypoints are for the sole frame and expressed in the trajectory frame. The maximum number of points can be found in the Footstep class.")
@@ -95,7 +92,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       this.orientation = new Quaternion(other.orientation);
       this.orientation.checkIfUnitary();
       MessageTools.copyData(other.predictedContactPoints, predictedContactPoints);
-      MessageTools.copyData(other.positionWaypoints, positionWaypoints);
+      MessageTools.copyData(other.customPositionWaypoints, customPositionWaypoints);
       MessageTools.copyData(other.swingTrajectory, swingTrajectory);
       this.trajectoryType = other.trajectoryType;
       this.swingHeight = other.swingHeight;
@@ -113,7 +110,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       location = new Point3D(other.location);
       orientation = new Quaternion(other.orientation);
       MessageTools.copyData(other.predictedContactPoints, predictedContactPoints);
-      MessageTools.copyData(other.positionWaypoints, positionWaypoints);
+      MessageTools.copyData(other.customPositionWaypoints, customPositionWaypoints);
       MessageTools.copyData(other.swingTrajectory, swingTrajectory);
       trajectoryType = other.trajectoryType;
       swingHeight = other.swingHeight;
@@ -136,19 +133,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       return location;
    }
 
-   public void getLocation(Point3DBasics locationToPack)
-   {
-      locationToPack.set(location);
-   }
-
    public Quaternion getOrientation()
    {
       return orientation;
-   }
-
-   public void getOrientation(QuaternionBasics orientationToPack)
-   {
-      orientationToPack.set(this.orientation);
    }
 
    public byte getRobotSide()
@@ -173,15 +160,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
 
    public void setLocation(Point3DReadOnly location)
    {
-      if (this.location == null)
-         this.location = new Point3D();
       this.location.set(location);
    }
 
    public void setOrientation(QuaternionReadOnly orientation)
    {
-      if (this.orientation == null)
-         this.orientation = new Quaternion();
       this.orientation.set(orientation);
    }
 
@@ -193,11 +176,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
    public void setSwingTrajectoryBlendDuration(double swingTrajectoryBlendDuration)
    {
       this.swingTrajectoryBlendDuration = swingTrajectoryBlendDuration;
-   }
-
-   public void setPredictedContactPoints(List<Point2D> predictedContactPoints)
-   {
-      MessageTools.copyData(predictedContactPoints, this.predictedContactPoints);
    }
 
    public byte getTrajectoryType()
@@ -212,35 +190,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
 
    public RecyclingArrayListPubSub<Point3D> getCustomPositionWaypoints()
    {
-      return positionWaypoints;
-   }
-
-   public void setCustomPositionWaypoints(Point3D[] trajectoryWaypoints)
-   {
-      MessageTools.copyData(trajectoryWaypoints, this.positionWaypoints);
+      return customPositionWaypoints;
    }
 
    public RecyclingArrayListPubSub<SE3TrajectoryPointMessage> getSwingTrajectory()
    {
       return swingTrajectory;
-   }
-
-   public void setSwingTrajectory(SE3TrajectoryPointMessage[] swingTrajectory)
-   {
-      MessageTools.copyData(swingTrajectory, this.swingTrajectory);
-   }
-
-   public void setTimings(double swingDuration, double transferDuration)
-   {
-      setSwingDuration(swingDuration);
-      setTransferDuration(transferDuration);
-   }
-
-   public void setTimings(double swingDuration, double touchdownDuration, double transferDuration)
-   {
-      setSwingDuration(swingDuration);
-      setTouchdownDuration(touchdownDuration);
-      setTransferDuration(transferDuration);
    }
 
    public void setSwingDuration(double swingDuration)
@@ -315,9 +270,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
 
       ret += TrajectoryType.fromByte(trajectoryType).name() + "\n";
 
-      if (positionWaypoints != null)
+      if (customPositionWaypoints != null)
       {
-         ret += "waypoints = " + positionWaypoints.size() + "\n";
+         ret += "waypoints = " + customPositionWaypoints.size() + "\n";
       }
       else
       {
@@ -342,7 +297,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage>
       }
 
       boolean contactPointsEqual = MessageTools.epsilonEquals(predictedContactPoints, other.predictedContactPoints, epsilon);
-      boolean trajectoryWaypointsEqual = MessageTools.epsilonEquals(positionWaypoints, other.positionWaypoints, epsilon);
+      boolean trajectoryWaypointsEqual = MessageTools.epsilonEquals(customPositionWaypoints, other.customPositionWaypoints, epsilon);
       boolean swingTrajectoriesEqual = MessageTools.epsilonEquals(swingTrajectory, other.swingTrajectory, epsilon);
 
       boolean sameTimings = MathTools.epsilonCompare(swingDuration, other.swingDuration, epsilon);

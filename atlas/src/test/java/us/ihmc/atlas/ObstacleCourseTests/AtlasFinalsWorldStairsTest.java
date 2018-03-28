@@ -199,33 +199,33 @@ public class AtlasFinalsWorldStairsTest
       ArrayList<Point2D> leftFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
       ArrayList<Point2D> rightFootPoint2ds = null;
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.25, startingLocation.getZ() + 0.0), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.25, startingLocation.getZ() + 0.0), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.55, startingLocation.getZ() + 0.0), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.55, startingLocation.getZ() + 0.0), new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.83, startingLocation.getZ() + 0.0), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.83, startingLocation.getZ() + 0.0), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.83, startingLocation.getZ() + 0.0), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.83, startingLocation.getZ() + 0.0), new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.10, startingLocation.getZ() + 0.25), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.10, startingLocation.getZ() + 0.25), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.18, startingLocation.getZ() + 0.25), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.18, startingLocation.getZ() + 0.25), new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.40, startingLocation.getZ() + 0.45), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.40, startingLocation.getZ() + 0.45), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.45, startingLocation.getZ() + 0.45), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.45, startingLocation.getZ() + 0.45), new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.68, startingLocation.getZ() + 0.68), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.68, startingLocation.getZ() + 0.68), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.74, startingLocation.getZ() + 0.68), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.74, startingLocation.getZ() + 0.68), new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.0, startingLocation.getZ() + 0.91), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.0, startingLocation.getZ() + 0.91), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.05, startingLocation.getZ() + 0.91), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.05, startingLocation.getZ() + 0.91), new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 0.91), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 0.91), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 0.91), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.2, startingLocation.getZ() + 0.91), new Quaternion(orientation), rightFootPoint2ds));
 
       return footstepDataList;
    }
@@ -261,25 +261,25 @@ public class AtlasFinalsWorldStairsTest
       ArrayList<Point2D> leftFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
       ArrayList<Point2D> rightFootPoint2ds = createPartialSupportPolygonForFoot(walkingControllerParameters);
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.27, startingLocation.getZ() + 0.0), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.27, startingLocation.getZ() + 0.0), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.57, startingLocation.getZ() + 0.0), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.57, startingLocation.getZ() + 0.0), new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.92, startingLocation.getZ() + 0.0), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 0.92, startingLocation.getZ() + 0.0), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.92, startingLocation.getZ() + 0.0), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 0.92, startingLocation.getZ() + 0.0), new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.1, startingLocation.getZ() + 0.25), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.1, startingLocation.getZ() + 0.25), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.4, startingLocation.getZ() + 0.45), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 1.4, startingLocation.getZ() + 0.45), new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.69, startingLocation.getZ() + 0.68), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 1.69, startingLocation.getZ() + 0.68), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.02, startingLocation.getZ() + 0.91), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.02, startingLocation.getZ() + 0.91), new Quaternion(orientation), rightFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.22, startingLocation.getZ() + 0.91), new Quaternion(orientation), leftFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(startingLocation.getX() + 0.15, startingLocation.getY() - 2.22, startingLocation.getZ() + 0.91), new Quaternion(orientation), leftFootPoint2ds));
 
-      footstepDataList.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.22, startingLocation.getZ() + 0.91), new Quaternion(orientation), rightFootPoint2ds));
+      footstepDataList.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(startingLocation.getX() - 0.15, startingLocation.getY() - 2.22, startingLocation.getZ() + 0.91), new Quaternion(orientation), rightFootPoint2ds));
 
 
       return footstepDataList;

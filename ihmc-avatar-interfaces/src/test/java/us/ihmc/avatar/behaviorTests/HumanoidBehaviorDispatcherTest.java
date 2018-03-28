@@ -43,6 +43,7 @@ import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
@@ -250,7 +251,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       PelvisOrientationTrajectoryMessage pelvisPosePacket = createPelvisOrientationTrajectoryMessage(new Vector3D(0.0, 1.0, 0.0), Math.toRadians(5.0));
       FramePose3D desiredPelvisPose = new FramePose3D();
-      desiredPelvisPose.setOrientation(pelvisPosePacket.getSO3Trajectory().getLastTrajectoryPoint().orientation);
+      desiredPelvisPose.setOrientation(pelvisPosePacket.getSo3Trajectory().taskspaceTrajectoryPoints.getLast().orientation);
 
       pelvisOrientationTrajectoryBehavior.initialize();
       pelvisOrientationTrajectoryBehavior.setInput(pelvisPosePacket);

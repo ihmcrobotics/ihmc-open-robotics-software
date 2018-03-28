@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
 public final class LoadBearingMessage extends Packet<LoadBearingMessage>
@@ -45,7 +45,7 @@ public final class LoadBearingMessage extends Packet<LoadBearingMessage>
       this.coefficientOfFriction = coefficientOfFriction;
    }
 
-   public void setBodyFrameToContactFrame(RigidBodyTransform bodyFrameToContactFrame)
+   public void setBodyFrameToContactFrame(Pose3DReadOnly bodyFrameToContactFrame)
    {
       this.bodyFrameToContactFrame.set(bodyFrameToContactFrame);
    }

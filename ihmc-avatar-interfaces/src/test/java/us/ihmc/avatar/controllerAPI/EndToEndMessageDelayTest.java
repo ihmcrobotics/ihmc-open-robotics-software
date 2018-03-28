@@ -90,28 +90,28 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       lookRight.changeFrame(ReferenceFrame.getWorldFrame());
 
       ChestTrajectoryMessage lookStraightAheadMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookStraightAhead, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookStraightAheadMessage.getSO3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-      lookStraightAheadMessage.getSO3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
+      lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      lookStraightAheadMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
       drcSimulationTestHelper.send(lookStraightAheadMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT()));
 
       ChestTrajectoryMessage lookLeftMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookLeft, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookLeftMessage.getSO3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-      lookLeftMessage.getSO3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
+      lookLeftMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      lookLeftMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
       drcSimulationTestHelper.send(lookLeftMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(robotModel.getControllerDT()));
 
       ChestTrajectoryMessage lookRightMessage = HumanoidMessageTools.createChestTrajectoryMessage(trajectoryTime, lookRight, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
-      lookRightMessage.getSO3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-      lookRightMessage.getSO3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
+      lookRightMessage.getSo3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+      lookRightMessage.getSo3Trajectory().getQueueingProperties().setPreviousMessageId((long) -1);
       drcSimulationTestHelper.send(lookRightMessage);
 
       SpineJointName[] spineJointNames = jointMap.getSpineJointNames();
-      SpineTrajectoryMessage zeroSpineJointMessage = HumanoidMessageTools.createSpineTrajectoryMessage(spineJointNames.length, 1);
-      zeroSpineJointMessage.getQueueingProperties().setExecutionDelayTime(5.0);
+      SpineTrajectoryMessage zeroSpineJointMessage = new SpineTrajectoryMessage();
+      zeroSpineJointMessage.jointspaceTrajectory.getQueueingProperties().setExecutionDelayTime(5.0);
       for(int i = 0; i < spineJointNames.length; i++)
       {
-         zeroSpineJointMessage.getJointspaceTrajectory().setTrajectory1DMessage(i, HumanoidMessageTools.createOneDoFJointTrajectoryMessage(1.0, 0.0));
+         zeroSpineJointMessage.getJointspaceTrajectory().jointTrajectoryMessages.add().set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(1.0, 0.0));
       }
       drcSimulationTestHelper.send(zeroSpineJointMessage);
 

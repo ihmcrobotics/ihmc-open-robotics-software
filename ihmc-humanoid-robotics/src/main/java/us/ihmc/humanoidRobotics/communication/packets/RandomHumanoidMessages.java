@@ -469,8 +469,8 @@ public final class RandomHumanoidMessages
       next.swingHeight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       if (next.trajectoryType == TrajectoryType.CUSTOM.toByte())
       {
-         next.positionWaypoints.add().set(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
-         next.positionWaypoints.add().set(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
+         next.customPositionWaypoints.add().set(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
+         next.customPositionWaypoints.add().set(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
       }
       else if (next.trajectoryType == TrajectoryType.WAYPOINTS.toByte())
       {
@@ -714,7 +714,9 @@ public final class RandomHumanoidMessages
       next.enableUserPelvisControl = random.nextBoolean();
       next.enableUserPelvisControlDuringWalking = random.nextBoolean();
       next.euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
-      next.euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
+      next.euclideanTrajectory.selectionMatrix.xSelected = false;
+      next.euclideanTrajectory.selectionMatrix.ySelected = false;
+      next.euclideanTrajectory.selectionMatrix.zSelected = true;
       return next;
    }
 
@@ -1213,7 +1215,7 @@ public final class RandomHumanoidMessages
 
       next.sensorId = random.nextInt();
 
-      next.params = nextLidarScanParametersMessage(random);
+      next.lidarScanParameters = nextLidarScanParametersMessage(random);
       return next;
    }
 

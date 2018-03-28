@@ -117,7 +117,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide.toByte());
-         message.add(footstepData);
+         message.footstepDataList.add().set(footstepData);
 
          drcSimulationTestHelper.send(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -163,7 +163,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide.toByte());
-         message.add(footstepData);
+         message.footstepDataList.add().set(footstepData);
 
          drcSimulationTestHelper.send(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -211,7 +211,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          footstepData.setLocation(placeToStepInWorld);
          footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide.toByte());
-         message.add(footstepData);
+         message.footstepDataList.add().set(footstepData);
 
          drcSimulationTestHelper.send(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);

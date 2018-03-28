@@ -37,65 +37,9 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       MessageTools.copyData(other.explorationRangeLowerLimits, explorationRangeLowerLimits);
    }
 
-   public void setExplorationConfigurationSpaces(byte[] degreesOfFreedomToExplore, double[] explorationRangeAmplitudes)
-   {
-      if (degreesOfFreedomToExplore.length != explorationRangeAmplitudes.length)
-         throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length
-               + ", explorationRangeLowerLimits.length = ");
-
-      this.configurationSpaceNamesToExplore.reset();
-      this.explorationRangeUpperLimits.reset();
-      this.explorationRangeLowerLimits.reset();
-
-      this.configurationSpaceNamesToExplore.add(degreesOfFreedomToExplore);
-
-      for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
-      {
-         explorationRangeUpperLimits.add(explorationRangeAmplitudes[i]);
-         explorationRangeLowerLimits.add(-explorationRangeAmplitudes[i]);
-      }
-   }
-
-   public void setExplorationConfigurationSpaces(byte[] degreesOfFreedomToExplore, double[] explorationRangeUpperLimits, double[] explorationRangeLowerLimits)
-   {
-      if (degreesOfFreedomToExplore.length != explorationRangeUpperLimits.length || degreesOfFreedomToExplore.length != explorationRangeLowerLimits.length)
-         throw new RuntimeException("Inconsistent array lengths: unconstrainedDegreesOfFreedom.length = " + degreesOfFreedomToExplore.length
-               + ", explorationRangeLowerLimits.length = ");
-
-      this.configurationSpaceNamesToExplore.reset();
-      this.explorationRangeUpperLimits.reset();
-      this.explorationRangeLowerLimits.reset();
-
-      this.configurationSpaceNamesToExplore.add(degreesOfFreedomToExplore);
-      this.explorationRangeUpperLimits.add(explorationRangeUpperLimits);
-      this.explorationRangeLowerLimits.add(explorationRangeLowerLimits);
-   }
-
    public long getRigidBodyNameBasedHashCode()
    {
       return rigidBodyNameBasedHashCode;
-   }
-
-   public int getNumberOfDegreesOfFreedomToExplore()
-   {
-      if (configurationSpaceNamesToExplore == null)
-         return 0;
-      return configurationSpaceNamesToExplore.size();
-   }
-
-   public byte getDegreeOfFreedomToExplore(int i)
-   {
-      return configurationSpaceNamesToExplore.get(i);
-   }
-
-   public double getExplorationRangeUpperLimits(int i)
-   {
-      return explorationRangeUpperLimits.get(i);
-   }
-
-   public double getExplorationRangeLowerLimits(int i)
-   {
-      return explorationRangeLowerLimits.get(i);
    }
 
    @Override

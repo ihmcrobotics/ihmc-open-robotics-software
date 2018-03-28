@@ -20,23 +20,23 @@ public final class MessageUnpackingTools
          @Override
          public void unpackMessage(WholeBodyTrajectoryMessage multipleMessageHolder, List<Packet<?>> messagesToPack)
          {
-            if (multipleMessageHolder.leftHandTrajectoryMessage != null)
+            if (multipleMessageHolder.leftHandTrajectoryMessage != null && !multipleMessageHolder.leftHandTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
                messagesToPack.add(multipleMessageHolder.leftHandTrajectoryMessage);
-            if (multipleMessageHolder.rightHandTrajectoryMessage != null)
+            if (multipleMessageHolder.rightHandTrajectoryMessage != null && !multipleMessageHolder.leftHandTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
                messagesToPack.add(multipleMessageHolder.rightHandTrajectoryMessage);
-            if (multipleMessageHolder.leftArmTrajectoryMessage != null)
+            if (multipleMessageHolder.leftArmTrajectoryMessage != null && !multipleMessageHolder.leftArmTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.isEmpty())
                messagesToPack.add(multipleMessageHolder.leftArmTrajectoryMessage);
-            if (multipleMessageHolder.rightArmTrajectoryMessage != null)
+            if (multipleMessageHolder.rightArmTrajectoryMessage != null && !multipleMessageHolder.rightArmTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.isEmpty())
                messagesToPack.add(multipleMessageHolder.rightArmTrajectoryMessage);
-            if (multipleMessageHolder.chestTrajectoryMessage != null)
+            if (multipleMessageHolder.chestTrajectoryMessage != null && !multipleMessageHolder.chestTrajectoryMessage.so3Trajectory.taskspaceTrajectoryPoints.isEmpty())
                messagesToPack.add(multipleMessageHolder.chestTrajectoryMessage);
-            if (multipleMessageHolder.pelvisTrajectoryMessage != null)
+            if (multipleMessageHolder.pelvisTrajectoryMessage != null && !multipleMessageHolder.pelvisTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
                messagesToPack.add(multipleMessageHolder.pelvisTrajectoryMessage);
-            if (multipleMessageHolder.headTrajectoryMessage != null)
+            if (multipleMessageHolder.headTrajectoryMessage != null && !multipleMessageHolder.headTrajectoryMessage.so3Trajectory.taskspaceTrajectoryPoints.isEmpty())
                messagesToPack.add(multipleMessageHolder.headTrajectoryMessage);
-            if (multipleMessageHolder.leftFootTrajectoryMessage != null)
+            if (multipleMessageHolder.leftFootTrajectoryMessage != null && !multipleMessageHolder.leftFootTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
                messagesToPack.add(multipleMessageHolder.leftFootTrajectoryMessage);
-            if (multipleMessageHolder.rightFootTrajectoryMessage != null)
+            if (multipleMessageHolder.rightFootTrajectoryMessage != null && !multipleMessageHolder.rightFootTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
                messagesToPack.add(multipleMessageHolder.rightFootTrajectoryMessage);
          }
       };

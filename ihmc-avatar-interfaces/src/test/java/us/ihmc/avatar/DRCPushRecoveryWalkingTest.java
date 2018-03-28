@@ -277,7 +277,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          location.setZ(0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
-         footsteps.add(footstepData);
+         footsteps.footstepDataList.add().set(footstepData);
       }
 
       drcSimulationTestHelper.send(footsteps);

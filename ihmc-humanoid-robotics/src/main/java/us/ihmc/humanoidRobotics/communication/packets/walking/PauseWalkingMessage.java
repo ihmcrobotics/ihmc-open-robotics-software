@@ -28,7 +28,7 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage>
       setPacketInformation(other);
    }
 
-   public boolean isPaused()
+   public boolean getPause()
    {
       return pause;
    }
@@ -36,12 +36,7 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage>
    @Override
    public String toString()
    {
-      return ("Paused = " + this.isPaused());
-   }
-
-   public boolean equals(PauseWalkingMessage obj)
-   {
-      return (this.isPaused() == obj.isPaused());
+      return ("Paused = " + this.getPause());
    }
 
    @Override
@@ -53,6 +48,6 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage>
    @Override
    public boolean epsilonEquals(PauseWalkingMessage other, double epsilon)
    {
-      return (this.isPaused() == other.isPaused());
+      return (this.getPause() == other.getPause());
    }
 }

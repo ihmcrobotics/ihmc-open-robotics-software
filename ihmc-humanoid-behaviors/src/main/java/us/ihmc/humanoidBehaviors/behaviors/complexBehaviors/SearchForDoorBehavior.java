@@ -60,7 +60,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
    {
       TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Recieved Door Location From UI");
       sendPacket(p1);
-      doorTransformToWorld = valveLocationPacket.getValveTransformToWorld();
+      doorTransformToWorld = valveLocationPacket.getDoorTransformToWorld();
 
       recievedNewDoorLocation = true;
 

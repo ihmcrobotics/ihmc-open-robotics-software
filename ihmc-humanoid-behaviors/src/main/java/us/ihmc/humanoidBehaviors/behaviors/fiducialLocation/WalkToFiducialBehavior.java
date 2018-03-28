@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -36,8 +37,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
    {
       if (!sentPlanningRequest.getBooleanValue())
       {
-         FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
-         request.set(new FramePose3D(ReferenceFrame.getWorldFrame()), RobotSide.LEFT.toByte(), goalPose, plannerToUse.toByte());
+         FootstepPlanningRequestPacket request = HumanoidMessageTools.createFootstepPlanningRequestPacket(new FramePose3D(ReferenceFrame.getWorldFrame()), RobotSide.LEFT, goalPose, plannerToUse);
          request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
          sendPacket(request);
       }

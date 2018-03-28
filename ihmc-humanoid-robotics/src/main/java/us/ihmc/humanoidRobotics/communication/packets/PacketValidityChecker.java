@@ -30,6 +30,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationT
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -196,11 +197,11 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if (message.getDataList() != null)
+      if (message.getFootstepDataList() != null)
       {
-         for (int arrayListIndex = 0; arrayListIndex < message.getDataList().size(); arrayListIndex++)
+         for (int arrayListIndex = 0; arrayListIndex < message.getFootstepDataList().size(); arrayListIndex++)
          {
-            FootstepDataMessage footstepData = message.getDataList().get(arrayListIndex);
+            FootstepDataMessage footstepData = message.getFootstepDataList().get(arrayListIndex);
             String footstepDataListErrorMessage = validateFootstepDataMessage(footstepData);
 
             if (footstepDataListErrorMessage != null)
@@ -291,7 +292,7 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(FootstepStatus.fromByte(message.getStatus()));
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(FootstepStatus.fromByte(message.getFootstepStatus()));
       if (packetFieldErrorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -404,7 +405,7 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      int numberOfJoints = message.getNumberOfJoints();
+      int numberOfJoints = message.jointTrajectoryMessages.size();
       if (numberOfJoints == 0)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -414,7 +415,7 @@ public abstract class PacketValidityChecker
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
-         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = message.getTrajectoryPointLists().get(jointIndex);
+         OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = message.getJointTrajectoryMessages().get(jointIndex);
          if(oneJointTrajectoryMessage != null)
          {
             errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
@@ -448,16 +449,16 @@ public abstract class PacketValidityChecker
 
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
 
-      if (message.getNumberOfTrajectoryPoints() == 0)
+      if (message.taskspaceTrajectoryPoints.size() == 0)
       {
          String messageClassName = message.getClass().getSimpleName();
          errorMessage = "Received " + messageClassName + " with no waypoint.";
          return errorMessage;
       }
 
-      for (int i = 0; i < message.getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < message.taskspaceTrajectoryPoints.size(); i++)
       {
-         SE3TrajectoryPointMessage waypoint = message.getTrajectoryPoint(i);
+         SE3TrajectoryPointMessage waypoint = message.taskspaceTrajectoryPoints.get(i);
          errorMessage = validateSE3TrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
          {
@@ -468,7 +469,7 @@ public abstract class PacketValidityChecker
          previousTrajectoryPoint = waypoint;
       }
 
-      if (message.useCustomControlFrame() && message.controlFramePose == null)
+      if (message.getUseCustomControlFrame() && message.controlFramePose == null)
       {
          String messageClassName = message.getClass().getSimpleName();
          return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
@@ -485,7 +486,7 @@ public abstract class PacketValidityChecker
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
-      if (message.getNumberOfTrajectoryPoints() == 0)
+      if (message.taskspaceTrajectoryPoints.size() == 0)
       {
          String messageClassName = message.getClass().getSimpleName();
          errorMessage = "Received " + messageClassName + " with no waypoint.";
@@ -502,9 +503,9 @@ public abstract class PacketValidityChecker
          return message.getClass().getSimpleName() + " Trajectory Reference Frame Id Not Set";
       }
 
-      for (int i = 0; i < message.getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < message.taskspaceTrajectoryPoints.size(); i++)
       {
-         SO3TrajectoryPointMessage waypoint = message.getTrajectoryPoint(i);
+         SO3TrajectoryPointMessage waypoint = message.taskspaceTrajectoryPoints.get(i);
          errorMessage = validateSO3TrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
          {
@@ -515,7 +516,7 @@ public abstract class PacketValidityChecker
          previousTrajectoryPoint = waypoint;
       }
 
-      if (message.useCustomControlFrame() && message.controlFramePose == null)
+      if (message.getUseCustomControlFrame() && message.controlFramePose == null)
       {
          String messageClassName = message.getClass().getSimpleName();
          return "The control frame pose for " + messageClassName + " has to be set to be able to use it.";
@@ -575,7 +576,7 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateEnum(LoadBearingRequest.fromByte(message.getRequest()));
+      errorType = ObjectValidityChecker.validateEnum(LoadBearingRequest.fromByte(message.getLoadBearingRequest()));
       if (errorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -594,7 +595,7 @@ public abstract class PacketValidityChecker
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateEnum(HumanoidBodyPart.fromByte(message.getBodyPart()));
+      errorType = ObjectValidityChecker.validateEnum(HumanoidBodyPart.fromByte(message.getHumanoidBodyPart()));
       if (errorType != null)
       {
          String messageClassName = message.getClass().getSimpleName();
@@ -602,13 +603,13 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if (HumanoidBodyPart.fromByte(message.getBodyPart()).isRobotSideNeeded())
+      if (HumanoidBodyPart.fromByte(message.getHumanoidBodyPart()).isRobotSideNeeded())
       {
          errorType = ObjectValidityChecker.validateEnum(RobotSide.fromByte(message.getRobotSide()));
          if (RobotSide.fromByte(message.getRobotSide()) == null)
          {
             String messageClassName = message.getClass().getSimpleName();
-            errorMessage = messageClassName + "'s robotSide field is null. It is required for the bodyPart " + message.getBodyPart();
+            errorMessage = messageClassName + "'s robotSide field is null. It is required for the bodyPart " + message.getHumanoidBodyPart();
             return errorMessage;
          }
       }
@@ -624,16 +625,16 @@ public abstract class PacketValidityChecker
 
       EuclideanTrajectoryPointMessage previousTrajectoryPoint = null;
 
-      if (message.getEuclideanTrajectory().getNumberOfTrajectoryPoints() == 0)
+      if (message.getEuclideanTrajectory().taskspaceTrajectoryPoints.isEmpty())
       {
          String messageClassName = message.getClass().getSimpleName();
          errorMessage = "Received " + messageClassName + " with no waypoint.";
          return errorMessage;
       }
 
-      for (int i = 0; i < message.getEuclideanTrajectory().getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < message.getEuclideanTrajectory().taskspaceTrajectoryPoints.size(); i++)
       {
-         EuclideanTrajectoryPointMessage waypoint = message.getEuclideanTrajectory().getTrajectoryPoint(i);
+         EuclideanTrajectoryPointMessage waypoint = message.getEuclideanTrajectory().taskspaceTrajectoryPoints.get(i);
          errorMessage = validateEuclideanTrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
          {
@@ -819,21 +820,21 @@ public abstract class PacketValidityChecker
 
       TrajectoryPoint1DMessage previousTrajectoryPoint = null;
 
-      if (message.getNumberOfTrajectoryPoints() == 0)
+      if (message.trajectoryPoints.size() == 0)
          return "The joint trajectory message has no waypoint.";
 
-      for (int i = 0; i < message.getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < message.trajectoryPoints.size(); i++)
       {
-         TrajectoryPoint1DMessage waypoint = message.getTrajectoryPoint(i);
+         TrajectoryPoint1DMessage waypoint = message.trajectoryPoints.get(i);
          errorMessage = validateTrajectoryPoint1DMessage(waypoint, previousTrajectoryPoint, false);
          if (errorMessage != null)
             return "The " + i + "th " + errorMessage;
          previousTrajectoryPoint = waypoint;
       }
 
-      for (int waypointIndex = 0; waypointIndex < message.getNumberOfTrajectoryPoints(); waypointIndex++)
+      for (int waypointIndex = 0; waypointIndex < message.trajectoryPoints.size(); waypointIndex++)
       {
-         TrajectoryPoint1DMessage waypoint = message.getTrajectoryPoint(waypointIndex);
+         TrajectoryPoint1DMessage waypoint = message.trajectoryPoints.get(waypointIndex);
          double waypointPosition = waypoint.getPosition();
 
          if (Math.abs(waypointPosition) > Math.PI)

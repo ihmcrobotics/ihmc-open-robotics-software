@@ -74,7 +74,7 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
       // WBT toolbox configuration message
       FullHumanoidRobotModel fullRobotModel = createFullRobotModelAtInitialConfiguration();
       WholeBodyTrajectoryToolboxConfigurationMessage configuration = new WholeBodyTrajectoryToolboxConfigurationMessage();
-      configuration.setInitialConfigration(fullRobotModel);
+      configuration.initialConfiguration = HumanoidMessageTools.createKinematicsToolboxOutputStatus(fullRobotModel);
       configuration.setMaximumExpansionSize(1000);
 
       // trajectory message, exploration message
@@ -92,8 +92,10 @@ public class AtlasWholeBodyTrajectoryToolboxControllerTest extends AvatarWholeBo
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
       selectionMatrix.resetSelection();
       WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
+      Pose3D controlFramePose = handControlFrames.get(robotSide);
 
-      trajectory.setControlFramePose(handControlFrames.get(robotSide));
+      trajectory.setControlFramePositionInEndEffector(controlFramePose.getPosition());
+      trajectory.setControlFrameOrientationInEndEffector(controlFramePose.getOrientation());
 
       handTrajectories.add(trajectory);
 

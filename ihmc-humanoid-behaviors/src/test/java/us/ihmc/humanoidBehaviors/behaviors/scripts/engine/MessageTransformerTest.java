@@ -111,7 +111,7 @@ public class MessageTransformerTest
       FootstepDataMessage expected = new FootstepDataMessage(original);
       expected.location.applyTransform(transform);
       expected.orientation.applyTransform(transform);
-      List<Point3D> positionWaypoints = expected.positionWaypoints;
+      List<Point3D> positionWaypoints = expected.customPositionWaypoints;
       for (int i = 0; i < positionWaypoints.size(); i++)
       {
          Point3D waypoint = positionWaypoints.get(i);
@@ -140,7 +140,7 @@ public class MessageTransformerTest
          FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
          footstepDataMessage.location.applyTransform(transform);
          footstepDataMessage.orientation.applyTransform(transform);
-         for (Point3D waypoint : footstepDataMessage.positionWaypoints)
+         for (Point3D waypoint : footstepDataMessage.customPositionWaypoints)
             waypoint.applyTransform(transform);
       }
 

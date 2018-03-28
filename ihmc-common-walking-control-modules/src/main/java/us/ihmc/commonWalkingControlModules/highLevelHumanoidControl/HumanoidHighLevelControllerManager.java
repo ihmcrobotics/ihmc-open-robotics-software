@@ -209,7 +209,8 @@ public class HumanoidHighLevelControllerManager implements RobotController
          {
             byte fromByte = from == null ? -1 : from.toByte();
             byte toByte = to == null ? -1 : to.toByte();
-            highLevelStateChangeStatusMessage.setStateChange(fromByte, toByte);
+            highLevelStateChangeStatusMessage.setInitialHighLevelControllerName(fromByte);
+            highLevelStateChangeStatusMessage.setEndHighLevelControllerName(toByte);
             statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
          }
       });

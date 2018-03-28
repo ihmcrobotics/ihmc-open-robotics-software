@@ -73,19 +73,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       return location;
    }
 
-   public void getLocation(Point3D locationToPack)
-   {
-      locationToPack.set(location);
-   }
-
    public Quaternion getOrientation()
    {
       return orientation;
-   }
-
-   public void getOrientation(Quaternion orientationToPack)
-   {
-      orientationToPack.set(orientation);
    }
 
    public byte getRobotSide()
@@ -110,11 +100,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       if (this.orientation == null)
          this.orientation = new Quaternion();
       this.orientation.set(orientation);
-   }
-
-   public void setPredictedContactPoints(List<Point2D> predictedContactPoints)
-   {
-      MessageTools.copyData(predictedContactPoints, this.predictedContactPoints);
    }
 
    /**

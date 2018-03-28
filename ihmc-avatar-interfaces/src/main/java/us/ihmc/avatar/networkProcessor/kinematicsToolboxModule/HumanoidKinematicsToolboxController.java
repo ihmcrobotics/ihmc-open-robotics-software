@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -182,7 +183,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       else
       {
          for (RobotSide robotside : RobotSide.values)
-            isFootInSupport.get(robotside).set(capturabilityBasedStatus.isSupportFoot(robotside));
+            isFootInSupport.get(robotside).set(HumanoidMessageTools.unpackIsSupportFoot(capturabilityBasedStatus, robotside));
       }
 
       // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.

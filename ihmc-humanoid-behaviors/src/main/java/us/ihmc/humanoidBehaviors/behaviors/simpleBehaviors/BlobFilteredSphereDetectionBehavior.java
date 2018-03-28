@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
@@ -61,7 +62,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       if (pointCloudQueue.isNewPacketAvailable())
       {
          PointCloudWorldPacket latestPointCloudWorldPacket = pointCloudQueue.getLatestPacket();
-         Point3D32[] fullPointCloud = latestPointCloudWorldPacket.getDecayingWorldScan();
+         Point3D32[] fullPointCloud = HumanoidMessageTools.getDecayingWorldScan(latestPointCloudWorldPacket);
 
          Point3D32[] filteredPointCloud = filterPointsNearBall(fullPointCloud);
 

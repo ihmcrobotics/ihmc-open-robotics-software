@@ -2,7 +2,7 @@ package us.ihmc.communication.packets;
 
 public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotificationPacket>
 {
-   public StringBuilder packetClass = new StringBuilder();
+   public StringBuilder packetClassSimpleName = new StringBuilder();
    public StringBuilder errorMessage = new StringBuilder();
 
    public InvalidPacketNotificationPacket()
@@ -10,17 +10,21 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
       setDestination(PacketDestination.BROADCAST);
    }
 
-   public void set(Class<? extends Packet<?>> packetClass, String errorMessage)
+   public void setErrorMessage(String errorMessage)
    {
-      this.packetClass.setLength(0);
-      this.packetClass.append(packetClass.getSimpleName());
       this.errorMessage.setLength(0);
       this.errorMessage.append(errorMessage);
    }
 
-   public String getPacketClassAsString()
+   public void setPacketClassSimpleName(String packetClassSimpleName)
    {
-      return packetClass.toString();
+      this.packetClassSimpleName.setLength(0);
+      this.packetClassSimpleName.append(packetClassSimpleName);
+   }
+
+   public String getPacketClassSimpleNameAsString()
+   {
+      return packetClassSimpleName.toString();
    }
 
    public String getErrorMessageAsString()
@@ -31,7 +35,7 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
    @Override
    public void set(InvalidPacketNotificationPacket other)
    {
-      this.packetClass = other.packetClass;
+      this.packetClassSimpleName = other.packetClassSimpleName;
       this.errorMessage = other.errorMessage;
       setPacketInformation(other);
    }

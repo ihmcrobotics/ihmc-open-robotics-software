@@ -254,8 +254,9 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
    {
       if (outputStatusToPack.getPlanningResult() == 4)
       {
-         outputStatusToPack.setRobotConfigurations(path.stream().map(SpatialNode::getConfiguration).toArray(size -> new KinematicsToolboxOutputStatus[size]));
-         outputStatusToPack.setTrajectoryTimes(path.stream().mapToDouble(SpatialNode::getTime).toArray());
+         MessageTools.copyData(path.stream().map(SpatialNode::getConfiguration).toArray(size -> new KinematicsToolboxOutputStatus[size]), outputStatusToPack.robotConfigurations);
+         outputStatusToPack.trajectoryTimes.reset();
+         outputStatusToPack.trajectoryTimes.add(path.stream().mapToDouble(SpatialNode::getTime).toArray());
 
          //if (VERBOSE)
          //   for (int i = 0; i < path.size(); i++)
@@ -752,8 +753,8 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
          return false;
       }
 
-      initialConfiguration.desiredRootOrientation.set(currentRobotConfiguration.getPelvisOrientation());
-      initialConfiguration.desiredRootTranslation.set(currentRobotConfiguration.getPelvisTranslation());
+      initialConfiguration.desiredRootOrientation.set(currentRobotConfiguration.getRootOrientation());
+      initialConfiguration.desiredRootTranslation.set(currentRobotConfiguration.getRootTranslation());
 
       initialConfiguration.jointNameHash = currentRobotConfiguration.jointNameHash;
       int length = currentRobotConfiguration.jointAngles.size();
@@ -835,14 +836,12 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
     */
    private void updateVisualizerRobotConfiguration(KinematicsToolboxOutputStatus robotKinematicsConfiguration)
    {
-      robotKinematicsConfiguration.getDesiredJointState(visualizedFullRobotModel.getRootJoint(),
-                                                        FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
+      MessageTools.unpackDesiredJointState(robotKinematicsConfiguration, visualizedFullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
    }
 
    private void updateVisualizerRobotConfiguration()
    {
-      visualizedNode.getConfiguration().getDesiredJointState(visualizedFullRobotModel.getRootJoint(),
-                                                             FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
+      MessageTools.unpackDesiredJointState(visualizedNode.getConfiguration(), visualizedFullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(visualizedFullRobotModel));
    }
 
    /**
