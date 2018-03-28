@@ -5,7 +5,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import boofcv.abst.feature.orientation.ConfigOrientation.Gradient;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
@@ -41,7 +40,6 @@ import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;

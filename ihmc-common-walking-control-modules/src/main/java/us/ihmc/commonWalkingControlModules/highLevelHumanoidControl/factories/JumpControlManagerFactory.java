@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
@@ -12,9 +14,12 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpControlManagerInterface;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -26,7 +31,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -44,7 +48,9 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
    private FeetJumpManager feetManager;
    private CentroidalMomentumManager momentumManager;
    private GravityCompensationManager gravityCompensationManager;
+   private PelvisControlManager pelvisControlManager;
 
+   private final List<JumpControlManagerInterface> controlManagers = new ArrayList<>();
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspacePositionGainMap = new HashMap<>();
@@ -74,6 +80,29 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       parentRegistry.addChild(registry);
    }
 
+   public PelvisControlManager getOrCreatePelvisControlManager()
+   {
+      if (pelvisControlManager != null)
+         return pelvisControlManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(PelvisControlManager.class))
+         return null;
+      if (!hasJumpControllerParameters(PelvisControlManager.class))
+         return null;
+
+      String bodyName = controllerToolbox.getFullRobotModel().getPelvis().getName();
+      PID3DGainsReadOnly positionGains = taskspacePositionGainMap.get(bodyName);
+      PID3DGainsReadOnly orientationGains = taskspaceOrientationGainMap.get(bodyName);
+      Vector3DReadOnly positionWeights = taskspaceLinearWeightMap.get(bodyName);
+      Vector3DReadOnly orientationWeights = taskspaceAngularWeightMap.get(bodyName);
+
+      pelvisControlManager = new PelvisControlManager(controllerToolbox, registry);
+      pelvisControlManager.setGains(positionGains, orientationGains);
+      pelvisControlManager.setWeights(positionWeights, orientationWeights);
+      controlManagers.add(pelvisControlManager);
+      return pelvisControlManager;
+   }
+
    public FeetJumpManager getOrCreateFeetManager()
    {
       if (feetManager != null)
@@ -87,6 +116,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
          return null;
 
       feetManager = new FeetJumpManager(controllerToolbox, jumpControllerParameters, registry);
+      controlManagers.add(feetManager);
       return feetManager;
    }
 
@@ -99,7 +129,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
          return null;
 
       momentumManager = new CentroidalMomentumManager(controllerToolbox, jumpControllerParameters, registry);
-
+      controlManagers.add(momentumManager);
       return momentumManager;
    }
 
@@ -113,7 +143,7 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
          return null;
 
       this.gravityCompensationManager = new GravityCompensationManager(controllerToolbox, jumpControllerParameters, registry);
-
+      controlManagers.add(gravityCompensationManager);
       return gravityCompensationManager;
    }
 
@@ -202,6 +232,12 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       {
          if (bodyManager != null)
             templateFeedbackCommandList.addCommand(bodyManager.createFeedbackControlTemplate());
+      }
+      for (JumpControlManagerInterface controlManager : controlManagers)
+      {
+         FeedbackControlCommand<?> feedbackControlCommand = controlManager.getFeedbackControlCommand();
+         if (feedbackControlCommand != null)
+            templateFeedbackCommandList.addCommand(feedbackControlCommand);
       }
       return templateFeedbackCommandList;
    }
