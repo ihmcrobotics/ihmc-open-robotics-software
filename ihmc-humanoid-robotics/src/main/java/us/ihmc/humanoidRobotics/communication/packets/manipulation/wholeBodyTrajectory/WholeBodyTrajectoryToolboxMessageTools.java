@@ -28,13 +28,13 @@ public class WholeBodyTrajectoryToolboxMessageTools
             double t0 = Double.NaN;
             double tf = Double.NaN;
 
-            for (int i = 1; i < message.getNumberOfWaypoints(); i++)
+            for (int i = 1; i < message.waypoints.size(); i++)
             {
-               t0 = message.getWaypointTime(i - 1);
-               tf = message.getWaypointTime(i);
-               previous = message.getWaypoint(i - 1);
-               next = message.getWaypoint(i);
-               if (time < message.getWaypointTime(i))
+               t0 = message.waypointTimes.get(i - 1);
+               tf = message.waypointTimes.get(i);
+               previous = message.waypoints.get(i - 1);
+               next = message.waypoints.get(i);
+               if (time < message.waypointTimes.get(i))
                   break;
             }
 

@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
 {
    @RosExportedField(documentation = "The orientation trajectory information.")
-   public SO3TrajectoryMessage so3Trajectory;
+   public SO3TrajectoryMessage so3Trajectory = new SO3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization.

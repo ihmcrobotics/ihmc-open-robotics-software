@@ -188,8 +188,8 @@ public class IHMCROSTranslationRuntimeTools
          }
       }
 
-      ihmcMessage.setPredictedContactPoints(predictedContactPoints);
-      ihmcMessage.setCustomPositionWaypoints(trajectoryWaypoints);
+      MessageTools.copyData(predictedContactPoints, ihmcMessage.predictedContactPoints);
+      MessageTools.copyData(trajectoryWaypoints, ihmcMessage.customPositionWaypoints);
 
       return ihmcMessage;
    }
@@ -233,13 +233,13 @@ public class IHMCROSTranslationRuntimeTools
       try
       {
          message.setChestTrajectoryMessage((ChestTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getChestTrajectoryMessage()));
-         message.setLeftArmTrajectoryMessage((ArmTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getArmTrajectoryMessage(RobotSide.LEFT)));
-         message.setRightArmTrajectoryMessage((ArmTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getArmTrajectoryMessage(RobotSide.RIGHT)));
+         message.setLeftArmTrajectoryMessage((ArmTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getLeftArmTrajectoryMessage()));
+         message.setRightArmTrajectoryMessage((ArmTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getRightArmTrajectoryMessage()));
          message.setPelvisTrajectoryMessage((PelvisTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage()));
-         message.setLeftFootTrajectoryMessage((FootTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getFootTrajectoryMessage(RobotSide.LEFT)));
-         message.setRightFootTrajectoryMessage((FootTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getFootTrajectoryMessage(RobotSide.RIGHT)));
-         message.setLeftHandTrajectoryMessage((HandTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT)));
-         message.setRightHandTrajectoryMessage((HandTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT)));
+         message.setLeftFootTrajectoryMessage((FootTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getLeftFootTrajectoryMessage()));
+         message.setRightFootTrajectoryMessage((FootTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getRightFootTrajectoryMessage()));
+         message.setLeftHandTrajectoryMessage((HandTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getLeftHandTrajectoryMessage()));
+         message.setRightHandTrajectoryMessage((HandTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getRightHandTrajectoryMessage()));
          message.setHeadTrajectoryMessage((HeadTrajectoryRosMessage) convertToRosMessage(wholeBodyTrajectoryMessage.getHeadTrajectoryMessage()));
       }
       catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException e)
@@ -258,19 +258,19 @@ public class IHMCROSTranslationRuntimeTools
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setChestTrajectoryMessage(component);
       }
-      if (wholeBodyTrajectoryMessage.getArmTrajectoryMessage(RobotSide.LEFT) == null)
+      if (wholeBodyTrajectoryMessage.getLeftArmTrajectoryMessage() == null)
       {
          ArmTrajectoryMessage component = new ArmTrajectoryMessage();
          component.robotSide = RobotSide.LEFT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
-         wholeBodyTrajectoryMessage.setArmTrajectoryMessage(component);
+         wholeBodyTrajectoryMessage.setLeftArmTrajectoryMessage(component);
       }
-      if (wholeBodyTrajectoryMessage.getArmTrajectoryMessage(RobotSide.RIGHT) == null)
+      if (wholeBodyTrajectoryMessage.getRightArmTrajectoryMessage() == null)
       {
          ArmTrajectoryMessage component = new ArmTrajectoryMessage();
          component.robotSide = RobotSide.RIGHT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
-         wholeBodyTrajectoryMessage.setArmTrajectoryMessage(component);
+         wholeBodyTrajectoryMessage.setRightArmTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage() == null)
       {
@@ -278,33 +278,33 @@ public class IHMCROSTranslationRuntimeTools
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
          wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(component);
       }
-      if (wholeBodyTrajectoryMessage.getFootTrajectoryMessage(RobotSide.LEFT) == null)
+      if (wholeBodyTrajectoryMessage.getLeftFootTrajectoryMessage() == null)
       {
          FootTrajectoryMessage component = new FootTrajectoryMessage();
          component.robotSide = RobotSide.LEFT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
-         wholeBodyTrajectoryMessage.setFootTrajectoryMessage(component);
+         wholeBodyTrajectoryMessage.setLeftFootTrajectoryMessage(component);
       }
-      if (wholeBodyTrajectoryMessage.getFootTrajectoryMessage(RobotSide.RIGHT) == null)
+      if (wholeBodyTrajectoryMessage.getRightFootTrajectoryMessage() == null)
       {
          FootTrajectoryMessage component = new FootTrajectoryMessage();
          component.robotSide = RobotSide.RIGHT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
-         wholeBodyTrajectoryMessage.setFootTrajectoryMessage(component);
+         wholeBodyTrajectoryMessage.setRightFootTrajectoryMessage(component);
       }
-      if (wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.LEFT) == null)
+      if (wholeBodyTrajectoryMessage.getLeftHandTrajectoryMessage() == null)
       {
          HandTrajectoryMessage component = new HandTrajectoryMessage();
          component.robotSide = RobotSide.LEFT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
-         wholeBodyTrajectoryMessage.setHandTrajectoryMessage(component);
+         wholeBodyTrajectoryMessage.setLeftHandTrajectoryMessage(component);
       }
-      if (wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT) == null)
+      if (wholeBodyTrajectoryMessage.getRightHandTrajectoryMessage() == null)
       {
          HandTrajectoryMessage component = new HandTrajectoryMessage();
          component.robotSide = RobotSide.RIGHT.toByte();
          component.setUniqueId(Packet.INVALID_MESSAGE_ID);
-         wholeBodyTrajectoryMessage.setHandTrajectoryMessage(component);
+         wholeBodyTrajectoryMessage.setRightHandTrajectoryMessage(component);
       }
       if (wholeBodyTrajectoryMessage.getHeadTrajectoryMessage() == null)
       {

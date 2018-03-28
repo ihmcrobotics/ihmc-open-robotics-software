@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.robotModels.FullRobotModel;
@@ -71,7 +72,8 @@ public class HandJointAngleProvider implements PacketConsumer<HandJointAnglePack
                      OneDoFJoint oneDoFJoint = joints.get(jointName);
                      if (oneDoFJoint != null)
                      {
-                        oneDoFJoint.setQ(handJointAngles.getJointAngle(jointName));
+                        double jointAngle = HumanoidMessageTools.unpackJointAngle(handJointAngles, jointName);
+                        oneDoFJoint.setQ(jointAngle);
                      }
                   }
                }

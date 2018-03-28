@@ -106,10 +106,10 @@ public final class MessageTransformer
       if (message.orientation != null)
          message.orientation.applyTransform(rigidBodyTransformToApply);
 
-      if (message.positionWaypoints != null)
+      if (message.customPositionWaypoints != null)
       {
-         for (int i = 0; i < message.positionWaypoints.size(); i++)
-            message.positionWaypoints.get(i).applyTransform(rigidBodyTransformToApply);
+         for (int i = 0; i < message.customPositionWaypoints.size(); i++)
+            message.customPositionWaypoints.get(i).applyTransform(rigidBodyTransformToApply);
       }
    }
 

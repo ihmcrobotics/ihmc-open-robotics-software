@@ -380,6 +380,36 @@ public class WeightMatrix6D
    }
 
    /**
+    * Get the X axis weight for the angular part.
+    * 
+    * @return the X axis weight for the angular part.
+    */
+   public double getAngularXAxisWeight()
+   {
+      return angularWeights.getXAxisWeight();
+   }
+
+   /**
+    * Get the Y axis weight for the angular part.
+    * 
+    * @return the Y axis weight for the angular part.
+    */
+   public double getAngularYAxisWeight()
+   {
+      return angularWeights.getYAxisWeight();
+   }
+
+   /**
+    * Get the Z axis weight for the angular part.
+    * 
+    * @return the Z axis weight for the angular part.
+    */
+   public double getAngularZAxisWeight()
+   {
+      return angularWeights.getZAxisWeight();
+   }
+
+   /**
     * The reference frame to which the angular weights are referring.
     * <p>
     * This weight frame can be {@code null}.
@@ -390,6 +420,36 @@ public class WeightMatrix6D
    public ReferenceFrame getAngularWeightFrame()
    {
       return angularWeights.getWeightFrame();
+   }
+
+   /**
+    * Get the X axis weight for the linear part.
+    * 
+    * @return the X axis weight for the linear part.
+    */
+   public double getLinearXAxisWeight()
+   {
+      return linearWeights.getXAxisWeight();
+   }
+
+   /**
+    * Get the Y axis weight for the linear part.
+    * 
+    * @return the Y axis weight for the linear part.
+    */
+   public double getLinearYAxisWeight()
+   {
+      return linearWeights.getYAxisWeight();
+   }
+
+   /**
+    * Get the Z axis weight for the linear part.
+    * 
+    * @return the Z axis weight for the linear part.
+    */
+   public double getLinearZAxisWeight()
+   {
+      return linearWeights.getZAxisWeight();
    }
 
    /**

@@ -1,24 +1,10 @@
 package us.ihmc.communication.packets;
 
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 
 /**
  * {@link KinematicsToolboxRigidBodyMessage} is part of the API of the
@@ -44,43 +30,68 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * defined, it represents the desired position of {@code endEffector.getBodyFixedFrame()}'s
     * origin. The data is assumed to be expressed in world frame.
     */
-   public Point3D32 desiredPositionInWorld;
+   public Point3D32 desiredPositionInWorld = new Point3D32();
    /**
     * This is the desired orientation of the control frame. If the control frame has not been
     * defined, it represents the desired orientation of {@code endEffector.getBodyFixedFrame()}. The
     * data is assumed to be expressed in world frame.
     */
-   public Quaternion32 desiredOrientationInWorld;
+   public Quaternion32 desiredOrientationInWorld = new Quaternion32();
    /**
     * This is the position of the control frame's origin expressed in
     * {@code endEffector.getBodyFixedFrame()}. By default the control frame is coincident to
     * {@code endEffector.getBodyFixedFrame()}. The control frame is assumed to be attached to the
     * end-effector.
     */
-   public Point3D32 controlFramePositionInEndEffector;
+   public Point3D32 controlFramePositionInEndEffector = new Point3D32();
    /**
     * This is the orientation of the control frame expressed in
     * {@code endEffector.getBodyFixedFrame()}. By default the control frame is coincident to
     * {@code endEffector.getBodyFixedFrame()}. The control frame is assumed to be attached to the
     * end-effector.
     */
-   public Quaternion32 controlFrameOrientationInEndEffector;
+   public Quaternion32 controlFrameOrientationInEndEffector = new Quaternion32();
 
-   // TODO Add doc
-   public SelectionMatrix3DMessage angularSelectionMatrix;
-   public SelectionMatrix3DMessage linearSelectionMatrix;
+   /**
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+    * be controlled. When it is NOT provided, the controller will assume that all the degrees of
+    * freedom of the end-effector should be controlled.
+    * <p>
+    * The selection frames coming along with the given selection matrix are used to determine to
+    * what reference frame the selected axes are referring to. For instance, if only the hand height
+    * in world should be controlled on the linear z component of the selection matrix should be
+    * selected and the reference frame should be world frame. When no reference frame is provided
+    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
+    * frame if not defined otherwise.
+    * </p>
+    */
+   public SelectionMatrix3DMessage angularSelectionMatrix = new SelectionMatrix3DMessage();
+   /**
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+    * be controlled. When it is NOT provided, the controller will assume that all the degrees of
+    * freedom of the end-effector should be controlled.
+    * <p>
+    * The selection frames coming along with the given selection matrix are used to determine to
+    * what reference frame the selected axes are referring to. For instance, if only the hand height
+    * in world should be controlled on the linear z component of the selection matrix should be
+    * selected and the reference frame should be world frame. When no reference frame is provided
+    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
+    * frame if not defined otherwise.
+    * </p>
+    */
+   public SelectionMatrix3DMessage linearSelectionMatrix = new SelectionMatrix3DMessage();
 
    /**
     * Weight Matrix used to define the priority of controlling the rotation around each axis on the
     * solver side:<br>
     */
-   public WeightMatrix3DMessage angularWeightMatrix;
+   public WeightMatrix3DMessage angularWeightMatrix = new WeightMatrix3DMessage();
 
    /**
     * Weight Matrix used to define the priority of controlling the translation of each axis on the
     * solver side:<br>
     */
-   public WeightMatrix3DMessage linearWeightMatrix;
+   public WeightMatrix3DMessage linearWeightMatrix = new WeightMatrix3DMessage();
 
    /**
     * Do not use this constructor, it is needed only for efficient serialization/deserialization.
@@ -95,33 +106,14 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    public void set(KinematicsToolboxRigidBodyMessage other)
    {
       endEffectorNameBasedHashCode = other.endEffectorNameBasedHashCode;
-      if (other.desiredPositionInWorld != null)
-         desiredPositionInWorld = new Point3D32(other.desiredPositionInWorld);
-      if (other.desiredOrientationInWorld != null)
-         desiredOrientationInWorld = new Quaternion32(other.desiredOrientationInWorld);
-      if (other.controlFramePositionInEndEffector != null)
-         controlFramePositionInEndEffector = new Point3D32(other.controlFramePositionInEndEffector);
-      controlFrameOrientationInEndEffector = new Quaternion32(other.controlFrameOrientationInEndEffector);
-      if (other.angularSelectionMatrix != null)
-      {
-         angularSelectionMatrix = new SelectionMatrix3DMessage();
-         angularSelectionMatrix.set(other.angularSelectionMatrix);
-      }
-      if (other.linearSelectionMatrix != null)
-      {
-         linearSelectionMatrix = new SelectionMatrix3DMessage();
-         linearSelectionMatrix.set(other.linearSelectionMatrix);
-      }
-      if (other.angularWeightMatrix != null)
-      {
-         angularWeightMatrix = new WeightMatrix3DMessage();
-         angularWeightMatrix.set(other.angularWeightMatrix);
-      }
-      if (other.linearWeightMatrix != null)
-      {
-         linearWeightMatrix = new WeightMatrix3DMessage();
-         linearWeightMatrix.set(other.linearWeightMatrix);
-      }
+      desiredPositionInWorld.set(other.desiredPositionInWorld);
+      desiredOrientationInWorld.set(other.desiredOrientationInWorld);
+      controlFramePositionInEndEffector.set(other.controlFramePositionInEndEffector);
+      controlFrameOrientationInEndEffector.set(other.controlFrameOrientationInEndEffector);
+      angularSelectionMatrix.set(other.angularSelectionMatrix);
+      linearSelectionMatrix.set(other.linearSelectionMatrix);
+      angularWeightMatrix.set(other.angularWeightMatrix);
+      linearWeightMatrix.set(other.linearWeightMatrix);
       setPacketInformation(other);
    }
 
@@ -132,26 +124,9 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * 
     * @param desiredPosition the position the control frame's origin should reach. Not modified.
     */
-   public void setDesiredPosition(Point3DReadOnly desiredPosition)
+   public void setDesiredPositionInWorld(Point3DReadOnly desiredPosition)
    {
-      if (desiredPositionInWorld == null)
-         desiredPositionInWorld = new Point3D32(desiredPosition);
-      else
-         desiredPositionInWorld.set(desiredPosition);
-   }
-
-   /**
-    * Sets the desired position that the control frame's origin should reach. By default the control
-    * frame is coincident to {@code endEffector.getBodyFixedFrame()}. The data is assumed to be
-    * expressed in world frame.
-    * 
-    * @param desiredPosition the position the control frame's origin should reach. Not modified.
-    * @throws ReferenceFrameMismatchException if the argument is not expressed in world frame.
-    */
-   public void setDesiredPosition(FramePoint3D desiredPosition)
-   {
-      desiredPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredPosition(desiredPosition);
+      desiredPositionInWorld.set(desiredPosition);
    }
 
    /**
@@ -161,222 +136,9 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * 
     * @param desiredOrientation the orientation the control frame should reach. Not modified.
     */
-   public void setDesiredOrientation(QuaternionReadOnly desiredOrientation)
+   public void setDesiredOrientationInWorld(QuaternionReadOnly desiredOrientation)
    {
-      if (desiredOrientationInWorld == null)
-         desiredOrientationInWorld = new Quaternion32(desiredOrientation);
-      else
-         desiredOrientationInWorld.set(desiredOrientation);
-   }
-
-   /**
-    * Sets the desired orientation that the control frame should reach. By default the control frame
-    * is coincident to {@code endEffector.getBodyFixedFrame()}. The data is assumed to be expressed
-    * in world frame.
-    * 
-    * @param desiredOrientation the orientation the control frame should reach. Not modified.
-    * @throws ReferenceFrameMismatchException if the argument is not expressed in world frame.
-    */
-   public void setDesiredOrientation(FrameQuaternion desiredOrientation)
-   {
-      desiredOrientation.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredOrientation(desiredOrientation);
-   }
-
-   /**
-    * Sets the desired pose that the control frame should reach. By default the control frame is
-    * coincident to {@code endEffector.getBodyFixedFrame()}. The data is assumed to be expressed in
-    * world frame.
-    * 
-    * @param desiredPosition the position the control frame's origin should reach. Not modified.
-    * @param desiredOrientation the orientation the control frame should reach. Not modified.
-    */
-   public void setDesiredPose(Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation)
-   {
-      setDesiredPosition(desiredPosition);
-      setDesiredOrientation(desiredOrientation);
-   }
-
-   /**
-    * Sets the desired pose that the control frame should reach. By default the control frame is
-    * coincident to {@code endEffector.getBodyFixedFrame()}. The data is assumed to be expressed in
-    * world frame.
-    * 
-    * @param desiredPose the pose the control frame should reach. Not modified.
-    */
-   public void setDesiredPose(Pose3DReadOnly pose)
-   {
-      setDesiredPosition(pose.getPosition());
-      setDesiredOrientation(pose.getOrientation());
-   }
-
-   /**
-    * Sets the desired pose that the control frame should reach. By default the control frame is
-    * coincident to {@code endEffector.getBodyFixedFrame()}. The data is assumed to be expressed in
-    * world frame.
-    * 
-    * @param desiredPosition the position the control frame's origin should reach. Not modified.
-    * @param desiredOrientation the orientation the control frame should reach. Not modified.
-    * @throws ReferenceFrameMismatchException if any of the arguments is not expressed in world
-    *            frame.
-    */
-   public void setDesiredPose(FramePoint3D desiredPosition, FrameQuaternion desiredOrientation)
-   {
-      setDesiredPosition(desiredPosition);
-      setDesiredOrientation(desiredOrientation);
-   }
-
-   /**
-    * Sets the desired pose that the control frame should reach. By default the control frame is
-    * coincident to {@code endEffector.getBodyFixedFrame()}. The data is assumed to be expressed in
-    * world frame.
-    * 
-    * @param desiredPose the pose the control frame should reach. Not modified.
-    * @throws ReferenceFrameMismatchException if the argument is not expressed in world frame.
-    */
-   public void setDesiredPose(FramePose3D desiredPose)
-   {
-      desiredPose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredPose((Pose3DReadOnly) desiredPose);
-   }
-
-   /** Ensures that the weight matrix's are initialized. */
-   private void initializeWeight()
-   {
-      if (linearWeightMatrix == null)
-      {
-         linearWeightMatrix = new WeightMatrix3DMessage();
-      }
-
-      if (angularWeightMatrix == null)
-      {
-         angularWeightMatrix = new WeightMatrix3DMessage();
-      }
-
-   }
-
-   /**
-    * Sets the weight to use for this task.
-    * <p>
-    * The weight relates to the priority of a task relative to the other active tasks. A higher
-    * weight refers to a higher priority.
-    * </p>
-    * 
-    * @param weight the weight value for this task.
-    */
-   public void setWeight(double weight)
-   {
-      initializeWeight();
-      linearWeightMatrix.setWeights(weight, weight, weight);
-      angularWeightMatrix.setWeights(weight, weight, weight);
-   }
-
-   /**
-    * Sets the weight to use for this task with the angular and linear parts set independently.
-    * <p>
-    * The weight relates to the priority of a task relative to the other active tasks. A higher
-    * weight refers to a higher priority.
-    * </p>
-    * 
-    * @param angular the weight to use for the angular part of this task.
-    * @param linear the weight to use for the linear part of this task.
-    */
-   public void setWeight(double angular, double linear)
-   {
-      initializeWeight();
-      linearWeightMatrix.setWeights(linear, linear, linear);
-      angularWeightMatrix.setWeights(angular, angular, angular);
-   }
-
-   /**
-    * Sets the weight to use for this task with the angular and linear parts set independently.
-    * <p>
-    * The weight relates to the priority of a task relative to the other active tasks. A higher
-    * weight refers to a higher priority.
-    * </p>
-    * 
-    * @param angular the weight to use for the angular part of this task.
-    * @param linear the weight to use for the linear part of this task.
-    */
-   public void setWeight(WeightMatrix6D weightMatrix)
-   {
-      initializeWeight();
-      linearWeightMatrix.set(weightMatrix.getLinearPart());
-      angularWeightMatrix.set(weightMatrix.getAngularPart());
-   }
-
-   /**
-    * Enables the control of all the degrees of freedom of the end-effector.
-    */
-   public void setSelectionMatrixToIdentity()
-   {
-      angularSelectionMatrix = new SelectionMatrix3DMessage();
-      linearSelectionMatrix = new SelectionMatrix3DMessage();
-   }
-
-   /**
-    * Enables the control for the translational degrees of freedom of the end-effector and disable
-    * the rotational part.
-    */
-   public void setSelectionMatrixForLinearControl()
-   {
-      angularSelectionMatrix = new SelectionMatrix3DMessage();
-      angularSelectionMatrix.setAxisSelection(false, false, false);
-      linearSelectionMatrix = new SelectionMatrix3DMessage();
-   }
-
-   /**
-    * Enables the control for the rotational degrees of freedom of the end-effector and disable the
-    * translational part.
-    */
-   public void setSelectionMatrixForAngularControl()
-   {
-      angularSelectionMatrix = new SelectionMatrix3DMessage();
-      linearSelectionMatrix = new SelectionMatrix3DMessage();
-      linearSelectionMatrix.setAxisSelection(false, false, false);
-   }
-
-   /**
-    * Sets the selection matrix to use for executing this message.
-    * <p>
-    * The selection matrix is used to determinate which degree of freedom of the end-effector should
-    * be controlled. When it is NOT provided, the controller will assume that all the degrees of
-    * freedom of the end-effector should be controlled.
-    * </p>
-    * <p>
-    * The selection frames coming along with the given selection matrix are used to determine to
-    * what reference frame the selected axes are referring to. For instance, if only the hand height
-    * in world should be controlled on the linear z component of the selection matrix should be
-    * selected and the reference frame should be world frame. When no reference frame is provided
-    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
-    * frame if not defined otherwise.
-    * </p>
-    * 
-    * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
-    *           modified.
-    */
-   public void setSelectionMatrix(SelectionMatrix6D selectionMatrix6D)
-   {
-      if (angularSelectionMatrix == null)
-         angularSelectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getAngularPart());
-      else
-         angularSelectionMatrix.set(selectionMatrix6D.getAngularPart());
-
-      if (linearSelectionMatrix == null)
-         linearSelectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getLinearPart());
-      else
-         linearSelectionMatrix.set(selectionMatrix6D.getLinearPart());
-   }
-
-   /**
-    * Resets the control frame so it is coincident with {@code endEffector.getBodyFixedFrame()}.
-    */
-   public void resetControlFrame()
-   {
-      if (controlFramePositionInEndEffector != null)
-         controlFramePositionInEndEffector.setToZero();
-      if (controlFrameOrientationInEndEffector != null)
-         controlFrameOrientationInEndEffector.setToZero();
+      desiredOrientationInWorld.set(desiredOrientation);
    }
 
    /**
@@ -386,12 +148,9 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * @param controlFramePosition the position of the control frame's origin expressed in
     *           {@code endEffector.getBodyFixedFrame()}. Not modified.
     */
-   public void setControlFramePosition(Tuple3DReadOnly controlFramePosition)
+   public void setControlFramePositionInEndEffector(Tuple3DReadOnly controlFramePosition)
    {
-      if (controlFramePositionInEndEffector == null)
-         controlFramePositionInEndEffector = new Point3D32(controlFramePosition);
-      else
-         controlFramePositionInEndEffector.set(controlFramePosition);
+      controlFramePositionInEndEffector.set(controlFramePosition);
    }
 
    /**
@@ -401,70 +160,9 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
     * @param controlFrameOrientation the orientation of the control frame expressed in
     *           {@code endEffector.getBodyFixedFrame()}. Not modified.
     */
-   public void setControlFrameOrientation(QuaternionReadOnly controlFrameOrientation)
+   public void setControlFrameOrientationInEndEffector(QuaternionReadOnly controlFrameOrientation)
    {
-      if (controlFrameOrientationInEndEffector == null)
-         controlFrameOrientationInEndEffector = new Quaternion32(controlFrameOrientation);
-      else
-         controlFrameOrientationInEndEffector.set(controlFrameOrientation);
-   }
-
-   /**
-    * Specifies the orientation of the control frame. The given quaternion is assumed to be
-    * expressed in {@code endEffector.getBodyFixedFrame()}.
-    * 
-    * @param controlFrameOrientation the orientation of the control frame expressed in
-    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
-    */
-   public void setControlFrameOrientation(RotationMatrixReadOnly controlFrameOrientation)
-   {
-      if (controlFrameOrientationInEndEffector == null)
-         controlFrameOrientationInEndEffector = new Quaternion32(controlFrameOrientation);
-      else
-         controlFrameOrientationInEndEffector.set(controlFrameOrientation);
-   }
-
-   /**
-    * Specifies the pose of the control frame. The given point and quaternion are assumed to be
-    * expressed in {@code endEffector.getBodyFixedFrame()}.
-    * 
-    * @param controlFramePosition the position of the control frame's origin expressed in
-    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
-    * @param controlFrameOrientation the orientation of the control frame expressed in
-    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
-    */
-   public void setControlFramePose(Tuple3DReadOnly controlFramePosition, QuaternionReadOnly controlFrameOrientation)
-   {
-      setControlFramePosition(controlFramePosition);
-      setControlFrameOrientation(controlFrameOrientation);
-   }
-
-   /**
-    * Specifies the pose of the control frame. The given point and quaternion are assumed to be
-    * expressed in {@code endEffector.getBodyFixedFrame()}.
-    * 
-    * @param controlFramePosition the position of the control frame's origin expressed in
-    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
-    * @param controlFrameOrientation the orientation of the control frame expressed in
-    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
-    */
-   public void setControlFramePose(Tuple3DReadOnly controlFramePosition, RotationMatrixReadOnly controlFrameOrientation)
-   {
-      setControlFramePosition(controlFramePosition);
-      setControlFrameOrientation(controlFrameOrientation);
-   }
-
-   /**
-    * Specifies the pose of the control frame. The given pose is assumed to be expressed in
-    * {@code endEffector.getBodyFixedFrame()}.
-    * 
-    * @param controlFramePose the pose of the control frame expressed in
-    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
-    */
-   public void setControlFramePose(Pose3D controlFramePose)
-   {
-      setControlFramePosition(controlFramePose.getPosition());
-      setControlFrameOrientation(controlFramePose.getOrientation());
+      controlFrameOrientationInEndEffector.set(controlFrameOrientation);
    }
 
    public long getEndEffectorNameBasedHashCode()
@@ -472,115 +170,24 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       return endEffectorNameBasedHashCode;
    }
 
-   public void getDesiredPose(FramePose3D desiredPoseToPack)
+   public SelectionMatrix3DMessage getAngularSelectionMatrix()
    {
-      desiredPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-
-      if (desiredPositionInWorld != null)
-         desiredPoseToPack.setPosition(desiredPositionInWorld);
-      if (desiredOrientationInWorld != null)
-         desiredPoseToPack.setOrientation(desiredOrientationInWorld);
+      return angularSelectionMatrix;
    }
 
-   public void getControlFramePose(RigidBody endEffector, FramePose3D controlFramePoseToPack)
+   public SelectionMatrix3DMessage getLinearSelectionMatrix()
    {
-      ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
-      controlFramePoseToPack.setToZero(referenceFrame);
-
-      if (controlFramePositionInEndEffector != null)
-         controlFramePoseToPack.setPosition(controlFramePositionInEndEffector);
-      if (controlFrameOrientationInEndEffector != null)
-         controlFramePoseToPack.setOrientation(controlFrameOrientationInEndEffector);
+      return linearSelectionMatrix;
    }
 
-   public void getSelectionMatrix(SelectionMatrix6D selectionMatrixToPack)
+   public WeightMatrix3DMessage getAngularWeightMatrix()
    {
-      selectionMatrixToPack.resetSelection();
-      if (angularSelectionMatrix != null)
-         angularSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getAngularPart());
-      if (linearSelectionMatrix != null)
-         linearSelectionMatrix.getSelectionMatrix(selectionMatrixToPack.getLinearPart());
+      return angularWeightMatrix;
    }
 
-   public void getWeightMatrix(WeightMatrix6D weightMatrixToPack)
+   public WeightMatrix3DMessage getLinearWeightMatrix()
    {
-      weightMatrixToPack.clear();
-      if (angularWeightMatrix != null)
-         angularWeightMatrix.getWeightMatrix(weightMatrixToPack.getAngularPart());
-      if (linearWeightMatrix != null)
-         linearWeightMatrix.getWeightMatrix(weightMatrixToPack.getLinearPart());
-   }
-
-   /**
-    * Returns the unique ID referring to the selection frame to use with the angular part of the
-    * selection matrix of this message.
-    * <p>
-    * If this message does not have a angular selection matrix, this method returns
-    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
-    * </p>
-    * 
-    * @return the selection frame ID for the angular part of the selection matrix.
-    */
-   public long getAngularSelectionFrameId()
-   {
-      if (angularSelectionMatrix != null)
-         return angularSelectionMatrix.getSelectionFrameId();
-      else
-         return NameBasedHashCodeTools.NULL_HASHCODE;
-   }
-
-   /**
-    * Returns the unique ID referring to the selection frame to use with the linear part of the
-    * selection matrix of this message.
-    * <p>
-    * If this message does not have a linear selection matrix, this method returns
-    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
-    * </p>
-    * 
-    * @return the selection frame ID for the linear part of the selection matrix.
-    */
-   public long getLinearSelectionFrameId()
-   {
-      if (linearSelectionMatrix != null)
-         return linearSelectionMatrix.getSelectionFrameId();
-      else
-         return NameBasedHashCodeTools.NULL_HASHCODE;
-   }
-
-   /**
-    * Returns the unique ID referring to the frame to use with the linear part of the weight matrix
-    * of this message.
-    * <p>
-    * If this message does not have a linear weight matrix or the frame has not been set, this
-    * method returns {@link NameBasedHashCodeTools#NULL_HASHCODE}.
-    * </p>
-    * 
-    * @return the frame ID for the linear part of the weight matrix.
-    */
-   public long getLinearWeightFrameId()
-   {
-      if (linearWeightMatrix != null)
-         return linearWeightMatrix.getWeightFrameId();
-      else
-         return NameBasedHashCodeTools.NULL_HASHCODE;
-   }
-
-   /**
-    * Returns the unique ID referring to the frame to use with the angular part of the weight matrix
-    * of this message.
-    * <p>
-    * If this message does not have a angular weight matrix or the frame has not been set, this
-    * method returns {@link NameBasedHashCodeTools#NULL_HASHCODE}.
-    * </p>
-    * 
-    * @return the frame ID for the linear part of the weight matrix.
-    */
-   public long getAngularWeightFrameId()
-   {
-      if (angularWeightMatrix != null)
-         return angularWeightMatrix.getWeightFrameId();
-      else
-         return NameBasedHashCodeTools.NULL_HASHCODE;
+      return linearWeightMatrix;
    }
 
    /**
@@ -599,57 +206,22 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    {
       if (endEffectorNameBasedHashCode != other.endEffectorNameBasedHashCode)
          return false;
-      if (!nullEqualsAndEpsilonEquals(desiredPositionInWorld, other.desiredPositionInWorld, epsilon))
+      if (!desiredPositionInWorld.epsilonEquals(other.desiredPositionInWorld, epsilon))
          return false;
-      if (!nullEqualsAndEpsilonEquals(desiredOrientationInWorld, other.desiredOrientationInWorld, epsilon))
+      if (!desiredOrientationInWorld.epsilonEquals(other.desiredOrientationInWorld, epsilon))
          return false;
-      if (!nullEqualsAndEpsilonEquals(controlFramePositionInEndEffector, other.controlFramePositionInEndEffector, epsilon))
+      if (!controlFramePositionInEndEffector.epsilonEquals(other.controlFramePositionInEndEffector, epsilon))
          return false;
-      if (!nullEqualsAndEpsilonEquals(controlFrameOrientationInEndEffector, other.controlFrameOrientationInEndEffector, epsilon))
+      if (!controlFrameOrientationInEndEffector.epsilonEquals(other.controlFrameOrientationInEndEffector, epsilon))
          return false;
-
-      // TODO Add the selection matrix back in here
-      if (linearWeightMatrix == null ^ other.linearWeightMatrix == null)//bit wise or
-      {
+      if (!linearWeightMatrix.epsilonEquals(linearWeightMatrix, epsilon))
          return false;
-      }
-      if (angularWeightMatrix == null ^ other.angularWeightMatrix == null)//bit wise or
-      {
+      if (!angularWeightMatrix.epsilonEquals(angularWeightMatrix, epsilon))
          return false;
-      }
-
-      if (linearWeightMatrix != null && !linearWeightMatrix.epsilonEquals(linearWeightMatrix, epsilon))
-      {
+      if (!linearSelectionMatrix.epsilonEquals(linearSelectionMatrix, epsilon))
          return false;
-      }
-
-      if (angularWeightMatrix != null && !angularWeightMatrix.epsilonEquals(angularWeightMatrix, epsilon))
-      {
+      if (!angularSelectionMatrix.epsilonEquals(angularSelectionMatrix, epsilon))
          return false;
-      }
-
       return true;
-   }
-
-   /**
-    * Convenience method that first performs {@code null} tests before returning the result from
-    * {@link EpsilonComparable#epsilonEquals(Object, double)}.
-    * 
-    * @param a the first object to compare. Not modified.
-    * @param b the second object to compare. Not modified.
-    * @param epsilon tolerance to use when comparing each component.
-    * @return {@code true} if the object are either {@code null} or not {@code null} and
-    *         epsilon-equal, {@code false} if only one object is {@code null} or if both objects are
-    *         not {@code null} but are not epsilon-equal.
-    */
-   static <T extends EpsilonComparable<T>> boolean nullEqualsAndEpsilonEquals(T a, T b, double epsilon)
-   {
-      if (a == null && b == null)
-         return true;
-      if (a == null && b != null)
-         return false;
-      if (a != null && b == null)
-         return false;
-      return a.epsilonEquals(b, epsilon);
    }
 }

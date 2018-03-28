@@ -64,7 +64,7 @@ public class SearchForValveBehavior extends AbstractBehavior
    {
       TextToSpeechPacket p1 = MessageTools.createTextToSpeechPacket("Recieved Valve Location From UI");
       sendPacket(p1);
-      valveTransformToWorld = valveLocationPacket.getValveTransformToWorld();
+      valveTransformToWorld = valveLocationPacket.getValvePoseInWorld();
 
       valveRadius = valveLocationPacket.getValveRadius();
       recievedNewValveLocation = true;

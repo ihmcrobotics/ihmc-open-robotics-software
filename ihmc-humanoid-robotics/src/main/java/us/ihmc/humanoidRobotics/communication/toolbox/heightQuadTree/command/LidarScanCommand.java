@@ -40,7 +40,7 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
    public void set(LidarScanMessage message)
    {
       timestamp = message.robotTimestamp;
-      message.getLidarPose(lidarPose);
+      lidarPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLidarPosition(), message.getLidarOrientation());
 
       int index = 0;
       TFloatArrayList newPointCloud = message.scan;

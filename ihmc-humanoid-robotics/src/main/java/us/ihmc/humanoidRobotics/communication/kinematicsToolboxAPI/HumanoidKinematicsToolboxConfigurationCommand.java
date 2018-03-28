@@ -26,8 +26,8 @@ public class HumanoidKinematicsToolboxConfigurationCommand
    @Override
    public void set(HumanoidKinematicsToolboxConfigurationMessage message)
    {
-      holdCurrentCenterOfMassXYPosition = message.holdCurrentCenterOfMassXYPosition();
-      holdSupportFootPositions = message.holdSupportFootPositions();
+      holdCurrentCenterOfMassXYPosition = message.getHoldCurrentCenterOfMassXYPosition();
+      holdSupportFootPositions = message.getHoldSupportFootPositions();
    }
 
    public boolean holdCurrentCenterOfMassXYPosition()

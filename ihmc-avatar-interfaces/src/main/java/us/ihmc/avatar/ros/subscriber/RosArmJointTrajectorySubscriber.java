@@ -8,6 +8,8 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -56,7 +58,11 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
       int numberOfJoints = rosMessage.getJointNames().size();
       int numberOfWaypoints = rosMessage.getPoints().size();
       
-      ArmTrajectoryMessage ihmcMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, numberOfJoints, numberOfWaypoints);
+      ArmTrajectoryMessage ihmcMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
+      RecyclingArrayListPubSub<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = ihmcMessage.jointspaceTrajectory.jointTrajectoryMessages;
+      for (int i = 0; i < numberOfJoints; i++)
+         jointTrajectoryMessages.add();
+
       for (int waypointIndex = 0; waypointIndex < numberOfWaypoints; waypointIndex++)
       {
          double[] positions = rosMessage.getPoints().get(waypointIndex).getPositions();
@@ -74,7 +80,7 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
          
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
-            ihmcMessage.getJointspaceTrajectory().setTrajectoryPoint(jointIndex, waypointIndex, time, positions[jointIndex], velocities[jointIndex]);
+            jointTrajectoryMessages.get(jointIndex).trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(time, positions[jointIndex], velocities[jointIndex]));
          }
       }
       

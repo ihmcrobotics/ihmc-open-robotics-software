@@ -67,7 +67,7 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
       setPacketInformation(other);
    }
 
-   public byte getHandDesiredConfiguration()
+   public byte getDesiredHandConfiguration()
    {
       return desiredHandConfiguration;
    }
@@ -93,7 +93,7 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    public boolean epsilonEquals(HandDesiredConfigurationMessage other, double epsilon)
    {
       boolean ret = (this.getRobotSide() == other.getRobotSide());
-      ret &= (this.getHandDesiredConfiguration() == other.getHandDesiredConfiguration());
+      ret &= (this.getDesiredHandConfiguration() == other.getDesiredHandConfiguration());
 
       return ret;
    }

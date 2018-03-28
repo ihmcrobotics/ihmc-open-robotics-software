@@ -21,7 +21,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
    @RosExportedField(documentation = "Specifies which hand will execute the trajectory.")
    public byte robotSide;
    @RosExportedField(documentation = "The position/orientation trajectory information.")
-   public SE3TrajectoryMessage se3Trajectory;
+   public SE3TrajectoryMessage se3Trajectory = new SE3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization.
@@ -94,7 +94,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
    {
       String ret = "";
       if (se3Trajectory.taskspaceTrajectoryPoints != null)
-         ret = "Hand SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.getNumberOfTrajectoryPoints();
+         ret = "Hand SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.taskspaceTrajectoryPoints.size();
       else
          ret = "Hand SE3 trajectory: no SE3 trajectory points";
 

@@ -5,12 +5,9 @@ import java.io.IOException;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -51,11 +48,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
 
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {
-         IMUPacket imuPacket = robotConfigurationData.imuSensorData.add();
-         Vector3D32 linearAcceleration = new Vector3D32();
-         Vector3D32 angularVelocity = new Vector3D32();
-         Quaternion32 orientation = new Quaternion32();
-         imuPacket.set(linearAcceleration, orientation, angularVelocity);
+         robotConfigurationData.imuSensorData.add();
       }
       
       robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING.toByte());

@@ -94,7 +94,7 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
    {
       String ret = "";
       if (se3Trajectory.taskspaceTrajectoryPoints != null)
-         ret = "Foot SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.getNumberOfTrajectoryPoints();
+         ret = "Foot SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.taskspaceTrajectoryPoints.size();
       else
          ret = "Foot SE3 trajectory: no SE3 trajectory points";
 

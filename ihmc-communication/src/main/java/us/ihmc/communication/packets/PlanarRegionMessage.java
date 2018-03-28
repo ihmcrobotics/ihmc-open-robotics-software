@@ -48,11 +48,6 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
       return regionNormal;
    }
 
-   public int getConcaveHullSize()
-   {
-      return concaveHull.getVertices().size();
-   }
-
    public Polygon2DMessage getConcaveHull()
    {
       return concaveHull;

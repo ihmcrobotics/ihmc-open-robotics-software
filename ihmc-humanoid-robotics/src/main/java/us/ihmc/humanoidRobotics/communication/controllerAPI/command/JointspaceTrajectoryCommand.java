@@ -47,7 +47,7 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
    public void set(JointspaceTrajectoryMessage message)
    {
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
-      set(message.getTrajectoryPointLists());
+      set(message.getJointTrajectoryMessages());
    }
 
    private void set(RecyclingArrayList<? extends OneDoFJointTrajectoryCommand> trajectoryPointListArray)
@@ -66,7 +66,7 @@ public final class JointspaceTrajectoryCommand extends QueueableCommand<Jointspa
          OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray.get(i);
          if (oneJointTrajectoryMessage != null)
          {
-            oneJointTrajectoryMessage.getTrajectoryPoints(oneDoFJointTrajectoryCommand);
+            oneDoFJointTrajectoryCommand.set(oneJointTrajectoryMessage);
             oneDoFJointTrajectoryCommand.setWeight(oneJointTrajectoryMessage.getWeight());
          }
       }

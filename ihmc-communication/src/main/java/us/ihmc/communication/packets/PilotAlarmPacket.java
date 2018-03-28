@@ -31,7 +31,7 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket>
       this.beepRate = beepRate;
    }
 
-   public boolean isToneEnabled()
+   public boolean getEnableTone()
    {
       return enableTone;
    }

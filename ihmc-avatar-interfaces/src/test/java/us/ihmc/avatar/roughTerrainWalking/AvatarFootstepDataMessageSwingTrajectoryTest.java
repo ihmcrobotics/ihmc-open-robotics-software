@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.communication.packets.ExecutionTiming;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -94,7 +95,8 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       FootstepDataMessage footstep = new FootstepDataMessage();
       footstep.setRobotSide(robotSide.toByte());
       footstep.setTrajectoryType(TrajectoryType.WAYPOINTS.toByte());
-      footstep.setTimings(swingTime, initialTransferTime);
+      footstep.setSwingDuration(swingTime);
+      footstep.setTransferDuration(initialTransferTime);
 
       double radius = robotScale * 0.10;
       double pitch = Math.toRadians(10.0);
@@ -154,9 +156,9 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       footOrientation.changeFrame(worldFrame);
       footstep.setLocation(footPosition);
       footstep.setOrientation(footOrientation);
-      footstep.setSwingTrajectory(waypoints);
+      MessageTools.copyData(waypoints, footstep.swingTrajectory);
 
-      footstepDataList.add(footstep);
+      footstepDataList.footstepDataList.add().set(footstep);
       drcSimulationTestHelper.send(footstepDataList);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialTransferTime + getRobotModel().getControllerDT() * 4.0));
 

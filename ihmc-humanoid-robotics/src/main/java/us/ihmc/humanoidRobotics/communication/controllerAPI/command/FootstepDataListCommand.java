@@ -50,8 +50,8 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       executionTiming = ExecutionTiming.fromByte(message.executionTiming);
       trustHeightOfFootsteps = message.trustHeightOfFootsteps;
       areFootstepsAdjustable = message.areFootstepsAdjustable;
-      offsetFootstepsWithExecutionError = message.isOffsetFootstepsWithExecutionError();
-      List<FootstepDataMessage> dataList = message.getDataList();
+      offsetFootstepsWithExecutionError = message.getOffsetFootstepsWithExecutionError();
+      List<FootstepDataMessage> dataList = message.getFootstepDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       if (dataList != null)
       {

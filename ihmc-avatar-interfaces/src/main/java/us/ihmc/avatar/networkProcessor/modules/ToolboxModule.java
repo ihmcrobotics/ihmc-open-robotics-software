@@ -228,7 +228,7 @@ public abstract class ToolboxModule
                return;
             }
 
-            switch (ToolboxState.fromByte(message.getRequestedState()))
+            switch (ToolboxState.fromByte(message.getRequestedToolboxState()))
             {
             case WAKE_UP:
                wakeUp(message.getSource());

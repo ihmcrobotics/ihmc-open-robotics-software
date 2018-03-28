@@ -9,9 +9,7 @@ import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 @RosMessagePacket(documentation = "This class is used to build trajectory messages in taskspace. It holds the only the translational information for one trajectory point (position & linear velocity). "
@@ -62,120 +60,29 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
       return time;
    }
 
-   public void addTimeOffset(double timeOffsetToAdd)
-   {
-      time += timeOffsetToAdd;
-   }
-
-   public void subtractTimeOffset(double timeOffsetToSubtract)
-   {
-      time -= timeOffsetToSubtract;
-   }
-
    public void setTime(double time)
    {
       this.time = time;
    }
 
-   public void getPosition(Point3DBasics positionToPack)
+   public Point3DReadOnly getPosition()
    {
-      positionToPack.set(position);
+      return position;
    }
 
    public void setPosition(Point3DReadOnly position)
    {
-      if (this.position == null)
-         this.position = new Point3D(position);
-      else
-         this.position.set(position);
+      this.position.set(position);
    }
 
-   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
+   public Vector3DReadOnly getLinearVelocity()
    {
-      linearVelocityToPack.set(linearVelocity);
+      return linearVelocity;
    }
 
    public void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
-      if (this.linearVelocity == null)
-         this.linearVelocity = new Vector3D(linearVelocity);
-      else
-         this.linearVelocity.set(linearVelocity);
-   }
-
-   public void setTimeToZero()
-   {
-      time = 0.0;
-   }
-
-   public void setPositionToZero()
-   {
-      position.set(0.0, 0.0, 0.0);
-   }
-
-   public void setLinearVelocityToZero()
-   {
-      linearVelocity.set(0.0, 0.0, 0.0);
-   }
-
-   public void setToZero()
-   {
-      setTimeToZero();
-      setPositionToZero();
-      setLinearVelocityToZero();
-   }
-
-   public void setTimeToNaN()
-   {
-      time = Double.NaN;
-   }
-
-   public void setPositionToNaN()
-   {
-      position.set(Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   public void setLinearVelocityToNaN()
-   {
-      linearVelocity.set(Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   public void setToNaN()
-   {
-      setTimeToNaN();
-      setPositionToNaN();
-      setLinearVelocityToNaN();
-   }
-
-   public double positionDistance(EuclideanTrajectoryPointMessage other)
-   {
-      return position.distance(other.position);
-   }
-
-   public double getX()
-   {
-      return position.getX();
-   }
-
-   public double getY()
-   {
-      return position.getY();
-   }
-
-   public double getZ()
-   {
-      return position.getZ();
-   }
-
-   public boolean containsNaN()
-   {
-      if (Double.isNaN(time))
-         return true;
-      if (Double.isNaN(position.getX()) || Double.isNaN(position.getY()) || Double.isNaN(position.getZ()))
-         return true;
-      if (Double.isNaN(linearVelocity.getX()) || Double.isNaN(linearVelocity.getY()) || Double.isNaN(linearVelocity.getZ()))
-         return true;
-      return false;
+      this.linearVelocity.set(linearVelocity);
    }
 
    @Override
@@ -192,24 +99,6 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
       if (position != null && !position.epsilonEquals(other.position, epsilon))
          return false;
       if (linearVelocity != null && !linearVelocity.epsilonEquals(other.linearVelocity, epsilon))
-         return false;
-
-      return true;
-   }
-
-   public boolean geometricallyEquals(EuclideanTrajectoryPointMessage other, double epsilon)
-   {
-      if (position == null ^ other.position == null)
-         return false;
-
-      if (linearVelocity == null ^ other.linearVelocity == null)
-         return false;
-
-      if (!MathTools.epsilonCompare(time, other.time, epsilon))
-         return false;
-      if (position != null && !position.geometricallyEquals(other.position, epsilon))
-         return false;
-      if (linearVelocity != null && !linearVelocity.geometricallyEquals(other.linearVelocity, epsilon))
          return false;
 
       return true;

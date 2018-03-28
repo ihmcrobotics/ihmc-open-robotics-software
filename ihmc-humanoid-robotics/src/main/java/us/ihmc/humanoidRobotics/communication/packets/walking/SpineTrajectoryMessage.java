@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
@@ -9,7 +8,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
 {
    @RosExportedField(documentation = "Trajectories for each joint.")
-   public JointspaceTrajectoryMessage jointspaceTrajectory;
+   public JointspaceTrajectoryMessage jointspaceTrajectory = new JointspaceTrajectoryMessage();
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -55,11 +54,6 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
    public JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspaceTrajectory;
-   }
-
-   public QueueableMessage getQueueingProperties()
-   {
-      return jointspaceTrajectory.getQueueingProperties();
    }
 
    @Override

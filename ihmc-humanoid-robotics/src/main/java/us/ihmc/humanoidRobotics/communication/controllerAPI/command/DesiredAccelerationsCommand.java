@@ -22,9 +22,9 @@ public final class DesiredAccelerationsCommand extends QueueableCommand<DesiredA
    public void set(DesiredAccelerationsMessage message)
    {
       desiredJointAccelerations.reset();
-      for (int i = 0; i < message.getNumberOfJoints(); i++)
+      for (int i = 0; i < message.desiredJointAccelerations.size(); i++)
       {
-         desiredJointAccelerations.add(message.getDesiredJointAcceleration(i));
+         desiredJointAccelerations.add(message.desiredJointAccelerations.get(i));
       }
       setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
    }

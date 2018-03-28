@@ -19,14 +19,14 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket>
       setPacketInformation(other);
    }
 
-   public Pose3D getValveTransformToWorld()
+   public Pose3D getDoorTransformToWorld()
    {
       return doorTransformToWorld;
    }
 
    public boolean epsilonEquals(DoorLocationPacket doorPacket, double epsilon)
    {
-      boolean transformEquals = doorTransformToWorld.epsilonEquals(doorPacket.getValveTransformToWorld(), epsilon);
+      boolean transformEquals = doorTransformToWorld.epsilonEquals(doorPacket.getDoorTransformToWorld(), epsilon);
 
       return transformEquals;
    }

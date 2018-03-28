@@ -20,12 +20,12 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
       setPacketInformation(other);
    }
 
-   public byte getRequestedOperatingMode()
+   public byte getRequestedStateEstimatorMode()
    {
       return requestedStateEstimatorMode;
    }
 
-   public void setRequestedOperatingMode(byte requestedOperatingMode)
+   public void setRequestedStateEstimatorMode(byte requestedOperatingMode)
    {
       this.requestedStateEstimatorMode = requestedOperatingMode;
    }

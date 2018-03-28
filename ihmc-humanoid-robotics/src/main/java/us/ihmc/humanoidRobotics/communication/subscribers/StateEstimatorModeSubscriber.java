@@ -30,7 +30,7 @@ public class StateEstimatorModeSubscriber implements PacketConsumer<StateEstimat
       if (packet == null)
          return;
 
-      StateEstimatorMode requestedOperatingMode = StateEstimatorMode.fromByte(packet.getRequestedOperatingMode());
+      StateEstimatorMode requestedOperatingMode = StateEstimatorMode.fromByte(packet.getRequestedStateEstimatorMode());
       if (requestedOperatingMode != null)
       {
          referenceToRequestedMode.set(requestedOperatingMode);

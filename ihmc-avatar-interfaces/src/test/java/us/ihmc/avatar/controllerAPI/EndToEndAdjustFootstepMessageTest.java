@@ -163,7 +163,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          framePosition.add(stepLength, side.negateIfRightSide(stepWidth), 0.0);
          Point3D position = new Point3D(framePosition);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         footstepDataListMessage.add(HumanoidMessageTools.createFootstepDataMessage(side, position, orientation));
+         footstepDataListMessage.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(side, position, orientation));
          side = side.getOppositeSide();
       }
 

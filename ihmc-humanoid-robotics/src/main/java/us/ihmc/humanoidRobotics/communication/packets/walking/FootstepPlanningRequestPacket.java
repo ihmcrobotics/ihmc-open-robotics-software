@@ -2,10 +2,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -32,7 +28,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public double timeout;
    public PlanarRegionsListMessage planarRegionsListMessage;
 
-   public int planId = NO_PLAN_ID;
+   public int plannerRequestId = NO_PLAN_ID;
 
    public FootstepPlanningRequestPacket()
    {
@@ -51,32 +47,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       timeout = other.timeout;
       planarRegionsListMessage = new PlanarRegionsListMessage();
       planarRegionsListMessage.set(other.planarRegionsListMessage);
-      planId = other.planId;
+      plannerRequestId = other.plannerRequestId;
 
       setPacketInformation(other);
-   }
-
-   public void set(FramePose3D initialStanceFootPose, byte initialStanceSide, FramePose3D goalPose, byte requestedPlannerType)
-   {
-      this.initialStanceRobotSide = initialStanceSide;
-
-      FramePoint3D initialFramePoint = new FramePoint3D(initialStanceFootPose.getPosition());
-      initialFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      stanceFootPositionInWorld = new Point3D32(initialFramePoint);
-
-      FrameQuaternion initialFrameOrientation = new FrameQuaternion(initialStanceFootPose.getOrientation());
-      initialFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      stanceFootOrientationInWorld = new Quaternion32(initialFrameOrientation);
-
-      FramePoint3D goalFramePoint = new FramePoint3D(goalPose.getPosition());
-      goalFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPositionInWorld = new Point3D32(goalFramePoint);
-
-      FrameQuaternion goalFrameOrientation = new FrameQuaternion(goalPose.getOrientation());
-      goalFrameOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      goalOrientationInWorld = new Quaternion32(goalFrameOrientation);
-
-      this.requestedFootstepPlannerType = requestedPlannerType;
    }
 
    public void setTimeout(double timeout)
@@ -96,7 +69,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
    public void setPlannerRequestId(int planId)
    {
-      this.planId = planId;
+      this.plannerRequestId = planId;
    }
 
    @Override
@@ -114,7 +87,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
          return false;
       if (this.requestedFootstepPlannerType != other.requestedFootstepPlannerType)
          return false;
-      if (planId != other.planId)
+      if (plannerRequestId != other.plannerRequestId)
          return false;
       if (planarRegionsListMessage != null && other.planarRegionsListMessage != null
             && planarRegionsListMessage.epsilonEquals(other.planarRegionsListMessage, epsilon))

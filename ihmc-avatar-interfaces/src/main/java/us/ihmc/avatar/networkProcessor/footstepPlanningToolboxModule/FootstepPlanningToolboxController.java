@@ -177,12 +177,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
       if (request == null)
          return false;
 
-      planId.set(request.planId);
+      planId.set(request.plannerRequestId);
       FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.requestedFootstepPlannerType);
 
       if (debug)
       {
-         PrintTools.info("Starting to plan. Plan id: " + request.planId + ". Timeout: " + request.timeout);
+         PrintTools.info("Starting to plan. Plan id: " + request.plannerRequestId + ". Timeout: " + request.timeout);
       }
 
       if (requestedPlannerType != null)
@@ -265,7 +265,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          result.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
       }
 
-      planarRegionsList.ifPresent(result::setPlanarRegionsList);
+      planarRegionsList.ifPresent(regions -> result.planarRegionsList.set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
       result.setPlanId(planId.getIntegerValue());
       result.footstepPlanningResult = status.toByte();
       return result;

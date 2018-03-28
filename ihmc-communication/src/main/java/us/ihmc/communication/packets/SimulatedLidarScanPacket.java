@@ -6,7 +6,7 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 {
    public TFloatArrayList ranges = new TFloatArrayList();
    public int sensorId;
-   public LidarScanParametersMessage params;
+   public LidarScanParametersMessage lidarScanParameters;
 
    public SimulatedLidarScanPacket()
    {
@@ -17,14 +17,14 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
    {
       MessageTools.copyData(other.ranges, ranges);
       sensorId = other.sensorId;
-      params = other.params;
+      lidarScanParameters = other.lidarScanParameters;
       setPacketInformation(other);
    }
 
    @Override
    public boolean epsilonEquals(SimulatedLidarScanPacket other, double epsilon)
    {
-      if (!params.equals(other.params))
+      if (!lidarScanParameters.equals(other.lidarScanParameters))
          return false;
       if (!MessageTools.epsilonEquals(ranges, other.ranges, epsilon))
          return false;
@@ -32,14 +32,9 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       return true;
    }
 
-   public long getScanStartTime()
-   {
-      return params.getTimestamp();
-   }
-
    public LidarScanParametersMessage getLidarScanParameters()
    {
-      return params;
+      return lidarScanParameters;
    }
 
    public TFloatArrayList getRanges()
@@ -50,10 +45,5 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
    public int getSensorId()
    {
       return sensorId;
-   }
-
-   public int size()
-   {
-      return ranges.size();
    }
 }

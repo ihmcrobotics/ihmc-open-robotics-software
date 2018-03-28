@@ -1,9 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import java.util.List;
 import java.util.Random;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
@@ -52,7 +54,16 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    @Override
    public void set(OneDoFJointTrajectoryMessage message)
    {
-      message.getTrajectoryPoints(this);
+      this.clear();
+      
+      List<TrajectoryPoint1DMessage> trajectoryPointMessages = message.getTrajectoryPoints();
+      int numberOfPoints = trajectoryPointMessages.size();
+      
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPointMessages.get(i);
+         this.addTrajectoryPoint(trajectoryPoint1DMessage.time, trajectoryPoint1DMessage.position, trajectoryPoint1DMessage.velocity);
+      }
       commandId = message.getUniqueId();
       setWeight(message.getWeight());
    }
