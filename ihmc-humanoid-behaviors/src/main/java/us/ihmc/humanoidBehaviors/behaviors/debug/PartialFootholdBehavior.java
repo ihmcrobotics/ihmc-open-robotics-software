@@ -56,7 +56,7 @@ public class PartialFootholdBehavior extends AbstractBehavior
          }
 
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(side, location, new Quaternion(0.0, 0.0, 0.0, 1.0), contactPoints);
-         message.add(footstepData);
+         message.footstepDataList.add().set(footstepData);
          side = side.getOppositeSide();
       }
 

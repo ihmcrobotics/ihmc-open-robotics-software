@@ -35,11 +35,6 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       setPacketInformation(other);
    }
 
-   public byte getRobotSide()
-   {
-      return robotSide;
-   }
-
    @Override
    public String toString()
    {
@@ -85,7 +80,7 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       return controlType;
    }
 
-   public byte getSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }

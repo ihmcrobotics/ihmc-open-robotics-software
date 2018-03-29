@@ -6,8 +6,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class WalkOverTerrainGoalPacket extends Packet<WalkOverTerrainGoalPacket>
 {
-   public Point3D position;
-   public Quaternion orientation;
+   public Point3D position = new Point3D();
+   public Quaternion orientation = new Quaternion();
 
    public WalkOverTerrainGoalPacket()
    {
@@ -16,8 +16,8 @@ public class WalkOverTerrainGoalPacket extends Packet<WalkOverTerrainGoalPacket>
    @Override
    public void set(WalkOverTerrainGoalPacket other)
    {
-      position = new Point3D(other.position);
-      orientation = new Quaternion(other.orientation);
+      position.set(other.position);
+      orientation.set(other.orientation);
       setPacketInformation(other);
    }
 

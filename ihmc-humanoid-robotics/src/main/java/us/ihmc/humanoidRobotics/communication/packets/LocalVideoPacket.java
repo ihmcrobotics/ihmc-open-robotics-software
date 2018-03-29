@@ -52,11 +52,4 @@ public class LocalVideoPacket extends Packet<LocalVideoPacket>
       ret &= intrinsicParameters.equals(other.intrinsicParameters);
       return ret;
    }
-
-   @Override
-   public boolean isClonable()
-   {
-      return false;
-   }
-
 }

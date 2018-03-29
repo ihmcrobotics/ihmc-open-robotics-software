@@ -39,12 +39,4 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
    {
       return angularMomentumTrajectory.epsilonEquals(other.angularMomentumTrajectory, epsilon);
    }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (angularMomentumTrajectory != null)
-         angularMomentumTrajectory.setUniqueId(uniqueId);
-   }
 }

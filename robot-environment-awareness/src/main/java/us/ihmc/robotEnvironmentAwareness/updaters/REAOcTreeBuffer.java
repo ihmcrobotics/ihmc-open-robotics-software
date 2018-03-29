@@ -141,7 +141,7 @@ public class REAOcTreeBuffer
       ScanCollection scanCollection = new ScanCollection();
       newFullScanReference.set(scanCollection);
       scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
-      scanCollection.addScan(lidarScanMessage.scan, lidarScanMessage.lidarPosition);
+      scanCollection.addScan(lidarScanMessage.scan.toArray(), lidarScanMessage.lidarPosition);
    }
 
    private void handlePacket(LidarScanMessage packet)

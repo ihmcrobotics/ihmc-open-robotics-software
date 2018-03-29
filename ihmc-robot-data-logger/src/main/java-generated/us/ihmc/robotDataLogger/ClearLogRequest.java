@@ -1,77 +1,87 @@
 package us.ihmc.robotDataLogger;
-/**
-* 
-* Definition of the class "ClearLogRequest" defined in ClearLogRequest.idl. 
-*
-* This file was automatically generated from ClearLogRequest.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit ClearLogRequest.idl instead.
-*
-*/
-public class ClearLogRequest
+
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
+public class ClearLogRequest extends Packet<ClearLogRequest> implements Settable<ClearLogRequest>, EpsilonComparable<ClearLogRequest>
 {
-    public ClearLogRequest()
-    {
-        	guid_ = new java.lang.StringBuilder(255); 
-        
-        
-    }
+   public java.lang.StringBuilder guid_;
 
-    public void set(ClearLogRequest other)
-    {
-        	guid_.setLength(0);
-        	guid_.append(other.guid_);
-    }
+   public ClearLogRequest()
+   {
+      guid_ = new java.lang.StringBuilder(255);
+   }
 
-        public void setGuid(String guid)
-        {
-        	guid_.setLength(0);
-        	guid_.append(guid);
-        }
-        
-        public java.lang.String getGuidAsString()
-        {
-        	return getGuid().toString();
-        }
+   public ClearLogRequest(ClearLogRequest other)
+   {
+      set(other);
+   }
 
-    public java.lang.StringBuilder getGuid()
-    {
-        return guid_;
-    }
+   public void set(ClearLogRequest other)
+   {
+      guid_.setLength(0);
+      guid_.append(other.guid_);
+   }
 
-        
+   public java.lang.String getGuidAsString()
+   {
+      return getGuid().toString();
+   }
 
+   public java.lang.StringBuilder getGuid()
+   {
+      return guid_;
+   }
 
+   public void setGuid(java.lang.String guid)
+   {
+      guid_.setLength(0);
+      guid_.append(guid);
+   }
 
+   @Override
+   public boolean epsilonEquals(ClearLogRequest other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
 
-    @Override
-    public boolean equals(java.lang.Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof ClearLogRequest)) return false;
-        ClearLogRequest otherMyClass = (ClearLogRequest)other;
-        boolean returnedValue = true;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.guid_, other.guid_, epsilon))
+         return false;
 
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.guid_, otherMyClass.guid_);
-                
+      return true;
+   }
 
-        return returnedValue;
-    }
-    
-     @Override
-    public java.lang.String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("ClearLogRequest {");
-        builder.append("guid=");
-        builder.append(this.guid_);
+   @Override
+   public boolean equals(Object other)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+      if (!(other instanceof ClearLogRequest))
+         return false;
 
-                
-        builder.append("}");
-		return builder.toString();
-    }
+      ClearLogRequest otherMyClass = (ClearLogRequest) other;
 
-    private java.lang.StringBuilder guid_; 
+      if (!us.ihmc.idl.IDLTools.equals(this.guid_, otherMyClass.guid_))
+         return false;
 
+      return true;
+   }
+
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("ClearLogRequest {");
+      builder.append("guid=");
+      builder.append(this.guid_);
+
+      builder.append("}");
+      return builder.toString();
+   }
 }

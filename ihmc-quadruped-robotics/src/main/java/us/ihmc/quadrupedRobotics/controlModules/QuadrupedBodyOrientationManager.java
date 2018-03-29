@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,7 +18,6 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedBodyOrientationManager
@@ -43,6 +41,7 @@ public class QuadrupedBodyOrientationManager
 
    private final MomentumRateCommand angularMomentumCommand = new MomentumRateCommand();
    private final YoFrameVector bodyAngularWeight = new YoFrameVector("bodyAngularWeight", worldFrame, registry);
+   private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
 
    public QuadrupedBodyOrientationManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
                                           YoVariableRegistry parentRegistry)
@@ -51,8 +50,8 @@ public class QuadrupedBodyOrientationManager
       this.postureProvider = postureProvider;
 
       DefaultPID3DGains bodyOrientationDefaultGains = new DefaultPID3DGains();
-      bodyOrientationDefaultGains.setProportionalGains(5000.0, 5000.0, 5000.0);
-      bodyOrientationDefaultGains.setDerivativeGains(750.0, 750.0, 750.0);
+      bodyOrientationDefaultGains.setProportionalGains(1000.0, 1000.0, 1000.0);
+      bodyOrientationDefaultGains.setDerivativeGains(250.0, 250.0, 250.0);
       bodyOrientationDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
       bodyOrientationGainsParameter = new ParameterizedPID3DGains("_bodyOrientation", GainCoupling.NONE, false, bodyOrientationDefaultGains, registry);
 
@@ -63,7 +62,8 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationReference = new FrameQuaternion();
       bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
 
-      bodyAngularWeight.set(5.0, 5.0, 1.0);
+      bodyAngularWeight.set(2.5, 2.5, 1.0);
+      angularMomentumCommand.setAngularWeights(bodyAngularWeight);
       angularMomentumCommand.setSelectionMatrixForAngularControl();
 
       parentRegistry.addChild(registry);
@@ -75,7 +75,7 @@ public class QuadrupedBodyOrientationManager
       controller.reset();
    }
 
-   public void compute(FrameVector3D angularMomentumRateToPack, FrameQuaternionReadOnly bodyOrientationDesired)
+   public void compute(FrameQuaternionReadOnly bodyOrientationDesired)
    {
       gains.set(bodyOrientationGainsParameter);
 
@@ -94,11 +94,16 @@ public class QuadrupedBodyOrientationManager
       setpoints.getBodyAngularVelocity().set(postureProvider.getBodyAngularRateInput());
       setpoints.getComTorqueFeedforward().setToZero();
 
-      controller.compute(angularMomentumRateToPack, setpoints, controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity());
+      controller.compute(desiredAngularMomentumRate, setpoints, controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity());
 
-      angularMomentumRateToPack.changeFrame(worldFrame);
-      angularMomentumCommand.setAngularMomentumRate(angularMomentumRateToPack);
+      desiredAngularMomentumRate.changeFrame(worldFrame);
+      angularMomentumCommand.setAngularMomentumRate(desiredAngularMomentumRate);
       angularMomentumCommand.setAngularWeights(bodyAngularWeight);
+   }
+
+   public void getDesiredAngularMomentumRate(FrameVector3D angularMomentumRateToPack)
+   {
+      angularMomentumRateToPack.setIncludingFrame(desiredAngularMomentumRate);
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()

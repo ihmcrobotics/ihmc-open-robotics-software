@@ -1,5 +1,6 @@
 package us.ihmc.robotModels;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +59,25 @@ public interface FullRobotModel
     */
    OneDoFJoint getNeckJoint(NeckJointName neckJointName);
 
+   
+   /**
+    * 
+    * @return the list of lidar sensor names in this robot model
+    */
+   default List<String> getLidarSensorNames()
+   {
+      return Collections.emptyList();
+   }
+   
+   /**
+    * 
+    * @return the list of camera sensor names in this robot model
+    */
+   default List<String> getCameraSensorNames()
+   {
+      return Collections.emptyList();
+   }
+   
    /**
     * Returns all the lidar joints existing on this robot.
     * @param lidarName TODO

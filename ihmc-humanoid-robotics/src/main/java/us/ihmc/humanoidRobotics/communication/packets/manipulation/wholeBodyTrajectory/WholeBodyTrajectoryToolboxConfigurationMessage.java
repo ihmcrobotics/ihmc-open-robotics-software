@@ -1,16 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 
 public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<WholeBodyTrajectoryToolboxConfigurationMessage>
 {
    public int numberOfInitialGuesses = -1;
    public int maximumExpansionSize = -1;
-   public KinematicsToolboxOutputStatus initialConfiguration = null;
+   public KinematicsToolboxOutputStatus initialConfiguration = new KinematicsToolboxOutputStatus();
 
    public WholeBodyTrajectoryToolboxConfigurationMessage()
    {
@@ -41,11 +38,6 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
    public void setInitialConfiguration(KinematicsToolboxOutputStatus initialConfiguration)
    {
       this.initialConfiguration = initialConfiguration;
-   }
-
-   public void setInitialConfigration(FullHumanoidRobotModel fullRobotModel)
-   {
-      initialConfiguration = MessageTools.createKinematicsToolboxOutputStatus(fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), false);
    }
 
    public int getNumberOfInitialGuesses()

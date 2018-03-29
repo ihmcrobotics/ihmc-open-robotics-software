@@ -102,10 +102,10 @@ public class FileInputManager extends VBox implements ParameterGuiInterface
       fileChooser.setTitle("Select Parameter File");
 
       // If a file is open initialize the folder path to the directory of the active file:
-      File activeFile = savingNode.getActiveFile();
-      if (activeFile != null)
+      File initialPath = savingNode.getDefaultFilePath();
+      if (initialPath != null)
       {
-         fileChooser.setInitialDirectory(activeFile.getParentFile());
+         fileChooser.setInitialDirectory(initialPath);
       }
       File file = fileChooser.showOpenDialog(open.getScene().getWindow());
 

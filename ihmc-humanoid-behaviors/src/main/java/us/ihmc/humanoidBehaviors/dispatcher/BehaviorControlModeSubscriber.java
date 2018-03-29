@@ -22,7 +22,7 @@ public class BehaviorControlModeSubscriber implements PacketConsumer<BehaviorCon
 
    public BehaviorControlModeEnum getRequestedBehaviorControl()
    {
-      return BehaviorControlModeEnum.fromByte(packetReference.getAndSet(null).getRequestedControl());
+      return BehaviorControlModeEnum.fromByte(packetReference.getAndSet(null).getBehaviorControlModeEnumRequest());
    }
 
    @Override

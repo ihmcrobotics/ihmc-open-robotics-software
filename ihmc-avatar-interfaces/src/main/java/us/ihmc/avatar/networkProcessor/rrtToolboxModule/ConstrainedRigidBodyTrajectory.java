@@ -19,6 +19,7 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Wayp
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNode;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class ConstrainedRigidBodyTrajectory
@@ -190,10 +191,14 @@ public class ConstrainedRigidBodyTrajectory
       Pose3D desiredEndEffectorPose = appendPoseToTrajectory(timeInTrajectory, poseToAppend);
 
       KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody);
-      message.setDesiredPose(desiredEndEffectorPose);
-      message.setControlFramePose(controlFramePose);
-      message.setSelectionMatrix(getSelectionMatrix());
-      message.setWeight(weight); // Sylvain's value :: 0.5
+      message.setDesiredPositionInWorld(desiredEndEffectorPose.getPosition());
+      message.setDesiredOrientationInWorld(desiredEndEffectorPose.getOrientation());
+      message.setControlFramePositionInEndEffector(controlFramePose.getPosition());
+      message.setControlFrameOrientationInEndEffector(controlFramePose.getOrientation());
+      message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(getSelectionMatrix().getAngularPart()));
+      message.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(getSelectionMatrix().getLinearPart()));
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(weight));
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(weight)); // Sylvain's value :: 0.5
 
       return message;
    }

@@ -29,6 +29,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       return current_alignment - initial_alignment;
    }
@@ -45,6 +46,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getAngularVelocity(), current_alignment);
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLinearAcceleration(), current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       return current_alignment - initial_alignment;
    }
@@ -57,6 +59,8 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getAngularVelocity(), cdr);
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearAcceleration(), cdr);
+
+      cdr.write_type_6(data.getTime());
    }
 
    public static void read(controller_msgs.msg.dds.IMUPacket data, us.ihmc.idl.CDR cdr)
@@ -67,6 +71,8 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getAngularVelocity(), cdr);
 
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearAcceleration(), cdr);
+
+      data.setTime(cdr.read_type_6());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.IMUPacket src, controller_msgs.msg.dds.IMUPacket dest)
@@ -98,6 +104,8 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
       ser.write_type_a("angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocity());
 
       ser.write_type_a("linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearAcceleration());
+
+      ser.write_type_6("time", data.getTime());
    }
 
    @Override
@@ -108,6 +116,8 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
       ser.read_type_a("angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocity());
 
       ser.read_type_a("linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearAcceleration());
+
+      data.setTime(ser.read_type_6("time"));
    }
 
    @Override

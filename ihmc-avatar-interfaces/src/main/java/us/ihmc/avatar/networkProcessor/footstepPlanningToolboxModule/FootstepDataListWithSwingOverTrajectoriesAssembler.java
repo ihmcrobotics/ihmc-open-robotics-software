@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -84,7 +85,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
-         footstepDataMessage.setCustomPositionWaypoints(waypoints);
+         MessageTools.copyData(waypoints, footstepDataMessage.customPositionWaypoints);
 
          if (simpleFootstep.hasFoothold())
          {
@@ -101,23 +102,25 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                fourPartialFootholdCorners.add(new Point2D(partialFootholdPolygon.getVertex(j)));
             }
 
-            footstepDataMessage.setPredictedContactPoints(fourPartialFootholdCorners);
+            MessageTools.copyData(fourPartialFootholdCorners, footstepDataMessage.predictedContactPoints);
          }
 
          double maxSpeed = maxSpeedDimensionless / swingTime;
          if (maxSpeed > maxSwingSpeed)
          {
             double adjustedSwingTime = maxSpeedDimensionless / maxSwingSpeed;
-            footstepDataMessage.setTimings(adjustedSwingTime, transferTime);
+            footstepDataMessage.setSwingDuration(adjustedSwingTime);
+            footstepDataMessage.setTransferDuration(transferTime);
          }
 
-         footstepDataListMessage.add(footstepDataMessage);
+         footstepDataListMessage.footstepDataList.add().set(footstepDataMessage);
 
          swingStartPose.setIncludingFrame(stanceFootPose);
          stanceFootPose.setIncludingFrame(swingEndPose);
       }
 
-      footstepDataListMessage.setExecutionMode(executionMode);
+      footstepDataListMessage.queueingProperties.setExecutionMode(executionMode.toByte());
+      footstepDataListMessage.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
       return footstepDataListMessage;
    }
 
@@ -146,7 +149,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
-         footstepDataMessage.setCustomPositionWaypoints(waypoints);
+         MessageTools.copyData(waypoints, footstepDataMessage.customPositionWaypoints);
 
          if (footstep.getFootstepType() == FootstepType.PARTIAL_FOOTSTEP)
          {
@@ -165,16 +168,17 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                fourPartialFootholdCorners.add(new Point2D(partialFootholdPolygon.getVertex(j)));
             }
 
-            footstepDataMessage.setPredictedContactPoints(fourPartialFootholdCorners);
+            MessageTools.copyData(fourPartialFootholdCorners, footstepDataMessage.predictedContactPoints);
          }
 
-         footstepDataListMessage.add(footstepDataMessage);
+         footstepDataListMessage.footstepDataList.add().set(footstepDataMessage);
 
          swingStartPose.setIncludingFrame(stanceFootPose);
          stanceFootPose.setIncludingFrame(swingEndPose);
       }
 
-      footstepDataListMessage.setExecutionMode(executionMode);
+      footstepDataListMessage.queueingProperties.setExecutionMode(executionMode.toByte());
+      footstepDataListMessage.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
       return footstepDataListMessage;
    }
 

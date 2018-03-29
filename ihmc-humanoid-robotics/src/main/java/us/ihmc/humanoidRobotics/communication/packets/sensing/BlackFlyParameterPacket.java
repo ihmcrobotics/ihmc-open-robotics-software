@@ -52,7 +52,7 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
    public boolean epsilonEquals(BlackFlyParameterPacket other, double epsilon)
    {
       if (fromUI)
-         return other.isFromUI();
+         return other.getFromUI();
       double roundedGain = Math.round(getGain() * 100) / 100.0;
       double roundedExposure = Math.round(getExposure() * 100) / 100.0;
       double roundedFrameRate = Math.round(getFrameRate() * 100) / 100.0;
@@ -66,7 +66,7 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
          System.out.println("flash1: " + roundedShutter + " flash 2 " + other.getShutter());
       }
 
-      return (other.isFromUI() == isFromUI()) && (other.getGain() == roundedGain) && (other.getExposure() == roundedExposure)
+      return (other.getFromUI() == getFromUI()) && (other.getGain() == roundedGain) && (other.getExposure() == roundedExposure)
             && (other.getFrameRate() == roundedFrameRate) && (other.getShutter() == roundedShutter);
    }
 
@@ -102,27 +102,27 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       return shutter;
    }
 
-   public byte getSide()
+   public byte getRobotSide()
    {
       return robotSide;
    }
 
-   public boolean isAutoExposure()
+   public boolean getAutoExposure()
    {
       return autoExposure;
    }
 
-   public boolean isAutoGain()
+   public boolean getAutoGain()
    {
       return autoGain;
    }
 
-   public boolean isAutoShutter()
+   public boolean getAutoShutter()
    {
       return autoShutter;
    }
 
-   public boolean isFromUI()
+   public boolean getFromUI()
    {
       return fromUI;
    }

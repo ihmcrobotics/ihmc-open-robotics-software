@@ -48,14 +48,7 @@ public class QuadrupedPreplannedStepInputProvider
       
       if (globalDataProducer != null)
       {
-         globalDataProducer.attachListener(QuadrupedTimedStepPacket.class, new PacketConsumer<QuadrupedTimedStepPacket>()
-         {
-            @Override
-            public void receivedPacket(QuadrupedTimedStepPacket packet)
-            {
-               inputTimedStepPacket.set(packet);
-            }
-         });
+         globalDataProducer.attachListener(QuadrupedTimedStepPacket.class, inputTimedStepPacket::set);
       }
    }
    

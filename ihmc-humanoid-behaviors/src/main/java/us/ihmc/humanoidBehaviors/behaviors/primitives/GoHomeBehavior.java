@@ -56,7 +56,7 @@ public class GoHomeBehavior extends AbstractBehavior
    {
       outgoingMessage = goHomeMessage;
 
-      bodyPart = HumanoidBodyPart.fromByte(goHomeMessage.getBodyPart());
+      bodyPart = HumanoidBodyPart.fromByte(goHomeMessage.getHumanoidBodyPart());
       startTime.set(yoTime.getDoubleValue());
       trajectoryTime.set(goHomeMessage.getTrajectoryTime());
 

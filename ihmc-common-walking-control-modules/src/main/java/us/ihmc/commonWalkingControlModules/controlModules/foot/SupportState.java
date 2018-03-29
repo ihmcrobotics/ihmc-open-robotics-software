@@ -296,8 +296,9 @@ public class SupportState extends AbstractFootControlState
       desiredCopPosition.setIncludingFrame(desiredSoleFrame, desiredCopPosition);
       desiredCopPosition.changeFrame(worldFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-      spatialFeedbackControlCommand.set(desiredCopPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.set(desiredCopPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
       spatialFeedbackControlCommand.setGains(gains);
 

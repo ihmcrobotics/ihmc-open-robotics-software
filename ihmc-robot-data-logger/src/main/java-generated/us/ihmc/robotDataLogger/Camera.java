@@ -1,152 +1,189 @@
 package us.ihmc.robotDataLogger;
-/**
-* 
-* Definition of the class "Camera" defined in LogProperties.idl. 
-*
-* This file was automatically generated from LogProperties.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit LogProperties.idl instead.
-*
-*/
-public class Camera
+
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
+public class Camera extends Packet<Camera> implements Settable<Camera>, EpsilonComparable<Camera>
 {
-    public Camera()
-    {
-        	name_ = new java.lang.StringBuilder(255); 
-        	videoFile_ = new java.lang.StringBuilder(255); 
-        	timestampFile_ = new java.lang.StringBuilder(255); 
-        
-        
-    }
+   // Camera definition
+   public java.lang.StringBuilder name_;
+   // Human readable camera name
+   public boolean interlaced_;
+   // Is the input interlaced
+   public java.lang.StringBuilder videoFile_;
+   // Video file
+   public java.lang.StringBuilder timestampFile_;
 
-    public void set(Camera other)
-    {
-        	name_.setLength(0);
-        	name_.append(other.name_);
-        	interlaced_ = other.interlaced_;
-        	videoFile_.setLength(0);
-        	videoFile_.append(other.videoFile_);
-        	timestampFile_.setLength(0);
-        	timestampFile_.append(other.timestampFile_);
+   public Camera()
+   {
+      name_ = new java.lang.StringBuilder(255);
 
-    }
+      videoFile_ = new java.lang.StringBuilder(255);
 
-        public void setName(String name)
-        {
-        	name_.setLength(0);
-        	name_.append(name);
-        }
-        
-        public java.lang.String getNameAsString()
-        {
-        	return getName().toString();
-        }
+      timestampFile_ = new java.lang.StringBuilder(255);
+   }
 
-    public java.lang.StringBuilder getName()
-    {
-        return name_;
-    }
+   public Camera(Camera other)
+   {
+      set(other);
+   }
 
-        
-    public void setInterlaced(boolean interlaced)
-    {
-        interlaced_ = interlaced;
-    }
+   public void set(Camera other)
+   {
+      name_.setLength(0);
+      name_.append(other.name_);
 
-    public boolean getInterlaced()
-    {
-        return interlaced_;
-    }
+      interlaced_ = other.interlaced_;
 
-        
-        public void setVideoFile(String videoFile)
-        {
-        	videoFile_.setLength(0);
-        	videoFile_.append(videoFile);
-        }
-        
-        public java.lang.String getVideoFileAsString()
-        {
-        	return getVideoFile().toString();
-        }
+      videoFile_.setLength(0);
+      videoFile_.append(other.videoFile_);
 
-    public java.lang.StringBuilder getVideoFile()
-    {
-        return videoFile_;
-    }
+      timestampFile_.setLength(0);
+      timestampFile_.append(other.timestampFile_);
+   }
 
-        
-        public void setTimestampFile(String timestampFile)
-        {
-        	timestampFile_.setLength(0);
-        	timestampFile_.append(timestampFile);
-        }
-        
-        public java.lang.String getTimestampFileAsString()
-        {
-        	return getTimestampFile().toString();
-        }
+   // Camera definition
+   public java.lang.String getNameAsString()
+   {
+      return getName().toString();
+   }
 
-    public java.lang.StringBuilder getTimestampFile()
-    {
-        return timestampFile_;
-    }
+   // Camera definition
+   public java.lang.StringBuilder getName()
+   {
+      return name_;
+   }
 
-        
+   // Camera definition
+   public void setName(java.lang.String name)
+   {
+      name_.setLength(0);
+      name_.append(name);
+   }
 
+   // Human readable camera name
+   public boolean getInterlaced()
+   {
+      return interlaced_;
+   }
 
+   // Human readable camera name
+   public void setInterlaced(boolean interlaced)
+   {
+      interlaced_ = interlaced;
+   }
 
+   // Is the input interlaced
+   public java.lang.String getVideoFileAsString()
+   {
+      return getVideoFile().toString();
+   }
 
-    @Override
-    public boolean equals(java.lang.Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof Camera)) return false;
-        Camera otherMyClass = (Camera)other;
-        boolean returnedValue = true;
+   // Is the input interlaced
+   public java.lang.StringBuilder getVideoFile()
+   {
+      return videoFile_;
+   }
 
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
-                
-        returnedValue &= this.interlaced_ == otherMyClass.interlaced_;
+   // Is the input interlaced
+   public void setVideoFile(java.lang.String videoFile)
+   {
+      videoFile_.setLength(0);
+      videoFile_.append(videoFile);
+   }
 
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.videoFile_, otherMyClass.videoFile_);
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.timestampFile_, otherMyClass.timestampFile_);
-                
+   // Video file
+   public java.lang.String getTimestampFileAsString()
+   {
+      return getTimestampFile().toString();
+   }
 
-        return returnedValue;
-    }
-    
-     @Override
-    public java.lang.String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("Camera {");
-        builder.append("name=");
-        builder.append(this.name_);
+   // Video file
+   public java.lang.StringBuilder getTimestampFile()
+   {
+      return timestampFile_;
+   }
 
-                builder.append(", ");
-        builder.append("interlaced=");
-        builder.append(this.interlaced_);
+   // Video file
+   public void setTimestampFile(java.lang.String timestampFile)
+   {
+      timestampFile_.setLength(0);
+      timestampFile_.append(timestampFile);
+   }
 
-                builder.append(", ");
-        builder.append("videoFile=");
-        builder.append(this.videoFile_);
+   @Override
+   public boolean epsilonEquals(Camera other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
 
-                builder.append(", ");
-        builder.append("timestampFile=");
-        builder.append(this.timestampFile_);
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon))
+         return false;
 
-                
-        builder.append("}");
-		return builder.toString();
-    }
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.interlaced_, other.interlaced_, epsilon))
+         return false;
 
-    private java.lang.StringBuilder name_; 
-    private boolean interlaced_; 
-    private java.lang.StringBuilder videoFile_; 
-    private java.lang.StringBuilder timestampFile_; 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.videoFile_, other.videoFile_, epsilon))
+         return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.timestampFile_, other.timestampFile_, epsilon))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object other)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+      if (!(other instanceof Camera))
+         return false;
+
+      Camera otherMyClass = (Camera) other;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_))
+         return false;
+
+      if (this.interlaced_ != otherMyClass.interlaced_)
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.videoFile_, otherMyClass.videoFile_))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.equals(this.timestampFile_, otherMyClass.timestampFile_))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("Camera {");
+      builder.append("name=");
+      builder.append(this.name_);
+
+      builder.append(", ");
+      builder.append("interlaced=");
+      builder.append(this.interlaced_);
+
+      builder.append(", ");
+      builder.append("videoFile=");
+      builder.append(this.videoFile_);
+
+      builder.append(", ");
+      builder.append("timestampFile=");
+      builder.append(this.timestampFile_);
+
+      builder.append("}");
+      return builder.toString();
+   }
 }

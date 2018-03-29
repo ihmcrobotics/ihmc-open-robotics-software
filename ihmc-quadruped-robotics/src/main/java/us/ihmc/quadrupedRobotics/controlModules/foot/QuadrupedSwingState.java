@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -11,17 +12,17 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.trajectory.ThreeDoFSwingFootTrajectory;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
+public class QuadrupedSwingState extends QuadrupedFootState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean createSwingTrajectoryGraphics = false;
@@ -31,13 +32,22 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final GlitchFilteredYoBoolean touchdownTrigger;
 
+   private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
+
    private final QuadrupedFootControlModuleParameters parameters;
 
    private final YoBoolean stepCommandIsValid;
    private final YoDouble timestamp;
    private final YoQuadrupedTimedStep currentStepCommand;
 
+   private final VirtualForceCommand virtualForceCommand = new VirtualForceCommand();
+   private final PointFeedbackControlCommand feedbackControlCommand = new PointFeedbackControlCommand();
+
    private final ReferenceFrame soleFrame;
+
+   private final QuadrupedForceControllerToolbox controllerToolbox;
+   private final RobotQuadrant robotQuadrant;
 
    // graphics
    private static final int pointsPerSecondOfSwingTime = 70;
@@ -45,10 +55,13 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    private final FramePoint3D swingPositionForVisualization = new FramePoint3D();
    private final BagOfBalls stepSequenceVisualization;
 
-   public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, QuadrupedSolePositionController solePositionController,
-                              YoBoolean stepCommandIsValid, YoQuadrupedTimedStep currentStepCommand, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
+   private boolean triggerSupport;
+
+   public QuadrupedSwingState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, YoBoolean stepCommandIsValid,
+                              YoQuadrupedTimedStep currentStepCommand, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
-      super(robotQuadrant, controllerToolbox, solePositionController);
+      this.robotQuadrant = robotQuadrant;
+      this.controllerToolbox = controllerToolbox;
 
       this.stepCommandIsValid = stepCommandIsValid;
       this.timestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
@@ -62,8 +75,15 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
       this.touchdownTrigger = new GlitchFilteredYoBoolean(this.robotQuadrant.getCamelCaseName() + "TouchdownTriggered", registry,
                                                           QuadrupedFootControlModuleParameters.getDefaultTouchdownTriggerWindow());
 
+      RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotQuadrant);
+      FramePoint3D currentPosition = new FramePoint3D(soleFrame);
+      currentPosition.changeFrame(foot.getBodyFixedFrame());
+
+      feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getBody(), foot);
+      feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
+
       // graphics
-      if(createSwingTrajectoryGraphics)
+      if (createSwingTrajectoryGraphics)
       {
          String prefix = robotQuadrant.getPascalCaseName() + "SwingTrajectory";
          stepSequenceVisualization = new BagOfBalls(pointsPerSecondOfSwingTime, 0.005, prefix, visualizationAppearance, registry, graphicsListRegistry);
@@ -77,7 +97,7 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    @Override
    public void onEntry()
    {
-      super.onEntry();
+      controllerToolbox.getFootContactState(robotQuadrant).clear();
 
       // initialize swing trajectory
       double groundClearance = currentStepCommand.getGroundClearance();
@@ -92,15 +112,11 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
 
       swingTrajectory.initializeTrajectory(initialPosition, goalPosition, groundClearance, timeInterval);
 
-      if(createSwingTrajectoryGraphics)
+      if (createSwingTrajectoryGraphics)
          updateGraphics(timeInterval.getStartTime(), timeInterval.getEndTime());
 
-      // initialize contact state and feedback gains
-      solePositionController.reset();
-      solePositionController.getGains().set(parameters.getSolePositionGains());
-      solePositionControllerSetpoints.initialize(soleFrame);
-
       touchdownTrigger.set(false);
+      triggerSupport = false;
    }
 
    private void updateGraphics(double startTime, double endTime)
@@ -119,7 +135,7 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
    }
 
    @Override
-   public QuadrupedFootControlModule.FootEvent process()
+   public void doAction(double timeInState)
    {
       double currentTime = timestamp.getDoubleValue();
       double touchDownTime = currentStepCommand.getTimeInterval().getEndTime();
@@ -135,7 +151,8 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
          swingTrajectory.adjustTrajectory(goalPosition, currentTime);
       }
       swingTrajectory.computeTrajectory(currentTime);
-      swingTrajectory.getPosition(solePositionControllerSetpoints.getSolePosition());
+      swingTrajectory.getPosition(desiredPosition);
+      swingTrajectory.getVelocity(desiredVelocity);
 
       // Detect early touch-down. // FIXME do something else with this (trigger a loaded transition?)
       FrameVector3D soleForceEstimate = controllerToolbox.getTaskSpaceEstimates().getSoleVirtualForce(robotQuadrant);
@@ -154,20 +171,18 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
          double pressureLimit = parameters.getTouchdownPressureLimitParameter();
          soleForceCommand.changeFrame(worldFrame);
          soleForceCommand.set(0, 0, -pressureLimit);
+         soleForceCommand.changeFrame(soleFrame);
+         virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
+
       }
       else
       {
-         solePositionController.compute(soleForceCommand, solePositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates().getSoleLinearVelocity(robotQuadrant));
-         soleForceCommand.changeFrame(worldFrame);
+         feedbackControlCommand.set(desiredPosition, desiredVelocity);
+         feedbackControlCommand.setGains(parameters.getSolePositionGains());
       }
 
-      if(createSwingTrajectoryGraphics)
+      if (createSwingTrajectoryGraphics)
          updateGraphics(currentTime, currentStepCommand.getTimeInterval().getEndTime());
-
-      soleForceCommand.changeFrame(soleFrame);
-      virtualForceCommand.setLinearForce(soleFrame, soleForceCommand);
-
-      super.doControl();
 
       // Trigger support phase.
       if (currentTime >= touchDownTime)
@@ -176,21 +191,41 @@ public class QuadrupedSwingState extends QuadrupedUnconstrainedFootState
          {
             stepTransitionCallback.onTouchDown(robotQuadrant);
          }
-         return QuadrupedFootControlModule.FootEvent.TIMEOUT;
+         triggerSupport = true;
       }
-      else
-      {
-         return null;
-      }
+   }
+
+   @Override
+   public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
+   {
+      return triggerSupport ? QuadrupedFootControlModule.FootEvent.TIMEOUT : null;
    }
 
    @Override
    public void onExit()
    {
-      soleForceCommand.setToZero();
       stepCommandIsValid.set(false);
 
-      if(createSwingTrajectoryGraphics)
+      if (createSwingTrajectoryGraphics)
          stepSequenceVisualization.hideAll();
+      triggerSupport = false;
+   }
+
+   @Override
+   public VirtualModelControlCommand<?> getVirtualModelControlCommand()
+   {
+      if (touchdownTrigger.getBooleanValue())
+         return virtualForceCommand;
+      else
+         return null;
+   }
+
+   @Override
+   public PointFeedbackControlCommand getFeedbackControlCommand()
+   {
+      if (touchdownTrigger.getBooleanValue())
+         return null;
+      else
+         return feedbackControlCommand;
    }
 }

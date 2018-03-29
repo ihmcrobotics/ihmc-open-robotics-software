@@ -1,17 +1,18 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.ArrayList;
-
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
 {
 
    public boolean goalsValid;
-   public FootstepDataMessage start;
-   public ArrayList<FootstepDataMessage> originalGoals = new ArrayList<FootstepDataMessage>();
-   public ArrayList<FootstepDataMessage> pathPlan = new ArrayList<FootstepDataMessage>();
-   public ArrayList<Boolean> footstepUnknown = new ArrayList<Boolean>();
+   public FootstepDataMessage start = new FootstepDataMessage();
+   public RecyclingArrayListPubSub<FootstepDataMessage> originalGoals = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 30);
+   public RecyclingArrayListPubSub<FootstepDataMessage> pathPlan = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 30);
+   public TIntArrayList footstepUnknown = new TIntArrayList(); // TODO change back to boolean list with moving to DDS
    public double subOptimality;
    public double pathCost = Double.POSITIVE_INFINITY;
 
@@ -26,23 +27,10 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
       goalsValid = other.goalsValid;
       start = new FootstepDataMessage();
       start.set(other.start);
-      originalGoals = new ArrayList<>();
-      for (int i = 0; i < other.originalGoals.size(); i++)
-      {
-         FootstepDataMessage footstep = new FootstepDataMessage();
-         footstep.set(other.originalGoals.get(i));
-         originalGoals.add(footstep);
-      }
-      pathPlan = new ArrayList<>();
-      for (int i = 0; i < other.pathPlan.size(); i++)
-      {
-         FootstepDataMessage footstep = new FootstepDataMessage();
-         footstep.set(other.pathPlan.get(i));
-         pathPlan.add(footstep);
-      }
-
-      footstepUnknown = new ArrayList<>();
-      other.footstepUnknown.forEach(footstepUnknown::add);
+      MessageTools.copyData(other.originalGoals, originalGoals);
+      MessageTools.copyData(other.pathPlan, pathPlan);
+      footstepUnknown.reset();
+      footstepUnknown.addAll(footstepUnknown);
 
       subOptimality = other.subOptimality;
       pathCost = other.pathCost;

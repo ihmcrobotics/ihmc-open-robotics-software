@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 
 public class ValveLocationPacket extends Packet<ValveLocationPacket>
 {
-   public Pose3D valvePoseInWorld;
+   public Pose3D valvePoseInWorld = new Pose3D();
    public double valveRadius;
    
    
@@ -17,12 +17,12 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket>
    @Override
    public void set(ValveLocationPacket other)
    {
-      valvePoseInWorld = new Pose3D(other.valvePoseInWorld);
+      valvePoseInWorld.set(other.valvePoseInWorld);
       valveRadius = other.valveRadius;
       setPacketInformation(other);
    }
 
-   public Pose3D getValveTransformToWorld()
+   public Pose3D getValvePoseInWorld()
    {
       return valvePoseInWorld;
    }
@@ -34,7 +34,7 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket>
    
    public boolean epsilonEquals(ValveLocationPacket turnValvePacket, double epsilon)
    {
-      boolean transformEquals = valvePoseInWorld.epsilonEquals(turnValvePacket.getValveTransformToWorld(), epsilon);
+      boolean transformEquals = valvePoseInWorld.epsilonEquals(turnValvePacket.getValvePoseInWorld(), epsilon);
       boolean radiusEquals = valveRadius == turnValvePacket.getValveRadius();
 
       return transformEquals  && radiusEquals;

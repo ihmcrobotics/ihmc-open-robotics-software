@@ -28,6 +28,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvi
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -127,19 +128,20 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          footstepData.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
          Point3D waypointOne = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
-         footstepData.setCustomPositionWaypoints(new Point3D[] {waypointOne, waypointTwo});
+         MessageTools.copyData(new Point3D[] {waypointOne, waypointTwo}, footstepData.customPositionWaypoints);
 
          double maxSpeed = maxSpeedDimensionless / swingTime;
          if (maxSpeed > maxSwingSpeed)
          {
             double adjustedSwingTime = maxSpeedDimensionless / maxSwingSpeed;
-            footstepData.setTimings(adjustedSwingTime, transferTime);
+            footstepData.setSwingDuration(adjustedSwingTime);
+            footstepData.setTransferDuration(transferTime);
             simulationTime += adjustedSwingTime;
          }
          else
             simulationTime += swingTime;
 
-         footsteps.add(footstepData);
+         footsteps.footstepDataList.add().set(footstepData);
       }
 
       drcSimulationTestHelper.send(footsteps);

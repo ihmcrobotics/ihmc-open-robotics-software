@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packets.SpatialVectorMessage;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
@@ -13,6 +15,7 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
 {
@@ -35,7 +38,7 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
    protected RobotDataReceiver(FullRobotModel fullRobotModel, OneDoFJoint[] allJoints, ForceSensorDataHolder forceSensorDataHolder)
    {
       this.allJoints = allJoints; 
-      jointNameHash = RobotConfigurationData.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
+      jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
 
       rootJoint = fullRobotModel.getRootJoint();
       this.forceSensorDataHolder = forceSensorDataHolder;
@@ -73,15 +76,15 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
             throw new RuntimeException("Joint names do not match for RobotConfigurationData");
          }
 
-         float[] newJointAngles = robotConfigurationData.getJointAngles();
-         for (int i = 0; i < newJointAngles.length; i++)
+         TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
+         for (int i = 0; i < newJointAngles.size(); i++)
          {
-            allJoints[i].setQ(newJointAngles[i]);
+            allJoints[i].setQ(newJointAngles.get(i));
          }
 
-         Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
+         Vector3D32 translation = robotConfigurationData.getRootTranslation();
          rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-         Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
+         Quaternion32 orientation = robotConfigurationData.getRootOrientation();
          rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.getPredecessor().updateFramesRecursively();
          
@@ -92,8 +95,9 @@ public class RobotDataReceiver implements PacketConsumer<RobotConfigurationData>
          {
             for (int i = 0; i < forceSensorDataHolder.getForceSensorDefinitions().size(); i++)
             {
-               forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i))
-                     .setWrench(robotConfigurationData.getMomentAndForceVectorForSensor(i));
+               SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.momentAndForceDataAllForceSensors.get(i);
+               forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i)).setWrench(momentAndForceVectorForSensor.angularPart,
+                                                                                                             momentAndForceVectorForSensor.linearPart);
             }
          }
          for (GraphicsUpdatable graphicsUpdatable : graphicsToUpdate)

@@ -56,9 +56,9 @@ public class HeightQuadTreeLeafMessagePubSubType implements us.ihmc.pubsub.Topic
    public static void write(controller_msgs.msg.dds.HeightQuadTreeLeafMessage data, us.ihmc.idl.CDR cdr)
    {
 
-      cdr.write_type_5(data.getXCenter());
+      cdr.write_type_5(data.getCenterX());
 
-      cdr.write_type_5(data.getYCenter());
+      cdr.write_type_5(data.getCenterY());
 
       cdr.write_type_5(data.getHeight());
    }
@@ -66,9 +66,9 @@ public class HeightQuadTreeLeafMessagePubSubType implements us.ihmc.pubsub.Topic
    public static void read(controller_msgs.msg.dds.HeightQuadTreeLeafMessage data, us.ihmc.idl.CDR cdr)
    {
 
-      data.setXCenter(cdr.read_type_5());
+      data.setCenterX(cdr.read_type_5());
 
-      data.setYCenter(cdr.read_type_5());
+      data.setCenterY(cdr.read_type_5());
 
       data.setHeight(cdr.read_type_5());
    }
@@ -99,9 +99,9 @@ public class HeightQuadTreeLeafMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.HeightQuadTreeLeafMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_5("x_center", data.getXCenter());
+      ser.write_type_5("center_x", data.getCenterX());
 
-      ser.write_type_5("y_center", data.getYCenter());
+      ser.write_type_5("center_y", data.getCenterY());
 
       ser.write_type_5("height", data.getHeight());
    }
@@ -109,9 +109,9 @@ public class HeightQuadTreeLeafMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HeightQuadTreeLeafMessage data)
    {
-      data.setXCenter(ser.read_type_5("x_center"));
+      data.setCenterX(ser.read_type_5("center_x"));
 
-      data.setYCenter(ser.read_type_5("y_center"));
+      data.setCenterY(ser.read_type_5("center_y"));
 
       data.setHeight(ser.read_type_5("height"));
    }

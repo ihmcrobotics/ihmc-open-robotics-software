@@ -17,8 +17,8 @@ module controller_msgs
       {
         float default_height;
         float resolution;
-        float x_size;
-        float y_size;
+        float size_x;
+        float size_y;
         sequence<controller_msgs::msg::dds::HeightQuadTreeLeafMessage, 5000> leaves;
       };
     };

@@ -44,12 +44,12 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
       this.preparePelvis = preparePelvis;
    }
 
-   public boolean isPrepareManipulation()
+   public boolean getPrepareManipulation()
    {
       return prepareManipulation;
    }
 
-   public boolean isPreparePelvis()
+   public boolean getPreparePelvis()
    {
       return preparePelvis;
    }

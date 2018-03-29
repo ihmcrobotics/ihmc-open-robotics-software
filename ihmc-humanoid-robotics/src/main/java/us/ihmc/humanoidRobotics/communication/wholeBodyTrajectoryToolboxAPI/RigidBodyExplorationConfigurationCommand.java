@@ -82,11 +82,11 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       else
          rigidBody = rigidBodyNamedBasedHashMap.get(rigidBodyNameBasedashCode);
 
-      for (int i = 0; i < message.getNumberOfDegreesOfFreedomToExplore(); i++)
+      for (int i = 0; i < message.configurationSpaceNamesToExplore.size(); i++)
       {
-         degreesOfFreedomToExplore.add(ConfigurationSpaceName.fromByte(message.getDegreeOfFreedomToExplore(i)));
-         explorationRangeUpperLimits.add(message.getExplorationRangeUpperLimits(i));
-         explorationRangeLowerLimits.add(message.getExplorationRangeLowerLimits(i));
+         degreesOfFreedomToExplore.add(ConfigurationSpaceName.fromByte(message.configurationSpaceNamesToExplore.get(i)));
+         explorationRangeUpperLimits.add(message.explorationRangeUpperLimits.get(i));
+         explorationRangeLowerLimits.add(message.explorationRangeLowerLimits.get(i));
       }
    }
 

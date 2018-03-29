@@ -5,7 +5,6 @@ import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation = "This mesage commands the controller to move the pelvis to a new height in the trajectory frame while going through the specified trajectory points."
       + " Sending this command will not affect the pelvis horizontal position. To control the pelvis 3D position use the PelvisTrajectoryMessage instead."
@@ -19,7 +18,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
          + " will keep the height manager in user mode while walking. If this is false the height manager will switch to controller mode when walking.")
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The position trajectory information.")
-   public EuclideanTrajectoryMessage euclideanTrajectory;
+   public EuclideanTrajectoryMessage euclideanTrajectory = new EuclideanTrajectoryMessage();
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -27,10 +26,10 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     */
    public PelvisHeightTrajectoryMessage()
    {
-      euclideanTrajectory = new EuclideanTrajectoryMessage();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       euclideanTrajectory.selectionMatrix = new SelectionMatrix3DMessage();
-      euclideanTrajectory.selectionMatrix.setAxisSelection(false, false, true);
+      euclideanTrajectory.selectionMatrix.xSelected = false;
+      euclideanTrajectory.selectionMatrix.ySelected = false;
+      euclideanTrajectory.selectionMatrix.zSelected = true;
    }
 
    /**
@@ -41,11 +40,10 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage other)
    {
       euclideanTrajectory = new EuclideanTrajectoryMessage(other.euclideanTrajectory);
-      setUniqueId(other.getUniqueId());
       setDestination(other.getDestination());
 
       enableUserPelvisControl = other.enableUserPelvisControl;
-      enableUserPelvisControlDuringWalking = other.isEnableUserPelvisControlDuringWalking();
+      enableUserPelvisControlDuringWalking = other.getEnableUserPelvisControlDuringWalking();
    }
 
    @Override
@@ -53,7 +51,6 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    {
       enableUserPelvisControl = other.enableUserPelvisControl;
       enableUserPelvisControlDuringWalking = other.enableUserPelvisControlDuringWalking;
-      euclideanTrajectory = new EuclideanTrajectoryMessage();
       euclideanTrajectory.set(other.euclideanTrajectory);
    }
 
@@ -64,7 +61,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     * 
     * @return whether or not user mode is enabled.
     */
-   public boolean isEnableUserPelvisControl()
+   public boolean getEnableUserPelvisControl()
    {
       return enableUserPelvisControl;
    }
@@ -85,7 +82,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     * 
     * @return whether or not user mode is enabled while walking
     **/
-   public boolean isEnableUserPelvisControlDuringWalking()
+   public boolean getEnableUserPelvisControlDuringWalking()
    {
       return enableUserPelvisControlDuringWalking;
    }
@@ -103,29 +100,9 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       this.enableUserPelvisControlDuringWalking = enableUserPelvisControlDuringWalking;
    }
 
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (euclideanTrajectory != null)
-         euclideanTrajectory.setUniqueId(uniqueId);
-   }
-
    public EuclideanTrajectoryMessage getEuclideanTrajectory()
    {
       return euclideanTrajectory;
-   }
-
-   /**
-    * Returns whether this message is valid
-    * 
-    * @return returns null if the message is valid, returns a string describing why the message is
-    *         invalid if it is invalid
-    */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validatePelvisHeightTrajectoryMessage(this);
    }
 
    /**
@@ -149,7 +126,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    public String toString()
    {
       if (euclideanTrajectory.taskspaceTrajectoryPoints != null)
-         return "Pelvis height trajectory: number of trajectory points = " + euclideanTrajectory.getNumberOfTrajectoryPoints();
+         return "Pelvis height trajectory: number of trajectory points = " + euclideanTrajectory.taskspaceTrajectoryPoints.size();
       else
          return "Pelvis height trajectory: no trajectory points   .";
    }

@@ -61,6 +61,8 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
    public double fitPlaneToPoints(Point2DBasics center, List<? extends Point3DReadOnly> pointList, Plane3D planeToPack)
    {
       double squareError = fitPlaneToPoints(pointList, planeToPack);
+      if (planeToPack.containsNaN())
+         return Double.POSITIVE_INFINITY;
 
       double centerZ = planeToPack.getZOnPlane(center.getX(), center.getY());
       Point3D planePoint = new Point3D(center.getX(), center.getY(), centerZ);

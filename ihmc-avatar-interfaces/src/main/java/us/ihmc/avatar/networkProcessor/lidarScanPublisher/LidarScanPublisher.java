@@ -202,13 +202,13 @@ public class LidarScanPublisher
          public void consumeObject(SimulatedLidarScanPacket packet)
          {
             LidarScanParameters lidarScanParameters = MessageTools.toLidarScanParameters(packet.getLidarScanParameters());
-            float[] ranges = packet.getRanges();
+            TFloatArrayList ranges = packet.getRanges();
             int sensorId = packet.getSensorId();
-            LidarScan scan = new LidarScan(lidarScanParameters, ranges, sensorId);
+            LidarScan scan = new LidarScan(lidarScanParameters, ranges.toArray(), sensorId);
             // Set the world transforms to nothing, so points are in lidar scan frame
             scan.setWorldTransforms(identityTransform, identityTransform);
             List<Point3D> scanPoints = scan.getAllPoints();
-            long timestamp = packet.getScanStartTime();
+            long timestamp = packet.lidarScanParameters.getTimestamp();
 
             scanDataToPublish.set(new ScanData(timestamp, scanPoints));
          }
@@ -296,12 +296,12 @@ public class LidarScanPublisher
 
                PriorityQueue<Integer> indicesToRemove = new PriorityQueue<>();
 
-               if (requestLidarScanMessage.isRemoveSelfCollisions())
+               if (requestLidarScanMessage.getRemoveSelfCollisions())
                {
                   indicesToRemove.addAll(selfCollisionRemovalIndices);
                }
 
-               if (requestLidarScanMessage.isRemoveShadows())
+               if (requestLidarScanMessage.getRemoveShadows())
                {
                   indicesToRemove.addAll(shadowRemovalIndices);
                }

@@ -9,4 +9,4 @@ geometry_msgs/Quaternion privileged_root_joint_orientation
 # See AbstractInverseDynamicsJoint.getNameBaseHashCode() for the computation of a joint hash code.
 int64[] privileged_joint_name_based_hash_codes
 # When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-float32 privileged_joint_angles
+float32[] privileged_joint_angles

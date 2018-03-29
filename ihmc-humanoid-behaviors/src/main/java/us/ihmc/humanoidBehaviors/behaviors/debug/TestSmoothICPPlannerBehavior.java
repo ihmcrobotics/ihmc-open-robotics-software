@@ -200,7 +200,7 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
       getRelativeFootstepInWorldFrame(stepReferenceFrame, stepLocation, stepOrientation, stepPose);
       FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, stepPose.getPosition(), stepPose.getOrientation());
 
-      footstepMessage.add(footstepData);
+      footstepMessage.footstepDataList.add().set(footstepData);
    }
 
    private void getRelativeFootstepInWorldFrame(ReferenceFrame frame, Point3D point3d, Quaternion quat4d, FramePose3D framePoseToPack)

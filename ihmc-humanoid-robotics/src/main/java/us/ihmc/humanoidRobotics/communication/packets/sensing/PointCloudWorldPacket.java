@@ -1,126 +1,48 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
+import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.packets.HighBandwidthPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
 
 @HighBandwidthPacket
 public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
 {
    public long timestamp;
 
-   public float[] groundQuadTreeSupport;
+   public TFloatArrayList groundQuadTreeSupport = new TFloatArrayList();
 
    // Code is duplicated, probably gets replaced with locality hash
-   public float[] decayingWorldScan;
+   public TFloatArrayList decayingWorldScan = new TFloatArrayList();
 
    public float defaultGroundHeight;
 
    public PointCloudWorldPacket()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setDestination(PacketDestination.BROADCAST);
+      this.setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      this.setDestination(PacketDestination.BROADCAST);
    }
 
    @Override
    public void set(PointCloudWorldPacket other)
    {
-      timestamp = other.timestamp;
-      groundQuadTreeSupport = Arrays.copyOf(other.groundQuadTreeSupport, other.groundQuadTreeSupport.length);
-      decayingWorldScan = Arrays.copyOf(other.decayingWorldScan, other.decayingWorldScan.length);
-      defaultGroundHeight = other.defaultGroundHeight;
-      setPacketInformation(other);
-   }
-
-   public void setGroundQuadTreeSupport(Point3D[] pointCloud)
-   {
-      groundQuadTreeSupport = new float[pointCloud.length * 3];
-      for (int i = 0; i < pointCloud.length; i++)
-      {
-         Point3D point = pointCloud[i];
-         groundQuadTreeSupport[3 * i] = (float) point.getX();
-         groundQuadTreeSupport[3 * i + 1] = (float) point.getY();
-         groundQuadTreeSupport[3 * i + 2] = (float) point.getZ();
-      }
-   }
-
-   public void setDecayingWorldScan(Point3D[] pointCloud)
-   {
-      decayingWorldScan = new float[pointCloud.length * 3];
-      for (int i = 0; i < pointCloud.length; i++)
-      {
-         Point3D point = pointCloud[i];
-         decayingWorldScan[3 * i] = (float) point.getX();
-         decayingWorldScan[3 * i + 1] = (float) point.getY();
-         decayingWorldScan[3 * i + 2] = (float) point.getZ();
-      }
-   }
-
-   public void setDecayingWorldScan(ArrayList<Point3D> pointCloud)
-   {
-      decayingWorldScan = new float[pointCloud.size() * 3];
-      for (int i = 0; i < pointCloud.size(); i++)
-      {
-         Point3D point = pointCloud.get(i);
-         decayingWorldScan[3 * i] = (float) point.getX();
-         decayingWorldScan[3 * i + 1] = (float) point.getY();
-         decayingWorldScan[3 * i + 2] = (float) point.getZ();
-      }
-   }
-
-   public Point3D32[] getGroundQuadTreeSupport()
-   {
-
-      int numberOfPoints = groundQuadTreeSupport.length / 3;
-
-      Point3D32[] points = new Point3D32[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         Point3D32 point = new Point3D32();
-         point.setX(groundQuadTreeSupport[3 * i]);
-         point.setY(groundQuadTreeSupport[3 * i + 1]);
-         point.setZ(groundQuadTreeSupport[3 * i + 2]);
-         points[i] = point;
-      }
-
-      return points;
-   }
-
-   public Point3D32[] getDecayingWorldScan()
-   {
-      int numberOfPoints = decayingWorldScan.length / 3;
-
-      Point3D32[] points = new Point3D32[numberOfPoints];
-      for (int i = 0; i < numberOfPoints; i++)
-      {
-         Point3D32 point = new Point3D32();
-         point.setX(decayingWorldScan[3 * i]);
-         point.setY(decayingWorldScan[3 * i + 1]);
-         point.setZ(decayingWorldScan[3 * i + 2]);
-         points[i] = point;
-      }
-
-      return points;
+      this.timestamp = other.timestamp;
+      MessageTools.copyData(other.groundQuadTreeSupport, this.groundQuadTreeSupport);
+      MessageTools.copyData(other.decayingWorldScan, this.decayingWorldScan);
+      this.defaultGroundHeight = other.defaultGroundHeight;
+      this.setPacketInformation(other);
    }
 
    @Override
    public boolean epsilonEquals(PointCloudWorldPacket other, double epsilon)
    {
-      boolean ret = timestamp == other.timestamp;
-      for (int i = 0; i < groundQuadTreeSupport.length; i++)
-      {
-         ret &= groundQuadTreeSupport[i] == other.groundQuadTreeSupport[i];
-      }
-      for (int i = 0; i < decayingWorldScan.length; i++)
-      {
-         ret &= decayingWorldScan[i] == other.decayingWorldScan[i];
-      }
-      ret &= defaultGroundHeight == other.defaultGroundHeight;
+      boolean ret = this.timestamp == other.timestamp;
+      if (!MessageTools.epsilonEquals(this.groundQuadTreeSupport, other.groundQuadTreeSupport, epsilon))
+         return false;
+      if (!MessageTools.epsilonEquals(this.decayingWorldScan, other.decayingWorldScan, epsilon))
+         return false;
+      ret &= this.defaultGroundHeight == other.defaultGroundHeight;
 
       return ret;
    }
@@ -132,12 +54,12 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
 
       try
       {
-         ret = "PointCloudWorldPacket [timestamp=" + timestamp + ", groundQuadTreeSupport=" + groundQuadTreeSupport.length / 3 + " points, decayingWorldScan="
-               + decayingWorldScan.length / 3 + " points, defaultGroundHeight=" + defaultGroundHeight + "]";
+         ret = "PointCloudWorldPacket [timestamp=" + this.timestamp + ", groundQuadTreeSupport=" + this.groundQuadTreeSupport.size() / 3 + " points, decayingWorldScan="
+               + this.decayingWorldScan.size() / 3 + " points, defaultGroundHeight=" + this.defaultGroundHeight + "]";
       }
       catch (NullPointerException e)
       {
-         ret = getClass().getSimpleName();
+         ret = this.getClass().getSimpleName();
       }
 
       return ret;
@@ -145,7 +67,7 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket>
 
    public long getTimestamp()
    {
-      return timestamp;
+      return this.timestamp;
    }
 
    public void setTimestamp(long timestamp)

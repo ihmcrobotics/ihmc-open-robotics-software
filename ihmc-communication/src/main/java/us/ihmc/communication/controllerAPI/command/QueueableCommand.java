@@ -53,11 +53,11 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    /**
     * Copies the variables associated with command queuing from the given {@link QueueableMessage} into this one.
     */
-   public void setQueueableCommandVariables(long messageId, QueueableMessage messageQueueingProperties)
+   public void setQueueableCommandVariables(QueueableMessage messageQueueingProperties)
    {
-      commandId = messageId;
       if (messageQueueingProperties == null)
          return;
+      commandId = messageQueueingProperties.getMessageId();
       setExecutionDelayTime(messageQueueingProperties.getExecutionDelayTime());
       executionMode = ExecutionMode.fromByte(messageQueueingProperties.getExecutionMode());
       previousCommandId = messageQueueingProperties.getPreviousMessageId();

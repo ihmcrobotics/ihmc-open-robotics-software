@@ -5,7 +5,7 @@ import us.ihmc.commons.MathTools;
 public class PilotAlarmPacket extends Packet<PilotAlarmPacket>
 {
    public double beepRate;
-   private boolean enableTone;
+   public boolean enableTone;
 
    @Override
    public void set(PilotAlarmPacket other)
@@ -31,7 +31,7 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket>
       this.beepRate = beepRate;
    }
 
-   public boolean isToneEnabled()
+   public boolean getEnableTone()
    {
       return enableTone;
    }
