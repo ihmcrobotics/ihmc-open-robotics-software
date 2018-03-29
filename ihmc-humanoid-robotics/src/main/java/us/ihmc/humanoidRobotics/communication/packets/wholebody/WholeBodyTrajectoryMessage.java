@@ -3,14 +3,12 @@ package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation = "Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.\n"
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule DOES apply to the fields of this message."
@@ -50,7 +48,6 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
     */
    public WholeBodyTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage other)
@@ -214,75 +211,6 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
          return false;
 
       return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      String errorMessage = PacketValidityChecker.validatePacket(this);
-      if (errorMessage != null)
-         return errorMessage;
-
-      if (!leftHandTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
-      {
-         if ((errorMessage = leftHandTrajectoryMessage.validateMessage()) != null)
-            return errorMessage;
-         else if (RobotSide.fromByte(leftHandTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
-            return "The robotSide of leftHandTrajectoryMessage field is inconsistent with its name.";
-      }
-      if (!leftHandTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
-      {
-         if ((errorMessage = rightHandTrajectoryMessage.validateMessage()) != null)
-            return errorMessage;
-         else if (RobotSide.fromByte(rightHandTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
-            return "The robotSide of rightHandTrajectoryMessage field is inconsistent with its name.";
-      }
-      if (!leftArmTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.isEmpty())
-      {
-         if ((errorMessage = leftArmTrajectoryMessage.validateMessage()) != null)
-            return errorMessage;
-         else if (RobotSide.fromByte(leftArmTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
-            return "The robotSide of leftArmTrajectoryMessage field is inconsistent with its name.";
-      }
-      if (!rightArmTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.isEmpty())
-      {
-         if ((errorMessage = rightArmTrajectoryMessage.validateMessage()) != null)
-            return errorMessage;
-         else if (RobotSide.fromByte(rightArmTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
-            return "The robotSide of rightArmTrajectoryMessage field is inconsistent with its name.";
-      }
-      if (!chestTrajectoryMessage.so3Trajectory.taskspaceTrajectoryPoints.isEmpty())
-      {
-         if ((errorMessage = chestTrajectoryMessage.validateMessage()) != null)
-            return errorMessage;
-      }
-      if (!pelvisTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
-      {
-         if ((errorMessage = pelvisTrajectoryMessage.validateMessage()) != null)
-            return errorMessage;
-      }
-      if (!headTrajectoryMessage.so3Trajectory.taskspaceTrajectoryPoints.isEmpty())
-      {
-         if ((errorMessage = headTrajectoryMessage.validateMessage()) != null)
-            return errorMessage;
-      }
-      if (!leftFootTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
-      {
-         if ((errorMessage = leftFootTrajectoryMessage.validateMessage()) != null)
-            return errorMessage;
-         else if (RobotSide.fromByte(leftFootTrajectoryMessage.getRobotSide()) != RobotSide.LEFT)
-            return "The robotSide of leftFootTrajectoryMessage field is inconsistent with its name.";
-      }
-      if (!rightFootTrajectoryMessage.se3Trajectory.taskspaceTrajectoryPoints.isEmpty())
-      {
-         if ((errorMessage = rightFootTrajectoryMessage.validateMessage()) != null)
-            return errorMessage;
-         else if (RobotSide.fromByte(rightFootTrajectoryMessage.getRobotSide()) != RobotSide.RIGHT)
-            return "The robotSide of rightFootTrajectoryMessage field is inconsistent with its name.";
-      }
-
-      return null;
    }
 
    @Override

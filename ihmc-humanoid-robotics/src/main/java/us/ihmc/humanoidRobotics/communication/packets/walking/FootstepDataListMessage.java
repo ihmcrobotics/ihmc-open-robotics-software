@@ -11,7 +11,6 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -23,12 +22,11 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    public static final byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = 1;
 
    @RosExportedField(documentation = "Defines the list of footstep to perform.")
-   public RecyclingArrayListPubSub<FootstepDataMessage> footstepDataList = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 5);
+   public RecyclingArrayListPubSub<FootstepDataMessage> footstepDataList = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 100);
 
    @RosExportedField(documentation = "When CONTROL_DURATIONS is chosen:"
          + "\n The controller will try to achieve the swingDuration and the transferDuration specified in the message. If a"
-         + "\n footstep touches down early, the next step will not be affected by this and the whole trajectory might finish"
-         + "\n earlier then expected."
+         + "\n footstep touches down early, the next step will not be affected by this and the whole trajectory might finish" + "\n earlier then expected."
          + "\nWhen CONTROL_ABSOLUTE_TIMINGS is chosen:"
          + "\n The controller will compute the expected times for swing start and touchdown and attempt to start a footstep"
          + "\n at that time. If a footstep touches down early, the following transfer will be extended to make up for this"
@@ -65,7 +63,6 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
     */
    public FootstepDataListMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public FootstepDataListMessage(FootstepDataListMessage other)
@@ -221,12 +218,5 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    public QueueableMessage getQueueingProperties()
    {
       return queueingProperties;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateFootstepDataListMessage(this);
    }
 }

@@ -72,13 +72,6 @@ public final class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage>
       return frameInformation;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateSO3TrajectoryMessage(this);
-   }
-
    @Override
    public String toString()
    {

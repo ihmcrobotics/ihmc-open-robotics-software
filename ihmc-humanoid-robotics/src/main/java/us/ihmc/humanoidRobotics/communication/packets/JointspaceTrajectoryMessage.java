@@ -60,13 +60,6 @@ public final class JointspaceTrajectoryMessage extends Packet<JointspaceTrajecto
       return queueingProperties;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateJointspaceTrajectoryMessage(this);
-   }
-
    @Override
    public boolean epsilonEquals(JointspaceTrajectoryMessage other, double epsilon)
    {

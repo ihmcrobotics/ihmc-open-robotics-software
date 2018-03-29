@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
 @RosMessagePacket(documentation = "This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points."
@@ -30,7 +29,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
     */
    public ChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
    {
-      so3Trajectory = new SO3TrajectoryMessage(chestTrajectoryMessage.so3Trajectory);
+      so3Trajectory.set(chestTrajectoryMessage.so3Trajectory);
       setDestination(chestTrajectoryMessage.getDestination());
    }
 
@@ -52,11 +51,5 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
       if (!so3Trajectory.epsilonEquals(other.so3Trajectory, epsilon))
          return false;
       return true;
-   }
-
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateChestTrajectoryMessage(this);
    }
 }

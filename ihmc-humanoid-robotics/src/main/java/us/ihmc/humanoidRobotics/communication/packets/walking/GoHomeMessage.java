@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation = "The message commands the controller to bring the given part of the body back to a default configuration called 'home'."
       + " It is useful to get back to a safe configuration before walking.", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/go_home")
@@ -84,12 +83,5 @@ public class GoHomeMessage extends Packet<GoHomeMessage>
       if (robotSide != other.robotSide)
          return false;
       return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateGoHomeMessage(this);
    }
 }

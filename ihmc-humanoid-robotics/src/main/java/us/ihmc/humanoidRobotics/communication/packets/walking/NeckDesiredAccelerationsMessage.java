@@ -4,7 +4,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.DesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation = "This message gives the user the option to bypass IHMC feedback controllers for the neck joints by sending desired neck joint accelerations."
       + " One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations."
@@ -12,7 +11,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerationsMessage>
 {
    @RosExportedField(documentation = "The desired joint acceleration information.")
-   public DesiredAccelerationsMessage desiredAccelerations;
+   public DesiredAccelerationsMessage desiredAccelerations = new DesiredAccelerationsMessage();
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -20,13 +19,11 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
     */
    public NeckDesiredAccelerationsMessage()
    {
-      desiredAccelerations = new DesiredAccelerationsMessage();
    }
 
    @Override
    public void set(NeckDesiredAccelerationsMessage other)
    {
-      desiredAccelerations = new DesiredAccelerationsMessage();
       desiredAccelerations.set(other.desiredAccelerations);
       setPacketInformation(other);
    }
@@ -45,12 +42,5 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
    public boolean epsilonEquals(NeckDesiredAccelerationsMessage other, double epsilon)
    {
       return desiredAccelerations.epsilonEquals(other.desiredAccelerations, epsilon);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateNeckDesiredAccelerationsMessage(this);
    }
 }
