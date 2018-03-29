@@ -7,7 +7,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settable<PilotAlarmPacket>, EpsilonComparable<PilotAlarmPacket>
 {
    public double beep_rate_;
-   public double enable_tone_;
+   public boolean enable_tone_;
 
    public PilotAlarmPacket()
    {
@@ -36,12 +36,12 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settab
       return beep_rate_;
    }
 
-   public void setEnableTone(double enable_tone)
+   public void setEnableTone(boolean enable_tone)
    {
       enable_tone_ = enable_tone;
    }
 
-   public double getEnableTone()
+   public boolean getEnableTone()
    {
       return enable_tone_;
    }
@@ -57,7 +57,7 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settab
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.beep_rate_, other.beep_rate_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.enable_tone_, other.enable_tone_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_tone_, other.enable_tone_, epsilon))
          return false;
 
       return true;

@@ -44,7 +44,7 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       return current_alignment - initial_alignment;
    }
@@ -60,7 +60,7 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       return current_alignment - initial_alignment;
    }
@@ -69,7 +69,7 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       cdr.write_type_6(data.getBeepRate());
 
-      cdr.write_type_6(data.getEnableTone());
+      cdr.write_type_7(data.getEnableTone());
 
    }
 
@@ -77,7 +77,7 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       data.setBeepRate(cdr.read_type_6());
 
-      data.setEnableTone(cdr.read_type_6());
+      data.setEnableTone(cdr.read_type_7());
 
    }
 
@@ -85,14 +85,14 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    public final void serialize(controller_msgs.msg.dds.PilotAlarmPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_6("beep_rate", data.getBeepRate());
-      ser.write_type_6("enable_tone", data.getEnableTone());
+      ser.write_type_7("enable_tone", data.getEnableTone());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PilotAlarmPacket data)
    {
       data.setBeepRate(ser.read_type_6("beep_rate"));
-      data.setEnableTone(ser.read_type_6("enable_tone"));
+      data.setEnableTone(ser.read_type_7("enable_tone"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.PilotAlarmPacket src, controller_msgs.msg.dds.PilotAlarmPacket dest)

@@ -12,7 +12,7 @@ module controller_msgs
       struct PilotAlarmPacket
       {
         double beep_rate;
-        double enable_tone;
+        boolean enable_tone;
       };
     };
   };
