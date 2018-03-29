@@ -49,20 +49,6 @@ public class ParameterSavingTools
       }
    }
 
-   public static boolean confirmSave(boolean isModified, boolean isMerge, String fileName)
-   {
-      String string = "Saving to " + fileName + ".";
-      string += isModified ? "\nSaving modified parameters only." : "\nSaving all parameters.";
-      string += isMerge ? "\nMerging parameters with existing file." : "\nOverwriting all parameters in file.";
-
-      Alert alert = new Alert(AlertType.CONFIRMATION);
-      alert.setTitle("Confirmation Dialog");
-      alert.setHeaderText("Confirm Save");
-      alert.setContentText(string);
-      Optional<ButtonType> result = alert.showAndWait();
-      return result.get() == ButtonType.OK;
-   }
-
    public static FileChooser.ExtensionFilter getExtensionFilter()
    {
       return new FileChooser.ExtensionFilter("XML files (*.xml)", "*.xml");
