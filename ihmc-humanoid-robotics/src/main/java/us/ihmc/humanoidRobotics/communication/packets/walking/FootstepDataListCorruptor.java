@@ -28,9 +28,9 @@ public class FootstepDataListCorruptor
    {
       FootstepDataListMessage ret = HumanoidMessageTools.createFootstepDataListMessage(footstepDataList.defaultSwingDuration, footstepDataList.defaultTransferDuration);
       
-      for (FootstepDataMessage footstepData : footstepDataList.footstepDataList)
+      for (int i = 0; i < footstepDataList.footstepDataList.size(); i++)
       {
-         ret.add(corruptFootstepData(footstepData));
+         ret.footstepDataList.add().set(corruptFootstepData(footstepDataList.footstepDataList.get(i)));
       }
       
       return ret;
@@ -40,14 +40,12 @@ public class FootstepDataListCorruptor
    {
       FootstepDataMessage ret = new FootstepDataMessage(footstepData);
       
-      Point3D location = new Point3D();
-      Quaternion orientation = new Quaternion();
+      Point3D location = new Point3D(ret.getLocation());
+      Quaternion orientation = new Quaternion(ret.getOrientation());
       
-      ret.getOrientation(orientation);
       corruptOrientation(orientation);
       ret.setOrientation(orientation);
       
-      ret.getLocation(location);
       corruptLocationVector(location);
       ret.setLocation(location);
       return ret;

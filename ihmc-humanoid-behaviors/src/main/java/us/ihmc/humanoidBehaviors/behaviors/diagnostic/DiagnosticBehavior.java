@@ -1692,7 +1692,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
             FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, footLocation, footOrientation);
 
-            footstepDataList.add(footstepData);
+            footstepDataList.footstepDataList.add().set(footstepData);
          }
       }
       pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList));
@@ -1718,7 +1718,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, footLocation, footOrientation);
 
-         footstepDataList.add(footstepData);
+         footstepDataList.footstepDataList.add().set(footstepData);
          pipeLine.submitSingleTaskStage(new FootstepListTask(footstepListBehavior, footstepDataList));
       }
 
@@ -1782,7 +1782,7 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       for (RobotSide flyingSide : RobotSide.values)
       {
-         ArmTrajectoryMessage flyingMessage = HumanoidMessageTools.createArmTrajectoryMessage(flyingSide, numberOfArmJoints);
+         ArmTrajectoryMessage flyingMessage = HumanoidMessageTools.createArmTrajectoryMessage(flyingSide);
 
          for (int jointIndex = 0; jointIndex < numberOfArmJoints; jointIndex++)
          {
@@ -1818,7 +1818,7 @@ public class DiagnosticBehavior extends AbstractBehavior
             }
             calculator.computeTrajectoryPointTimes(0.0, flyingTrajectoryTime.getDoubleValue());
             calculator.computeTrajectoryPointVelocities(true);
-            flyingMessage.getJointspaceTrajectory().setTrajectory1DMessage(jointIndex, HumanoidMessageTools.createOneDoFJointTrajectoryMessage(calculator.getTrajectoryData()));
+            flyingMessage.getJointspaceTrajectory().jointTrajectoryMessages.add().set(HumanoidMessageTools.createOneDoFJointTrajectoryMessage(calculator.getTrajectoryData()));;
          }
 
          pipeLine.submitTaskForPallelPipesStage(armTrajectoryBehaviors.get(flyingSide),

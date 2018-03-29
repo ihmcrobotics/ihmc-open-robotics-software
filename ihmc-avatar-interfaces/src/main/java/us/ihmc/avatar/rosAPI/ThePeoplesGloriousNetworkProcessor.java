@@ -249,7 +249,7 @@ public class ThePeoplesGloriousNetworkProcessor
          @Override
          public void receivedPacket(InvalidPacketNotificationPacket packet)
          {
-            System.err.println("Controller recieved invalid packet of type " + packet.packetClass);
+            System.err.println("Controller recieved invalid packet of type " + packet.packetClassSimpleName);
             System.err.println("Message: " + packet.errorMessage);
          }
       });

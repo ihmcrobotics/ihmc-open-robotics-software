@@ -11,8 +11,8 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
 {
    public float default_height_;
    public float resolution_;
-   public float x_size_;
-   public float y_size_;
+   public float size_x_;
+   public float size_y_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.HeightQuadTreeLeafMessage> leaves_;
 
    public HeightQuadTreeMessage()
@@ -34,9 +34,9 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
 
       resolution_ = other.resolution_;
 
-      x_size_ = other.x_size_;
+      size_x_ = other.size_x_;
 
-      y_size_ = other.y_size_;
+      size_y_ = other.size_y_;
 
       leaves_.set(other.leaves_);
    }
@@ -61,24 +61,24 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
       resolution_ = resolution;
    }
 
-   public float getXSize()
+   public float getSizeX()
    {
-      return x_size_;
+      return size_x_;
    }
 
-   public void setXSize(float x_size)
+   public void setSizeX(float size_x)
    {
-      x_size_ = x_size;
+      size_x_ = size_x;
    }
 
-   public float getYSize()
+   public float getSizeY()
    {
-      return y_size_;
+      return size_y_;
    }
 
-   public void setYSize(float y_size)
+   public void setSizeY(float size_y)
    {
-      y_size_ = y_size;
+      size_y_ = size_y;
    }
 
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.HeightQuadTreeLeafMessage> getLeaves()
@@ -100,10 +100,10 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.resolution_, other.resolution_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_size_, other.x_size_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.size_x_, other.size_x_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_size_, other.y_size_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.size_y_, other.size_y_, epsilon))
          return false;
 
       if (this.leaves_.size() == other.leaves_.size())
@@ -140,10 +140,10 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
       if (this.resolution_ != otherMyClass.resolution_)
          return false;
 
-      if (this.x_size_ != otherMyClass.x_size_)
+      if (this.size_x_ != otherMyClass.size_x_)
          return false;
 
-      if (this.y_size_ != otherMyClass.y_size_)
+      if (this.size_y_ != otherMyClass.size_y_)
          return false;
 
       if (!this.leaves_.equals(otherMyClass.leaves_))
@@ -166,12 +166,12 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
       builder.append(this.resolution_);
 
       builder.append(", ");
-      builder.append("x_size=");
-      builder.append(this.x_size_);
+      builder.append("size_x=");
+      builder.append(this.size_x_);
 
       builder.append(", ");
-      builder.append("y_size=");
-      builder.append(this.y_size_);
+      builder.append("size_y=");
+      builder.append(this.size_y_);
 
       builder.append(", ");
       builder.append("leaves=");

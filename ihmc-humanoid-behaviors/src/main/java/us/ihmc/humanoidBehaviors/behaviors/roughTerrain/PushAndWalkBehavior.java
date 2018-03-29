@@ -122,13 +122,13 @@ public class PushAndWalkBehavior extends AbstractBehavior
       if (statusQueue.isNewPacketAvailable())
       {
          CapturabilityBasedStatus latestPacket = statusQueue.getLatestPacket();
-         FramePoint2D desiredCapturePoint = latestPacket.getDesiredCapturePoint();
-         FramePoint2D capturePoint = latestPacket.getCapturePoint();
+         FramePoint2D desiredCapturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.desiredCapturePoint);
+         FramePoint2D capturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.capturePoint);
 
          boolean doubleSupport = true;
          for (RobotSide robotSide : RobotSide.values)
          {
-            doubleSupport &= !latestPacket.getFootSupportPolygon(robotSide).isEmpty();
+            doubleSupport &= !HumanoidMessageTools.unpackFootSupportPolygon(latestPacket, robotSide).isEmpty();
          }
 
          double error = desiredCapturePoint.distance(capturePoint);
@@ -211,7 +211,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(swingSide, location, orientation);
-      footsteps.add(footstep);
+      footsteps.footstepDataList.add().set(footstep);
       sendPacketToController(footsteps);
    }
 

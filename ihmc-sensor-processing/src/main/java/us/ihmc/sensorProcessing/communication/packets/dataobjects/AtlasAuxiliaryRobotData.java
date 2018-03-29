@@ -1,10 +1,13 @@
 package us.ihmc.sensorProcessing.communication.packets.dataobjects;
 
-import java.util.Arrays;
-
+import gnu.trove.list.array.TByteArrayList;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.tools.ArrayTools;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 /**
  *
@@ -12,14 +15,14 @@ import us.ihmc.tools.ArrayTools;
  */
 public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 {
-   public float[] electricJointTemperatures;
-   public float[] electricJointCurrents;
-   public boolean[] electricJointEnabledArray;
+   public TFloatArrayList electricJointTemperatures = new TFloatArrayList();
+   public TFloatArrayList electricJointCurrents = new TFloatArrayList();
+   public TByteArrayList electricJointEnabledArray = new TByteArrayList(); // TODO change back to an array of booleans
 
-   public long[] rawImuTimestamps = new long[15];
-   public long[] rawImuPacketCounts = new long[15];
-   public float[][] rawImuRates = new float[15][3];
-   public float[][] rawImuDeltas = new float[15][3];
+   public TLongArrayList rawImuTimestamps = new TLongArrayList();
+   public TLongArrayList rawImuPacketCounts = new TLongArrayList();
+   public RecyclingArrayListPubSub<Vector3D32> rawImuRates = new RecyclingArrayListPubSub<>(Vector3D32.class, Vector3D32::new, 1);
+   public RecyclingArrayListPubSub<Vector3D32> rawImuDeltas = new RecyclingArrayListPubSub<>(Vector3D32.class, Vector3D32::new, 1);
 
    public boolean batteryCharging;
    public float batteryVoltage;
@@ -39,72 +42,36 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 
    public AtlasAuxiliaryRobotData()
    {
-      electricJointTemperatures = new float[6];
-      electricJointEnabledArray = new boolean[6];
-      electricJointCurrents = new float[6];
-   }
-
-   public void updateRawImuData(int index, long timestamp, long packetCount, float dax, float day, float daz, float ddx, float ddy, float ddz)
-   {
-      rawImuTimestamps[index] = timestamp;
-      rawImuPacketCounts[index] = packetCount;
-
-      rawImuRates[index][0] = dax;
-      rawImuRates[index][1] = day;
-      rawImuRates[index][2] = daz;
-
-      rawImuDeltas[index][0] = ddx;
-      rawImuDeltas[index][1] = ddy;
-      rawImuDeltas[index][2] = ddz;
-   }
-
-   public void updateElectricJointStatus(int index, boolean enabled, float driveCurrent, float driveTemperature)
-   {
-      electricJointEnabledArray[index] = enabled;
-      electricJointTemperatures[index] = driveTemperature;
-      electricJointCurrents[index] = driveCurrent;
    }
 
    @Override
-   public void set(AtlasAuxiliaryRobotData auxiliaryRobotData)
+   public void set(AtlasAuxiliaryRobotData other)
    {
-      batteryCharging = auxiliaryRobotData.batteryCharging;
-      batteryVoltage = auxiliaryRobotData.batteryVoltage;
-      batteryCurrent = auxiliaryRobotData.batteryCurrent;
-      remainingBatteryTime = auxiliaryRobotData.remainingBatteryTime;
-      remainingAmpHours = auxiliaryRobotData.remainingAmpHours;
-      remainingChargePercentage = auxiliaryRobotData.remainingChargePercentage;
-      batteryCycleCount = auxiliaryRobotData.batteryCycleCount;
+      batteryCharging = other.batteryCharging;
+      batteryVoltage = other.batteryVoltage;
+      batteryCurrent = other.batteryCurrent;
+      remainingBatteryTime = other.remainingBatteryTime;
+      remainingAmpHours = other.remainingAmpHours;
+      remainingChargePercentage = other.remainingChargePercentage;
+      batteryCycleCount = other.batteryCycleCount;
 
-      pumpInletPressure = auxiliaryRobotData.pumpInletPressure;
-      pumpSupplyPressure = auxiliaryRobotData.pumpSupplyPressure;
-      airSumpPressure = auxiliaryRobotData.airSumpPressure;
-      pumpSupplyTemperature = auxiliaryRobotData.pumpSupplyTemperature;
-      pumpRPM = auxiliaryRobotData.pumpRPM;
-      motorTemperature = auxiliaryRobotData.motorTemperature;
-      motorDriverTemperature = auxiliaryRobotData.motorDriverTemperature;
-
-      for (int i = 0; i < 6; i++)
-      {
-         electricJointCurrents[i] = auxiliaryRobotData.electricJointCurrents[i];
-         electricJointTemperatures[i] = auxiliaryRobotData.electricJointTemperatures[i];
-         electricJointEnabledArray[i] = auxiliaryRobotData.electricJointEnabledArray[i];
-      }
-
-      for (int i = 0; i < 15; i++)
-      {
-         rawImuTimestamps[i] = auxiliaryRobotData.rawImuTimestamps[i];
-         rawImuPacketCounts[i] = auxiliaryRobotData.rawImuPacketCounts[i];
-
-         for (int j = 0; j < 3; j++)
-         {
-            rawImuRates[i][j] = auxiliaryRobotData.rawImuRates[i][j];
-            rawImuDeltas[i][j] = auxiliaryRobotData.rawImuDeltas[i][j];
-         }
-      }
+      pumpInletPressure = other.pumpInletPressure;
+      pumpSupplyPressure = other.pumpSupplyPressure;
+      airSumpPressure = other.airSumpPressure;
+      pumpSupplyTemperature = other.pumpSupplyTemperature;
+      pumpRPM = other.pumpRPM;
+      motorTemperature = other.motorTemperature;
+      motorDriverTemperature = other.motorDriverTemperature;
+      MessageTools.copyData(other.electricJointCurrents, electricJointCurrents);
+      MessageTools.copyData(other.electricJointTemperatures, electricJointTemperatures);
+      MessageTools.copyData(other.electricJointEnabledArray, electricJointEnabledArray);
+      MessageTools.copyData(other.rawImuTimestamps, rawImuTimestamps);
+      MessageTools.copyData(other.rawImuPacketCounts, rawImuPacketCounts);
+      MessageTools.copyData(other.rawImuRates, rawImuRates);
+      MessageTools.copyData(other.rawImuDeltas, rawImuDeltas);
    }
 
-   public boolean isBatteryCharging()
+   public boolean getBatteryCharging()
    {
       return batteryCharging;
    }
@@ -247,25 +214,21 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
    @Override
    public boolean epsilonEquals(AtlasAuxiliaryRobotData other, double epsilon)
    {
-      if (!ArrayTools.deltaEquals(electricJointTemperatures, other.electricJointTemperatures, (float) epsilon))
+      if (!MessageTools.epsilonEquals(electricJointTemperatures, other.electricJointTemperatures, (float) epsilon))
          return false;
-      if (!ArrayTools.deltaEquals(electricJointCurrents, other.electricJointCurrents, (float) epsilon))
+      if (!MessageTools.epsilonEquals(electricJointCurrents, other.electricJointCurrents, (float) epsilon))
          return false;
-      if (!Arrays.equals(electricJointEnabledArray, other.electricJointEnabledArray))
+      if (!electricJointEnabledArray.equals(other.electricJointEnabledArray))
          return false;
-      if (!Arrays.equals(rawImuTimestamps, other.rawImuTimestamps))
+      if (!rawImuTimestamps.equals(other.rawImuTimestamps))
          return false;
-      if (!Arrays.equals(rawImuPacketCounts, other.rawImuPacketCounts))
+      if (!rawImuPacketCounts.equals(other.rawImuPacketCounts))
          return false;
 
-      for (int i = 0; i < 15; i++)
-      {
-         if (!ArrayTools.deltaEquals(rawImuRates[i], other.rawImuRates[i], (float) epsilon))
-            return false;
-         if (!ArrayTools.deltaEquals(rawImuDeltas[i], other.rawImuDeltas[i], (float) epsilon))
-            return false;
-      }
-
+      if (!MessageTools.epsilonEquals(rawImuRates, other.rawImuRates, epsilon))
+         return false;
+      if (!MessageTools.epsilonEquals(rawImuDeltas, other.rawImuDeltas, epsilon))
+         return false;
       if (batteryCharging != other.batteryCharging)
          return false;
       if (!MathTools.epsilonEquals(batteryVoltage, other.batteryVoltage, epsilon))

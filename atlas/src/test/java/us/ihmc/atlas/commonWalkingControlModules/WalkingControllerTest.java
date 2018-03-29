@@ -35,6 +35,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -50,7 +51,10 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -223,20 +227,27 @@ public class WalkingControllerTest
          location.changeFrame(ReferenceFrame.getWorldFrame());
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
          FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
-         footsteps.add(footstep);
+         footsteps.footstepDataList.add().set(footstep);
       }
       commandInputManager.submitMessage(footsteps);
    }
 
    private void sendChestTrajectory()
    {
-      ChestTrajectoryMessage message = HumanoidMessageTools.createChestTrajectoryMessage(2);
+      ChestTrajectoryMessage message = new ChestTrajectoryMessage();
       Quaternion orientation = new Quaternion();
       orientation.appendYawRotation(Math.toRadians(-10.0));
       orientation.appendRollRotation(Math.toRadians(10.0));
-      message.getSO3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getPelvisZUpFrame());
-      message.getSO3Trajectory().setTrajectoryPoint(0, 0.5, orientation, new Vector3D(), referenceFrames.getPelvisZUpFrame());
-      message.getSO3Trajectory().setTrajectoryPoint(1, 1.0, new Quaternion(), new Vector3D(), referenceFrames.getPelvisZUpFrame());
+      SO3TrajectoryMessage so3Trajectory = message.getSo3Trajectory();
+      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(referenceFrames.getPelvisZUpFrame()));
+      SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.taskspaceTrajectoryPoints.add();
+      trajectoryPoint.setTime(0.5);
+      trajectoryPoint.setOrientation(orientation);
+      trajectoryPoint.setAngularVelocity(new Vector3D());
+      trajectoryPoint = so3Trajectory.taskspaceTrajectoryPoints.add();
+      trajectoryPoint.setTime(1.0);
+      trajectoryPoint.setOrientation(new Quaternion());
+      trajectoryPoint.setAngularVelocity(new Vector3D());
       commandInputManager.submitMessage(message);
    }
 
@@ -247,14 +258,16 @@ public class WalkingControllerTest
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] joints = ScrewTools.createOneDoFJointPath(chest, hand);
-         ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, joints.length, 2);
+         ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
+
          for (int jointIdx = 0; jointIdx < joints.length; jointIdx++)
          {
             OneDoFJoint joint = joints[jointIdx];
             double angle1 = MathTools.clamp(Math.toRadians(45.0), joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
             double angle2 = MathTools.clamp(0.0, joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
-            message.getJointspaceTrajectory().setTrajectoryPoint(jointIdx, 0, 0.5, angle1, 0.0);
-            message.getJointspaceTrajectory().setTrajectoryPoint(jointIdx, 1, 1.0, angle2, 0.0);
+            OneDoFJointTrajectoryMessage jointTrajectoryMessage = message.jointspaceTrajectory.jointTrajectoryMessages.add();
+            jointTrajectoryMessage.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(0.5, angle1, 0.0));
+            jointTrajectoryMessage.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(1.0, angle2, 0.0));
          }
          commandInputManager.submitMessage(message);
       }

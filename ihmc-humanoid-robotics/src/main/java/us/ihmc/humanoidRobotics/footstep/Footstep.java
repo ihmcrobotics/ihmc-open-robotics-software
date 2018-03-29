@@ -92,8 +92,13 @@ public class Footstep implements Settable<Footstep>
       this(robotSide, footstepPose, trustHeight, isAdjustable, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
-   public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, boolean isAdjustable, List<Point2D> predictedContactPoints, TrajectoryType trajectoryType,
-                   double swingHeight)
+   public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, boolean isAdjustable, TrajectoryType trajectoryType, double swingHeight)
+   {
+      this(robotSide, footstepPose, trustHeight, isAdjustable, null, trajectoryType, swingHeight);
+   }
+
+   public Footstep(RobotSide robotSide, FramePose3D footstepPose, boolean trustHeight, boolean isAdjustable, List<Point2D> predictedContactPoints,
+                   TrajectoryType trajectoryType, double swingHeight)
    {
       this.robotSide = robotSide;
       this.trustHeight = trustHeight;
@@ -263,6 +268,22 @@ public class Footstep implements Settable<Footstep>
    public void setIsAdjustable(boolean isAdjustable)
    {
       this.isAdjustable = isAdjustable;
+   }
+
+   public void setPredictedContactPoints(Point2DReadOnly[] contactPointArray)
+   {
+      predictedContactPoints.clear();
+
+      if (contactPointArray == null)
+      {
+         return;
+      }
+
+      for (int i = 0; i < contactPointArray.length; i++)
+      {
+         Point2DReadOnly point = contactPointArray[i];
+         this.predictedContactPoints.add().set(point);
+      }
    }
 
    public void setPredictedContactPoints(List<? extends Point2DReadOnly> contactPointList)

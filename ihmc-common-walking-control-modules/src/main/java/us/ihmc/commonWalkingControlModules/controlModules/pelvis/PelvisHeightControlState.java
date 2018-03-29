@@ -325,8 +325,10 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       pointFeedbackCommand.getSpatialAccelerationCommand().set(spcatialAccelerationCommand);
       pointFeedbackCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
       pointFeedbackCommand.set(spatialFeedbackControlCommand.getBase(), spatialFeedbackControlCommand.getEndEffector());
-      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      pointFeedbackCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.getFeedForwardLinearActionIncludingFrame(feedForwardLinearAcceleration);
+      pointFeedbackCommand.set(desiredPosition, desiredLinearVelocity);
+      pointFeedbackCommand.setFeedForwardAction(feedForwardLinearAcceleration);
       pointFeedbackCommand.setControlBaseFrame(spatialFeedbackControlCommand.getControlBaseFrame());
       pointFeedbackCommand.setGains(spatialFeedbackControlCommand.getGains().getPositionGains());
       pointFeedbackCommand.setGainsFrame(baseFrame);
@@ -345,7 +347,8 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
          FeetManager feetManager)
    {
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = taskspaceControlState.getSpatialFeedbackControlCommand();
-      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      spatialFeedbackControlCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.getFeedForwardLinearActionIncludingFrame(feedForwardLinearAcceleration);
       spatialFeedbackControlCommand.getControlFramePoseIncludingFrame(controlPosition, controlOrientation);
       controlPosition.changeFrame(pelvis.getBodyFixedFrame());
 

@@ -2,6 +2,8 @@ package us.ihmc.exampleSimulations.genericQuadruped;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
@@ -45,7 +47,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private static final boolean USE_STATE_ESTIMATOR = false;
    private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = true;
-   private static final boolean USE_NETWORKING = false;
 
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
 
@@ -54,6 +55,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<QuadrupedSimulationInitialPositionParameters> initialPosition = new OptionalFactoryField<>("initialPosition");
+   private final OptionalFactoryField<Boolean> useNetworking = new OptionalFactoryField<>("useNetworking");
 
    @Override
    public GoalOrientedTestConductor createTestConductor() throws IOException
@@ -61,6 +63,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       useStateEstimator.setDefaultValue(USE_STATE_ESTIMATOR);
       initialPosition.setDefaultValue(new GenericQuadrupedDefaultInitialPosition());
       usePushRobotController.setDefaultValue(false);
+      useNetworking.setDefaultValue(false);
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -101,7 +104,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setFullRobotModel(fullRobotModel);
       simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
-      simulationFactory.setUseNetworking(USE_NETWORKING);
+      simulationFactory.setUseNetworking(useNetworking.get());
       simulationFactory.setTimestampHolder(timestampProvider);
       simulationFactory.setUseStateEstimator(useStateEstimator.get());
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
@@ -112,6 +115,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setControlMode(controlMode.get());
       simulationFactory.setXGaitSettings(xGaitSettings);
       simulationFactory.setInitialForceControlState(QuadrupedForceControllerEnum.FREEZE);
+      simulationFactory.setUseLocalCommunicator(useNetworking.get());
 
       if (groundContactModelType.hasValue())
       {
@@ -121,6 +125,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       {
          simulationFactory.setGroundProfile3D(providedGroundProfile3D.get());
       }
+      
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       simulationFactory.setUsePushRobotController(usePushRobotController.get());
       GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
@@ -164,5 +169,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public void setInitialPosition(QuadrupedSimulationInitialPositionParameters initialPosition)
    {
       this.initialPosition.set(initialPosition);
+   }
+
+   @Override
+   public void setUseNetworking(boolean useNetworking)
+   {
+      this.useNetworking.set(useNetworking);
    }
 }

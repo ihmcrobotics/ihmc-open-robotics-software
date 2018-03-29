@@ -428,6 +428,21 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    /**
+    * Retrieves and returns the {@code YoSpatialVector} for holding the angular and linear
+    * forces of the given end-effector for representing a given data {@code type}. If it does
+    * not exist it is created.
+    *
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param type the type of the data to retrieve.
+    * @return the unique {@code YoSpatialVector} matching the search criteria.
+    */
+   public YoSpatialVector getWrench(RigidBody endEffector, Type type, YoBoolean enabled)
+   {
+      return new YoSpatialVector(getDataVector(endEffector, type, Space.LINEAR_FORCE, enabled),
+                                 getDataVector(endEffector, type, Space.ANGULAR_TORQUE, enabled));
+   }
+
+   /**
     * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
     * linear velocities of the given end-effector. The date type of the vector is defined by
     * {@code type}. If it does not exist it is created.
@@ -439,7 +454,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param endEffector the end-effector to which the returned data is associated.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
-    * @param maximumRate the maximum rate allowed rate. Not modified.
+    * @param maximumLinearRate the maximum linear rate allowed rate. Not modified.
+    * @param maximumAngularRate the maximum angular rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
     */
    public RateLimitedYoSpatialVector getRateLimitedVelocity(RigidBody endEffector, Type rawDataType, double dt, YoDouble maximumLinearRate,
@@ -461,7 +477,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param endEffector the end-effector to which the returned data is associated.
     * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
     * @param dt the duration of a control tick.
-    * @param maximumRate the maximum rate allowed rate. Not modified.
+    * @param maximumLinearRate the maximum linear rate allowed rate. Not modified.
+    * @param maximumAngularRate the maximum angular rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
     */
    public RateLimitedYoSpatialVector getRateLimitedAcceleration(RigidBody endEffector, Type rawDataType, double dt, YoDouble maximumLinearRate,
@@ -469,6 +486,29 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    {
       return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_ACCELERATION, dt, maximumLinearRate, enabled),
                                             getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_ACCELERATION, dt, maximumAngularRate, enabled));
+   }
+
+   /**
+    * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
+    * linear accelerations of the given end-effector. The date type of the vector is defined by
+    * {@code type}. If it does not exist it is created.
+    * <p>
+    * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
+    * only used if the data does not exist yet.
+    * </p>
+    *
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
+    * @param dt the duration of a control tick.
+    * @param maximumLinearRate the maximum linear rate allowed rate. Not modified.
+    * @param maximumAngularRate the maximum angular rate allowed rate. Not modified.
+    * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
+    */
+   public RateLimitedYoSpatialVector getRateLimitedWrench(RigidBody endEffector, Type rawDataType, double dt, YoDouble maximumLinearRate,
+                                                                YoDouble maximumAngularRate, YoBoolean enabled)
+   {
+      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_FORCE, dt, maximumLinearRate, enabled),
+                                            getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_TORQUE, dt, maximumAngularRate, enabled));
    }
 
    /**

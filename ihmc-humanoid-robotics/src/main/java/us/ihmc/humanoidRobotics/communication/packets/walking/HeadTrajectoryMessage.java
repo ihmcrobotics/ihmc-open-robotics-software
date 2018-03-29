@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
 @RosMessagePacket(documentation =
@@ -16,7 +15,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
 {
    @RosExportedField(documentation = "The orientation trajectory information.")
-   public SO3TrajectoryMessage so3Trajectory;
+   public SO3TrajectoryMessage so3Trajectory = new SO3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization.
@@ -24,7 +23,6 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
     */
    public HeadTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -33,25 +31,15 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
     */
    public HeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
    {
-      so3Trajectory = new SO3TrajectoryMessage(headTrajectoryMessage.so3Trajectory);
-      setUniqueId(headTrajectoryMessage.getUniqueId());
+      so3Trajectory.set(headTrajectoryMessage.so3Trajectory);
       setDestination(headTrajectoryMessage.getDestination());
    }
 
    @Override
    public void set(HeadTrajectoryMessage other)
    {
-      so3Trajectory = new SO3TrajectoryMessage();
       so3Trajectory.set(other.so3Trajectory);
       setPacketInformation(other);
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (so3Trajectory != null)
-         so3Trajectory.setUniqueId(uniqueId);
    }
 
    public void setSo3Trajectory(SO3TrajectoryMessage so3Trajectory)
@@ -70,11 +58,5 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage>
       if (!so3Trajectory.epsilonEquals(other.so3Trajectory, epsilon))
          return false;
       return true;
-   }
-
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateHeadTrajectoryMessage(this);
    }
 }

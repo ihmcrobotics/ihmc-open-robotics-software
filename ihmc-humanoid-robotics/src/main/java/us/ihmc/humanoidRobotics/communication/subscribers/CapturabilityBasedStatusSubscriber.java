@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -56,11 +58,11 @@ public class CapturabilityBasedStatusSubscriber implements PacketConsumer<Captur
       if (object == null)
          return;
 
-      capturePointReference.set(object.getCapturePoint());
-      desiredCapturePointReference.set(object.getDesiredCapturePoint());
+      capturePointReference.set(new FramePoint2D(ReferenceFrame.getWorldFrame(), object.capturePoint));
+      desiredCapturePointReference.set(new FramePoint2D(ReferenceFrame.getWorldFrame(), object.desiredCapturePoint));
       for (RobotSide robotSide : RobotSide.values)
-         footSupportPolygonReferences.get(robotSide).set(object.getFootSupportPolygon(robotSide));
-      doubleSupportReference.set(object.isInDoubleSupport());
+         footSupportPolygonReferences.get(robotSide).set(HumanoidMessageTools.unpackFootSupportPolygon(object, robotSide));
+      doubleSupportReference.set(HumanoidMessageTools.unpackIsInDoubleSupport(object));
 
       for (CapturabilityBasedStatusListener listener : listOfListener)
       {

@@ -787,6 +787,28 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    }
 
    /**
+    * Packs the linear value of the selection matrix carried by this command into the given
+    * {@code selectionMatrixToPack}.
+    *
+    * @param selectionMatrixToPack the linear selection matrix to pack.
+    */
+   public void getLinearSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
+   {
+      selectionMatrixToPack.set(selectionMatrix.getLinearPart());
+   }
+
+   /**
+    * Packs the angular value of the selection matrix carried by this command into the given
+    * {@code selectionMatrixToPack}.
+    *
+    * @param selectionMatrixToPack the linear selection matrix to pack.
+    */
+   public void getAngularSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
+   {
+      selectionMatrixToPack.set(selectionMatrix.getAngularPart());
+   }
+
+   /**
     * Gets the reference to the base of this command.
     * <p>
     * The joint path going from the {@code base} to the {@code endEffector} specifies the joints

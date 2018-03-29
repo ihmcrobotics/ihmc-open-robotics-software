@@ -108,8 +108,11 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
 
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {
-         IMUPacket imuPacket = robotConfigurationData.getImuPacketForSensor(sensorNumber);
-         imuPacket.set(RandomGeometry.nextVector3D32(random), RandomGeometry.nextQuaternion32(random), RandomGeometry.nextVector3D32(random));
+         IMUPacket imuPacket = robotConfigurationData.imuSensorData.add();
+         imuPacket.linearAcceleration.set(RandomGeometry.nextVector3D32(random));
+         imuPacket.orientation.set(RandomGeometry.nextQuaternion32(random));
+         imuPacket.angularVelocity.set(RandomGeometry.nextVector3D32(random));
+         imuPacket.time = 0.0;
       }
       
       robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING.toByte());

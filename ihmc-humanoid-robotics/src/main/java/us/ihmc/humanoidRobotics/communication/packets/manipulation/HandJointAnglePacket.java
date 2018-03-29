@@ -1,10 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import java.util.Arrays;
-
+import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
 {
@@ -12,7 +10,7 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
    public static final byte ROBOT_SIDE_RIGHT = 1;
 
    public byte robotSide;
-   public double[] jointAngles;
+   public TDoubleArrayList jointAngles = new TDoubleArrayList();
    public boolean connected;
    public boolean calibrated;
 
@@ -21,34 +19,15 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
       // Empty constructor for deserialization
    }
 
-   public void setAll(byte robotSide, boolean connected, boolean calibrated, double[] jointAngles)
-   {
-      this.robotSide = robotSide;
-      if (this.jointAngles == null)
-      {
-         this.jointAngles = new double[jointAngles.length];
-      }
-      System.arraycopy(jointAngles, 0, this.jointAngles, 0, jointAngles.length);
-      this.connected = connected;
-      this.calibrated = calibrated;
-   }
-
    @Override
    public void set(HandJointAnglePacket other)
    {
-      setAll(other.robotSide, other.connected, other.calibrated, other.jointAngles);
+      robotSide = other.robotSide;
+      MessageTools.copyData(other.jointAngles, jointAngles);
+      connected = other.connected;
+      calibrated = other.calibrated;
+      
       setPacketInformation(other);
-   }
-
-   public double getJointAngle(HandJointName jointName)
-   {
-      int index = jointName.getIndex(RobotSide.fromByte(robotSide));
-      if (index == -1)
-      {
-         return 0;
-      }
-
-      return jointAngles[index];
    }
 
    public byte getRobotSide()
@@ -56,22 +35,17 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
       return robotSide;
    }
 
-   public double[] getJointAngles()
+   public TDoubleArrayList getJointAngles()
    {
       return jointAngles;
    }
 
-   public int getNumberOfJoints()
-   {
-      return jointAngles.length;
-   }
-
-   public boolean isHandConnected()
+   public boolean getConnected()
    {
       return connected;
    }
 
-   public boolean isCalibrated()
+   public boolean getCalibrated()
    {
       return calibrated;
    }
@@ -79,7 +53,7 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
    @Override
    public String toString()
    {
-      return "HandJointAnglePacket [robotSide=" + robotSide + ", joints=" + Arrays.toString(jointAngles) + ", connected=" + connected + ", calibrated="
+      return "HandJointAnglePacket [robotSide=" + robotSide + ", joints=" + jointAngles + ", connected=" + connected + ", calibrated="
             + calibrated + "]";
    }
 
@@ -88,10 +62,10 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket>
    {
       boolean ret = robotSide == other.robotSide;
 
-      ret &= other.jointAngles.length == jointAngles.length;
-      for (int i = 0; i < jointAngles.length; i++)
+      ret &= other.jointAngles.size() == jointAngles.size();
+      for (int i = 0; i < jointAngles.size(); i++)
       {
-         ret &= Math.abs(jointAngles[i] - other.jointAngles[i]) < epsilon;
+         ret &= Math.abs(jointAngles.get(i) - other.jointAngles.get(i)) < epsilon;
       }
 
       ret &= connected == other.connected;

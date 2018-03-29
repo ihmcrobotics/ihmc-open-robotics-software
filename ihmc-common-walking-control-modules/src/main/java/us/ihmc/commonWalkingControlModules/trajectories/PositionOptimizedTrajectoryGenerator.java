@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -12,11 +13,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -25,6 +21,10 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * This class is a wrapper for the TrajectoryPointOptimizer. It was made for trajectories in 3d
@@ -256,6 +256,12 @@ public class PositionOptimizedTrajectoryGenerator
       {
          waypointPosition.setIncludingFrame(waypointPositions.get(i));
          waypointPosition.changeFrame(trajectoryFrame);
+
+         if (i > 0 && waypointPosition.epsilonEquals(waypointPositions.get(i - 1), 1.0e-4))
+         {
+            continue;
+         }
+
          TDoubleArrayList waypoint = this.waypointPositions.add();
          for (Axis axis : Axis.values)
             waypoint.set(axis.ordinal(), this.waypointPosition.getElement(axis.ordinal()));
@@ -263,7 +269,7 @@ public class PositionOptimizedTrajectoryGenerator
       }
 
       optimizer.setWaypoints(this.waypointPositions);
-      segments.set(waypointPositions.size() + 1);
+      segments.set(coefficients.size());
    }
 
    /**
@@ -350,9 +356,16 @@ public class PositionOptimizedTrajectoryGenerator
       doOptimizationUpdate();
       isDone.set(time > 1.0);
 
-      if (isDone())
+      if (time < 0.0)
       {
-         desiredPosition.setToZero();
+         desiredPosition.set(initialPosition);
+         desiredVelocity.setToZero();
+         desiredAcceleration.setToZero();
+         return;
+      }
+      if (time > 1.0)
+      {
+         desiredPosition.set(finalPosition);
          desiredVelocity.setToZero();
          desiredAcceleration.setToZero();
          return;

@@ -2,9 +2,7 @@ package us.ihmc.communication.packets;
 
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 @RosMessagePacket(documentation = "", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE, topic = "/control/weight_matrix")
 public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
@@ -42,56 +40,13 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
     * 
     * @param weightMatrix3D the weight matrix to copy the data of. parameter will not be modified.
     */
+   @Override
    public void set(WeightMatrix3DMessage weightMatrix)
    {
       weightFrameId = weightMatrix.getWeightFrameId();
-      this.xWeight = weightMatrix.getXWeight();
-      this.yWeight = weightMatrix.getYWeight();
-      this.zWeight = weightMatrix.getZWeight();
-   }
-
-   /**
-    * Sets this weight matrix message to {@code weightMatrix}.
-    * 
-    * @param weightMatrix the weight matrix to copy the data of. parameter will not be modified.
-    */
-   public void set(WeightMatrix3D weightMatrix)
-   {
-      setWeightFrame(weightMatrix.getWeightFrame());
-      this.xWeight = weightMatrix.getXAxisWeight();
-      this.yWeight = weightMatrix.getYAxisWeight();
-      this.zWeight = weightMatrix.getZAxisWeight();
-   }
-
-   /**
-    * Sets the weights
-    * <p>
-    * Note that it is preferable to also set weight frame to which these weights are expressed in
-    * to.
-    * </p>
-    * 
-    * @param xWeight sets the weight of the x-axis motion
-    * @param yWeight sets the weight of the y-axis motion
-    * @param zWeight sets the weight of the z-axis motion
-    */
-   public void setWeights(double xWeight, double yWeight, double zWeight)
-   {
-      this.xWeight = xWeight;
-      this.yWeight = yWeight;
-      this.zWeight = zWeight;
-   }
-
-   /**
-    * sets the frame the weights are expressed in
-    * 
-    * @param weightFrame the new frame to which the weights are expressed in
-    */
-   public void setWeightFrame(ReferenceFrame weightFrame)
-   {
-      if (weightFrame == null)
-         weightFrameId = NameBasedHashCodeTools.NULL_HASHCODE;
-      else
-         weightFrameId = weightFrame.getNameBasedHashCode();
+      xWeight = weightMatrix.getXWeight();
+      yWeight = weightMatrix.getYWeight();
+      zWeight = weightMatrix.getZWeight();
    }
 
    /**
@@ -102,20 +57,6 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    public void setWeightFrameId(long weightFrameId)
    {
       this.weightFrameId = weightFrameId;
-   }
-
-   /**
-    * Unpacks this message into the given {@code weightMatrix3D}.
-    * <p>
-    * Note that the weight frame can not be retrieved here, it has to be set afterwards.
-    * </p>
-    * 
-    * @param weightMatrix3D the weight matrix into which this message is being unpacked. Modified.
-    */
-   public void getWeightMatrix(WeightMatrix3D weightMatrix3D)
-   {
-      weightMatrix3D.clearWeightFrame();
-      weightMatrix3D.setWeights(xWeight, yWeight, zWeight);
    }
 
    /**
@@ -189,22 +130,6 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage>
    public void setZWeight(double zWeight)
    {
       this.zWeight = zWeight;
-   }
-
-   @Override
-   public int hashCode()
-   {
-      final int prime = 31;
-      int result = 1;
-      result = prime * result + (int) (weightFrameId ^ (weightFrameId >>> 32));
-      long temp;
-      temp = Double.doubleToLongBits(xWeight);
-      result = prime * result + (int) (temp ^ (temp >>> 32));
-      temp = Double.doubleToLongBits(yWeight);
-      result = prime * result + (int) (temp ^ (temp >>> 32));
-      temp = Double.doubleToLongBits(zWeight);
-      result = prime * result + (int) (temp ^ (temp >>> 32));
-      return result;
    }
 
    @Override

@@ -8,6 +8,6 @@ bool enable_user_pelvis_control false
 # If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking
 # will keep the height manager in user mode while walking.
 # If this is false the height manager will switch back to controller mode when walking.
-bool enable_user_pelvis_height_control_during_walking false
+bool enable_user_pelvis_control_during_walking false
 # The position trajectory information.
 EuclideanTrajectoryMessage euclidean_trajectory

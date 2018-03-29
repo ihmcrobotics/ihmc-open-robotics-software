@@ -3,9 +3,7 @@ package us.ihmc.quadrupedRobotics.controller;
 public enum QuadrupedControlMode
 {
    POSITION,
-   FORCE,
-   POSITION_DEV,
-   FORCE_DEV;
+   FORCE;
 
    public static QuadrupedControlMode fromCmdArgument(String argument)
    {
@@ -16,14 +14,6 @@ public enum QuadrupedControlMode
       else if (argument.equals("--force"))
       {
          return FORCE;
-      }
-      else if (argument.equals("--position-dev"))
-      {
-         return POSITION_DEV;
-      }
-      else if (argument.equals("--force-dev"))
-      {
-         return FORCE_DEV;
       }
 
       return null;

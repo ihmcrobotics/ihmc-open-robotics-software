@@ -4,6 +4,7 @@ import java.util.Map;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -81,14 +82,19 @@ public class WaypointBasedTrajectoryCommand
       else
          endEffector = rigidBodyNamedBasedHashMap.get(endEffectorNameBasedHashCode);
 
-      for (int i = 0; i < message.getNumberOfWaypoints(); i++)
+      for (int i = 0; i < message.waypoints.size(); i++)
       {
-         waypointTimes.add(message.getWaypointTime(i));
-         waypoints.add().set(message.getWaypoint(i));
+         waypointTimes.add(message.waypointTimes.get(i));
+         waypoints.add().set(message.waypoints.get(i));
       }
 
-      message.getControlFramePose(endEffector, controlFramePose);
-      message.getSelectionMatrix(selectionMatrix);
+      ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
+      controlFramePose.setIncludingFrame(referenceFrame, message.controlFramePositionInEndEffector, message.controlFrameOrientationInEndEffector);
+      selectionMatrix.resetSelection();
+      SelectionMatrix3DMessage angularSelection = message.getAngularSelectionMatrix();
+      SelectionMatrix3DMessage linearSelection = message.getLinearSelectionMatrix();
+      selectionMatrix.setAngularAxisSelection(angularSelection.xSelected, angularSelection.ySelected, angularSelection.zSelected);
+      selectionMatrix.setLinearAxisSelection(linearSelection.xSelected, linearSelection.ySelected, linearSelection.zSelected);
       
       weight = message.weight;
    }

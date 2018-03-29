@@ -75,7 +75,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
    {
       fullRobotModel.updateFrames();
 
@@ -89,7 +89,11 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
       }
 
       timeInTrajectory += dt;
+   }
 
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
+   {
       return isMotionExpired() ? ControllerEvent.DONE : null;
    }
 

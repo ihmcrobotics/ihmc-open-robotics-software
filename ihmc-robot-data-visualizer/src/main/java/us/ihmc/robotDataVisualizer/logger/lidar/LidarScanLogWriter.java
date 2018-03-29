@@ -184,9 +184,9 @@ public class LidarScanLogWriter
          logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.getZ32());
          logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.getS32());
 
-         logDataOutputStream.writeInt(lidarScanMessage.scan.length);
+         logDataOutputStream.writeInt(lidarScanMessage.scan.size());
 
-         for (float scanPoint : lidarScanMessage.scan)
+         for (float scanPoint : lidarScanMessage.scan.toArray())
          {
             logDataOutputStream.writeFloat(scanPoint);
          }

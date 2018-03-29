@@ -206,17 +206,26 @@ public class StateMachine<K extends Enum<K>, S extends State>
     */
    public boolean doTransitions()
    {
+      if (currentStateKey.getEnumValue() == null)
+         resetToInitialState();
+
       callPreTransitionCallbacks();
 
       StateTransition<K> stateTransition = stateTransitions.get(currentStateKey.getEnumValue());
 
       if (stateTransition == null)
+      {
+         callPostTransitionCallbacks();
          return false;
+      }
 
       K nextStateKey = stateTransition.isTransitionRequested(clock.getTimeInCurrentState());
 
       if (nextStateKey == null)
+      {
+         callPostTransitionCallbacks();
          return false;
+      }
 
       performTransition(nextStateKey);
 

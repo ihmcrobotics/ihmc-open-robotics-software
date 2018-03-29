@@ -2,7 +2,6 @@ package us.ihmc.communication.packetCommunicator;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 
 import us.ihmc.communication.interfaces.Connectable;
 import us.ihmc.communication.net.ConnectionStateListener;
@@ -10,6 +9,7 @@ import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.KryoObjectClient;
 import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.net.NetClassList.PacketTrimmer;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.PacketConsumer;
@@ -27,7 +27,7 @@ public class PacketCommunicator implements Connectable
    private final HashMap<Class<?>, HashMap<PacketConsumer<?>, ObjectConsumer<?>>> consumers = new HashMap<>();
    private final HashMap<GlobalPacketConsumer, GlobalObjectConsumer> globalConsumers = new HashMap<>();
 
-   private final List<Class<?>> registeredClasses;
+   private final NetClassList netClassList;
 
    private final String description;
 
@@ -47,7 +47,7 @@ public class PacketCommunicator implements Connectable
    {
       KryoObjectClient objectCommunicator = new KryoObjectClient(KryoObjectClient.getByName(host), port.getPort(), netClassList, BUFFER_SIZE, BUFFER_SIZE);
       objectCommunicator.setReconnectAutomatically(reconnectAutomatically);
-      return new PacketCommunicator("TCPClient[host=" + host + ",port=" + port + "]", objectCommunicator, netClassList.getPacketClassList());
+      return new PacketCommunicator("TCPClient[host=" + host + ",port=" + port + "]", objectCommunicator, netClassList);
    }
 
    public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, NetClassList netClassList)
@@ -61,32 +61,29 @@ public class PacketCommunicator implements Connectable
       KryoObjectServer server = new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize);
       server.setMaximumObjectSize(maximumObjectSize);
 
-      return new PacketCommunicator("TCPServer[port=" + port + "]", server, netClassList.getPacketClassList());
+      return new PacketCommunicator("TCPServer[port=" + port + "]", server, netClassList);
    }
 
    public static PacketCommunicator createTCPPacketCommunicatorServer(NetworkPorts port, int writeBufferSize, int receiveBufferSize, NetClassList netClassList)
    {
-      return new PacketCommunicator("TCPServer[port=" + port + "]", new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize),
-                                    netClassList.getPacketClassList());
+      return new PacketCommunicator("TCPServer[port=" + port + "]", new KryoObjectServer(port.getPort(), netClassList, writeBufferSize, receiveBufferSize), netClassList);
    }
 
    public static PacketCommunicator createIntraprocessPacketCommunicator(NetworkPorts port, NetClassList netClassList)
    {
-      return new PacketCommunicator("IntraProcess[port=" + port + "]", new IntraprocessObjectCommunicator(port.getPort(), netClassList),
-                                    netClassList.getPacketClassList());
+      return new PacketCommunicator("IntraProcess[port=" + port + "]", new IntraprocessObjectCommunicator(port.getPort(), netClassList), netClassList);
    }
 
    public static PacketCommunicator createCustomPacketCommunicator(NetworkedObjectCommunicator objectCommunicator, NetClassList netClassList)
    {
-      return new PacketCommunicator("Custom[class=" + objectCommunicator.getClass().getSimpleName() + "]", objectCommunicator,
-                                    netClassList.getPacketClassList());
+      return new PacketCommunicator("Custom[class=" + objectCommunicator.getClass().getSimpleName() + "]", objectCommunicator, netClassList);
    }
 
-   private PacketCommunicator(String description, NetworkedObjectCommunicator communicator, List<Class<?>> registeredClasses)
+   private PacketCommunicator(String description, NetworkedObjectCommunicator communicator, NetClassList netClassList)
    {
       this.description = description;
       this.communicator = communicator;
-      this.registeredClasses = registeredClasses;
+      this.netClassList = netClassList;
    }
 
    public void attachStateListener(ConnectionStateListener stateListener)
@@ -178,12 +175,21 @@ public class PacketCommunicator implements Connectable
     * @param packet Send a packet to connected receivers. Does not call listeners
     * @return
     */
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public int send(Packet<?> packet)
    {
       if (!freezeCommunication)
-         return communicator.send(packet);
+      {
+         PacketTrimmer packetTrimmer = netClassList.getPacketTrimmer(packet.getClass());
+         if (packetTrimmer != null)
+            return communicator.send(packetTrimmer.trim(packet));
+         else
+            return communicator.send(packet);
+      }
       else
+      {
          return -1;
+      }
    }
 
    private static class GlobalPacketObjectConsumer implements GlobalObjectConsumer
@@ -221,11 +227,6 @@ public class PacketCommunicator implements Connectable
          if (!freezeCommunication)
             packetConsumer.receivedPacket(object);
       }
-   }
-
-   public List<Class<?>> getRegisteredClasses()
-   {
-      return registeredClasses;
    }
 
    @Override

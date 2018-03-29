@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 
 @RosMessagePacket(documentation =
@@ -21,7 +20,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
    @RosExportedField(documentation = "Specifies which hand will execute the trajectory.")
    public byte robotSide;
    @RosExportedField(documentation = "The position/orientation trajectory information.")
-   public SE3TrajectoryMessage se3Trajectory;
+   public SE3TrajectoryMessage se3Trajectory = new SE3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization.
@@ -29,7 +28,6 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
     */
    public HandTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -40,7 +38,6 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
    {
       se3Trajectory = new SE3TrajectoryMessage(handTrajectoryMessage.se3Trajectory);
       robotSide = handTrajectoryMessage.robotSide;
-      setUniqueId(handTrajectoryMessage.getUniqueId());
       setDestination(handTrajectoryMessage.getDestination());
    }
 
@@ -73,14 +70,6 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
    }
 
    @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (se3Trajectory != null)
-         se3Trajectory.setUniqueId(uniqueId);
-   }
-
-   @Override
    public boolean epsilonEquals(HandTrajectoryMessage other, double epsilon)
    {
       if (robotSide != other.robotSide)
@@ -94,17 +83,10 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage>
    {
       String ret = "";
       if (se3Trajectory.taskspaceTrajectoryPoints != null)
-         ret = "Hand SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.getNumberOfTrajectoryPoints();
+         ret = "Hand SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.taskspaceTrajectoryPoints.size();
       else
          ret = "Hand SE3 trajectory: no SE3 trajectory points";
 
       return ret + ", robotSide = " + robotSide;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateHandTrajectoryMessage(this);
    }
 }

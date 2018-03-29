@@ -1,5 +1,10 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -14,8 +19,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
-import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -31,7 +36,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineState;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
@@ -44,11 +48,6 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.JointStat
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class GenericQuadrupedControllerFactoryDummyOutputDemo
 {
@@ -186,7 +185,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       double robotTimeBeforeWarmUp = robotTimestamp.getDoubleValue();
       for (QuadrupedForceControllerEnum state : QuadrupedForceControllerEnum.values)
       {
-         FiniteStateMachineState<ControllerEvent> stateImpl = controllerManager.getState(state);
+         QuadrupedController stateImpl = controllerManager.getState(state);
 
          stateImpl.onEntry();
 
@@ -199,7 +198,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
             long itStart = System.nanoTime();
             simulationStateEstimator.doControl();
             robotTimestamp.add(Conversions.millisecondsToSeconds(1));
-            stateImpl.process();
+            stateImpl.doAction(Double.NaN);
 
             long itTime = System.nanoTime() - itStart;
 

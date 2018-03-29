@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.10"
+      classpath "us.ihmc:ihmc-build:0.12.11"
       classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
 
    }
@@ -30,7 +30,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
    compile group: 'us.ihmc', name: 'euclid', version: '0.7.9.1'
    compile group: "us.ihmc", name: "ihmc-javafx-toolkit", version: "source"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.9'
    compile group: 'us.ihmc', name: 'robot-environment-awareness', version: "source"
 }
 

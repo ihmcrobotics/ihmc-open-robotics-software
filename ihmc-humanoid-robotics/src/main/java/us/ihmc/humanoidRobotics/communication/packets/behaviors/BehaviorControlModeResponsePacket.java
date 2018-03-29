@@ -22,7 +22,7 @@ public class BehaviorControlModeResponsePacket extends Packet<BehaviorControlMod
       behaviorControlModeEnumRequest = other.behaviorControlModeEnumRequest;
    }
 
-   public byte getRequestedControl()
+   public byte getBehaviorControlModeEnumRequest()
    {
       return behaviorControlModeEnumRequest;
    }

@@ -1,19 +1,6 @@
 package us.ihmc.communication.packets;
 
-import static us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage.nullEqualsAndEpsilonEquals;
-
-import java.util.Arrays;
-
-import org.ejml.data.DenseMatrix64F;
-
-import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 /**
  * {@link KinematicsToolboxCenterOfMassMessage} is part of the API of the
@@ -32,10 +19,22 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
     * This is the desired center of mass position. The data is assumed to be expressed in world
     * frame.
     */
-   public Point3D32 desiredPositionInWorld;
-
-   // TODO add doc
-   public SelectionMatrix3DMessage selectionMatrix;
+   public Point3D32 desiredPositionInWorld = new Point3D32();
+   /**
+    * The selection matrix is used to determinate which degree of freedom of the center of mass
+    * should be controlled. When it is NOT provided, the controller will assume that all the degrees
+    * of freedom should be controlled.
+    * <p>
+    * The selection frame coming along with the given selection matrix is used to determine to what
+    * reference frame the selected axes are referring to. For instance, if only the hand height in
+    * world should be controlled on the linear z component of the selection matrix should be
+    * selected and the reference frame should world frame. When no reference frame is provided with
+    * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
+    * if not defined otherwise.
+    * </p>
+    * 
+    */
+   public SelectionMatrix3DMessage selectionMatrix = new SelectionMatrix3DMessage();
    /**
     * Array of 3 floats used to define the priority of this task on the solver side:<br>
     * <code>float[] weights = {weightX, weightY, weightZ};</code>
@@ -44,11 +43,10 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
     * center of mass frame.
     * </p>
     */
-   public float[] weights;
+   public WeightMatrix3DMessage weights = new WeightMatrix3DMessage();
 
    public KinematicsToolboxCenterOfMassMessage()
    {
-      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override
@@ -60,138 +58,18 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
          selectionMatrix = new SelectionMatrix3DMessage();
          selectionMatrix.set(other.selectionMatrix);
       }
-      if (other.weights != null)
-         weights = Arrays.copyOf(other.weights, other.weights.length);
+      weights.set(other.weights);
       setPacketInformation(other);
    }
 
-   /**
-    * Sets the desired position that the center of mass should reach. The data is assumed to be
-    * expressed in world frame.
-    * 
-    * @param desiredPosition the position the center of mass should reach. Not modified.
-    */
-   public void setDesiredPosition(Point3DReadOnly desiredPosition)
+   public SelectionMatrix3DMessage getSelectionMatrix()
    {
-      if (desiredPositionInWorld == null)
-         desiredPositionInWorld = new Point3D32(desiredPosition);
-      else
-         desiredPositionInWorld.set(desiredPosition);
+      return selectionMatrix;
    }
 
-   /**
-    * Sets the desired position that the center of mass should reach. The data is assumed to be
-    * expressed in world frame.
-    * 
-    * @param desiredPosition the position the center of mass should reach. Not modified.
-    * @throws ReferenceFrameMismatchException if the argument is not expressed in world frame.
-    */
-   public void setDesiredPosition(FramePoint3D desiredPosition)
+   public WeightMatrix3DMessage getWeights()
    {
-      desiredPosition.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setDesiredPosition(desiredPosition);
-   }
-
-   /** Ensures that the array for the weights is initialized. */
-   private void initializeWeight()
-   {
-      if (weights == null)
-         weights = new float[3];
-   }
-
-   /**
-    * Sets the weight to use for this task.
-    * <p>
-    * The weight relates to the priority of a task relative to the other active tasks. A higher
-    * weight refers to a higher priority.
-    * </p>
-    * 
-    * @param weight the weight value for this task.
-    */
-   public void setWeight(double weight)
-   {
-      initializeWeight();
-      for (int i = 0; i < 3; i++)
-         weights[i] = (float) weight;
-   }
-
-   /**
-    * Enables the control of all the degrees of freedom of the center of mass.
-    */
-   public void setSelectionMatrixToIdentity()
-   {
-      selectionMatrix = new SelectionMatrix3DMessage();
-   }
-
-   /**
-    * Sets the selection matrix to use for executing this message.
-    * <p>
-    * The selection matrix is used to determinate which degree of freedom of the center of mass
-    * should be controlled. When it is NOT provided, the controller will assume that all the degrees
-    * of freedom should be controlled.
-    * </p>
-    * <p>
-    * The selection frame coming along with the given selection matrix is used to determine to what
-    * reference frame the selected axes are referring to. For instance, if only the hand height in
-    * world should be controlled on the linear z component of the selection matrix should be
-    * selected and the reference frame should world frame. When no reference frame is provided with
-    * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
-    * if not defined otherwise.
-    * </p>
-    * 
-    * @param selectionMatrix the selection matrix to use when executing this trajectory message. Not
-    *           modified.
-    */
-   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
-   {
-      if (this.selectionMatrix == null)
-         this.selectionMatrix = MessageTools.createSelectionMatrix3DMessage(selectionMatrix);
-      else
-         this.selectionMatrix.set(selectionMatrix);
-   }
-
-   public void getDesiredPosition(FramePoint3D desiredPositionToPack)
-   {
-      desiredPositionToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), desiredPositionInWorld);
-   }
-
-   public void getSelectionMatrix(SelectionMatrix3D selectionMatrixToPack)
-   {
-      selectionMatrixToPack.clearSelection();
-      if (selectionMatrix != null)
-         selectionMatrix.getSelectionMatrix(selectionMatrixToPack);
-   }
-
-   /**
-    * Returns the unique ID referring to the selection frame to use with the selection matrix of
-    * this message.
-    * <p>
-    * If this message does not have a selection matrix, this method returns
-    * {@link NameBasedHashCodeTools#NULL_HASHCODE}.
-    * </p>
-    * 
-    * @return the selection frame ID for the selection matrix.
-    */
-   public long getSelectionFrameId()
-   {
-      if (selectionMatrix != null)
-         return selectionMatrix.getSelectionFrameId();
-      else
-         return NameBasedHashCodeTools.NULL_HASHCODE;
-   }
-
-   public void getWeightVector(DenseMatrix64F weightVectorToPack)
-   {
-      weightVectorToPack.reshape(3, 1);
-      if (weights == null)
-      {
-         weightVectorToPack.zero();
-      }
-      else
-      {
-         for (int i = 0; i < 3; i++)
-            weightVectorToPack.set(i, 0, weights[i]);
-      }
+      return weights;
    }
 
    /**
@@ -208,10 +86,8 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
    @Override
    public boolean epsilonEquals(KinematicsToolboxCenterOfMassMessage other, double epsilon)
    {
-      if (!nullEqualsAndEpsilonEquals(desiredPositionInWorld, desiredPositionInWorld, epsilon))
+      if (!desiredPositionInWorld.epsilonEquals(desiredPositionInWorld, epsilon))
          return false;
-
-      // TODO Add the selection matrix in there
 
       if (weights == null && other.weights == null)
          return true;
@@ -219,11 +95,10 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
          return false;
       if (weights != null && other.weights == null)
          return false;
-      for (int i = 0; i < 6; i++)
-      {
-         if (!MathTools.epsilonEquals(weights[i], other.weights[i], epsilon))
-            return false;
-      }
+      if (!weights.epsilonEquals(other.weights, epsilon))
+         return false;
+      if (!selectionMatrix.epsilonEquals(other.selectionMatrix, epsilon))
+         return false;
       return true;
    }
 }

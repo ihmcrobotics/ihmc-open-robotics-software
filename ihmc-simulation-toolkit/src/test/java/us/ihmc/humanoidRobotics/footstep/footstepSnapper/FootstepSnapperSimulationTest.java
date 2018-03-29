@@ -13,6 +13,7 @@ import java.util.Random;
 import java.util.StringTokenizer;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -55,7 +56,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -75,6 +75,7 @@ public class FootstepSnapperSimulationTest
 
       FootstepPointsDataReader dataReader = new FootstepPointsDataReader(resourceAsStream);
       FootstepDataMessage footstepData = new FootstepDataMessage();
+      footstepData.setRobotSide(RobotSide.LEFT.toByte());
       FootSpoof spoof = new FootSpoof("basicSpoof");
       FramePose2D desiredPose = new FramePose2D(ReferenceFrame.getWorldFrame());
 

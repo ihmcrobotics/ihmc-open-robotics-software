@@ -105,7 +105,11 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
       {
          return;
       }
-      packet.setAll(side.toByte(), connected.get(), calibrated.get(), fingers);
+      packet.robotSide = side.toByte();
+      packet.connected = connected.get();
+      packet.calibrated = calibrated.get();
+      packet.jointAngles.reset();
+      packet.jointAngles.add(fingers);
       packetCopier.commit();
    }
 

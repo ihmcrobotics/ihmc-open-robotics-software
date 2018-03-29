@@ -15,8 +15,8 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
    private double masterGain = Double.NaN;
 
    private double velocityScaling = Double.NaN;
-   private double velocityIntegrationLeakRate = Double.NaN;
-   private double positionIntegrationLeakRate = Double.NaN;
+   private double velocityIntegrationBreakFrequency = Double.NaN;
+   private double positionIntegrationBreakFrequency = Double.NaN;
 
    public JointDesiredOutput()
    {
@@ -37,8 +37,8 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       masterGain = Double.NaN;
 
       velocityScaling = Double.NaN;
-      velocityIntegrationLeakRate = Double.NaN;
-      positionIntegrationLeakRate = Double.NaN;
+      velocityIntegrationBreakFrequency = Double.NaN;
+      positionIntegrationBreakFrequency = Double.NaN;
    }
 
    public void set(JointDesiredOutputReadOnly other)
@@ -53,8 +53,8 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
       damping = other.getDamping();
       masterGain = other.getMasterGain();
       velocityScaling = other.getVelocityScaling();
-      velocityIntegrationLeakRate = other.getVelocityIntegrationLeakRate();
-      positionIntegrationLeakRate = other.getPositionIntegrationLeakRate();
+      velocityIntegrationBreakFrequency = other.getVelocityIntegrationBreakFrequency();
+      positionIntegrationBreakFrequency = other.getPositionIntegrationBreakFrequency();
    }
 
    /**
@@ -83,10 +83,10 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
          masterGain = other.getMasterGain();
       if (!hasVelocityScaling())
          velocityScaling = other.getVelocityScaling();
-      if (!hasVelocityIntegrationLeakRate())
-         velocityIntegrationLeakRate = other.getVelocityIntegrationLeakRate();
-      if (!hasPositionIntegrationLeakRate())
-         positionIntegrationLeakRate = other.getPositionIntegrationLeakRate();
+      if (!hasVelocityIntegrationBreakFrequency())
+         velocityIntegrationBreakFrequency = other.getVelocityIntegrationBreakFrequency();
+      if (!hasPositionIntegrationBreakFrequency())
+         positionIntegrationBreakFrequency = other.getPositionIntegrationBreakFrequency();
    }
 
    public void setControlMode(JointDesiredControlMode controlMode)
@@ -263,36 +263,36 @@ public class JointDesiredOutput extends JointDesiredOutputReadOnly
    }
 
    @Override
-   public boolean hasVelocityIntegrationLeakRate()
+   public boolean hasVelocityIntegrationBreakFrequency()
    {
-      return !Double.isNaN(velocityIntegrationLeakRate);
+      return !Double.isNaN(velocityIntegrationBreakFrequency);
    }
 
    @Override
-   public double getVelocityIntegrationLeakRate()
+   public double getVelocityIntegrationBreakFrequency()
    {
-      return velocityIntegrationLeakRate;
+      return velocityIntegrationBreakFrequency;
    }
 
-   public void setVelocityIntegrationLeakRate(double velocityIntegrationLeakRate)
+   public void setVelocityIntegrationBreakFrequency(double velocityIntegrationBreakFrequency)
    {
-      this.velocityIntegrationLeakRate = velocityIntegrationLeakRate;
-   }
-
-   @Override
-   public boolean hasPositionIntegrationLeakRate()
-   {
-      return !Double.isNaN(positionIntegrationLeakRate);
+      this.velocityIntegrationBreakFrequency = velocityIntegrationBreakFrequency;
    }
 
    @Override
-   public double getPositionIntegrationLeakRate()
+   public boolean hasPositionIntegrationBreakFrequency()
    {
-      return positionIntegrationLeakRate;
+      return !Double.isNaN(positionIntegrationBreakFrequency);
    }
 
-   public void setPositionIntegrationLeakRate(double positionIntegrationLeakRate)
+   @Override
+   public double getPositionIntegrationBreakFrequency()
    {
-      this.positionIntegrationLeakRate = positionIntegrationLeakRate;
+      return positionIntegrationBreakFrequency;
+   }
+
+   public void setPositionIntegrationBreakFrequency(double positionIntegrationBreakFrequency)
+   {
+      this.positionIntegrationBreakFrequency = positionIntegrationBreakFrequency;
    }
 }

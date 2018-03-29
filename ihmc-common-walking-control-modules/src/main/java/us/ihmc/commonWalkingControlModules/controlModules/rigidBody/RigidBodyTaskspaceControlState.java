@@ -240,8 +240,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       positionTrajectoryGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
       orientationTrajectoryGenerator.getAngularData(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
 
-      spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackControlCommand.changeFrameAndSetFeedForward(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
       if (orientationGains != null)
          spatialFeedbackControlCommand.setOrientationGains(orientationGains);
       if (positionGains != null)

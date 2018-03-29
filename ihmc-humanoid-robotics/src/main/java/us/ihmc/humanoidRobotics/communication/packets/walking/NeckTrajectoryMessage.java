@@ -1,11 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move the neck in jointspace to the desired joint angles while going through the specified trajectory points."
@@ -16,7 +14,7 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage>
 {
    @RosExportedField(documentation = "Trajectories for each joint.")
-   public JointspaceTrajectoryMessage jointspaceTrajectory;
+   public JointspaceTrajectoryMessage jointspaceTrajectory = new JointspaceTrajectoryMessage();
 
    /**
     * Empty constructor for serialization.
@@ -34,7 +32,6 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage>
    public NeckTrajectoryMessage(NeckTrajectoryMessage neckTrajectoryMessage)
    {
       jointspaceTrajectory = new JointspaceTrajectoryMessage(neckTrajectoryMessage.jointspaceTrajectory);
-      setUniqueId(neckTrajectoryMessage.getUniqueId());
    }
 
    @Override
@@ -43,14 +40,6 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage>
       jointspaceTrajectory = new JointspaceTrajectoryMessage();
       jointspaceTrajectory.set(other.jointspaceTrajectory);
       setPacketInformation(other);
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (jointspaceTrajectory != null)
-         jointspaceTrajectory.setUniqueId(uniqueId);
    }
 
    public void setJointspaceTrajectory(JointspaceTrajectoryMessage jointspaceTrajectory)
@@ -63,22 +52,11 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage>
       return jointspaceTrajectory;
    }
 
-   public QueueableMessage getQueueingProperties()
-   {
-      return jointspaceTrajectory.getQueueingProperties();
-   }
-
    @Override
    public boolean epsilonEquals(NeckTrajectoryMessage other, double epsilon)
    {
       if (!jointspaceTrajectory.epsilonEquals(other.jointspaceTrajectory, epsilon))
          return false;
       return true;
-   }
-
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateNeckTrajectoryMessage(this);
    }
 }

@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.communication.packets.ExecutionTiming;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -50,15 +50,15 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       executionTiming = ExecutionTiming.fromByte(message.executionTiming);
       trustHeightOfFootsteps = message.trustHeightOfFootsteps;
       areFootstepsAdjustable = message.areFootstepsAdjustable;
-      offsetFootstepsWithExecutionError = message.isOffsetFootstepsWithExecutionError();
-      ArrayList<FootstepDataMessage> dataList = message.getDataList();
+      offsetFootstepsWithExecutionError = message.getOffsetFootstepsWithExecutionError();
+      List<FootstepDataMessage> dataList = message.getFootstepDataList();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       if (dataList != null)
       {
          for (int i = 0; i < dataList.size(); i++)
             footsteps.add().set(worldFrame, dataList.get(i));
       }
-      setQueueableCommandVariables(message.getUniqueId(), message.getQueueingProperties());
+      setQueueableCommandVariables(message.getQueueingProperties());
    }
 
    @Override

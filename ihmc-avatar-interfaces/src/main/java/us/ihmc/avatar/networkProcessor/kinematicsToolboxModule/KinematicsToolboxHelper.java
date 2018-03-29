@@ -134,19 +134,19 @@ public class KinematicsToolboxHelper
    static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
                                                        OneDoFJoint[] oneDoFJoints)
    {
-      float[] newJointAngles = robotConfigurationData.getJointAngles();
+      TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
 
-      for (int i = 0; i < newJointAngles.length; i++)
+      for (int i = 0; i < newJointAngles.size(); i++)
       {
-         oneDoFJoints[i].setQ(newJointAngles[i]);
+         oneDoFJoints[i].setQ(newJointAngles.get(i));
          oneDoFJoints[i].setQd(0.0);
       }
 
       if (desiredRootJoint != null)
       {
-         Vector3D32 translation = robotConfigurationData.getPelvisTranslation();
+         Vector3D32 translation = robotConfigurationData.getRootTranslation();
          desiredRootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-         Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
+         Quaternion32 orientation = robotConfigurationData.getRootOrientation();
          desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
          

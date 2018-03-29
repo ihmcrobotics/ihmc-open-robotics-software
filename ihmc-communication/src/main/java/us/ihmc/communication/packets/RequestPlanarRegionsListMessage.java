@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlanarRegionsListMessage>
+public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegionsListMessage>
 {
    public static final byte SINGLE_UPDATE = 0;
    public static final byte CONTINUOUS_UPDATE = 1;
@@ -8,7 +8,7 @@ public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlana
    public static final byte CLEAR = 3;
 
    public byte planarRegionsRequestType;
-   public BoundingBox3DMessage boundingBoxInWorldForRequest;
+   public BoundingBox3DMessage boundingBoxInWorldForRequest = new BoundingBox3DMessage();
 
    public RequestPlanarRegionsListMessage()
    {
@@ -18,24 +18,19 @@ public class RequestPlanarRegionsListMessage extends SettablePacket<RequestPlana
    public void set(RequestPlanarRegionsListMessage other)
    {
       planarRegionsRequestType = other.planarRegionsRequestType;
-      boundingBoxInWorldForRequest = other.boundingBoxInWorldForRequest;
+      boundingBoxInWorldForRequest.set(other.boundingBoxInWorldForRequest);
       setDestination(other.getDestination());
       setPacketInformation(other);
    }
 
-   public byte getRequestType()
+   public byte getPlanarRegionsRequestType()
    {
       return planarRegionsRequestType;
    }
 
-   public void setRequestType(byte requestType)
+   public void setPlanarRegionsRequestType(byte requestType)
    {
       this.planarRegionsRequestType = requestType;
-   }
-
-   public boolean hasBoundingBox()
-   {
-      return boundingBoxInWorldForRequest != null;
    }
 
    public BoundingBox3DMessage getBoundingBoxInWorldForRequest()
