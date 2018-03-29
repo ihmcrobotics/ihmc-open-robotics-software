@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.Test;
@@ -157,5 +158,23 @@ public class PreallocatedListTest
       assertEquals(doubleList.size(), 10);
       assertEquals(doubleList.get(8).doubleValue(), 8.0, epsilon);
       assertEquals(doubleList.get(9).doubleValue(), 9.0, epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testPreallocatedListSubList()
+   {
+      PreallocatedList<MutableDouble> doubleList = new PreallocatedList<MutableDouble>(8, MutableDouble::new);
+      doubleList.add(); doubleList.get(0).setValue(0.0);
+      doubleList.add(); doubleList.get(1).setValue(1.0);
+      doubleList.add(); doubleList.get(2).setValue(2.0);
+      doubleList.add(); doubleList.get(3).setValue(3.0);
+      doubleList.add(); doubleList.get(4).setValue(4.0);
+      doubleList.add(); doubleList.get(5).setValue(5.0);
+
+      List<MutableDouble> subList = doubleList.subList(2, 4);
+      assertTrue(subList.size() == 2);
+      assertEquals(subList.get(0).getValue(), 2.0, 1e-12);
+      assertEquals(subList.get(1).getValue(), 3.0, 1e-12);
    }
 }

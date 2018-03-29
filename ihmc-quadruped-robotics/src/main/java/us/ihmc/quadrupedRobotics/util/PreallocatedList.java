@@ -296,7 +296,25 @@ public class PreallocatedList<E> implements List<E>
    @Override
    public List<E> subList(int i, int i1)
    {
-      throw new UnsupportedOperationException();
+      subListRangeCheck(i, i1);
+      for (int j = size.getValue() - 1; j >= i1; j--)
+      {
+         remove(j);
+      }
+      for (int j = 0; j < i; j++)
+      {
+         remove(0);
+      }
+      return this;
+   }
+
+   private void subListRangeCheck(int i, int i1) {
+      if (i < 0)
+         throw new IndexOutOfBoundsException("startIndex = " + i);
+      if (i1 > size.getValue())
+         throw new IndexOutOfBoundsException("endIndex = " + i1);
+      if (i > i1)
+         throw new IllegalArgumentException("startIndex(" + i + ") shouldn't be greater than endIndex(" + i1 + ")");
    }
 
    private void swapUnsafe(int i1, int i2)
