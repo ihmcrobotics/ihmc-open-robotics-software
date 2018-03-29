@@ -52,7 +52,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -68,6 +70,12 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(TLongArrayList.class);
       registerPacketField(TFloatArrayList.class);
       registerPacketField(TByteArrayList.class);
+      registerPacketField(IDLSequence.Object.class);
+      registerPacketField(IDLSequence.Float.class);
+      registerPacketField(IDLSequence.Boolean.class);
+      registerPacketField(IDLSequence.Double.class);
+      registerPacketField(IDLSequence.Integer.class);
+      registerPacketField(TopicDataType.class);
       registerPacketField(RecyclingArrayListPubSub.class);
 
       registerPacketClass(Packet.class);
