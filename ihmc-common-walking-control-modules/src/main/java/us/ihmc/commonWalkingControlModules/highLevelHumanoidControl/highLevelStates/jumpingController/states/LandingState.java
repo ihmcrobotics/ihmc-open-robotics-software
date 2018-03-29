@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states;
 
-public class LandingState extends AbstractJumpingState
+public class LandingState extends AbstractJumpState
 {
    private static final JumpStateEnum stateEnum = JumpStateEnum.LANDING;
 

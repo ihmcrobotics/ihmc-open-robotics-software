@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -38,8 +39,12 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
    private final YoFrameVector yoDesiredAngularMomentumRateOfChange;
 
    private final double totalMass;
-   private ForceTrajectory groundReactionForceProfile;
-   private FrameVector3D gravitationalForce = new FrameVector3D(worldFrame);
+   private final ForceTrajectory groundReactionForceProfile = new ForceTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments,
+                                                                                  WholeBodyMotionPlanner.numberOfForceCoefficients);
+   private final FrameVector3D gravitationalForce = new FrameVector3D(worldFrame);
+   private final FrameVector3D groundReactionForceToAchieve = new FrameVector3D();
+   private final FramePoint3D currentCoMPosition = new FramePoint3D();
+   private final FrameVector3D currentCoMVelocity = new FrameVector3D();
 
    public CentroidalMomentumManager(HighLevelHumanoidControllerToolbox controllerToolbox, JumpControllerParameters parameters, YoVariableRegistry registry)
    {
@@ -105,8 +110,6 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       momentumCommand.setSelectionMatrixToIdentity();
    }
 
-   private final FrameVector3D groundReactionForceToAchieve = new FrameVector3D();
-
    public void computeMomentumRateOfChangeFromForceProfile(double time)
    {
       groundReactionForceProfile.update(time, groundReactionForceToAchieve);
@@ -123,9 +126,14 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       momentumCommand.setSelectionMatrixToIdentity();
    }
 
+   public FramePoint3D getCurrentCoMPosition()
+   {
+      return currentCoMPosition;
+   }
+
    public void setGroundReactionForceProfile(ForceTrajectory forceTrajectory)
    {
-      this.groundReactionForceProfile = forceTrajectory;
+      this.groundReactionForceProfile.set(forceTrajectory);
    }
 
    @Override

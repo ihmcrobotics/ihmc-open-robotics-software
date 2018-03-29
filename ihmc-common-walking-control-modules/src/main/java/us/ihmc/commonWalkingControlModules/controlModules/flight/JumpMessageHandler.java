@@ -40,25 +40,31 @@ public class JumpMessageHandler
    
    public void createJumpSequenceForTesting(FramePoint3D currentPosition, JumpStateEnum currentState)
    {
+      contactStateList.clear();
       switch (currentState)
       {
+      case STANDING:
+         break;
       case TAKE_OFF:
          ContactState launchState = new ContactState(worldFrame);
-         launchState.setContactStateDuration(0.45);
+         launchState.setDuration(0.45);
          createRectangle(currentPosition.getReferenceFrame(), currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
          launchState.setSupportPolygon(tempPolygon);
+         launchState.setContactType(ContactType.DOUBLE_SUPPORT);
          contactStateList.add(launchState);
       case FLIGHT:
          ContactState flightState = new ContactState(worldFrame);
-         flightState.setContactStateDuration(0.1);
+         flightState.setDuration(0.1);
          tempPolygon.clear();
          flightState.setSupportPolygon(tempPolygon);
+         flightState.setContactType(ContactType.NO_SUPPORT);
          contactStateList.add(flightState);
       case LANDING:
          ContactState landingState = new ContactState(worldFrame);
-         landingState.setContactStateDuration(0.45);
+         landingState.setDuration(0.45);
          createRectangle(currentPosition.getReferenceFrame(), currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
          landingState.setSupportPolygon(tempPolygon);
+         landingState.setContactType(ContactType.DOUBLE_SUPPORT);
          contactStateList.add(landingState);
          break;
       default: throw new RuntimeException("Unhandled jump state");

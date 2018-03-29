@@ -16,7 +16,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class StandingState extends AbstractJumpingState
+public class StandingState extends AbstractJumpState
 {
    private static final JumpStateEnum stateEnum = JumpStateEnum.STANDING;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

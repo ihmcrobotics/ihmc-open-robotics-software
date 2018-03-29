@@ -11,9 +11,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class LinearControlModuleHelper
 {
-   static final int forceCoefficients = 4;
-   static final int velocityCoefficients = forceCoefficients + 1;
-   static final int positionCoefficients = velocityCoefficients + 1;
+   public static final int forceCoefficients = 4;
+   public static final int velocityCoefficients = forceCoefficients + 1;
+   public static final int positionCoefficients = velocityCoefficients + 1;
    static final int defaultNumberOfNodes = 100;
    static final int numberOfAxis = Axis.values.length;
 

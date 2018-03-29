@@ -1,6 +1,10 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
 import java.lang.reflect.Array;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 
@@ -11,7 +15,7 @@ import us.ihmc.robotics.lists.GenericTypeBuilder;
  * @author Apoorv S
  * @param <T>
  */
-public class RecycledLinkedListBuilder<T>
+public class RecycledLinkedListBuilder<T> implements List<T>
 {
    public class RecycledLinkedListEntry<T>
    {
@@ -79,7 +83,7 @@ public class RecycledLinkedListBuilder<T>
    public void clear()
    {
       RecycledLinkedListEntry<T> entry = firstEntry;
-      while(entry != null)
+      while (entry != null)
       {
          RecycledLinkedListEntry<T> nextEntry = entry.getNext();
          entry.next = null;
@@ -91,7 +95,7 @@ public class RecycledLinkedListBuilder<T>
       this.lastEntry = null;
       this.size = 0;
    }
-   
+
    public RecycledLinkedListEntry<T> getFirstEntry()
    {
       return firstEntry;
@@ -151,17 +155,17 @@ public class RecycledLinkedListBuilder<T>
 
    public RecycledLinkedListEntry<T> insertAtEnd()
    {
-      if(lastEntry != null)
+      if (lastEntry != null)
          return insertAfter(lastEntry);
-      else 
+      else
          return getOrCreateLastEntry();
    }
 
    public RecycledLinkedListEntry<T> insertAtBeginning()
    {
-      if(firstEntry != null)
+      if (firstEntry != null)
          return insertBefore(firstEntry);
-      else 
+      else
          return getOrCreateFirstEntry();
    }
 
@@ -216,5 +220,153 @@ public class RecycledLinkedListBuilder<T>
          if (freeEntries[i] == null)
             freeEntries[i] = new RecycledLinkedListEntry<T>(builder.newInstance());
       freeEntrySize = freeEntries.length;
+   }
+
+   @Override
+   public boolean add(T arg0)
+   {
+      throw new RuntimeException("Cannot add external elements to recycling list. Use the the insert methods");
+   }
+
+   @Override
+   public void add(int arg0, T arg1)
+   {
+      throw new RuntimeException("Cannot add external elements to recycling list. Use the the insert methods");
+   }
+
+   @Override
+   public boolean addAll(Collection<? extends T> arg0)
+   {
+      throw new RuntimeException("Cannot add external elements to recycling list. Use the the insert methods");
+   }
+
+   @Override
+   public boolean addAll(int arg0, Collection<? extends T> arg1)
+   {
+      throw new RuntimeException("Cannot add external elements to recycling list. Use the the insert methods");
+   }
+
+   @Override
+   public boolean contains(Object arg0)
+   {
+
+      for (RecycledLinkedListEntry<T> entry = getFirstEntry(); entry != null; entry = entry.getNext())
+      {
+         if (entry.element == arg0)
+            return true;
+      }
+      return false;
+   }
+
+   @Override
+   public boolean containsAll(Collection<?> arg0)
+   {
+      boolean ans = true;
+      Iterator<?> iterator = arg0.iterator();
+      while (ans)
+      {
+         Object objectToCheck = iterator.next();
+         ans &= contains(objectToCheck);
+      }
+      return ans;
+   }
+
+   @Override
+   public T get(int arg0)
+   {
+      RecycledLinkedListEntry<T> entry = getFirstEntry();
+      for (; arg0 > 0; arg0--)
+         entry = entry.getNext();
+      return entry.element;
+   }
+
+   @Override
+   public int indexOf(Object arg0)
+   {
+      throw new RuntimeException("Linked list does not contain indices");
+   }
+
+   @Override
+   public boolean isEmpty()
+   {
+      return (size == 0);
+   }
+
+   @Override
+   public Iterator<T> iterator()
+   {
+      throw new RuntimeException("Use the entries of the linked list to iterate through the linked list");
+   }
+
+   @Override
+   public int lastIndexOf(Object arg0)
+   {
+      throw new RuntimeException("Linked list does not contain indices");
+   }
+
+   @Override
+   public ListIterator<T> listIterator()
+   {
+      throw new RuntimeException("Use the entries of the linked list to iterate through the linked list");
+   }
+
+   @Override
+   public ListIterator<T> listIterator(int arg0)
+   {
+      throw new RuntimeException("Use the entries of the linked list to iterate through the linked list");
+   }
+
+   @Override
+   public boolean remove(Object arg0)
+   {
+      throw new RuntimeException("Cannot remove non linked list objects");
+   }
+
+   @Override
+   public T remove(int arg0)
+   {
+      throw new RuntimeException("Can only remove objects through the linked list remove method");
+   }
+
+   @Override
+   public boolean removeAll(Collection<?> arg0)
+   {
+      throw new RuntimeException("Can only remove objects through the linked list remove method");
+   }
+
+   @Override
+   public boolean retainAll(Collection<?> arg0)
+   {
+      throw new RuntimeException("Can only remove objects through the linked list remove method");
+   }
+
+   @Override
+   public T set(int arg0, T arg1)
+   {
+      throw new RuntimeException("Cannot set elements inside the list. Get the element and set using an appropriate method");
+   }
+
+   @Override
+   public int size()
+   {
+      return getSize();
+   }
+
+   @Override
+   public List<T> subList(int arg0, int arg1)
+   {
+      throw new RuntimeException("Unimplemented method");
+   }
+
+   @Override
+   public Object[] toArray()
+   {
+      throw new RuntimeException("Unimplemented method");
+   }
+
+   @Override
+   public <T> T[] toArray(T[] a)
+   {
+      throw new RuntimeException("Unimplemented method");
    }
 }

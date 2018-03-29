@@ -133,7 +133,7 @@ public class CentroidalMotionPlanner
       packForceTrajectory();
       return forceTrajectory;
    }
-
+   
    private void packForceTrajectory()
    {
       forceTrajectory.reset();

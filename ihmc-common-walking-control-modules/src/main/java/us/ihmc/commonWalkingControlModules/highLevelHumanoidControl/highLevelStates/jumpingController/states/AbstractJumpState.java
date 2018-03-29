@@ -2,11 +2,16 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 
-public abstract class AbstractJumpingState extends FinishableState<JumpStateEnum>
+public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
 {
-
-   public AbstractJumpingState(JumpStateEnum stateEnum)
+   public AbstractJumpState(JumpStateEnum stateEnum)
    {
       super(stateEnum);
+   }
+   
+   @Override
+   public void doTransitionIntoAction()
+   {
+      
    }
 }

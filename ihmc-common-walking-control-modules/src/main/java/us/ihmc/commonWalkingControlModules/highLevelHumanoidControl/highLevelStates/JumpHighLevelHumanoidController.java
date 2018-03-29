@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomen
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpControlManagerInterface;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpMessageHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -25,7 +26,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.stateTransitions.LandingToStandingCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.stateTransitions.StandingToTakeOffCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.stateTransitions.TakeOffToFlightCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.AbstractJumpingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.AbstractJumpState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.FlightState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.LandingState;
@@ -45,13 +46,15 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class JumpHighLevelHumanoidController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final GenericStateMachine<JumpStateEnum, AbstractJumpingState> stateMachine;
+   private final GenericStateMachine<JumpStateEnum, AbstractJumpState> stateMachine;
 
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusOutputManager;
@@ -66,6 +69,7 @@ public class JumpHighLevelHumanoidController
 
    private final FullHumanoidRobotModel fullRobotModel;
 
+   private final JumpMessageHandler messageHandler;
    private final CentroidalMomentumManager centroidalMomentumManager;
    private final GravityCompensationManager gravityCompensationManager;
    private final PelvisControlManager pelvisControlManager;
@@ -90,6 +94,7 @@ public class JumpHighLevelHumanoidController
       this.stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", JumpStateEnum.class, controllerToolbox.getYoTime(),
                                                     registry);
       this.stateEnum = stateMachine.getStateYoVariable();
+      attachMessageHandlerHackToStateMachine();
 
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
@@ -101,6 +106,7 @@ public class JumpHighLevelHumanoidController
       this.controllerToolbox = controllerToolbox;
       this.jumpControlManagerFactory = jumpControlManagerFactory;
 
+      this.messageHandler = new JumpMessageHandler();
       this.centroidalMomentumManager = jumpControlManagerFactory.getOrCreateCentroidalMomentumManager();
       controlManagerList.add(centroidalMomentumManager);
       this.gravityCompensationManager = jumpControlManagerFactory.getOrCreateGravityCompensationManager();
@@ -162,6 +168,18 @@ public class JumpHighLevelHumanoidController
       parentRegistry.addChild(registry);
    }
 
+   private void attachMessageHandlerHackToStateMachine()
+   {
+      stateEnum.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            messageHandler.createJumpSequenceForTesting(centroidalMomentumManager.getCurrentCoMPosition(), stateEnum.getEnumValue());
+         }
+      });
+   }
+
    private void setupStateMachine()
    {
       StandingState standingState = new StandingState(centroidalMomentumManager, gravityCompensationManager, pelvisControlManager, handManagers, feetManager,
@@ -216,6 +234,7 @@ public class JumpHighLevelHumanoidController
          planeContactStateCommand.setUseHighCoPDamping(false);
          controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
       }
+
       for (int i = 0; i < bodyManagers.size(); i++)
       {
          RigidBodyControlManager manager = bodyManagers.get(i);

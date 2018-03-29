@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class TakeOffState extends AbstractJumpingState
+public class TakeOffState extends AbstractJumpState
 {
    private static final JumpStateEnum stateEnum = JumpStateEnum.TAKE_OFF;
 

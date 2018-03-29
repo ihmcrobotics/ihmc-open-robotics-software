@@ -149,11 +149,25 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       this.forceWeight.setToNaN();
    }
 
+   public void setZeroForceConstraint()
+   {
+      force.setToZero();
+      this.forceRateConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
+      this.forceWeight.setToNaN();
+   }
+
    public void setForceObjective(FrameVector3D force, FrameVector3D forceWeight)
    {
       setForceInternal(force);
       this.forceConstraintType.setXYZ(EffortVariableConstraintType.OBJECTIVE);
       setForceWeightInternal(forceWeight);
+   }
+
+   public void setForceObjective(FrameVector3D force)
+   {
+      setForceInternal(force);
+      this.forceConstraintType.setXYZ(EffortVariableConstraintType.OBJECTIVE);
+      this.forceWeight.setToNaN();
    }
 
    private void setForceWeightInternal(FrameVector3D forceWeight)
@@ -195,6 +209,13 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       setForceRateWeightInternal(dForceWeight);
    }
 
+   public void setForceRateObjective(FrameVector3D dForce)
+   {
+      setForceRateInternal(dForce);
+      this.forceConstraintType.setXYZ(EffortVariableConstraintType.OBJECTIVE);
+      this.forceRateWeight.setToNaN();
+   }
+
    private void setForceRateWeightInternal(FrameVector3D dForceWeight)
    {
       this.forceRateWeight.setIncludingFrame(dForceWeight);
@@ -210,6 +231,13 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public void setForceRateConstraint(FrameVector3D dForce)
    {
       setForceRateInternal(dForce);
+      this.forceRateConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
+      this.forceRateWeight.setToNaN();
+   }
+
+   public void setZeroForceRateConstraint()
+   {
+      forceRate.setToZero();
       this.forceRateConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
       this.forceRateWeight.setToNaN();
    }
@@ -726,6 +754,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
 
    public String toString()
    {
+      String output = "";
       return "Max position: " + this.positionMax.toString() + ", Min position: " + this.positionMin.toString();
    }
 }

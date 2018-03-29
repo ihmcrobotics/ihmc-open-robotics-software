@@ -5,7 +5,7 @@ import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 
 public class ContactState
 {
-   private ContactStateEnum state;
+   private ContactType state;
    private double duration;
    private final FrameConvexPolygon2d supportPolygon;
 
@@ -27,7 +27,7 @@ public class ContactState
       supportPolygon.clear();
    }
 
-   public void setContactStat(ContactStateEnum stateToSet)
+   public void setContactType(ContactType stateToSet)
    {
       this.state = stateToSet;
    }
@@ -42,7 +42,7 @@ public class ContactState
       this.supportPolygon.set(supportPolygonToSet);
    }
 
-   public void setContactStateDuration(double duration)
+   public void setDuration(double duration)
    {
       this.duration = duration;
    }
@@ -52,7 +52,7 @@ public class ContactState
       supportPolygonToSet.setIncludingFrame(supportPolygon);
    }
 
-   public ContactStateEnum getContactState()
+   public ContactType getContactType()
    {
       return state;
    }

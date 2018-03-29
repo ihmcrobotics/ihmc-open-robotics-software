@@ -13,7 +13,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
-public class FlightState extends AbstractJumpingState
+public class FlightState extends AbstractJumpState
 {
    private static final JumpStateEnum stateEnum = JumpStateEnum.FLIGHT;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;

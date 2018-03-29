@@ -4,6 +4,7 @@ import java.util.List;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
@@ -135,6 +136,12 @@ public class SegmentedFrameTrajectory3D implements SegmentedFrameTrajectory3DInt
          FrameTrajectory3D segment = segments.add();
          segment.set(other.getSegment(segmentIndex));
       }
+   }
+   
+   public void set(SegmentedFrameTrajectory3D other)
+   {
+      reset();
+      setAll(other);
    }
 
    public double getFinalTime()
