@@ -1,6 +1,6 @@
 <object-stream>
   <long>0</long>
-  <us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage>
+  <controller_msgs.msgs.dds.HandTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -10,9 +10,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
+          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -38,7 +38,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
+          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -108,7 +108,7 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage>
+  </controller_msgs.msgs.dds.HandTrajectoryMessage>
   <long>0</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>

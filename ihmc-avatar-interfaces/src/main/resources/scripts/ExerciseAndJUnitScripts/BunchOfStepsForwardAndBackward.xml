@@ -1,13 +1,13 @@
 <object-stream>
   <long>0</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+  <controller_msgs.msgs.dds.FootstepDataListMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
     <footstepDataList>
-      <clazz>us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage</clazz>
+      <clazz>controller_msgs.msgs.dds.FootstepDataMessage</clazz>
       <values>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -36,7 +36,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -45,8 +45,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -75,7 +75,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -84,8 +84,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -114,7 +114,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -123,8 +123,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -153,7 +153,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -162,8 +162,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -192,7 +192,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -201,8 +201,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -231,7 +231,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -240,8 +240,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -270,7 +270,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -279,8 +279,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -309,7 +309,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -318,8 +318,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -348,7 +348,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -357,8 +357,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -387,7 +387,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -396,8 +396,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -426,7 +426,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -435,8 +435,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -465,7 +465,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -474,8 +474,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -504,7 +504,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -513,8 +513,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -543,7 +543,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -552,8 +552,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -582,7 +582,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -591,8 +591,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -621,7 +621,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -630,8 +630,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -660,7 +660,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -669,8 +669,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -699,7 +699,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -708,8 +708,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -738,7 +738,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -747,8 +747,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -777,7 +777,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -786,8 +786,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -816,7 +816,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -825,8 +825,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -855,7 +855,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -864,8 +864,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -894,7 +894,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -903,8 +903,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -933,7 +933,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -942,8 +942,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -972,7 +972,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -981,8 +981,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1011,7 +1011,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1020,8 +1020,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1050,7 +1050,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1059,8 +1059,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1089,7 +1089,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1098,8 +1098,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1128,7 +1128,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1137,8 +1137,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1167,7 +1167,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1176,8 +1176,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1206,7 +1206,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1215,8 +1215,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1245,7 +1245,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1254,8 +1254,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1284,7 +1284,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1293,8 +1293,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msgs.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1323,7 +1323,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1332,7 +1332,7 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        </controller_msgs.msgs.dds.FootstepDataMessage>
       </values>
       <size>34</size>
     </footstepDataList>
@@ -1351,7 +1351,7 @@
       <previousMessageId>0</previousMessageId>
       <executionDelayTime>0.0</executionDelayTime>
     </queueingProperties>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+  </controller_msgs.msgs.dds.FootstepDataListMessage>
   <long>0</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>
