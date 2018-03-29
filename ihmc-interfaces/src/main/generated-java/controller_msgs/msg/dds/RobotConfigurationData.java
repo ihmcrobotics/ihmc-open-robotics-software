@@ -54,6 +54,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
 
    public RobotConfigurationData(RobotConfigurationData other)
    {
+      this();
       set(other);
    }
 

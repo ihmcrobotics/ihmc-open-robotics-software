@@ -42,6 +42,7 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
 
    public ReachingManifoldMessage(ReachingManifoldMessage other)
    {
+      this();
       set(other);
    }
 

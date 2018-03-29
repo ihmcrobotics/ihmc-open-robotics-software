@@ -39,6 +39,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
    public WaypointBasedTrajectoryMessage(WaypointBasedTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

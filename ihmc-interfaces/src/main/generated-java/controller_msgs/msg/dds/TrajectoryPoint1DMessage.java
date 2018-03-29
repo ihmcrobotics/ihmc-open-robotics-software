@@ -37,6 +37,7 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
 
    public TrajectoryPoint1DMessage(TrajectoryPoint1DMessage other)
    {
+      this();
       set(other);
    }
 

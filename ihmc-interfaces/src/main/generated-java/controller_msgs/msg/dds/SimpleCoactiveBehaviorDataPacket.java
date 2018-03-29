@@ -24,6 +24,7 @@ public class SimpleCoactiveBehaviorDataPacket extends Packet<SimpleCoactiveBehav
 
    public SimpleCoactiveBehaviorDataPacket(SimpleCoactiveBehaviorDataPacket other)
    {
+      this();
       set(other);
    }
 

@@ -40,6 +40,7 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
 
    public TextToSpeechPacket(TextToSpeechPacket other)
    {
+      this();
       set(other);
    }
 

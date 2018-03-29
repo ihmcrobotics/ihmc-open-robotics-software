@@ -42,6 +42,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
    public OneDoFJointTrajectoryMessage(OneDoFJointTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

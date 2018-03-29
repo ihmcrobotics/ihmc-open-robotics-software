@@ -24,6 +24,7 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
 
    public HeatMapPacket(HeatMapPacket other)
    {
+      this();
       set(other);
    }
 

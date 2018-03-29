@@ -25,6 +25,7 @@ public class ObjectDetectorResultPacket extends Packet<ObjectDetectorResultPacke
 
    public ObjectDetectorResultPacket(ObjectDetectorResultPacket other)
    {
+      this();
       set(other);
    }
 

@@ -18,6 +18,7 @@ public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implement
 
    public DrillDetectionPacket(DrillDetectionPacket other)
    {
+      this();
       set(other);
    }
 

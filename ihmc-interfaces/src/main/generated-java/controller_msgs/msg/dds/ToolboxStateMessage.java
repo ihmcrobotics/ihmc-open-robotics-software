@@ -24,6 +24,7 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
 
    public ToolboxStateMessage(ToolboxStateMessage other)
    {
+      this();
       set(other);
    }
 

@@ -28,6 +28,7 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
    public LidarScanMessage(LidarScanMessage other)
    {
+      this();
       set(other);
    }
 

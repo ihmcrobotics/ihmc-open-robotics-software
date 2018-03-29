@@ -36,6 +36,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
    public HandTrajectoryMessage(HandTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

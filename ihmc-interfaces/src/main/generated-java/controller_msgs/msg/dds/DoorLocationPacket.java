@@ -22,6 +22,7 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket> implements Se
 
    public DoorLocationPacket(DoorLocationPacket other)
    {
+      this();
       set(other);
    }
 

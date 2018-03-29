@@ -29,6 +29,7 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
 
    public HeightQuadTreeMessage(HeightQuadTreeMessage other)
    {
+      this();
       set(other);
    }
 

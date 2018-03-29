@@ -28,6 +28,7 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
    public StereoVisionPointCloudMessage(StereoVisionPointCloudMessage other)
    {
+      this();
       set(other);
    }
 

@@ -46,6 +46,7 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
 
    public KinematicsToolboxCenterOfMassMessage(KinematicsToolboxCenterOfMassMessage other)
    {
+      this();
       set(other);
    }
 

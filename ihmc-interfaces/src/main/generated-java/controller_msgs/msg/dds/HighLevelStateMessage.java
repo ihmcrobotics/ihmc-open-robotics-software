@@ -33,6 +33,7 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
 
    public HighLevelStateMessage(HighLevelStateMessage other)
    {
+      this();
       set(other);
    }
 

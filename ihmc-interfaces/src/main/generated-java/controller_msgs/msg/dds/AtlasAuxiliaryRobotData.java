@@ -64,6 +64,7 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 
    public AtlasAuxiliaryRobotData(AtlasAuxiliaryRobotData other)
    {
+      this();
       set(other);
    }
 

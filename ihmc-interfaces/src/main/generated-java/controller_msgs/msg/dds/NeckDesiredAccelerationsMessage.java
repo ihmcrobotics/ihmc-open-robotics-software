@@ -29,6 +29,7 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
 
    public NeckDesiredAccelerationsMessage(NeckDesiredAccelerationsMessage other)
    {
+      this();
       set(other);
    }
 

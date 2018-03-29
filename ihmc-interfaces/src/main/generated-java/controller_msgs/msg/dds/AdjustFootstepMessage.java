@@ -55,6 +55,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
    public AdjustFootstepMessage(AdjustFootstepMessage other)
    {
+      this();
       set(other);
    }
 

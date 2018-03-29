@@ -21,6 +21,7 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
 
    public UIConnectedPacket(UIConnectedPacket other)
    {
+      this();
       set(other);
    }
 

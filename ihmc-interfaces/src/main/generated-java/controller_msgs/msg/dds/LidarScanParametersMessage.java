@@ -32,6 +32,7 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
 
    public LidarScanParametersMessage(LidarScanParametersMessage other)
    {
+      this();
       set(other);
    }
 

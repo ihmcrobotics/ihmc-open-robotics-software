@@ -24,6 +24,7 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
 
    public AutomaticManipulationAbortMessage(AutomaticManipulationAbortMessage other)
    {
+      this();
       set(other);
    }
 

@@ -41,6 +41,7 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
 
    public SelectionMatrix3DMessage(SelectionMatrix3DMessage other)
    {
+      this();
       set(other);
    }
 

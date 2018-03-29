@@ -23,6 +23,7 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket> implements 
 
    public ValveLocationPacket(ValveLocationPacket other)
    {
+      this();
       set(other);
    }
 

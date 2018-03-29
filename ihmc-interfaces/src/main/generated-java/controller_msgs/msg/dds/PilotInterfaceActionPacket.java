@@ -19,6 +19,7 @@ public class PilotInterfaceActionPacket extends Packet<PilotInterfaceActionPacke
 
    public PilotInterfaceActionPacket(PilotInterfaceActionPacket other)
    {
+      this();
       set(other);
    }
 

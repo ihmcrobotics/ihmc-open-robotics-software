@@ -37,6 +37,7 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
 
    public WholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryToolboxMessage other)
    {
+      this();
       set(other);
    }
 

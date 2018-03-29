@@ -49,6 +49,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
 
    public SE3TrajectoryPointMessage(SE3TrajectoryPointMessage other)
    {
+      this();
       set(other);
    }
 

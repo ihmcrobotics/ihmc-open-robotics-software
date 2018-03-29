@@ -119,6 +119,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage(FootstepDataMessage other)
    {
+      this();
       set(other);
    }
 

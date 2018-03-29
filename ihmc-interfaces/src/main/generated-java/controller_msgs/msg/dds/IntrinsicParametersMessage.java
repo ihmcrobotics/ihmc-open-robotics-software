@@ -33,6 +33,7 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
 
    public IntrinsicParametersMessage(IntrinsicParametersMessage other)
    {
+      this();
       set(other);
    }
 

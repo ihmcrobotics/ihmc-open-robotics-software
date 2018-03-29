@@ -25,6 +25,7 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Sett
 
    public VehiclePosePacket(VehiclePosePacket other)
    {
+      this();
       set(other);
    }
 

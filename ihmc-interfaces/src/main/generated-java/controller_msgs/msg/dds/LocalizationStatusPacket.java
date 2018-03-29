@@ -24,6 +24,7 @@ public class LocalizationStatusPacket extends Packet<LocalizationStatusPacket>
 
    public LocalizationStatusPacket(LocalizationStatusPacket other)
    {
+      this();
       set(other);
    }
 

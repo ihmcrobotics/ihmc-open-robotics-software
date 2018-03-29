@@ -41,6 +41,7 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
 
    public EuclideanTrajectoryPointMessage(EuclideanTrajectoryPointMessage other)
    {
+      this();
       set(other);
    }
 

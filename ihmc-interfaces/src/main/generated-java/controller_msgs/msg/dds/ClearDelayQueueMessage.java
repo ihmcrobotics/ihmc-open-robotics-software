@@ -33,6 +33,7 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
 
    public ClearDelayQueueMessage(ClearDelayQueueMessage other)
    {
+      this();
       set(other);
    }
 

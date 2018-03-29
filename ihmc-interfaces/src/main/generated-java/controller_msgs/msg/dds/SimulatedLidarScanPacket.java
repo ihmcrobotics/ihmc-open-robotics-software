@@ -24,6 +24,7 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 
    public SimulatedLidarScanPacket(SimulatedLidarScanPacket other)
    {
+      this();
       set(other);
    }
 

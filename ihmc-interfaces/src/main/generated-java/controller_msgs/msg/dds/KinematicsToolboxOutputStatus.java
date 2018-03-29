@@ -31,6 +31,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
    public KinematicsToolboxOutputStatus(KinematicsToolboxOutputStatus other)
    {
+      this();
       set(other);
    }
 

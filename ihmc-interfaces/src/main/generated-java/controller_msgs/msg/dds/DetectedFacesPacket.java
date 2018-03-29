@@ -23,6 +23,7 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket> implements 
 
    public DetectedFacesPacket(DetectedFacesPacket other)
    {
+      this();
       set(other);
    }
 

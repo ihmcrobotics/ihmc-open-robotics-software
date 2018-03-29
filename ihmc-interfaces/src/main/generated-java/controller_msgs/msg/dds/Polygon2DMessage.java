@@ -24,6 +24,7 @@ public class Polygon2DMessage extends Packet<Polygon2DMessage> implements Settab
 
    public Polygon2DMessage(Polygon2DMessage other)
    {
+      this();
       set(other);
    }
 

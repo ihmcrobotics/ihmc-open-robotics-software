@@ -25,6 +25,7 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
 
    public HandCollisionDetectedPacket(HandCollisionDetectedPacket other)
    {
+      this();
       set(other);
    }
 

@@ -26,6 +26,7 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
    public PauseWalkingMessage(PauseWalkingMessage other)
    {
+      this();
       set(other);
    }
 

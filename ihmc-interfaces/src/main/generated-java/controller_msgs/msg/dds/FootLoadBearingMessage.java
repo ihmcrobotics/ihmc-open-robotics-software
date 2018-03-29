@@ -40,6 +40,7 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
 
    public FootLoadBearingMessage(FootLoadBearingMessage other)
    {
+      this();
       set(other);
    }
 

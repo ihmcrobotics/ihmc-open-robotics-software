@@ -34,6 +34,7 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 
    public PlanarRegionMessage(PlanarRegionMessage other)
    {
+      this();
       set(other);
    }
 

@@ -29,6 +29,7 @@ public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegions
 
    public RequestPlanarRegionsListMessage(RequestPlanarRegionsListMessage other)
    {
+      this();
       set(other);
    }
 

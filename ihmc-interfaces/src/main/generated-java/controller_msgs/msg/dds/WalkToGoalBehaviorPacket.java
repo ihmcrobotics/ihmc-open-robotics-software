@@ -32,6 +32,7 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
 
    public WalkToGoalBehaviorPacket(WalkToGoalBehaviorPacket other)
    {
+      this();
       set(other);
    }
 

@@ -39,6 +39,7 @@ public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChan
 
    public HighLevelStateChangeStatusMessage(HighLevelStateChangeStatusMessage other)
    {
+      this();
       set(other);
    }
 

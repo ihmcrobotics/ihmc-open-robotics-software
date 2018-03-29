@@ -34,6 +34,7 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
 
    public DesiredAccelerationsMessage(DesiredAccelerationsMessage other)
    {
+      this();
       set(other);
    }
 

@@ -25,6 +25,7 @@ public class WallPosePacket extends Packet<WallPosePacket> implements Settable<W
 
    public WallPosePacket(WallPosePacket other)
    {
+      this();
       set(other);
    }
 

@@ -36,6 +36,7 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
    public CapturabilityBasedStatus(CapturabilityBasedStatus other)
    {
+      this();
       set(other);
    }
 

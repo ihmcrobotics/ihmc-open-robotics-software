@@ -19,6 +19,7 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settab
 
    public PilotAlarmPacket(PilotAlarmPacket other)
    {
+      this();
       set(other);
    }
 

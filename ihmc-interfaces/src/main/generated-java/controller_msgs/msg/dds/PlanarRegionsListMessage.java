@@ -26,6 +26,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage>
 
    public PlanarRegionsListMessage(PlanarRegionsListMessage other)
    {
+      this();
       set(other);
    }
 

@@ -35,6 +35,7 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
    public WholeBodyTrajectoryToolboxOutputStatus(WholeBodyTrajectoryToolboxOutputStatus other)
    {
+      this();
       set(other);
    }
 

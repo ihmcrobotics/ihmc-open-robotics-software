@@ -90,6 +90,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
    public KinematicsToolboxRigidBodyMessage(KinematicsToolboxRigidBodyMessage other)
    {
+      this();
       set(other);
    }
 

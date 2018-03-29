@@ -23,6 +23,7 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
 
    public HeightQuadTreeToolboxRequestMessage(HeightQuadTreeToolboxRequestMessage other)
    {
+      this();
       set(other);
    }
 

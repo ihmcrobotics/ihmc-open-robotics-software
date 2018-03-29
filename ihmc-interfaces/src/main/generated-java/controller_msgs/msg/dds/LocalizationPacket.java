@@ -22,6 +22,7 @@ public class LocalizationPacket extends Packet<LocalizationPacket> implements Se
 
    public LocalizationPacket(LocalizationPacket other)
    {
+      this();
       set(other);
    }
 

@@ -21,6 +21,7 @@ public class AbortWalkingMessage extends Packet<AbortWalkingMessage> implements 
 
    public AbortWalkingMessage(AbortWalkingMessage other)
    {
+      this();
       set(other);
    }
 

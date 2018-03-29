@@ -23,6 +23,7 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage>
 
    public RequestLidarScanMessage(RequestLidarScanMessage other)
    {
+      this();
       set(other);
    }
 

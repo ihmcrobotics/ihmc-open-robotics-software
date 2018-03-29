@@ -34,6 +34,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HeadH
 
    public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

@@ -35,6 +35,7 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
 
    public FootstepPathPlanPacket(FootstepPathPlanPacket other)
    {
+      this();
       set(other);
    }
 

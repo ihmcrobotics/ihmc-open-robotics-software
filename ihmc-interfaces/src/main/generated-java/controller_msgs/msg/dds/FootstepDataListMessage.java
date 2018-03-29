@@ -83,6 +83,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 
    public FootstepDataListMessage(FootstepDataListMessage other)
    {
+      this();
       set(other);
    }
 

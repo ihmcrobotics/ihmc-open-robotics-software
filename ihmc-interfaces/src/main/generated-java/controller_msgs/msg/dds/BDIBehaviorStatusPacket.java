@@ -32,6 +32,7 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
 
    public BDIBehaviorStatusPacket(BDIBehaviorStatusPacket other)
    {
+      this();
       set(other);
    }
 

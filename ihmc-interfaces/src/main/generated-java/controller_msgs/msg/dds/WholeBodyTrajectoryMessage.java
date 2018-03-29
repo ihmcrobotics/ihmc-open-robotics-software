@@ -67,6 +67,7 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
    public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

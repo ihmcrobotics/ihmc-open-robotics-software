@@ -29,6 +29,7 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
 
    public SpineDesiredAccelerationsMessage(SpineDesiredAccelerationsMessage other)
    {
+      this();
       set(other);
    }
 

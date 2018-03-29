@@ -27,6 +27,7 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
 
    public AtlasWristSensorCalibrationRequestPacket(AtlasWristSensorCalibrationRequestPacket other)
    {
+      this();
       set(other);
    }
 

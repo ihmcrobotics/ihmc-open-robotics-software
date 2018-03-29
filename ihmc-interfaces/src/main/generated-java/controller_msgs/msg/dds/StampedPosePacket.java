@@ -26,6 +26,7 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
 
    public StampedPosePacket(StampedPosePacket other)
    {
+      this();
       set(other);
    }
 

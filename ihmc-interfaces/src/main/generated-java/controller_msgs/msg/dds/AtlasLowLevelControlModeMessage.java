@@ -24,6 +24,7 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
 
    public AtlasLowLevelControlModeMessage(AtlasLowLevelControlModeMessage other)
    {
+      this();
       set(other);
    }
 

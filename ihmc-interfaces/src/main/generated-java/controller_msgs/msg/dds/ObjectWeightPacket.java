@@ -24,6 +24,7 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Se
 
    public ObjectWeightPacket(ObjectWeightPacket other)
    {
+      this();
       set(other);
    }
 

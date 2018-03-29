@@ -24,6 +24,7 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
 
    public RequestWristForceSensorCalibrationPacket(RequestWristForceSensorCalibrationPacket other)
    {
+      this();
       set(other);
    }
 

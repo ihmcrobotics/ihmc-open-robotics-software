@@ -24,6 +24,7 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implement
 
    public BehaviorStatusPacket(BehaviorStatusPacket other)
    {
+      this();
       set(other);
    }
 
