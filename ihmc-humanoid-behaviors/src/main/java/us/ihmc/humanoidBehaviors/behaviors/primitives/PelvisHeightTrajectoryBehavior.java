@@ -31,7 +31,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    public void setInput(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)
    {
       this.outgoingPelvisHeightTrajectoryMessage = pelvisHeightTrajectoryMessage;
-         System.out.println("Pelvis height " + pelvisHeightTrajectoryMessage.getEuclideanTrajectory().getLastTrajectoryPoint().getZ());
+         System.out.println("Pelvis height " + pelvisHeightTrajectoryMessage.getEuclideanTrajectory().taskspaceTrajectoryPoints.getLast().getPosition().getZ());
       hasInputBeenSet.set(true);
    }
 
@@ -53,7 +53,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
          sendPacket(outgoingPelvisHeightTrajectoryMessage);
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingPelvisHeightTrajectoryMessage.getEuclideanTrajectory().getTrajectoryTime());
+         trajectoryTime.set(outgoingPelvisHeightTrajectoryMessage.getEuclideanTrajectory().taskspaceTrajectoryPoints.getLast().time);
       }
    }
 

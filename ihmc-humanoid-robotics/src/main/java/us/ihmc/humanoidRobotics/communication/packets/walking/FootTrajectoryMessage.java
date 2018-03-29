@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 
 @RosMessagePacket(documentation =
@@ -21,7 +20,7 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
    @RosExportedField(documentation = "Specifies which foot will execute the trajectory.")
    public byte robotSide;
    @RosExportedField(documentation = "The position/orientation trajectory information.")
-   public SE3TrajectoryMessage se3Trajectory;
+   public SE3TrajectoryMessage se3Trajectory = new SE3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization.
@@ -29,7 +28,6 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
     */
    public FootTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -40,7 +38,6 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
    {
       se3Trajectory = new SE3TrajectoryMessage(footTrajectoryMessage.se3Trajectory);
       robotSide = footTrajectoryMessage.robotSide;
-      setUniqueId(footTrajectoryMessage.getUniqueId());
       setDestination(footTrajectoryMessage.getDestination());
    }
 
@@ -73,14 +70,6 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
    }
 
    @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (se3Trajectory != null)
-         se3Trajectory.setUniqueId(uniqueId);
-   }
-
-   @Override
    public boolean epsilonEquals(FootTrajectoryMessage other, double epsilon)
    {
       if (robotSide != other.robotSide)
@@ -94,17 +83,10 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage>
    {
       String ret = "";
       if (se3Trajectory.taskspaceTrajectoryPoints != null)
-         ret = "Foot SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.getNumberOfTrajectoryPoints();
+         ret = "Foot SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.taskspaceTrajectoryPoints.size();
       else
          ret = "Foot SE3 trajectory: no SE3 trajectory points";
 
       return ret + ", robotSide = " + robotSide + ".";
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateFootTrajectoryMessage(this);
    }
 }

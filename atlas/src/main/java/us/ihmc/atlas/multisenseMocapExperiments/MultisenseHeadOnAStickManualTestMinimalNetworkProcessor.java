@@ -21,6 +21,7 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -86,7 +87,7 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
       }
       
       PointCloudWorldPacket pointCloudPacket = new PointCloudWorldPacket();
-      pointCloudPacket.setDecayingWorldScan(points);
+      HumanoidMessageTools.setDecayingWorldScan(pointCloudPacket, points);
       uiPacketServer.send(pointCloudPacket);
    }
    

@@ -68,8 +68,8 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       else
          privilegedRootJointOrientation.setToNaN();
 
-      long[] messageHashCodes = message.getPrivilegedJointNameBasedHashCodes();
-      float[] messageJointAngles = message.getPrivilegedJointAngles();
+      TLongArrayList messageHashCodes = message.getPrivilegedJointNameBasedHashCodes();
+      TFloatArrayList messageJointAngles = message.getPrivilegedJointAngles();
 
       hasPrivilegedJointAngles = messageHashCodes != null && messageJointAngles != null;
       jointNameBasedHashCodes.reset();

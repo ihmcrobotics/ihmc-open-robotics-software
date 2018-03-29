@@ -36,9 +36,14 @@ public class TorqueSpeedDataExporterGraphCreator extends DataExporterGraphCreato
          DataBufferEntry torque = dataBuffer.getEntry(pinJoint.getTauYoVariable());
          DataBufferEntry speed = dataBuffer.getEntry(pinJoint.getQDYoVariable());
 
-         createDataVsTimeGraph(directory, fileHeader, torque, createJPG, createPDF, Color.black);
-         createDataVsTimeGraph(directory, fileHeader, speed, createJPG, createPDF, Color.black);
-         createDataOneVsDataTwoGraph(directory, fileHeader, speed, torque, createJPG, createPDF, Color.black);
+         String timeLabel = "time [s]";
+         String torqueLabel = torque.getVariableName() + " [Nm]";
+         String speedLabel = speed.getVariableName() + " [rad/s]";
+         String torqueSpeedTitle = torque.getVariableName() + "_Vs_" + speed.getVariableName();
+
+         createDataVsTimeGraph(directory, fileHeader, torque, createJPG, createPDF, timeLabel, torqueLabel, Color.black);
+         createDataVsTimeGraph(directory, fileHeader, speed, createJPG, createPDF, timeLabel, speedLabel, Color.black);
+         createDataOneVsDataTwoGraph(directory, fileHeader, speed, torque, createJPG, createPDF, torqueSpeedTitle, speedLabel, torqueLabel, Color.black);
       }
    }
 

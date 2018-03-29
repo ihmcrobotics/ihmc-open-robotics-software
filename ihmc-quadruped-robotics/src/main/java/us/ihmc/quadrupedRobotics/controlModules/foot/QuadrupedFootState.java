@@ -1,15 +1,14 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
-import us.ihmc.robotics.stateMachine.old.eventBasedStateMachine.FiniteStateMachineState;
+import us.ihmc.robotics.stateMachine.extra.EventState;
 
-public abstract class QuadrupedFootState implements FiniteStateMachineState<QuadrupedFootControlModule.FootEvent>
+public abstract class QuadrupedFootState implements EventState
 {
    protected final FrameVector3D soleForceCommand = new FrameVector3D();
 
@@ -17,7 +16,7 @@ public abstract class QuadrupedFootState implements FiniteStateMachineState<Quad
    protected QuadrupedWaypointCallback waypointCallback = null;
 
    public abstract VirtualModelControlCommand<?> getVirtualModelControlCommand();
-   public abstract SpatialFeedbackControlCommand getFeedbackControlCommand();
+   public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
 
    public FrameVector3DReadOnly getSoleForceCommand()
    {

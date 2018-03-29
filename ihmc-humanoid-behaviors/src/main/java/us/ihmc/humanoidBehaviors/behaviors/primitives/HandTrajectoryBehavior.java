@@ -8,9 +8,9 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandTrajectoryBehavior extends AbstractBehavior
 {
@@ -60,7 +60,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
 
       robotSide = RobotSide.fromByte(armTrajectoryMessage.getRobotSide());
       startTime.set(yoTime.getDoubleValue());
-      trajectoryTime.set(armTrajectoryMessage.getSe3Trajectory().getTrajectoryTime());
+      trajectoryTime.set(armTrajectoryMessage.getSe3Trajectory().taskspaceTrajectoryPoints.getLast().time);
 
       hasInputBeenSet.set(true);
    }

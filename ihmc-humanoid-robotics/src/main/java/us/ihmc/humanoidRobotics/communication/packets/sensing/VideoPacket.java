@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
-import java.util.Arrays;
-
+import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.communication.packets.HighBandwidthPacket;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -24,10 +24,10 @@ public class VideoPacket extends Packet<VideoPacket>
 
    public byte videoSource;
    public long timeStamp;
-   public byte[] data;
-   public Point3D position;
-   public Quaternion orientation;
-   public IntrinsicParametersMessage intrinsicParameters;
+   public TByteArrayList data = new TByteArrayList();
+   public Point3D position = new Point3D();
+   public Quaternion orientation = new Quaternion();
+   public IntrinsicParametersMessage intrinsicParameters = new IntrinsicParametersMessage();
 
    public VideoPacket()
    {
@@ -36,12 +36,7 @@ public class VideoPacket extends Packet<VideoPacket>
 
    public VideoPacket(VideoPacket other)
    {
-      videoSource = other.videoSource;
-      timeStamp = other.timeStamp;
-      data = Arrays.copyOf(other.data, other.data.length);
-      position = new Point3D(other.position);
-      orientation = new Quaternion(other.orientation);
-      intrinsicParameters = new IntrinsicParametersMessage(other.intrinsicParameters);
+      set(other);
    }
 
    @Override
@@ -49,10 +44,10 @@ public class VideoPacket extends Packet<VideoPacket>
    {
       videoSource = other.videoSource;
       timeStamp = other.timeStamp;
-      data = Arrays.copyOf(other.data, other.data.length);
-      position = new Point3D(other.position);
-      orientation = new Quaternion(other.orientation);
-      intrinsicParameters = other.intrinsicParameters;
+      MessageTools.copyData(other.data, data);
+      position.set(other.position);
+      orientation.set(other.orientation);
+      intrinsicParameters.set(other.intrinsicParameters);
       setPacketInformation(other);
    }
 
@@ -66,7 +61,7 @@ public class VideoPacket extends Packet<VideoPacket>
       return timeStamp;
    }
 
-   public byte[] getData()
+   public TByteArrayList getData()
    {
       return data;
    }
@@ -105,22 +100,8 @@ public class VideoPacket extends Packet<VideoPacket>
          return false;
       }
 
-      if (this.getData().length != other.getData().length)
-      {
-         System.out.println("Data length");
-         System.out.println(getData().length);
-         System.out.println(other.getData().length);
-
+      if (!data.equals(other.data))
          return false;
-      }
-
-      for (int i = 0; i < getData().length; i++)
-      {
-         if (getData()[i] != other.getData()[i])
-         {
-            return false;
-         }
-      }
 
       return true;
    }
@@ -128,7 +109,7 @@ public class VideoPacket extends Packet<VideoPacket>
    @Override
    public String toString()
    {
-      return "VideoPacket [source=" + videoSource + ", timeStamp=" + timeStamp + ", data=" + data.length + " byte, position=" + position + ", orientation="
+      return "VideoPacket [source=" + videoSource + ", timeStamp=" + timeStamp + ", data=" + data.size() + " byte, position=" + position + ", orientation="
             + orientation;
    }
 }

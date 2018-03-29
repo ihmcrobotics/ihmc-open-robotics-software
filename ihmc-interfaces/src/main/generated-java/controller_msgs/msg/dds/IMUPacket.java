@@ -12,6 +12,7 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    public us.ihmc.euclid.tuple3D.Vector3D angular_velocity_;
    public us.ihmc.euclid.tuple3D.Vector3D linear_acceleration_;
+   public double time_;
 
    public IMUPacket()
    {
@@ -30,6 +31,7 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.angular_velocity_, angular_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.linear_acceleration_, linear_acceleration_);
+      time_ = other.time_;
    }
 
    public us.ihmc.euclid.tuple4D.Quaternion getOrientation()
@@ -47,6 +49,16 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
       return linear_acceleration_;
    }
 
+   public double getTime()
+   {
+      return time_;
+   }
+
+   public void setTime(double time)
+   {
+      time_ = time;
+   }
+
    @Override
    public boolean epsilonEquals(IMUPacket other, double epsilon)
    {
@@ -62,6 +74,9 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
          return false;
 
       if (!this.linear_acceleration_.epsilonEquals(other.linear_acceleration_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon))
          return false;
 
       return true;
@@ -88,6 +103,9 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
       if (!this.linear_acceleration_.equals(otherMyClass.linear_acceleration_))
          return false;
 
+      if (this.time_ != otherMyClass.time_)
+         return false;
+
       return true;
    }
 
@@ -107,6 +125,10 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
       builder.append(", ");
       builder.append("linear_acceleration=");
       builder.append(this.linear_acceleration_);
+
+      builder.append(", ");
+      builder.append("time=");
+      builder.append(this.time_);
 
       builder.append("}");
       return builder.toString();

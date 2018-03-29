@@ -1,9 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
-import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -21,6 +19,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedMomentumRateOfChangeModule
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final QuadrupedPostureInputProviderInterface postureProvider;
@@ -40,6 +40,8 @@ public class QuadrupedMomentumRateOfChangeModule
    private final ReferenceFrame supportFrame;
    private final FramePoint3D cmpPositionSetpoint = new FramePoint3D();
 
+   private final ReferenceFrame centerOfMassFrame;
+
    public QuadrupedMomentumRateOfChangeModule(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -50,12 +52,14 @@ public class QuadrupedMomentumRateOfChangeModule
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
       supportFrame = controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
+      centerOfMassFrame = controllerToolbox.getReferenceFrames().getCenterOfMassFrame();
 
       QuadrupedRuntimeEnvironment runtimeEnvironment = controllerToolbox.getRuntimeEnvironment();
+      ReferenceFrame comFrame = controllerToolbox.getReferenceFrames().getCenterOfMassFrame();
       ReferenceFrame comZUpFrame = controllerToolbox.getReferenceFrames().getCenterOfMassZUpFrame();
       LinearInvertedPendulumModel linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
-      dcmPositionController = new DivergentComponentOfMotionController(comZUpFrame, runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry);
+      dcmPositionController = new DivergentComponentOfMotionController(comFrame, runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry);
       comPositionController = new QuadrupedComPositionController(comZUpFrame, runtimeEnvironment.getControlDT(), registry);
       comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
 
@@ -101,5 +105,27 @@ public class QuadrupedMomentumRateOfChangeModule
       comPositionControllerSetpoints.getComForceFeedforward().setZ(comPositionGravityCompensationParameter.getValue() * mass * gravity);
 
       comPositionController.compute(linearMomentumRateOfChangeToPack, comPositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates());
+   }
+
+   private final FramePoint2D centerOfMass2d = new FramePoint2D();
+   private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
+
+   public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate, FixedFramePoint2DBasics achievedCMPToPack)
+   {
+      if (achievedLinearMomentumRate.containsNaN())
+         return;
+
+      centerOfMass2d.setToZero(centerOfMassFrame);
+      centerOfMass2d.changeFrame(worldFrame);
+
+      achievedCoMAcceleration2d.setIncludingFrame(achievedLinearMomentumRate);
+      achievedCoMAcceleration2d.scale(1.0 / mass);
+      achievedCoMAcceleration2d.changeFrame(worldFrame);
+
+      double omega0 = linearInvertedPendulumModel.getNaturalFrequency();
+
+      achievedCMPToPack.set(achievedCoMAcceleration2d);
+      achievedCMPToPack.scale(-1.0 / (omega0 * omega0));
+      achievedCMPToPack.add(centerOfMass2d);
    }
 }

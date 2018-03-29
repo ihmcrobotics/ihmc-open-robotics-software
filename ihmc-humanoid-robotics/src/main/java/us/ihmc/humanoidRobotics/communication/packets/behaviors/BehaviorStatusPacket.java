@@ -22,7 +22,7 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket>
       currentBehaviorStatus = other.currentBehaviorStatus;
    }
 
-   public byte getCurrentStatus()
+   public byte getCurrentBehaviorStatus()
    {
       return currentBehaviorStatus;
    }

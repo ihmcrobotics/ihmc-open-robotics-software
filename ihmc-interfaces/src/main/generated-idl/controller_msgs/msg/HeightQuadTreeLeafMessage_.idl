@@ -14,8 +14,8 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::HeightQuadTreeLeafMessage_")
       struct HeightQuadTreeLeafMessage
       {
-        float x_center;
-        float y_center;
+        float center_x;
+        float center_y;
         float height;
       };
     };

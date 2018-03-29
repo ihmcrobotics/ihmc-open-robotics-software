@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation = "This message commands the controller to start loading a foot that was unloaded to support the robot weight. "
       + " When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support."
@@ -30,7 +29,6 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
     */
    public FootLoadBearingMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    @Override
@@ -46,7 +44,7 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       return robotSide;
    }
 
-   public byte getRequest()
+   public byte getLoadBearingRequest()
    {
       return loadBearingRequest;
    }
@@ -83,12 +81,5 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    public String toString()
    {
       return "Foot load bearing:" + "\nrobotSide = " + robotSide + "\nrequest = " + loadBearingRequest;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateFootLoadBearingMessage(this);
    }
 }

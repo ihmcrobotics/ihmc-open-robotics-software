@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
 @RosMessagePacket(documentation = "This message commands the controller to move in taskspace the pelvis to the desired orientation while going through the specified trajectory points."
@@ -16,7 +15,7 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
    @RosExportedField(documentation = "Whether the pelvis orientation is allowed to controlled by the user when the robot is walking.")
    public boolean enableUserPelvisControlDuringWalking = false;
    @RosExportedField(documentation = "The orientation trajectory information.")
-   public SO3TrajectoryMessage so3Trajectory;
+   public SO3TrajectoryMessage so3Trajectory = new SO3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -24,7 +23,6 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
     */
    public PelvisOrientationTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -34,12 +32,11 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
     */
    public PelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)
    {
-      so3Trajectory = new SO3TrajectoryMessage(pelvisOrientationTrajectoryMessage.so3Trajectory);
-      setUniqueId(pelvisOrientationTrajectoryMessage.getUniqueId());
+      so3Trajectory.set(pelvisOrientationTrajectoryMessage.so3Trajectory);
       setDestination(pelvisOrientationTrajectoryMessage.getDestination());
    }
 
-   public boolean isEnableUserPelvisControlDuringWalking()
+   public boolean getEnableUserPelvisControlDuringWalking()
    {
       return enableUserPelvisControlDuringWalking;
    }
@@ -52,20 +49,12 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
    @Override
    public void set(PelvisOrientationTrajectoryMessage other)
    {
-      so3Trajectory = new SO3TrajectoryMessage(other.so3Trajectory);
+      so3Trajectory.set(other.so3Trajectory);
       enableUserPelvisControlDuringWalking = other.enableUserPelvisControlDuringWalking;
       setPacketInformation(other);
    }
 
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (so3Trajectory != null)
-         so3Trajectory.setUniqueId(uniqueId);
-   }
-
-   public SO3TrajectoryMessage getSO3Trajectory()
+   public SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3Trajectory;
    }
@@ -84,15 +73,8 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
    public String toString()
    {
       if (so3Trajectory.taskspaceTrajectoryPoints != null)
-         return "Pelvis SO3 trajectory: number of SO3 trajectory points = " + so3Trajectory.getNumberOfTrajectoryPoints();
+         return "Pelvis SO3 trajectory: number of SO3 trajectory points = " + so3Trajectory.taskspaceTrajectoryPoints.size();
       else
          return "Pelvis SO3 trajectory: no SO3 trajectory points";
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validatePelvisOrientationTrajectoryMessage(this);
    }
 }

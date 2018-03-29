@@ -116,14 +116,14 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
 
       if (executePlan.getBooleanValue() && hasNewPlan.getBooleanValue() && (!stepCompleted.getBooleanValue() || allStepsCompleted.getBooleanValue()))
       {
-         if (planValid(currentPlan) && (!currentPlan.footstepUnknown.get(1) || executeUnknownFirstStep.getBooleanValue()))
+         if (planValid(currentPlan) && (currentPlan.footstepUnknown.get(1) == 0 || executeUnknownFirstStep.getBooleanValue()))
          {
             processNextStep();
             return;
          }
       }
 
-      if (currentPlan != null && currentPlan.footstepUnknown != null && (currentPlan.footstepUnknown.isEmpty() || currentPlan.footstepUnknown.get(1))
+      if (currentPlan != null && currentPlan.footstepUnknown != null && (currentPlan.footstepUnknown.isEmpty() || currentPlan.footstepUnknown.get(1) == 1)
             && requestQuickSearch.getBooleanValue())
       {
          //no plan or next step unknown, need a new plan fast
@@ -162,19 +162,16 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
 
    private void visualizePlan(FootstepPathPlanPacket plan)
    {
-      if (plan.pathPlan == null || plan.pathPlan.size() == 0)
+      if (plan.pathPlan == null || plan.pathPlan.isEmpty())
          return;
       int size = plan.pathPlan.size();
       SnapFootstepPacket planVisualizationPacket = new SnapFootstepPacket();
-      planVisualizationPacket.footstepData = new ArrayList<FootstepDataMessage>();
-      planVisualizationPacket.footstepOrder = new int[size];
-      planVisualizationPacket.flag = new byte[size];
 
       for (int i = 0; i < size; i++)
       {
-         planVisualizationPacket.footstepData.add(plan.pathPlan.get(i));
-         planVisualizationPacket.footstepOrder[i] = i;
-         planVisualizationPacket.flag[i] = (byte) (plan.footstepUnknown.get(i) ? 0 : 2);
+         planVisualizationPacket.footstepData.add().set(plan.pathPlan.get(i));
+         planVisualizationPacket.footstepOrder.add(i);
+         planVisualizationPacket.flag.add((byte) (plan.footstepUnknown.get(i) == 1 ? 0 : 2));
       }
       planVisualizationPacket.setDestination(PacketDestination.NETWORK_PROCESSOR);
       sendPacket(planVisualizationPacket);
@@ -194,7 +191,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
       while (plan.pathPlan.size() > 0 && !approximatelyEqual(plan.pathPlan.get(0), predictedLocation))
       {
          plan.pathPlan.remove(0);
-         plan.footstepUnknown.remove(0);
+         plan.footstepUnknown.removeAt(0);
       }
       if (plan.pathPlan.size() < 2)
          return false;
@@ -266,9 +263,9 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
    {
       //remove current location from plan, element 1 is next step
       currentPlan.pathPlan.remove(0);
-      currentPlan.footstepUnknown.remove(0);
+      currentPlan.footstepUnknown.removeAt(0);
       //element 1 is now element 0
-      if (currentPlan.footstepUnknown.get(0) && !executeUnknownFirstStep.getBooleanValue())
+      if (currentPlan.footstepUnknown.get(0) == 1 && !executeUnknownFirstStep.getBooleanValue())
          return;
 
       sendStepsToController();
@@ -336,12 +333,12 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
       {
          if (executeUnknownFirstStep.getBooleanValue() && i == 0)
          {
-            outgoingFootsteps.footstepDataList.add(currentPlan.pathPlan.get(i));
+            outgoingFootsteps.footstepDataList.add().set(currentPlan.pathPlan.get(i));
             executeUnknownFirstStep.set(false);
          }
-         else if (!currentPlan.footstepUnknown.get(i))
+         else if (currentPlan.footstepUnknown.get(i) == 0)
          {
-            outgoingFootsteps.footstepDataList.add(currentPlan.pathPlan.get(i));
+            outgoingFootsteps.footstepDataList.add().set(currentPlan.pathPlan.get(i));
          }
          else
          {
@@ -371,7 +368,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
       {
          if (newestPacket.walkToGoalAction == WalkToGoalAction.FIND_PATH.toByte())
          {
-            set(newestPacket.getGoalPosition()[0], newestPacket.getGoalPosition()[1], newestPacket.getGoalPosition()[2], RobotSide.fromByte(newestPacket.getGoalSide()));
+            set(newestPacket.xGoal, newestPacket.yGoal, newestPacket.thetaGoal, RobotSide.fromByte(newestPacket.getGoalRobotSide()));
             requestFootstepPlan();
             hasInputBeenSet.set(true);
             debugPrintln("Requesting path");

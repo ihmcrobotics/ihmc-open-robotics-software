@@ -134,10 +134,9 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
             .predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime, stepTime);
 
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(Double.NaN, Double.NaN);
-      footsteps.add(footstep);
-      footsteps.add(nextFootstep);
-      footsteps.add(nextNextFootstep);
-      footsteps.setExecutionMode(ExecutionMode.OVERRIDE);
+      footsteps.footstepDataList.add().set(footstep);
+      footsteps.footstepDataList.add().set(nextFootstep);
+      footsteps.footstepDataList.add().set(nextNextFootstep);
 
       return footsteps;
    }

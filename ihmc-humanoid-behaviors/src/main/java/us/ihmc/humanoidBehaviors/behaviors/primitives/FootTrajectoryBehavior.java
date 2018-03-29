@@ -65,7 +65,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
          outgoingFootTrajectoryMessage.setDestination(PacketDestination.UI);
          sendPacketToController(outgoingFootTrajectoryMessage);
          hasPacketBeenSent.set(true);
-         trajectoryTime.set(outgoingFootTrajectoryMessage.getSe3Trajectory().getTrajectoryTime());
+         trajectoryTime.set(outgoingFootTrajectoryMessage.getSe3Trajectory().taskspaceTrajectoryPoints.getLast().time);
       }
    }
 

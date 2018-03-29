@@ -1,7 +1,12 @@
 package us.ihmc.atlas.multisenseTestbench;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.concurrent.ArrayBlockingQueue;
+
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.ros.message.Time;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -14,7 +19,6 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
@@ -22,14 +26,11 @@ import us.ihmc.ihmcPerception.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
+import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
 import us.ihmc.utilities.ros.publisher.RosOdometryPublisher;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -101,7 +102,7 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
          jointNamesList.add(controllableOneDoFJoints[i].getName());
       }
 
-      jointNameHash = RobotConfigurationData
+      jointNameHash = RobotConfigurationDataFactory
             .calculateJointNameHash(controllableOneDoFJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
 
       rosAPICommunicator.attachListener(RobotConfigurationData.class, this);
@@ -160,9 +161,9 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
          }
          if (rosMainNode.isStarted())
          {
-            float[] jointAngles = robotConfigurationData.getJointAngles();
-            float[] jointVelocities = robotConfigurationData.getJointVelocities();
-            float[] jointTorques = robotConfigurationData.getJointTorques();
+            float[] jointAngles = robotConfigurationData.getJointAngles().toArray();
+            float[] jointVelocities = robotConfigurationData.getJointVelocities().toArray();
+            float[] jointTorques = robotConfigurationData.getJointTorques().toArray();
 
             long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(robotConfigurationData.getTimestamp());
             Time t = Time.fromNano(timeStamp);
@@ -174,7 +175,7 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
 
             rosJointStatePublisher.publish(jointNamesList, jointAngles, jointVelocities, jointTorques, t);
 
-            RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getPelvisOrientation(), robotConfigurationData.getPelvisTranslation());
+            RigidBodyTransform pelvisTransform = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
 
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
                                             robotConfigurationData.getPelvisAngularVelocity(), jointMap.getUnsanitizedRootJointInSdf(),

@@ -234,7 +234,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       footstepData.setLocation(stepLocation);
       footstepData.setOrientation(orient);
       footstepData.setRobotSide(robotSide.toByte());
-      message.add(footstepData);
+      message.footstepDataList.add().set(footstepData);
    }
 
    private void setupCameraBackView()

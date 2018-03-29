@@ -30,7 +30,7 @@ public class FootLoadBearingCommand implements Command<FootLoadBearingCommand, F
    public void set(FootLoadBearingMessage message)
    {
       clear();
-      LoadBearingRequest request = LoadBearingRequest.fromByte(message.getRequest());
+      LoadBearingRequest request = LoadBearingRequest.fromByte(message.getLoadBearingRequest());
       RobotSide robotSide = RobotSide.fromByte(message.getRobotSide());
       footRequests.put(robotSide, request);
       executionDelayTime = message.executionDelayTime;

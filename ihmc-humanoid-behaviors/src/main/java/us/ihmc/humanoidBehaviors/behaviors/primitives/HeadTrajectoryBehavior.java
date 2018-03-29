@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -60,7 +61,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
          
          packetHasBeenSent.set(true);
          startTime.set(yoTime.getDoubleValue());
-         trajectoryTime.set(outgoingHeadTrajectoryMessage.getSo3Trajectory().getTrajectoryTime());
+         trajectoryTime.set(outgoingHeadTrajectoryMessage.getSo3Trajectory().taskspaceTrajectoryPoints.getLast().time);
       }
    }
 

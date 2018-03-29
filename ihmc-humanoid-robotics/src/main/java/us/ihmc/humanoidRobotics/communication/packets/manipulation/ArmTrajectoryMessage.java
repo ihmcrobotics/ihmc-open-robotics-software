@@ -1,11 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move an arm in jointspace to the desired joint angles while going through the specified trajectory points."
@@ -23,7 +21,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
    @RosExportedField(documentation = "Specifies the side of the robot that will execute the trajectory.")
    public byte robotSide;
    @RosExportedField(documentation = "Trajectories for each joint.")
-   public JointspaceTrajectoryMessage jointspaceTrajectory;
+   public JointspaceTrajectoryMessage jointspaceTrajectory = new JointspaceTrajectoryMessage();
 
    /**
     * Empty constructor for serialization.
@@ -32,7 +30,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
    public ArmTrajectoryMessage()
    {
       jointspaceTrajectory = new JointspaceTrajectoryMessage();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -42,14 +39,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
    public ArmTrajectoryMessage(ArmTrajectoryMessage other)
    {
       set(other);
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (jointspaceTrajectory != null)
-         jointspaceTrajectory.setUniqueId(uniqueId);
    }
 
    @Override
@@ -80,11 +69,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
       return jointspaceTrajectory;
    }
 
-   public QueueableMessage getQueueingProperties()
-   {
-      return jointspaceTrajectory.getQueueingProperties();
-   }
-
    @Override
    public boolean epsilonEquals(ArmTrajectoryMessage other, double epsilon)
    {
@@ -99,15 +83,8 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage>
    public String toString()
    {
       if (jointspaceTrajectory.jointTrajectoryMessages != null)
-         return "Arm 1D trajectories: number of joints = " + jointspaceTrajectory.getNumberOfJoints() + ", robotSide = " + robotSide;
+         return "Arm 1D trajectories: number of joints = " + jointspaceTrajectory.jointTrajectoryMessages.size() + ", robotSide = " + robotSide;
       else
          return "Arm 1D trajectories: no joint trajectory, robotSide = " + robotSide;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateArmTrajectoryMessage(this);
    }
 }

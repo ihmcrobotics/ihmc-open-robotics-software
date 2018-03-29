@@ -23,4 +23,6 @@ public interface QuadrupedTestFactory
    public void setUsePushRobotController(boolean usePushRobotController);
 
    public void setInitialPosition(QuadrupedSimulationInitialPositionParameters initialPosition);
+
+   public void setUseNetworking(boolean useNetworking);
 }

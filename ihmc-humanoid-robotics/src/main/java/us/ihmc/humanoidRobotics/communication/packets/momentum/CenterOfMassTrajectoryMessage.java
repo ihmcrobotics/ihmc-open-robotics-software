@@ -25,14 +25,6 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
       setPacketInformation(other);
    }
 
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (euclideanTrajectory != null)
-         euclideanTrajectory.setUniqueId(uniqueId);
-   }
-
    public EuclideanTrajectoryMessage getEuclideanTrajectory()
    {
       return euclideanTrajectory;

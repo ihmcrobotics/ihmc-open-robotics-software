@@ -19,6 +19,7 @@ module controller_msgs
         geometry_msgs::msg::dds::Quaternion orientation;
         geometry_msgs::msg::dds::Vector3 angular_velocity;
         geometry_msgs::msg::dds::Vector3 linear_acceleration;
+        double time;
       };
     };
   };

@@ -7,28 +7,23 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.interfaces.Transformable;
-import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 @RosMessagePacket(documentation =
       "This class is used to build trajectory messages in taskspace. It holds the only the rotational information for one trajectory point (orientation & angular velocity). "
       + "Feel free to look at EuclideanTrajectoryPointMessage (translational) and SE3TrajectoryPointMessage (rotational AND translational)",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
-public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage> implements Transformable
-      //implements SO3TrajectoryPointInterface<SO3TrajectoryPointMessage>, TransformableDataObject<SO3TrajectoryPointMessage>
+public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
 {
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
    @RosExportedField(documentation = "Define the desired 3D orientation to be reached at this trajectory point.")
-   public Quaternion orientation;
+   public Quaternion orientation = new Quaternion();
    @RosExportedField(documentation = "Define the desired 3D angular velocity to be reached at this trajectory point.")
-   public Vector3D angularVelocity;
+   public Vector3D angularVelocity = new Vector3D();
 
    /**
     * Empty constructor for serialization.
@@ -46,6 +41,7 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
          angularVelocity = new Vector3D(trajectoryPoint.angularVelocity);
    }
 
+   @Override
    public void set(SO3TrajectoryPointMessage other)
    {
       time = other.time;
@@ -69,9 +65,9 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       this.time = time;
    }
 
-   public void getOrientation(QuaternionBasics orientationToPack)
+   public QuaternionReadOnly getOrientation()
    {
-      orientationToPack.set(orientation);
+      return orientation;
    }
 
    public void setOrientation(QuaternionReadOnly orientation)
@@ -79,9 +75,9 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       this.orientation.set(orientation);
    }
 
-   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
+   public Vector3DReadOnly getAngularVelocity()
    {
-      angularVelocityToPack.set(angularVelocity);
+      return angularVelocity;
    }
 
    public void setAngularVelocity(Vector3DReadOnly angularVelocity)
@@ -110,20 +106,6 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
          return false;
 
       return true;
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      transform.transform(orientation);
-      transform.transform(angularVelocity);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      transform.inverseTransform(orientation);
-      transform.inverseTransform(angularVelocity);
    }
 
    @Override

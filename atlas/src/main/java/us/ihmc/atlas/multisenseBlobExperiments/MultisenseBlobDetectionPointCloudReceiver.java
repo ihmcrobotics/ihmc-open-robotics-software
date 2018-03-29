@@ -4,6 +4,7 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 
@@ -29,7 +30,7 @@ public class MultisenseBlobDetectionPointCloudReceiver extends RosPointCloudSubs
       Point3D[] points = pointCloudData.getPoints();
 
       PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
-      pointCloudWorldPacket.setDecayingWorldScan(points);
+      HumanoidMessageTools.setDecayingWorldScan(pointCloudWorldPacket, points);
       pointCloudWorldPacket.setDestination(PacketDestination.BROADCAST);
 
       if(DEBUG)

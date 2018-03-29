@@ -31,12 +31,12 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       setPacketInformation(other);
    }
 
-   public boolean isInitialize()
+   public boolean getInitialize()
    {
       return initialize;
    }
 
-   public boolean isAutoExposure()
+   public boolean getAutoExposure()
    {
       return autoExposure;
    }
@@ -61,7 +61,7 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       this.motorSpeed = motorSpeed;
    }
 
-   public boolean isLedEnable()
+   public boolean getLedEnable()
    {
       return ledEnable;
    }
@@ -71,7 +71,7 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       this.ledEnable = ledEnable;
    }
 
-   public boolean isFlashEnable()
+   public boolean getFlashEnable()
    {
       return flashEnable;
    }
@@ -86,7 +86,7 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       return dutyCycle;
    }
 
-   public boolean isAutoWhiteBalance()
+   public boolean getAutoWhiteBalance()
    {
       return autoWhiteBalance;
    }
@@ -109,20 +109,20 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
    public boolean epsilonEquals(MultisenseParameterPacket other, double epsilon)
    {
       if (initialize)
-         return other.isInitialize();
+         return other.getInitialize();
       double roundedGain = Math.round(getGain() * 100) / 100.0;
       double roundedSpeed = Math.round(getMotorSpeed() * 1000) / 1000.0;
       double roundedDutyCycle = Math.round(getDutyCycle() * 10) / 10.0;
       System.out.println("gain1: " + roundedGain + " gain 2 " + other.getGain());
       System.out.println("speed1: " + roundedSpeed + " speed 2 " + other.getMotorSpeed());
-      System.out.println("led1: " + isLedEnable() + " led 2 " + other.isLedEnable());
-      System.out.println("flash1: " + isFlashEnable() + " flash 2 " + other.isFlashEnable());
+      System.out.println("led1: " + getLedEnable() + " led 2 " + other.getLedEnable());
+      System.out.println("flash1: " + getFlashEnable() + " flash 2 " + other.getFlashEnable());
       System.out.println("dutyCycle 1 : " + roundedDutyCycle + " dutyCycle 2 " + other.getDutyCycle());
-      System.out.println("auto exposure 1: " + isAutoExposure() + " auto exposure 2 " + other.isAutoExposure());
-      System.out.println("auto white balance 1: " + isAutoWhiteBalance() + " auto white balance 2 " + other.isAutoWhiteBalance());
+      System.out.println("auto exposure 1: " + getAutoExposure() + " auto exposure 2 " + other.getAutoExposure());
+      System.out.println("auto white balance 1: " + getAutoWhiteBalance() + " auto white balance 2 " + other.getAutoWhiteBalance());
 
-      return (other.isInitialize() == isInitialize()) && (other.getGain() == roundedGain) && (other.getMotorSpeed() == roundedSpeed)
-            && (other.getDutyCycle() == roundedDutyCycle) && (other.isFlashEnable() == isFlashEnable()) && (other.isLedEnable() == isLedEnable())
-            && (other.isAutoExposure() == isAutoExposure()) && (other.isAutoWhiteBalance() == isAutoWhiteBalance());
+      return (other.getInitialize() == getInitialize()) && (other.getGain() == roundedGain) && (other.getMotorSpeed() == roundedSpeed)
+            && (other.getDutyCycle() == roundedDutyCycle) && (other.getFlashEnable() == getFlashEnable()) && (other.getLedEnable() == getLedEnable())
+            && (other.getAutoExposure() == getAutoExposure()) && (other.getAutoWhiteBalance() == getAutoWhiteBalance());
    }
 }

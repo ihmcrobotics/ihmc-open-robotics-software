@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
@@ -63,7 +64,7 @@ public class FootstepListBehavior extends AbstractBehavior
    public void set(FootstepDataListMessage footStepList)
    {
       outgoingFootstepDataList = footStepList;
-      numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
+      numberOfFootsteps.set(outgoingFootstepDataList.getFootstepDataList().size());
       packetHasBeenSent.set(false);
    }
 
@@ -81,7 +82,7 @@ public class FootstepListBehavior extends AbstractBehavior
 
          RobotSide footstepSide = footstep.getRobotSide();
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstepSide, position, orientation);
-         footstepDataList.add(footstepData);
+         footstepDataList.footstepDataList.add().set(footstepData);
       }
       set(footstepDataList);
    }
@@ -267,7 +268,12 @@ public class FootstepListBehavior extends AbstractBehavior
          WalkingControllerParameters walkingControllerParameters)
    {
       ArrayList<Double> footStepLengths = new ArrayList<Double>();
-      footstepDataList.addAll(footStepList.getDataList());
+      List<FootstepDataMessage> dataList = footStepList.getFootstepDataList();
+      for (int i = 0; i < dataList.size(); i++)
+      {
+         FootstepDataMessage step = dataList.get(i);
+         footstepDataList.add(step);
+      }
 
       FootstepDataMessage firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
 
@@ -276,13 +282,13 @@ public class FootstepListBehavior extends AbstractBehavior
       firstSingleSupportFootTransformToWorld.getTranslation(firstSingleSupportFootTranslationFromWorld);
 
       previousFootStepLocation.set(firstSingleSupportFootTranslationFromWorld);
-      firstStepData.getLocation(nextFootStepLocation);
+      nextFootStepLocation.set(firstStepData.getLocation());
 
       while (!footstepDataList.isEmpty())
       {
          footStepLengths.add(previousFootStepLocation.distance(nextFootStepLocation));
          previousFootStepLocation.set(nextFootStepLocation);
-         footstepDataList.remove(footstepDataList.size() - 1).getLocation(nextFootStepLocation);
+         nextFootStepLocation.set(footstepDataList.remove(footstepDataList.size() - 1).getLocation());
       }
 
       double lastStepLength = previousFootStepLocation.distance(nextFootStepLocation);

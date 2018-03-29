@@ -22,7 +22,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     * will keep the height manager in user mode while walking.
     * If this is false the height manager will switch back to controller mode when walking.
     */
-   public boolean enable_user_pelvis_height_control_during_walking_;
+   public boolean enable_user_pelvis_control_during_walking_;
    /**
     * The position trajectory information.
     */
@@ -43,7 +43,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    {
       enable_user_pelvis_control_ = other.enable_user_pelvis_control_;
 
-      enable_user_pelvis_height_control_during_walking_ = other.enable_user_pelvis_height_control_during_walking_;
+      enable_user_pelvis_control_during_walking_ = other.enable_user_pelvis_control_during_walking_;
 
       controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.euclidean_trajectory_, euclidean_trajectory_);
    }
@@ -69,9 +69,9 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     * will keep the height manager in user mode while walking.
     * If this is false the height manager will switch back to controller mode when walking.
     */
-   public boolean getEnableUserPelvisHeightControlDuringWalking()
+   public boolean getEnableUserPelvisControlDuringWalking()
    {
-      return enable_user_pelvis_height_control_during_walking_;
+      return enable_user_pelvis_control_during_walking_;
    }
 
    /**
@@ -79,9 +79,9 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
     * will keep the height manager in user mode while walking.
     * If this is false the height manager will switch back to controller mode when walking.
     */
-   public void setEnableUserPelvisHeightControlDuringWalking(boolean enable_user_pelvis_height_control_during_walking)
+   public void setEnableUserPelvisControlDuringWalking(boolean enable_user_pelvis_control_during_walking)
    {
-      enable_user_pelvis_height_control_during_walking_ = enable_user_pelvis_height_control_during_walking;
+      enable_user_pelvis_control_during_walking_ = enable_user_pelvis_control_during_walking;
    }
 
    /**
@@ -104,7 +104,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
          return false;
 
       if (!us.ihmc.idl.IDLTools
-            .epsilonEqualsBoolean(this.enable_user_pelvis_height_control_during_walking_, other.enable_user_pelvis_height_control_during_walking_, epsilon))
+            .epsilonEqualsBoolean(this.enable_user_pelvis_control_during_walking_, other.enable_user_pelvis_control_during_walking_, epsilon))
          return false;
 
       if (!this.euclidean_trajectory_.epsilonEquals(other.euclidean_trajectory_, epsilon))
@@ -128,7 +128,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       if (this.enable_user_pelvis_control_ != otherMyClass.enable_user_pelvis_control_)
          return false;
 
-      if (this.enable_user_pelvis_height_control_during_walking_ != otherMyClass.enable_user_pelvis_height_control_during_walking_)
+      if (this.enable_user_pelvis_control_during_walking_ != otherMyClass.enable_user_pelvis_control_during_walking_)
          return false;
 
       if (!this.euclidean_trajectory_.equals(otherMyClass.euclidean_trajectory_))
@@ -147,8 +147,8 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       builder.append(this.enable_user_pelvis_control_);
 
       builder.append(", ");
-      builder.append("enable_user_pelvis_height_control_during_walking=");
-      builder.append(this.enable_user_pelvis_height_control_during_walking_);
+      builder.append("enable_user_pelvis_control_during_walking=");
+      builder.append(this.enable_user_pelvis_control_during_walking_);
 
       builder.append(", ");
       builder.append("euclidean_trajectory=");

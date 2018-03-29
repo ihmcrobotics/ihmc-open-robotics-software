@@ -1,98 +1,111 @@
 package us.ihmc.robotDataLogger;
-/**
-* 
-* Definition of the class "YoRegistryDefinition" defined in Handshake.idl. 
-*
-* This file was automatically generated from Handshake.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit Handshake.idl instead.
-*
-*/
-public class YoRegistryDefinition
+
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
+public class YoRegistryDefinition extends Packet<YoRegistryDefinition> implements Settable<YoRegistryDefinition>, EpsilonComparable<YoRegistryDefinition>
 {
-    public YoRegistryDefinition()
-    {
-        	name_ = new java.lang.StringBuilder(255); 
-        
-        
-    }
+   public int parent_;
+   public java.lang.StringBuilder name_;
 
-    public void set(YoRegistryDefinition other)
-    {
-        	parent_ = other.parent_;
-        	name_.setLength(0);
-        	name_.append(other.name_);
+   public YoRegistryDefinition()
+   {
 
-    }
+      name_ = new java.lang.StringBuilder(255);
+   }
 
-    public void setParent(int parent)
-    {
-        parent_ = parent;
-    }
+   public YoRegistryDefinition(YoRegistryDefinition other)
+   {
+      set(other);
+   }
 
-    public int getParent()
-    {
-        return parent_;
-    }
+   public void set(YoRegistryDefinition other)
+   {
+      parent_ = other.parent_;
 
-        
-        public void setName(String name)
-        {
-        	name_.setLength(0);
-        	name_.append(name);
-        }
-        
-        public java.lang.String getNameAsString()
-        {
-        	return getName().toString();
-        }
+      name_.setLength(0);
+      name_.append(other.name_);
+   }
 
-    public java.lang.StringBuilder getName()
-    {
-        return name_;
-    }
+   public int getParent()
+   {
+      return parent_;
+   }
 
-        
+   public void setParent(int parent)
+   {
+      parent_ = parent;
+   }
 
+   public java.lang.String getNameAsString()
+   {
+      return getName().toString();
+   }
 
+   public java.lang.StringBuilder getName()
+   {
+      return name_;
+   }
 
+   public void setName(java.lang.String name)
+   {
+      name_.setLength(0);
+      name_.append(name);
+   }
 
-    @Override
-    public boolean equals(java.lang.Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof YoRegistryDefinition)) return false;
-        YoRegistryDefinition otherMyClass = (YoRegistryDefinition)other;
-        boolean returnedValue = true;
+   @Override
+   public boolean epsilonEquals(YoRegistryDefinition other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
 
-        returnedValue &= this.parent_ == otherMyClass.parent_;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.parent_, other.parent_, epsilon))
+         return false;
 
-                
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
-                
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon))
+         return false;
 
-        return returnedValue;
-    }
-    
-     @Override
-    public java.lang.String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("YoRegistryDefinition {");
-        builder.append("parent=");
-        builder.append(this.parent_);
+      return true;
+   }
 
-                builder.append(", ");
-        builder.append("name=");
-        builder.append(this.name_);
+   @Override
+   public boolean equals(Object other)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+      if (!(other instanceof YoRegistryDefinition))
+         return false;
 
-                
-        builder.append("}");
-		return builder.toString();
-    }
+      YoRegistryDefinition otherMyClass = (YoRegistryDefinition) other;
 
-    private int parent_; 
-    private java.lang.StringBuilder name_; 
+      if (this.parent_ != otherMyClass.parent_)
+         return false;
 
+      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_))
+         return false;
+
+      return true;
+   }
+
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("YoRegistryDefinition {");
+      builder.append("parent=");
+      builder.append(this.parent_);
+
+      builder.append(", ");
+      builder.append("name=");
+      builder.append(this.name_);
+
+      builder.append("}");
+      return builder.toString();
+   }
 }

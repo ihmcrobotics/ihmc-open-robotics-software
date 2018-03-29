@@ -27,7 +27,7 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
       return robotSide;
    }
 
-   public int getCollisionSeverityOneToThree()
+   public int getCollisionSeverityLevelOneToThree()
    {
       return collisionSeverityLevelOneToThree;
    }
@@ -36,7 +36,7 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
    public boolean epsilonEquals(HandCollisionDetectedPacket other, double epsilon)
    {
       boolean robotSideEquals = robotSide == other.robotSide;
-      boolean collisionSeverityEquals = collisionSeverityLevelOneToThree == other.getCollisionSeverityOneToThree();
+      boolean collisionSeverityEquals = collisionSeverityLevelOneToThree == other.getCollisionSeverityLevelOneToThree();
       return robotSideEquals && collisionSeverityEquals;
    }
 }

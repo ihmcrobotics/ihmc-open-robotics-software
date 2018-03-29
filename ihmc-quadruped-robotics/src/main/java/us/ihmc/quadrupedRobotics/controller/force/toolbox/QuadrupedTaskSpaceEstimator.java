@@ -47,7 +47,7 @@ public class QuadrupedTaskSpaceEstimator
          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.referenceFrames = referenceFrames;
-      comFrame = referenceFrames.getCenterOfMassZUpFrame();
+      comFrame = referenceFrames.getCenterOfMassFrame();
       bodyFrame = referenceFrames.getBodyFrame();
       soleFrames = referenceFrames.getFootReferenceFrames();
       pelvisRigidBody = fullRobotModel.getRootBody();

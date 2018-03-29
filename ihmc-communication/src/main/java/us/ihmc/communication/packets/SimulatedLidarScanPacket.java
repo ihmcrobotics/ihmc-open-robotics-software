@@ -1,14 +1,12 @@
 package us.ihmc.communication.packets;
 
-import java.util.Arrays;
-
-import us.ihmc.commons.MathTools;
+import gnu.trove.list.array.TFloatArrayList;
 
 public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 {
-   public float[] ranges;
+   public TFloatArrayList ranges = new TFloatArrayList();
    public int sensorId;
-   public LidarScanParametersMessage params;
+   public LidarScanParametersMessage lidarScanParameters = new LidarScanParametersMessage();
 
    public SimulatedLidarScanPacket()
    {
@@ -17,37 +15,29 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
    @Override
    public void set(SimulatedLidarScanPacket other)
    {
-      ranges = Arrays.copyOf(other.ranges, other.ranges.length);
+      MessageTools.copyData(other.ranges, ranges);
       sensorId = other.sensorId;
-      params = other.params;
+      lidarScanParameters.set(other.lidarScanParameters);
       setPacketInformation(other);
    }
 
    @Override
    public boolean epsilonEquals(SimulatedLidarScanPacket other, double epsilon)
    {
-      boolean ret = true;
-      for (int i = 0; i < ranges.length; i++)
-      {
-         ret &= MathTools.epsilonEquals(ranges[i], other.ranges[i], epsilon);
-      }
+      if (!lidarScanParameters.equals(other.lidarScanParameters))
+         return false;
+      if (!MessageTools.epsilonEquals(ranges, other.ranges, epsilon))
+         return false;
 
-      ret &= params.equals(other.params);
-
-      return ret;
-   }
-
-   public long getScanStartTime()
-   {
-      return params.getTimestamp();
+      return true;
    }
 
    public LidarScanParametersMessage getLidarScanParameters()
    {
-      return params;
+      return lidarScanParameters;
    }
 
-   public float[] getRanges()
+   public TFloatArrayList getRanges()
    {
       return ranges;
    }
@@ -55,10 +45,5 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
    public int getSensorId()
    {
       return sensorId;
-   }
-
-   public int size()
-   {
-      return ranges.length;
    }
 }

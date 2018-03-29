@@ -59,21 +59,21 @@ public abstract class AvatarPushAndWalkBehaviorTest implements MultiRobotTestInt
       double duration = 0.5;
       Vector3D direction = new Vector3D();
 
-      for (int i = 0; i < 5; i++)
+      for (int i = 0; i < 1; i++)
       {
          direction.set(1.0, 0.0, 0.0);
          pushRobotController.applyForce(direction, force, duration);
          assertTrue("Caught an exception, robot probably fell", drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
       }
 
-      for (int i = 0; i < 5; i++)
+      for (int i = 0; i < 1; i++)
       {
          direction.set(0.0, 1.0, 0.0);
          pushRobotController.applyForce(direction, force, duration);
          assertTrue("Caught an exception, robot probably fell", drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
       }
 
-      for (int i = 0; i < 5; i++)
+      for (int i = 0; i < 1; i++)
       {
          direction.set(1.0, 1.0, 0.0);
          pushRobotController.applyForce(direction, force, duration);

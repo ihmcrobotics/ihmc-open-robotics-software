@@ -15,7 +15,6 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
@@ -47,10 +46,12 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    /** Used to schedule status message sending. */
    private final PeriodicThreadScheduler scheduler;
    /** Used to filter messages coming in. */
-   private final AtomicReference<MessageFilter> messageFilter = new AtomicReference<>(null);
+   private final AtomicReference<MessageFilter> messageFilter;
+   /** Used to filter messages coming in and report an error. */
+   private final AtomicReference<MessageValidator> messageValidator;
 
    /** All the possible status message that can be sent to the communicator. */
-   private final List<Class<? extends SettablePacket<?>>> listOfSupportedStatusMessages;
+   private final List<Class<? extends Packet<?>>> listOfSupportedStatusMessages;
 
    /** All the possible messages that can be sent to the communicator. */
    private final List<Class<? extends Packet<?>>> listOfSupportedControlMessages;
@@ -59,7 +60,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
     * Local buffers for each message to ensure proper copying from the controller thread to the
     * communication thread.
     */
-   private final Map<Class<? extends SettablePacket<?>>, ConcurrentRingBuffer<? extends SettablePacket<?>>> statusMessageClassToBufferMap = new HashMap<>();
+   private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends Packet<?>>> statusMessageClassToBufferMap = new HashMap<>();
 
    public ControllerNetworkSubscriber(CommandInputManager controllerCommandInputManager, StatusMessageOutputManager controllerStatusOutputManager,
                                       PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
@@ -70,6 +71,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       this.packetCommunicator = packetCommunicator;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
       listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
+      messageFilter = new AtomicReference<>(message -> true);
+      messageValidator = new AtomicReference<>(message -> null);
 
       if (packetCommunicator == null)
       {
@@ -103,7 +106,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
                PrintTools.debug(ControllerNetworkSubscriber.this,
                                 "Received message: " + multipleMessageHolder.getClass().getSimpleName() + ", " + multipleMessageHolder);
 
-            String errorMessage = multipleMessageHolder.validateMessage();
+            String errorMessage = messageValidator.get().validate(multipleMessageHolder);
 
             if (errorMessage != null)
             {
@@ -136,8 +139,18 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       messageFilter.set(null);
    }
 
+   public void addMessageValidator(MessageValidator newValidator)
+   {
+      messageValidator.set(newValidator);
+   }
+
+   public void removeMessageValidator()
+   {
+      messageValidator.set(null);
+   }
+
    @SuppressWarnings("unchecked")
-   private <T extends SettablePacket<T>> void createAllStatusMessageBuffers()
+   private <T extends Packet<T>> void createAllStatusMessageBuffers()
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
@@ -164,7 +177,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       if (DEBUG)
          PrintTools.debug(ControllerNetworkSubscriber.this, "Received message: " + message.getClass().getSimpleName() + ", " + message);
 
-      String errorMessage = message.validateMessage();
+      String errorMessage = messageValidator.get().validate(message);
 
       if (errorMessage != null)
       {
@@ -178,7 +191,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
    private boolean testMessageWithMessageFilter(Packet<?> messageToTest)
    {
-      if (messageFilter.get() != null && !messageFilter.get().isMessageValid(messageToTest))
+      if (!messageFilter.get().isMessageValid(messageToTest))
       {
          if (DEBUG)
             PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate filter! Filter class: "
@@ -196,11 +209,12 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
       if (next != null)
       {
-         next.set(messageClass, errorMessage);
+         next.setPacketClassSimpleName(messageClass.getSimpleName());
+         next.setErrorMessage(errorMessage);
          buffer.commit();
       }
 
-      PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate:");
+      PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate: " + messageClass.getSimpleName());
       PrintTools.error(ControllerNetworkSubscriber.this, errorMessage);
    }
 
@@ -209,13 +223,13 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       GlobalStatusMessageListener globalStatusMessageListener = new GlobalStatusMessageListener()
       {
          @Override
-         public void receivedNewMessageStatus(SettablePacket<?> statusMessage)
+         public void receivedNewMessageStatus(Packet<?> statusMessage)
          {
             copyData(statusMessage);
          }
 
          @SuppressWarnings("unchecked")
-         private <T extends SettablePacket<T>> void copyData(SettablePacket<?> statusMessage)
+         private <T extends Packet<T>> void copyData(Packet<?> statusMessage)
          {
             ConcurrentRingBuffer<T> buffer = (ConcurrentRingBuffer<T>) statusMessageClassToBufferMap.get(statusMessage.getClass());
             T next = buffer.next();
@@ -234,10 +248,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
-         ConcurrentRingBuffer<? extends SettablePacket<?>> buffer = statusMessageClassToBufferMap.get(listOfSupportedStatusMessages.get(i));
+         ConcurrentRingBuffer<? extends Packet<?>> buffer = statusMessageClassToBufferMap.get(listOfSupportedStatusMessages.get(i));
          if (buffer.poll())
          {
-            SettablePacket<?> statusMessage;
+            Packet<?> statusMessage;
             while ((statusMessage = buffer.read()) != null)
             {
                packetCommunicator.send(statusMessage);
@@ -257,5 +271,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    public static interface MessageFilter
    {
       public boolean isMessageValid(Packet<?> message);
+   }
+
+   public static interface MessageValidator
+   {
+      String validate(Packet<?> message);
    }
 }

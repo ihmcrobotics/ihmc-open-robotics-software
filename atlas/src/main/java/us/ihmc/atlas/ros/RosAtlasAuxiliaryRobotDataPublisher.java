@@ -133,13 +133,13 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements Runnable
       for (AtlasElectricMotorPacketEnum value : AtlasElectricMotorPacketEnum.values)
       {
          RosBoolPublisher rosBoolPublisher = electricForearmEnabledPublishers.get(value);
-         rosBoolPublisher.publish(auxiliaryRobotData.electricJointEnabledArray[value.getId()]);
+         rosBoolPublisher.publish(auxiliaryRobotData.electricJointEnabledArray.get(value.getId()) == 1);
 
          RosDoublePublisher temperaturePublisher = electricForearmTemperaturePublishers.get(value);
-         temperaturePublisher.publish(auxiliaryRobotData.electricJointTemperatures[value.getId()]);
+         temperaturePublisher.publish(auxiliaryRobotData.electricJointTemperatures.get(value.getId()));
 
          RosDoublePublisher currentPublisher = electricForearmCurrentPublishers.get(value);
-         currentPublisher.publish(auxiliaryRobotData.electricJointCurrents[value.getId()]);
+         currentPublisher.publish(auxiliaryRobotData.electricJointCurrents.get(value.getId()));
       }
    }
 

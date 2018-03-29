@@ -5,17 +5,17 @@ import java.util.ArrayList;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  * A controller that does nothing, but signifies that the robot is ready to transition to stand prep
@@ -62,7 +62,7 @@ public class QuadrupedForceBasedDoNothingController implements QuadrupedControll
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
    {
       for (int i = 0; i < legJoints.size(); i++)
       {
@@ -71,6 +71,11 @@ public class QuadrupedForceBasedDoNothingController implements QuadrupedControll
          jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
          jointDesiredOutput.setDesiredTorque(desiredDoNothingTorques.get(i).getDoubleValue());
       }
+   }
+
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
+   {
       return null;
    }
 

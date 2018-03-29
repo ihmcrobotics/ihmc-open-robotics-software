@@ -76,9 +76,9 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_5(data.getResolution());
 
-      cdr.write_type_5(data.getXSize());
+      cdr.write_type_5(data.getSizeX());
 
-      cdr.write_type_5(data.getYSize());
+      cdr.write_type_5(data.getSizeY());
 
       if (data.getLeaves().size() <= 5000)
          cdr.write_type_e(data.getLeaves());
@@ -93,9 +93,9 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       data.setResolution(cdr.read_type_5());
 
-      data.setXSize(cdr.read_type_5());
+      data.setSizeX(cdr.read_type_5());
 
-      data.setYSize(cdr.read_type_5());
+      data.setSizeY(cdr.read_type_5());
 
       cdr.read_type_e(data.getLeaves());
    }
@@ -130,9 +130,9 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       ser.write_type_5("resolution", data.getResolution());
 
-      ser.write_type_5("x_size", data.getXSize());
+      ser.write_type_5("size_x", data.getSizeX());
 
-      ser.write_type_5("y_size", data.getYSize());
+      ser.write_type_5("size_y", data.getSizeY());
 
       ser.write_type_e("leaves", data.getLeaves());
    }
@@ -144,9 +144,9 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       data.setResolution(ser.read_type_5("resolution"));
 
-      data.setXSize(ser.read_type_5("x_size"));
+      data.setSizeX(ser.read_type_5("size_x"));
 
-      data.setYSize(ser.read_type_5("y_size"));
+      data.setSizeY(ser.read_type_5("size_y"));
 
       ser.read_type_e("leaves", data.getLeaves());
    }

@@ -57,7 +57,7 @@ public class ScriptedFootstepGenerator
          double[][] footstepLocationAndOrientation = footstepLocationsAndOrientations[i];
          Footstep footstep = generateFootstepFromLocationAndOrientation(robotSide, footstepLocationAndOrientation);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, footstep.getFootstepPose().getPosition(), footstep.getFootstepPose().getOrientation());
-         footstepDataList.add(footstepData);
+         footstepDataList.footstepDataList.add().set(footstepData);
       }
 
       return footstepDataList;

@@ -58,7 +58,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_7(data.getEnableUserPelvisControl());
 
-      cdr.write_type_7(data.getEnableUserPelvisHeightControlDuringWalking());
+      cdr.write_type_7(data.getEnableUserPelvisControlDuringWalking());
 
       controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
    }
@@ -68,7 +68,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
 
       data.setEnableUserPelvisControl(cdr.read_type_7());
 
-      data.setEnableUserPelvisHeightControlDuringWalking(cdr.read_type_7());
+      data.setEnableUserPelvisControlDuringWalking(cdr.read_type_7());
 
       controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);
    }
@@ -101,7 +101,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       ser.write_type_7("enable_user_pelvis_control", data.getEnableUserPelvisControl());
 
-      ser.write_type_7("enable_user_pelvis_height_control_during_walking", data.getEnableUserPelvisHeightControlDuringWalking());
+      ser.write_type_7("enable_user_pelvis_control_during_walking", data.getEnableUserPelvisControlDuringWalking());
 
       ser.write_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
    }
@@ -111,7 +111,7 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
    {
       data.setEnableUserPelvisControl(ser.read_type_7("enable_user_pelvis_control"));
 
-      data.setEnableUserPelvisHeightControlDuringWalking(ser.read_type_7("enable_user_pelvis_height_control_during_walking"));
+      data.setEnableUserPelvisControlDuringWalking(ser.read_type_7("enable_user_pelvis_control_during_walking"));
 
       ser.read_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
    }

@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.CameraAnnouncement;
@@ -94,8 +95,13 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       
       if(!options.getDisableVideo())
       {
-         System.out.println("Cameras: " + request.getCameras());
-         cameras.addAll(Arrays.asList(request.getCameras().toArray()));
+         IDLSequence.Object<CameraAnnouncement> cameras = request.getCameras();
+         System.out.println("Cameras: " + cameras);
+
+         for (int i = 0; i < cameras.size(); i++)
+         {
+            this.cameras.add(cameras.get(i));
+         }
       }
       else
       {

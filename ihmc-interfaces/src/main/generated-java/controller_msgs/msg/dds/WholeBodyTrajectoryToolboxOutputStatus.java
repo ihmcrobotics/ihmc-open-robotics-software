@@ -11,6 +11,13 @@ import us.ihmc.euclid.interfaces.Settable;
 public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTrajectoryToolboxOutputStatus>
       implements Settable<WholeBodyTrajectoryToolboxOutputStatus>, EpsilonComparable<WholeBodyTrajectoryToolboxOutputStatus>
 {
+   /**
+    * 0: not completed.
+    * 1: fail to find initial guess.
+    * 2: fail to complete expanding tree.
+    * 3: fail to optimize path.
+    * 4: solution is available.
+    */
    public int planning_result_;
    public us.ihmc.idl.IDLSequence.Double trajectory_times_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus> robot_configurations_;
@@ -38,11 +45,25 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       robot_configurations_.set(other.robot_configurations_);
    }
 
+   /**
+    * 0: not completed.
+    * 1: fail to find initial guess.
+    * 2: fail to complete expanding tree.
+    * 3: fail to optimize path.
+    * 4: solution is available.
+    */
    public int getPlanningResult()
    {
       return planning_result_;
    }
 
+   /**
+    * 0: not completed.
+    * 1: fail to find initial guess.
+    * 2: fail to complete expanding tree.
+    * 3: fail to optimize path.
+    * 4: solution is available.
+    */
    public void setPlanningResult(int planning_result)
    {
       planning_result_ = planning_result;

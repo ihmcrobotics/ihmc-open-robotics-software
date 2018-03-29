@@ -3,6 +3,7 @@ package us.ihmc.avatar.obstacleCourseTests;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
@@ -13,6 +14,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -46,7 +48,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiRobotTestInterface
 {
@@ -121,9 +122,9 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
       // Corrupt the footsteps by adding a big z offset and coorupting the pitch and roll
       FrameQuaternion tempFrameOrientation = new FrameQuaternion();
-      for (int i = 0; i < corruptedFootstepDataList.getDataList().size(); i++)
+      for (int i = 0; i < corruptedFootstepDataList.getFootstepDataList().size(); i++)
       {
-         FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
+         FootstepDataMessage footstepData = corruptedFootstepDataList.getFootstepDataList().get(i);
          footstepData.location.setZ(footstepData.location.getZ() + 1.0);
          tempFrameOrientation.set(footstepData.getOrientation());
          double[] yawPitchRoll = new double[3];
@@ -137,9 +138,9 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       vidualizeCorruptedFootsteps(corruptedFootstepDataList, scs);
 
       ArrayList<Footstep> corruptedFootstepList = new ArrayList<>();
-      for (int i = 0; i < corruptedFootstepDataList.getDataList().size(); i++)
+      for (int i = 0; i < corruptedFootstepDataList.getFootstepDataList().size(); i++)
       {
-         FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
+         FootstepDataMessage footstepData = corruptedFootstepDataList.getFootstepDataList().get(i);
          RobotSide robotSide = RobotSide.fromByte(footstepData.getRobotSide());
          FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame());
          pose.set(footstepData.getLocation(), footstepData.getOrientation());
@@ -150,8 +151,10 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       Point2D boundingBoxMin = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       Point2D boundingBoxMax = new Point2D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 
-      for (FootstepDataMessage footstepData : corruptedFootstepDataList.getDataList())
+      List<FootstepDataMessage> dataList = corruptedFootstepDataList.getFootstepDataList();
+      for (int i = 0; i < dataList.size(); i++)
       {
+         FootstepDataMessage footstepData = dataList.get(i);
          double footstepX = footstepData.getLocation().getX();
          double footstepY = footstepData.getLocation().getY();
 
@@ -193,7 +196,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          FrameQuaternion orientation = new FrameQuaternion();
          footstep.getPose(position, orientation);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, position, orientation);
-         snappedFootstepDataList.add(footstepData);
+         snappedFootstepDataList.footstepDataList.add().set(footstepData);
       }
 
       // Send footsteps to controller
@@ -213,15 +216,17 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       if (!VISUALIZE)
          return;
 
-      for (FootstepDataMessage footstepData : corruptedFootstepDataList.getDataList())
+      List<FootstepDataMessage> dataList = corruptedFootstepDataList.getFootstepDataList();
+      for (int i = 0; i < dataList.size(); i++)
       {
-            Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-            staticLinkGraphics.translate(new Vector3D(footstepData.location));
-            RotationMatrix rotationMatrix = new RotationMatrix();
-            rotationMatrix.set(footstepData.getOrientation());
-            staticLinkGraphics.rotate(rotationMatrix);
-            staticLinkGraphics.addCoordinateSystem(0.15, YoAppearance.Red());
-            scs.addStaticLinkGraphics(staticLinkGraphics);
+         FootstepDataMessage footstepData = dataList.get(i);
+         Graphics3DObject staticLinkGraphics = new Graphics3DObject();
+         staticLinkGraphics.translate(new Vector3D(footstepData.location));
+         RotationMatrix rotationMatrix = new RotationMatrix();
+         rotationMatrix.set(footstepData.getOrientation());
+         staticLinkGraphics.rotate(rotationMatrix);
+         staticLinkGraphics.addCoordinateSystem(0.15, YoAppearance.Red());
+         scs.addStaticLinkGraphics(staticLinkGraphics);
       }
    }
 

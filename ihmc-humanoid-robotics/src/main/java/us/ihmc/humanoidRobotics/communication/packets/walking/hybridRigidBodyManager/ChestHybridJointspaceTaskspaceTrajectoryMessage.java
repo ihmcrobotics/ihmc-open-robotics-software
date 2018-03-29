@@ -13,9 +13,9 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
    @RosExportedField(documentation = "The taskspace trajectory information.")
-   public SO3TrajectoryMessage taskspaceTrajectoryMessage;
+   public SO3TrajectoryMessage taskspaceTrajectoryMessage = new SO3TrajectoryMessage();
    @RosExportedField(documentation = "The jointspace trajectory information.")
-   public JointspaceTrajectoryMessage jointspaceTrajectoryMessage;
+   public JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
 
    /**
     * Empty constructor for serialization.
@@ -23,8 +23,6 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
     */
    public ChestHybridJointspaceTaskspaceTrajectoryMessage()
    {
-      super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -39,9 +37,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
    @Override
    public void set(ChestHybridJointspaceTaskspaceTrajectoryMessage other)
    {
-      taskspaceTrajectoryMessage = new SO3TrajectoryMessage();
       taskspaceTrajectoryMessage.set(other.taskspaceTrajectoryMessage);
-      jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
       jointspaceTrajectoryMessage.set(other.jointspaceTrajectoryMessage);
       setPacketInformation(other);
    }
@@ -53,7 +49,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
    public void setTaskspaceTrajectoryMessage(SO3TrajectoryMessage taskspaceTrajectoryMessage)
    {
-      this.taskspaceTrajectoryMessage = taskspaceTrajectoryMessage;
+      this.taskspaceTrajectoryMessage.set(taskspaceTrajectoryMessage);
    }
 
    public JointspaceTrajectoryMessage getJointspaceTrajectoryMessage()
@@ -63,7 +59,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
    public void setJointspaceTrajectoryMessage(JointspaceTrajectoryMessage jointspaceTrajectoryMessage)
    {
-      this.jointspaceTrajectoryMessage = jointspaceTrajectoryMessage;
+      this.jointspaceTrajectoryMessage.set(jointspaceTrajectoryMessage);
    }
 
    @Override

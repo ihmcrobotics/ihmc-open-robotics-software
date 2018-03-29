@@ -22,7 +22,7 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
    /**
     * Sets the pose of the contact frame in the frame of the end effector body.
     */
-   public us.ihmc.euclid.geometry.Pose3D body_frame_to_control_frame_;
+   public us.ihmc.euclid.geometry.Pose3D body_frame_to_contact_frame_;
    /**
     * Sets the contact normal used by the controller to load the contact point.
     */
@@ -31,7 +31,7 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
    public LoadBearingMessage()
    {
 
-      body_frame_to_control_frame_ = new us.ihmc.euclid.geometry.Pose3D();
+      body_frame_to_contact_frame_ = new us.ihmc.euclid.geometry.Pose3D();
       contact_normal_in_world_frame_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
@@ -46,7 +46,7 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
       coefficient_of_friction_ = other.coefficient_of_friction_;
 
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.body_frame_to_control_frame_, body_frame_to_control_frame_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.body_frame_to_contact_frame_, body_frame_to_contact_frame_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.contact_normal_in_world_frame_, contact_normal_in_world_frame_);
    }
 
@@ -85,9 +85,9 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
    /**
     * Sets the pose of the contact frame in the frame of the end effector body.
     */
-   public us.ihmc.euclid.geometry.Pose3D getBodyFrameToControlFrame()
+   public us.ihmc.euclid.geometry.Pose3D getBodyFrameToContactFrame()
    {
-      return body_frame_to_control_frame_;
+      return body_frame_to_contact_frame_;
    }
 
    /**
@@ -112,7 +112,7 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.coefficient_of_friction_, other.coefficient_of_friction_, epsilon))
          return false;
 
-      if (!this.body_frame_to_control_frame_.epsilonEquals(other.body_frame_to_control_frame_, epsilon))
+      if (!this.body_frame_to_contact_frame_.epsilonEquals(other.body_frame_to_contact_frame_, epsilon))
          return false;
 
       if (!this.contact_normal_in_world_frame_.epsilonEquals(other.contact_normal_in_world_frame_, epsilon))
@@ -139,7 +139,7 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
       if (this.coefficient_of_friction_ != otherMyClass.coefficient_of_friction_)
          return false;
 
-      if (!this.body_frame_to_control_frame_.equals(otherMyClass.body_frame_to_control_frame_))
+      if (!this.body_frame_to_contact_frame_.equals(otherMyClass.body_frame_to_contact_frame_))
          return false;
 
       if (!this.contact_normal_in_world_frame_.equals(otherMyClass.contact_normal_in_world_frame_))
@@ -162,8 +162,8 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
       builder.append(this.coefficient_of_friction_);
 
       builder.append(", ");
-      builder.append("body_frame_to_control_frame=");
-      builder.append(this.body_frame_to_control_frame_);
+      builder.append("body_frame_to_contact_frame=");
+      builder.append(this.body_frame_to_contact_frame_);
 
       builder.append(", ");
       builder.append("contact_normal_in_world_frame=");
