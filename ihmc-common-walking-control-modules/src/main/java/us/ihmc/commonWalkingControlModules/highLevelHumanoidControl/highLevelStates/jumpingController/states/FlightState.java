@@ -27,8 +27,7 @@ public class FlightState extends AbstractJumpingState
 
    public FlightState(WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox,
                       CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
-                      SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager,
-                      Map<String, RigidBodyControlManager> bodyManagerMap)
+                      SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager, Map<String, RigidBodyControlManager> bodyManagerMap)
    {
       super(stateEnum);
       this.controllerToolbox = controllerToolbox;
@@ -50,12 +49,12 @@ public class FlightState extends AbstractJumpingState
    @Override
    public void doAction()
    {
-      wholeBodyMomentumManager.compute();
-      gravityCompensationManager.compute();
+      wholeBodyMomentumManager.computeMomentumRateOfChangeForFreeFall();
+      gravityCompensationManager.setRootJointAccelerationForFreeFall();
+      feetManager.makeFeetFullyUnconstrained();
+
       for (RobotSide side : RobotSide.values)
-      {
          handManagers.get(side).compute();
-      }
       chestManager.compute();
       headManager.compute();
    }

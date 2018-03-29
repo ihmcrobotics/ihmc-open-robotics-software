@@ -51,15 +51,19 @@ public class StandingState extends AbstractJumpingState
    @Override
    public boolean isDone()
    {
+      isDone = getTimeInCurrentState() > 0.5;
       return isDone;
    }
 
    @Override
    public void doAction()
    {
-      centroidalMomentumManager.compute();
-      gravityCompensationManager.compute();
-      pelvisControlManager.compute();
+      centroidalMomentumManager.computeForZeroMomentumRateOfChange();
+      gravityCompensationManager.setRootJointAccelerationForStandardGravitationalForce();
+      pelvisControlManager.maintainDesiredPositionAndOrientation();
+      feetManager.makeFeetFullyConstrained();
+      feetManager.computeForDampedCompliantMode();
+
       headManager.compute();
       chestManager.compute();
       for (RobotSide robotSide : RobotSide.values)

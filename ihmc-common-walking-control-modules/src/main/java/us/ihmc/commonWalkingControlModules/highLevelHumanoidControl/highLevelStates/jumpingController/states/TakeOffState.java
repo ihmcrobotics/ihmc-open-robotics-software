@@ -1,40 +1,63 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states;
 
+import java.util.Map;
+
+import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.SideDependentList;
+
 public class TakeOffState extends AbstractJumpingState
 {
    private static final JumpStateEnum stateEnum = JumpStateEnum.TAKE_OFF;
 
-   public TakeOffState()
+   private final CentroidalMomentumManager centroidalMomentumManager;
+   private final GravityCompensationManager gravityCompensationManager;
+   private final PelvisControlManager pelvisControlManager;
+   private final SideDependentList<RigidBodyControlManager> handManagers;
+   private final FeetJumpManager feetManager;
+   private final Map<String, RigidBodyControlManager> bodyManagerMap;
+   private final FullHumanoidRobotModel fullRobotModel;
+
+   public TakeOffState(CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
+                       PelvisControlManager pelvisControlManager, SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager,
+                       Map<String, RigidBodyControlManager> bodyManagerMap, FullHumanoidRobotModel fullRobotModel)
    {
       super(stateEnum);
-      // TODO Auto-generated constructor stub
+      this.centroidalMomentumManager = centroidalMomentumManager;
+      this.gravityCompensationManager = gravityCompensationManager;
+      this.pelvisControlManager = pelvisControlManager;
+      this.handManagers = handManagers;
+      this.feetManager = feetManager;
+      this.bodyManagerMap = bodyManagerMap;
+      this.fullRobotModel = fullRobotModel;
    }
 
    @Override
    public boolean isDone()
    {
-      // TODO Auto-generated method stub
       return false;
    }
 
    @Override
    public void doAction()
    {
-      // TODO Auto-generated method stub
-
+      double timeInCurrentState = getTimeInCurrentState();
+      centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(timeInCurrentState);
    }
 
    @Override
    public void doTransitionIntoAction()
    {
-      // TODO Auto-generated method stub
 
    }
 
    @Override
    public void doTransitionOutOfAction()
    {
-      // TODO Auto-generated method stub
 
    }
 }

@@ -1,23 +1,17 @@
 package us.ihmc.commonWalkingControlModules.controlModules.flight;
 
+import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.ForceTrajectory;
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.yoVariables.providers.EnumProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -27,6 +21,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CentroidalMomentumManager implements JumpControlManagerInterface
 {
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry;
 
    private final double gravityZ;
@@ -42,26 +37,23 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
    private final YoFrameVector yoDesiredLinearMomentumRateOfChange;
    private final YoFrameVector yoDesiredAngularMomentumRateOfChange;
 
-   private EnumProvider<JumpStateEnum> currentState;
    private final double totalMass;
+   private ForceTrajectory groundReactionForceProfile;
+   private FrameVector3D gravitationalForce = new FrameVector3D(worldFrame);
+
    public CentroidalMomentumManager(HighLevelHumanoidControllerToolbox controllerToolbox, JumpControllerParameters parameters, YoVariableRegistry registry)
    {
       this.registry = registry;
       controlFrame = ReferenceFrame.getWorldFrame();
-      gravityZ = controllerToolbox.getGravityZ();
-      comFrame = controllerToolbox.getCenterOfMassFrame();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       totalMass = fullRobotModel.getTotalMass();
+      gravityZ = controllerToolbox.getGravityZ();
+      gravitationalForce.set(0.0, 0.0, totalMass * -gravityZ);
+      comFrame = controllerToolbox.getCenterOfMassFrame();
       momentumCommand = new MomentumRateCommand();
       yoDesiredAngularMomentumRateOfChange = new YoFrameVector(getClass().getSimpleName() + "DesiredAngularMomentumRateOfChange", controlFrame, registry);
       yoDesiredLinearMomentumRateOfChange = new YoFrameVector(getClass().getSimpleName() + "DesiredLinearMomentumRateOfChange", controlFrame, registry);
       setMomentumCommandWeights();
-   }
-
-   @Override
-   public void setStateEnumProvider(EnumProvider<JumpStateEnum> stateEnumProvider)
-   {
-      this.currentState = stateEnumProvider;
    }
 
    public void setOptimizationWeights(Vector3DReadOnly angularMomentumWeight, Vector3DReadOnly linearMomentumWeight)
@@ -88,34 +80,20 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       momentumCommand.setLinearWeights(linearMomentumWeight);
    }
 
-   @Override
-   public void compute()
+   public void computeMomentumRateOfChangeForFreeFall()
    {
-      switch (currentState.getValue())
-      {
-      case STANDING:
-         computeMomentumCommandForStandingState(true);
-         break;
-      case TAKE_OFF:
-         throw new RuntimeException("Unimplemented");
-      case FLIGHT:
-         desiredLinearMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, -gravityZ * totalMass);
-         desiredAngularMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
-         momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
-         yoDesiredAngularMomentumRateOfChange.set(desiredAngularMomentumRateOfChange);
-         yoDesiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
-         setOptimizationWeights(50.0, 2.0);
-         setMomentumCommandWeights();
-         momentumCommand.setSelectionMatrixForLinearControl();
-         break;
-      case LANDING:
-         throw new RuntimeException("Unimplemented");
-      default:
-         throw new RuntimeException("Invalid jump state for centroidal momentum computation");
-      }
+      desiredLinearMomentumRateOfChange.setIncludingFrame(gravitationalForce);
+      desiredLinearMomentumRateOfChange.changeFrame(controlFrame);
+      desiredAngularMomentumRateOfChange.setIncludingFrame(controlFrame, 0.0, 0.0, 0.0);
+      momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
+      yoDesiredAngularMomentumRateOfChange.set(desiredAngularMomentumRateOfChange);
+      yoDesiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
+      setOptimizationWeights(50.0, 2.0);
+      setMomentumCommandWeights();
+      momentumCommand.setSelectionMatrixForLinearControl();
    }
 
-   private void computeMomentumCommandForStandingState(boolean computePelvisFeedbackControl)
+   public void computeForZeroMomentumRateOfChange()
    {
       desiredLinearMomentumRateOfChange.setToZero(controlFrame);
       desiredAngularMomentumRateOfChange.setToZero(controlFrame);
@@ -125,6 +103,29 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       setOptimizationWeights(50.0, 2.0);
       setMomentumCommandWeights();
       momentumCommand.setSelectionMatrixToIdentity();
+   }
+
+   private final FrameVector3D groundReactionForceToAchieve = new FrameVector3D();
+
+   public void computeMomentumRateOfChangeFromForceProfile(double time)
+   {
+      groundReactionForceProfile.update(time, groundReactionForceToAchieve);
+      groundReactionForceToAchieve.changeFrame(worldFrame);
+      desiredLinearMomentumRateOfChange.sub(groundReactionForceToAchieve, gravitationalForce);
+      desiredLinearMomentumRateOfChange.changeFrame(controlFrame);
+      desiredLinearMomentumRateOfChange.setIncludingFrame(controlFrame, desiredLinearMomentumRateOfChange);
+      desiredAngularMomentumRateOfChange.setToZero(controlFrame);
+      momentumCommand.setMomentumRate(desiredAngularMomentumRateOfChange, desiredLinearMomentumRateOfChange);
+      yoDesiredAngularMomentumRateOfChange.set(desiredAngularMomentumRateOfChange);
+      yoDesiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
+      setOptimizationWeights(50.0, 2.0);
+      setMomentumCommandWeights();
+      momentumCommand.setSelectionMatrixToIdentity();
+   }
+
+   public void setGroundReactionForceProfile(ForceTrajectory forceTrajectory)
+   {
+      this.groundReactionForceProfile = forceTrajectory;
    }
 
    @Override

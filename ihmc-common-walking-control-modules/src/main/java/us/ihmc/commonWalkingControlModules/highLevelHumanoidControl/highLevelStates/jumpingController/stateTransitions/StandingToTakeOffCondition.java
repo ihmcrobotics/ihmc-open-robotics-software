@@ -1,16 +1,25 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.stateTransitions;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.StandingState;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandingToTakeOffCondition implements StateTransitionCondition, StateTransitionAction
 {
-   boolean standingForTheFirstTime = true;
+   private boolean standingForTheFirstTime = true;
+   private final StandingState standingState;
+   
+   public StandingToTakeOffCondition(StandingState standingState)
+   {
+      this.standingState = standingState;
+   }
    
    @Override
    public boolean checkCondition()
    {
-      return standingForTheFirstTime;
+      return standingForTheFirstTime && standingState.isDone();
    }
 
    @Override

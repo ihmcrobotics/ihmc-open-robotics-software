@@ -4,13 +4,11 @@ import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParamete
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.RootJointAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.yoVariables.providers.EnumProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
@@ -28,8 +26,6 @@ public class GravityCompensationManager implements JumpControlManagerInterface
    private final double gravityZ;
    private final JumpControllerParameters jumpControllerParameters;
 
-   private EnumProvider<JumpStateEnum> currentState;
-
    private final RootJointAccelerationCommand rootJointAccelerationCommand;
    private final FrameVector3D rootAcceleration;
 
@@ -46,29 +42,15 @@ public class GravityCompensationManager implements JumpControlManagerInterface
       rootAcceleration = new FrameVector3D(rootFrame);
    }
    
-   @Override
-   public void setStateEnumProvider(EnumProvider<JumpStateEnum> stateEnumProvider)
-   {  
-      this.currentState = stateEnumProvider;
+   public void setRootJointAccelerationForFreeFall()
+   {
+      rootAcceleration.set(0.0, 0.0, 0.0);
+      rootJointAccelerationCommand.setRootJointLinearAcceleration(rootAcceleration);
    }
 
-   public void compute()
+   public void setRootJointAccelerationForStandardGravitationalForce()
    {
-      switch (currentState.getValue())
-      {
-      case STANDING:
-         rootAcceleration.set(0.0, 0.0, gravityZ);
-         break;
-      case TAKE_OFF:
-         throw new RuntimeException("Unimplemented case");
-      case FLIGHT:
-         rootAcceleration.set(0.0, 0.0, 0.0);
-         break;
-      case LANDING:
-         throw new RuntimeException("Unimplemented case");
-      default:
-         throw new RuntimeException("Invalid jump controller state for gravity compensation control");
-      }
+      rootAcceleration.set(0.0, 0.0, gravityZ);
       rootJointAccelerationCommand.setRootJointLinearAcceleration(rootAcceleration);
    }
 

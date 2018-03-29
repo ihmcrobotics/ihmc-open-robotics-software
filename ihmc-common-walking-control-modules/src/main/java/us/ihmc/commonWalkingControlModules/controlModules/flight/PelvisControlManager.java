@@ -3,21 +3,18 @@ package us.ihmc.commonWalkingControlModules.controlModules.flight;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.states.JumpStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.yoVariables.providers.EnumProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class PelvisControlManager implements JumpControlManagerInterface
@@ -34,11 +31,11 @@ public class PelvisControlManager implements JumpControlManagerInterface
    private final FrameQuaternion desiredPelvisOrientation = new FrameQuaternion();
 
    private final Twist tempTwist = new Twist();
-   private EnumProvider<JumpStateEnum> currentState;
    private PID3DGainsReadOnly linearGains;
    private PID3DGainsReadOnly angularGains;
    private Vector3DReadOnly linearWeights;
    private Vector3DReadOnly angularWeights;
+   private Vector3D zeroWeight = new Vector3D(0.0, 0.0, 0.0);
 
    public PelvisControlManager(HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
@@ -67,25 +64,22 @@ public class PelvisControlManager implements JumpControlManagerInterface
       this.angularWeights = angularWeights;
    }
 
-   public void compute()
+   public void mainDesiredOrientationOnly()
    {
-      switch (currentState.getValue())
-      {
-      case STANDING:
-         spatialFeedbackControlCommand.set(desiredPelvisPosition);
-         spatialFeedbackControlCommand.set(desiredPelvisOrientation);
-         spatialFeedbackControlCommand.setPositionGains(linearGains);
-         spatialFeedbackControlCommand.setOrientationGains(angularGains);
-         spatialFeedbackControlCommand.setWeightsForSolver(angularWeights, linearWeights);
-         break;
-      case TAKE_OFF:
-      case FLIGHT:
-      case LANDING:
-         throw new RuntimeException("Unimplemented case");
-      default:
-         throw new RuntimeException("Unknown jump control state");
-      }
+      spatialFeedbackControlCommand.set(desiredPelvisPosition);
+      spatialFeedbackControlCommand.set(desiredPelvisOrientation);
+      spatialFeedbackControlCommand.setPositionGains(linearGains);
+      spatialFeedbackControlCommand.setOrientationGains(angularGains);
+      spatialFeedbackControlCommand.setWeightsForSolver(zeroWeight, angularWeights);
+   }
 
+   public void maintainDesiredPositionAndOrientation()
+   {
+      spatialFeedbackControlCommand.set(desiredPelvisPosition);
+      spatialFeedbackControlCommand.set(desiredPelvisOrientation);
+      spatialFeedbackControlCommand.setPositionGains(linearGains);
+      spatialFeedbackControlCommand.setOrientationGains(angularGains);
+      spatialFeedbackControlCommand.setWeightsForSolver(angularWeights, linearWeights);
    }
 
    public void getCurrentPelvisAngularVelocity(ReferenceFrame referenceFrame, FrameVector3D angularVelocityToSet)
@@ -138,11 +132,5 @@ public class PelvisControlManager implements JumpControlManagerInterface
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return spatialFeedbackControlCommand;
-   }
-
-   @Override
-   public void setStateEnumProvider(EnumProvider<JumpStateEnum> stateEnumProvider)
-   {
-      this.currentState = stateEnumProvider;
    }
 }
