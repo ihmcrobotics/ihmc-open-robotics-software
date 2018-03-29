@@ -17,7 +17,6 @@ import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.LidarScanParametersMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ObjectDetectorResultPacket;
-import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.communication.packets.SimulatedLidarScanPacket;
@@ -437,7 +436,7 @@ public final class RandomHumanoidMessages
       next.robotSide = RobotSide.generateRandomRobotSide(random).toByte();
       next.location = EuclidCoreRandomTools.nextPoint3D(random);
       next.orientation = EuclidCoreRandomTools.nextQuaternion(random);
-      IntStream.range(0, random.nextInt(10)).forEach(i -> next.predictedContactPoints.add().set(EuclidCoreRandomTools.nextPoint2D(random)));
+      IntStream.range(0, random.nextInt(10)).forEach(i -> next.predictedContactPoint2Ds.add().set(EuclidCoreRandomTools.nextPoint2D(random)));
       next.trajectoryType = RandomNumbers.nextEnum(random, TrajectoryType.class).toByte();
       next.swingHeight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.1);
       if (next.trajectoryType == TrajectoryType.CUSTOM.toByte())
@@ -763,12 +762,12 @@ public final class RandomHumanoidMessages
    {
       CapturabilityBasedStatus next = new CapturabilityBasedStatus();
       double max = Double.MAX_VALUE / 2;
-      next.capturePoint = RandomGeometry.nextPoint2D(random, max, max);
-      next.desiredCapturePoint = RandomGeometry.nextPoint2D(random, max, max);
-      next.centerOfMass = RandomGeometry.nextPoint3D(random, max, max, max);
+      next.capturePoint2D = RandomGeometry.nextPoint3D(random, max, max, 0.0);
+      next.desiredCapturePoint2D = RandomGeometry.nextPoint3D(random, max, max, 0.0);
+      next.centerOfMass3D = RandomGeometry.nextPoint3D(random, max, max, max);
 
-      IntStream.range(0, MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> nextPoint2D(random)).forEach(next.leftFootSupportPolygon.add()::set);
-      IntStream.range(0, MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> nextPoint2D(random)).forEach(next.rightFootSupportPolygon.add()::set);
+      IntStream.range(0, MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> nextPoint2D(random)).forEach(next.leftFootSupportPolygon2D.add()::set);
+      IntStream.range(0, MAXIMUM_NUMBER_OF_VERTICES).mapToObj(i -> nextPoint2D(random)).forEach(next.rightFootSupportPolygon2D.add()::set);
 
       return next;
    }

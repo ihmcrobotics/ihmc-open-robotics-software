@@ -100,7 +100,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
          }
       }
 
-      List<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
+      List<Point3D> originalPredictedContactPoints = message.getPredictedContactPoint2Ds();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
       {

@@ -345,10 +345,10 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
             break;
          }
          debugPrintln("Step Added To Send: " + outgoingFootsteps.footstepDataList.get(i));
-         if (outgoingFootsteps.footstepDataList.get(i).predictedContactPoints != null
-               && outgoingFootsteps.footstepDataList.get(i).predictedContactPoints.isEmpty())
+         if (outgoingFootsteps.footstepDataList.get(i).predictedContactPoint2Ds != null
+               && outgoingFootsteps.footstepDataList.get(i).predictedContactPoint2Ds.isEmpty())
          {
-            debugPrintln("Support Points are: " + outgoingFootsteps.footstepDataList.get(i).predictedContactPoints.toString());
+            debugPrintln("Support Points are: " + outgoingFootsteps.footstepDataList.get(i).predictedContactPoint2Ds.toString());
             throw new RuntimeException("attempting to send footstep with empty list of support points");
          }
       }
