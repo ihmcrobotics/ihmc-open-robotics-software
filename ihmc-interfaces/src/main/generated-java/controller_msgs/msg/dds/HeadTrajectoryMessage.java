@@ -29,6 +29,7 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
 
    public HeadTrajectoryMessage(HeadTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

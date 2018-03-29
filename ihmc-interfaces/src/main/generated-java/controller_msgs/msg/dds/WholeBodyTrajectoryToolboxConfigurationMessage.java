@@ -26,6 +26,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
 
    public WholeBodyTrajectoryToolboxConfigurationMessage(WholeBodyTrajectoryToolboxConfigurationMessage other)
    {
+      this();
       set(other);
    }
 

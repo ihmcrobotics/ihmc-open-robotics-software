@@ -52,6 +52,7 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
 
    public FrameInformation(FrameInformation other)
    {
+      this();
       set(other);
    }
 

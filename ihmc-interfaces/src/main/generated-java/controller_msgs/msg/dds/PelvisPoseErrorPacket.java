@@ -23,6 +23,7 @@ public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket> impleme
 
    public PelvisPoseErrorPacket(PelvisPoseErrorPacket other)
    {
+      this();
       set(other);
    }
 

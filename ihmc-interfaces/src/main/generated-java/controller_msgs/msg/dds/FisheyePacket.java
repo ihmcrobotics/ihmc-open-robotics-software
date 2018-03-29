@@ -19,6 +19,7 @@ public class FisheyePacket extends Packet<FisheyePacket> implements Settable<Fis
 
    public FisheyePacket(FisheyePacket other)
    {
+      this();
       set(other);
    }
 

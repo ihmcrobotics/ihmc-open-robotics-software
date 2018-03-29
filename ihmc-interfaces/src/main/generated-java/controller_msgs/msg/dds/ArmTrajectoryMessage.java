@@ -34,6 +34,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
    public ArmTrajectoryMessage(ArmTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

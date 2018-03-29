@@ -26,6 +26,7 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
 
    public InvalidPacketNotificationPacket(InvalidPacketNotificationPacket other)
    {
+      this();
       set(other);
    }
 

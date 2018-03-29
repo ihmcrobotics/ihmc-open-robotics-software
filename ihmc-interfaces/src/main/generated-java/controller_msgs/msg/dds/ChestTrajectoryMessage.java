@@ -30,6 +30,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
 
    public ChestTrajectoryMessage(ChestTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

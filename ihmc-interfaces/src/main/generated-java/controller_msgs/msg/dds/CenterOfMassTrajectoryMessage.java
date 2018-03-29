@@ -28,6 +28,7 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
 
    public CenterOfMassTrajectoryMessage(CenterOfMassTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

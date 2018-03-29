@@ -31,6 +31,7 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
 
    public ManualHandControlPacket(ManualHandControlPacket other)
    {
+      this();
       set(other);
    }
 

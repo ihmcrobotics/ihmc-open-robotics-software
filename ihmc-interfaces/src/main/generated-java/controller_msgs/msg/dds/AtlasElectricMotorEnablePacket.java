@@ -35,6 +35,7 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
 
    public AtlasElectricMotorEnablePacket(AtlasElectricMotorEnablePacket other)
    {
+      this();
       set(other);
    }
 

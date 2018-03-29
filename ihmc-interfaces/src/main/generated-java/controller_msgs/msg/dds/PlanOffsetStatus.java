@@ -26,6 +26,7 @@ public class PlanOffsetStatus extends Packet<PlanOffsetStatus> implements Settab
 
    public PlanOffsetStatus(PlanOffsetStatus other)
    {
+      this();
       set(other);
    }
 

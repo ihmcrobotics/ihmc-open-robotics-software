@@ -36,6 +36,7 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
 
    public FootTrajectoryMessage(FootTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

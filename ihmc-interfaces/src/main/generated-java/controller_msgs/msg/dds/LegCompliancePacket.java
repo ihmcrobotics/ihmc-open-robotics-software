@@ -38,6 +38,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
 
    public LegCompliancePacket(LegCompliancePacket other)
    {
+      this();
       set(other);
    }
 

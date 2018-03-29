@@ -21,6 +21,7 @@ public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointClo
 
    public RequestStereoPointCloudMessage(RequestStereoPointCloudMessage other)
    {
+      this();
       set(other);
    }
 

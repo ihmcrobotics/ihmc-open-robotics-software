@@ -35,6 +35,7 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
    public VideoPacket(VideoPacket other)
    {
+      this();
       set(other);
    }
 

@@ -28,6 +28,7 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket> impleme
 
    public PointCloudWorldPacket(PointCloudWorldPacket other)
    {
+      this();
       set(other);
    }
 

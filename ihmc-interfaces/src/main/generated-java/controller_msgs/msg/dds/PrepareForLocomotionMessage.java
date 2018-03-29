@@ -32,6 +32,7 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
 
    public PrepareForLocomotionMessage(PrepareForLocomotionMessage other)
    {
+      this();
       set(other);
    }
 

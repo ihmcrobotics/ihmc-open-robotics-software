@@ -22,6 +22,7 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
 
    public AtlasElectricMotorAutoEnableFlagPacket(AtlasElectricMotorAutoEnableFlagPacket other)
    {
+      this();
       set(other);
    }
 

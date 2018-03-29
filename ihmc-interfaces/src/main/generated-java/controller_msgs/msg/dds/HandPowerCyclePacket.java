@@ -23,6 +23,7 @@ public class HandPowerCyclePacket extends Packet<HandPowerCyclePacket> implement
 
    public HandPowerCyclePacket(HandPowerCyclePacket other)
    {
+      this();
       set(other);
    }
 

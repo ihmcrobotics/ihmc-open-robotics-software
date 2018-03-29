@@ -22,6 +22,7 @@ public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
 
    public StopAllTrajectoryMessage(StopAllTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

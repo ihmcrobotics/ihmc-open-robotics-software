@@ -24,6 +24,7 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
 
    public StateEstimatorModePacket(StateEstimatorModePacket other)
    {
+      this();
       set(other);
    }
 

@@ -24,6 +24,7 @@ public class SpatialVectorMessage extends Packet<SpatialVectorMessage> implement
 
    public SpatialVectorMessage(SpatialVectorMessage other)
    {
+      this();
       set(other);
    }
 

@@ -63,6 +63,7 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
    public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

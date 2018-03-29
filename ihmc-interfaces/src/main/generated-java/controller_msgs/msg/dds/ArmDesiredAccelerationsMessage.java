@@ -36,6 +36,7 @@ public class ArmDesiredAccelerationsMessage extends Packet<ArmDesiredAcceleratio
 
    public ArmDesiredAccelerationsMessage(ArmDesiredAccelerationsMessage other)
    {
+      this();
       set(other);
    }
 

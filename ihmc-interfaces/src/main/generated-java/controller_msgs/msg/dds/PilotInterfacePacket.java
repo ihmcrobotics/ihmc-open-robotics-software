@@ -27,6 +27,7 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
 
    public PilotInterfacePacket(PilotInterfacePacket other)
    {
+      this();
       set(other);
    }
 

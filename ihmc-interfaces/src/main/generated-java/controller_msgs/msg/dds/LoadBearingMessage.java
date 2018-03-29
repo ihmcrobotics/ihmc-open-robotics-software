@@ -41,6 +41,7 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
    public LoadBearingMessage(LoadBearingMessage other)
    {
+      this();
       set(other);
    }
 

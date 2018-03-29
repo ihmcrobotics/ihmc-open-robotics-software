@@ -73,6 +73,7 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
 
    public SE3TrajectoryMessage(SE3TrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

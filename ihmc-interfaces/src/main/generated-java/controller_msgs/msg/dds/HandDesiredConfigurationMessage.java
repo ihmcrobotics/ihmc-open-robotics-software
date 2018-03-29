@@ -63,6 +63,7 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
 
    public HandDesiredConfigurationMessage(HandDesiredConfigurationMessage other)
    {
+      this();
       set(other);
    }
 

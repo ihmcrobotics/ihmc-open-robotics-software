@@ -43,6 +43,7 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
 
    public WeightMatrix3DMessage(WeightMatrix3DMessage other)
    {
+      this();
       set(other);
    }
 

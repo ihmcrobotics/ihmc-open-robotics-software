@@ -27,6 +27,7 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
 
    public WalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage other)
    {
+      this();
       set(other);
    }
 

@@ -21,6 +21,7 @@ public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implement
 
    public BoundingBox3DMessage(BoundingBox3DMessage other)
    {
+      this();
       set(other);
    }
 

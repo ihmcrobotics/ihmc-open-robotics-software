@@ -30,6 +30,7 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
 
    public MomentumTrajectoryMessage(MomentumTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

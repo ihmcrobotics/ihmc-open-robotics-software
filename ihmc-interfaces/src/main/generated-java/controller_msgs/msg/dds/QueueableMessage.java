@@ -51,6 +51,7 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
    public QueueableMessage(QueueableMessage other)
    {
+      this();
       set(other);
    }
 

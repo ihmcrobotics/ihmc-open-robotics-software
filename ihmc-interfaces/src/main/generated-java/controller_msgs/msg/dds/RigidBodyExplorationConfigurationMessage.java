@@ -38,6 +38,7 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
    public RigidBodyExplorationConfigurationMessage(RigidBodyExplorationConfigurationMessage other)
    {
+      this();
       set(other);
    }
 

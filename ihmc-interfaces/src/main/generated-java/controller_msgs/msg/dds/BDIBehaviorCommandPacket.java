@@ -33,6 +33,7 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
 
    public BDIBehaviorCommandPacket(BDIBehaviorCommandPacket other)
    {
+      this();
       set(other);
    }
 

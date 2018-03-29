@@ -25,6 +25,7 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
 
    public LocalizationPointMapPacket(LocalizationPointMapPacket other)
    {
+      this();
       set(other);
    }
 

@@ -25,6 +25,7 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
 
    public AtlasDesiredPumpPSIPacket(AtlasDesiredPumpPSIPacket other)
    {
+      this();
       set(other);
    }
 

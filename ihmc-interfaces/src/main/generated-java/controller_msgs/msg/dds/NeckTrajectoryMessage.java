@@ -29,6 +29,7 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
 
    public NeckTrajectoryMessage(NeckTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

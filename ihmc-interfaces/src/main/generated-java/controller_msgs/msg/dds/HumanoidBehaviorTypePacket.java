@@ -51,6 +51,7 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
 
    public HumanoidBehaviorTypePacket(HumanoidBehaviorTypePacket other)
    {
+      this();
       set(other);
    }
 

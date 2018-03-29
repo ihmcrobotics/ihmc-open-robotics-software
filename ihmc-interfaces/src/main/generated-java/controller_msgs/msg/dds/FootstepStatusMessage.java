@@ -61,6 +61,7 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
 
    public FootstepStatusMessage(FootstepStatusMessage other)
    {
+      this();
       set(other);
    }
 

@@ -22,6 +22,7 @@ public class UIPositionCheckerPacket extends Packet<UIPositionCheckerPacket>
 
    public UIPositionCheckerPacket(UIPositionCheckerPacket other)
    {
+      this();
       set(other);
    }
 

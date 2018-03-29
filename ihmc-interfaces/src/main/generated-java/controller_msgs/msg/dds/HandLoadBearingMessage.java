@@ -48,6 +48,7 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
 
    public HandLoadBearingMessage(HandLoadBearingMessage other)
    {
+      this();
       set(other);
    }
 

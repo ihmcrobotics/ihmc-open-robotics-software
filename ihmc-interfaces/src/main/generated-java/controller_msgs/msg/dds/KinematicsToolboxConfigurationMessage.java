@@ -49,6 +49,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
    public KinematicsToolboxConfigurationMessage(KinematicsToolboxConfigurationMessage other)
    {
+      this();
       set(other);
    }
 

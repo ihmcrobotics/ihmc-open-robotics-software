@@ -31,6 +31,7 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
 
    public BoundingBoxesPacket(BoundingBoxesPacket other)
    {
+      this();
       set(other);
    }
 

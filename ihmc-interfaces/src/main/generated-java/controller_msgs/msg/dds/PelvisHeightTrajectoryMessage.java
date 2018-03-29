@@ -40,6 +40,7 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
    public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

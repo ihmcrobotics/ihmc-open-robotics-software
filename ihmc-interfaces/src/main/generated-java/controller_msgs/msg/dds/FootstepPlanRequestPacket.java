@@ -33,6 +33,7 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 
    public FootstepPlanRequestPacket(FootstepPlanRequestPacket other)
    {
+      this();
       set(other);
    }
 

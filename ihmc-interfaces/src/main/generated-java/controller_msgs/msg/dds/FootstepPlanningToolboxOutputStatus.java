@@ -40,6 +40,7 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
    public FootstepPlanningToolboxOutputStatus(FootstepPlanningToolboxOutputStatus other)
    {
+      this();
       set(other);
    }
 

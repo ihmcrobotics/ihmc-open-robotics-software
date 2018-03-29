@@ -37,6 +37,7 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
 
    public PelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

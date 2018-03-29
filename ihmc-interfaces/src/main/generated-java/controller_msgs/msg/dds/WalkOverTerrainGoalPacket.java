@@ -25,6 +25,7 @@ public class WalkOverTerrainGoalPacket extends Packet<WalkOverTerrainGoalPacket>
 
    public WalkOverTerrainGoalPacket(WalkOverTerrainGoalPacket other)
    {
+      this();
       set(other);
    }
 

@@ -29,6 +29,7 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket> implements Se
 
    public SnapFootstepPacket(SnapFootstepPacket other)
    {
+      this();
       set(other);
    }
 

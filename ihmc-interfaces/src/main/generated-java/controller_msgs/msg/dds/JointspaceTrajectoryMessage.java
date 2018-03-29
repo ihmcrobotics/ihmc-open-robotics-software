@@ -39,6 +39,7 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
 
    public JointspaceTrajectoryMessage(JointspaceTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

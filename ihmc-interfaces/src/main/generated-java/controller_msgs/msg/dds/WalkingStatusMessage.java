@@ -28,6 +28,7 @@ public class WalkingStatusMessage extends Packet<WalkingStatusMessage> implement
 
    public WalkingStatusMessage(WalkingStatusMessage other)
    {
+      this();
       set(other);
    }
 

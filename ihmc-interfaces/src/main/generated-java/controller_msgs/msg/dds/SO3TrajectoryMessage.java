@@ -62,6 +62,7 @@ public class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> implement
 
    public SO3TrajectoryMessage(SO3TrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

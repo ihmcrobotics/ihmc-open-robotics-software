@@ -27,6 +27,7 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
 
    public IMUPacket(IMUPacket other)
    {
+      this();
       set(other);
    }
 

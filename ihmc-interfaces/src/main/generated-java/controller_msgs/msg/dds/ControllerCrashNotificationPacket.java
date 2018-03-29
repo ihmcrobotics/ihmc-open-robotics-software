@@ -30,6 +30,7 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
 
    public ControllerCrashNotificationPacket(ControllerCrashNotificationPacket other)
    {
+      this();
       set(other);
    }
 

@@ -28,6 +28,7 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implement
 
    public HandJointAnglePacket(HandJointAnglePacket other)
    {
+      this();
       set(other);
    }
 

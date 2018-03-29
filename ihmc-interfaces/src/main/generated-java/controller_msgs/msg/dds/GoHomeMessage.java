@@ -43,6 +43,7 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
 
    public GoHomeMessage(GoHomeMessage other)
    {
+      this();
       set(other);
    }
 

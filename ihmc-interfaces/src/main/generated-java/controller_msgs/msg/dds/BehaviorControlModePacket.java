@@ -25,6 +25,7 @@ public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
 
    public BehaviorControlModePacket(BehaviorControlModePacket other)
    {
+      this();
       set(other);
    }
 

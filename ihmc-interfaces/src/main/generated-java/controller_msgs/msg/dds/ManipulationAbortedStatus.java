@@ -22,6 +22,7 @@ public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus>
 
    public ManipulationAbortedStatus(ManipulationAbortedStatus other)
    {
+      this();
       set(other);
    }
 

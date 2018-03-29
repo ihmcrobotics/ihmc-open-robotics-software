@@ -30,6 +30,7 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
 
    public SpineTrajectoryMessage(SpineTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 

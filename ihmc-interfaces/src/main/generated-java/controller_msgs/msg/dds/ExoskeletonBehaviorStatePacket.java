@@ -24,6 +24,7 @@ public class ExoskeletonBehaviorStatePacket extends Packet<ExoskeletonBehaviorSt
 
    public ExoskeletonBehaviorStatePacket(ExoskeletonBehaviorStatePacket other)
    {
+      this();
       set(other);
    }
 

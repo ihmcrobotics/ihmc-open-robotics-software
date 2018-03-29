@@ -22,6 +22,7 @@ public class SCSListenerPacket extends Packet<SCSListenerPacket> implements Sett
 
    public SCSListenerPacket(SCSListenerPacket other)
    {
+      this();
       set(other);
    }
 

@@ -26,6 +26,7 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
 
    public MultisenseParameterPacket(MultisenseParameterPacket other)
    {
+      this();
       set(other);
    }
 

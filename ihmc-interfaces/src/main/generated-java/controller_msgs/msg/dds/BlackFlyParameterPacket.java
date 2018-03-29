@@ -32,6 +32,7 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
 
    public BlackFlyParameterPacket(BlackFlyParameterPacket other)
    {
+      this();
       set(other);
    }
 

@@ -23,6 +23,7 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
    public DetectedObjectPacket(DetectedObjectPacket other)
    {
+      this();
       set(other);
    }
 

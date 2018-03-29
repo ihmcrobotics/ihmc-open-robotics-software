@@ -40,6 +40,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage(HandHybridJointspaceTaskspaceTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 
