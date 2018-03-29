@@ -6,6 +6,9 @@
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # Specifies the side of the robot that will execute the command.
 byte robot_side 255
 # The desired joint acceleration information.

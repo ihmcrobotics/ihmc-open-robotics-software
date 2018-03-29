@@ -1,6 +1,9 @@
 byte ROBOT_MOTION_STATUS_STANDING=0
 byte ROBOT_MOTION_STATUS_IN_MOTION=1
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 int64 timestamp
 int64 sensor_head_pps_timestamp
 int32 joint_name_hash

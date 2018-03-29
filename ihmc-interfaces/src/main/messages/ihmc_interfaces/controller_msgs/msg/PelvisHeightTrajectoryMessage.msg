@@ -3,6 +3,9 @@
 # Sending this command will not affect the pelvis horizontal position.
 # To control the pelvis 3D position use the PelvisTrajectoryMessage instead.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
 bool enable_user_pelvis_control false
 # If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking

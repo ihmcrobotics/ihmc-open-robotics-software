@@ -2,6 +2,9 @@
 # This message is used to clear the delay buffers on the controller, if you sent a message with a
 # delay and now you do not want them executed, use this command.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # If only a specific message type is to be cleared, use this field.
 # The integer represents the hash code of the message simple name.
 # The hash code of a string should be computed as in java.lang.String.hashCode().

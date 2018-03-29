@@ -1,5 +1,8 @@
 # This message is used to provides additional properties for cameras.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 int32 width
 int32 height
 float64 fx

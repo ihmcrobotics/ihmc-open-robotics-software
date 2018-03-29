@@ -2,4 +2,7 @@
 # Request the controller to enable the automatic manipulation abort feature.
 # When enabled, any arm trajectory will get aborted as soon as the balance controller has a large tracking error.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 bool enable

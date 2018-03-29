@@ -4,6 +4,9 @@
 byte EXECUTION_MODE_OVERRIDE = 0
 byte EXECUTION_MODE_QUEUE = 1
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # When EXECUTION_MODE_OVERRIDE is chosen:
 # - For trajectory messages: the time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point.
 #   Otherwise the controller will prepend a first trajectory point at the current desired position.

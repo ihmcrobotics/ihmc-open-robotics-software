@@ -11,6 +11,9 @@ byte WALKING = 5
 byte DIAGNOSTICS = 6
 byte CALIBRATION = 7
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # Specifies the controller's state prior to transition.
 byte initial_high_level_controller_name 255
 # Specifies the state the controller has transitioned into.

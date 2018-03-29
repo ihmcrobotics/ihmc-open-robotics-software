@@ -2,5 +2,8 @@
 # This message gives the user the option to bypass IHMC feedback controllers for the neck joints by sending desired neck joint accelerations.
 # One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # The desired joint acceleration information.
 DesiredAccelerationsMessage desired_accelerations

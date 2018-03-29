@@ -9,6 +9,9 @@ byte TRAJECTORY_TYPE_OBSTACLE_CLEARANCE = 1
 byte TRAJECTORY_TYPE_CUSTOM = 2
 byte TRAJECTORY_TYPE_WAYPOINTS = 3
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # Specifies which foot will swing to reach the footstep.
 byte robot_side 255
 # Specifies the position of the footstep (sole frame) in world frame.

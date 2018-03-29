@@ -4,6 +4,9 @@
 # This message allows controlling the pelvis orientation without interfering with position that will still be controlled to maintain the current desired capture point position.
 # To execute a normal trajectory to reach a desired pelvis orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # Whether the pelvis orientation is allowed to be controlled by the user when the robot is walking.
 bool enable_user_pelvis_control_during_walking false
 # The orientation trajectory information.

@@ -7,5 +7,8 @@ byte ESTIMATOR_READ = 3
 byte ESTIMATOR_WRITE = 4
 byte ESTIMATOR_RUN = 5
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 byte controller_crash_location 255
 string stacktrace

@@ -3,5 +3,8 @@
 # A Hermite based curve (third order) is used to interpolate the orientations.
 # To execute a simple trajectory to reach a desired chest orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # The orientation trajectory information.
 SO3TrajectoryMessage so3_trajectory
