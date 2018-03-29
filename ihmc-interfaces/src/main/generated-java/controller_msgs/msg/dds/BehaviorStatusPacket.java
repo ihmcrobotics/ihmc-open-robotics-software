@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
@@ -12,30 +12,46 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implement
    public static final byte NO_BEHAVIOR_RUNNING = (byte) 0;
    public static final byte BEHAVIOS_RUNNING = (byte) 1;
    public static final byte BEHAVIOR_PAUSED = (byte) 2;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public byte current_behavior_status_ = (byte) 255;
 
    public BehaviorStatusPacket()
    {
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public BehaviorStatusPacket(BehaviorStatusPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(BehaviorStatusPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       current_behavior_status_ = other.current_behavior_status_;
+
    }
 
-   public byte getCurrentBehaviorStatus()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return current_behavior_status_;
+      return header_;
    }
 
    public void setCurrentBehaviorStatus(byte current_behavior_status)
    {
       current_behavior_status_ = current_behavior_status;
+   }
+
+   public byte getCurrentBehaviorStatus()
+   {
+      return current_behavior_status_;
    }
 
    @Override
@@ -46,6 +62,8 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implement
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_behavior_status_, other.current_behavior_status_, epsilon))
          return false;
 
@@ -64,6 +82,8 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implement
 
       BehaviorStatusPacket otherMyClass = (BehaviorStatusPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.current_behavior_status_ != otherMyClass.current_behavior_status_)
          return false;
 
@@ -76,9 +96,11 @@ public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("BehaviorStatusPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("current_behavior_status=");
       builder.append(this.current_behavior_status_);
-
       builder.append("}");
       return builder.toString();
    }

@@ -5,6 +5,7 @@
 #include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose2D_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -39,6 +40,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::FootstepPlanningToolboxOutputStatus_")
       struct FootstepPlanningToolboxOutputStatus
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         controller_msgs::msg::dds::FootstepDataListMessage footstep_data_list;
         @defaultValue(value=255)
         octet footstep_planning_result;

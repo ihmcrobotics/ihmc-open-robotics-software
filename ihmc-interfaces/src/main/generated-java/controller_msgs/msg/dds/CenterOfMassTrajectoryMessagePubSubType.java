@@ -1,66 +1,22 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "CenterOfMassTrajectoryMessage" defined in "CenterOfMassTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "CenterOfMassTrajectoryMessage" defined in
+ * "CenterOfMassTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a
+ * Participant.
  *
- * This file was automatically generated from CenterOfMassTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit CenterOfMassTrajectoryMessage_.idl instead.
+ * This file was automatically generated from CenterOfMassTrajectoryMessage_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * CenterOfMassTrajectoryMessage_.idl instead.
+ *
  */
 public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.CenterOfMassTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::CenterOfMassTrajectoryMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
-
-   public CenterOfMassTrajectoryMessagePubSubType()
-   {
-
-   }
-
-   public static int getMaxCdrSerializedSize()
-   {
-      return getMaxCdrSerializedSize(0);
-   }
-
-   public static int getMaxCdrSerializedSize(int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data)
-   {
-      return getCdrSerializedSize(data, 0);
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public static void write(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.CDR cdr)
-   {
-
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
-   }
-
-   public static void read(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.CDR cdr)
-   {
-
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);
-   }
-
-   public static void staticCopy(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage src, controller_msgs.msg.dds.CenterOfMassTrajectoryMessage dest)
-   {
-      dest.set(src);
-   }
 
    @Override
    public void serialize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
@@ -80,16 +36,72 @@ public class CenterOfMassTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
       deserializeCDR.finishDeserialize();
    }
 
+   public static int getMaxCdrSerializedSize()
+   {
+      return getMaxCdrSerializedSize(0);
+   }
+
+   public static int getMaxCdrSerializedSize(int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data)
+   {
+      return getCdrSerializedSize(data, 0);
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
+      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public static void write(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
+   }
+
+   public static void read(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);
+
+   }
+
    @Override
    public final void serialize(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       ser.write_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.CenterOfMassTrajectoryMessage data)
    {
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       ser.read_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.CenterOfMassTrajectoryMessage src, controller_msgs.msg.dds.CenterOfMassTrajectoryMessage dest)
+   {
+      dest.set(src);
    }
 
    @Override

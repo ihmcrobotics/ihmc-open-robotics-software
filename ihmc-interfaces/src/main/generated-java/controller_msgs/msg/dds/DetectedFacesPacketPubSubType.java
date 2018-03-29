@@ -1,20 +1,37 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "DetectedFacesPacket" defined in "DetectedFacesPacket_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "DetectedFacesPacket" defined in "DetectedFacesPacket_.idl". Use
+ * this class to provide the TopicDataType to a Participant.
  *
- * This file was automatically generated from DetectedFacesPacket_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit DetectedFacesPacket_.idl instead.
+ * This file was automatically generated from DetectedFacesPacket_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * DetectedFacesPacket_.idl instead.
+ *
  */
 public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.DetectedFacesPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::DetectedFacesPacket_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public DetectedFacesPacketPubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.DetectedFacesPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.DetectedFacesPacket data)
+         throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -25,6 +42,8 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    public static int getMaxCdrSerializedSize(int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < 100; ++i0)
@@ -49,6 +68,8 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < data.getIds().size(); ++i0)
       {
@@ -65,7 +86,7 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(controller_msgs.msg.dds.DetectedFacesPacket data, us.ihmc.idl.CDR cdr)
    {
-
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
       if (data.getIds().size() <= 100)
          cdr.write_type_e(data.getIds());
       else
@@ -75,52 +96,38 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
          cdr.write_type_e(data.getPositions());
       else
          throw new RuntimeException("positions field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.DetectedFacesPacket data, us.ihmc.idl.CDR cdr)
    {
-
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
       cdr.read_type_e(data.getIds());
-
       cdr.read_type_e(data.getPositions());
-   }
 
-   public static void staticCopy(controller_msgs.msg.dds.DetectedFacesPacket src, controller_msgs.msg.dds.DetectedFacesPacket dest)
-   {
-      dest.set(src);
-   }
-
-   @Override
-   public void serialize(controller_msgs.msg.dds.DetectedFacesPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.DetectedFacesPacket data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
    }
 
    @Override
    public final void serialize(controller_msgs.msg.dds.DetectedFacesPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_e("ids", data.getIds());
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
+      ser.write_type_e("ids", data.getIds());
       ser.write_type_e("positions", data.getPositions());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.DetectedFacesPacket data)
    {
-      ser.read_type_e("ids", data.getIds());
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
+      ser.read_type_e("ids", data.getIds());
       ser.read_type_e("positions", data.getPositions());
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.DetectedFacesPacket src, controller_msgs.msg.dds.DetectedFacesPacket dest)
+   {
+      dest.set(src);
    }
 
    @Override

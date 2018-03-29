@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__FootstepPlanRequestPacket__idl__
 
 #include "controller_msgs/msg/./FootstepDataMessage_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -24,6 +25,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::FootstepPlanRequestPacket_")
       struct FootstepPlanRequestPacket
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         controller_msgs::msg::dds::FootstepDataMessage start_footstep;
         double theta_start;
         @defaultValue(value=1.0)

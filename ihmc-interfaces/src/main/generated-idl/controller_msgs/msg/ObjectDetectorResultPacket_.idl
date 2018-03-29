@@ -3,6 +3,7 @@
 
 #include "controller_msgs/msg/./BoundingBoxesPacket_.idl"
 #include "controller_msgs/msg/./HeatMapPacket_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -16,6 +17,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::ObjectDetectorResultPacket_")
       struct ObjectDetectorResultPacket
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         controller_msgs::msg::dds::HeatMapPacket heat_map;
         controller_msgs::msg::dds::BoundingBoxesPacket bounding_boxes;
       };

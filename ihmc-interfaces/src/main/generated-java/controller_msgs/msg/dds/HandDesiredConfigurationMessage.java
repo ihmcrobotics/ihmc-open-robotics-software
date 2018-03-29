@@ -1,13 +1,12 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message is old will be refreshed in a future release.
- * Message for commanding the hands to perform various predefined grasps.
+ * This message is part of the IHMC whole-body controller API. This message is old will be refreshed
+ * in a future release. Message for commanding the hands to perform various predefined grasps.
  */
 public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigurationMessage>
       implements Settable<HandDesiredConfigurationMessage>, EpsilonComparable<HandDesiredConfigurationMessage>
@@ -46,6 +45,10 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    public static final byte HAND_CONFIGURATION_CREEPY_GRASPING_HARD = (byte) 29;
    public static final byte HAND_CONFIGURATION_SLOW_CLOSE = (byte) 30;
    /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
+   /**
     * Specifies the side of the robot that will execute the trajectory
     */
    public byte robot_side_ = (byte) 255;
@@ -56,27 +59,30 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
 
    public HandDesiredConfigurationMessage()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public HandDesiredConfigurationMessage(HandDesiredConfigurationMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(HandDesiredConfigurationMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       robot_side_ = other.robot_side_;
 
       desired_hand_configuration_ = other.desired_hand_configuration_;
+
    }
 
    /**
-    * Specifies the side of the robot that will execute the trajectory
+    * As of March 2018, the header for this message is only use for its sequence ID.
     */
-   public byte getRobotSide()
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return robot_side_;
+      return header_;
    }
 
    /**
@@ -88,11 +94,11 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    }
 
    /**
-    * Specifies the grasp to perform
+    * Specifies the side of the robot that will execute the trajectory
     */
-   public byte getDesiredHandConfiguration()
+   public byte getRobotSide()
    {
-      return desired_hand_configuration_;
+      return robot_side_;
    }
 
    /**
@@ -103,6 +109,14 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
       desired_hand_configuration_ = desired_hand_configuration;
    }
 
+   /**
+    * Specifies the grasp to perform
+    */
+   public byte getDesiredHandConfiguration()
+   {
+      return desired_hand_configuration_;
+   }
+
    @Override
    public boolean epsilonEquals(HandDesiredConfigurationMessage other, double epsilon)
    {
@@ -111,6 +125,8 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -132,6 +148,8 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
 
       HandDesiredConfigurationMessage otherMyClass = (HandDesiredConfigurationMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -147,13 +165,14 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandDesiredConfigurationMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("desired_hand_configuration=");
       builder.append(this.desired_hand_configuration_);
-
       builder.append("}");
       return builder.toString();
    }

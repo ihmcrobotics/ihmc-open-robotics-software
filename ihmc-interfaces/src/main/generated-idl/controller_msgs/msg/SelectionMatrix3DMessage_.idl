@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__SelectionMatrix3DMessage__idl__
 #define __controller_msgs__msg__SelectionMatrix3DMessage__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -15,6 +16,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::SelectionMatrix3DMessage_")
       struct SelectionMatrix3DMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * The ID of the reference frame defining the selection frame.
          * When selecting the axes of interest, these axes refer to the selection frame axes.

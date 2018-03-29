@@ -1,14 +1,18 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * This message is part of the IHMC localization module.
  */
 public class StampedPosePacket extends Packet<StampedPosePacket> implements Settable<StampedPosePacket>, EpsilonComparable<StampedPosePacket>
 {
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public us.ihmc.euclid.geometry.Pose3D pose_;
    public long timestamp_;
    public double confidence_factor_;
@@ -16,18 +20,20 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
 
    public StampedPosePacket()
    {
+      header_ = new std_msgs.msg.dds.Header();
       pose_ = new us.ihmc.euclid.geometry.Pose3D();
-
       frame_id_ = new java.lang.StringBuilder(255);
    }
 
    public StampedPosePacket(StampedPosePacket other)
    {
+      this();
       set(other);
    }
 
    public void set(StampedPosePacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
       timestamp_ = other.timestamp_;
 
@@ -35,6 +41,15 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
 
       frame_id_.setLength(0);
       frame_id_.append(other.frame_id_);
+
+   }
+
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
+   {
+      return header_;
    }
 
    public us.ihmc.euclid.geometry.Pose3D getPose()
@@ -42,14 +57,19 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       return pose_;
    }
 
+   public void setTimestamp(long timestamp)
+   {
+      timestamp_ = timestamp;
+   }
+
    public long getTimestamp()
    {
       return timestamp_;
    }
 
-   public void setTimestamp(long timestamp)
+   public void setConfidenceFactor(double confidence_factor)
    {
-      timestamp_ = timestamp;
+      confidence_factor_ = confidence_factor;
    }
 
    public double getConfidenceFactor()
@@ -57,9 +77,10 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       return confidence_factor_;
    }
 
-   public void setConfidenceFactor(double confidence_factor)
+   public void setFrameId(java.lang.String frame_id)
    {
-      confidence_factor_ = confidence_factor;
+      frame_id_.setLength(0);
+      frame_id_.append(frame_id);
    }
 
    public java.lang.String getFrameIdAsString()
@@ -72,12 +93,6 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       return frame_id_;
    }
 
-   public void setFrameId(java.lang.String frame_id)
-   {
-      frame_id_.setLength(0);
-      frame_id_.append(frame_id);
-   }
-
    @Override
    public boolean epsilonEquals(StampedPosePacket other, double epsilon)
    {
@@ -86,9 +101,10 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!this.pose_.epsilonEquals(other.pose_, epsilon))
          return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon))
          return false;
 
@@ -113,9 +129,10 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
 
       StampedPosePacket otherMyClass = (StampedPosePacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (!this.pose_.equals(otherMyClass.pose_))
          return false;
-
       if (this.timestamp_ != otherMyClass.timestamp_)
          return false;
 
@@ -134,21 +151,20 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("StampedPosePacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("pose=");
       builder.append(this.pose_);
-
       builder.append(", ");
       builder.append("timestamp=");
       builder.append(this.timestamp_);
-
       builder.append(", ");
       builder.append("confidence_factor=");
       builder.append(this.confidence_factor_);
-
       builder.append(", ");
       builder.append("frame_id=");
       builder.append(this.frame_id_);
-
       builder.append("}");
       return builder.toString();
    }

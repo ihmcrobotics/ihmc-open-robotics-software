@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * Atlas specific message: request taring of the wrist force/torque sensors.
@@ -13,30 +13,38 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
+   /**
     * The robot side (left or right) for the wrist sensor you would like to request calibration for.
     */
    public byte robot_side_ = (byte) 255;
 
    public AtlasWristSensorCalibrationRequestPacket()
    {
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public AtlasWristSensorCalibrationRequestPacket(AtlasWristSensorCalibrationRequestPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(AtlasWristSensorCalibrationRequestPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       robot_side_ = other.robot_side_;
+
    }
 
    /**
-    * The robot side (left or right) for the wrist sensor you would like to request calibration for.
+    * As of March 2018, the header for this message is only use for its sequence ID.
     */
-   public byte getRobotSide()
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return robot_side_;
+      return header_;
    }
 
    /**
@@ -47,6 +55,14 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       robot_side_ = robot_side;
    }
 
+   /**
+    * The robot side (left or right) for the wrist sensor you would like to request calibration for.
+    */
+   public byte getRobotSide()
+   {
+      return robot_side_;
+   }
+
    @Override
    public boolean epsilonEquals(AtlasWristSensorCalibrationRequestPacket other, double epsilon)
    {
@@ -55,6 +71,8 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -73,6 +91,8 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
 
       AtlasWristSensorCalibrationRequestPacket otherMyClass = (AtlasWristSensorCalibrationRequestPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -85,9 +105,11 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       StringBuilder builder = new StringBuilder();
 
       builder.append("AtlasWristSensorCalibrationRequestPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append("}");
       return builder.toString();
    }

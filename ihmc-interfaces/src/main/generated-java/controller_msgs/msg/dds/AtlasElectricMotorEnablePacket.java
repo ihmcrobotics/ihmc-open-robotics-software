@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * Specifies a specific electric motor in the Atlas forearm to power on or off.
@@ -17,6 +17,10 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
    public static final byte R_ARM_WRX = (byte) 4;
    public static final byte R_ARM_WRY2 = (byte) 5;
    /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
+   /**
     * The Enum value of the motor to enable
     */
    public byte atlas_electric_motor_packet_enum_enable_ = (byte) 255;
@@ -27,27 +31,30 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
 
    public AtlasElectricMotorEnablePacket()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public AtlasElectricMotorEnablePacket(AtlasElectricMotorEnablePacket other)
    {
+      this();
       set(other);
    }
 
    public void set(AtlasElectricMotorEnablePacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       atlas_electric_motor_packet_enum_enable_ = other.atlas_electric_motor_packet_enum_enable_;
 
       enable_ = other.enable_;
+
    }
 
    /**
-    * The Enum value of the motor to enable
+    * As of March 2018, the header for this message is only use for its sequence ID.
     */
-   public byte getAtlasElectricMotorPacketEnumEnable()
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return atlas_electric_motor_packet_enum_enable_;
+      return header_;
    }
 
    /**
@@ -59,11 +66,11 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
    }
 
    /**
-    * Boolean for enable state; true for enable, false for disable.
+    * The Enum value of the motor to enable
     */
-   public boolean getEnable()
+   public byte getAtlasElectricMotorPacketEnumEnable()
    {
-      return enable_;
+      return atlas_electric_motor_packet_enum_enable_;
    }
 
    /**
@@ -74,6 +81,14 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
       enable_ = enable;
    }
 
+   /**
+    * Boolean for enable state; true for enable, false for disable.
+    */
+   public boolean getEnable()
+   {
+      return enable_;
+   }
+
    @Override
    public boolean epsilonEquals(AtlasElectricMotorEnablePacket other, double epsilon)
    {
@@ -82,6 +97,8 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.atlas_electric_motor_packet_enum_enable_, other.atlas_electric_motor_packet_enum_enable_, epsilon))
          return false;
 
@@ -103,6 +120,8 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
 
       AtlasElectricMotorEnablePacket otherMyClass = (AtlasElectricMotorEnablePacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.atlas_electric_motor_packet_enum_enable_ != otherMyClass.atlas_electric_motor_packet_enum_enable_)
          return false;
 
@@ -118,13 +137,14 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
       StringBuilder builder = new StringBuilder();
 
       builder.append("AtlasElectricMotorEnablePacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("atlas_electric_motor_packet_enum_enable=");
       builder.append(this.atlas_electric_motor_packet_enum_enable_);
-
       builder.append(", ");
       builder.append("enable=");
       builder.append(this.enable_);
-
       builder.append("}");
       return builder.toString();
    }

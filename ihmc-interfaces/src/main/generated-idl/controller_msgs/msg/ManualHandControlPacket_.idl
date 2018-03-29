@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__ManualHandControlPacket__idl__
 #define __controller_msgs__msg__ManualHandControlPacket__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -26,6 +27,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::ManualHandControlPacket_")
       struct ManualHandControlPacket
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         @defaultValue(value=255)
         octet robot_side;
         double index;

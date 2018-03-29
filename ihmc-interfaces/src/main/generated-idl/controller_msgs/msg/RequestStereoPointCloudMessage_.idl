@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__RequestStereoPointCloudMessage__idl__
 #define __controller_msgs__msg__RequestStereoPointCloudMessage__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -8,10 +9,16 @@ module controller_msgs
     module dds
     {
 
+      /**
+       * Use this message to request a new point cloud from the stereo camera.
+       */
       @TypeCode(type="controller_msgs::msg::dds_::RequestStereoPointCloudMessage_")
       struct RequestStereoPointCloudMessage
       {
-        boolean unused_placeholder_field;
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
       };
     };
   };

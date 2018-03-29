@@ -1,74 +1,22 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "AtlasElectricMotorEnablePacket" defined in "AtlasElectricMotorEnablePacket_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "AtlasElectricMotorEnablePacket" defined in
+ * "AtlasElectricMotorEnablePacket_.idl". Use this class to provide the TopicDataType to a
+ * Participant.
  *
- * This file was automatically generated from AtlasElectricMotorEnablePacket_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit AtlasElectricMotorEnablePacket_.idl instead.
+ * This file was automatically generated from AtlasElectricMotorEnablePacket_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * AtlasElectricMotorEnablePacket_.idl instead.
+ *
  */
 public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.AtlasElectricMotorEnablePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::AtlasElectricMotorEnablePacket_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
-
-   public AtlasElectricMotorEnablePacketPubSubType()
-   {
-
-   }
-
-   public static int getMaxCdrSerializedSize()
-   {
-      return getMaxCdrSerializedSize(0);
-   }
-
-   public static int getMaxCdrSerializedSize(int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data)
-   {
-      return getCdrSerializedSize(data, 0);
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public static void write(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.CDR cdr)
-   {
-
-      cdr.write_type_9(data.getAtlasElectricMotorPacketEnumEnable());
-
-      cdr.write_type_7(data.getEnable());
-   }
-
-   public static void read(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.CDR cdr)
-   {
-
-      data.setAtlasElectricMotorPacketEnumEnable(cdr.read_type_9());
-
-      data.setEnable(cdr.read_type_7());
-   }
-
-   public static void staticCopy(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket src, controller_msgs.msg.dds.AtlasElectricMotorEnablePacket dest)
-   {
-      dest.set(src);
-   }
 
    @Override
    public void serialize(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
@@ -88,20 +36,81 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
       deserializeCDR.finishDeserialize();
    }
 
+   public static int getMaxCdrSerializedSize()
+   {
+      return getMaxCdrSerializedSize(0);
+   }
+
+   public static int getMaxCdrSerializedSize(int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data)
+   {
+      return getCdrSerializedSize(data, 0);
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public static void write(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_9(data.getAtlasElectricMotorPacketEnumEnable());
+
+      cdr.write_type_7(data.getEnable());
+
+   }
+
+   public static void read(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setAtlasElectricMotorPacketEnumEnable(cdr.read_type_9());
+
+      data.setEnable(cdr.read_type_7());
+
+   }
+
    @Override
    public final void serialize(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_9("atlas_electric_motor_packet_enum_enable", data.getAtlasElectricMotorPacketEnumEnable());
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
+      ser.write_type_9("atlas_electric_motor_packet_enum_enable", data.getAtlasElectricMotorPacketEnumEnable());
       ser.write_type_7("enable", data.getEnable());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data)
    {
-      data.setAtlasElectricMotorPacketEnumEnable(ser.read_type_9("atlas_electric_motor_packet_enum_enable"));
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
+      data.setAtlasElectricMotorPacketEnumEnable(ser.read_type_9("atlas_electric_motor_packet_enum_enable"));
       data.setEnable(ser.read_type_7("enable"));
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket src, controller_msgs.msg.dds.AtlasElectricMotorEnablePacket dest)
+   {
+      dest.set(src);
    }
 
    @Override

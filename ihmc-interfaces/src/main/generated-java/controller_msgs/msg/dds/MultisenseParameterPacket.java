@@ -1,12 +1,16 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       implements Settable<MultisenseParameterPacket>, EpsilonComparable<MultisenseParameterPacket>
 {
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public boolean initialize_;
    public double gain_;
    public double motor_speed_;
@@ -18,16 +22,18 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
 
    public MultisenseParameterPacket()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public MultisenseParameterPacket(MultisenseParameterPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(MultisenseParameterPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       initialize_ = other.initialize_;
 
       gain_ = other.gain_;
@@ -43,11 +49,15 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       auto_exposure_ = other.auto_exposure_;
 
       auto_white_balance_ = other.auto_white_balance_;
+
    }
 
-   public boolean getInitialize()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return initialize_;
+      return header_;
    }
 
    public void setInitialize(boolean initialize)
@@ -55,9 +65,9 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       initialize_ = initialize;
    }
 
-   public double getGain()
+   public boolean getInitialize()
    {
-      return gain_;
+      return initialize_;
    }
 
    public void setGain(double gain)
@@ -65,9 +75,9 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       gain_ = gain;
    }
 
-   public double getMotorSpeed()
+   public double getGain()
    {
-      return motor_speed_;
+      return gain_;
    }
 
    public void setMotorSpeed(double motor_speed)
@@ -75,9 +85,9 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       motor_speed_ = motor_speed;
    }
 
-   public boolean getLedEnable()
+   public double getMotorSpeed()
    {
-      return led_enable_;
+      return motor_speed_;
    }
 
    public void setLedEnable(boolean led_enable)
@@ -85,9 +95,9 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       led_enable_ = led_enable;
    }
 
-   public boolean getFlashEnable()
+   public boolean getLedEnable()
    {
-      return flash_enable_;
+      return led_enable_;
    }
 
    public void setFlashEnable(boolean flash_enable)
@@ -95,9 +105,9 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       flash_enable_ = flash_enable;
    }
 
-   public double getDutyCycle()
+   public boolean getFlashEnable()
    {
-      return duty_cycle_;
+      return flash_enable_;
    }
 
    public void setDutyCycle(double duty_cycle)
@@ -105,9 +115,9 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       duty_cycle_ = duty_cycle;
    }
 
-   public boolean getAutoExposure()
+   public double getDutyCycle()
    {
-      return auto_exposure_;
+      return duty_cycle_;
    }
 
    public void setAutoExposure(boolean auto_exposure)
@@ -115,14 +125,19 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       auto_exposure_ = auto_exposure;
    }
 
-   public boolean getAutoWhiteBalance()
+   public boolean getAutoExposure()
    {
-      return auto_white_balance_;
+      return auto_exposure_;
    }
 
    public void setAutoWhiteBalance(boolean auto_white_balance)
    {
       auto_white_balance_ = auto_white_balance;
+   }
+
+   public boolean getAutoWhiteBalance()
+   {
+      return auto_white_balance_;
    }
 
    @Override
@@ -133,6 +148,8 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.initialize_, other.initialize_, epsilon))
          return false;
 
@@ -172,6 +189,8 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
 
       MultisenseParameterPacket otherMyClass = (MultisenseParameterPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.initialize_ != otherMyClass.initialize_)
          return false;
 
@@ -205,37 +224,32 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("MultisenseParameterPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("initialize=");
       builder.append(this.initialize_);
-
       builder.append(", ");
       builder.append("gain=");
       builder.append(this.gain_);
-
       builder.append(", ");
       builder.append("motor_speed=");
       builder.append(this.motor_speed_);
-
       builder.append(", ");
       builder.append("led_enable=");
       builder.append(this.led_enable_);
-
       builder.append(", ");
       builder.append("flash_enable=");
       builder.append(this.flash_enable_);
-
       builder.append(", ");
       builder.append("duty_cycle=");
       builder.append(this.duty_cycle_);
-
       builder.append(", ");
       builder.append("auto_exposure=");
       builder.append(this.auto_exposure_);
-
       builder.append(", ");
       builder.append("auto_white_balance=");
       builder.append(this.auto_white_balance_);
-
       builder.append("}");
       return builder.toString();
    }

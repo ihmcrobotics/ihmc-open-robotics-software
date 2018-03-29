@@ -7,6 +7,7 @@
 #include "controller_msgs/msg/./SelectionMatrix3DMessage_.idl"
 #include "controller_msgs/msg/./WeightMatrix3DMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -23,6 +24,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::SE3TrajectoryMessage_")
       struct SE3TrajectoryMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * List of trajectory points (in taskpsace) to go through while executing the trajectory.
          */

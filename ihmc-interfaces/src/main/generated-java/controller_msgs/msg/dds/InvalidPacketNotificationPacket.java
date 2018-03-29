@@ -1,37 +1,59 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message notifies the user that a previously sent message was rejected by the whole-body controller.
+ * This message notifies the user that a previously sent message was rejected by the whole-body
+ * controller.
  */
 public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotificationPacket>
       implements Settable<InvalidPacketNotificationPacket>, EpsilonComparable<InvalidPacketNotificationPacket>
 {
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public java.lang.StringBuilder packet_class_simple_name_;
    public java.lang.StringBuilder error_message_;
 
    public InvalidPacketNotificationPacket()
    {
+      header_ = new std_msgs.msg.dds.Header();
       packet_class_simple_name_ = new java.lang.StringBuilder(255);
-
       error_message_ = new java.lang.StringBuilder(255);
    }
 
    public InvalidPacketNotificationPacket(InvalidPacketNotificationPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(InvalidPacketNotificationPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       packet_class_simple_name_.setLength(0);
       packet_class_simple_name_.append(other.packet_class_simple_name_);
 
       error_message_.setLength(0);
       error_message_.append(other.error_message_);
+
+   }
+
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
+   {
+      return header_;
+   }
+
+   public void setPacketClassSimpleName(java.lang.String packet_class_simple_name)
+   {
+      packet_class_simple_name_.setLength(0);
+      packet_class_simple_name_.append(packet_class_simple_name);
    }
 
    public java.lang.String getPacketClassSimpleNameAsString()
@@ -44,10 +66,10 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
       return packet_class_simple_name_;
    }
 
-   public void setPacketClassSimpleName(java.lang.String packet_class_simple_name)
+   public void setErrorMessage(java.lang.String error_message)
    {
-      packet_class_simple_name_.setLength(0);
-      packet_class_simple_name_.append(packet_class_simple_name);
+      error_message_.setLength(0);
+      error_message_.append(error_message);
    }
 
    public java.lang.String getErrorMessageAsString()
@@ -60,12 +82,6 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
       return error_message_;
    }
 
-   public void setErrorMessage(java.lang.String error_message)
-   {
-      error_message_.setLength(0);
-      error_message_.append(error_message);
-   }
-
    @Override
    public boolean epsilonEquals(InvalidPacketNotificationPacket other, double epsilon)
    {
@@ -74,6 +90,8 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.packet_class_simple_name_, other.packet_class_simple_name_, epsilon))
          return false;
 
@@ -95,6 +113,8 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
 
       InvalidPacketNotificationPacket otherMyClass = (InvalidPacketNotificationPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (!us.ihmc.idl.IDLTools.equals(this.packet_class_simple_name_, otherMyClass.packet_class_simple_name_))
          return false;
 
@@ -110,13 +130,14 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
       StringBuilder builder = new StringBuilder();
 
       builder.append("InvalidPacketNotificationPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("packet_class_simple_name=");
       builder.append(this.packet_class_simple_name_);
-
       builder.append(", ");
       builder.append("error_message=");
       builder.append(this.error_message_);
-
       builder.append("}");
       return builder.toString();
    }

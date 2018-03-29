@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__RequestWristForceSensorCalibrationPacket__idl__
 #define __controller_msgs__msg__RequestWristForceSensorCalibrationPacket__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -8,10 +9,18 @@ module controller_msgs
     module dds
     {
 
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message will request a calibration the wrist force sensors to the IHMC controller (does not do hardware calibration).
+       * It is strongly suggested to perform the calibration when the hands are not moving nor interacting with the environment.
+       */
       @TypeCode(type="controller_msgs::msg::dds_::RequestWristForceSensorCalibrationPacket_")
       struct RequestWristForceSensorCalibrationPacket
       {
-        boolean unused_placeholder_field;
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
       };
     };
   };

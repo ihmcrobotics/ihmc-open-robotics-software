@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__FrameInformation__idl__
 #define __controller_msgs__msg__FrameInformation__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -40,6 +41,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::FrameInformation_")
       struct FrameInformation
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * The ID of the reference frame that a trajectory is executed in.
          */

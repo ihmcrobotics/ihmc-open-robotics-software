@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__SpatialVectorMessage__idl__
 
 #include "geometry_msgs/msg/./Vector3_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -15,6 +16,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::SpatialVectorMessage_")
       struct SpatialVectorMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         geometry_msgs::msg::dds::Vector3 angular_part;
         geometry_msgs::msg::dds::Vector3 linear_part;
       };

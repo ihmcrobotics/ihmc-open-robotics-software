@@ -4,6 +4,7 @@
 #include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -41,6 +42,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::FootstepPlanningRequestPacket_")
       struct FootstepPlanningRequestPacket
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         @defaultValue(value=255)
         octet initial_stance_robot_side;
         geometry_msgs::msg::dds::Point stance_foot_position_in_world;

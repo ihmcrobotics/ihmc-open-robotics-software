@@ -1,21 +1,41 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "HandHybridJointspaceTaskspaceTrajectoryMessage" defined in "HandHybridJointspaceTaskspaceTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "HandHybridJointspaceTaskspaceTrajectoryMessage" defined in
+ * "HandHybridJointspaceTaskspaceTrajectoryMessage_.idl". Use this class to provide the
+ * TopicDataType to a Participant.
  *
- * This file was automatically generated from HandHybridJointspaceTaskspaceTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit HandHybridJointspaceTaskspaceTrajectoryMessage_.idl instead.
+ * This file was automatically generated from HandHybridJointspaceTaskspaceTrajectoryMessage_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * HandHybridJointspaceTaskspaceTrajectoryMessage_.idl instead.
+ *
  */
 public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType
       implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HandHybridJointspaceTaskspaceTrajectoryMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
+         throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload,
+                           controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data)
+         throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -27,9 +47,12 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       return current_alignment - initial_alignment;
@@ -44,79 +67,67 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getTaskspaceTrajectoryMessage(), current_alignment);
-      current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType
-            .getCdrSerializedSize(data.getJointspaceTrajectoryMessage(), current_alignment);
+
+      current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointspaceTrajectoryMessage(),
+                                                                                                              current_alignment);
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getTaskspaceTrajectoryMessage(), cdr);
-
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.write(data.getJointspaceTrajectoryMessage(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
       data.setRobotSide(cdr.read_type_9());
 
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getTaskspaceTrajectoryMessage(), cdr);
-
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectoryMessage(), cdr);
+
+   }
+
+   @Override
+   public final void serialize(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
+      ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_a("taskspace_trajectory_message", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
+
+      ser.write_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(),
+                       data.getJointspaceTrajectoryMessage());
+
+   }
+
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data)
+   {
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
+      data.setRobotSide(ser.read_type_9("robot_side"));
+      ser.read_type_a("taskspace_trajectory_message", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
+
+      ser.read_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(),
+                      data.getJointspaceTrajectoryMessage());
+
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage src,
                                  controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage dest)
    {
       dest.set(src);
-   }
-
-   @Override
-   public void serialize(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload,
-                           controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data) throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
-   }
-
-   @Override
-   public final void serialize(controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
-   {
-      ser.write_type_9("robot_side", data.getRobotSide());
-
-      ser.write_type_a("taskspace_trajectory_message", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
-
-      ser.write_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(),
-                       data.getJointspaceTrajectoryMessage());
-   }
-
-   @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage data)
-   {
-      data.setRobotSide(ser.read_type_9("robot_side"));
-
-      ser.read_type_a("taskspace_trajectory_message", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
-
-      ser.read_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(),
-                      data.getJointspaceTrajectoryMessage());
    }
 
    @Override

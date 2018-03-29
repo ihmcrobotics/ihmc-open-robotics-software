@@ -1,16 +1,20 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * Configure a constrained trajectory for a given end-effector.
- * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+ * Configure a constrained trajectory for a given end-effector. Main usage is the IHMC
+ * WholeBodyTrajectoryToolbox.
  */
 public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajectoryMessage>
       implements Settable<WaypointBasedTrajectoryMessage>, EpsilonComparable<WaypointBasedTrajectoryMessage>
 {
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public long end_effector_name_based_hash_code_;
    public us.ihmc.idl.IDLSequence.Double waypoint_times_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> waypoints_;
@@ -22,25 +26,27 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
    public WaypointBasedTrajectoryMessage()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
       waypoint_times_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
 
       waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>(100, us.ihmc.euclid.geometry.Pose3D.class,
                                                                                       new geometry_msgs.msg.dds.PosePubSubType());
-
       angular_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
       linear_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
       control_frame_position_in_end_effector_ = new us.ihmc.euclid.tuple3D.Point3D();
       control_frame_orientation_in_end_effector_ = new us.ihmc.euclid.tuple4D.Quaternion();
+
    }
 
    public WaypointBasedTrajectoryMessage(WaypointBasedTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(WaypointBasedTrajectoryMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       end_effector_name_based_hash_code_ = other.end_effector_name_based_hash_code_;
 
       waypoint_times_.set(other.waypoint_times_);
@@ -50,16 +56,25 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.control_frame_position_in_end_effector_, control_frame_position_in_end_effector_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.control_frame_orientation_in_end_effector_, control_frame_orientation_in_end_effector_);
       weight_ = other.weight_;
+
    }
 
-   public long getEndEffectorNameBasedHashCode()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return end_effector_name_based_hash_code_;
+      return header_;
    }
 
    public void setEndEffectorNameBasedHashCode(long end_effector_name_based_hash_code)
    {
       end_effector_name_based_hash_code_ = end_effector_name_based_hash_code;
+   }
+
+   public long getEndEffectorNameBasedHashCode()
+   {
+      return end_effector_name_based_hash_code_;
    }
 
    public us.ihmc.idl.IDLSequence.Double getWaypointTimes()
@@ -92,14 +107,14 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       return control_frame_orientation_in_end_effector_;
    }
 
-   public double getWeight()
-   {
-      return weight_;
-   }
-
    public void setWeight(double weight)
    {
       weight_ = weight;
+   }
+
+   public double getWeight()
+   {
+      return weight_;
    }
 
    @Override
@@ -110,6 +125,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_name_based_hash_code_, other.end_effector_name_based_hash_code_, epsilon))
          return false;
 
@@ -131,16 +148,12 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
       if (!this.angular_selection_matrix_.epsilonEquals(other.angular_selection_matrix_, epsilon))
          return false;
-
       if (!this.linear_selection_matrix_.epsilonEquals(other.linear_selection_matrix_, epsilon))
          return false;
-
       if (!this.control_frame_position_in_end_effector_.epsilonEquals(other.control_frame_position_in_end_effector_, epsilon))
          return false;
-
       if (!this.control_frame_orientation_in_end_effector_.epsilonEquals(other.control_frame_orientation_in_end_effector_, epsilon))
          return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_, other.weight_, epsilon))
          return false;
 
@@ -159,27 +172,23 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
       WaypointBasedTrajectoryMessage otherMyClass = (WaypointBasedTrajectoryMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.end_effector_name_based_hash_code_ != otherMyClass.end_effector_name_based_hash_code_)
          return false;
 
       if (!this.waypoint_times_.equals(otherMyClass.waypoint_times_))
          return false;
-
       if (!this.waypoints_.equals(otherMyClass.waypoints_))
          return false;
-
       if (!this.angular_selection_matrix_.equals(otherMyClass.angular_selection_matrix_))
          return false;
-
       if (!this.linear_selection_matrix_.equals(otherMyClass.linear_selection_matrix_))
          return false;
-
       if (!this.control_frame_position_in_end_effector_.equals(otherMyClass.control_frame_position_in_end_effector_))
          return false;
-
       if (!this.control_frame_orientation_in_end_effector_.equals(otherMyClass.control_frame_orientation_in_end_effector_))
          return false;
-
       if (this.weight_ != otherMyClass.weight_)
          return false;
 
@@ -192,37 +201,32 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       StringBuilder builder = new StringBuilder();
 
       builder.append("WaypointBasedTrajectoryMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("end_effector_name_based_hash_code=");
       builder.append(this.end_effector_name_based_hash_code_);
-
       builder.append(", ");
       builder.append("waypoint_times=");
       builder.append(this.waypoint_times_);
-
       builder.append(", ");
       builder.append("waypoints=");
       builder.append(this.waypoints_);
-
       builder.append(", ");
       builder.append("angular_selection_matrix=");
       builder.append(this.angular_selection_matrix_);
-
       builder.append(", ");
       builder.append("linear_selection_matrix=");
       builder.append(this.linear_selection_matrix_);
-
       builder.append(", ");
       builder.append("control_frame_position_in_end_effector=");
       builder.append(this.control_frame_position_in_end_effector_);
-
       builder.append(", ");
       builder.append("control_frame_orientation_in_end_effector=");
       builder.append(this.control_frame_orientation_in_end_effector_);
-
       builder.append(", ");
       builder.append("weight=");
       builder.append(this.weight_);
-
       builder.append("}");
       return builder.toString();
    }

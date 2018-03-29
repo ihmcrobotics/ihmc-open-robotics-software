@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__CenterOfMassTrajectoryMessage__idl__
 
 #include "controller_msgs/msg/./EuclideanTrajectoryMessage_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -16,6 +17,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::CenterOfMassTrajectoryMessage_")
       struct CenterOfMassTrajectoryMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and velocity at a given time.
          */

@@ -1,22 +1,25 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This class is used to build 1D trajectory messages including jointspace trajectory messages.
- * For 3D trajectory points look at:
- * - EuclideanTrajectoryMessage (translational),
- * - SO3TrajectoryPointMessage (rotational),
- * - SE3TrajectoryPointMessage (translational AND rotational).
+ * This message is part of the IHMC whole-body controller API. This class is used to build 1D
+ * trajectory messages including jointspace trajectory messages. For 3D trajectory points look at: -
+ * EuclideanTrajectoryMessage (translational), - SO3TrajectoryPointMessage (rotational), -
+ * SE3TrajectoryPointMessage (translational AND rotational).
  */
 public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
       implements Settable<TrajectoryPoint1DMessage>, EpsilonComparable<TrajectoryPoint1DMessage>
 {
    /**
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
+   /**
+    * Time at which the trajectory point has to be reached. The time is relative to when the
+    * trajectory starts.
     */
    public double time_;
    /**
@@ -30,33 +33,37 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
 
    public TrajectoryPoint1DMessage()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public TrajectoryPoint1DMessage(TrajectoryPoint1DMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(TrajectoryPoint1DMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       time_ = other.time_;
 
       position_ = other.position_;
 
       velocity_ = other.velocity_;
+
    }
 
    /**
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * As of March 2018, the header for this message is only use for its sequence ID.
     */
-   public double getTime()
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return time_;
+      return header_;
    }
 
    /**
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * Time at which the trajectory point has to be reached. The time is relative to when the
+    * trajectory starts.
     */
    public void setTime(double time)
    {
@@ -64,11 +71,12 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
    }
 
    /**
-    * Define the desired 1D position to be reached at this trajectory point.
+    * Time at which the trajectory point has to be reached. The time is relative to when the
+    * trajectory starts.
     */
-   public double getPosition()
+   public double getTime()
    {
-      return position_;
+      return time_;
    }
 
    /**
@@ -80,11 +88,11 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
    }
 
    /**
-    * Define the desired 1D velocity to be reached at this trajectory point.
+    * Define the desired 1D position to be reached at this trajectory point.
     */
-   public double getVelocity()
+   public double getPosition()
    {
-      return velocity_;
+      return position_;
    }
 
    /**
@@ -95,6 +103,14 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
       velocity_ = velocity;
    }
 
+   /**
+    * Define the desired 1D velocity to be reached at this trajectory point.
+    */
+   public double getVelocity()
+   {
+      return velocity_;
+   }
+
    @Override
    public boolean epsilonEquals(TrajectoryPoint1DMessage other, double epsilon)
    {
@@ -103,6 +119,8 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon))
          return false;
 
@@ -127,6 +145,8 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
 
       TrajectoryPoint1DMessage otherMyClass = (TrajectoryPoint1DMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.time_ != otherMyClass.time_)
          return false;
 
@@ -145,17 +165,17 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("TrajectoryPoint1DMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("time=");
       builder.append(this.time_);
-
       builder.append(", ");
       builder.append("position=");
       builder.append(this.position_);
-
       builder.append(", ");
       builder.append("velocity=");
       builder.append(this.velocity_);
-
       builder.append("}");
       return builder.toString();
    }

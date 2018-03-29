@@ -1,11 +1,15 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<HeatMapPacket>, EpsilonComparable<HeatMapPacket>
 {
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public us.ihmc.idl.IDLSequence.Float data_;
    public int width_;
    public int height_;
@@ -13,6 +17,7 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
 
    public HeatMapPacket()
    {
+      header_ = new std_msgs.msg.dds.Header();
       data_ = new us.ihmc.idl.IDLSequence.Float(100, "type_5");
 
       name_ = new java.lang.StringBuilder(255);
@@ -20,11 +25,13 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
 
    public HeatMapPacket(HeatMapPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(HeatMapPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       data_.set(other.data_);
       width_ = other.width_;
 
@@ -32,6 +39,15 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
 
       name_.setLength(0);
       name_.append(other.name_);
+
+   }
+
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
+   {
+      return header_;
    }
 
    public us.ihmc.idl.IDLSequence.Float getData()
@@ -39,14 +55,19 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
       return data_;
    }
 
+   public void setWidth(int width)
+   {
+      width_ = width;
+   }
+
    public int getWidth()
    {
       return width_;
    }
 
-   public void setWidth(int width)
+   public void setHeight(int height)
    {
-      width_ = width;
+      height_ = height;
    }
 
    public int getHeight()
@@ -54,9 +75,10 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
       return height_;
    }
 
-   public void setHeight(int height)
+   public void setName(java.lang.String name)
    {
-      height_ = height;
+      name_.setLength(0);
+      name_.append(name);
    }
 
    public java.lang.String getNameAsString()
@@ -69,12 +91,6 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
       return name_;
    }
 
-   public void setName(java.lang.String name)
-   {
-      name_.setLength(0);
-      name_.append(name);
-   }
-
    @Override
    public boolean epsilonEquals(HeatMapPacket other, double epsilon)
    {
@@ -83,6 +99,8 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.data_, other.data_, epsilon))
          return false;
 
@@ -110,9 +128,10 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
 
       HeatMapPacket otherMyClass = (HeatMapPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (!this.data_.equals(otherMyClass.data_))
          return false;
-
       if (this.width_ != otherMyClass.width_)
          return false;
 
@@ -131,21 +150,20 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
       StringBuilder builder = new StringBuilder();
 
       builder.append("HeatMapPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("data=");
       builder.append(this.data_);
-
       builder.append(", ");
       builder.append("width=");
       builder.append(this.width_);
-
       builder.append(", ");
       builder.append("height=");
       builder.append(this.height_);
-
       builder.append(", ");
       builder.append("name=");
       builder.append(this.name_);
-
       builder.append("}");
       return builder.toString();
    }

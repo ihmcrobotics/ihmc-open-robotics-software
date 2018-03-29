@@ -1,13 +1,13 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * The message commands the controller to bring the given part of the body back to a default configuration called 'home'.
- * It is useful to get back to a safe configuration before walking.
+ * This message is part of the IHMC whole-body controller API. The message commands the controller
+ * to bring the given part of the body back to a default configuration called 'home'. It is useful
+ * to get back to a safe configuration before walking.
  */
 public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoHomeMessage>, EpsilonComparable<GoHomeMessage>
 {
@@ -16,6 +16,10 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
    public static final byte HUMANOID_BODY_PART_PELVIS = (byte) 2;
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    /**
     * Specifies the part of the body the use wants to move back to its home configuration.
     */
@@ -35,16 +39,18 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
 
    public GoHomeMessage()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public GoHomeMessage(GoHomeMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(GoHomeMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       humanoid_body_part_ = other.humanoid_body_part_;
 
       robot_side_ = other.robot_side_;
@@ -52,14 +58,15 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
       trajectory_time_ = other.trajectory_time_;
 
       execution_delay_time_ = other.execution_delay_time_;
+
    }
 
    /**
-    * Specifies the part of the body the use wants to move back to its home configuration.
+    * As of March 2018, the header for this message is only use for its sequence ID.
     */
-   public byte getHumanoidBodyPart()
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return humanoid_body_part_;
+      return header_;
    }
 
    /**
@@ -71,11 +78,11 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
    }
 
    /**
-    * Needed to identify a side dependent end-effector.
+    * Specifies the part of the body the use wants to move back to its home configuration.
     */
-   public byte getRobotSide()
+   public byte getHumanoidBodyPart()
    {
-      return robot_side_;
+      return humanoid_body_part_;
    }
 
    /**
@@ -87,11 +94,11 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
    }
 
    /**
-    * How long the trajectory will spline from the current desired to the home configuration.
+    * Needed to identify a side dependent end-effector.
     */
-   public double getTrajectoryTime()
+   public byte getRobotSide()
    {
-      return trajectory_time_;
+      return robot_side_;
    }
 
    /**
@@ -103,11 +110,11 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
    }
 
    /**
-    * The time to delay this command on the controller side before being executed.
+    * How long the trajectory will spline from the current desired to the home configuration.
     */
-   public double getExecutionDelayTime()
+   public double getTrajectoryTime()
    {
-      return execution_delay_time_;
+      return trajectory_time_;
    }
 
    /**
@@ -118,6 +125,14 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
       execution_delay_time_ = execution_delay_time;
    }
 
+   /**
+    * The time to delay this command on the controller side before being executed.
+    */
+   public double getExecutionDelayTime()
+   {
+      return execution_delay_time_;
+   }
+
    @Override
    public boolean epsilonEquals(GoHomeMessage other, double epsilon)
    {
@@ -126,6 +141,8 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.humanoid_body_part_, other.humanoid_body_part_, epsilon))
          return false;
 
@@ -153,6 +170,8 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
 
       GoHomeMessage otherMyClass = (GoHomeMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.humanoid_body_part_ != otherMyClass.humanoid_body_part_)
          return false;
 
@@ -174,21 +193,20 @@ public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoH
       StringBuilder builder = new StringBuilder();
 
       builder.append("GoHomeMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("humanoid_body_part=");
       builder.append(this.humanoid_body_part_);
-
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("trajectory_time=");
       builder.append(this.trajectory_time_);
-
       builder.append(", ");
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);
-
       builder.append("}");
       return builder.toString();
    }

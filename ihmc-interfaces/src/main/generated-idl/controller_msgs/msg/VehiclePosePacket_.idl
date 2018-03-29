@@ -3,6 +3,7 @@
 
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -10,12 +11,16 @@ module controller_msgs
     module dds
     {
 
+      /**
+       * Old message used for the VRC? Needs to be revised, maybe deleted?
+       */
       @TypeCode(type="controller_msgs::msg::dds_::VehiclePosePacket_")
       struct VehiclePosePacket
       {
         /**
-         * Old message used for the VRC? Needs to be revised, maybe deleted?
+         * As of March 2018, the header for this message is only use for its sequence ID.
          */
+        std_msgs::msg::dds::Header header;
         geometry_msgs::msg::dds::Point position;
         geometry_msgs::msg::dds::Quaternion orientation;
         long index;

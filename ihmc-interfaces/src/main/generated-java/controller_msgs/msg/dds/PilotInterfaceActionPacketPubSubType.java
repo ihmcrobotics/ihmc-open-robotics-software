@@ -44,6 +44,8 @@ public class PilotInterfaceActionPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       return current_alignment - initial_alignment;
@@ -58,6 +60,8 @@ public class PilotInterfaceActionPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       return current_alignment - initial_alignment;
@@ -65,12 +69,14 @@ public class PilotInterfaceActionPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.PilotInterfaceActionPacket data, us.ihmc.idl.CDR cdr)
    {
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
       cdr.write_type_9(data.getPilotAction());
 
    }
 
    public static void read(controller_msgs.msg.dds.PilotInterfaceActionPacket data, us.ihmc.idl.CDR cdr)
    {
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
       data.setPilotAction(cdr.read_type_9());
 
    }
@@ -78,12 +84,16 @@ public class PilotInterfaceActionPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.PilotInterfaceActionPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       ser.write_type_9("pilot_action", data.getPilotAction());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PilotInterfaceActionPacket data)
    {
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       data.setPilotAction(ser.read_type_9("pilot_action"));
    }
 
