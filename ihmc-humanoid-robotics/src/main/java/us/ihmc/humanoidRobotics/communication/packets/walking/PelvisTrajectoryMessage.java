@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
 
 @RosMessagePacket(documentation =
@@ -27,7 +26,6 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage>
     */
    public PelvisTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -44,7 +42,6 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage>
    {
       enableUserPelvisControl = other.enableUserPelvisControl;
       enableUserPelvisControlDuringWalking = other.enableUserPelvisControlDuringWalking;
-      se3Trajectory = new SE3TrajectoryMessage();
       se3Trajectory.set(other.se3Trajectory);
       setPacketInformation(other);
    }
@@ -92,12 +89,5 @@ public class PelvisTrajectoryMessage extends Packet<PelvisTrajectoryMessage>
          return "Pelvis SE3 trajectory: number of SE3 trajectory points = " + se3Trajectory.taskspaceTrajectoryPoints.size();
       else
          return "Pelvis SE3 trajectory: no SE3 trajectory points";
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validatePelvisTrajectoryMessage(this);
    }
 }

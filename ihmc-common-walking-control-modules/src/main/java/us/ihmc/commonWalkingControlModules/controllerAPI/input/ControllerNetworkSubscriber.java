@@ -46,7 +46,9 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    /** Used to schedule status message sending. */
    private final PeriodicThreadScheduler scheduler;
    /** Used to filter messages coming in. */
-   private final AtomicReference<MessageFilter> messageFilter = new AtomicReference<>(null);
+   private final AtomicReference<MessageFilter> messageFilter;
+   /** Used to filter messages coming in and report an error. */
+   private final AtomicReference<MessageValidator> messageValidator;
 
    /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends Packet<?>>> listOfSupportedStatusMessages;
@@ -69,6 +71,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       this.packetCommunicator = packetCommunicator;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
       listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
+      messageFilter = new AtomicReference<>(message -> true);
+      messageValidator = new AtomicReference<>(message -> null);
 
       if (packetCommunicator == null)
       {
@@ -102,7 +106,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
                PrintTools.debug(ControllerNetworkSubscriber.this,
                                 "Received message: " + multipleMessageHolder.getClass().getSimpleName() + ", " + multipleMessageHolder);
 
-            String errorMessage = multipleMessageHolder.validateMessage();
+            String errorMessage = messageValidator.get().validate(multipleMessageHolder);
 
             if (errorMessage != null)
             {
@@ -135,6 +139,16 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       messageFilter.set(null);
    }
 
+   public void addMessageValidator(MessageValidator newValidator)
+   {
+      messageValidator.set(newValidator);
+   }
+
+   public void removeMessageValidator()
+   {
+      messageValidator.set(null);
+   }
+
    @SuppressWarnings("unchecked")
    private <T extends Packet<T>> void createAllStatusMessageBuffers()
    {
@@ -163,7 +177,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       if (DEBUG)
          PrintTools.debug(ControllerNetworkSubscriber.this, "Received message: " + message.getClass().getSimpleName() + ", " + message);
 
-      String errorMessage = message.validateMessage();
+      String errorMessage = messageValidator.get().validate(message);
 
       if (errorMessage != null)
       {
@@ -177,7 +191,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
    private boolean testMessageWithMessageFilter(Packet<?> messageToTest)
    {
-      if (messageFilter.get() != null && !messageFilter.get().isMessageValid(messageToTest))
+      if (!messageFilter.get().isMessageValid(messageToTest))
       {
          if (DEBUG)
             PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate filter! Filter class: "
@@ -200,7 +214,7 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
          buffer.commit();
       }
 
-      PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate:");
+      PrintTools.error(ControllerNetworkSubscriber.this, "Packet failed to validate: " + messageClass.getSimpleName());
       PrintTools.error(ControllerNetworkSubscriber.this, errorMessage);
    }
 
@@ -257,5 +271,10 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    public static interface MessageFilter
    {
       public boolean isMessageValid(Packet<?> message);
+   }
+
+   public static interface MessageValidator
+   {
+      String validate(Packet<?> message);
    }
 }
