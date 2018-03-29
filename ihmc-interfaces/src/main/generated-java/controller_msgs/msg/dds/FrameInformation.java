@@ -30,7 +30,7 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
    /**
     * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of
     * the trajectory data will be switched to the trajectory frame immediately when the message is
-    * received by the controller. If set to the value 0 it will be assumed that this is the same
+    * received by the controller. If set to the value 1 it will be assumed that this is the same
     * frame as the trajectory frame. It is recommended that this should be the same frame as the
     * trajectory_reference_frame_id to avoid unexpected behavior. When different, the controller
     * will change the data to be expressed in the trajectory frame at reception of the message. The
@@ -44,7 +44,7 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
     * transformation to trajectory frame happens at the start of execution rather than every
     * controller tick.
     */
-   public long data_reference_frame_id_;
+   public long data_reference_frame_id_ = 1;
 
    public FrameInformation()
    {
@@ -101,7 +101,7 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
    /**
     * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of
     * the trajectory data will be switched to the trajectory frame immediately when the message is
-    * received by the controller. If set to the value 0 it will be assumed that this is the same
+    * received by the controller. If set to the value 1 it will be assumed that this is the same
     * frame as the trajectory frame. It is recommended that this should be the same frame as the
     * trajectory_reference_frame_id to avoid unexpected behavior. When different, the controller
     * will change the data to be expressed in the trajectory frame at reception of the message. The
@@ -123,7 +123,7 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
    /**
     * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of
     * the trajectory data will be switched to the trajectory frame immediately when the message is
-    * received by the controller. If set to the value 0 it will be assumed that this is the same
+    * received by the controller. If set to the value 1 it will be assumed that this is the same
     * frame as the trajectory frame. It is recommended that this should be the same frame as the
     * trajectory_reference_frame_id to avoid unexpected behavior. When different, the controller
     * will change the data to be expressed in the trajectory frame at reception of the message. The
