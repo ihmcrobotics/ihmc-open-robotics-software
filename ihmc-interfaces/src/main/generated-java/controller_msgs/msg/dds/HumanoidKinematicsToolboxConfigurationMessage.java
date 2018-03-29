@@ -11,9 +11,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       implements Settable<HumanoidKinematicsToolboxConfigurationMessage>, EpsilonComparable<HumanoidKinematicsToolboxConfigurationMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * When set to true, the solver will hold the current x and y coordinates of the center of mass.
     * By 'current', it means that the solver will use the robot configuration data broadcasted by
@@ -27,18 +27,17 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public HumanoidKinematicsToolboxConfigurationMessage(HumanoidKinematicsToolboxConfigurationMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(HumanoidKinematicsToolboxConfigurationMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       hold_current_center_of_mass_xy_position_ = other.hold_current_center_of_mass_xy_position_;
 
       hold_support_foot_positions_ = other.hold_support_foot_positions_;
@@ -46,11 +45,19 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -97,8 +104,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_current_center_of_mass_xy_position_, other.hold_current_center_of_mass_xy_position_, epsilon))
          return false;
 
@@ -120,8 +128,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       HumanoidKinematicsToolboxConfigurationMessage otherMyClass = (HumanoidKinematicsToolboxConfigurationMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.hold_current_center_of_mass_xy_position_ != otherMyClass.hold_current_center_of_mass_xy_position_)
          return false;
 
@@ -137,8 +146,8 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       StringBuilder builder = new StringBuilder();
 
       builder.append("HumanoidKinematicsToolboxConfigurationMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("hold_current_center_of_mass_xy_position=");
       builder.append(this.hold_current_center_of_mass_xy_position_);

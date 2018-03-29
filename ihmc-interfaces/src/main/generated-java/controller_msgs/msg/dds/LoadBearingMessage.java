@@ -12,9 +12,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Settable<LoadBearingMessage>, EpsilonComparable<LoadBearingMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * If set to true this will load the contact point. Otherwise the rigid body will stop bearing
     * load.
@@ -35,20 +35,19 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
    public LoadBearingMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       body_frame_to_contact_frame_ = new us.ihmc.euclid.geometry.Pose3D();
       contact_normal_in_world_frame_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public LoadBearingMessage(LoadBearingMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(LoadBearingMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       load_ = other.load_;
 
       coefficient_of_friction_ = other.coefficient_of_friction_;
@@ -58,11 +57,19 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -123,8 +130,9 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.load_, other.load_, epsilon))
          return false;
 
@@ -151,8 +159,9 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
       LoadBearingMessage otherMyClass = (LoadBearingMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.load_ != otherMyClass.load_)
          return false;
 
@@ -173,8 +182,8 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
       StringBuilder builder = new StringBuilder();
 
       builder.append("LoadBearingMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("load=");
       builder.append(this.load_);

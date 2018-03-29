@@ -17,9 +17,9 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte walk_to_goal_action_ = (byte) 255;
    public double x_goal_;
    public double y_goal_;
@@ -28,18 +28,17 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
 
    public WalkToGoalBehaviorPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public WalkToGoalBehaviorPacket(WalkToGoalBehaviorPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(WalkToGoalBehaviorPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       walk_to_goal_action_ = other.walk_to_goal_action_;
 
       x_goal_ = other.x_goal_;
@@ -53,11 +52,19 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setWalkToGoalAction(byte walk_to_goal_action)
@@ -118,8 +125,9 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.walk_to_goal_action_, other.walk_to_goal_action_, epsilon))
          return false;
 
@@ -150,8 +158,9 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
 
       WalkToGoalBehaviorPacket otherMyClass = (WalkToGoalBehaviorPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.walk_to_goal_action_ != otherMyClass.walk_to_goal_action_)
          return false;
 
@@ -176,8 +185,8 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkToGoalBehaviorPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("walk_to_goal_action=");
       builder.append(this.walk_to_goal_action_);

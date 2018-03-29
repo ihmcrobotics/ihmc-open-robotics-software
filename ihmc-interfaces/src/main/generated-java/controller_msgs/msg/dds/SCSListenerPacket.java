@@ -11,35 +11,42 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class SCSListenerPacket extends Packet<SCSListenerPacket> implements Settable<SCSListenerPacket>, EpsilonComparable<SCSListenerPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public boolean is_stopped_ = true;
 
    public SCSListenerPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public SCSListenerPacket(SCSListenerPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(SCSListenerPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       is_stopped_ = other.is_stopped_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setIsStopped(boolean is_stopped)
@@ -60,8 +67,9 @@ public class SCSListenerPacket extends Packet<SCSListenerPacket> implements Sett
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_stopped_, other.is_stopped_, epsilon))
          return false;
 
@@ -80,8 +88,9 @@ public class SCSListenerPacket extends Packet<SCSListenerPacket> implements Sett
 
       SCSListenerPacket otherMyClass = (SCSListenerPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.is_stopped_ != otherMyClass.is_stopped_)
          return false;
 
@@ -94,8 +103,8 @@ public class SCSListenerPacket extends Packet<SCSListenerPacket> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("SCSListenerPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("is_stopped=");
       builder.append(this.is_stopped_);

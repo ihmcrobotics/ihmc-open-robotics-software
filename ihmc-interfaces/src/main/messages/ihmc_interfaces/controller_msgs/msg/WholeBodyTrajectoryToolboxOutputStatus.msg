@@ -1,8 +1,8 @@
 # General purpose message normally used to report the solution of a whole-body trajectory planner.
 # Main usage is the IHMC WholeBodyTrajectoryToolbox.
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # 0: not completed.
 # 1: fail to find initial guess.

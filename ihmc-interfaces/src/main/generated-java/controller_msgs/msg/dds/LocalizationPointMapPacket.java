@@ -11,39 +11,46 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
       implements Settable<LocalizationPointMapPacket>, EpsilonComparable<LocalizationPointMapPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public long timestamp_;
    public us.ihmc.idl.IDLSequence.Float localization_point_map_;
 
    public LocalizationPointMapPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       localization_point_map_ = new us.ihmc.idl.IDLSequence.Float(100, "type_5");
 
    }
 
    public LocalizationPointMapPacket(LocalizationPointMapPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(LocalizationPointMapPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       timestamp_ = other.timestamp_;
 
       localization_point_map_.set(other.localization_point_map_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setTimestamp(long timestamp)
@@ -69,8 +76,9 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon))
          return false;
 
@@ -92,8 +100,9 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
 
       LocalizationPointMapPacket otherMyClass = (LocalizationPointMapPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.timestamp_ != otherMyClass.timestamp_)
          return false;
 
@@ -109,8 +118,8 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
       StringBuilder builder = new StringBuilder();
 
       builder.append("LocalizationPointMapPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("timestamp=");
       builder.append(this.timestamp_);

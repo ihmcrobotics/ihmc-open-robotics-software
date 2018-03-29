@@ -12,9 +12,9 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implement
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte robot_side_ = (byte) 255;
    public us.ihmc.idl.IDLSequence.Double joint_angles_;
    public boolean connected_;
@@ -22,20 +22,19 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implement
 
    public HandJointAnglePacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       joint_angles_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
 
    }
 
    public HandJointAnglePacket(HandJointAnglePacket other)
    {
-      this();
       set(other);
    }
 
    public void set(HandJointAnglePacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       joint_angles_.set(other.joint_angles_);
@@ -46,11 +45,19 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implement
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRobotSide(byte robot_side)
@@ -96,8 +103,9 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implement
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -125,8 +133,9 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implement
 
       HandJointAnglePacket otherMyClass = (HandJointAnglePacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -147,8 +156,8 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandJointAnglePacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);

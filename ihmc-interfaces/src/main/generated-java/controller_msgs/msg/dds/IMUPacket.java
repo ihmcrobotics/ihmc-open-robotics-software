@@ -10,9 +10,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>, EpsilonComparable<IMUPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    public us.ihmc.euclid.tuple3D.Vector3D angular_velocity_;
    public us.ihmc.euclid.tuple3D.Vector3D linear_acceleration_;
@@ -20,7 +20,6 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
 
    public IMUPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       linear_acceleration_ = new us.ihmc.euclid.tuple3D.Vector3D();
@@ -28,13 +27,13 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
 
    public IMUPacket(IMUPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(IMUPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.angular_velocity_, angular_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.linear_acceleration_, linear_acceleration_);
@@ -43,11 +42,19 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.euclid.tuple4D.Quaternion getOrientation()
@@ -83,8 +90,9 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
          return false;
       if (!this.angular_velocity_.epsilonEquals(other.angular_velocity_, epsilon))
@@ -109,8 +117,9 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
 
       IMUPacket otherMyClass = (IMUPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.orientation_.equals(otherMyClass.orientation_))
          return false;
       if (!this.angular_velocity_.equals(otherMyClass.angular_velocity_))
@@ -129,8 +138,8 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
       StringBuilder builder = new StringBuilder();
 
       builder.append("IMUPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("orientation=");
       builder.append(this.orientation_);

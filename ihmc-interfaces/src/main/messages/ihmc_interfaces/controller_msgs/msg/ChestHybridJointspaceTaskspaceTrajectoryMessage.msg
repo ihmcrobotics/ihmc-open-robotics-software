@@ -2,8 +2,8 @@
 # This message commands the controller to move the chest in both taskspace and jointspace 
 # to the desired orientation and joint angles while going through the specified trajectory points.
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # The taskspace trajectory information.
 SO3TrajectoryMessage taskspace_trajectory_message

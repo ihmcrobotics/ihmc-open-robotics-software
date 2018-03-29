@@ -11,9 +11,9 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
       implements Settable<AtlasAuxiliaryRobotData>, EpsilonComparable<AtlasAuxiliaryRobotData>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public us.ihmc.idl.IDLSequence.Float electric_joint_temperatures_;
    public us.ihmc.idl.IDLSequence.Float electric_joint_currents_;
    public us.ihmc.idl.IDLSequence.Boolean electric_joint_enabled_array_;
@@ -38,7 +38,6 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 
    public AtlasAuxiliaryRobotData()
    {
-      header_ = new std_msgs.msg.dds.Header();
       electric_joint_temperatures_ = new us.ihmc.idl.IDLSequence.Float(6, "type_5");
 
       electric_joint_currents_ = new us.ihmc.idl.IDLSequence.Float(6, "type_5");
@@ -65,13 +64,13 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 
    public AtlasAuxiliaryRobotData(AtlasAuxiliaryRobotData other)
    {
-      this();
       set(other);
    }
 
    public void set(AtlasAuxiliaryRobotData other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       electric_joint_temperatures_.set(other.electric_joint_temperatures_);
       electric_joint_currents_.set(other.electric_joint_currents_);
       electric_joint_enabled_array_.set(other.electric_joint_enabled_array_);
@@ -128,11 +127,19 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.idl.IDLSequence.Float getElectricJointTemperatures()
@@ -318,8 +325,9 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.electric_joint_temperatures_, other.electric_joint_temperatures_, epsilon))
          return false;
 
@@ -410,8 +418,9 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
 
       AtlasAuxiliaryRobotData otherMyClass = (AtlasAuxiliaryRobotData) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.electric_joint_temperatures_.equals(otherMyClass.electric_joint_temperatures_))
          return false;
       if (!this.electric_joint_currents_.equals(otherMyClass.electric_joint_currents_))
@@ -491,8 +500,8 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
       StringBuilder builder = new StringBuilder();
 
       builder.append("AtlasAuxiliaryRobotData {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("electric_joint_temperatures=");
       builder.append(this.electric_joint_temperatures_);

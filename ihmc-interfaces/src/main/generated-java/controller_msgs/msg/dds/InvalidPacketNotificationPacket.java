@@ -12,28 +12,27 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
       implements Settable<InvalidPacketNotificationPacket>, EpsilonComparable<InvalidPacketNotificationPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public java.lang.StringBuilder packet_class_simple_name_;
    public java.lang.StringBuilder error_message_;
 
    public InvalidPacketNotificationPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       packet_class_simple_name_ = new java.lang.StringBuilder(255);
       error_message_ = new java.lang.StringBuilder(255);
    }
 
    public InvalidPacketNotificationPacket(InvalidPacketNotificationPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(InvalidPacketNotificationPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       packet_class_simple_name_.setLength(0);
       packet_class_simple_name_.append(other.packet_class_simple_name_);
 
@@ -43,11 +42,19 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setPacketClassSimpleName(java.lang.String packet_class_simple_name)
@@ -90,8 +97,9 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.packet_class_simple_name_, other.packet_class_simple_name_, epsilon))
          return false;
 
@@ -113,8 +121,9 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
 
       InvalidPacketNotificationPacket otherMyClass = (InvalidPacketNotificationPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!us.ihmc.idl.IDLTools.equals(this.packet_class_simple_name_, otherMyClass.packet_class_simple_name_))
          return false;
 
@@ -130,8 +139,8 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
       StringBuilder builder = new StringBuilder();
 
       builder.append("InvalidPacketNotificationPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("packet_class_simple_name=");
       builder.append(this.packet_class_simple_name_);

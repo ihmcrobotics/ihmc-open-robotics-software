@@ -13,9 +13,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> implements Settable<NeckTrajectoryMessage>, EpsilonComparable<NeckTrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * The trajectories for each joint in order from the one closest to the chest to the one the
     * closest to the head.
@@ -24,28 +24,35 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
 
    public NeckTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       jointspace_trajectory_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
    }
 
    public NeckTrajectoryMessage(NeckTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(NeckTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_, jointspace_trajectory_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -65,8 +72,9 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon))
          return false;
 
@@ -85,8 +93,9 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
 
       NeckTrajectoryMessage otherMyClass = (NeckTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_))
          return false;
 
@@ -99,8 +108,8 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("NeckTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("jointspace_trajectory=");
       builder.append(this.jointspace_trajectory_);

@@ -44,7 +44,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -63,7 +63,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -75,7 +75,8 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.LocalizationPointMapPacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_11(data.getTimestamp());
 
       if (data.getLocalizationPointMap().size() <= 100)
@@ -87,7 +88,8 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(controller_msgs.msg.dds.LocalizationPointMapPacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       data.setTimestamp(cdr.read_type_11());
 
       cdr.read_type_e(data.getLocalizationPointMap());
@@ -97,8 +99,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.LocalizationPointMapPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_11("timestamp", data.getTimestamp());
       ser.write_type_e("localization_point_map", data.getLocalizationPointMap());
    }
@@ -106,8 +107,7 @@ public class LocalizationPointMapPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.LocalizationPointMapPacket data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setTimestamp(ser.read_type_11("timestamp"));
       ser.read_type_e("localization_point_map", data.getLocalizationPointMap());
    }

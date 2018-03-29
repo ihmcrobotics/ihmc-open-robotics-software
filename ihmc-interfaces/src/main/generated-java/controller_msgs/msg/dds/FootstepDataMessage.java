@@ -17,9 +17,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public static final byte TRAJECTORY_TYPE_CUSTOM = (byte) 2;
    public static final byte TRAJECTORY_TYPE_WAYPOINTS = (byte) 3;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Specifies which foot will swing to reach the footstep.
     */
@@ -105,7 +105,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       location_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       predicted_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>(100, us.ihmc.euclid.tuple3D.Point3D.class,
@@ -120,13 +119,13 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage(FootstepDataMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(FootstepDataMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.location_, location_);
@@ -151,11 +150,19 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -379,8 +386,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -463,8 +471,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       FootstepDataMessage otherMyClass = (FootstepDataMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -508,8 +517,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepDataMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);

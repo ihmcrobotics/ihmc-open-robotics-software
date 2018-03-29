@@ -10,16 +10,15 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class SnapFootstepPacket extends Packet<SnapFootstepPacket> implements Settable<SnapFootstepPacket>, EpsilonComparable<SnapFootstepPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> footstep_data_;
    public us.ihmc.idl.IDLSequence.Integer footstep_order_;
    public us.ihmc.idl.IDLSequence.Byte flag_;
 
    public SnapFootstepPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       footstep_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage>(100, controller_msgs.msg.dds.FootstepDataMessage.class,
                                                                                                        new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
       footstep_order_ = new us.ihmc.idl.IDLSequence.Integer(100, "type_2");
@@ -30,24 +29,32 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket> implements Se
 
    public SnapFootstepPacket(SnapFootstepPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(SnapFootstepPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       footstep_data_.set(other.footstep_data_);
       footstep_order_.set(other.footstep_order_);
       flag_.set(other.flag_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> getFootstepData()
@@ -73,8 +80,9 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket> implements Se
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (this.footstep_data_.size() == other.footstep_data_.size())
       {
          return false;
@@ -109,8 +117,9 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket> implements Se
 
       SnapFootstepPacket otherMyClass = (SnapFootstepPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.footstep_data_.equals(otherMyClass.footstep_data_))
          return false;
       if (!this.footstep_order_.equals(otherMyClass.footstep_order_))
@@ -127,8 +136,8 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket> implements Se
       StringBuilder builder = new StringBuilder();
 
       builder.append("SnapFootstepPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("footstep_data=");
       builder.append(this.footstep_data_);

@@ -10,9 +10,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class StampedPosePacket extends Packet<StampedPosePacket> implements Settable<StampedPosePacket>, EpsilonComparable<StampedPosePacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public us.ihmc.euclid.geometry.Pose3D pose_;
    public long timestamp_;
    public double confidence_factor_;
@@ -20,20 +20,19 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
 
    public StampedPosePacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       pose_ = new us.ihmc.euclid.geometry.Pose3D();
       frame_id_ = new java.lang.StringBuilder(255);
    }
 
    public StampedPosePacket(StampedPosePacket other)
    {
-      this();
       set(other);
    }
 
    public void set(StampedPosePacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
       timestamp_ = other.timestamp_;
 
@@ -45,11 +44,19 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.euclid.geometry.Pose3D getPose()
@@ -101,8 +108,9 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.pose_.epsilonEquals(other.pose_, epsilon))
          return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon))
@@ -129,8 +137,9 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
 
       StampedPosePacket otherMyClass = (StampedPosePacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.pose_.equals(otherMyClass.pose_))
          return false;
       if (this.timestamp_ != otherMyClass.timestamp_)
@@ -151,8 +160,8 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("StampedPosePacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("pose=");
       builder.append(this.pose_);

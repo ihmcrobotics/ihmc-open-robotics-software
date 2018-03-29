@@ -14,9 +14,9 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       implements Settable<PelvisHeightTrajectoryMessage>, EpsilonComparable<PelvisHeightTrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the
     * leg kinematics.
@@ -35,19 +35,18 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
    public PelvisHeightTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       euclidean_trajectory_ = new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
    }
 
    public PelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(PelvisHeightTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       enable_user_pelvis_control_ = other.enable_user_pelvis_control_;
 
       enable_user_pelvis_control_during_walking_ = other.enable_user_pelvis_control_during_walking_;
@@ -56,11 +55,19 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -117,8 +124,9 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_user_pelvis_control_, other.enable_user_pelvis_control_, epsilon))
          return false;
 
@@ -144,8 +152,9 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
       PelvisHeightTrajectoryMessage otherMyClass = (PelvisHeightTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.enable_user_pelvis_control_ != otherMyClass.enable_user_pelvis_control_)
          return false;
 
@@ -164,8 +173,8 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
       StringBuilder builder = new StringBuilder();
 
       builder.append("PelvisHeightTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("enable_user_pelvis_control=");
       builder.append(this.enable_user_pelvis_control_);

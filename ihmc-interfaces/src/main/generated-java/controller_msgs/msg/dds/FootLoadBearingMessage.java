@@ -18,9 +18,9 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    public static final byte LOAD_BEARING_REQUEST_LOAD = (byte) 0;
    public static final byte LOAD_BEARING_REQUEST_UNLOAD = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Needed to identify a side dependent end-effector.
     */
@@ -36,18 +36,17 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
 
    public FootLoadBearingMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public FootLoadBearingMessage(FootLoadBearingMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(FootLoadBearingMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       load_bearing_request_ = other.load_bearing_request_;
@@ -57,11 +56,19 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -120,8 +127,9 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -146,8 +154,9 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
 
       FootLoadBearingMessage otherMyClass = (FootLoadBearingMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -166,8 +175,8 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootLoadBearingMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);

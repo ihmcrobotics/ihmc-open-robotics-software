@@ -12,9 +12,9 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
       implements Settable<WalkingControllerFailureStatusMessage>, EpsilonComparable<WalkingControllerFailureStatusMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Specifies the estimated falling direction in 2D
     */
@@ -22,28 +22,35 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
 
    public WalkingControllerFailureStatusMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       falling_direction_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public WalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(WalkingControllerFailureStatusMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.falling_direction_, falling_direction_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -62,8 +69,9 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.falling_direction_.epsilonEquals(other.falling_direction_, epsilon))
          return false;
 
@@ -82,8 +90,9 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
 
       WalkingControllerFailureStatusMessage otherMyClass = (WalkingControllerFailureStatusMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.falling_direction_.equals(otherMyClass.falling_direction_))
          return false;
 
@@ -96,8 +105,8 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkingControllerFailureStatusMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("falling_direction=");
       builder.append(this.falling_direction_);

@@ -13,9 +13,9 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       implements Settable<KinematicsToolboxRigidBodyMessage>, EpsilonComparable<KinematicsToolboxRigidBodyMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * The is the unique hash code of the end-effector to be solved for. It is used on the solver
     * side to retrieve the desired end-effector to be controlled. See
@@ -78,7 +78,6 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
    public KinematicsToolboxRigidBodyMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       desired_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
       control_frame_position_in_end_effector_ = new us.ihmc.euclid.tuple3D.Point3D();
@@ -91,13 +90,13 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
    public KinematicsToolboxRigidBodyMessage(KinematicsToolboxRigidBodyMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(KinematicsToolboxRigidBodyMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       end_effector_name_based_hash_code_ = other.end_effector_name_based_hash_code_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_position_in_world_, desired_position_in_world_);
@@ -111,11 +110,19 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -231,8 +238,9 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_name_based_hash_code_, other.end_effector_name_based_hash_code_, epsilon))
          return false;
 
@@ -268,8 +276,9 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
       KinematicsToolboxRigidBodyMessage otherMyClass = (KinematicsToolboxRigidBodyMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.end_effector_name_based_hash_code_ != otherMyClass.end_effector_name_based_hash_code_)
          return false;
 
@@ -299,8 +308,8 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       StringBuilder builder = new StringBuilder();
 
       builder.append("KinematicsToolboxRigidBodyMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("end_effector_name_based_hash_code=");
       builder.append(this.end_effector_name_based_hash_code_);

@@ -11,9 +11,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       implements Settable<LidarScanParametersMessage>, EpsilonComparable<LidarScanParametersMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public long timestamp_;
    public float sweep_yaw_max_;
    public float sweep_yaw_min_;
@@ -28,18 +28,17 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
 
    public LidarScanParametersMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public LidarScanParametersMessage(LidarScanParametersMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(LidarScanParametersMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       timestamp_ = other.timestamp_;
 
       sweep_yaw_max_ = other.sweep_yaw_max_;
@@ -65,11 +64,19 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setTimestamp(long timestamp)
@@ -190,8 +197,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon))
          return false;
 
@@ -240,8 +248,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
 
       LidarScanParametersMessage otherMyClass = (LidarScanParametersMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.timestamp_ != otherMyClass.timestamp_)
          return false;
 
@@ -284,8 +293,8 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       StringBuilder builder = new StringBuilder();
 
       builder.append("LidarScanParametersMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("timestamp=");
       builder.append(this.timestamp_);

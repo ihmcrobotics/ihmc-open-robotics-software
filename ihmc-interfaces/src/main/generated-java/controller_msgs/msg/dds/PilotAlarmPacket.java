@@ -7,26 +7,25 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settable<PilotAlarmPacket>, EpsilonComparable<PilotAlarmPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public double beep_rate_;
    public boolean enable_tone_;
 
    public PilotAlarmPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public PilotAlarmPacket(PilotAlarmPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(PilotAlarmPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       beep_rate_ = other.beep_rate_;
 
       enable_tone_ = other.enable_tone_;
@@ -34,11 +33,19 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settab
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setBeepRate(double beep_rate)
@@ -69,8 +76,9 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settab
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.beep_rate_, other.beep_rate_, epsilon))
          return false;
 
@@ -92,8 +100,9 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settab
 
       PilotAlarmPacket otherMyClass = (PilotAlarmPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.beep_rate_ != otherMyClass.beep_rate_)
          return false;
 
@@ -109,8 +118,8 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settab
       StringBuilder builder = new StringBuilder();
 
       builder.append("PilotAlarmPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("beep_rate=");
       builder.append(this.beep_rate_);

@@ -11,8 +11,8 @@ byte WALKING = 5
 byte DIAGNOSTICS = 6
 byte CALIBRATION = 7
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # Specifies the controller's state prior to transition.
 byte initial_high_level_controller_name 255

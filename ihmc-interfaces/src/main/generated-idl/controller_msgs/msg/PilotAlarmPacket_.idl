@@ -1,7 +1,6 @@
 #ifndef __controller_msgs__msg__PilotAlarmPacket__idl__
 #define __controller_msgs__msg__PilotAlarmPacket__idl__
 
-#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -13,9 +12,9 @@ module controller_msgs
       struct PilotAlarmPacket
       {
         /**
-         * As of March 2018, the header for this message is only use for its sequence ID.
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        std_msgs::msg::dds::Header header;
+        unsigned long sequence_id;
         double beep_rate;
         boolean enable_tone;
       };

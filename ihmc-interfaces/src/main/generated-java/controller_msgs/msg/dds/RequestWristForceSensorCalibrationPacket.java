@@ -14,32 +14,39 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
       implements Settable<RequestWristForceSensorCalibrationPacket>, EpsilonComparable<RequestWristForceSensorCalibrationPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
 
    public RequestWristForceSensorCalibrationPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public RequestWristForceSensorCalibrationPacket(RequestWristForceSensorCalibrationPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(RequestWristForceSensorCalibrationPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    @Override
@@ -50,7 +57,7 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
 
       return true;
@@ -68,7 +75,7 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
 
       RequestWristForceSensorCalibrationPacket otherMyClass = (RequestWristForceSensorCalibrationPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
 
       return true;
@@ -80,8 +87,8 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
       StringBuilder builder = new StringBuilder();
 
       builder.append("RequestWristForceSensorCalibrationPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append("}");
       return builder.toString();
    }

@@ -12,9 +12,9 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       implements Settable<KinematicsToolboxConfigurationMessage>, EpsilonComparable<KinematicsToolboxConfigurationMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * When provided, the solver will attempt to find the solution that is the closest to the
     * privileged configuration.
@@ -39,7 +39,6 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
    public KinematicsToolboxConfigurationMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       privileged_root_joint_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       privileged_root_joint_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       privileged_joint_name_based_hash_codes_ = new us.ihmc.idl.IDLSequence.Long(100, "type_11");
@@ -50,13 +49,13 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
    public KinematicsToolboxConfigurationMessage(KinematicsToolboxConfigurationMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(KinematicsToolboxConfigurationMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.privileged_root_joint_position_, privileged_root_joint_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.privileged_root_joint_orientation_, privileged_root_joint_orientation_);
       privileged_joint_name_based_hash_codes_.set(other.privileged_joint_name_based_hash_codes_);
@@ -64,11 +63,19 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -116,8 +123,9 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.privileged_root_joint_position_.epsilonEquals(other.privileged_root_joint_position_, epsilon))
          return false;
       if (!this.privileged_root_joint_orientation_.epsilonEquals(other.privileged_root_joint_orientation_, epsilon))
@@ -143,8 +151,9 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
       KinematicsToolboxConfigurationMessage otherMyClass = (KinematicsToolboxConfigurationMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.privileged_root_joint_position_.equals(otherMyClass.privileged_root_joint_position_))
          return false;
       if (!this.privileged_root_joint_orientation_.equals(otherMyClass.privileged_root_joint_orientation_))
@@ -163,8 +172,8 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       StringBuilder builder = new StringBuilder();
 
       builder.append("KinematicsToolboxConfigurationMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("privileged_root_joint_position=");
       builder.append(this.privileged_root_joint_position_);

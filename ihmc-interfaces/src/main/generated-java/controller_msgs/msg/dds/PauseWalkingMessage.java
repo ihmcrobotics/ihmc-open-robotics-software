@@ -12,9 +12,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements Settable<PauseWalkingMessage>, EpsilonComparable<PauseWalkingMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * True to pause walking, false to unpause and resume an existing footstep plan.
     */
@@ -22,28 +22,35 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
    public PauseWalkingMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public PauseWalkingMessage(PauseWalkingMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(PauseWalkingMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       pause_ = other.pause_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -70,8 +77,9 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.pause_, other.pause_, epsilon))
          return false;
 
@@ -90,8 +98,9 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
       PauseWalkingMessage otherMyClass = (PauseWalkingMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.pause_ != otherMyClass.pause_)
          return false;
 
@@ -104,8 +113,8 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("PauseWalkingMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("pause=");
       builder.append(this.pause_);

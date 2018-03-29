@@ -13,9 +13,9 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
       implements Settable<MomentumTrajectoryMessage>, EpsilonComparable<MomentumTrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * List of angular momentum trajectory waypoints. Each waypoint contains the angular momentum and
     * the angular momentum rate at a given time. NOTE: As the angular momentum can't be encoded
@@ -25,28 +25,35 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
 
    public MomentumTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       angular_momentum_trajectory_ = new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
    }
 
    public MomentumTrajectoryMessage(MomentumTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(MomentumTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.angular_momentum_trajectory_, angular_momentum_trajectory_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -67,8 +74,9 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.angular_momentum_trajectory_.epsilonEquals(other.angular_momentum_trajectory_, epsilon))
          return false;
 
@@ -87,8 +95,9 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
 
       MomentumTrajectoryMessage otherMyClass = (MomentumTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.angular_momentum_trajectory_.equals(otherMyClass.angular_momentum_trajectory_))
          return false;
 
@@ -101,8 +110,8 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("MomentumTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("angular_momentum_trajectory=");
       builder.append(this.angular_momentum_trajectory_);

@@ -5,8 +5,8 @@
 byte EXECUTION_TIMING_CONTROL_DURATIONS = 0
 byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = 1
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # Defines the list of footstep to perform.
 FootstepDataMessage[] footstep_data_list

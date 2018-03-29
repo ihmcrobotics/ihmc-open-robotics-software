@@ -1,7 +1,6 @@
 #ifndef __controller_msgs__msg__HumanoidBehaviorTypePacket__idl__
 #define __controller_msgs__msg__HumanoidBehaviorTypePacket__idl__
 
-#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -103,9 +102,9 @@ module controller_msgs
       struct HumanoidBehaviorTypePacket
       {
         /**
-         * As of March 2018, the header for this message is only use for its sequence ID.
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        std_msgs::msg::dds::Header header;
+        unsigned long sequence_id;
         @defaultValue(value=255)
         octet humanoid_behavior_type;
       };

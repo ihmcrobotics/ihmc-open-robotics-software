@@ -13,35 +13,42 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
       implements Settable<AutomaticManipulationAbortMessage>, EpsilonComparable<AutomaticManipulationAbortMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public boolean enable_;
 
    public AutomaticManipulationAbortMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public AutomaticManipulationAbortMessage(AutomaticManipulationAbortMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(AutomaticManipulationAbortMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       enable_ = other.enable_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setEnable(boolean enable)
@@ -62,8 +69,9 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_, other.enable_, epsilon))
          return false;
 
@@ -82,8 +90,9 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
 
       AutomaticManipulationAbortMessage otherMyClass = (AutomaticManipulationAbortMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.enable_ != otherMyClass.enable_)
          return false;
 
@@ -96,8 +105,8 @@ public class AutomaticManipulationAbortMessage extends Packet<AutomaticManipulat
       StringBuilder builder = new StringBuilder();
 
       builder.append("AutomaticManipulationAbortMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("enable=");
       builder.append(this.enable_);

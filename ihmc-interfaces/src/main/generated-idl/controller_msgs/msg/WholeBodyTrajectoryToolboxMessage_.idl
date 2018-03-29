@@ -5,7 +5,6 @@
 #include "controller_msgs/msg/./RigidBodyExplorationConfigurationMessage_.idl"
 #include "controller_msgs/msg/./WaypointBasedTrajectoryMessage_.idl"
 #include "controller_msgs/msg/./WholeBodyTrajectoryToolboxConfigurationMessage_.idl"
-#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -21,9 +20,9 @@ module controller_msgs
       struct WholeBodyTrajectoryToolboxMessage
       {
         /**
-         * As of March 2018, the header for this message is only use for its sequence ID.
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        std_msgs::msg::dds::Header header;
+        unsigned long sequence_id;
         controller_msgs::msg::dds::WholeBodyTrajectoryToolboxConfigurationMessage configuration;
         sequence<controller_msgs::msg::dds::WaypointBasedTrajectoryMessage, 10> end_effector_trajectories;
         sequence<controller_msgs::msg::dds::RigidBodyExplorationConfigurationMessage, 10> exploration_configurations;

@@ -10,9 +10,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class LidarScanMessage extends Packet<LidarScanMessage> implements Settable<LidarScanMessage>, EpsilonComparable<LidarScanMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public long robot_timestamp_;
    public us.ihmc.euclid.tuple3D.Point3D lidar_position_;
    public us.ihmc.euclid.tuple4D.Quaternion lidar_orientation_;
@@ -20,7 +20,6 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
    public LidarScanMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       lidar_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       lidar_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       scan_ = new us.ihmc.idl.IDLSequence.Float(100, "type_5");
@@ -29,13 +28,13 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
    public LidarScanMessage(LidarScanMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(LidarScanMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       robot_timestamp_ = other.robot_timestamp_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.lidar_position_, lidar_position_);
@@ -44,11 +43,19 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRobotTimestamp(long robot_timestamp)
@@ -84,8 +91,9 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_timestamp_, other.robot_timestamp_, epsilon))
          return false;
 
@@ -111,8 +119,9 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
       LidarScanMessage otherMyClass = (LidarScanMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.robot_timestamp_ != otherMyClass.robot_timestamp_)
          return false;
 
@@ -132,8 +141,8 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       StringBuilder builder = new StringBuilder();
 
       builder.append("LidarScanMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("robot_timestamp=");
       builder.append(this.robot_timestamp_);

@@ -21,35 +21,42 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
    public static final byte CALIBRATE = (byte) 8;
    public static final byte SOFT_STOP = (byte) 9;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte current_bdi_robot_behavior_ = (byte) 255;
 
    public BDIBehaviorStatusPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public BDIBehaviorStatusPacket(BDIBehaviorStatusPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(BDIBehaviorStatusPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       current_bdi_robot_behavior_ = other.current_bdi_robot_behavior_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setCurrentBdiRobotBehavior(byte current_bdi_robot_behavior)
@@ -70,8 +77,9 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_bdi_robot_behavior_, other.current_bdi_robot_behavior_, epsilon))
          return false;
 
@@ -90,8 +98,9 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
 
       BDIBehaviorStatusPacket otherMyClass = (BDIBehaviorStatusPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.current_bdi_robot_behavior_ != otherMyClass.current_bdi_robot_behavior_)
          return false;
 
@@ -104,8 +113,8 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("BDIBehaviorStatusPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("current_bdi_robot_behavior=");
       builder.append(this.current_bdi_robot_behavior_);

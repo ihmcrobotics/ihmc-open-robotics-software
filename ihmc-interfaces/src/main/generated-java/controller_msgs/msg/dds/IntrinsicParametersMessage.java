@@ -11,9 +11,9 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
       implements Settable<IntrinsicParametersMessage>, EpsilonComparable<IntrinsicParametersMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public int width_;
    public int height_;
    public double fx_;
@@ -27,20 +27,19 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
 
    public IntrinsicParametersMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       radial_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
 
    }
 
    public IntrinsicParametersMessage(IntrinsicParametersMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(IntrinsicParametersMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       width_ = other.width_;
 
       height_ = other.height_;
@@ -63,11 +62,19 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setWidth(int width)
@@ -173,8 +180,9 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.width_, other.width_, epsilon))
          return false;
 
@@ -220,8 +228,9 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
 
       IntrinsicParametersMessage otherMyClass = (IntrinsicParametersMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.width_ != otherMyClass.width_)
          return false;
 
@@ -260,8 +269,8 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
       StringBuilder builder = new StringBuilder();
 
       builder.append("IntrinsicParametersMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("width=");
       builder.append(this.width_);

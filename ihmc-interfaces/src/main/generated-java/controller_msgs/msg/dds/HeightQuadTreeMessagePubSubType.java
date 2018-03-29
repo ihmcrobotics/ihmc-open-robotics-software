@@ -44,7 +44,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -72,7 +72,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -93,7 +93,8 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(controller_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_5(data.getDefaultHeight());
 
       cdr.write_type_5(data.getResolution());
@@ -111,7 +112,8 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(controller_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       data.setDefaultHeight(cdr.read_type_5());
 
       data.setResolution(cdr.read_type_5());
@@ -127,8 +129,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(controller_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_5("default_height", data.getDefaultHeight());
       ser.write_type_5("resolution", data.getResolution());
       ser.write_type_5("size_x", data.getSizeX());
@@ -139,8 +140,7 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HeightQuadTreeMessage data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setDefaultHeight(ser.read_type_5("default_height"));
       data.setResolution(ser.read_type_5("resolution"));
       data.setSizeX(ser.read_type_5("size_x"));

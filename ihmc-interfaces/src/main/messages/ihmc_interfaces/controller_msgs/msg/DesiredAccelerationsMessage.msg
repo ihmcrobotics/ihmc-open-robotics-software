@@ -2,8 +2,8 @@
 # General message that carries desired joint accelerations.
 # It is used by ArmDesiredAccelerationsMessage, SpineDesiredAccelerationsMessage, NeckDesiredAccelerationsMessage.
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # Specifies the desired joint accelerations.
 float64[] desired_joint_accelerations

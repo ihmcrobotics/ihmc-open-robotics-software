@@ -44,7 +44,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -79,7 +79,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -107,7 +107,8 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_2(data.getWidth());
 
       cdr.write_type_2(data.getHeight());
@@ -135,7 +136,8 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(controller_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       data.setWidth(cdr.read_type_2());
 
       data.setHeight(cdr.read_type_2());
@@ -160,8 +162,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_2("width", data.getWidth());
       ser.write_type_2("height", data.getHeight());
       ser.write_type_6("fx", data.getFx());
@@ -177,8 +178,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.IntrinsicParametersMessage data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setWidth(ser.read_type_2("width"));
       data.setHeight(ser.read_type_2("height"));
       data.setFx(ser.read_type_6("fx"));

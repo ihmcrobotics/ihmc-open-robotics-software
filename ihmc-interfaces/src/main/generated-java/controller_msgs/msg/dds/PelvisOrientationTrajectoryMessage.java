@@ -17,9 +17,9 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
       implements Settable<PelvisOrientationTrajectoryMessage>, EpsilonComparable<PelvisOrientationTrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Whether the pelvis orientation is allowed to be controlled by the user when the robot is
     * walking.
@@ -32,30 +32,37 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
 
    public PelvisOrientationTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       so3_trajectory_ = new controller_msgs.msg.dds.SO3TrajectoryMessage();
    }
 
    public PelvisOrientationTrajectoryMessage(PelvisOrientationTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(PelvisOrientationTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       enable_user_pelvis_control_during_walking_ = other.enable_user_pelvis_control_during_walking_;
 
       controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -92,8 +99,9 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_user_pelvis_control_during_walking_, other.enable_user_pelvis_control_during_walking_,
                                                      epsilon))
          return false;
@@ -116,8 +124,9 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
 
       PelvisOrientationTrajectoryMessage otherMyClass = (PelvisOrientationTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.enable_user_pelvis_control_during_walking_ != otherMyClass.enable_user_pelvis_control_during_walking_)
          return false;
 
@@ -133,8 +142,8 @@ public class PelvisOrientationTrajectoryMessage extends Packet<PelvisOrientation
       StringBuilder builder = new StringBuilder();
 
       builder.append("PelvisOrientationTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("enable_user_pelvis_control_during_walking=");
       builder.append(this.enable_user_pelvis_control_during_walking_);

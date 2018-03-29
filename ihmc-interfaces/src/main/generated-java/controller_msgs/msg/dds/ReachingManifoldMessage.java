@@ -18,9 +18,9 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
    public static final byte CONFIGURATION_SPACE_NAME_PITCH = (byte) 4;
    public static final byte CONFIGURATION_SPACE_NAME_YAW = (byte) 5;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public long end_effector_name_based_hash_code_;
    public us.ihmc.euclid.tuple3D.Point3D manifold_origin_position_;
    public us.ihmc.euclid.tuple4D.Quaternion manifold_origin_orientation_;
@@ -30,7 +30,6 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
 
    public ReachingManifoldMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       manifold_origin_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       manifold_origin_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       manifold_configuration_space_names_ = new us.ihmc.idl.IDLSequence.Byte(100, "type_9");
@@ -43,13 +42,13 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
 
    public ReachingManifoldMessage(ReachingManifoldMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(ReachingManifoldMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       end_effector_name_based_hash_code_ = other.end_effector_name_based_hash_code_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.manifold_origin_position_, manifold_origin_position_);
@@ -60,11 +59,19 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setEndEffectorNameBasedHashCode(long end_effector_name_based_hash_code)
@@ -110,8 +117,9 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_name_based_hash_code_, other.end_effector_name_based_hash_code_, epsilon))
          return false;
 
@@ -143,8 +151,9 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
 
       ReachingManifoldMessage otherMyClass = (ReachingManifoldMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.end_effector_name_based_hash_code_ != otherMyClass.end_effector_name_based_hash_code_)
          return false;
 
@@ -168,8 +177,8 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("ReachingManifoldMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("end_effector_name_based_hash_code=");
       builder.append(this.end_effector_name_based_hash_code_);

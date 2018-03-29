@@ -26,7 +26,6 @@ public class MessageCollection extends Packet<MessageCollection> implements Sett
 
    public MessageCollection(MessageCollection other)
    {
-      this();
       set(other);
    }
 

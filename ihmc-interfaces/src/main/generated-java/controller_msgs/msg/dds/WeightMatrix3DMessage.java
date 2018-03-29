@@ -11,9 +11,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> implements Settable<WeightMatrix3DMessage>, EpsilonComparable<WeightMatrix3DMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * The ID of the reference frame defining the weight frame. This reference frame defines the x
     * axis, y axis, z axis for the weights. This frame is optional. It is preferable to provide it
@@ -39,18 +39,17 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
 
    public WeightMatrix3DMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public WeightMatrix3DMessage(WeightMatrix3DMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(WeightMatrix3DMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       weight_frame_id_ = other.weight_frame_id_;
 
       x_weight_ = other.x_weight_;
@@ -62,11 +61,19 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -153,8 +160,9 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.weight_frame_id_, other.weight_frame_id_, epsilon))
          return false;
 
@@ -182,8 +190,9 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
 
       WeightMatrix3DMessage otherMyClass = (WeightMatrix3DMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.weight_frame_id_ != otherMyClass.weight_frame_id_)
          return false;
 
@@ -205,8 +214,8 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("WeightMatrix3DMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("weight_frame_id=");
       builder.append(this.weight_frame_id_);

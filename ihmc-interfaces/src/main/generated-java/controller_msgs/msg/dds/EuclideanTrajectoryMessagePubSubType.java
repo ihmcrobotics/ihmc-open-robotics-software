@@ -44,7 +44,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < 100; ++i0)
@@ -75,7 +75,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < data.getTaskspaceTrajectoryPoints().size(); ++i0)
@@ -102,7 +102,8 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       if (data.getTaskspaceTrajectoryPoints().size() <= 100)
          cdr.write_type_e(data.getTaskspaceTrajectoryPoints());
       else
@@ -119,7 +120,8 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(controller_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       cdr.read_type_e(data.getTaskspaceTrajectoryPoints());
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getSelectionMatrix(), cdr);
       controller_msgs.msg.dds.FrameInformationPubSubType.read(data.getFrameInformation(), cdr);
@@ -134,8 +136,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.EuclideanTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("taskspace_trajectory_points", data.getTaskspaceTrajectoryPoints());
       ser.write_type_a("selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
 
@@ -153,8 +154,7 @@ public class EuclideanTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.EuclideanTrajectoryMessage data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("taskspace_trajectory_points", data.getTaskspaceTrajectoryPoints());
       ser.read_type_a("selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
 

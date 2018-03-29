@@ -11,32 +11,39 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Settable<UIConnectedPacket>, EpsilonComparable<UIConnectedPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
 
    public UIConnectedPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public UIConnectedPacket(UIConnectedPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(UIConnectedPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    @Override
@@ -47,7 +54,7 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
 
       return true;
@@ -65,7 +72,7 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
 
       UIConnectedPacket otherMyClass = (UIConnectedPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
 
       return true;
@@ -77,8 +84,8 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("UIConnectedPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append("}");
       return builder.toString();
    }

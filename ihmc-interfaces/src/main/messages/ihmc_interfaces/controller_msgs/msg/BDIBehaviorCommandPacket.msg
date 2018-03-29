@@ -11,8 +11,8 @@ byte USER = 7
 byte CALIBRATE = 8
 byte SOFT_STOP = 9
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 byte atlas_bdi_robot_behavior 255
 bool stop false

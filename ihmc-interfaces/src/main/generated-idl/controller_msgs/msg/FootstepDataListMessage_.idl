@@ -3,7 +3,6 @@
 
 #include "controller_msgs/msg/./FootstepDataMessage_.idl"
 #include "controller_msgs/msg/./QueueableMessage_.idl"
-#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -26,9 +25,9 @@ module controller_msgs
       struct FootstepDataListMessage
       {
         /**
-         * As of March 2018, the header for this message is only use for its sequence ID.
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        std_msgs::msg::dds::Header header;
+        unsigned long sequence_id;
         /**
          * Defines the list of footstep to perform.
          */

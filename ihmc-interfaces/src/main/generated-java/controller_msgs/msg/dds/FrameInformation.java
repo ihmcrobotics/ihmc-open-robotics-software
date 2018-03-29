@@ -20,9 +20,9 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
    public static final long LEFT_SOLE_FRAME = -105;
    public static final long RIGHT_SOLE_FRAME = -106;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * The ID of the reference frame that a trajectory is executed in.
     */
@@ -48,18 +48,17 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
 
    public FrameInformation()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public FrameInformation(FrameInformation other)
    {
-      this();
       set(other);
    }
 
    public void set(FrameInformation other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       trajectory_reference_frame_id_ = other.trajectory_reference_frame_id_;
 
       data_reference_frame_id_ = other.data_reference_frame_id_;
@@ -67,11 +66,19 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -142,8 +149,9 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_reference_frame_id_, other.trajectory_reference_frame_id_, epsilon))
          return false;
 
@@ -165,8 +173,9 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
 
       FrameInformation otherMyClass = (FrameInformation) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.trajectory_reference_frame_id_ != otherMyClass.trajectory_reference_frame_id_)
          return false;
 
@@ -182,8 +191,8 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
       StringBuilder builder = new StringBuilder();
 
       builder.append("FrameInformation {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("trajectory_reference_frame_id=");
       builder.append(this.trajectory_reference_frame_id_);

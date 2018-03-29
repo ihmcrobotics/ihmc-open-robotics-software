@@ -10,9 +10,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> implements Settable<HeightQuadTreeMessage>, EpsilonComparable<HeightQuadTreeMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public float default_height_;
    public float resolution_;
    public float size_x_;
@@ -21,7 +21,6 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
 
    public HeightQuadTreeMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       leaves_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.HeightQuadTreeLeafMessage>(5000,
                                                                                                       controller_msgs.msg.dds.HeightQuadTreeLeafMessage.class,
                                                                                                       new controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType());
@@ -30,13 +29,13 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
 
    public HeightQuadTreeMessage(HeightQuadTreeMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(HeightQuadTreeMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       default_height_ = other.default_height_;
 
       resolution_ = other.resolution_;
@@ -49,11 +48,19 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setDefaultHeight(float default_height)
@@ -109,8 +116,9 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_height_, other.default_height_, epsilon))
          return false;
 
@@ -151,8 +159,9 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
 
       HeightQuadTreeMessage otherMyClass = (HeightQuadTreeMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.default_height_ != otherMyClass.default_height_)
          return false;
 
@@ -177,8 +186,8 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("HeightQuadTreeMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("default_height=");
       builder.append(this.default_height_);

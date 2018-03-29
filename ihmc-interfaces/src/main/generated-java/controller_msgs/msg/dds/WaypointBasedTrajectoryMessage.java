@@ -12,9 +12,9 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       implements Settable<WaypointBasedTrajectoryMessage>, EpsilonComparable<WaypointBasedTrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public long end_effector_name_based_hash_code_;
    public us.ihmc.idl.IDLSequence.Double waypoint_times_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> waypoints_;
@@ -26,7 +26,6 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
    public WaypointBasedTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       waypoint_times_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
 
       waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>(100, us.ihmc.euclid.geometry.Pose3D.class,
@@ -40,13 +39,13 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
    public WaypointBasedTrajectoryMessage(WaypointBasedTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(WaypointBasedTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       end_effector_name_based_hash_code_ = other.end_effector_name_based_hash_code_;
 
       waypoint_times_.set(other.waypoint_times_);
@@ -60,11 +59,19 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setEndEffectorNameBasedHashCode(long end_effector_name_based_hash_code)
@@ -125,8 +132,9 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_name_based_hash_code_, other.end_effector_name_based_hash_code_, epsilon))
          return false;
 
@@ -172,8 +180,9 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
       WaypointBasedTrajectoryMessage otherMyClass = (WaypointBasedTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.end_effector_name_based_hash_code_ != otherMyClass.end_effector_name_based_hash_code_)
          return false;
 
@@ -201,8 +210,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       StringBuilder builder = new StringBuilder();
 
       builder.append("WaypointBasedTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("end_effector_name_based_hash_code=");
       builder.append(this.end_effector_name_based_hash_code_);

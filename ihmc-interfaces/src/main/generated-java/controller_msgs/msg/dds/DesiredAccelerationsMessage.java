@@ -13,9 +13,9 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
       implements Settable<DesiredAccelerationsMessage>, EpsilonComparable<DesiredAccelerationsMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Specifies the desired joint accelerations.
     */
@@ -27,7 +27,6 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
 
    public DesiredAccelerationsMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       desired_joint_accelerations_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
 
       queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
@@ -35,23 +34,31 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
 
    public DesiredAccelerationsMessage(DesiredAccelerationsMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(DesiredAccelerationsMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       desired_joint_accelerations_.set(other.desired_joint_accelerations_);
       controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -78,8 +85,9 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.desired_joint_accelerations_, other.desired_joint_accelerations_, epsilon))
          return false;
 
@@ -101,8 +109,9 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
 
       DesiredAccelerationsMessage otherMyClass = (DesiredAccelerationsMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.desired_joint_accelerations_.equals(otherMyClass.desired_joint_accelerations_))
          return false;
       if (!this.queueing_properties_.equals(otherMyClass.queueing_properties_))
@@ -117,8 +126,8 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
       StringBuilder builder = new StringBuilder();
 
       builder.append("DesiredAccelerationsMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("desired_joint_accelerations=");
       builder.append(this.desired_joint_accelerations_);

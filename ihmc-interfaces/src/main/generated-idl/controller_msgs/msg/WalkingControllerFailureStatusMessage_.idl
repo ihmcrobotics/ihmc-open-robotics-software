@@ -2,7 +2,6 @@
 #define __controller_msgs__msg__WalkingControllerFailureStatusMessage__idl__
 
 #include "geometry_msgs/msg/./Vector3_.idl"
-#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -18,9 +17,9 @@ module controller_msgs
       struct WalkingControllerFailureStatusMessage
       {
         /**
-         * As of March 2018, the header for this message is only use for its sequence ID.
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        std_msgs::msg::dds::Header header;
+        unsigned long sequence_id;
         /**
          * Specifies the estimated falling direction in 2D
          */

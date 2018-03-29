@@ -10,38 +10,45 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implements Settable<DetectedObjectPacket>, EpsilonComparable<DetectedObjectPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public us.ihmc.euclid.geometry.Pose3D pose_;
    public int id_;
 
    public DetectedObjectPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       pose_ = new us.ihmc.euclid.geometry.Pose3D();
    }
 
    public DetectedObjectPacket(DetectedObjectPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(DetectedObjectPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
       id_ = other.id_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.euclid.geometry.Pose3D getPose()
@@ -67,8 +74,9 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.pose_.epsilonEquals(other.pose_, epsilon))
          return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon))
@@ -89,8 +97,9 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
       DetectedObjectPacket otherMyClass = (DetectedObjectPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.pose_.equals(otherMyClass.pose_))
          return false;
       if (this.id_ != otherMyClass.id_)
@@ -105,8 +114,8 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("DetectedObjectPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("pose=");
       builder.append(this.pose_);

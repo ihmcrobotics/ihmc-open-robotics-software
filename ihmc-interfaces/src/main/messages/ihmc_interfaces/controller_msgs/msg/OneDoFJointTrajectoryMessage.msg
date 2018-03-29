@@ -3,8 +3,8 @@
 # It holds all the trajectory points to go through with a one-dimensional trajectory.
 # A third order polynomial function is used to interpolate between trajectory points.
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # The list of trajectory points to go through while executing the trajectory.
 # The time has to be strictly increasing.

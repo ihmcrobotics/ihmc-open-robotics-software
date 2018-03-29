@@ -11,26 +11,25 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
       implements Settable<HeightQuadTreeToolboxRequestMessage>, EpsilonComparable<HeightQuadTreeToolboxRequestMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public boolean request_clear_quad_tree_;
    public boolean request_quad_tree_update_;
 
    public HeightQuadTreeToolboxRequestMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public HeightQuadTreeToolboxRequestMessage(HeightQuadTreeToolboxRequestMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(HeightQuadTreeToolboxRequestMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       request_clear_quad_tree_ = other.request_clear_quad_tree_;
 
       request_quad_tree_update_ = other.request_quad_tree_update_;
@@ -38,11 +37,19 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRequestClearQuadTree(boolean request_clear_quad_tree)
@@ -73,8 +80,9 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.request_clear_quad_tree_, other.request_clear_quad_tree_, epsilon))
          return false;
 
@@ -96,8 +104,9 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
 
       HeightQuadTreeToolboxRequestMessage otherMyClass = (HeightQuadTreeToolboxRequestMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.request_clear_quad_tree_ != otherMyClass.request_clear_quad_tree_)
          return false;
 
@@ -113,8 +122,8 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
       StringBuilder builder = new StringBuilder();
 
       builder.append("HeightQuadTreeToolboxRequestMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("request_clear_quad_tree=");
       builder.append(this.request_clear_quad_tree_);

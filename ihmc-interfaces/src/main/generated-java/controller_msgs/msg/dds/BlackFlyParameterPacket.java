@@ -13,9 +13,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public boolean auto_exposure_;
    public boolean auto_gain_;
    public boolean auto_shutter_;
@@ -28,18 +28,17 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
 
    public BlackFlyParameterPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public BlackFlyParameterPacket(BlackFlyParameterPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(BlackFlyParameterPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       auto_exposure_ = other.auto_exposure_;
 
       auto_gain_ = other.auto_gain_;
@@ -61,11 +60,19 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setAutoExposure(boolean auto_exposure)
@@ -166,8 +173,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.auto_exposure_, other.auto_exposure_, epsilon))
          return false;
 
@@ -210,8 +218,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
 
       BlackFlyParameterPacket otherMyClass = (BlackFlyParameterPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.auto_exposure_ != otherMyClass.auto_exposure_)
          return false;
 
@@ -248,8 +257,8 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("BlackFlyParameterPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("auto_exposure=");
       builder.append(this.auto_exposure_);

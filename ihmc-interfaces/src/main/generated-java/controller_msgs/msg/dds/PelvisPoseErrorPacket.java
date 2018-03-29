@@ -10,27 +10,26 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket> implements Settable<PelvisPoseErrorPacket>, EpsilonComparable<PelvisPoseErrorPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public float residual_error_;
    public float total_error_;
    public boolean has_map_been_reset_;
 
    public PelvisPoseErrorPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public PelvisPoseErrorPacket(PelvisPoseErrorPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(PelvisPoseErrorPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       residual_error_ = other.residual_error_;
 
       total_error_ = other.total_error_;
@@ -40,11 +39,19 @@ public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket> impleme
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setResidualError(float residual_error)
@@ -85,8 +92,9 @@ public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket> impleme
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.residual_error_, other.residual_error_, epsilon))
          return false;
 
@@ -111,8 +119,9 @@ public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket> impleme
 
       PelvisPoseErrorPacket otherMyClass = (PelvisPoseErrorPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.residual_error_ != otherMyClass.residual_error_)
          return false;
 
@@ -131,8 +140,8 @@ public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("PelvisPoseErrorPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("residual_error=");
       builder.append(this.residual_error_);

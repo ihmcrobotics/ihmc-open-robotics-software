@@ -42,7 +42,7 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -65,7 +65,7 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getData().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -81,7 +81,8 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
 
    public static void write(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       if (data.getData().size() <= 100)
          cdr.write_type_e(data.getData());
       else
@@ -100,7 +101,8 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
 
    public static void read(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       cdr.read_type_e(data.getData());
       data.setWidth(cdr.read_type_2());
 
@@ -113,8 +115,7 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    @Override
    public final void serialize(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("data", data.getData());
       ser.write_type_2("width", data.getWidth());
       ser.write_type_2("height", data.getHeight());
@@ -124,8 +125,7 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HeatMapPacket data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("data", data.getData());
       data.setWidth(ser.read_type_2("width"));
       data.setHeight(ser.read_type_2("height"));

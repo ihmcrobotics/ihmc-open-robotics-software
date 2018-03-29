@@ -12,9 +12,9 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       implements Settable<WholeBodyTrajectoryToolboxMessage>, EpsilonComparable<WholeBodyTrajectoryToolboxMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage configuration_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WaypointBasedTrajectoryMessage> end_effector_trajectories_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage> exploration_configurations_;
@@ -22,7 +22,6 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
 
    public WholeBodyTrajectoryToolboxMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       configuration_ = new controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage();
       end_effector_trajectories_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WaypointBasedTrajectoryMessage>(10,
                                                                                                                               controller_msgs.msg.dds.WaypointBasedTrajectoryMessage.class,
@@ -38,13 +37,13 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
 
    public WholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryToolboxMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(WholeBodyTrajectoryToolboxMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.staticCopy(other.configuration_, configuration_);
       end_effector_trajectories_.set(other.end_effector_trajectories_);
       exploration_configurations_.set(other.exploration_configurations_);
@@ -52,11 +51,19 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage getConfiguration()
@@ -87,8 +94,9 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.configuration_.epsilonEquals(other.configuration_, epsilon))
          return false;
       if (this.end_effector_trajectories_.size() == other.end_effector_trajectories_.size())
@@ -145,8 +153,9 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
 
       WholeBodyTrajectoryToolboxMessage otherMyClass = (WholeBodyTrajectoryToolboxMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.configuration_.equals(otherMyClass.configuration_))
          return false;
       if (!this.end_effector_trajectories_.equals(otherMyClass.end_effector_trajectories_))
@@ -165,8 +174,8 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       StringBuilder builder = new StringBuilder();
 
       builder.append("WholeBodyTrajectoryToolboxMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("configuration=");
       builder.append(this.configuration_);

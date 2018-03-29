@@ -11,9 +11,9 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
       implements Settable<FootstepPathPlanPacket>, EpsilonComparable<FootstepPathPlanPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public boolean goals_valid_;
    public controller_msgs.msg.dds.FootstepDataMessage start_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> original_goals_;
@@ -24,7 +24,6 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
 
    public FootstepPathPlanPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       start_ = new controller_msgs.msg.dds.FootstepDataMessage();
       original_goals_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage>(100, controller_msgs.msg.dds.FootstepDataMessage.class,
                                                                                                         new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
@@ -36,13 +35,13 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
 
    public FootstepPathPlanPacket(FootstepPathPlanPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(FootstepPathPlanPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       goals_valid_ = other.goals_valid_;
 
       controller_msgs.msg.dds.FootstepDataMessagePubSubType.staticCopy(other.start_, start_);
@@ -56,11 +55,19 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setGoalsValid(boolean goals_valid)
@@ -121,8 +128,9 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.goals_valid_, other.goals_valid_, epsilon))
          return false;
 
@@ -178,8 +186,9 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
 
       FootstepPathPlanPacket otherMyClass = (FootstepPathPlanPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.goals_valid_ != otherMyClass.goals_valid_)
          return false;
 
@@ -206,8 +215,8 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPathPlanPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("goals_valid=");
       builder.append(this.goals_valid_);

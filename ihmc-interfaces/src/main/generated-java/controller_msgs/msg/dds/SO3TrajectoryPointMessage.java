@@ -14,9 +14,9 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       implements Settable<SO3TrajectoryPointMessage>, EpsilonComparable<SO3TrajectoryPointMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Time at which the trajectory point has to be reached. The time is relative to when the
     * trajectory starts.
@@ -33,20 +33,19 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
 
    public SO3TrajectoryPointMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public SO3TrajectoryPointMessage(SO3TrajectoryPointMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(SO3TrajectoryPointMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       time_ = other.time_;
 
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
@@ -54,11 +53,19 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -103,8 +110,9 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon))
          return false;
 
@@ -128,8 +136,9 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
 
       SO3TrajectoryPointMessage otherMyClass = (SO3TrajectoryPointMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.time_ != otherMyClass.time_)
          return false;
 
@@ -147,8 +156,8 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("SO3TrajectoryPointMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("time=");
       builder.append(this.time_);

@@ -12,9 +12,9 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
       implements Settable<SelectionMatrix3DMessage>, EpsilonComparable<SelectionMatrix3DMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * The ID of the reference frame defining the selection frame. When selecting the axes of
     * interest, these axes refer to the selection frame axes. This frame is optional. It is
@@ -37,18 +37,17 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
 
    public SelectionMatrix3DMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public SelectionMatrix3DMessage(SelectionMatrix3DMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(SelectionMatrix3DMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       selection_frame_id_ = other.selection_frame_id_;
 
       x_selected_ = other.x_selected_;
@@ -60,11 +59,19 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -145,8 +152,9 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.selection_frame_id_, other.selection_frame_id_, epsilon))
          return false;
 
@@ -174,8 +182,9 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
 
       SelectionMatrix3DMessage otherMyClass = (SelectionMatrix3DMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.selection_frame_id_ != otherMyClass.selection_frame_id_)
          return false;
 
@@ -197,8 +206,8 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("SelectionMatrix3DMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("selection_frame_id=");
       builder.append(this.selection_frame_id_);

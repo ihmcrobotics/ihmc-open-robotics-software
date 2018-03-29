@@ -13,35 +13,42 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
    public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_STAND_PREP = (byte) 0;
    public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_FREEZE = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte requested_atlas_low_level_control_mode_ = (byte) 255;
 
    public AtlasLowLevelControlModeMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public AtlasLowLevelControlModeMessage(AtlasLowLevelControlModeMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(AtlasLowLevelControlModeMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       requested_atlas_low_level_control_mode_ = other.requested_atlas_low_level_control_mode_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRequestedAtlasLowLevelControlMode(byte requested_atlas_low_level_control_mode)
@@ -62,8 +69,9 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_atlas_low_level_control_mode_, other.requested_atlas_low_level_control_mode_, epsilon))
          return false;
 
@@ -82,8 +90,9 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
 
       AtlasLowLevelControlModeMessage otherMyClass = (AtlasLowLevelControlModeMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.requested_atlas_low_level_control_mode_ != otherMyClass.requested_atlas_low_level_control_mode_)
          return false;
 
@@ -96,8 +105,8 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
       StringBuilder builder = new StringBuilder();
 
       builder.append("AtlasLowLevelControlModeMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("requested_atlas_low_level_control_mode=");
       builder.append(this.requested_atlas_low_level_control_mode_);

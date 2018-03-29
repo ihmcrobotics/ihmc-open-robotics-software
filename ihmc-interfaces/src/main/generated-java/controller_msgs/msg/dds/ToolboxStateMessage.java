@@ -13,35 +13,42 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
    public static final byte REINITIALIZE = (byte) 1;
    public static final byte SLEEP = (byte) 2;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte requested_toolbox_state_ = (byte) 255;
 
    public ToolboxStateMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public ToolboxStateMessage(ToolboxStateMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(ToolboxStateMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       requested_toolbox_state_ = other.requested_toolbox_state_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRequestedToolboxState(byte requested_toolbox_state)
@@ -62,8 +69,9 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_toolbox_state_, other.requested_toolbox_state_, epsilon))
          return false;
 
@@ -82,8 +90,9 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
 
       ToolboxStateMessage otherMyClass = (ToolboxStateMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.requested_toolbox_state_ != otherMyClass.requested_toolbox_state_)
          return false;
 
@@ -96,8 +105,8 @@ public class ToolboxStateMessage extends Packet<ToolboxStateMessage> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("ToolboxStateMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("requested_toolbox_state=");
       builder.append(this.requested_toolbox_state_);

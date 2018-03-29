@@ -17,9 +17,9 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * maximum allowed force (ratio) from velocity control in the range of [0.0, 1.0]. 1.0 is the
     * maximum stiffness (default) value tuned for fast walking, 0.0 refers to zero velocity control
@@ -32,31 +32,38 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
 
    public LegCompliancePacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       max_velocity_deltas_ = new us.ihmc.idl.IDLSequence.Float(100, "type_5");
 
    }
 
    public LegCompliancePacket(LegCompliancePacket other)
    {
-      this();
       set(other);
    }
 
    public void set(LegCompliancePacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       max_velocity_deltas_.set(other.max_velocity_deltas_);
       robot_side_ = other.robot_side_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -89,8 +96,9 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.max_velocity_deltas_, other.max_velocity_deltas_, epsilon))
          return false;
 
@@ -112,8 +120,9 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
 
       LegCompliancePacket otherMyClass = (LegCompliancePacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.max_velocity_deltas_.equals(otherMyClass.max_velocity_deltas_))
          return false;
       if (this.robot_side_ != otherMyClass.robot_side_)
@@ -128,8 +137,8 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("LegCompliancePacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("max_velocity_deltas=");
       builder.append(this.max_velocity_deltas_);

@@ -15,9 +15,9 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    public static final byte EXECUTION_TIMING_CONTROL_DURATIONS = (byte) 0;
    public static final byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Defines the list of footstep to perform.
     */
@@ -74,7 +74,6 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 
    public FootstepDataListMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       footstep_data_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage>(100,
                                                                                                             controller_msgs.msg.dds.FootstepDataMessage.class,
                                                                                                             new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
@@ -84,13 +83,13 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 
    public FootstepDataListMessage(FootstepDataListMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(FootstepDataListMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       footstep_data_list_.set(other.footstep_data_list_);
       execution_timing_ = other.execution_timing_;
 
@@ -110,11 +109,19 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -287,8 +294,9 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (this.footstep_data_list_.size() == other.footstep_data_list_.size())
       {
          return false;
@@ -341,8 +349,9 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 
       FootstepDataListMessage otherMyClass = (FootstepDataListMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.footstep_data_list_.equals(otherMyClass.footstep_data_list_))
          return false;
       if (this.execution_timing_ != otherMyClass.execution_timing_)
@@ -378,8 +387,8 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepDataListMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("footstep_data_list=");
       builder.append(this.footstep_data_list_);

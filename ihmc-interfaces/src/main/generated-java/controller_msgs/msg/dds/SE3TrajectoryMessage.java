@@ -15,9 +15,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implements Settable<SE3TrajectoryMessage>, EpsilonComparable<SE3TrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * List of trajectory points (in taskpsace) to go through while executing the trajectory.
     */
@@ -58,7 +58,6 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
 
    public SE3TrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       taskspace_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage>(2000,
                                                                                                                            controller_msgs.msg.dds.SE3TrajectoryPointMessage.class,
                                                                                                                            new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
@@ -74,13 +73,13 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
 
    public SE3TrajectoryMessage(SE3TrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(SE3TrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       taskspace_trajectory_points_.set(other.taskspace_trajectory_points_);
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.angular_selection_matrix_, angular_selection_matrix_);
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.linear_selection_matrix_, linear_selection_matrix_);
@@ -94,11 +93,19 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -190,8 +197,9 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (this.taskspace_trajectory_points_.size() == other.taskspace_trajectory_points_.size())
       {
          return false;
@@ -238,8 +246,9 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
 
       SE3TrajectoryMessage otherMyClass = (SE3TrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.taskspace_trajectory_points_.equals(otherMyClass.taskspace_trajectory_points_))
          return false;
       if (!this.angular_selection_matrix_.equals(otherMyClass.angular_selection_matrix_))
@@ -269,8 +278,8 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("SE3TrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("taskspace_trajectory_points=");
       builder.append(this.taskspace_trajectory_points_);

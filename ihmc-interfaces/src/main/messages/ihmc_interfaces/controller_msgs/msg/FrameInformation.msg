@@ -10,8 +10,8 @@ int64 CENTER_OF_MASS_FRAME = -104
 int64 LEFT_SOLE_FRAME = -105
 int64 RIGHT_SOLE_FRAME = -106
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # The ID of the reference frame that a trajectory is executed in.
 int64 trajectory_reference_frame_id

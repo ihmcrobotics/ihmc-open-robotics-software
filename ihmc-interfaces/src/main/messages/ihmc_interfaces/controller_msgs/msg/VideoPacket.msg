@@ -7,8 +7,8 @@ byte VIDEO_SOURCE_CV_THRESHOLD = 4
 byte VIDEO_SOURCE_IMAGE_PROCESSING_BEHAVIOR = 5
 byte VIDEO_SOURCE_AWARE_FACE_TRACKER = 6
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 byte video_source 255
 int64 timestamp

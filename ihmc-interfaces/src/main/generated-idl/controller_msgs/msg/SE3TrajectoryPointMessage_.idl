@@ -4,7 +4,6 @@
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
-#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -22,9 +21,9 @@ module controller_msgs
       struct SE3TrajectoryPointMessage
       {
         /**
-         * As of March 2018, the header for this message is only use for its sequence ID.
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        std_msgs::msg::dds::Header header;
+        unsigned long sequence_id;
         /**
          * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
          */

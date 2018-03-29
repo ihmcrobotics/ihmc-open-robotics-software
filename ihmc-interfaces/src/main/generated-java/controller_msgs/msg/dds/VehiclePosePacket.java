@@ -10,29 +10,28 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Settable<VehiclePosePacket>, EpsilonComparable<VehiclePosePacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public us.ihmc.euclid.tuple3D.Point3D position_;
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    public int index_;
 
    public VehiclePosePacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
    }
 
    public VehiclePosePacket(VehiclePosePacket other)
    {
-      this();
       set(other);
    }
 
    public void set(VehiclePosePacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
       index_ = other.index_;
@@ -40,11 +39,19 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Sett
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.euclid.tuple3D.Point3D getPosition()
@@ -75,8 +82,9 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Sett
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.position_.epsilonEquals(other.position_, epsilon))
          return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
@@ -99,8 +107,9 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Sett
 
       VehiclePosePacket otherMyClass = (VehiclePosePacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.position_.equals(otherMyClass.position_))
          return false;
       if (!this.orientation_.equals(otherMyClass.orientation_))
@@ -117,8 +126,8 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("VehiclePosePacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("position=");
       builder.append(this.position_);

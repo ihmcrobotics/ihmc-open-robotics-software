@@ -44,7 +44,7 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -78,7 +78,7 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -105,7 +105,8 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(controller_msgs.msg.dds.PilotInterfacePacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_2(data.getBehaviourState());
 
       cdr.write_type_2(data.getRequestedBehaviorState());
@@ -130,7 +131,8 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(controller_msgs.msg.dds.PilotInterfacePacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       data.setBehaviourState(cdr.read_type_2());
 
       data.setRequestedBehaviorState(cdr.read_type_2());
@@ -156,8 +158,7 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(controller_msgs.msg.dds.PilotInterfacePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_2("behaviour_state", data.getBehaviourState());
       ser.write_type_2("requested_behavior_state", data.getRequestedBehaviorState());
       ser.write_type_2("desired_step_type", data.getDesiredStepType());
@@ -173,8 +174,7 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PilotInterfacePacket data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setBehaviourState(ser.read_type_2("behaviour_state"));
       data.setRequestedBehaviorState(ser.read_type_2("requested_behavior_state"));
       data.setDesiredStepType(ser.read_type_2("desired_step_type"));

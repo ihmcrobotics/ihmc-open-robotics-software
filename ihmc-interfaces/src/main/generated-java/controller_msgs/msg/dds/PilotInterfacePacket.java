@@ -7,9 +7,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implements Settable<PilotInterfacePacket>, EpsilonComparable<PilotInterfacePacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public int behaviour_state_;
    public int requested_behavior_state_;
    public int desired_step_type_;
@@ -23,18 +23,17 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
 
    public PilotInterfacePacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public PilotInterfacePacket(PilotInterfacePacket other)
    {
-      this();
       set(other);
    }
 
    public void set(PilotInterfacePacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       behaviour_state_ = other.behaviour_state_;
 
       requested_behavior_state_ = other.requested_behavior_state_;
@@ -58,11 +57,19 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setBehaviourState(int behaviour_state)
@@ -173,8 +180,9 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.behaviour_state_, other.behaviour_state_, epsilon))
          return false;
 
@@ -220,8 +228,9 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
 
       PilotInterfacePacket otherMyClass = (PilotInterfacePacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.behaviour_state_ != otherMyClass.behaviour_state_)
          return false;
 
@@ -261,8 +270,8 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("PilotInterfacePacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("behaviour_state=");
       builder.append(this.behaviour_state_);

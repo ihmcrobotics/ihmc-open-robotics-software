@@ -1,8 +1,8 @@
 # Message used to encode the manifold of an object to be used as input by a reaching motion planner.
 # Main usage is the IHMC WholeBodyTrajectoryToolbox.
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 byte CONFIGURATION_SPACE_NAME_X = 0
 byte CONFIGURATION_SPACE_NAME_Y = 1

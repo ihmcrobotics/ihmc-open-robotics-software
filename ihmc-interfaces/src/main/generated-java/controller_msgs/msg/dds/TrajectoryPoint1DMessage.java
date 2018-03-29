@@ -14,9 +14,9 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
       implements Settable<TrajectoryPoint1DMessage>, EpsilonComparable<TrajectoryPoint1DMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Time at which the trajectory point has to be reached. The time is relative to when the
     * trajectory starts.
@@ -33,18 +33,17 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
 
    public TrajectoryPoint1DMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public TrajectoryPoint1DMessage(TrajectoryPoint1DMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(TrajectoryPoint1DMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       time_ = other.time_;
 
       position_ = other.position_;
@@ -54,11 +53,19 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -119,8 +126,9 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon))
          return false;
 
@@ -145,8 +153,9 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
 
       TrajectoryPoint1DMessage otherMyClass = (TrajectoryPoint1DMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.time_ != otherMyClass.time_)
          return false;
 
@@ -165,8 +174,8 @@ public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("TrajectoryPoint1DMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("time=");
       builder.append(this.time_);
