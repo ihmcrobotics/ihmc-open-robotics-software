@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
+package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -11,17 +11,12 @@ public class ForceTrajectory extends SegmentedFrameTrajectory3D
       super(maxNumberOfSegments, maxNumberOfCoefficients);
    }
 
-   public void update(double time)
-   {
-      super.update(time);
-   }
-
    public void set(FrameTrajectory3D trajectory)
    {
       FrameTrajectory3D newSegment = segments.add();
       newSegment.set(trajectory);
    }
-   
+
    public void update(double time, FrameVector3D forceValue)
    {
       update(time);

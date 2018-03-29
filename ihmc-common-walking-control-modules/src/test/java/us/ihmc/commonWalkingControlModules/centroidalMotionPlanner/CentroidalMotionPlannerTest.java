@@ -5,10 +5,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.RecycledLinkedListBuilder.RecycledLinkedListEntry;
+import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.ForceTrajectory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CentroidalMotionPlannerTest
 {
@@ -24,13 +26,15 @@ public class CentroidalMotionPlannerTest
    @Test
    public void testConstructor()
    {
-      CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters);
+      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters, registry);
       assertTrue(motionPlanner != null);
    }
 
    @Test
    public void testNodeEntrySubmission()
    {
+      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
       CentroidalMotionNode node1 = new CentroidalMotionNode();
       node1.setTime(0.1);
       node1.setForceConstraint(new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.NaN, Double.NaN, 100.0));
@@ -41,7 +45,7 @@ public class CentroidalMotionPlannerTest
       node3.setTime(0.5);
       node3.setForceConstraint(new FrameVector3D(ReferenceFrame.getWorldFrame(), Double.NaN, Double.NaN, 0.0));
 
-      CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters);
+      CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters, registry);
       motionPlanner.submitNode(node1);
       motionPlanner.submitNode(node2);
       motionPlanner.submitNode(node3);
@@ -78,7 +82,8 @@ public class CentroidalMotionPlannerTest
       node3.setPositionObjective(new FramePoint3D(worldFrame, 0.0, 0.0, 0.75), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
       node3.setLinearVelocityObjective(new FrameVector3D(worldFrame, 0.0, 0.0, 0.0), new FrameVector3D(worldFrame, 10.0, 10.0, 10.0));
 
-      CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters);
+      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      CentroidalMotionPlanner motionPlanner = new CentroidalMotionPlanner(parameters, registry);
       motionPlanner.reset();
       motionPlanner.submitNode(node1);
       motionPlanner.submitNode(node2);

@@ -96,5 +96,15 @@ public class CentroidalZAxisOptimizationControlModule
       DenseMatrix64F helperInequalitiesbin = helper.getConstraintbinMatrix(axis);
       solverInput_Ain.set(helperInequalitiesAin);
       solverInput_bin.set(helperInequalitiesbin);
+      
+//      PrintTools.debug("H:" + solverInput_H.toString());
+//      PrintTools.debug("f:" + solverInput_f.toString());
+//      PrintTools.debug("Aeq:" + solverInput_Aeq.toString());
+//      PrintTools.debug("beq:" + solverInput_beq.toString());
+//      PrintTools.debug("Ain:" + solverInput_Ain.toString());
+//      PrintTools.debug("bin:" + solverInput_bin.toString());
+//      PrintTools.debug("ub:" + solverInput_ub.toString());
+//      PrintTools.debug("lb:" + solverInput_lb.toString());
+
    }
 }

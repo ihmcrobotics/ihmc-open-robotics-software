@@ -491,16 +491,7 @@ public class HighLevelHumanoidControllerToolbox
 
    private void computeCapturePoint()
    {
-      centerOfMassPosition.setToZero(centerOfMassFrame);
-
-      if (centerOfMassDataHolder != null)
-      {
-         centerOfMassDataHolder.getCenterOfMassVelocity(centerOfMassVelocity);
-      }
-      else
-      {
-         centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
-      }
+      computeCenterOfMass();
 
       centerOfMassPosition.changeFrame(worldFrame);
       centerOfMassVelocity.changeFrame(worldFrame);
@@ -513,6 +504,30 @@ public class HighLevelHumanoidControllerToolbox
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.set(capturePoint2d, 0.0);
       yoCapturePointVelocity.update();
+   }
+
+   private void computeCenterOfMass()
+   {
+      centerOfMassPosition.setToZero(centerOfMassFrame);
+
+      if (centerOfMassDataHolder != null)
+      {
+         centerOfMassDataHolder.getCenterOfMassVelocity(centerOfMassVelocity);
+      }
+      else
+      {
+         centerOfMassJacobian.getCenterOfMassVelocity(centerOfMassVelocity);
+      }
+   }
+   
+   public void getCenterOfMassPosition(FramePoint3D comPositionToSet)
+   {
+      comPositionToSet.setIncludingFrame(centerOfMassPosition);
+   }
+   
+   public void getCenterOfMassVelocity(FrameVector3D comVelocityToSet)
+   {
+      comVelocityToSet.setIncludingFrame(centerOfMassVelocity);
    }
 
    private final FrameVector3D angularMomentum = new FrameVector3D();

@@ -5,8 +5,11 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpMessageHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotionPlanner;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -21,12 +24,15 @@ public class TakeOffState extends AbstractJumpState
    private final FeetJumpManager feetManager;
    private final Map<String, RigidBodyControlManager> bodyManagerMap;
    private final FullHumanoidRobotModel fullRobotModel;
+   private final WholeBodyMotionPlanner motionPlanner;
 
-   public TakeOffState(CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
+   public TakeOffState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
+                       CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
                        PelvisControlManager pelvisControlManager, SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager,
                        Map<String, RigidBodyControlManager> bodyManagerMap, FullHumanoidRobotModel fullRobotModel)
    {
-      super(stateEnum);
+      super(stateEnum, motionPlanner, messageHandler, controllerToolbox);
+      this.motionPlanner = motionPlanner;
       this.centroidalMomentumManager = centroidalMomentumManager;
       this.gravityCompensationManager = gravityCompensationManager;
       this.pelvisControlManager = pelvisControlManager;
@@ -50,9 +56,10 @@ public class TakeOffState extends AbstractJumpState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void doStateSpecificTransitionIntoAction()
    {
-
+      centroidalMomentumManager.setGroundReactionForceProfile(motionPlanner.getGroundReactionForceProfile());
+      centroidalMomentumManager.setCoMTrajectory(motionPlanner.getPositionTrajectory());
    }
 
    @Override

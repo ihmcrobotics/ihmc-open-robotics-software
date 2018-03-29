@@ -5,6 +5,8 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpMessageHandler;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotionPlanner;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -25,11 +27,12 @@ public class FlightState extends AbstractJumpState
    private final RigidBodyControlManager headManager;
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
-   public FlightState(WholeBodyControlCoreToolbox controlCoreToolbox, HighLevelHumanoidControllerToolbox controllerToolbox,
-                      CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
-                      SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager, Map<String, RigidBodyControlManager> bodyManagerMap)
+   public FlightState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
+                      WholeBodyControlCoreToolbox controlCoreToolbox, CentroidalMomentumManager centroidalMomentumManager,
+                      GravityCompensationManager gravityCompensationManager, SideDependentList<RigidBodyControlManager> handManagers,
+                      FeetJumpManager feetManager, Map<String, RigidBodyControlManager> bodyManagerMap)
    {
-      super(stateEnum);
+      super(stateEnum, motionPlanner, messageHandler, controllerToolbox);
       this.controllerToolbox = controllerToolbox;
       this.wholeBodyMomentumManager = centroidalMomentumManager;
       this.gravityCompensationManager = gravityCompensationManager;
@@ -60,7 +63,7 @@ public class FlightState extends AbstractJumpState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void doStateSpecificTransitionIntoAction()
    {
       controllerToolbox.clearContacts();
       for (RobotSide side : RobotSide.values)

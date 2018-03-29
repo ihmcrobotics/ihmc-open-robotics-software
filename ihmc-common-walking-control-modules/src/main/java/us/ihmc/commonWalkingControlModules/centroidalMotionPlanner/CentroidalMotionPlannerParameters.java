@@ -169,6 +169,16 @@ public class CentroidalMotionPlannerParameters
 
    public double getOptimizationConvergenceThreshold()
    {
-      return 0.01;
+      return 1e-14;
+   }
+
+   public double getDefaultMotionPlanningPositionObjecitveWeight()
+   {
+      return 10.0;
+   }
+
+   public double getDefaultMotionPlanningVelocityObjecitveWeight()
+   {
+      return 10.0;
    }
 }

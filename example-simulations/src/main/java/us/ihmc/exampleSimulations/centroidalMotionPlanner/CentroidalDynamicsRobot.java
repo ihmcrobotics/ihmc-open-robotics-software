@@ -11,8 +11,8 @@ import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMot
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionPlanner;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionPlannerParameters;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.DependentVariableConstraintType;
-import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.ForceTrajectory;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.VectorEnum;
+import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.ForceTrajectory;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -260,7 +260,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       @Override
       public void initialize()
       {
-         this.motionPlanner = new CentroidalMotionPlanner(parameters);
+         this.motionPlanner = new CentroidalMotionPlanner(parameters, registry);
          setupStateMachine();
       }
 

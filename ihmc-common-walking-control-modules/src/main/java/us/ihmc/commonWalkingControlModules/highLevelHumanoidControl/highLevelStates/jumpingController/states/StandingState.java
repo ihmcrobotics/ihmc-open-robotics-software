@@ -5,7 +5,9 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpMessageHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotionPlanner;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -33,11 +35,12 @@ public class StandingState extends AbstractJumpState
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
-   public StandingState(CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager, PelvisControlManager pelvisControlManager,
-                        SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager,
+   public StandingState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
+                        CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
+                        PelvisControlManager pelvisControlManager, SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager,
                         Map<String, RigidBodyControlManager> bodyManagerMap, FullHumanoidRobotModel fullRobotModel)
    {
-      super(stateEnum);
+      super(stateEnum, motionPlanner, messageHandler, controllerToolbox);
       this.centroidalMomentumManager = centroidalMomentumManager;
       this.gravityCompensationManager = gravityCompensationManager;
       this.pelvisControlManager = pelvisControlManager;
@@ -74,7 +77,7 @@ public class StandingState extends AbstractJumpState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void doStateSpecificTransitionIntoAction()
    {
       isDone = false;
       pelvisControlManager.getCurrentPelvisPosition(worldFrame, tempPoint);
@@ -93,7 +96,7 @@ public class StandingState extends AbstractJumpState
    @Override
    public void doTransitionOutOfAction()
    {
-      
+
    }
 
    public void startJump(boolean startJump)
