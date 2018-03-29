@@ -13,6 +13,10 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
    private final YoDouble swingDuration;
    private final YoDouble desiredCoMPositionZ;
 
+   private final YoDouble yoPlanarVelocityInputX;
+   private final YoDouble yoPlanarVelocityInputY;
+   private final YoDouble yoPlanarVelocityInputZ;
+
    @SuppressWarnings("unchecked")
    public QuadrupedPositionTestYoVariables(SimulationConstructionSet scs)
    {
@@ -22,6 +26,10 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
       positionControllerState = (YoEnum<QuadrupedPositionControllerState>) scs.getVariable("positionControllerState");
       swingDuration = (YoDouble) scs.getVariable("swingDuration");
       desiredCoMPositionZ = (YoDouble) scs.getVariable("desiredCoMPositionZ");
+
+      yoPlanarVelocityInputX = (YoDouble) scs.getVariable("planarVelocityInputX");
+      yoPlanarVelocityInputY = (YoDouble) scs.getVariable("planarVelocityInputY");
+      yoPlanarVelocityInputZ = (YoDouble) scs.getVariable("planarVelocityInputZ");
    }
 
    public YoEnum<QuadrupedPositionControllerRequestedEvent> getUserTrigger()
@@ -42,5 +50,20 @@ public class QuadrupedPositionTestYoVariables extends QuadrupedTestYoVariables
    public YoDouble getDesiredCoMPositionZ()
    {
       return desiredCoMPositionZ;
+   }
+
+   public YoDouble getYoPlanarVelocityInputX()
+   {
+      return yoPlanarVelocityInputX;
+   }
+
+   public YoDouble getYoPlanarVelocityInputY()
+   {
+      return yoPlanarVelocityInputY;
+   }
+
+   public YoDouble getYoPlanarVelocityInputZ()
+   {
+      return yoPlanarVelocityInputZ;
    }
 }
