@@ -103,6 +103,8 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       if(XBoxOneMapping.getMapping(event) == XBoxOneMapping.A)
       {
          stepTeleopManager.requestSteppingState();
+         if(stepTeleopManager.isWalking())
+            stepTeleopManager.stopWalking();
       }
 
       if(XBoxOneMapping.getMapping(event) == XBoxOneMapping.X)

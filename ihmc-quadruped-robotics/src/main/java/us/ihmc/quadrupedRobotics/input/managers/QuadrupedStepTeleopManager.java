@@ -20,6 +20,7 @@ import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
@@ -35,8 +36,10 @@ public class QuadrupedStepTeleopManager
    private final YoQuadrupedXGaitSettings xGaitSettings;
    private final QuadrupedPlanarVelocityInputProvider velocityInput = new QuadrupedPlanarVelocityInputProvider(null, registry);
    private final YoDouble timestamp = new YoDouble("timestamp", registry);
+   private final YoBoolean walking = new YoBoolean("walking", registry);
 
    private final AtomicBoolean xGaitRequested = new AtomicBoolean();
+   private final AtomicBoolean stopWalkingRequested = new AtomicBoolean();
    private final AtomicReference<QuadrupedForceControllerStatePacket> forceControlStatePacket = new AtomicReference<>();
    private final AtomicReference<QuadrupedSteppingStatePacket> steppingStatePacket = new AtomicReference<>();
    private final AtomicDouble desiredVelocityX = new AtomicDouble();
@@ -66,12 +69,21 @@ public class QuadrupedStepTeleopManager
       {
          stepStream.onEntry();
          sendSteps();
+         walking.set(true);
       }
-
-      if (isInStepState())
+      else if (isInStepState())
       {
-         stepStream.process();
-         sendSteps();
+         if(stopWalkingRequested.getAndSet(false))
+         {
+            stepStream.process();
+            sendStepsToStopWalking();
+            walking.set(false);
+         }
+         else if(walking.getBooleanValue())
+         {
+            stepStream.process();
+            sendSteps();
+         }
       }
    }
 
@@ -101,9 +113,26 @@ public class QuadrupedStepTeleopManager
             && steppingStatePacket.get() == QuadrupedSteppingStateEnum.STEP);
    }
 
+   public boolean isWalking()
+   {
+      return walking.getBooleanValue();
+   }
+
+   public void stopWalking()
+   {
+      stopWalkingRequested.set(true);
+   }
+
    private void sendSteps()
    {
       List<? extends QuadrupedTimedStep> steps = stepStream.getSteps();
+      QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps, true);
+      packetCommunicator.send(timedStepPacket);
+   }
+
+   private void sendStepsToStopWalking()
+   {
+      List<? extends QuadrupedTimedStep> steps = stepStream.getSteps().subList(0, 2);
       QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps, true);
       packetCommunicator.send(timedStepPacket);
    }
