@@ -1,13 +1,13 @@
 <object-stream>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootstepDataListMessage>
+  <controller_msgs.msg.dds.FootstepDataListMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
     <footstepDataList>
-      <clazz>controller_msgs.msgs.dds.FootstepDataMessage</clazz>
+      <clazz>controller_msgs.msg.dds.FootstepDataMessage</clazz>
       <values>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -36,7 +36,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -45,7 +45,7 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
       </values>
       <size>1</size>
     </footstepDataList>
@@ -64,7 +64,7 @@
       <previousMessageId>0</previousMessageId>
       <executionDelayTime>0.0</executionDelayTime>
     </queueingProperties>
-  </controller_msgs.msgs.dds.FootstepDataListMessage>
+  </controller_msgs.msg.dds.FootstepDataListMessage>
   <long>0</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>

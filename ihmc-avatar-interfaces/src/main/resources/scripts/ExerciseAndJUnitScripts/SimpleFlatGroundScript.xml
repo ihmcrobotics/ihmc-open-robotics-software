@@ -1,13 +1,13 @@
 <object-stream>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootstepDataListMessage>
+  <controller_msgs.msg.dds.FootstepDataListMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
     <footstepDataList>
-      <clazz>controller_msgs.msgs.dds.FootstepDataMessage</clazz>
+      <clazz>controller_msgs.msg.dds.FootstepDataMessage</clazz>
       <values>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -36,7 +36,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -45,8 +45,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -75,7 +75,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -84,7 +84,7 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
       </values>
       <size>2</size>
     </footstepDataList>
@@ -103,9 +103,9 @@
       <previousMessageId>0</previousMessageId>
       <executionDelayTime>0.0</executionDelayTime>
     </queueingProperties>
-  </controller_msgs.msgs.dds.FootstepDataListMessage>
+  </controller_msgs.msg.dds.FootstepDataListMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootTrajectoryMessage>
+  <controller_msgs.msg.dds.FootTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -115,9 +115,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -143,7 +143,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -213,9 +213,9 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.FootTrajectoryMessage>
+  </controller_msgs.msg.dds.FootTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootTrajectoryMessage>
+  <controller_msgs.msg.dds.FootTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -225,9 +225,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -253,7 +253,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -323,9 +323,9 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.FootTrajectoryMessage>
+  </controller_msgs.msg.dds.FootTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootTrajectoryMessage>
+  <controller_msgs.msg.dds.FootTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -335,9 +335,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -363,7 +363,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -433,9 +433,9 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.FootTrajectoryMessage>
+  </controller_msgs.msg.dds.FootTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.HandTrajectoryMessage>
+  <controller_msgs.msg.dds.HandTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -445,9 +445,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -473,7 +473,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -543,9 +543,9 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.HandTrajectoryMessage>
+  </controller_msgs.msg.dds.HandTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootTrajectoryMessage>
+  <controller_msgs.msg.dds.FootTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -555,9 +555,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -583,7 +583,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -653,9 +653,9 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.FootTrajectoryMessage>
+  </controller_msgs.msg.dds.FootTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootTrajectoryMessage>
+  <controller_msgs.msg.dds.FootTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -665,9 +665,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -693,7 +693,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -763,9 +763,9 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.FootTrajectoryMessage>
+  </controller_msgs.msg.dds.FootTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootTrajectoryMessage>
+  <controller_msgs.msg.dds.FootTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -775,9 +775,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -803,7 +803,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -873,9 +873,9 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.FootTrajectoryMessage>
+  </controller_msgs.msg.dds.FootTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.HandTrajectoryMessage>
+  <controller_msgs.msg.dds.HandTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -885,9 +885,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -913,7 +913,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -983,16 +983,16 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.HandTrajectoryMessage>
+  </controller_msgs.msg.dds.HandTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootstepDataListMessage>
+  <controller_msgs.msg.dds.FootstepDataListMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
     <footstepDataList>
-      <clazz>controller_msgs.msgs.dds.FootstepDataMessage</clazz>
+      <clazz>controller_msgs.msg.dds.FootstepDataMessage</clazz>
       <values>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1021,7 +1021,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1030,8 +1030,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1060,7 +1060,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1069,8 +1069,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1099,7 +1099,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1108,7 +1108,7 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
       </values>
       <size>3</size>
     </footstepDataList>
@@ -1127,16 +1127,16 @@
       <previousMessageId>0</previousMessageId>
       <executionDelayTime>0.0</executionDelayTime>
     </queueingProperties>
-  </controller_msgs.msgs.dds.FootstepDataListMessage>
+  </controller_msgs.msg.dds.FootstepDataListMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.PauseWalkingMessage>
+  <controller_msgs.msg.dds.PauseWalkingMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
     <pause>true</pause>
-  </controller_msgs.msgs.dds.PauseWalkingMessage>
+  </controller_msgs.msg.dds.PauseWalkingMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.HandTrajectoryMessage>
+  <controller_msgs.msg.dds.HandTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -1146,9 +1146,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -1174,7 +1174,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -1244,16 +1244,16 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.HandTrajectoryMessage>
+  </controller_msgs.msg.dds.HandTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootstepDataListMessage>
+  <controller_msgs.msg.dds.FootstepDataListMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
     <footstepDataList>
-      <clazz>controller_msgs.msgs.dds.FootstepDataMessage</clazz>
+      <clazz>controller_msgs.msg.dds.FootstepDataMessage</clazz>
       <values>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1282,7 +1282,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1291,8 +1291,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1321,7 +1321,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1330,8 +1330,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1360,7 +1360,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1369,7 +1369,7 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
       </values>
       <size>3</size>
     </footstepDataList>
@@ -1388,16 +1388,16 @@
       <previousMessageId>0</previousMessageId>
       <executionDelayTime>0.0</executionDelayTime>
     </queueingProperties>
-  </controller_msgs.msgs.dds.FootstepDataListMessage>
+  </controller_msgs.msg.dds.FootstepDataListMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.PauseWalkingMessage>
+  <controller_msgs.msg.dds.PauseWalkingMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
     <pause>true</pause>
-  </controller_msgs.msgs.dds.PauseWalkingMessage>
+  </controller_msgs.msg.dds.PauseWalkingMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.HandTrajectoryMessage>
+  <controller_msgs.msg.dds.HandTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -1407,9 +1407,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -1435,7 +1435,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -1505,9 +1505,9 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.HandTrajectoryMessage>
+  </controller_msgs.msg.dds.HandTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.HandTrajectoryMessage>
+  <controller_msgs.msg.dds.HandTrajectoryMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
@@ -1517,9 +1517,9 @@
       <destination>0</destination>
       <source>0</source>
       <taskspaceTrajectoryPoints>
-        <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values>
-          <controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          <controller_msgs.msg.dds.SE3TrajectoryPointMessage>
             <uniqueId>0</uniqueId>
             <destination>0</destination>
             <source>0</source>
@@ -1545,7 +1545,7 @@
               <y>0.0</y>
               <z>0.0</z>
             </angularVelocity>
-          </controller_msgs.msgs.dds.SE3TrajectoryPointMessage>
+          </controller_msgs.msg.dds.SE3TrajectoryPointMessage>
         </values>
         <size>1</size>
       </taskspaceTrajectoryPoints>
@@ -1615,16 +1615,16 @@
         <executionDelayTime>0.0</executionDelayTime>
       </queueingProperties>
     </se3Trajectory>
-  </controller_msgs.msgs.dds.HandTrajectoryMessage>
+  </controller_msgs.msg.dds.HandTrajectoryMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.FootstepDataListMessage>
+  <controller_msgs.msg.dds.FootstepDataListMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
     <footstepDataList>
-      <clazz>controller_msgs.msgs.dds.FootstepDataMessage</clazz>
+      <clazz>controller_msgs.msg.dds.FootstepDataMessage</clazz>
       <values>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1653,7 +1653,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1662,8 +1662,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1692,7 +1692,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1701,8 +1701,8 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
-        <controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
+        <controller_msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
@@ -1731,7 +1731,7 @@
             <size>0</size>
           </customPositionWaypoints>
           <swingTrajectory>
-            <clazz>controller_msgs.msgs.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
           </swingTrajectory>
@@ -1740,7 +1740,7 @@
           <transferDuration>-1.0</transferDuration>
           <touchdownDuration>-1.0</touchdownDuration>
           <executionDelayTime>0.0</executionDelayTime>
-        </controller_msgs.msgs.dds.FootstepDataMessage>
+        </controller_msgs.msg.dds.FootstepDataMessage>
       </values>
       <size>3</size>
     </footstepDataList>
@@ -1759,14 +1759,14 @@
       <previousMessageId>0</previousMessageId>
       <executionDelayTime>0.0</executionDelayTime>
     </queueingProperties>
-  </controller_msgs.msgs.dds.FootstepDataListMessage>
+  </controller_msgs.msg.dds.FootstepDataListMessage>
   <long>0</long>
-  <controller_msgs.msgs.dds.PauseWalkingMessage>
+  <controller_msgs.msg.dds.PauseWalkingMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <source>0</source>
     <pause>true</pause>
-  </controller_msgs.msgs.dds.PauseWalkingMessage>
+  </controller_msgs.msg.dds.PauseWalkingMessage>
   <long>0</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>
