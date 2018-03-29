@@ -30,4 +30,7 @@ byte FIRE_FIGHTING = 26
 byte CUTTING_WALL = 27
 byte REPEATEDLY_WALK_FOOTSTEP_LIST = 28
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 byte humanoid_behavior_type 255

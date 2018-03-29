@@ -3,6 +3,9 @@
 # It is defined by an origin, a normal, and a concave hull.
 # For easier processing, a set of convex polygons approximating the concave hull are also provided.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 int32 NO_REGION_ID = -1
 
 int32 region_id -1

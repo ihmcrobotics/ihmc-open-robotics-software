@@ -4,6 +4,9 @@
 # The joint_trajectory_messages can have different waypoint times and different number of waypoints.
 # If a joint trajectory message is empty, the controller will hold the last desired joint position while executing the other joint trajectories.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # Trajectory for each.
 OneDoFJointTrajectoryMessage[] joint_trajectory_messages
 # Properties for queueing trajectories.

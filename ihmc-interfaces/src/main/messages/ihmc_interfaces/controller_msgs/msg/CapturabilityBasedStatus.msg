@@ -3,6 +3,9 @@
 # to the current balance status of the robot.
 # All the information here is expressed in the world frame.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 geometry_msgs/Point capture_point_2d
 geometry_msgs/Point desired_capture_point_2d
 geometry_msgs/Point center_of_mass_3d

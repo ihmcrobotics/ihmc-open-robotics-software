@@ -5,6 +5,9 @@
 byte EXECUTION_TIMING_CONTROL_DURATIONS = 0
 byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = 1
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # Defines the list of footstep to perform.
 FootstepDataMessage[] footstep_data_list
 # When CONTROL_DURATIONS is chosen:

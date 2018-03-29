@@ -9,6 +9,9 @@ string MOVING_LEFT_ARM = "moving the left arm"
 string MOVING_RIGHT_ARM = "moving the right arm"
 string NETWORKPROCESSOR_ONLINE = "Reestablished Connection To The Network Processor"
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 bool speak_packet false
 bool beep true
 string text_to_speak

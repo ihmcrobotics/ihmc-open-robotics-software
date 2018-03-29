@@ -1,5 +1,8 @@
 # Message specific to Atlas, it is reported by the IHMC state estimator.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 float32[<=6] electric_joint_temperatures
 float32[<=6] electric_joint_currents
 bool[<=6] electric_joint_enabled_array

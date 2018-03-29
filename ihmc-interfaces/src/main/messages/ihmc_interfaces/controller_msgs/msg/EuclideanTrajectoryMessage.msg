@@ -3,6 +3,9 @@
 # A third order polynomial function is used to interpolate positions.
 # To execute a single straight line trajectory to reach a desired position, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # List of trajectory points (in taskpsace) to go through while executing the trajectory.
 EuclideanTrajectoryPointMessage[] taskspace_trajectory_points
 # The selection matrix for each axis.

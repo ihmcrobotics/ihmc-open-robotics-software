@@ -1,5 +1,8 @@
 # This message is part of the IHMC footstep planning module.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 byte FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION = 0
 byte FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION = 1
 byte FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION = 2

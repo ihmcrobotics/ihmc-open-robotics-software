@@ -6,6 +6,9 @@ byte CONTINUOUS_UPDATE = 1
 byte STOP_UPDATE = 2
 byte CLEAR = 3
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 byte planar_regions_request_type
 
 BoundingBox3DMessage bounding_box_in_world_for_request

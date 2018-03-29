@@ -3,6 +3,9 @@
 # It holds all the trajectory points to go through with a one-dimensional trajectory.
 # A third order polynomial function is used to interpolate between trajectory points.
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # The list of trajectory points to go through while executing the trajectory.
 # The time has to be strictly increasing.
 TrajectoryPoint1DMessage[<=2000] trajectory_points

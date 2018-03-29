@@ -9,6 +9,9 @@
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
+# As of March 2018, the header for this message is only use for its sequence ID.
+std_msgs/Header header
+
 # maximum allowed force (ratio) from velocity control in the range of [0.0, 1.0]. 1.0 is the
 # maximum stiffness (default) value tuned for fast walking, 0.0 refers to zero velocity control
 # making the joint very compliant (only force control) but often bad tracking. On Atlas, 0.1-0.3
