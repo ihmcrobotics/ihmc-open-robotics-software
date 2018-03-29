@@ -16,6 +16,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -26,6 +27,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
+   private QuadrupedStepTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -38,8 +40,10 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
          quadrupedTestFactory.setUseStateEstimator(false);
+         quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -52,6 +56,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    {
       conductor = null;
       variables = null;
+      stepTeleopManager = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -110,14 +115,13 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    {
       double originalHeight = standupPrecisely();
       
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
-      
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
 
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
       lowerHeightUntilFailure(originalHeight);
 
       conductor.concludeTesting();
@@ -129,13 +133,13 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    {
       double originalHeight = standupPrecisely();
       
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(0.7);
+
+      stepTeleopManager.setDesiredVelocity(0.7, 0.0, 0.0);
 
       lowerHeightUntilFailure(originalHeight);
 
@@ -144,7 +148,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
 
    private double standupPrecisely() throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       double originalHeight = variables.getYoComPositionInputZ().getDoubleValue();
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
