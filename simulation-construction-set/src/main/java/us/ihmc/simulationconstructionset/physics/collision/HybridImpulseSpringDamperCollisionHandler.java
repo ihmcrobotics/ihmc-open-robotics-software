@@ -61,6 +61,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private static final boolean slipTowardEachOtherIfSlipping = true;
 
    private static final boolean allowRecyclingOfPointsInUse = true;
+   
+   private static final boolean useStaticContact = true;
 
    private final Random random;
 
@@ -133,7 +135,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    {
       int numberOfCollisions = shapesInContactList.size();
 
-      Collections.shuffle(shapesInContactList, random);
+      if(!useStaticContact)
+         Collections.shuffle(shapesInContactList, random);
 
       if (DEBUG)
          System.out.println("Resolving " + numberOfCollisions + " collisions....");
