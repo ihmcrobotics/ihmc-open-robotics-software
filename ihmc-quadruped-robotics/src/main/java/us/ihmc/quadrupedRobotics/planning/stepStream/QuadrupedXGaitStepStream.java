@@ -1,7 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
-import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
@@ -10,17 +13,14 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+
 import java.util.ArrayList;
 
 public class QuadrupedXGaitStepStream implements QuadrupedStepStream
@@ -37,7 +37,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    private final ReferenceFrame bodyZUpFrame;
    private final ReferenceFrame worldFrame;
    private final double controlDT;
-   private final YoDouble timestamp;
+   private final YoDouble timestamp, previousTimestamp;
 
    private final YoDouble bodyYaw;
    private final YoFrameOrientation bodyOrientation;
@@ -63,6 +63,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       this.worldFrame = ReferenceFrame.getWorldFrame();
       this.controlDT = controlDT;
       this.timestamp = timestamp;
+      this.previousTimestamp = new YoDouble("previousTimestamp", registry);
 
       this.bodyYaw = new YoDouble("bodyYaw", registry);
       this.bodyOrientation = new YoFrameOrientation("bodyOrientation", worldFrame, registry);
@@ -104,6 +105,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       // initialize body orientation
       bodyOrientation.setFromReferenceFrame(bodyZUpFrame);
       bodyYaw.set(bodyOrientation.getYaw().getDoubleValue());
+      previousTimestamp.set(timestamp.getDoubleValue());
 
       // initialize step queue
       updateXGaitSettings();
@@ -129,13 +131,13 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       // update body orientation
       if(Double.isNaN(controlDT))
       {
-         bodyOrientation.setFromReferenceFrame(bodyZUpFrame);
-         bodyYaw.set(bodyOrientation.getYaw().getDoubleValue());
+         double effectiveDT = timestamp.getDoubleValue() - previousTimestamp.getDoubleValue();
+         previousTimestamp.set(timestamp.getDoubleValue());
+         updateBodyOrientation(effectiveDT);
       }
       else
       {
-         bodyYaw.add(planarVelocityProvider.get().getZ() * controlDT);
-         bodyOrientation.setYawPitchRoll(bodyYaw.getDoubleValue(), 0.0, 0.0);
+         updateBodyOrientation(controlDT);
       }
 
       // update xgait current steps
@@ -172,6 +174,12 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
             stepSequence.get(stepSequence.size() - 1).set(xGaitPreviewSteps.get(i));
          }
       }
+   }
+
+   private void updateBodyOrientation(double dt)
+   {
+      bodyYaw.add(planarVelocityProvider.get().getZ() * dt);
+      bodyOrientation.setYawPitchRoll(bodyYaw.getDoubleValue(), 0.0, 0.0);
    }
 
    @Override
