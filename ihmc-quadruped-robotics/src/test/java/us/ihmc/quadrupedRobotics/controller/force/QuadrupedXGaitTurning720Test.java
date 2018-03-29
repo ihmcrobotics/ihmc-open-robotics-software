@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -24,6 +25,7 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
+   private QuadrupedStepTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -35,8 +37,10 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
+         quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -50,20 +54,20 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
       conductor.concludeTesting();
       conductor = null;
       variables = null;
+      stepTeleopManager = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
    public void rotate720InPlaceRight() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      variables.getXGaitStanceWidthInput().set(0.35);
-      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
+      stepTeleopManager.getXGaitSettings().setStanceWidth(0.35);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
-      variables.getYoPlanarVelocityInputZ().set(-0.5);
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, -0.5);
 
       int numSpins = 2;
       for (int i = 0; i < numSpins; i++)
@@ -84,10 +88,9 @@ public abstract class QuadrupedXGaitTurning720Test implements QuadrupedMultiRobo
    
    public void rotate720InPlaceLeft() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       variables.getXGaitStanceWidthInput().set(0.35);
-      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
