@@ -73,7 +73,7 @@ public abstract class QuadrupedXGaitFlatGroundPaceTest implements QuadrupedMulti
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(0.0);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
 
       stepTeleopManager.setDesiredVelocity(directionX * 1.0, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
