@@ -44,7 +44,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < 100; ++i0)
@@ -79,7 +79,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < data.getFootstepDataList().size(); ++i0)
@@ -108,7 +108,8 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(controller_msgs.msg.dds.FootstepDataListMessage data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       if (data.getFootstepDataList().size() <= 100)
          cdr.write_type_e(data.getFootstepDataList());
       else
@@ -133,7 +134,8 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void read(controller_msgs.msg.dds.FootstepDataListMessage data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       cdr.read_type_e(data.getFootstepDataList());
       data.setExecutionTiming(cdr.read_type_9());
 
@@ -156,8 +158,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepDataListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("footstep_data_list", data.getFootstepDataList());
       ser.write_type_9("execution_timing", data.getExecutionTiming());
       ser.write_type_6("default_swing_duration", data.getDefaultSwingDuration());
@@ -173,8 +174,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepDataListMessage data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("footstep_data_list", data.getFootstepDataList());
       data.setExecutionTiming(ser.read_type_9("execution_timing"));
       data.setDefaultSwingDuration(ser.read_type_6("default_swing_duration"));

@@ -14,9 +14,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Specifies which foot is expected to be executing the footstep to be adjusted.
     */
@@ -46,7 +46,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
    public AdjustFootstepMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       location_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       predicted_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>(100, us.ihmc.euclid.tuple3D.Point3D.class,
@@ -56,13 +55,13 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
    public AdjustFootstepMessage(AdjustFootstepMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(AdjustFootstepMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.location_, location_);
@@ -73,11 +72,19 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -150,8 +157,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -190,8 +198,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
       AdjustFootstepMessage otherMyClass = (AdjustFootstepMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -213,8 +222,8 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("AdjustFootstepMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);

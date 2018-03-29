@@ -12,9 +12,9 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
       implements Settable<CenterOfMassTrajectoryMessage>, EpsilonComparable<CenterOfMassTrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * List of center of mass trajectory waypoints. Each waypoint contains the center of mass
     * position and velocity at a given time.
@@ -23,28 +23,35 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
 
    public CenterOfMassTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       euclidean_trajectory_ = new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
    }
 
    public CenterOfMassTrajectoryMessage(CenterOfMassTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(CenterOfMassTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.euclidean_trajectory_, euclidean_trajectory_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -64,8 +71,9 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.euclidean_trajectory_.epsilonEquals(other.euclidean_trajectory_, epsilon))
          return false;
 
@@ -84,8 +92,9 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
 
       CenterOfMassTrajectoryMessage otherMyClass = (CenterOfMassTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.euclidean_trajectory_.equals(otherMyClass.euclidean_trajectory_))
          return false;
 
@@ -98,8 +107,8 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
       StringBuilder builder = new StringBuilder();
 
       builder.append("CenterOfMassTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("euclidean_trajectory=");
       builder.append(this.euclidean_trajectory_);

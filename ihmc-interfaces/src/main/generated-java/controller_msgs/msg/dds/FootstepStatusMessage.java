@@ -16,9 +16,9 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * The current footstep status enum value.
     */
@@ -53,7 +53,6 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
 
    public FootstepStatusMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       desired_foot_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_foot_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
       actual_foot_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
@@ -62,13 +61,13 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
 
    public FootstepStatusMessage(FootstepStatusMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(FootstepStatusMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       footstep_status_ = other.footstep_status_;
 
       footstep_index_ = other.footstep_index_;
@@ -82,11 +81,19 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -181,8 +188,9 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_status_, other.footstep_status_, epsilon))
          return false;
 
@@ -216,8 +224,9 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
 
       FootstepStatusMessage otherMyClass = (FootstepStatusMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.footstep_status_ != otherMyClass.footstep_status_)
          return false;
 
@@ -245,8 +254,8 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepStatusMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("footstep_status=");
       builder.append(this.footstep_status_);

@@ -8,16 +8,15 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       implements Settable<SimulatedLidarScanPacket>, EpsilonComparable<SimulatedLidarScanPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public us.ihmc.idl.IDLSequence.Float ranges_;
    public int sensor_id_;
    public controller_msgs.msg.dds.LidarScanParametersMessage lidar_scan_parameters_;
 
    public SimulatedLidarScanPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       ranges_ = new us.ihmc.idl.IDLSequence.Float(100, "type_5");
 
       lidar_scan_parameters_ = new controller_msgs.msg.dds.LidarScanParametersMessage();
@@ -25,13 +24,13 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 
    public SimulatedLidarScanPacket(SimulatedLidarScanPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(SimulatedLidarScanPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       ranges_.set(other.ranges_);
       sensor_id_ = other.sensor_id_;
 
@@ -39,11 +38,19 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.idl.IDLSequence.Float getRanges()
@@ -74,8 +81,9 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.ranges_, other.ranges_, epsilon))
          return false;
 
@@ -100,8 +108,9 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 
       SimulatedLidarScanPacket otherMyClass = (SimulatedLidarScanPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.ranges_.equals(otherMyClass.ranges_))
          return false;
       if (this.sensor_id_ != otherMyClass.sensor_id_)
@@ -119,8 +128,8 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("SimulatedLidarScanPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("ranges=");
       builder.append(this.ranges_);

@@ -14,9 +14,9 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
       implements Settable<OneDoFJointTrajectoryMessage>, EpsilonComparable<OneDoFJointTrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * The list of trajectory points to go through while executing the trajectory. The time has to be
     * strictly increasing.
@@ -34,7 +34,6 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
    public OneDoFJointTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TrajectoryPoint1DMessage>(2000,
                                                                                                                 controller_msgs.msg.dds.TrajectoryPoint1DMessage.class,
                                                                                                                 new controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType());
@@ -43,24 +42,32 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
    public OneDoFJointTrajectoryMessage(OneDoFJointTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(OneDoFJointTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       trajectory_points_.set(other.trajectory_points_);
       weight_ = other.weight_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -106,8 +113,9 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (this.trajectory_points_.size() == other.trajectory_points_.size())
       {
          return false;
@@ -139,8 +147,9 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
       OneDoFJointTrajectoryMessage otherMyClass = (OneDoFJointTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.trajectory_points_.equals(otherMyClass.trajectory_points_))
          return false;
       if (this.weight_ != otherMyClass.weight_)
@@ -155,8 +164,8 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
       StringBuilder builder = new StringBuilder();
 
       builder.append("OneDoFJointTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("trajectory_points=");
       builder.append(this.trajectory_points_);

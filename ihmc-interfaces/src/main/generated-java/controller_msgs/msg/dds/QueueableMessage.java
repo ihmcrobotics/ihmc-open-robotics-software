@@ -13,9 +13,9 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
    public static final byte EXECUTION_MODE_OVERRIDE = (byte) 0;
    public static final byte EXECUTION_MODE_QUEUE = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * When EXECUTION_MODE_OVERRIDE is chosen: - For trajectory messages: the time of the first
     * trajectory point can be zero, in which case the controller will start directly at the first
@@ -47,18 +47,17 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
    public QueueableMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public QueueableMessage(QueueableMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(QueueableMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       execution_mode_ = other.execution_mode_;
 
       message_id_ = other.message_id_;
@@ -70,11 +69,19 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -173,8 +180,9 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_mode_, other.execution_mode_, epsilon))
          return false;
 
@@ -202,8 +210,9 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
       QueueableMessage otherMyClass = (QueueableMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.execution_mode_ != otherMyClass.execution_mode_)
          return false;
 
@@ -225,8 +234,8 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       StringBuilder builder = new StringBuilder();
 
       builder.append("QueueableMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("execution_mode=");
       builder.append(this.execution_mode_);

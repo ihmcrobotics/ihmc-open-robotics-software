@@ -12,9 +12,9 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       implements Settable<WholeBodyTrajectoryMessage>, EpsilonComparable<WholeBodyTrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Trajectory for the left hand
     */
@@ -54,7 +54,6 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
    public WholeBodyTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       left_hand_trajectory_message_ = new controller_msgs.msg.dds.HandTrajectoryMessage();
       right_hand_trajectory_message_ = new controller_msgs.msg.dds.HandTrajectoryMessage();
       left_arm_trajectory_message_ = new controller_msgs.msg.dds.ArmTrajectoryMessage();
@@ -68,13 +67,13 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
    public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(WholeBodyTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.staticCopy(other.left_hand_trajectory_message_, left_hand_trajectory_message_);
       controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.staticCopy(other.right_hand_trajectory_message_, right_hand_trajectory_message_);
       controller_msgs.msg.dds.ArmTrajectoryMessagePubSubType.staticCopy(other.left_arm_trajectory_message_, left_arm_trajectory_message_);
@@ -87,11 +86,19 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -174,8 +181,9 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.left_hand_trajectory_message_.epsilonEquals(other.left_hand_trajectory_message_, epsilon))
          return false;
       if (!this.right_hand_trajectory_message_.epsilonEquals(other.right_hand_trajectory_message_, epsilon))
@@ -210,8 +218,9 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
       WholeBodyTrajectoryMessage otherMyClass = (WholeBodyTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.left_hand_trajectory_message_.equals(otherMyClass.left_hand_trajectory_message_))
          return false;
       if (!this.right_hand_trajectory_message_.equals(otherMyClass.right_hand_trajectory_message_))
@@ -240,8 +249,8 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
       StringBuilder builder = new StringBuilder();
 
       builder.append("WholeBodyTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("left_hand_trajectory_message=");
       builder.append(this.left_hand_trajectory_message_);

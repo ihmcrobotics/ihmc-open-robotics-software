@@ -14,35 +14,42 @@ public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
    public static final byte PAUSE = (byte) 1;
    public static final byte RESUME = (byte) 2;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte behavior_control_mode_enum_request_ = (byte) 255;
 
    public BehaviorControlModePacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public BehaviorControlModePacket(BehaviorControlModePacket other)
    {
-      this();
       set(other);
    }
 
    public void set(BehaviorControlModePacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       behavior_control_mode_enum_request_ = other.behavior_control_mode_enum_request_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setBehaviorControlModeEnumRequest(byte behavior_control_mode_enum_request)
@@ -63,8 +70,9 @@ public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.behavior_control_mode_enum_request_, other.behavior_control_mode_enum_request_, epsilon))
          return false;
 
@@ -83,8 +91,9 @@ public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
 
       BehaviorControlModePacket otherMyClass = (BehaviorControlModePacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.behavior_control_mode_enum_request_ != otherMyClass.behavior_control_mode_enum_request_)
          return false;
 
@@ -97,8 +106,8 @@ public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("BehaviorControlModePacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("behavior_control_mode_enum_request=");
       builder.append(this.behavior_control_mode_enum_request_);

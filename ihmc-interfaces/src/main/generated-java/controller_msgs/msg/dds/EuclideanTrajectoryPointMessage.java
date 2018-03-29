@@ -14,9 +14,9 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
       implements Settable<EuclideanTrajectoryPointMessage>, EpsilonComparable<EuclideanTrajectoryPointMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Time at which the trajectory point has to be reached. The time is relative to when the
     * trajectory starts.
@@ -35,20 +35,19 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
 
    public EuclideanTrajectoryPointMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public EuclideanTrajectoryPointMessage(EuclideanTrajectoryPointMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(EuclideanTrajectoryPointMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       time_ = other.time_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
@@ -56,11 +55,19 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -107,8 +114,9 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon))
          return false;
 
@@ -132,8 +140,9 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
 
       EuclideanTrajectoryPointMessage otherMyClass = (EuclideanTrajectoryPointMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.time_ != otherMyClass.time_)
          return false;
 
@@ -151,8 +160,8 @@ public class EuclideanTrajectoryPointMessage extends Packet<EuclideanTrajectoryP
       StringBuilder builder = new StringBuilder();
 
       builder.append("EuclideanTrajectoryPointMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("time=");
       builder.append(this.time_);

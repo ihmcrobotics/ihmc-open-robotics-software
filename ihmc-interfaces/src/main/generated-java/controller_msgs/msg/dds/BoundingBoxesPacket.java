@@ -7,9 +7,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements Settable<BoundingBoxesPacket>, EpsilonComparable<BoundingBoxesPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public us.ihmc.idl.IDLSequence.Integer bounding_boxes_x_coordinates_;
    public us.ihmc.idl.IDLSequence.Integer bounding_boxes_y_coordinates_;
    public us.ihmc.idl.IDLSequence.Integer bounding_boxes_widths_;
@@ -18,7 +18,6 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
 
    public BoundingBoxesPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       bounding_boxes_x_coordinates_ = new us.ihmc.idl.IDLSequence.Integer(100, "type_2");
 
       bounding_boxes_y_coordinates_ = new us.ihmc.idl.IDLSequence.Integer(100, "type_2");
@@ -32,13 +31,13 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
 
    public BoundingBoxesPacket(BoundingBoxesPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(BoundingBoxesPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       bounding_boxes_x_coordinates_.set(other.bounding_boxes_x_coordinates_);
       bounding_boxes_y_coordinates_.set(other.bounding_boxes_y_coordinates_);
       bounding_boxes_widths_.set(other.bounding_boxes_widths_);
@@ -47,11 +46,19 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.idl.IDLSequence.Integer getBoundingBoxesXCoordinates()
@@ -87,8 +94,9 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.bounding_boxes_x_coordinates_, other.bounding_boxes_x_coordinates_, epsilon))
          return false;
 
@@ -119,8 +127,9 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
 
       BoundingBoxesPacket otherMyClass = (BoundingBoxesPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.bounding_boxes_x_coordinates_.equals(otherMyClass.bounding_boxes_x_coordinates_))
          return false;
       if (!this.bounding_boxes_y_coordinates_.equals(otherMyClass.bounding_boxes_y_coordinates_))
@@ -141,8 +150,8 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("BoundingBoxesPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("bounding_boxes_x_coordinates=");
       builder.append(this.bounding_boxes_x_coordinates_);

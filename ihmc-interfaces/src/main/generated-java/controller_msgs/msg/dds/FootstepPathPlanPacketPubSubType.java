@@ -44,7 +44,7 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -79,7 +79,7 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -109,7 +109,8 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(controller_msgs.msg.dds.FootstepPathPlanPacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_7(data.getGoalsValid());
 
       controller_msgs.msg.dds.FootstepDataMessagePubSubType.write(data.getStart(), cdr);
@@ -136,7 +137,8 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void read(controller_msgs.msg.dds.FootstepPathPlanPacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       data.setGoalsValid(cdr.read_type_7());
 
       controller_msgs.msg.dds.FootstepDataMessagePubSubType.read(data.getStart(), cdr);
@@ -152,8 +154,7 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepPathPlanPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("goals_valid", data.getGoalsValid());
       ser.write_type_a("start", new controller_msgs.msg.dds.FootstepDataMessagePubSubType(), data.getStart());
 
@@ -167,8 +168,7 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPathPlanPacket data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setGoalsValid(ser.read_type_7("goals_valid"));
       ser.read_type_a("start", new controller_msgs.msg.dds.FootstepDataMessagePubSubType(), data.getStart());
 

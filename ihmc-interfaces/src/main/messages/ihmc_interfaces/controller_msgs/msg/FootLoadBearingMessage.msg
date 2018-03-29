@@ -8,8 +8,8 @@ byte ROBOT_SIDE_RIGHT = 1
 byte LOAD_BEARING_REQUEST_LOAD = 0
 byte LOAD_BEARING_REQUEST_UNLOAD = 1
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # Needed to identify a side dependent end-effector.
 byte robot_side 255

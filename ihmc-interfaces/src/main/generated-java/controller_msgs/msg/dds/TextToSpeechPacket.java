@@ -26,28 +26,27 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
    public static final String NETWORKPROCESSOR_ONLINE = "Reestablished Connection To The Network Processor";
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public boolean speak_packet_;
    public boolean beep_ = true;
    public java.lang.StringBuilder text_to_speak_;
 
    public TextToSpeechPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       text_to_speak_ = new java.lang.StringBuilder(255);
    }
 
    public TextToSpeechPacket(TextToSpeechPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(TextToSpeechPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       speak_packet_ = other.speak_packet_;
 
       beep_ = other.beep_;
@@ -58,11 +57,19 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setSpeakPacket(boolean speak_packet)
@@ -109,8 +116,9 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.speak_packet_, other.speak_packet_, epsilon))
          return false;
 
@@ -135,8 +143,9 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
 
       TextToSpeechPacket otherMyClass = (TextToSpeechPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.speak_packet_ != otherMyClass.speak_packet_)
          return false;
 
@@ -155,8 +164,8 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
       StringBuilder builder = new StringBuilder();
 
       builder.append("TextToSpeechPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("speak_packet=");
       builder.append(this.speak_packet_);

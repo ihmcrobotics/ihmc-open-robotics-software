@@ -13,35 +13,42 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
    public static final byte NORMAL = (byte) 0;
    public static final byte FROZEN = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte requested_state_estimator_mode_ = (byte) 255;
 
    public StateEstimatorModePacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public StateEstimatorModePacket(StateEstimatorModePacket other)
    {
-      this();
       set(other);
    }
 
    public void set(StateEstimatorModePacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       requested_state_estimator_mode_ = other.requested_state_estimator_mode_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRequestedStateEstimatorMode(byte requested_state_estimator_mode)
@@ -62,8 +69,9 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_state_estimator_mode_, other.requested_state_estimator_mode_, epsilon))
          return false;
 
@@ -82,8 +90,9 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
 
       StateEstimatorModePacket otherMyClass = (StateEstimatorModePacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.requested_state_estimator_mode_ != otherMyClass.requested_state_estimator_mode_)
          return false;
 
@@ -96,8 +105,8 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("StateEstimatorModePacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("requested_state_estimator_mode=");
       builder.append(this.requested_state_estimator_mode_);

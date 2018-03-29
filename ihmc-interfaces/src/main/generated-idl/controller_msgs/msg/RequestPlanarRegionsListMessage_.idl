@@ -2,7 +2,6 @@
 #define __controller_msgs__msg__RequestPlanarRegionsListMessage__idl__
 
 #include "controller_msgs/msg/./BoundingBox3DMessage_.idl"
-#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -30,9 +29,9 @@ module controller_msgs
       struct RequestPlanarRegionsListMessage
       {
         /**
-         * As of March 2018, the header for this message is only use for its sequence ID.
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        std_msgs::msg::dds::Header header;
+        unsigned long sequence_id;
         octet planar_regions_request_type;
         controller_msgs::msg::dds::BoundingBox3DMessage bounding_box_in_world_for_request;
       };

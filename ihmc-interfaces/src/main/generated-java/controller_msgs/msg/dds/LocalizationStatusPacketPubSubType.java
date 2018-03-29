@@ -44,7 +44,7 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -62,7 +62,7 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -73,7 +73,8 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(controller_msgs.msg.dds.LocalizationStatusPacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_6(data.getOverlap());
 
       if (data.getStatus().length() <= 255)
@@ -85,7 +86,8 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(controller_msgs.msg.dds.LocalizationStatusPacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       data.setOverlap(cdr.read_type_6());
 
       cdr.read_type_d(data.getStatus());
@@ -95,8 +97,7 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(controller_msgs.msg.dds.LocalizationStatusPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("overlap", data.getOverlap());
       ser.write_type_d("status", data.getStatus());
    }
@@ -104,8 +105,7 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.LocalizationStatusPacket data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setOverlap(ser.read_type_6("overlap"));
       ser.read_type_d("status", data.getStatus());
    }

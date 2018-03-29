@@ -14,9 +14,9 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
    public static final byte VIDEO_SOURCE_IMAGE_PROCESSING_BEHAVIOR = (byte) 5;
    public static final byte VIDEO_SOURCE_AWARE_FACE_TRACKER = (byte) 6;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte video_source_ = (byte) 255;
    public long timestamp_;
    public us.ihmc.idl.IDLSequence.Byte data_;
@@ -26,7 +26,6 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
    public VideoPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       data_ = new us.ihmc.idl.IDLSequence.Byte(100, "type_9");
 
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
@@ -36,13 +35,13 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
    public VideoPacket(VideoPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(VideoPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       video_source_ = other.video_source_;
 
       timestamp_ = other.timestamp_;
@@ -54,11 +53,19 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setVideoSource(byte video_source)
@@ -109,8 +116,9 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.video_source_, other.video_source_, epsilon))
          return false;
 
@@ -142,8 +150,9 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
       VideoPacket otherMyClass = (VideoPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.video_source_ != otherMyClass.video_source_)
          return false;
 
@@ -168,8 +177,8 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       StringBuilder builder = new StringBuilder();
 
       builder.append("VideoPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("video_source=");
       builder.append(this.video_source_);

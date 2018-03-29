@@ -12,9 +12,9 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       implements Settable<KinematicsToolboxCenterOfMassMessage>, EpsilonComparable<KinematicsToolboxCenterOfMassMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Specifies the desired center of mass position. The data is assumed to be expressed in world
     * frame.
@@ -39,7 +39,6 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
 
    public KinematicsToolboxCenterOfMassMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       desired_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
       weights_ = new controller_msgs.msg.dds.WeightMatrix3DMessage();
@@ -47,24 +46,32 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
 
    public KinematicsToolboxCenterOfMassMessage(KinematicsToolboxCenterOfMassMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(KinematicsToolboxCenterOfMassMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_position_in_world_, desired_position_in_world_);
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.selection_matrix_, selection_matrix_);
       controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.weights_, weights_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -108,8 +115,9 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.desired_position_in_world_.epsilonEquals(other.desired_position_in_world_, epsilon))
          return false;
       if (!this.selection_matrix_.epsilonEquals(other.selection_matrix_, epsilon))
@@ -132,8 +140,9 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
 
       KinematicsToolboxCenterOfMassMessage otherMyClass = (KinematicsToolboxCenterOfMassMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.desired_position_in_world_.equals(otherMyClass.desired_position_in_world_))
          return false;
       if (!this.selection_matrix_.equals(otherMyClass.selection_matrix_))
@@ -150,8 +159,8 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       StringBuilder builder = new StringBuilder();
 
       builder.append("KinematicsToolboxCenterOfMassMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("desired_position_in_world=");
       builder.append(this.desired_position_in_world_);

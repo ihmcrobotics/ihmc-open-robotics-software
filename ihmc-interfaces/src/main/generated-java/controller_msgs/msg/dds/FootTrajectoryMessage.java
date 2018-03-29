@@ -17,9 +17,9 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Specifies which foot will execute the trajectory.
     */
@@ -31,30 +31,37 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
 
    public FootTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       se3_trajectory_ = new controller_msgs.msg.dds.SE3TrajectoryMessage();
    }
 
    public FootTrajectoryMessage(FootTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(FootTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -89,8 +96,9 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -112,8 +120,9 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
 
       FootTrajectoryMessage otherMyClass = (FootTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -129,8 +138,8 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);

@@ -13,9 +13,9 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
       implements Settable<ChestHybridJointspaceTaskspaceTrajectoryMessage>, EpsilonComparable<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * The taskspace trajectory information.
     */
@@ -28,30 +28,37 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
    public ChestHybridJointspaceTaskspaceTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       taskspace_trajectory_message_ = new controller_msgs.msg.dds.SO3TrajectoryMessage();
       jointspace_trajectory_message_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
    }
 
    public ChestHybridJointspaceTaskspaceTrajectoryMessage(ChestHybridJointspaceTaskspaceTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(ChestHybridJointspaceTaskspaceTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.taskspace_trajectory_message_, taskspace_trajectory_message_);
       controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.staticCopy(other.jointspace_trajectory_message_, jointspace_trajectory_message_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -79,8 +86,9 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.taskspace_trajectory_message_.epsilonEquals(other.taskspace_trajectory_message_, epsilon))
          return false;
       if (!this.jointspace_trajectory_message_.epsilonEquals(other.jointspace_trajectory_message_, epsilon))
@@ -101,8 +109,9 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
       ChestHybridJointspaceTaskspaceTrajectoryMessage otherMyClass = (ChestHybridJointspaceTaskspaceTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.taskspace_trajectory_message_.equals(otherMyClass.taskspace_trajectory_message_))
          return false;
       if (!this.jointspace_trajectory_message_.equals(otherMyClass.jointspace_trajectory_message_))
@@ -117,8 +126,8 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
       StringBuilder builder = new StringBuilder();
 
       builder.append("ChestHybridJointspaceTaskspaceTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("taskspace_trajectory_message=");
       builder.append(this.taskspace_trajectory_message_);

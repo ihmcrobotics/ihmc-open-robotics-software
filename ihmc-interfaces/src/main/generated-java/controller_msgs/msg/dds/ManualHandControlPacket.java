@@ -15,9 +15,9 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
    public static final int VELOCITY = 0;
    public static final int POSITION = 1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte robot_side_ = (byte) 255;
    public double index_;
    public double middle_;
@@ -27,18 +27,17 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
 
    public ManualHandControlPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public ManualHandControlPacket(ManualHandControlPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(ManualHandControlPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       index_ = other.index_;
@@ -54,11 +53,19 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRobotSide(byte robot_side)
@@ -129,8 +136,9 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -164,8 +172,9 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
 
       ManualHandControlPacket otherMyClass = (ManualHandControlPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -193,8 +202,8 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("ManualHandControlPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);

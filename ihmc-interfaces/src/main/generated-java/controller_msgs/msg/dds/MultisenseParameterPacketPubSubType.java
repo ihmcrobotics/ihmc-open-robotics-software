@@ -44,7 +44,7 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -74,7 +74,7 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -97,7 +97,8 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(controller_msgs.msg.dds.MultisenseParameterPacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_7(data.getInitialize());
 
       cdr.write_type_6(data.getGain());
@@ -118,7 +119,8 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(controller_msgs.msg.dds.MultisenseParameterPacket data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       data.setInitialize(cdr.read_type_7());
 
       data.setGain(cdr.read_type_6());
@@ -140,8 +142,7 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.MultisenseParameterPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("initialize", data.getInitialize());
       ser.write_type_6("gain", data.getGain());
       ser.write_type_6("motor_speed", data.getMotorSpeed());
@@ -155,8 +156,7 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MultisenseParameterPacket data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setInitialize(ser.read_type_7("initialize"));
       data.setGain(ser.read_type_6("gain"));
       data.setMotorSpeed(ser.read_type_6("motor_speed"));

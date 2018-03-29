@@ -19,9 +19,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public static final byte FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR = (byte) 4;
    public static final int NO_PLAN_ID = -1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte initial_stance_robot_side_ = (byte) 255;
    public us.ihmc.euclid.tuple3D.Point3D stance_foot_position_in_world_;
    public us.ihmc.euclid.tuple4D.Quaternion stance_foot_orientation_in_world_;
@@ -34,7 +34,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
    public FootstepPlanningRequestPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       stance_foot_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       stance_foot_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
       goal_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
@@ -44,13 +43,13 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
    public FootstepPlanningRequestPacket(FootstepPlanningRequestPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(FootstepPlanningRequestPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       initial_stance_robot_side_ = other.initial_stance_robot_side_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.stance_foot_position_in_world_, stance_foot_position_in_world_);
@@ -67,11 +66,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setInitialStanceRobotSide(byte initial_stance_robot_side)
@@ -147,8 +154,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.initial_stance_robot_side_, other.initial_stance_robot_side_, epsilon))
          return false;
 
@@ -186,8 +194,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       FootstepPlanningRequestPacket otherMyClass = (FootstepPlanningRequestPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.initial_stance_robot_side_ != otherMyClass.initial_stance_robot_side_)
          return false;
 
@@ -219,8 +228,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanningRequestPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("initial_stance_robot_side=");
       builder.append(this.initial_stance_robot_side_);

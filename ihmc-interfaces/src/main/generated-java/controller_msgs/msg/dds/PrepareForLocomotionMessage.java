@@ -12,9 +12,9 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
       implements Settable<PrepareForLocomotionMessage>, EpsilonComparable<PrepareForLocomotionMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * When true, the controller will cancel any arm trajectory in progress, if any, before starting
     * to walk.
@@ -28,18 +28,17 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
 
    public PrepareForLocomotionMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public PrepareForLocomotionMessage(PrepareForLocomotionMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(PrepareForLocomotionMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       prepare_manipulation_ = other.prepare_manipulation_;
 
       prepare_pelvis_ = other.prepare_pelvis_;
@@ -47,11 +46,19 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -98,8 +105,9 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.prepare_manipulation_, other.prepare_manipulation_, epsilon))
          return false;
 
@@ -121,8 +129,9 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
 
       PrepareForLocomotionMessage otherMyClass = (PrepareForLocomotionMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.prepare_manipulation_ != otherMyClass.prepare_manipulation_)
          return false;
 
@@ -138,8 +147,8 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
       StringBuilder builder = new StringBuilder();
 
       builder.append("PrepareForLocomotionMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("prepare_manipulation=");
       builder.append(this.prepare_manipulation_);

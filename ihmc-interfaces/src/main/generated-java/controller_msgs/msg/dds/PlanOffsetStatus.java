@@ -11,9 +11,9 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class PlanOffsetStatus extends Packet<PlanOffsetStatus> implements Settable<PlanOffsetStatus>, EpsilonComparable<PlanOffsetStatus>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * The amount by which the remaining footsteps have been translated.
     */
@@ -21,28 +21,35 @@ public class PlanOffsetStatus extends Packet<PlanOffsetStatus> implements Settab
 
    public PlanOffsetStatus()
    {
-      header_ = new std_msgs.msg.dds.Header();
       offset_vector_ = new us.ihmc.euclid.tuple3D.Vector3D();
    }
 
    public PlanOffsetStatus(PlanOffsetStatus other)
    {
-      this();
       set(other);
    }
 
    public void set(PlanOffsetStatus other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.offset_vector_, offset_vector_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -61,8 +68,9 @@ public class PlanOffsetStatus extends Packet<PlanOffsetStatus> implements Settab
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.offset_vector_.epsilonEquals(other.offset_vector_, epsilon))
          return false;
 
@@ -81,8 +89,9 @@ public class PlanOffsetStatus extends Packet<PlanOffsetStatus> implements Settab
 
       PlanOffsetStatus otherMyClass = (PlanOffsetStatus) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.offset_vector_.equals(otherMyClass.offset_vector_))
          return false;
 
@@ -95,8 +104,8 @@ public class PlanOffsetStatus extends Packet<PlanOffsetStatus> implements Settab
       StringBuilder builder = new StringBuilder();
 
       builder.append("PlanOffsetStatus {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("offset_vector=");
       builder.append(this.offset_vector_);

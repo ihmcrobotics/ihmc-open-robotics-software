@@ -12,28 +12,27 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
       implements Settable<WholeBodyTrajectoryToolboxConfigurationMessage>, EpsilonComparable<WholeBodyTrajectoryToolboxConfigurationMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public int number_of_initial_guesses_ = -1;
    public int maximum_expansion_size_ = -1;
    public controller_msgs.msg.dds.KinematicsToolboxOutputStatus initial_configuration_;
 
    public WholeBodyTrajectoryToolboxConfigurationMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       initial_configuration_ = new controller_msgs.msg.dds.KinematicsToolboxOutputStatus();
    }
 
    public WholeBodyTrajectoryToolboxConfigurationMessage(WholeBodyTrajectoryToolboxConfigurationMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(WholeBodyTrajectoryToolboxConfigurationMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       number_of_initial_guesses_ = other.number_of_initial_guesses_;
 
       maximum_expansion_size_ = other.maximum_expansion_size_;
@@ -42,11 +41,19 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setNumberOfInitialGuesses(int number_of_initial_guesses)
@@ -82,8 +89,9 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_initial_guesses_, other.number_of_initial_guesses_, epsilon))
          return false;
 
@@ -108,8 +116,9 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
 
       WholeBodyTrajectoryToolboxConfigurationMessage otherMyClass = (WholeBodyTrajectoryToolboxConfigurationMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.number_of_initial_guesses_ != otherMyClass.number_of_initial_guesses_)
          return false;
 
@@ -128,8 +137,8 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
       StringBuilder builder = new StringBuilder();
 
       builder.append("WholeBodyTrajectoryToolboxConfigurationMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("number_of_initial_guesses=");
       builder.append(this.number_of_initial_guesses_);

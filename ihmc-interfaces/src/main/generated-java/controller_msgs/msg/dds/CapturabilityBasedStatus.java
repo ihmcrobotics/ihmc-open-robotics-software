@@ -13,9 +13,9 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
       implements Settable<CapturabilityBasedStatus>, EpsilonComparable<CapturabilityBasedStatus>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public us.ihmc.euclid.tuple3D.Point3D capture_point_2d_;
    public us.ihmc.euclid.tuple3D.Point3D desired_capture_point_2d_;
    public us.ihmc.euclid.tuple3D.Point3D center_of_mass_3d_;
@@ -24,7 +24,6 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
    public CapturabilityBasedStatus()
    {
-      header_ = new std_msgs.msg.dds.Header();
       capture_point_2d_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_capture_point_2d_ = new us.ihmc.euclid.tuple3D.Point3D();
       center_of_mass_3d_ = new us.ihmc.euclid.tuple3D.Point3D();
@@ -37,13 +36,13 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
    public CapturabilityBasedStatus(CapturabilityBasedStatus other)
    {
-      this();
       set(other);
    }
 
    public void set(CapturabilityBasedStatus other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.capture_point_2d_, capture_point_2d_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_capture_point_2d_, desired_capture_point_2d_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.center_of_mass_3d_, center_of_mass_3d_);
@@ -52,11 +51,19 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.euclid.tuple3D.Point3D getCapturePoint2d()
@@ -92,8 +99,9 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.capture_point_2d_.epsilonEquals(other.capture_point_2d_, epsilon))
          return false;
       if (!this.desired_capture_point_2d_.epsilonEquals(other.desired_capture_point_2d_, epsilon))
@@ -141,8 +149,9 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
 
       CapturabilityBasedStatus otherMyClass = (CapturabilityBasedStatus) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.capture_point_2d_.equals(otherMyClass.capture_point_2d_))
          return false;
       if (!this.desired_capture_point_2d_.equals(otherMyClass.desired_capture_point_2d_))
@@ -163,8 +172,8 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus>
       StringBuilder builder = new StringBuilder();
 
       builder.append("CapturabilityBasedStatus {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("capture_point_2d=");
       builder.append(this.capture_point_2d_);

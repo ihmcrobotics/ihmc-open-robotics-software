@@ -1,7 +1,7 @@
 # Old message, needs to be tested and cleaned up.
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 FootstepDataMessage[] footstep_data
 int32[] footstep_order

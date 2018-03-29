@@ -11,27 +11,26 @@ public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
       implements Settable<HeightQuadTreeLeafMessage>, EpsilonComparable<HeightQuadTreeLeafMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public float center_x_;
    public float center_y_;
    public float height_;
 
    public HeightQuadTreeLeafMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public HeightQuadTreeLeafMessage(HeightQuadTreeLeafMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(HeightQuadTreeLeafMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       center_x_ = other.center_x_;
 
       center_y_ = other.center_y_;
@@ -41,11 +40,19 @@ public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setCenterX(float center_x)
@@ -86,8 +93,9 @@ public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.center_x_, other.center_x_, epsilon))
          return false;
 
@@ -112,8 +120,9 @@ public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
 
       HeightQuadTreeLeafMessage otherMyClass = (HeightQuadTreeLeafMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.center_x_ != otherMyClass.center_x_)
          return false;
 
@@ -132,8 +141,8 @@ public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("HeightQuadTreeLeafMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("center_x=");
       builder.append(this.center_x_);

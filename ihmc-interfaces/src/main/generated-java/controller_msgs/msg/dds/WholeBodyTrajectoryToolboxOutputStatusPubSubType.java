@@ -46,7 +46,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -71,7 +71,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -90,7 +90,8 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
 
    public static void write(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_2(data.getPlanningResult());
 
       if (data.getTrajectoryTimes().size() <= 50)
@@ -107,7 +108,8 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
 
    public static void read(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
-      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setSequenceId(cdr.read_type_4());
+
       data.setPlanningResult(cdr.read_type_2());
 
       cdr.read_type_e(data.getTrajectoryTimes());
@@ -118,8 +120,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
    @Override
    public final void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_2("planning_result", data.getPlanningResult());
       ser.write_type_e("trajectory_times", data.getTrajectoryTimes());
       ser.write_type_e("robot_configurations", data.getRobotConfigurations());
@@ -128,8 +129,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data)
    {
-      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
-
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setPlanningResult(ser.read_type_2("planning_result"));
       ser.read_type_e("trajectory_times", data.getTrajectoryTimes());
       ser.read_type_e("robot_configurations", data.getRobotConfigurations());

@@ -18,9 +18,9 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    public static final byte CONFIGURATION_SPACE_NAME_PITCH = (byte) 4;
    public static final byte CONFIGURATION_SPACE_NAME_YAW = (byte) 5;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public long rigid_body_name_based_hash_code_;
    public us.ihmc.idl.IDLSequence.Byte configuration_space_names_to_explore_;
    public us.ihmc.idl.IDLSequence.Double exploration_range_upper_limits_;
@@ -28,7 +28,6 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
    public RigidBodyExplorationConfigurationMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       configuration_space_names_to_explore_ = new us.ihmc.idl.IDLSequence.Byte(100, "type_9");
 
       exploration_range_upper_limits_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
@@ -39,13 +38,13 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
    public RigidBodyExplorationConfigurationMessage(RigidBodyExplorationConfigurationMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(RigidBodyExplorationConfigurationMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       rigid_body_name_based_hash_code_ = other.rigid_body_name_based_hash_code_;
 
       configuration_space_names_to_explore_.set(other.configuration_space_names_to_explore_);
@@ -54,11 +53,19 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRigidBodyNameBasedHashCode(long rigid_body_name_based_hash_code)
@@ -94,8 +101,9 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.rigid_body_name_based_hash_code_, other.rigid_body_name_based_hash_code_, epsilon))
          return false;
 
@@ -123,8 +131,9 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
       RigidBodyExplorationConfigurationMessage otherMyClass = (RigidBodyExplorationConfigurationMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.rigid_body_name_based_hash_code_ != otherMyClass.rigid_body_name_based_hash_code_)
          return false;
 
@@ -144,8 +153,8 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       StringBuilder builder = new StringBuilder();
 
       builder.append("RigidBodyExplorationConfigurationMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("rigid_body_name_based_hash_code=");
       builder.append(this.rigid_body_name_based_hash_code_);

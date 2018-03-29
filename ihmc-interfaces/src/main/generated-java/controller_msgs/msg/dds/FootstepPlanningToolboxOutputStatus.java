@@ -18,9 +18,9 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = (byte) 5;
    public static final int NO_PLAN_ID = -1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public controller_msgs.msg.dds.FootstepDataListMessage footstep_data_list_;
    public byte footstep_planning_result_ = (byte) 255;
    public int plan_id_ = -1;
@@ -30,7 +30,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
    public FootstepPlanningToolboxOutputStatus()
    {
-      header_ = new std_msgs.msg.dds.Header();
       footstep_data_list_ = new controller_msgs.msg.dds.FootstepDataListMessage();
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
       body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>(100, us.ihmc.euclid.tuple3D.Point3D.class,
@@ -41,13 +40,13 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
    public FootstepPlanningToolboxOutputStatus(FootstepPlanningToolboxOutputStatus other)
    {
-      this();
       set(other);
    }
 
    public void set(FootstepPlanningToolboxOutputStatus other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.staticCopy(other.footstep_data_list_, footstep_data_list_);
       footstep_planning_result_ = other.footstep_planning_result_;
 
@@ -59,11 +58,19 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public controller_msgs.msg.dds.FootstepDataListMessage getFootstepDataList()
@@ -114,8 +121,9 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.footstep_data_list_.epsilonEquals(other.footstep_data_list_, epsilon))
          return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_planning_result_, other.footstep_planning_result_, epsilon))
@@ -157,8 +165,9 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       FootstepPlanningToolboxOutputStatus otherMyClass = (FootstepPlanningToolboxOutputStatus) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.footstep_data_list_.equals(otherMyClass.footstep_data_list_))
          return false;
       if (this.footstep_planning_result_ != otherMyClass.footstep_planning_result_)
@@ -183,8 +192,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanningToolboxOutputStatus {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("footstep_data_list=");
       builder.append(this.footstep_data_list_);

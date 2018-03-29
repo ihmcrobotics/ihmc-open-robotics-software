@@ -10,38 +10,45 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class ValveLocationPacket extends Packet<ValveLocationPacket> implements Settable<ValveLocationPacket>, EpsilonComparable<ValveLocationPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public us.ihmc.euclid.geometry.Pose3D valve_pose_in_world_;
    public double valve_radius_;
 
    public ValveLocationPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       valve_pose_in_world_ = new us.ihmc.euclid.geometry.Pose3D();
    }
 
    public ValveLocationPacket(ValveLocationPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(ValveLocationPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.valve_pose_in_world_, valve_pose_in_world_);
       valve_radius_ = other.valve_radius_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.euclid.geometry.Pose3D getValvePoseInWorld()
@@ -67,8 +74,9 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket> implements 
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.valve_pose_in_world_.epsilonEquals(other.valve_pose_in_world_, epsilon))
          return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.valve_radius_, other.valve_radius_, epsilon))
@@ -89,8 +97,9 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket> implements 
 
       ValveLocationPacket otherMyClass = (ValveLocationPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.valve_pose_in_world_.equals(otherMyClass.valve_pose_in_world_))
          return false;
       if (this.valve_radius_ != otherMyClass.valve_radius_)
@@ -105,8 +114,8 @@ public class ValveLocationPacket extends Packet<ValveLocationPacket> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("ValveLocationPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("valve_pose_in_world=");
       builder.append(this.valve_pose_in_world_);

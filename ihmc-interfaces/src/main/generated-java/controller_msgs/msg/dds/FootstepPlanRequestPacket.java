@@ -14,9 +14,9 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_STOP_SEARCH = (byte) 1;
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_UPDATE_START = (byte) 2;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public controller_msgs.msg.dds.FootstepDataMessage start_footstep_;
    public double theta_start_;
    public double max_sub_optimality_ = 1.0;
@@ -25,7 +25,6 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 
    public FootstepPlanRequestPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
       start_footstep_ = new controller_msgs.msg.dds.FootstepDataMessage();
       goals_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage>(100, controller_msgs.msg.dds.FootstepDataMessage.class,
                                                                                                new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
@@ -34,13 +33,13 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 
    public FootstepPlanRequestPacket(FootstepPlanRequestPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(FootstepPlanRequestPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.FootstepDataMessagePubSubType.staticCopy(other.start_footstep_, start_footstep_);
       theta_start_ = other.theta_start_;
 
@@ -52,11 +51,19 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public controller_msgs.msg.dds.FootstepDataMessage getStartFootstep()
@@ -107,8 +114,9 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.start_footstep_.epsilonEquals(other.start_footstep_, epsilon))
          return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.theta_start_, other.theta_start_, epsilon))
@@ -148,8 +156,9 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 
       FootstepPlanRequestPacket otherMyClass = (FootstepPlanRequestPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.start_footstep_.equals(otherMyClass.start_footstep_))
          return false;
       if (this.theta_start_ != otherMyClass.theta_start_)
@@ -172,8 +181,8 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanRequestPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("start_footstep=");
       builder.append(this.start_footstep_);

@@ -5,7 +5,6 @@
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
-#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -21,9 +20,9 @@ module controller_msgs
       struct WaypointBasedTrajectoryMessage
       {
         /**
-         * As of March 2018, the header for this message is only use for its sequence ID.
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        std_msgs::msg::dds::Header header;
+        unsigned long sequence_id;
         long long end_effector_name_based_hash_code;
         sequence<double> waypoint_times;
         sequence<geometry_msgs::msg::dds::Pose> waypoints;

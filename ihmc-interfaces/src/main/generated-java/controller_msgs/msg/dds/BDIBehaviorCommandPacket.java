@@ -21,26 +21,25 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
    public static final byte CALIBRATE = (byte) 8;
    public static final byte SOFT_STOP = (byte) 9;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte atlas_bdi_robot_behavior_ = (byte) 255;
    public boolean stop_;
 
    public BDIBehaviorCommandPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public BDIBehaviorCommandPacket(BDIBehaviorCommandPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(BDIBehaviorCommandPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       atlas_bdi_robot_behavior_ = other.atlas_bdi_robot_behavior_;
 
       stop_ = other.stop_;
@@ -48,11 +47,19 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setAtlasBdiRobotBehavior(byte atlas_bdi_robot_behavior)
@@ -83,8 +90,9 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.atlas_bdi_robot_behavior_, other.atlas_bdi_robot_behavior_, epsilon))
          return false;
 
@@ -106,8 +114,9 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
 
       BDIBehaviorCommandPacket otherMyClass = (BDIBehaviorCommandPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.atlas_bdi_robot_behavior_ != otherMyClass.atlas_bdi_robot_behavior_)
          return false;
 
@@ -123,8 +132,8 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("BDIBehaviorCommandPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("atlas_bdi_robot_behavior=");
       builder.append(this.atlas_bdi_robot_behavior_);

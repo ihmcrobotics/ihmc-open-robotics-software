@@ -13,35 +13,42 @@ public class ExoskeletonBehaviorStatePacket extends Packet<ExoskeletonBehaviorSt
       implements Settable<ExoskeletonBehaviorStatePacket>, EpsilonComparable<ExoskeletonBehaviorStatePacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte exoskeleton_behavior_state_;
 
    public ExoskeletonBehaviorStatePacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public ExoskeletonBehaviorStatePacket(ExoskeletonBehaviorStatePacket other)
    {
-      this();
       set(other);
    }
 
    public void set(ExoskeletonBehaviorStatePacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       exoskeleton_behavior_state_ = other.exoskeleton_behavior_state_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setExoskeletonBehaviorState(byte exoskeleton_behavior_state)
@@ -62,8 +69,9 @@ public class ExoskeletonBehaviorStatePacket extends Packet<ExoskeletonBehaviorSt
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.exoskeleton_behavior_state_, other.exoskeleton_behavior_state_, epsilon))
          return false;
 
@@ -82,8 +90,9 @@ public class ExoskeletonBehaviorStatePacket extends Packet<ExoskeletonBehaviorSt
 
       ExoskeletonBehaviorStatePacket otherMyClass = (ExoskeletonBehaviorStatePacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.exoskeleton_behavior_state_ != otherMyClass.exoskeleton_behavior_state_)
          return false;
 
@@ -96,8 +105,8 @@ public class ExoskeletonBehaviorStatePacket extends Packet<ExoskeletonBehaviorSt
       StringBuilder builder = new StringBuilder();
 
       builder.append("ExoskeletonBehaviorStatePacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("exoskeleton_behavior_state=");
       builder.append(this.exoskeleton_behavior_state_);

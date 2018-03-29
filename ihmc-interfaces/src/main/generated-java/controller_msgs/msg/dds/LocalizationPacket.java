@@ -10,26 +10,25 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class LocalizationPacket extends Packet<LocalizationPacket> implements Settable<LocalizationPacket>, EpsilonComparable<LocalizationPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public boolean reset_;
    public boolean toggle_;
 
    public LocalizationPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public LocalizationPacket(LocalizationPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(LocalizationPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       reset_ = other.reset_;
 
       toggle_ = other.toggle_;
@@ -37,11 +36,19 @@ public class LocalizationPacket extends Packet<LocalizationPacket> implements Se
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setReset(boolean reset)
@@ -72,8 +79,9 @@ public class LocalizationPacket extends Packet<LocalizationPacket> implements Se
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.reset_, other.reset_, epsilon))
          return false;
 
@@ -95,8 +103,9 @@ public class LocalizationPacket extends Packet<LocalizationPacket> implements Se
 
       LocalizationPacket otherMyClass = (LocalizationPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.reset_ != otherMyClass.reset_)
          return false;
 
@@ -112,8 +121,8 @@ public class LocalizationPacket extends Packet<LocalizationPacket> implements Se
       StringBuilder builder = new StringBuilder();
 
       builder.append("LocalizationPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("reset=");
       builder.append(this.reset_);

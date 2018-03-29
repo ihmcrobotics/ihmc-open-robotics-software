@@ -13,9 +13,9 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
       implements Settable<ClearDelayQueueMessage>, EpsilonComparable<ClearDelayQueueMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * If only a specific message type is to be cleared, use this field. The integer represents the
     * hash code of the message simple name. The hash code of a string should be computed as in
@@ -29,18 +29,17 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
 
    public ClearDelayQueueMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public ClearDelayQueueMessage(ClearDelayQueueMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(ClearDelayQueueMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       class_simple_name_based_hash_code_ = other.class_simple_name_based_hash_code_;
 
       clear_all_delay_buffers_ = other.clear_all_delay_buffers_;
@@ -48,11 +47,19 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -99,8 +106,9 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.class_simple_name_based_hash_code_, other.class_simple_name_based_hash_code_, epsilon))
          return false;
 
@@ -122,8 +130,9 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
 
       ClearDelayQueueMessage otherMyClass = (ClearDelayQueueMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.class_simple_name_based_hash_code_ != otherMyClass.class_simple_name_based_hash_code_)
          return false;
 
@@ -139,8 +148,8 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("ClearDelayQueueMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("class_simple_name_based_hash_code=");
       builder.append(this.class_simple_name_based_hash_code_);

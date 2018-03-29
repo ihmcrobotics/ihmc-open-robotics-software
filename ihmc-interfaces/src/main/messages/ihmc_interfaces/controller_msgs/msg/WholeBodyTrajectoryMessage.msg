@@ -1,8 +1,8 @@
 # This message is part of the IHMC whole-body controller API.
 # Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # Trajectory for the left hand
 HandTrajectoryMessage left_hand_trajectory_message

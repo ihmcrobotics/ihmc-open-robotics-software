@@ -13,9 +13,9 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 {
    public static final int NO_REGION_ID = -1;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public int region_id_ = -1;
    public us.ihmc.euclid.tuple3D.Point3D region_origin_;
    public us.ihmc.euclid.tuple3D.Vector3D region_normal_;
@@ -24,7 +24,6 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 
    public PlanarRegionMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       region_origin_ = new us.ihmc.euclid.tuple3D.Point3D();
       region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
       concave_hull_ = new controller_msgs.msg.dds.Polygon2DMessage();
@@ -35,13 +34,13 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 
    public PlanarRegionMessage(PlanarRegionMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(PlanarRegionMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       region_id_ = other.region_id_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.region_origin_, region_origin_);
@@ -51,11 +50,19 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRegionId(int region_id)
@@ -96,8 +103,9 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.region_id_, other.region_id_, epsilon))
          return false;
 
@@ -135,8 +143,9 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 
       PlanarRegionMessage otherMyClass = (PlanarRegionMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.region_id_ != otherMyClass.region_id_)
          return false;
 
@@ -158,8 +167,8 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("PlanarRegionMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("region_id=");
       builder.append(this.region_id_);

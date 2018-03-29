@@ -2,7 +2,6 @@
 #define __controller_msgs__msg__SimulatedLidarScanPacket__idl__
 
 #include "controller_msgs/msg/./LidarScanParametersMessage_.idl"
-#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -14,9 +13,9 @@ module controller_msgs
       struct SimulatedLidarScanPacket
       {
         /**
-         * As of March 2018, the header for this message is only use for its sequence ID.
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        std_msgs::msg::dds::Header header;
+        unsigned long sequence_id;
         sequence<float> ranges;
         long sensor_id;
         controller_msgs::msg::dds::LidarScanParametersMessage lidar_scan_parameters;

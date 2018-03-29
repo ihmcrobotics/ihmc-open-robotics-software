@@ -14,9 +14,9 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
       implements Settable<SpineDesiredAccelerationsMessage>, EpsilonComparable<SpineDesiredAccelerationsMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * The desired joint acceleration information.
     */
@@ -24,28 +24,35 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
 
    public SpineDesiredAccelerationsMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       desired_accelerations_ = new controller_msgs.msg.dds.DesiredAccelerationsMessage();
    }
 
    public SpineDesiredAccelerationsMessage(SpineDesiredAccelerationsMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(SpineDesiredAccelerationsMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType.staticCopy(other.desired_accelerations_, desired_accelerations_);
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -64,8 +71,9 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!this.desired_accelerations_.epsilonEquals(other.desired_accelerations_, epsilon))
          return false;
 
@@ -84,8 +92,9 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
 
       SpineDesiredAccelerationsMessage otherMyClass = (SpineDesiredAccelerationsMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.desired_accelerations_.equals(otherMyClass.desired_accelerations_))
          return false;
 
@@ -98,8 +107,8 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
       StringBuilder builder = new StringBuilder();
 
       builder.append("SpineDesiredAccelerationsMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("desired_accelerations=");
       builder.append(this.desired_accelerations_);

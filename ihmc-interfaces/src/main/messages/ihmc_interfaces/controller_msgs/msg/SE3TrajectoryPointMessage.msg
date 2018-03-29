@@ -3,8 +3,8 @@
 # It holds the necessary information for one trajectory point.
 # Feel free to look at EuclideanTrajectoryPointMessage (translational) and SE3TrajectoryPointMessage (rotational).
 
-# As of March 2018, the header for this message is only use for its sequence ID.
-std_msgs/Header header
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
 
 # Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
 float64 time

@@ -8,9 +8,9 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       implements Settable<MultisenseParameterPacket>, EpsilonComparable<MultisenseParameterPacket>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public boolean initialize_;
    public double gain_;
    public double motor_speed_;
@@ -22,18 +22,17 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
 
    public MultisenseParameterPacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public MultisenseParameterPacket(MultisenseParameterPacket other)
    {
-      this();
       set(other);
    }
 
    public void set(MultisenseParameterPacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       initialize_ = other.initialize_;
 
       gain_ = other.gain_;
@@ -53,11 +52,19 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setInitialize(boolean initialize)
@@ -148,8 +155,9 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.initialize_, other.initialize_, epsilon))
          return false;
 
@@ -189,8 +197,9 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
 
       MultisenseParameterPacket otherMyClass = (MultisenseParameterPacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.initialize_ != otherMyClass.initialize_)
          return false;
 
@@ -224,8 +233,8 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("MultisenseParameterPacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("initialize=");
       builder.append(this.initialize_);

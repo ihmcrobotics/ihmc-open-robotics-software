@@ -12,9 +12,9 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       implements Settable<WholeBodyTrajectoryToolboxOutputStatus>, EpsilonComparable<WholeBodyTrajectoryToolboxOutputStatus>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * 0: not completed. 1: fail to find initial guess. 2: fail to complete expanding tree. 3: fail
     * to optimize path. 4: solution is available.
@@ -25,7 +25,6 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
    public WholeBodyTrajectoryToolboxOutputStatus()
    {
-      header_ = new std_msgs.msg.dds.Header();
       trajectory_times_ = new us.ihmc.idl.IDLSequence.Double(50, "type_6");
 
       robot_configurations_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>(50,
@@ -36,13 +35,13 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
    public WholeBodyTrajectoryToolboxOutputStatus(WholeBodyTrajectoryToolboxOutputStatus other)
    {
-      this();
       set(other);
    }
 
    public void set(WholeBodyTrajectoryToolboxOutputStatus other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       planning_result_ = other.planning_result_;
 
       trajectory_times_.set(other.trajectory_times_);
@@ -50,11 +49,19 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -93,8 +100,9 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planning_result_, other.planning_result_, epsilon))
          return false;
 
@@ -129,8 +137,9 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
       WholeBodyTrajectoryToolboxOutputStatus otherMyClass = (WholeBodyTrajectoryToolboxOutputStatus) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.planning_result_ != otherMyClass.planning_result_)
          return false;
 
@@ -148,8 +157,8 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       StringBuilder builder = new StringBuilder();
 
       builder.append("WholeBodyTrajectoryToolboxOutputStatus {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("planning_result=");
       builder.append(this.planning_result_);

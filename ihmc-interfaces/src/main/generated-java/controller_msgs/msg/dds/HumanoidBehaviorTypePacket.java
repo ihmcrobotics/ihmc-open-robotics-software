@@ -40,35 +40,42 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
    public static final byte CUTTING_WALL = (byte) 27;
    public static final byte REPEATEDLY_WALK_FOOTSTEP_LIST = (byte) 28;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    public byte humanoid_behavior_type_ = (byte) 255;
 
    public HumanoidBehaviorTypePacket()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public HumanoidBehaviorTypePacket(HumanoidBehaviorTypePacket other)
    {
-      this();
       set(other);
    }
 
    public void set(HumanoidBehaviorTypePacket other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       humanoid_behavior_type_ = other.humanoid_behavior_type_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setHumanoidBehaviorType(byte humanoid_behavior_type)
@@ -89,8 +96,9 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.humanoid_behavior_type_, other.humanoid_behavior_type_, epsilon))
          return false;
 
@@ -109,8 +117,9 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
 
       HumanoidBehaviorTypePacket otherMyClass = (HumanoidBehaviorTypePacket) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.humanoid_behavior_type_ != otherMyClass.humanoid_behavior_type_)
          return false;
 
@@ -123,8 +132,8 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
       StringBuilder builder = new StringBuilder();
 
       builder.append("HumanoidBehaviorTypePacket {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("humanoid_behavior_type=");
       builder.append(this.humanoid_behavior_type_);

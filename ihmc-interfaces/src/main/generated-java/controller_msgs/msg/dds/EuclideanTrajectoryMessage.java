@@ -15,9 +15,9 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
       implements Settable<EuclideanTrajectoryMessage>, EpsilonComparable<EuclideanTrajectoryMessage>
 {
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * List of trajectory points (in taskpsace) to go through while executing the trajectory.
     */
@@ -50,7 +50,6 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
    public EuclideanTrajectoryMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
       taskspace_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage>(100,
                                                                                                                                  controller_msgs.msg.dds.EuclideanTrajectoryPointMessage.class,
                                                                                                                                  new controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType());
@@ -64,13 +63,13 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
    public EuclideanTrajectoryMessage(EuclideanTrajectoryMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(EuclideanTrajectoryMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       taskspace_trajectory_points_.set(other.taskspace_trajectory_points_);
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.selection_matrix_, selection_matrix_);
       controller_msgs.msg.dds.FrameInformationPubSubType.staticCopy(other.frame_information_, frame_information_);
@@ -82,11 +81,19 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -162,8 +169,9 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (this.taskspace_trajectory_points_.size() == other.taskspace_trajectory_points_.size())
       {
          return false;
@@ -206,8 +214,9 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
       EuclideanTrajectoryMessage otherMyClass = (EuclideanTrajectoryMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (!this.taskspace_trajectory_points_.equals(otherMyClass.taskspace_trajectory_points_))
          return false;
       if (!this.selection_matrix_.equals(otherMyClass.selection_matrix_))
@@ -233,8 +242,8 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
       StringBuilder builder = new StringBuilder();
 
       builder.append("EuclideanTrajectoryMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("taskspace_trajectory_points=");
       builder.append(this.taskspace_trajectory_points_);

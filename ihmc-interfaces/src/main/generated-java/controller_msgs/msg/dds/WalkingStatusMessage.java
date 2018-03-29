@@ -14,9 +14,9 @@ public class WalkingStatusMessage extends Packet<WalkingStatusMessage> implement
    public static final byte COMPLETED = (byte) 1;
    public static final byte ABORT_REQUESTED = (byte) 2;
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header header_;
+   public long sequence_id_;
    /**
     * Status of walking.
     */
@@ -24,28 +24,35 @@ public class WalkingStatusMessage extends Packet<WalkingStatusMessage> implement
 
    public WalkingStatusMessage()
    {
-      header_ = new std_msgs.msg.dds.Header();
    }
 
    public WalkingStatusMessage(WalkingStatusMessage other)
    {
-      this();
       set(other);
    }
 
    public void set(WalkingStatusMessage other)
    {
-      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
+      sequence_id_ = other.sequence_id_;
+
       walking_status_ = other.walking_status_;
 
    }
 
    /**
-    * As of March 2018, the header for this message is only use for its sequence ID.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public std_msgs.msg.dds.Header getHeader()
+   public void setSequenceId(long sequence_id)
    {
-      return header_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -72,8 +79,9 @@ public class WalkingStatusMessage extends Packet<WalkingStatusMessage> implement
       if (other == this)
          return true;
 
-      if (!this.header_.epsilonEquals(other.header_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.walking_status_, other.walking_status_, epsilon))
          return false;
 
@@ -92,8 +100,9 @@ public class WalkingStatusMessage extends Packet<WalkingStatusMessage> implement
 
       WalkingStatusMessage otherMyClass = (WalkingStatusMessage) other;
 
-      if (!this.header_.equals(otherMyClass.header_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
+
       if (this.walking_status_ != otherMyClass.walking_status_)
          return false;
 
@@ -106,8 +115,8 @@ public class WalkingStatusMessage extends Packet<WalkingStatusMessage> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkingStatusMessage {");
-      builder.append("header=");
-      builder.append(this.header_);
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
       builder.append("walking_status=");
       builder.append(this.walking_status_);
