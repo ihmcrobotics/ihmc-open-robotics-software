@@ -102,7 +102,7 @@ public class CentroidalMotionPlannerParameters
       return forceRegulizationWeight;
    }
 
-   public void setForceRegulizationWeight(double forceRegulizationWeight)
+   public void setForceRegularizationWeight(double forceRegulizationWeight)
    {
       this.forceRegulizationWeight = forceRegulizationWeight;
    }

@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.flight;
 
 import java.util.List;
 
-import afu.org.checkerframework.checker.units.qual.m;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionNode;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionPlanner;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMotionPlannerParameters;
@@ -103,6 +102,7 @@ public class WholeBodyMotionPlanner
       tempVector.addZ(-gravityZ);
       tempVector.scale(robotMass);
       motionNode.setForceConstraint(tempVector);
+      motionNode.setZeroForceRateConstraint();
       motionPlanner.submitNode(motionNode);
       for (int i = 0; i < contactStateList.size() - 1; i++)
       {

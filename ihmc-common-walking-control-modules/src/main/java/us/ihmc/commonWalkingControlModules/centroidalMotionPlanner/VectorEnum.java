@@ -117,4 +117,12 @@ public class VectorEnum<F> implements Settable<VectorEnum<F>>, Clearable
          throw new RuntimeException("Invalid axis specified");
       }
    }
+
+   public String toString()
+   {
+      String xToString = getX() == null ? "null" : getX().toString();
+      String yToString = getY() == null ? "null" : getY().toString();
+      String zToString = getZ() == null ? "null" : getZ().toString();
+      return "( " + xToString + ", " + yToString + ", " + zToString + " )";
+   }
 }

@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 /**
  * This class is used to store all the relevant data for a particular node of a trajectory.
@@ -152,7 +153,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public void setZeroForceConstraint()
    {
       force.setToZero();
-      this.forceRateConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
+      this.forceConstraintType.setXYZ(EffortVariableConstraintType.EQUALITY);
       this.forceWeight.setToNaN();
    }
 
@@ -212,7 +213,7 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
    public void setForceRateObjective(FrameVector3D dForce)
    {
       setForceRateInternal(dForce);
-      this.forceConstraintType.setXYZ(EffortVariableConstraintType.OBJECTIVE);
+      this.forceRateConstraintType.setXYZ(EffortVariableConstraintType.OBJECTIVE);
       this.forceRateWeight.setToNaN();
    }
 
@@ -752,9 +753,17 @@ public class CentroidalMotionNode implements ReferenceFrameHolder
       forceRateToPack.setIncludingFrame(forceRate);
    }
 
+   private String getPrintLine(Tuple3DReadOnly value, Tuple3DReadOnly weight, VectorEnum<?> constraint)
+   {
+      return "Value: " + value.toString() + ", Weight: " + weight.toString() + ", ConstraintType: " + constraint.toString();
+   }
+
    public String toString()
    {
-      String output = "";
-      return "Max position: " + this.positionMax.toString() + ", Min position: " + this.positionMin.toString();
+      String output = "Time: " + String.format("%.3f", getTime()) + "\nForce: " + getPrintLine(force, forceWeight, forceConstraintType) + "\nForceRate: "
+            + getPrintLine(forceRate, forceRateWeight, forceRateConstraintType) + "\nPosition: "
+            + getPrintLine(position, positionWeight, positionConstraintType) + "\nVelocity: "
+            + getPrintLine(linearVelocity, linearVelocityWeight, linearVelocityConstraintType);
+      return output;
    }
 }
