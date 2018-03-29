@@ -1,19 +1,25 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message commands the controller to move in taskspace a foot to the desired pose (position & orientation) while going through the specified trajectory points.
- * A third order polynomial function is used to interpolate positions and a Hermite based curve (third order) is used to interpolate the orientations.
- * To execute a single straight line trajectory to reach a desired foot pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+ * This message is part of the IHMC whole-body controller API. This message commands the controller
+ * to move in taskspace a foot to the desired pose (position & orientation) while going through the
+ * specified trajectory points. A third order polynomial function is used to interpolate positions
+ * and a Hermite based curve (third order) is used to interpolate the orientations. To execute a
+ * single straight line trajectory to reach a desired foot pose, set only one trajectory point with
+ * zero velocity and its time to be equal to the desired trajectory time.
  */
 public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> implements Settable<FootTrajectoryMessage>, EpsilonComparable<FootTrajectoryMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    /**
     * Specifies which foot will execute the trajectory.
     */
@@ -25,28 +31,30 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
 
    public FootTrajectoryMessage()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
       se3_trajectory_ = new controller_msgs.msg.dds.SE3TrajectoryMessage();
    }
 
    public FootTrajectoryMessage(FootTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(FootTrajectoryMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       robot_side_ = other.robot_side_;
 
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
    }
 
    /**
-    * Specifies which foot will execute the trajectory.
+    * As of March 2018, the header for this message is only use for its sequence ID.
     */
-   public byte getRobotSide()
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return robot_side_;
+      return header_;
    }
 
    /**
@@ -55,6 +63,14 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
+   }
+
+   /**
+    * Specifies which foot will execute the trajectory.
+    */
+   public byte getRobotSide()
+   {
+      return robot_side_;
    }
 
    /**
@@ -73,6 +89,8 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -94,6 +112,8 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
 
       FootTrajectoryMessage otherMyClass = (FootTrajectoryMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -109,13 +129,14 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootTrajectoryMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("se3_trajectory=");
       builder.append(this.se3_trajectory_);
-
       builder.append("}");
       return builder.toString();
    }

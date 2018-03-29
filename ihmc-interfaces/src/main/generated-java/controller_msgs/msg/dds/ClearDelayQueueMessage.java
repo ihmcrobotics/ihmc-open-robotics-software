@@ -1,21 +1,25 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message is used to clear the delay buffers on the controller, if you sent a message with a
- * delay and now you do not want them executed, use this command.
+ * This message is part of the IHMC whole-body controller API. This message is used to clear the
+ * delay buffers on the controller, if you sent a message with a delay and now you do not want them
+ * executed, use this command.
  */
 public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
       implements Settable<ClearDelayQueueMessage>, EpsilonComparable<ClearDelayQueueMessage>
 {
    /**
-    * If only a specific message type is to be cleared, use this field.
-    * The integer represents the hash code of the message simple name.
-    * The hash code of a string should be computed as in java.lang.String.hashCode().
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
+   /**
+    * If only a specific message type is to be cleared, use this field. The integer represents the
+    * hash code of the message simple name. The hash code of a string should be computed as in
+    * java.lang.String.hashCode().
     */
    public int class_simple_name_based_hash_code_;
    /**
@@ -25,35 +29,36 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
 
    public ClearDelayQueueMessage()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public ClearDelayQueueMessage(ClearDelayQueueMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(ClearDelayQueueMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       class_simple_name_based_hash_code_ = other.class_simple_name_based_hash_code_;
 
       clear_all_delay_buffers_ = other.clear_all_delay_buffers_;
+
    }
 
    /**
-    * If only a specific message type is to be cleared, use this field.
-    * The integer represents the hash code of the message simple name.
-    * The hash code of a string should be computed as in java.lang.String.hashCode().
+    * As of March 2018, the header for this message is only use for its sequence ID.
     */
-   public int getClassSimpleNameBasedHashCode()
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return class_simple_name_based_hash_code_;
+      return header_;
    }
 
    /**
-    * If only a specific message type is to be cleared, use this field.
-    * The integer represents the hash code of the message simple name.
-    * The hash code of a string should be computed as in java.lang.String.hashCode().
+    * If only a specific message type is to be cleared, use this field. The integer represents the
+    * hash code of the message simple name. The hash code of a string should be computed as in
+    * java.lang.String.hashCode().
     */
    public void setClassSimpleNameBasedHashCode(int class_simple_name_based_hash_code)
    {
@@ -61,11 +66,13 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
    }
 
    /**
-    * If all the messages should be cleared, then this field should be set to true.
+    * If only a specific message type is to be cleared, use this field. The integer represents the
+    * hash code of the message simple name. The hash code of a string should be computed as in
+    * java.lang.String.hashCode().
     */
-   public boolean getClearAllDelayBuffers()
+   public int getClassSimpleNameBasedHashCode()
    {
-      return clear_all_delay_buffers_;
+      return class_simple_name_based_hash_code_;
    }
 
    /**
@@ -76,6 +83,14 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
       clear_all_delay_buffers_ = clear_all_delay_buffers;
    }
 
+   /**
+    * If all the messages should be cleared, then this field should be set to true.
+    */
+   public boolean getClearAllDelayBuffers()
+   {
+      return clear_all_delay_buffers_;
+   }
+
    @Override
    public boolean epsilonEquals(ClearDelayQueueMessage other, double epsilon)
    {
@@ -84,6 +99,8 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.class_simple_name_based_hash_code_, other.class_simple_name_based_hash_code_, epsilon))
          return false;
 
@@ -105,6 +122,8 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
 
       ClearDelayQueueMessage otherMyClass = (ClearDelayQueueMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.class_simple_name_based_hash_code_ != otherMyClass.class_simple_name_based_hash_code_)
          return false;
 
@@ -120,13 +139,14 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("ClearDelayQueueMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("class_simple_name_based_hash_code=");
       builder.append(this.class_simple_name_based_hash_code_);
-
       builder.append(", ");
       builder.append("clear_all_delay_buffers=");
       builder.append(this.clear_all_delay_buffers_);
-
       builder.append("}");
       return builder.toString();
    }

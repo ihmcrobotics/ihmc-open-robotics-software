@@ -4,6 +4,7 @@
 #include "controller_msgs/msg/./Polygon2DMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -23,6 +24,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::PlanarRegionMessage_")
       struct PlanarRegionMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         @defaultValue(value=-1)
         long region_id;
         geometry_msgs::msg::dds::Point region_origin;

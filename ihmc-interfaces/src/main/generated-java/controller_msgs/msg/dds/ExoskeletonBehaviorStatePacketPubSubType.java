@@ -45,6 +45,8 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       return current_alignment - initial_alignment;
@@ -59,6 +61,8 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       return current_alignment - initial_alignment;
@@ -66,12 +70,14 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
 
    public static void write(controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket data, us.ihmc.idl.CDR cdr)
    {
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
       cdr.write_type_9(data.getExoskeletonBehaviorState());
 
    }
 
    public static void read(controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket data, us.ihmc.idl.CDR cdr)
    {
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
       data.setExoskeletonBehaviorState(cdr.read_type_9());
 
    }
@@ -79,12 +85,16 @@ public class ExoskeletonBehaviorStatePacketPubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       ser.write_type_9("exoskeleton_behavior_state", data.getExoskeletonBehaviorState());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket data)
    {
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       data.setExoskeletonBehaviorState(ser.read_type_9("exoskeleton_behavior_state"));
    }
 

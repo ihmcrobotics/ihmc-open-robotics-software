@@ -1,35 +1,42 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
+/**
+ * TODO: This message is not really used, the feature it provides needs to be fixed or this message
+ * needs to be deleted.
+ */
 public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Settable<UIConnectedPacket>, EpsilonComparable<UIConnectedPacket>
 {
-   public boolean unused_placeholder_field_;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
 
    public UIConnectedPacket()
    {
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public UIConnectedPacket(UIConnectedPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(UIConnectedPacket other)
    {
-      unused_placeholder_field_ = other.unused_placeholder_field_;
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
    }
 
-   public boolean getUnusedPlaceholderField()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return unused_placeholder_field_;
-   }
-
-   public void setUnusedPlaceholderField(boolean unused_placeholder_field)
-   {
-      unused_placeholder_field_ = unused_placeholder_field;
+      return header_;
    }
 
    @Override
@@ -40,7 +47,7 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
       if (other == this)
          return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unused_placeholder_field_, other.unused_placeholder_field_, epsilon))
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
          return false;
 
       return true;
@@ -58,7 +65,7 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
 
       UIConnectedPacket otherMyClass = (UIConnectedPacket) other;
 
-      if (this.unused_placeholder_field_ != otherMyClass.unused_placeholder_field_)
+      if (!this.header_.equals(otherMyClass.header_))
          return false;
 
       return true;
@@ -70,9 +77,8 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("UIConnectedPacket {");
-      builder.append("unused_placeholder_field=");
-      builder.append(this.unused_placeholder_field_);
-
+      builder.append("header=");
+      builder.append(this.header_);
       builder.append("}");
       return builder.toString();
    }

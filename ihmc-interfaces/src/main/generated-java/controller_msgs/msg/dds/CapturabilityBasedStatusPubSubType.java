@@ -1,114 +1,21 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "CapturabilityBasedStatus" defined in "CapturabilityBasedStatus_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "CapturabilityBasedStatus" defined in
+ * "CapturabilityBasedStatus_.idl". Use this class to provide the TopicDataType to a Participant.
  *
- * This file was automatically generated from CapturabilityBasedStatus_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit CapturabilityBasedStatus_.idl instead.
+ * This file was automatically generated from CapturabilityBasedStatus_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * CapturabilityBasedStatus_.idl instead.
+ *
  */
 public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.CapturabilityBasedStatus>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::CapturabilityBasedStatus_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
-
-   public CapturabilityBasedStatusPubSubType()
-   {
-
-   }
-
-   public static int getMaxCdrSerializedSize()
-   {
-      return getMaxCdrSerializedSize(0);
-   }
-
-   public static int getMaxCdrSerializedSize(int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 8; ++i0)
-      {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 8; ++i0)
-      {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
-
-      return current_alignment - initial_alignment;
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.CapturabilityBasedStatus data)
-   {
-      return getCdrSerializedSize(data, 0);
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.CapturabilityBasedStatus data, int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCapturePoint2d(), current_alignment);
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredCapturePoint2d(), current_alignment);
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCenterOfMass3d(), current_alignment);
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getLeftFootSupportPolygon2d().size(); ++i0)
-      {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLeftFootSupportPolygon2d().get(i0), current_alignment);
-      }
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getRightFootSupportPolygon2d().size(); ++i0)
-      {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRightFootSupportPolygon2d().get(i0), current_alignment);
-      }
-
-      return current_alignment - initial_alignment;
-   }
-
-   public static void write(controller_msgs.msg.dds.CapturabilityBasedStatus data, us.ihmc.idl.CDR cdr)
-   {
-
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getCapturePoint2d(), cdr);
-
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredCapturePoint2d(), cdr);
-
-      geometry_msgs.msg.dds.PointPubSubType.write(data.getCenterOfMass3d(), cdr);
-
-      if (data.getLeftFootSupportPolygon2d().size() <= 8)
-         cdr.write_type_e(data.getLeftFootSupportPolygon2d());
-      else
-         throw new RuntimeException("left_foot_support_polygon_2d field exceeds the maximum length");
-
-      if (data.getRightFootSupportPolygon2d().size() <= 8)
-         cdr.write_type_e(data.getRightFootSupportPolygon2d());
-      else
-         throw new RuntimeException("right_foot_support_polygon_2d field exceeds the maximum length");
-   }
-
-   public static void read(controller_msgs.msg.dds.CapturabilityBasedStatus data, us.ihmc.idl.CDR cdr)
-   {
-
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getCapturePoint2d(), cdr);
-
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredCapturePoint2d(), cdr);
-
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getCenterOfMass3d(), cdr);
-
-      cdr.read_type_e(data.getLeftFootSupportPolygon2d());
-
-      cdr.read_type_e(data.getRightFootSupportPolygon2d());
-   }
-
-   public static void staticCopy(controller_msgs.msg.dds.CapturabilityBasedStatus src, controller_msgs.msg.dds.CapturabilityBasedStatus dest)
-   {
-      dest.set(src);
-   }
 
    @Override
    public void serialize(controller_msgs.msg.dds.CapturabilityBasedStatus data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
@@ -128,9 +35,103 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       deserializeCDR.finishDeserialize();
    }
 
+   public static int getMaxCdrSerializedSize()
+   {
+      return getMaxCdrSerializedSize(0);
+   }
+
+   public static int getMaxCdrSerializedSize(int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < 8; ++i0)
+      {
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+      }
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < 8; ++i0)
+      {
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+      }
+
+      return current_alignment - initial_alignment;
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.CapturabilityBasedStatus data)
+   {
+      return getCdrSerializedSize(data, 0);
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.CapturabilityBasedStatus data, int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCapturePoint2d(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredCapturePoint2d(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCenterOfMass3d(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < data.getLeftFootSupportPolygon2d().size(); ++i0)
+      {
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLeftFootSupportPolygon2d().get(i0), current_alignment);
+      }
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for (int i0 = 0; i0 < data.getRightFootSupportPolygon2d().size(); ++i0)
+      {
+         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRightFootSupportPolygon2d().get(i0), current_alignment);
+      }
+
+      return current_alignment - initial_alignment;
+   }
+
+   public static void write(controller_msgs.msg.dds.CapturabilityBasedStatus data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getCapturePoint2d(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredCapturePoint2d(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getCenterOfMass3d(), cdr);
+      if (data.getLeftFootSupportPolygon2d().size() <= 8)
+         cdr.write_type_e(data.getLeftFootSupportPolygon2d());
+      else
+         throw new RuntimeException("left_foot_support_polygon_2d field exceeds the maximum length");
+
+      if (data.getRightFootSupportPolygon2d().size() <= 8)
+         cdr.write_type_e(data.getRightFootSupportPolygon2d());
+      else
+         throw new RuntimeException("right_foot_support_polygon_2d field exceeds the maximum length");
+
+   }
+
+   public static void read(controller_msgs.msg.dds.CapturabilityBasedStatus data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getCapturePoint2d(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredCapturePoint2d(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getCenterOfMass3d(), cdr);
+      cdr.read_type_e(data.getLeftFootSupportPolygon2d());
+      cdr.read_type_e(data.getRightFootSupportPolygon2d());
+
+   }
+
    @Override
    public final void serialize(controller_msgs.msg.dds.CapturabilityBasedStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       ser.write_type_a("capture_point_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCapturePoint2d());
 
       ser.write_type_a("desired_capture_point_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredCapturePoint2d());
@@ -138,13 +139,14 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_a("center_of_mass_3d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterOfMass3d());
 
       ser.write_type_e("left_foot_support_polygon_2d", data.getLeftFootSupportPolygon2d());
-
       ser.write_type_e("right_foot_support_polygon_2d", data.getRightFootSupportPolygon2d());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.CapturabilityBasedStatus data)
    {
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       ser.read_type_a("capture_point_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCapturePoint2d());
 
       ser.read_type_a("desired_capture_point_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredCapturePoint2d());
@@ -152,8 +154,12 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_a("center_of_mass_3d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterOfMass3d());
 
       ser.read_type_e("left_foot_support_polygon_2d", data.getLeftFootSupportPolygon2d());
-
       ser.read_type_e("right_foot_support_polygon_2d", data.getRightFootSupportPolygon2d());
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.CapturabilityBasedStatus src, controller_msgs.msg.dds.CapturabilityBasedStatus dest)
+   {
+      dest.set(src);
    }
 
    @Override

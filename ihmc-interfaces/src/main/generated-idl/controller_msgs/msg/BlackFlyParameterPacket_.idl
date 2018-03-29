@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__BlackFlyParameterPacket__idl__
 #define __controller_msgs__msg__BlackFlyParameterPacket__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -20,6 +21,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::BlackFlyParameterPacket_")
       struct BlackFlyParameterPacket
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         boolean auto_exposure;
         boolean auto_gain;
         boolean auto_shutter;

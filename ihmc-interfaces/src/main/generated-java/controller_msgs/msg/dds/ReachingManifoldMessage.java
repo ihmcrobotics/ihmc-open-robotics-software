@@ -1,12 +1,12 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * Message used to encode the manifold of an object to be used as input by a reaching motion planner.
- * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+ * Message used to encode the manifold of an object to be used as input by a reaching motion
+ * planner. Main usage is the IHMC WholeBodyTrajectoryToolbox.
  */
 public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       implements Settable<ReachingManifoldMessage>, EpsilonComparable<ReachingManifoldMessage>
@@ -17,6 +17,10 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
    public static final byte CONFIGURATION_SPACE_NAME_ROLL = (byte) 3;
    public static final byte CONFIGURATION_SPACE_NAME_PITCH = (byte) 4;
    public static final byte CONFIGURATION_SPACE_NAME_YAW = (byte) 5;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public long end_effector_name_based_hash_code_;
    public us.ihmc.euclid.tuple3D.Point3D manifold_origin_position_;
    public us.ihmc.euclid.tuple4D.Quaternion manifold_origin_orientation_;
@@ -26,7 +30,7 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
 
    public ReachingManifoldMessage()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
       manifold_origin_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       manifold_origin_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       manifold_configuration_space_names_ = new us.ihmc.idl.IDLSequence.Byte(100, "type_9");
@@ -34,15 +38,18 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       manifold_lower_limits_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
 
       manifold_upper_limits_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
+
    }
 
    public ReachingManifoldMessage(ReachingManifoldMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(ReachingManifoldMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       end_effector_name_based_hash_code_ = other.end_effector_name_based_hash_code_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.manifold_origin_position_, manifold_origin_position_);
@@ -52,14 +59,22 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       manifold_upper_limits_.set(other.manifold_upper_limits_);
    }
 
-   public long getEndEffectorNameBasedHashCode()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return end_effector_name_based_hash_code_;
+      return header_;
    }
 
    public void setEndEffectorNameBasedHashCode(long end_effector_name_based_hash_code)
    {
       end_effector_name_based_hash_code_ = end_effector_name_based_hash_code;
+   }
+
+   public long getEndEffectorNameBasedHashCode()
+   {
+      return end_effector_name_based_hash_code_;
    }
 
    public us.ihmc.euclid.tuple3D.Point3D getManifoldOriginPosition()
@@ -95,15 +110,15 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_effector_name_based_hash_code_, other.end_effector_name_based_hash_code_, epsilon))
          return false;
 
       if (!this.manifold_origin_position_.epsilonEquals(other.manifold_origin_position_, epsilon))
          return false;
-
       if (!this.manifold_origin_orientation_.epsilonEquals(other.manifold_origin_orientation_, epsilon))
          return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.manifold_configuration_space_names_, other.manifold_configuration_space_names_, epsilon))
          return false;
 
@@ -128,21 +143,19 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
 
       ReachingManifoldMessage otherMyClass = (ReachingManifoldMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.end_effector_name_based_hash_code_ != otherMyClass.end_effector_name_based_hash_code_)
          return false;
 
       if (!this.manifold_origin_position_.equals(otherMyClass.manifold_origin_position_))
          return false;
-
       if (!this.manifold_origin_orientation_.equals(otherMyClass.manifold_origin_orientation_))
          return false;
-
       if (!this.manifold_configuration_space_names_.equals(otherMyClass.manifold_configuration_space_names_))
          return false;
-
       if (!this.manifold_lower_limits_.equals(otherMyClass.manifold_lower_limits_))
          return false;
-
       if (!this.manifold_upper_limits_.equals(otherMyClass.manifold_upper_limits_))
          return false;
 
@@ -155,29 +168,26 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("ReachingManifoldMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("end_effector_name_based_hash_code=");
       builder.append(this.end_effector_name_based_hash_code_);
-
       builder.append(", ");
       builder.append("manifold_origin_position=");
       builder.append(this.manifold_origin_position_);
-
       builder.append(", ");
       builder.append("manifold_origin_orientation=");
       builder.append(this.manifold_origin_orientation_);
-
       builder.append(", ");
       builder.append("manifold_configuration_space_names=");
       builder.append(this.manifold_configuration_space_names_);
-
       builder.append(", ");
       builder.append("manifold_lower_limits=");
       builder.append(this.manifold_lower_limits_);
-
       builder.append(", ");
       builder.append("manifold_upper_limits=");
       builder.append(this.manifold_upper_limits_);
-
       builder.append("}");
       return builder.toString();
    }

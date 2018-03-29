@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * Message used for simulated LIDAR
@@ -10,6 +10,10 @@ import us.ihmc.euclid.interfaces.Settable;
 public class LidarScanParametersMessage extends Packet<LidarScanParametersMessage>
       implements Settable<LidarScanParametersMessage>, EpsilonComparable<LidarScanParametersMessage>
 {
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public long timestamp_;
    public float sweep_yaw_max_;
    public float sweep_yaw_min_;
@@ -24,16 +28,18 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
 
    public LidarScanParametersMessage()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public LidarScanParametersMessage(LidarScanParametersMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(LidarScanParametersMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       timestamp_ = other.timestamp_;
 
       sweep_yaw_max_ = other.sweep_yaw_max_;
@@ -55,11 +61,15 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       points_per_sweep_ = other.points_per_sweep_;
 
       scan_height_ = other.scan_height_;
+
    }
 
-   public long getTimestamp()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return timestamp_;
+      return header_;
    }
 
    public void setTimestamp(long timestamp)
@@ -67,9 +77,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       timestamp_ = timestamp;
    }
 
-   public float getSweepYawMax()
+   public long getTimestamp()
    {
-      return sweep_yaw_max_;
+      return timestamp_;
    }
 
    public void setSweepYawMax(float sweep_yaw_max)
@@ -77,9 +87,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       sweep_yaw_max_ = sweep_yaw_max;
    }
 
-   public float getSweepYawMin()
+   public float getSweepYawMax()
    {
-      return sweep_yaw_min_;
+      return sweep_yaw_max_;
    }
 
    public void setSweepYawMin(float sweep_yaw_min)
@@ -87,9 +97,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       sweep_yaw_min_ = sweep_yaw_min;
    }
 
-   public float getHeightPitchMax()
+   public float getSweepYawMin()
    {
-      return height_pitch_max_;
+      return sweep_yaw_min_;
    }
 
    public void setHeightPitchMax(float height_pitch_max)
@@ -97,9 +107,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       height_pitch_max_ = height_pitch_max;
    }
 
-   public float getHeightPitchMin()
+   public float getHeightPitchMax()
    {
-      return height_pitch_min_;
+      return height_pitch_max_;
    }
 
    public void setHeightPitchMin(float height_pitch_min)
@@ -107,9 +117,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       height_pitch_min_ = height_pitch_min;
    }
 
-   public float getTimeIncrement()
+   public float getHeightPitchMin()
    {
-      return time_increment_;
+      return height_pitch_min_;
    }
 
    public void setTimeIncrement(float time_increment)
@@ -117,9 +127,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       time_increment_ = time_increment;
    }
 
-   public float getScanTime()
+   public float getTimeIncrement()
    {
-      return scan_time_;
+      return time_increment_;
    }
 
    public void setScanTime(float scan_time)
@@ -127,9 +137,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       scan_time_ = scan_time;
    }
 
-   public float getMinRange()
+   public float getScanTime()
    {
-      return min_range_;
+      return scan_time_;
    }
 
    public void setMinRange(float min_range)
@@ -137,9 +147,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       min_range_ = min_range;
    }
 
-   public float getMaxRange()
+   public float getMinRange()
    {
-      return max_range_;
+      return min_range_;
    }
 
    public void setMaxRange(float max_range)
@@ -147,9 +157,9 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       max_range_ = max_range;
    }
 
-   public int getPointsPerSweep()
+   public float getMaxRange()
    {
-      return points_per_sweep_;
+      return max_range_;
    }
 
    public void setPointsPerSweep(int points_per_sweep)
@@ -157,14 +167,19 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       points_per_sweep_ = points_per_sweep;
    }
 
-   public int getScanHeight()
+   public int getPointsPerSweep()
    {
-      return scan_height_;
+      return points_per_sweep_;
    }
 
    public void setScanHeight(int scan_height)
    {
       scan_height_ = scan_height;
+   }
+
+   public int getScanHeight()
+   {
+      return scan_height_;
    }
 
    @Override
@@ -175,6 +190,8 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon))
          return false;
 
@@ -223,6 +240,8 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
 
       LidarScanParametersMessage otherMyClass = (LidarScanParametersMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.timestamp_ != otherMyClass.timestamp_)
          return false;
 
@@ -265,49 +284,41 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       StringBuilder builder = new StringBuilder();
 
       builder.append("LidarScanParametersMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("timestamp=");
       builder.append(this.timestamp_);
-
       builder.append(", ");
       builder.append("sweep_yaw_max=");
       builder.append(this.sweep_yaw_max_);
-
       builder.append(", ");
       builder.append("sweep_yaw_min=");
       builder.append(this.sweep_yaw_min_);
-
       builder.append(", ");
       builder.append("height_pitch_max=");
       builder.append(this.height_pitch_max_);
-
       builder.append(", ");
       builder.append("height_pitch_min=");
       builder.append(this.height_pitch_min_);
-
       builder.append(", ");
       builder.append("time_increment=");
       builder.append(this.time_increment_);
-
       builder.append(", ");
       builder.append("scan_time=");
       builder.append(this.scan_time_);
-
       builder.append(", ");
       builder.append("min_range=");
       builder.append(this.min_range_);
-
       builder.append(", ");
       builder.append("max_range=");
       builder.append(this.max_range_);
-
       builder.append(", ");
       builder.append("points_per_sweep=");
       builder.append(this.points_per_sweep_);
-
       builder.append(", ");
       builder.append("scan_height=");
       builder.append(this.scan_height_);
-
       builder.append("}");
       return builder.toString();
    }

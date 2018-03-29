@@ -3,6 +3,7 @@
 
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -17,6 +18,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::KinematicsToolboxConfigurationMessage_")
       struct KinematicsToolboxConfigurationMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
          */

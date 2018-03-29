@@ -1,46 +1,60 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
 public class WallPosePacket extends Packet<WallPosePacket> implements Settable<WallPosePacket>, EpsilonComparable<WallPosePacket>
 {
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public double cutting_radius_ = 0.2;
    public us.ihmc.euclid.tuple3D.Point3D center_position_;
    public us.ihmc.euclid.tuple4D.Quaternion center_orientation_;
 
    public WallPosePacket()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
       center_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       center_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
    }
 
    public WallPosePacket(WallPosePacket other)
    {
+      this();
       set(other);
    }
 
    public void set(WallPosePacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       cutting_radius_ = other.cutting_radius_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.center_position_, center_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.center_orientation_, center_orientation_);
    }
 
-   public double getCuttingRadius()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return cutting_radius_;
+      return header_;
    }
 
    public void setCuttingRadius(double cutting_radius)
    {
       cutting_radius_ = cutting_radius;
+   }
+
+   public double getCuttingRadius()
+   {
+      return cutting_radius_;
    }
 
    public us.ihmc.euclid.tuple3D.Point3D getCenterPosition()
@@ -61,12 +75,13 @@ public class WallPosePacket extends Packet<WallPosePacket> implements Settable<W
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cutting_radius_, other.cutting_radius_, epsilon))
          return false;
 
       if (!this.center_position_.epsilonEquals(other.center_position_, epsilon))
          return false;
-
       if (!this.center_orientation_.epsilonEquals(other.center_orientation_, epsilon))
          return false;
 
@@ -85,12 +100,13 @@ public class WallPosePacket extends Packet<WallPosePacket> implements Settable<W
 
       WallPosePacket otherMyClass = (WallPosePacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.cutting_radius_ != otherMyClass.cutting_radius_)
          return false;
 
       if (!this.center_position_.equals(otherMyClass.center_position_))
          return false;
-
       if (!this.center_orientation_.equals(otherMyClass.center_orientation_))
          return false;
 
@@ -103,17 +119,17 @@ public class WallPosePacket extends Packet<WallPosePacket> implements Settable<W
       StringBuilder builder = new StringBuilder();
 
       builder.append("WallPosePacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("cutting_radius=");
       builder.append(this.cutting_radius_);
-
       builder.append(", ");
       builder.append("center_position=");
       builder.append(this.center_position_);
-
       builder.append(", ");
       builder.append("center_orientation=");
       builder.append(this.center_orientation_);
-
       builder.append("}");
       return builder.toString();
    }

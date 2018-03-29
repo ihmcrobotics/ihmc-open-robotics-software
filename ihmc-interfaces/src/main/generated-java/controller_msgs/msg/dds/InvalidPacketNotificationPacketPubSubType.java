@@ -1,80 +1,22 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "InvalidPacketNotificationPacket" defined in "InvalidPacketNotificationPacket_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "InvalidPacketNotificationPacket" defined in
+ * "InvalidPacketNotificationPacket_.idl". Use this class to provide the TopicDataType to a
+ * Participant.
  *
- * This file was automatically generated from InvalidPacketNotificationPacket_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit InvalidPacketNotificationPacket_.idl instead.
+ * This file was automatically generated from InvalidPacketNotificationPacket_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * InvalidPacketNotificationPacket_.idl instead.
+ *
  */
 public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.InvalidPacketNotificationPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::InvalidPacketNotificationPacket_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
-
-   public InvalidPacketNotificationPacketPubSubType()
-   {
-
-   }
-
-   public static int getMaxCdrSerializedSize()
-   {
-      return getMaxCdrSerializedSize(0);
-   }
-
-   public static int getMaxCdrSerializedSize(int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-
-      return current_alignment - initial_alignment;
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.InvalidPacketNotificationPacket data)
-   {
-      return getCdrSerializedSize(data, 0);
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getPacketClassSimpleName().length() + 1;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getErrorMessage().length() + 1;
-
-      return current_alignment - initial_alignment;
-   }
-
-   public static void write(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, us.ihmc.idl.CDR cdr)
-   {
-
-      if (data.getPacketClassSimpleName().length() <= 255)
-         cdr.write_type_d(data.getPacketClassSimpleName());
-      else
-         throw new RuntimeException("packet_class_simple_name field exceeds the maximum length");
-
-      if (data.getErrorMessage().length() <= 255)
-         cdr.write_type_d(data.getErrorMessage());
-      else
-         throw new RuntimeException("error_message field exceeds the maximum length");
-   }
-
-   public static void read(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, us.ihmc.idl.CDR cdr)
-   {
-
-      cdr.read_type_d(data.getPacketClassSimpleName());
-
-      cdr.read_type_d(data.getErrorMessage());
-   }
-
-   public static void staticCopy(controller_msgs.msg.dds.InvalidPacketNotificationPacket src, controller_msgs.msg.dds.InvalidPacketNotificationPacket dest)
-   {
-      dest.set(src);
-   }
 
    @Override
    public void serialize(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
@@ -94,20 +36,85 @@ public class InvalidPacketNotificationPacketPubSubType implements us.ihmc.pubsub
       deserializeCDR.finishDeserialize();
    }
 
+   public static int getMaxCdrSerializedSize()
+   {
+      return getMaxCdrSerializedSize(0);
+   }
+
+   public static int getMaxCdrSerializedSize(int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+
+      return current_alignment - initial_alignment;
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.InvalidPacketNotificationPacket data)
+   {
+      return getCdrSerializedSize(data, 0);
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getPacketClassSimpleName().length() + 1;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getErrorMessage().length() + 1;
+
+      return current_alignment - initial_alignment;
+   }
+
+   public static void write(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      if (data.getPacketClassSimpleName().length() <= 255)
+         cdr.write_type_d(data.getPacketClassSimpleName());
+      else
+         throw new RuntimeException("packet_class_simple_name field exceeds the maximum length");
+
+      if (data.getErrorMessage().length() <= 255)
+         cdr.write_type_d(data.getErrorMessage());
+      else
+         throw new RuntimeException("error_message field exceeds the maximum length");
+
+   }
+
+   public static void read(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      cdr.read_type_d(data.getPacketClassSimpleName());
+      cdr.read_type_d(data.getErrorMessage());
+
+   }
+
    @Override
    public final void serialize(controller_msgs.msg.dds.InvalidPacketNotificationPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_d("packet_class_simple_name", data.getPacketClassSimpleName());
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
+      ser.write_type_d("packet_class_simple_name", data.getPacketClassSimpleName());
       ser.write_type_d("error_message", data.getErrorMessage());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.InvalidPacketNotificationPacket data)
    {
-      ser.read_type_d("packet_class_simple_name", data.getPacketClassSimpleName());
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
+      ser.read_type_d("packet_class_simple_name", data.getPacketClassSimpleName());
       ser.read_type_d("error_message", data.getErrorMessage());
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.InvalidPacketNotificationPacket src, controller_msgs.msg.dds.InvalidPacketNotificationPacket dest)
+   {
+      dest.set(src);
    }
 
    @Override

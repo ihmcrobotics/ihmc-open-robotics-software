@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__TrajectoryPoint1DMessage__idl__
 #define __controller_msgs__msg__TrajectoryPoint1DMessage__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -19,6 +20,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::TrajectoryPoint1DMessage_")
       struct TrajectoryPoint1DMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
          */

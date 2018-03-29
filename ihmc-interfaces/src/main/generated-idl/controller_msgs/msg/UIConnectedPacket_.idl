@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__UIConnectedPacket__idl__
 #define __controller_msgs__msg__UIConnectedPacket__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -8,10 +9,16 @@ module controller_msgs
     module dds
     {
 
+      /**
+       * TODO: This message is not really used, the feature it provides needs to be fixed or this message needs to be deleted.
+       */
       @TypeCode(type="controller_msgs::msg::dds_::UIConnectedPacket_")
       struct UIConnectedPacket
       {
-        boolean unused_placeholder_field;
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
       };
     };
   };

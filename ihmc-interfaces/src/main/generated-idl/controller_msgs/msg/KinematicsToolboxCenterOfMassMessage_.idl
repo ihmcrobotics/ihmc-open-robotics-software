@@ -4,6 +4,7 @@
 #include "controller_msgs/msg/./SelectionMatrix3DMessage_.idl"
 #include "controller_msgs/msg/./WeightMatrix3DMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -18,6 +19,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::KinematicsToolboxCenterOfMassMessage_")
       struct KinematicsToolboxCenterOfMassMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * Specifies the desired center of mass position.
          * The data is assumed to be expressed in world frame.

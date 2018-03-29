@@ -3,6 +3,7 @@
 
 #include "geometry_msgs/msg/./Quaternion_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -19,6 +20,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::SO3TrajectoryPointMessage_")
       struct SO3TrajectoryPointMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
          */

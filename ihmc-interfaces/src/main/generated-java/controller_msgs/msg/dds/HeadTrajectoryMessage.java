@@ -1,17 +1,22 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message commands the controller to move in taskspace the head to the desired orientation while going through the specified trajectory points.
- * A Hermite based curve (third order) is used to interpolate the orientations.
- * To execute a simple trajectory to reach a desired head orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+ * This message is part of the IHMC whole-body controller API. This message commands the controller
+ * to move in taskspace the head to the desired orientation while going through the specified
+ * trajectory points. A Hermite based curve (third order) is used to interpolate the orientations.
+ * To execute a simple trajectory to reach a desired head orientation, set only one trajectory point
+ * with zero velocity and its time to be equal to the desired trajectory time.
  */
 public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> implements Settable<HeadTrajectoryMessage>, EpsilonComparable<HeadTrajectoryMessage>
 {
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    /**
     * The orientation trajectory information.
     */
@@ -19,17 +24,28 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
 
    public HeadTrajectoryMessage()
    {
+      header_ = new std_msgs.msg.dds.Header();
       so3_trajectory_ = new controller_msgs.msg.dds.SO3TrajectoryMessage();
    }
 
    public HeadTrajectoryMessage(HeadTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(HeadTrajectoryMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
+   }
+
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
+   {
+      return header_;
    }
 
    /**
@@ -48,6 +64,8 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!this.so3_trajectory_.epsilonEquals(other.so3_trajectory_, epsilon))
          return false;
 
@@ -66,6 +84,8 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
 
       HeadTrajectoryMessage otherMyClass = (HeadTrajectoryMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (!this.so3_trajectory_.equals(otherMyClass.so3_trajectory_))
          return false;
 
@@ -78,9 +98,11 @@ public class HeadTrajectoryMessage extends Packet<HeadTrajectoryMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("HeadTrajectoryMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("so3_trajectory=");
       builder.append(this.so3_trajectory_);
-
       builder.append("}");
       return builder.toString();
    }

@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__WalkingStatusMessage__idl__
 #define __controller_msgs__msg__WalkingStatusMessage__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -24,6 +25,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::WalkingStatusMessage_")
       struct WalkingStatusMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * Status of walking.
          */

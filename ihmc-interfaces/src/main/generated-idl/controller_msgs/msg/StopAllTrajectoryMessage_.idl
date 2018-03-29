@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__StopAllTrajectoryMessage__idl__
 #define __controller_msgs__msg__StopAllTrajectoryMessage__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -8,10 +9,17 @@ module controller_msgs
     module dds
     {
 
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * Stop the execution of any trajectory being executed.
+       */
       @TypeCode(type="controller_msgs::msg::dds_::StopAllTrajectoryMessage_")
       struct StopAllTrajectoryMessage
       {
-        boolean unused_placeholder_field;
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
       };
     };
   };

@@ -1,36 +1,45 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
+/**
+ * This message is part of the IHMC whole-body controller API. This message will request a
+ * calibration the wrist force sensors to the IHMC controller (does not do hardware calibration). It
+ * is strongly suggested to perform the calibration when the hands are not moving nor interacting
+ * with the environment.
+ */
 public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWristForceSensorCalibrationPacket>
       implements Settable<RequestWristForceSensorCalibrationPacket>, EpsilonComparable<RequestWristForceSensorCalibrationPacket>
 {
-   public boolean unused_placeholder_field_;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
 
    public RequestWristForceSensorCalibrationPacket()
    {
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public RequestWristForceSensorCalibrationPacket(RequestWristForceSensorCalibrationPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(RequestWristForceSensorCalibrationPacket other)
    {
-      unused_placeholder_field_ = other.unused_placeholder_field_;
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
    }
 
-   public boolean getUnusedPlaceholderField()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return unused_placeholder_field_;
-   }
-
-   public void setUnusedPlaceholderField(boolean unused_placeholder_field)
-   {
-      unused_placeholder_field_ = unused_placeholder_field;
+      return header_;
    }
 
    @Override
@@ -41,7 +50,7 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
       if (other == this)
          return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unused_placeholder_field_, other.unused_placeholder_field_, epsilon))
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
          return false;
 
       return true;
@@ -59,7 +68,7 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
 
       RequestWristForceSensorCalibrationPacket otherMyClass = (RequestWristForceSensorCalibrationPacket) other;
 
-      if (this.unused_placeholder_field_ != otherMyClass.unused_placeholder_field_)
+      if (!this.header_.equals(otherMyClass.header_))
          return false;
 
       return true;
@@ -71,9 +80,8 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
       StringBuilder builder = new StringBuilder();
 
       builder.append("RequestWristForceSensorCalibrationPacket {");
-      builder.append("unused_placeholder_field=");
-      builder.append(this.unused_placeholder_field_);
-
+      builder.append("header=");
+      builder.append(this.header_);
       builder.append("}");
       return builder.toString();
    }

@@ -1,66 +1,21 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "DrillDetectionPacket" defined in "DrillDetectionPacket_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "DrillDetectionPacket" defined in "DrillDetectionPacket_.idl". Use
+ * this class to provide the TopicDataType to a Participant.
  *
- * This file was automatically generated from DrillDetectionPacket_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit DrillDetectionPacket_.idl instead.
+ * This file was automatically generated from DrillDetectionPacket_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * DrillDetectionPacket_.idl instead.
+ *
  */
 public class DrillDetectionPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.DrillDetectionPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::DrillDetectionPacket_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
-
-   public DrillDetectionPacketPubSubType()
-   {
-
-   }
-
-   public static int getMaxCdrSerializedSize()
-   {
-      return getMaxCdrSerializedSize(0);
-   }
-
-   public static int getMaxCdrSerializedSize(int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.DrillDetectionPacket data)
-   {
-      return getCdrSerializedSize(data, 0);
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.DrillDetectionPacket data, int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public static void write(controller_msgs.msg.dds.DrillDetectionPacket data, us.ihmc.idl.CDR cdr)
-   {
-
-      cdr.write_type_7(data.getIsDrillOn());
-   }
-
-   public static void read(controller_msgs.msg.dds.DrillDetectionPacket data, us.ihmc.idl.CDR cdr)
-   {
-
-      data.setIsDrillOn(cdr.read_type_7());
-   }
-
-   public static void staticCopy(controller_msgs.msg.dds.DrillDetectionPacket src, controller_msgs.msg.dds.DrillDetectionPacket dest)
-   {
-      dest.set(src);
-   }
 
    @Override
    public void serialize(controller_msgs.msg.dds.DrillDetectionPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
@@ -80,16 +35,71 @@ public class DrillDetectionPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       deserializeCDR.finishDeserialize();
    }
 
+   public static int getMaxCdrSerializedSize()
+   {
+      return getMaxCdrSerializedSize(0);
+   }
+
+   public static int getMaxCdrSerializedSize(int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.DrillDetectionPacket data)
+   {
+      return getCdrSerializedSize(data, 0);
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.DrillDetectionPacket data, int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public static void write(controller_msgs.msg.dds.DrillDetectionPacket data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_7(data.getIsDrillOn());
+
+   }
+
+   public static void read(controller_msgs.msg.dds.DrillDetectionPacket data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setIsDrillOn(cdr.read_type_7());
+
+   }
+
    @Override
    public final void serialize(controller_msgs.msg.dds.DrillDetectionPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       ser.write_type_7("is_drill_on", data.getIsDrillOn());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.DrillDetectionPacket data)
    {
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       data.setIsDrillOn(ser.read_type_7("is_drill_on"));
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.DrillDetectionPacket src, controller_msgs.msg.dds.DrillDetectionPacket dest)
+   {
+      dest.set(src);
    }
 
    @Override

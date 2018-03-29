@@ -1,36 +1,43 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
+/**
+ * This message is part of the IHMC whole-body controller API. Stop the execution of any trajectory
+ * being executed.
+ */
 public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
       implements Settable<StopAllTrajectoryMessage>, EpsilonComparable<StopAllTrajectoryMessage>
 {
-   public boolean unused_placeholder_field_;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
 
    public StopAllTrajectoryMessage()
    {
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public StopAllTrajectoryMessage(StopAllTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(StopAllTrajectoryMessage other)
    {
-      unused_placeholder_field_ = other.unused_placeholder_field_;
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
    }
 
-   public boolean getUnusedPlaceholderField()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return unused_placeholder_field_;
-   }
-
-   public void setUnusedPlaceholderField(boolean unused_placeholder_field)
-   {
-      unused_placeholder_field_ = unused_placeholder_field;
+      return header_;
    }
 
    @Override
@@ -41,7 +48,7 @@ public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
       if (other == this)
          return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.unused_placeholder_field_, other.unused_placeholder_field_, epsilon))
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
          return false;
 
       return true;
@@ -59,7 +66,7 @@ public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
 
       StopAllTrajectoryMessage otherMyClass = (StopAllTrajectoryMessage) other;
 
-      if (this.unused_placeholder_field_ != otherMyClass.unused_placeholder_field_)
+      if (!this.header_.equals(otherMyClass.header_))
          return false;
 
       return true;
@@ -71,9 +78,8 @@ public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("StopAllTrajectoryMessage {");
-      builder.append("unused_placeholder_field=");
-      builder.append(this.unused_placeholder_field_);
-
+      builder.append("header=");
+      builder.append(this.header_);
       builder.append("}");
       return builder.toString();
    }

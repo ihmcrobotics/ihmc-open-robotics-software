@@ -3,6 +3,7 @@
 
 #include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
 #include "controller_msgs/msg/./SO3TrajectoryMessage_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -18,6 +19,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::ChestHybridJointspaceTaskspaceTrajectoryMessage_")
       struct ChestHybridJointspaceTaskspaceTrajectoryMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * The taskspace trajectory information.
          */

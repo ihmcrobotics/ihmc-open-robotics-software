@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__QueueableMessage__idl__
 #define __controller_msgs__msg__QueueableMessage__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -21,6 +22,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::QueueableMessage_")
       struct QueueableMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * When EXECUTION_MODE_OVERRIDE is chosen:
          * - For trajectory messages: the time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point.

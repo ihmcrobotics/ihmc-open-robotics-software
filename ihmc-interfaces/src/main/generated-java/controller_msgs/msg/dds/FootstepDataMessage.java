@@ -1,12 +1,12 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.
+ * This message is part of the IHMC whole-body controller API. This message specifies the position,
+ * orientation and side (left or right) of a desired footstep in world frame.
  */
 public class FootstepDataMessage extends Packet<FootstepDataMessage> implements Settable<FootstepDataMessage>, EpsilonComparable<FootstepDataMessage>
 {
@@ -16,6 +16,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public static final byte TRAJECTORY_TYPE_OBSTACLE_CLEARANCE = (byte) 1;
    public static final byte TRAJECTORY_TYPE_CUSTOM = (byte) 2;
    public static final byte TRAJECTORY_TYPE_WAYPOINTS = (byte) 3;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    /**
     * Specifies which foot will swing to reach the footstep.
     */
@@ -29,65 +33,69 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
     */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
    /**
-    * Predicted contact points represent the vertices of the expected contact polygon between the foot and the world.
-    * An empty list will request the controller to use the default foot support polygon.
-    * Contact points  are expressed in sole frame. The ordering does not matter.
-    * For example: to tell the controller to use the entire foot, the predicted contact points would be:
-    * - x: 0.5 * foot_length, y: -0.5 * toe_width
-    * - x: 0.5 * foot_length, y: 0.5 * toe_width
-    * - x: -0.5 * foot_length, y: -0.5 * heel_width
-    * - x: -0.5 * foot_length, y: 0.5 * heel_width
-    * Note: The z coordinate of each point is ignored.
+    * Predicted contact points represent the vertices of the expected contact polygon between the
+    * foot and the world. An empty list will request the controller to use the default foot support
+    * polygon. Contact points are expressed in sole frame. The ordering does not matter. For
+    * example: to tell the controller to use the entire foot, the predicted contact points would be:
+    * - x: 0.5 * foot_length, y: -0.5 * toe_width - x: 0.5 * foot_length, y: 0.5 * toe_width - x:
+    * -0.5 * foot_length, y: -0.5 * heel_width - x: -0.5 * foot_length, y: 0.5 * heel_width Note:
+    * The z coordinate of each point is ignored.
     */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> predicted_contact_points_2d_;
    /**
-    * This contains information on what the swing trajectory should be for each step. Recommended is TRAJECTORY_TYPE_DEFAULT.
+    * This contains information on what the swing trajectory should be for each step. Recommended is
+    * TRAJECTORY_TYPE_DEFAULT.
     */
    public byte trajectory_type_;
    /**
-    * Contains information on how high the robot should swing its foot.
-    * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
-    * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
+    * Contains information on how high the robot should swing its foot. This affects trajectory
+    * types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE. If a value smaller then
+    * the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default
+    * value.
     */
    public double swing_height_;
    /**
-    * In case the trajectory type is set to TRAJECTORY_TYPE_CUSTOM two swing waypoints can be specified here.
-    * The waypoints define sole positions.
-    * The controller will compute times and velocities at the waypoints.
-    * This is a convenient way to shape the trajectory of the swing.
-    * If full control over the swing trajectory is desired use the trajectory type TRAJECTORY_TYPE_WAYPOINTS instead.
-    * The position waypoints are expected in the trajectory frame.
+    * In case the trajectory type is set to TRAJECTORY_TYPE_CUSTOM two swing waypoints can be
+    * specified here. The waypoints define sole positions. The controller will compute times and
+    * velocities at the waypoints. This is a convenient way to shape the trajectory of the swing. If
+    * full control over the swing trajectory is desired use the trajectory type
+    * TRAJECTORY_TYPE_WAYPOINTS instead. The position waypoints are expected in the trajectory
+    * frame.
     */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> custom_position_waypoints_;
    /**
-    * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, swing waypoints can be specified here.
-    * The waypoints do not include the start point (which is set to the current foot state at lift-off) and the touch down point
-    * (which is specified by the location and orientation fields).
-    * All waypoints are for the sole frame and expressed in the trajectory frame.
-    * The maximum number of points can be found in the Footstep class.
+    * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, swing waypoints can be
+    * specified here. The waypoints do not include the start point (which is set to the current foot
+    * state at lift-off) and the touch down point (which is specified by the location and
+    * orientation fields). All waypoints are for the sole frame and expressed in the trajectory
+    * frame. The maximum number of points can be found in the Footstep class.
     */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> swing_trajectory_;
    /**
-    * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to specify the trajectory blend duration in seconds.
-    * If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning the desired blend duration)
-    * will be adjusted to account for the initial error between the actual and expected position and orientation of the swing foot.
-    * Note that the expected_initial_location and expected_initial_orientation fields must be defined in order to enable trajectory blending.
+    * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to
+    * specify the trajectory blend duration in seconds. If greater than zero, waypoints that fall
+    * within the valid time window (beginning at the start of the swing phase and spanning the
+    * desired blend duration) will be adjusted to account for the initial error between the actual
+    * and expected position and orientation of the swing foot. Note that the
+    * expected_initial_location and expected_initial_orientation fields must be defined in order to
+    * enable trajectory blending.
     */
    public double swing_trajectory_blend_duration_;
    /**
-    * The swingDuration is the time a foot is not in ground contact during a step.
-    * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
+    * The swingDuration is the time a foot is not in ground contact during a step. If the value of
+    * this field is invalid (not positive) it will be replaced by a default swing_duration.
     */
    public double swing_duration_ = -1.0;
    /**
-    * The transferDuration is the time spent with the feet in ground contact before a step.
-    * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
+    * The transferDuration is the time spent with the feet in ground contact before a step. If the
+    * value of this field is invalid (not positive) it will be replaced by a default
+    * transfer_duration.
     */
    public double transfer_duration_ = -1.0;
    /**
-    * (Experimental) The touchdown duration is the time spent trying to do a soft touchdown.
-    * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-    * If the default is set to zero, the touchdown state will be disabled.
+    * (Experimental) The touchdown duration is the time spent trying to do a soft touchdown. If the
+    * value of this field is invalid (not positive) it will be replaced by a default
+    * transfer_duration. If the default is set to zero, the touchdown state will be disabled.
     */
    public double touchdown_duration_ = -1.0;
    /**
@@ -97,27 +105,28 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
       location_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       predicted_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>(100, us.ihmc.euclid.tuple3D.Point3D.class,
                                                                                                         new geometry_msgs.msg.dds.PointPubSubType());
-
       custom_position_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>(2, us.ihmc.euclid.tuple3D.Point3D.class,
                                                                                                       new geometry_msgs.msg.dds.PointPubSubType());
-
       swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage>(100,
                                                                                                                 controller_msgs.msg.dds.SE3TrajectoryPointMessage.class,
                                                                                                                 new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
+
    }
 
    public FootstepDataMessage(FootstepDataMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(FootstepDataMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       robot_side_ = other.robot_side_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.location_, location_);
@@ -138,14 +147,15 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       touchdown_duration_ = other.touchdown_duration_;
 
       execution_delay_time_ = other.execution_delay_time_;
+
    }
 
    /**
-    * Specifies which foot will swing to reach the footstep.
+    * As of March 2018, the header for this message is only use for its sequence ID.
     */
-   public byte getRobotSide()
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return robot_side_;
+      return header_;
    }
 
    /**
@@ -154,6 +164,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
+   }
+
+   /**
+    * Specifies which foot will swing to reach the footstep.
+    */
+   public byte getRobotSide()
+   {
+      return robot_side_;
    }
 
    /**
@@ -173,15 +191,13 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * Predicted contact points represent the vertices of the expected contact polygon between the foot and the world.
-    * An empty list will request the controller to use the default foot support polygon.
-    * Contact points  are expressed in sole frame. The ordering does not matter.
-    * For example: to tell the controller to use the entire foot, the predicted contact points would be:
-    * - x: 0.5 * foot_length, y: -0.5 * toe_width
-    * - x: 0.5 * foot_length, y: 0.5 * toe_width
-    * - x: -0.5 * foot_length, y: -0.5 * heel_width
-    * - x: -0.5 * foot_length, y: 0.5 * heel_width
-    * Note: The z coordinate of each point is ignored.
+    * Predicted contact points represent the vertices of the expected contact polygon between the
+    * foot and the world. An empty list will request the controller to use the default foot support
+    * polygon. Contact points are expressed in sole frame. The ordering does not matter. For
+    * example: to tell the controller to use the entire foot, the predicted contact points would be:
+    * - x: 0.5 * foot_length, y: -0.5 * toe_width - x: 0.5 * foot_length, y: 0.5 * toe_width - x:
+    * -0.5 * foot_length, y: -0.5 * heel_width - x: -0.5 * foot_length, y: 0.5 * heel_width Note:
+    * The z coordinate of each point is ignored.
     */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> getPredictedContactPoints2d()
    {
@@ -189,15 +205,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * This contains information on what the swing trajectory should be for each step. Recommended is TRAJECTORY_TYPE_DEFAULT.
-    */
-   public byte getTrajectoryType()
-   {
-      return trajectory_type_;
-   }
-
-   /**
-    * This contains information on what the swing trajectory should be for each step. Recommended is TRAJECTORY_TYPE_DEFAULT.
+    * This contains information on what the swing trajectory should be for each step. Recommended is
+    * TRAJECTORY_TYPE_DEFAULT.
     */
    public void setTrajectoryType(byte trajectory_type)
    {
@@ -205,19 +214,19 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * Contains information on how high the robot should swing its foot.
-    * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
-    * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
+    * This contains information on what the swing trajectory should be for each step. Recommended is
+    * TRAJECTORY_TYPE_DEFAULT.
     */
-   public double getSwingHeight()
+   public byte getTrajectoryType()
    {
-      return swing_height_;
+      return trajectory_type_;
    }
 
    /**
-    * Contains information on how high the robot should swing its foot.
-    * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
-    * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
+    * Contains information on how high the robot should swing its foot. This affects trajectory
+    * types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE. If a value smaller then
+    * the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default
+    * value.
     */
    public void setSwingHeight(double swing_height)
    {
@@ -225,12 +234,23 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * In case the trajectory type is set to TRAJECTORY_TYPE_CUSTOM two swing waypoints can be specified here.
-    * The waypoints define sole positions.
-    * The controller will compute times and velocities at the waypoints.
-    * This is a convenient way to shape the trajectory of the swing.
-    * If full control over the swing trajectory is desired use the trajectory type TRAJECTORY_TYPE_WAYPOINTS instead.
-    * The position waypoints are expected in the trajectory frame.
+    * Contains information on how high the robot should swing its foot. This affects trajectory
+    * types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE. If a value smaller then
+    * the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default
+    * value.
+    */
+   public double getSwingHeight()
+   {
+      return swing_height_;
+   }
+
+   /**
+    * In case the trajectory type is set to TRAJECTORY_TYPE_CUSTOM two swing waypoints can be
+    * specified here. The waypoints define sole positions. The controller will compute times and
+    * velocities at the waypoints. This is a convenient way to shape the trajectory of the swing. If
+    * full control over the swing trajectory is desired use the trajectory type
+    * TRAJECTORY_TYPE_WAYPOINTS instead. The position waypoints are expected in the trajectory
+    * frame.
     */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> getCustomPositionWaypoints()
    {
@@ -238,11 +258,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, swing waypoints can be specified here.
-    * The waypoints do not include the start point (which is set to the current foot state at lift-off) and the touch down point
-    * (which is specified by the location and orientation fields).
-    * All waypoints are for the sole frame and expressed in the trajectory frame.
-    * The maximum number of points can be found in the Footstep class.
+    * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, swing waypoints can be
+    * specified here. The waypoints do not include the start point (which is set to the current foot
+    * state at lift-off) and the touch down point (which is specified by the location and
+    * orientation fields). All waypoints are for the sole frame and expressed in the trajectory
+    * frame. The maximum number of points can be found in the Footstep class.
     */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> getSwingTrajectory()
    {
@@ -250,21 +270,13 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to specify the trajectory blend duration in seconds.
-    * If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning the desired blend duration)
-    * will be adjusted to account for the initial error between the actual and expected position and orientation of the swing foot.
-    * Note that the expected_initial_location and expected_initial_orientation fields must be defined in order to enable trajectory blending.
-    */
-   public double getSwingTrajectoryBlendDuration()
-   {
-      return swing_trajectory_blend_duration_;
-   }
-
-   /**
-    * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to specify the trajectory blend duration in seconds.
-    * If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning the desired blend duration)
-    * will be adjusted to account for the initial error between the actual and expected position and orientation of the swing foot.
-    * Note that the expected_initial_location and expected_initial_orientation fields must be defined in order to enable trajectory blending.
+    * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to
+    * specify the trajectory blend duration in seconds. If greater than zero, waypoints that fall
+    * within the valid time window (beginning at the start of the swing phase and spanning the
+    * desired blend duration) will be adjusted to account for the initial error between the actual
+    * and expected position and orientation of the swing foot. Note that the
+    * expected_initial_location and expected_initial_orientation fields must be defined in order to
+    * enable trajectory blending.
     */
    public void setSwingTrajectoryBlendDuration(double swing_trajectory_blend_duration)
    {
@@ -272,17 +284,22 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * The swingDuration is the time a foot is not in ground contact during a step.
-    * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
+    * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to
+    * specify the trajectory blend duration in seconds. If greater than zero, waypoints that fall
+    * within the valid time window (beginning at the start of the swing phase and spanning the
+    * desired blend duration) will be adjusted to account for the initial error between the actual
+    * and expected position and orientation of the swing foot. Note that the
+    * expected_initial_location and expected_initial_orientation fields must be defined in order to
+    * enable trajectory blending.
     */
-   public double getSwingDuration()
+   public double getSwingTrajectoryBlendDuration()
    {
-      return swing_duration_;
+      return swing_trajectory_blend_duration_;
    }
 
    /**
-    * The swingDuration is the time a foot is not in ground contact during a step.
-    * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
+    * The swingDuration is the time a foot is not in ground contact during a step. If the value of
+    * this field is invalid (not positive) it will be replaced by a default swing_duration.
     */
    public void setSwingDuration(double swing_duration)
    {
@@ -290,17 +307,18 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * The transferDuration is the time spent with the feet in ground contact before a step.
-    * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
+    * The swingDuration is the time a foot is not in ground contact during a step. If the value of
+    * this field is invalid (not positive) it will be replaced by a default swing_duration.
     */
-   public double getTransferDuration()
+   public double getSwingDuration()
    {
-      return transfer_duration_;
+      return swing_duration_;
    }
 
    /**
-    * The transferDuration is the time spent with the feet in ground contact before a step.
-    * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
+    * The transferDuration is the time spent with the feet in ground contact before a step. If the
+    * value of this field is invalid (not positive) it will be replaced by a default
+    * transfer_duration.
     */
    public void setTransferDuration(double transfer_duration)
    {
@@ -308,19 +326,19 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * (Experimental) The touchdown duration is the time spent trying to do a soft touchdown.
-    * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-    * If the default is set to zero, the touchdown state will be disabled.
+    * The transferDuration is the time spent with the feet in ground contact before a step. If the
+    * value of this field is invalid (not positive) it will be replaced by a default
+    * transfer_duration.
     */
-   public double getTouchdownDuration()
+   public double getTransferDuration()
    {
-      return touchdown_duration_;
+      return transfer_duration_;
    }
 
    /**
-    * (Experimental) The touchdown duration is the time spent trying to do a soft touchdown.
-    * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-    * If the default is set to zero, the touchdown state will be disabled.
+    * (Experimental) The touchdown duration is the time spent trying to do a soft touchdown. If the
+    * value of this field is invalid (not positive) it will be replaced by a default
+    * transfer_duration. If the default is set to zero, the touchdown state will be disabled.
     */
    public void setTouchdownDuration(double touchdown_duration)
    {
@@ -328,11 +346,13 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    /**
-    * The time to delay this command on the controller side before being executed.
+    * (Experimental) The touchdown duration is the time spent trying to do a soft touchdown. If the
+    * value of this field is invalid (not positive) it will be replaced by a default
+    * transfer_duration. If the default is set to zero, the touchdown state will be disabled.
     */
-   public double getExecutionDelayTime()
+   public double getTouchdownDuration()
    {
-      return execution_delay_time_;
+      return touchdown_duration_;
    }
 
    /**
@@ -343,6 +363,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       execution_delay_time_ = execution_delay_time;
    }
 
+   /**
+    * The time to delay this command on the controller side before being executed.
+    */
+   public double getExecutionDelayTime()
+   {
+      return execution_delay_time_;
+   }
+
    @Override
    public boolean epsilonEquals(FootstepDataMessage other, double epsilon)
    {
@@ -351,15 +379,15 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
       if (!this.location_.epsilonEquals(other.location_, epsilon))
          return false;
-
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
          return false;
-
       if (this.predicted_contact_points_2d_.size() == other.predicted_contact_points_2d_.size())
       {
          return false;
@@ -435,18 +463,17 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       FootstepDataMessage otherMyClass = (FootstepDataMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
       if (!this.location_.equals(otherMyClass.location_))
          return false;
-
       if (!this.orientation_.equals(otherMyClass.orientation_))
          return false;
-
       if (!this.predicted_contact_points_2d_.equals(otherMyClass.predicted_contact_points_2d_))
          return false;
-
       if (this.trajectory_type_ != otherMyClass.trajectory_type_)
          return false;
 
@@ -455,10 +482,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (!this.custom_position_waypoints_.equals(otherMyClass.custom_position_waypoints_))
          return false;
-
       if (!this.swing_trajectory_.equals(otherMyClass.swing_trajectory_))
          return false;
-
       if (this.swing_trajectory_blend_duration_ != otherMyClass.swing_trajectory_blend_duration_)
          return false;
 
@@ -483,57 +508,47 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepDataMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("location=");
       builder.append(this.location_);
-
       builder.append(", ");
       builder.append("orientation=");
       builder.append(this.orientation_);
-
       builder.append(", ");
       builder.append("predicted_contact_points_2d=");
       builder.append(this.predicted_contact_points_2d_);
-
       builder.append(", ");
       builder.append("trajectory_type=");
       builder.append(this.trajectory_type_);
-
       builder.append(", ");
       builder.append("swing_height=");
       builder.append(this.swing_height_);
-
       builder.append(", ");
       builder.append("custom_position_waypoints=");
       builder.append(this.custom_position_waypoints_);
-
       builder.append(", ");
       builder.append("swing_trajectory=");
       builder.append(this.swing_trajectory_);
-
       builder.append(", ");
       builder.append("swing_trajectory_blend_duration=");
       builder.append(this.swing_trajectory_blend_duration_);
-
       builder.append(", ");
       builder.append("swing_duration=");
       builder.append(this.swing_duration_);
-
       builder.append(", ");
       builder.append("transfer_duration=");
       builder.append(this.transfer_duration_);
-
       builder.append(", ");
       builder.append("touchdown_duration=");
       builder.append(this.touchdown_duration_);
-
       builder.append(", ");
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);
-
       builder.append("}");
       return builder.toString();
    }

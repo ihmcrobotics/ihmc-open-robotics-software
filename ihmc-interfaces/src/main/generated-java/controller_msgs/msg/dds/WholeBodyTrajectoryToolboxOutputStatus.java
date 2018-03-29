@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * General purpose message normally used to report the solution of a whole-body trajectory planner.
@@ -12,11 +12,12 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       implements Settable<WholeBodyTrajectoryToolboxOutputStatus>, EpsilonComparable<WholeBodyTrajectoryToolboxOutputStatus>
 {
    /**
-    * 0: not completed.
-    * 1: fail to find initial guess.
-    * 2: fail to complete expanding tree.
-    * 3: fail to optimize path.
-    * 4: solution is available.
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
+   /**
+    * 0: not completed. 1: fail to find initial guess. 2: fail to complete expanding tree. 3: fail
+    * to optimize path. 4: solution is available.
     */
    public int planning_result_;
    public us.ihmc.idl.IDLSequence.Double trajectory_times_;
@@ -24,21 +25,24 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
    public WholeBodyTrajectoryToolboxOutputStatus()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
       trajectory_times_ = new us.ihmc.idl.IDLSequence.Double(50, "type_6");
 
       robot_configurations_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>(50,
                                                                                                                         controller_msgs.msg.dds.KinematicsToolboxOutputStatus.class,
                                                                                                                         new controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType());
+
    }
 
    public WholeBodyTrajectoryToolboxOutputStatus(WholeBodyTrajectoryToolboxOutputStatus other)
    {
+      this();
       set(other);
    }
 
    public void set(WholeBodyTrajectoryToolboxOutputStatus other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       planning_result_ = other.planning_result_;
 
       trajectory_times_.set(other.trajectory_times_);
@@ -46,27 +50,29 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
    }
 
    /**
-    * 0: not completed.
-    * 1: fail to find initial guess.
-    * 2: fail to complete expanding tree.
-    * 3: fail to optimize path.
-    * 4: solution is available.
+    * As of March 2018, the header for this message is only use for its sequence ID.
     */
-   public int getPlanningResult()
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return planning_result_;
+      return header_;
    }
 
    /**
-    * 0: not completed.
-    * 1: fail to find initial guess.
-    * 2: fail to complete expanding tree.
-    * 3: fail to optimize path.
-    * 4: solution is available.
+    * 0: not completed. 1: fail to find initial guess. 2: fail to complete expanding tree. 3: fail
+    * to optimize path. 4: solution is available.
     */
    public void setPlanningResult(int planning_result)
    {
       planning_result_ = planning_result;
+   }
+
+   /**
+    * 0: not completed. 1: fail to find initial guess. 2: fail to complete expanding tree. 3: fail
+    * to optimize path. 4: solution is available.
+    */
+   public int getPlanningResult()
+   {
+      return planning_result_;
    }
 
    public us.ihmc.idl.IDLSequence.Double getTrajectoryTimes()
@@ -87,6 +93,8 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planning_result_, other.planning_result_, epsilon))
          return false;
 
@@ -121,12 +129,13 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
       WholeBodyTrajectoryToolboxOutputStatus otherMyClass = (WholeBodyTrajectoryToolboxOutputStatus) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.planning_result_ != otherMyClass.planning_result_)
          return false;
 
       if (!this.trajectory_times_.equals(otherMyClass.trajectory_times_))
          return false;
-
       if (!this.robot_configurations_.equals(otherMyClass.robot_configurations_))
          return false;
 
@@ -139,17 +148,17 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       StringBuilder builder = new StringBuilder();
 
       builder.append("WholeBodyTrajectoryToolboxOutputStatus {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("planning_result=");
       builder.append(this.planning_result_);
-
       builder.append(", ");
       builder.append("trajectory_times=");
       builder.append(this.trajectory_times_);
-
       builder.append(", ");
       builder.append("robot_configurations=");
       builder.append(this.robot_configurations_);
-
       builder.append("}");
       return builder.toString();
    }

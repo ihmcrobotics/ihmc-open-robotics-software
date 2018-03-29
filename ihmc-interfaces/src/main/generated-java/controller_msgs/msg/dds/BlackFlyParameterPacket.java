@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * Atlas specific message
@@ -12,6 +12,10 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public boolean auto_exposure_;
    public boolean auto_gain_;
    public boolean auto_shutter_;
@@ -24,16 +28,18 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
 
    public BlackFlyParameterPacket()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public BlackFlyParameterPacket(BlackFlyParameterPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(BlackFlyParameterPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       auto_exposure_ = other.auto_exposure_;
 
       auto_gain_ = other.auto_gain_;
@@ -51,11 +57,15 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       shutter_ = other.shutter_;
 
       robot_side_ = other.robot_side_;
+
    }
 
-   public boolean getAutoExposure()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return auto_exposure_;
+      return header_;
    }
 
    public void setAutoExposure(boolean auto_exposure)
@@ -63,9 +73,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       auto_exposure_ = auto_exposure;
    }
 
-   public boolean getAutoGain()
+   public boolean getAutoExposure()
    {
-      return auto_gain_;
+      return auto_exposure_;
    }
 
    public void setAutoGain(boolean auto_gain)
@@ -73,9 +83,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       auto_gain_ = auto_gain;
    }
 
-   public boolean getAutoShutter()
+   public boolean getAutoGain()
    {
-      return auto_shutter_;
+      return auto_gain_;
    }
 
    public void setAutoShutter(boolean auto_shutter)
@@ -83,9 +93,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       auto_shutter_ = auto_shutter;
    }
 
-   public double getExposure()
+   public boolean getAutoShutter()
    {
-      return exposure_;
+      return auto_shutter_;
    }
 
    public void setExposure(double exposure)
@@ -93,9 +103,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       exposure_ = exposure;
    }
 
-   public double getFrameRate()
+   public double getExposure()
    {
-      return frame_rate_;
+      return exposure_;
    }
 
    public void setFrameRate(double frame_rate)
@@ -103,9 +113,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       frame_rate_ = frame_rate;
    }
 
-   public boolean getFromUi()
+   public double getFrameRate()
    {
-      return from_ui_;
+      return frame_rate_;
    }
 
    public void setFromUi(boolean from_ui)
@@ -113,9 +123,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       from_ui_ = from_ui;
    }
 
-   public double getGain()
+   public boolean getFromUi()
    {
-      return gain_;
+      return from_ui_;
    }
 
    public void setGain(double gain)
@@ -123,9 +133,9 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       gain_ = gain;
    }
 
-   public double getShutter()
+   public double getGain()
    {
-      return shutter_;
+      return gain_;
    }
 
    public void setShutter(double shutter)
@@ -133,14 +143,19 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       shutter_ = shutter;
    }
 
-   public byte getRobotSide()
+   public double getShutter()
    {
-      return robot_side_;
+      return shutter_;
    }
 
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
+   }
+
+   public byte getRobotSide()
+   {
+      return robot_side_;
    }
 
    @Override
@@ -151,6 +166,8 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.auto_exposure_, other.auto_exposure_, epsilon))
          return false;
 
@@ -193,6 +210,8 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
 
       BlackFlyParameterPacket otherMyClass = (BlackFlyParameterPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.auto_exposure_ != otherMyClass.auto_exposure_)
          return false;
 
@@ -229,41 +248,35 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("BlackFlyParameterPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("auto_exposure=");
       builder.append(this.auto_exposure_);
-
       builder.append(", ");
       builder.append("auto_gain=");
       builder.append(this.auto_gain_);
-
       builder.append(", ");
       builder.append("auto_shutter=");
       builder.append(this.auto_shutter_);
-
       builder.append(", ");
       builder.append("exposure=");
       builder.append(this.exposure_);
-
       builder.append(", ");
       builder.append("frame_rate=");
       builder.append(this.frame_rate_);
-
       builder.append(", ");
       builder.append("from_ui=");
       builder.append(this.from_ui_);
-
       builder.append(", ");
       builder.append("gain=");
       builder.append(this.gain_);
-
       builder.append(", ");
       builder.append("shutter=");
       builder.append(this.shutter_);
-
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append("}");
       return builder.toString();
    }

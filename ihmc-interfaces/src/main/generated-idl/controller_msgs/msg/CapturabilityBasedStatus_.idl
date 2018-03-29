@@ -2,6 +2,7 @@
 #define __controller_msgs__msg__CapturabilityBasedStatus__idl__
 
 #include "geometry_msgs/msg/./Point_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -18,6 +19,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::CapturabilityBasedStatus_")
       struct CapturabilityBasedStatus
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         geometry_msgs::msg::dds::Point capture_point_2d;
         geometry_msgs::msg::dds::Point desired_capture_point_2d;
         geometry_msgs::msg::dds::Point center_of_mass_3d;

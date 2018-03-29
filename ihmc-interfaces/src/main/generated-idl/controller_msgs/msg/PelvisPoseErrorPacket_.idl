@@ -1,6 +1,7 @@
 #ifndef __controller_msgs__msg__PelvisPoseErrorPacket__idl__
 #define __controller_msgs__msg__PelvisPoseErrorPacket__idl__
 
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -14,6 +15,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::PelvisPoseErrorPacket_")
       struct PelvisPoseErrorPacket
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         float residual_error;
         float total_error;
         boolean has_map_been_reset;

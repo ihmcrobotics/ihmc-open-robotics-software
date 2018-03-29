@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * Message for the IHMC humanoid behavior module.
@@ -12,29 +12,39 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public byte robot_side_ = (byte) 255;
    public int collision_severity_level_one_to_three_;
 
    public HandCollisionDetectedPacket()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public HandCollisionDetectedPacket(HandCollisionDetectedPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(HandCollisionDetectedPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       robot_side_ = other.robot_side_;
 
       collision_severity_level_one_to_three_ = other.collision_severity_level_one_to_three_;
+
    }
 
-   public byte getRobotSide()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return robot_side_;
+      return header_;
    }
 
    public void setRobotSide(byte robot_side)
@@ -42,14 +52,19 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
       robot_side_ = robot_side;
    }
 
-   public int getCollisionSeverityLevelOneToThree()
+   public byte getRobotSide()
    {
-      return collision_severity_level_one_to_three_;
+      return robot_side_;
    }
 
    public void setCollisionSeverityLevelOneToThree(int collision_severity_level_one_to_three)
    {
       collision_severity_level_one_to_three_ = collision_severity_level_one_to_three;
+   }
+
+   public int getCollisionSeverityLevelOneToThree()
+   {
+      return collision_severity_level_one_to_three_;
    }
 
    @Override
@@ -60,6 +75,8 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -81,6 +98,8 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
 
       HandCollisionDetectedPacket otherMyClass = (HandCollisionDetectedPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -96,13 +115,14 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandCollisionDetectedPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("collision_severity_level_one_to_three=");
       builder.append(this.collision_severity_level_one_to_three_);
-
       builder.append("}");
       return builder.toString();
    }

@@ -1,74 +1,21 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "ClearDelayQueueMessage" defined in "ClearDelayQueueMessage_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "ClearDelayQueueMessage" defined in "ClearDelayQueueMessage_.idl".
+ * Use this class to provide the TopicDataType to a Participant.
  *
- * This file was automatically generated from ClearDelayQueueMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit ClearDelayQueueMessage_.idl instead.
+ * This file was automatically generated from ClearDelayQueueMessage_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * ClearDelayQueueMessage_.idl instead.
+ *
  */
 public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ClearDelayQueueMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ClearDelayQueueMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
-
-   public ClearDelayQueueMessagePubSubType()
-   {
-
-   }
-
-   public static int getMaxCdrSerializedSize()
-   {
-      return getMaxCdrSerializedSize(0);
-   }
-
-   public static int getMaxCdrSerializedSize(int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ClearDelayQueueMessage data)
-   {
-      return getCdrSerializedSize(data, 0);
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ClearDelayQueueMessage data, int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public static void write(controller_msgs.msg.dds.ClearDelayQueueMessage data, us.ihmc.idl.CDR cdr)
-   {
-
-      cdr.write_type_2(data.getClassSimpleNameBasedHashCode());
-
-      cdr.write_type_7(data.getClearAllDelayBuffers());
-   }
-
-   public static void read(controller_msgs.msg.dds.ClearDelayQueueMessage data, us.ihmc.idl.CDR cdr)
-   {
-
-      data.setClassSimpleNameBasedHashCode(cdr.read_type_2());
-
-      data.setClearAllDelayBuffers(cdr.read_type_7());
-   }
-
-   public static void staticCopy(controller_msgs.msg.dds.ClearDelayQueueMessage src, controller_msgs.msg.dds.ClearDelayQueueMessage dest)
-   {
-      dest.set(src);
-   }
 
    @Override
    public void serialize(controller_msgs.msg.dds.ClearDelayQueueMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
@@ -88,20 +35,81 @@ public class ClearDelayQueueMessagePubSubType implements us.ihmc.pubsub.TopicDat
       deserializeCDR.finishDeserialize();
    }
 
+   public static int getMaxCdrSerializedSize()
+   {
+      return getMaxCdrSerializedSize(0);
+   }
+
+   public static int getMaxCdrSerializedSize(int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ClearDelayQueueMessage data)
+   {
+      return getCdrSerializedSize(data, 0);
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.ClearDelayQueueMessage data, int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public static void write(controller_msgs.msg.dds.ClearDelayQueueMessage data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
+      cdr.write_type_2(data.getClassSimpleNameBasedHashCode());
+
+      cdr.write_type_7(data.getClearAllDelayBuffers());
+
+   }
+
+   public static void read(controller_msgs.msg.dds.ClearDelayQueueMessage data, us.ihmc.idl.CDR cdr)
+   {
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
+      data.setClassSimpleNameBasedHashCode(cdr.read_type_2());
+
+      data.setClearAllDelayBuffers(cdr.read_type_7());
+
+   }
+
    @Override
    public final void serialize(controller_msgs.msg.dds.ClearDelayQueueMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_2("class_simple_name_based_hash_code", data.getClassSimpleNameBasedHashCode());
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
+      ser.write_type_2("class_simple_name_based_hash_code", data.getClassSimpleNameBasedHashCode());
       ser.write_type_7("clear_all_delay_buffers", data.getClearAllDelayBuffers());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ClearDelayQueueMessage data)
    {
-      data.setClassSimpleNameBasedHashCode(ser.read_type_2("class_simple_name_based_hash_code"));
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
 
+      data.setClassSimpleNameBasedHashCode(ser.read_type_2("class_simple_name_based_hash_code"));
       data.setClearAllDelayBuffers(ser.read_type_7("clear_all_delay_buffers"));
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.ClearDelayQueueMessage src, controller_msgs.msg.dds.ClearDelayQueueMessage dest)
+   {
+      dest.set(src);
    }
 
    @Override

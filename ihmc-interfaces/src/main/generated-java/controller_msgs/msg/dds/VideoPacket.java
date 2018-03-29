@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPacket>, EpsilonComparable<VideoPacket>
 {
@@ -13,6 +13,10 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
    public static final byte VIDEO_SOURCE_CV_THRESHOLD = (byte) 4;
    public static final byte VIDEO_SOURCE_IMAGE_PROCESSING_BEHAVIOR = (byte) 5;
    public static final byte VIDEO_SOURCE_AWARE_FACE_TRACKER = (byte) 6;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public byte video_source_ = (byte) 255;
    public long timestamp_;
    public us.ihmc.idl.IDLSequence.Byte data_;
@@ -22,7 +26,7 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
    public VideoPacket()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
       data_ = new us.ihmc.idl.IDLSequence.Byte(100, "type_9");
 
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
@@ -32,11 +36,13 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
    public VideoPacket(VideoPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(VideoPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       video_source_ = other.video_source_;
 
       timestamp_ = other.timestamp_;
@@ -47,9 +53,12 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       controller_msgs.msg.dds.IntrinsicParametersMessagePubSubType.staticCopy(other.intrinsic_parameters_, intrinsic_parameters_);
    }
 
-   public byte getVideoSource()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return video_source_;
+      return header_;
    }
 
    public void setVideoSource(byte video_source)
@@ -57,14 +66,19 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       video_source_ = video_source;
    }
 
-   public long getTimestamp()
+   public byte getVideoSource()
    {
-      return timestamp_;
+      return video_source_;
    }
 
    public void setTimestamp(long timestamp)
    {
       timestamp_ = timestamp;
+   }
+
+   public long getTimestamp()
+   {
+      return timestamp_;
    }
 
    public us.ihmc.idl.IDLSequence.Byte getData()
@@ -95,6 +109,8 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.video_source_, other.video_source_, epsilon))
          return false;
 
@@ -106,10 +122,8 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
       if (!this.position_.epsilonEquals(other.position_, epsilon))
          return false;
-
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
          return false;
-
       if (!this.intrinsic_parameters_.epsilonEquals(other.intrinsic_parameters_, epsilon))
          return false;
 
@@ -128,6 +142,8 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
       VideoPacket otherMyClass = (VideoPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.video_source_ != otherMyClass.video_source_)
          return false;
 
@@ -136,13 +152,10 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
       if (!this.data_.equals(otherMyClass.data_))
          return false;
-
       if (!this.position_.equals(otherMyClass.position_))
          return false;
-
       if (!this.orientation_.equals(otherMyClass.orientation_))
          return false;
-
       if (!this.intrinsic_parameters_.equals(otherMyClass.intrinsic_parameters_))
          return false;
 
@@ -155,29 +168,26 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       StringBuilder builder = new StringBuilder();
 
       builder.append("VideoPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("video_source=");
       builder.append(this.video_source_);
-
       builder.append(", ");
       builder.append("timestamp=");
       builder.append(this.timestamp_);
-
       builder.append(", ");
       builder.append("data=");
       builder.append(this.data_);
-
       builder.append(", ");
       builder.append("position=");
       builder.append(this.position_);
-
       builder.append(", ");
       builder.append("orientation=");
       builder.append(this.orientation_);
-
       builder.append(", ");
       builder.append("intrinsic_parameters=");
       builder.append(this.intrinsic_parameters_);
-
       builder.append("}");
       return builder.toString();
    }

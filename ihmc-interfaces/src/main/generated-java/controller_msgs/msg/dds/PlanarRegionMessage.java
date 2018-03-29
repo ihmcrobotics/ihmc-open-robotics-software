@@ -1,18 +1,21 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC robot environment awareness module.
- * This message contains a single planar region.
- * It is defined by an origin, a normal, and a concave hull.
- * For easier processing, a set of convex polygons approximating the concave hull are also provided.
+ * This message is part of the IHMC robot environment awareness module. This message contains a
+ * single planar region. It is defined by an origin, a normal, and a concave hull. For easier
+ * processing, a set of convex polygons approximating the concave hull are also provided.
  */
 public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements Settable<PlanarRegionMessage>, EpsilonComparable<PlanarRegionMessage>
 {
    public static final int NO_REGION_ID = -1;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public int region_id_ = -1;
    public us.ihmc.euclid.tuple3D.Point3D region_origin_;
    public us.ihmc.euclid.tuple3D.Vector3D region_normal_;
@@ -21,21 +24,24 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 
    public PlanarRegionMessage()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
       region_origin_ = new us.ihmc.euclid.tuple3D.Point3D();
       region_normal_ = new us.ihmc.euclid.tuple3D.Vector3D();
       concave_hull_ = new controller_msgs.msg.dds.Polygon2DMessage();
       convex_polygons_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.Polygon2DMessage>(100, controller_msgs.msg.dds.Polygon2DMessage.class,
                                                                                                       new controller_msgs.msg.dds.Polygon2DMessagePubSubType());
+
    }
 
    public PlanarRegionMessage(PlanarRegionMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(PlanarRegionMessage other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       region_id_ = other.region_id_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.region_origin_, region_origin_);
@@ -44,14 +50,22 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       convex_polygons_.set(other.convex_polygons_);
    }
 
-   public int getRegionId()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return region_id_;
+      return header_;
    }
 
    public void setRegionId(int region_id)
    {
       region_id_ = region_id;
+   }
+
+   public int getRegionId()
+   {
+      return region_id_;
    }
 
    public us.ihmc.euclid.tuple3D.Point3D getRegionOrigin()
@@ -82,18 +96,17 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.region_id_, other.region_id_, epsilon))
          return false;
 
       if (!this.region_origin_.epsilonEquals(other.region_origin_, epsilon))
          return false;
-
       if (!this.region_normal_.epsilonEquals(other.region_normal_, epsilon))
          return false;
-
       if (!this.concave_hull_.epsilonEquals(other.concave_hull_, epsilon))
          return false;
-
       if (this.convex_polygons_.size() == other.convex_polygons_.size())
       {
          return false;
@@ -122,18 +135,17 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 
       PlanarRegionMessage otherMyClass = (PlanarRegionMessage) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.region_id_ != otherMyClass.region_id_)
          return false;
 
       if (!this.region_origin_.equals(otherMyClass.region_origin_))
          return false;
-
       if (!this.region_normal_.equals(otherMyClass.region_normal_))
          return false;
-
       if (!this.concave_hull_.equals(otherMyClass.concave_hull_))
          return false;
-
       if (!this.convex_polygons_.equals(otherMyClass.convex_polygons_))
          return false;
 
@@ -146,25 +158,23 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("PlanarRegionMessage {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("region_id=");
       builder.append(this.region_id_);
-
       builder.append(", ");
       builder.append("region_origin=");
       builder.append(this.region_origin_);
-
       builder.append(", ");
       builder.append("region_normal=");
       builder.append(this.region_normal_);
-
       builder.append(", ");
       builder.append("concave_hull=");
       builder.append(this.concave_hull_);
-
       builder.append(", ");
       builder.append("convex_polygons=");
       builder.append(this.convex_polygons_);
-
       builder.append("}");
       return builder.toString();
    }

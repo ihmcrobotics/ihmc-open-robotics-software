@@ -1,20 +1,36 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "StampedPosePacket" defined in "StampedPosePacket_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "StampedPosePacket" defined in "StampedPosePacket_.idl". Use this
+ * class to provide the TopicDataType to a Participant.
  *
- * This file was automatically generated from StampedPosePacket_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit StampedPosePacket_.idl instead.
+ * This file was automatically generated from StampedPosePacket_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit StampedPosePacket_.idl
+ * instead.
+ *
  */
 public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.StampedPosePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::StampedPosePacket_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public StampedPosePacketPubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.StampedPosePacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.StampedPosePacket data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -26,7 +42,10 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -45,7 +64,10 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += std_msgs.msg.dds.HeaderPubSubType.getCdrSerializedSize(data.getHeader(), current_alignment);
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -57,9 +79,8 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(controller_msgs.msg.dds.StampedPosePacket data, us.ihmc.idl.CDR cdr)
    {
-
+      std_msgs.msg.dds.HeaderPubSubType.write(data.getHeader(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
-
       cdr.write_type_11(data.getTimestamp());
 
       cdr.write_type_6(data.getConfidenceFactor());
@@ -68,63 +89,48 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
          cdr.write_type_d(data.getFrameId());
       else
          throw new RuntimeException("frame_id field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.StampedPosePacket data, us.ihmc.idl.CDR cdr)
    {
-
+      std_msgs.msg.dds.HeaderPubSubType.read(data.getHeader(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);
-
       data.setTimestamp(cdr.read_type_11());
 
       data.setConfidenceFactor(cdr.read_type_6());
 
       cdr.read_type_d(data.getFrameId());
-   }
 
-   public static void staticCopy(controller_msgs.msg.dds.StampedPosePacket src, controller_msgs.msg.dds.StampedPosePacket dest)
-   {
-      dest.set(src);
-   }
-
-   @Override
-   public void serialize(controller_msgs.msg.dds.StampedPosePacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.StampedPosePacket data) throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
    }
 
    @Override
    public final void serialize(controller_msgs.msg.dds.StampedPosePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
       ser.write_type_11("timestamp", data.getTimestamp());
-
       ser.write_type_6("confidence_factor", data.getConfidenceFactor());
-
       ser.write_type_d("frame_id", data.getFrameId());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.StampedPosePacket data)
    {
+      ser.read_type_a("header", new std_msgs.msg.dds.HeaderPubSubType(), data.getHeader());
+
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
 
       data.setTimestamp(ser.read_type_11("timestamp"));
-
       data.setConfidenceFactor(ser.read_type_6("confidence_factor"));
-
       ser.read_type_d("frame_id", data.getFrameId());
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.StampedPosePacket src, controller_msgs.msg.dds.StampedPosePacket dest)
+   {
+      dest.set(src);
    }
 
    @Override

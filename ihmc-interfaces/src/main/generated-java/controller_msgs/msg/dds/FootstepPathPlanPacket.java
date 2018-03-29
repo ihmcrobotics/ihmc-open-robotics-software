@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * (Obsolete) This message is part of the old IHMC footstep planning module.
@@ -10,6 +10,10 @@ import us.ihmc.euclid.interfaces.Settable;
 public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
       implements Settable<FootstepPathPlanPacket>, EpsilonComparable<FootstepPathPlanPacket>
 {
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public boolean goals_valid_;
    public controller_msgs.msg.dds.FootstepDataMessage start_;
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> original_goals_;
@@ -20,24 +24,25 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
 
    public FootstepPathPlanPacket()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
       start_ = new controller_msgs.msg.dds.FootstepDataMessage();
       original_goals_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage>(100, controller_msgs.msg.dds.FootstepDataMessage.class,
                                                                                                         new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
-
       path_plan_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage>(100, controller_msgs.msg.dds.FootstepDataMessage.class,
                                                                                                    new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
-
       footstep_unknown_ = new us.ihmc.idl.IDLSequence.Boolean(100, "type_7");
+
    }
 
    public FootstepPathPlanPacket(FootstepPathPlanPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(FootstepPathPlanPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       goals_valid_ = other.goals_valid_;
 
       controller_msgs.msg.dds.FootstepDataMessagePubSubType.staticCopy(other.start_, start_);
@@ -47,16 +52,25 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
       sub_optimality_ = other.sub_optimality_;
 
       path_cost_ = other.path_cost_;
+
    }
 
-   public boolean getGoalsValid()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return goals_valid_;
+      return header_;
    }
 
    public void setGoalsValid(boolean goals_valid)
    {
       goals_valid_ = goals_valid;
+   }
+
+   public boolean getGoalsValid()
+   {
+      return goals_valid_;
    }
 
    public controller_msgs.msg.dds.FootstepDataMessage getStart()
@@ -79,24 +93,24 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
       return footstep_unknown_;
    }
 
-   public double getSubOptimality()
-   {
-      return sub_optimality_;
-   }
-
    public void setSubOptimality(double sub_optimality)
    {
       sub_optimality_ = sub_optimality;
    }
 
-   public double getPathCost()
+   public double getSubOptimality()
    {
-      return path_cost_;
+      return sub_optimality_;
    }
 
    public void setPathCost(double path_cost)
    {
       path_cost_ = path_cost;
+   }
+
+   public double getPathCost()
+   {
+      return path_cost_;
    }
 
    @Override
@@ -107,12 +121,13 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.goals_valid_, other.goals_valid_, epsilon))
          return false;
 
       if (!this.start_.epsilonEquals(other.start_, epsilon))
          return false;
-
       if (this.original_goals_.size() == other.original_goals_.size())
       {
          return false;
@@ -163,21 +178,19 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
 
       FootstepPathPlanPacket otherMyClass = (FootstepPathPlanPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.goals_valid_ != otherMyClass.goals_valid_)
          return false;
 
       if (!this.start_.equals(otherMyClass.start_))
          return false;
-
       if (!this.original_goals_.equals(otherMyClass.original_goals_))
          return false;
-
       if (!this.path_plan_.equals(otherMyClass.path_plan_))
          return false;
-
       if (!this.footstep_unknown_.equals(otherMyClass.footstep_unknown_))
          return false;
-
       if (this.sub_optimality_ != otherMyClass.sub_optimality_)
          return false;
 
@@ -193,33 +206,29 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPathPlanPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("goals_valid=");
       builder.append(this.goals_valid_);
-
       builder.append(", ");
       builder.append("start=");
       builder.append(this.start_);
-
       builder.append(", ");
       builder.append("original_goals=");
       builder.append(this.original_goals_);
-
       builder.append(", ");
       builder.append("path_plan=");
       builder.append(this.path_plan_);
-
       builder.append(", ");
       builder.append("footstep_unknown=");
       builder.append(this.footstep_unknown_);
-
       builder.append(", ");
       builder.append("sub_optimality=");
       builder.append(this.sub_optimality_);
-
       builder.append(", ");
       builder.append("path_cost=");
       builder.append(this.path_cost_);
-
       builder.append("}");
       return builder.toString();
    }

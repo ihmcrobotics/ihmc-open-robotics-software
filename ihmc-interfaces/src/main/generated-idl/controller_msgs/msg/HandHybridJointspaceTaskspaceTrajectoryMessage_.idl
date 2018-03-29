@@ -3,6 +3,7 @@
 
 #include "controller_msgs/msg/./JointspaceTrajectoryMessage_.idl"
 #include "controller_msgs/msg/./SE3TrajectoryMessage_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -24,6 +25,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::HandHybridJointspaceTaskspaceTrajectoryMessage_")
       struct HandHybridJointspaceTaskspaceTrajectoryMessage
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         /**
          * Specifies the side of the robot that will execute the trajectory.
          */

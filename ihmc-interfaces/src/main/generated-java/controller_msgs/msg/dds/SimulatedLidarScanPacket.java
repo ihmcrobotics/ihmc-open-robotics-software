@@ -1,18 +1,23 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       implements Settable<SimulatedLidarScanPacket>, EpsilonComparable<SimulatedLidarScanPacket>
 {
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public us.ihmc.idl.IDLSequence.Float ranges_;
    public int sensor_id_;
    public controller_msgs.msg.dds.LidarScanParametersMessage lidar_scan_parameters_;
 
    public SimulatedLidarScanPacket()
    {
+      header_ = new std_msgs.msg.dds.Header();
       ranges_ = new us.ihmc.idl.IDLSequence.Float(100, "type_5");
 
       lidar_scan_parameters_ = new controller_msgs.msg.dds.LidarScanParametersMessage();
@@ -20,15 +25,25 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 
    public SimulatedLidarScanPacket(SimulatedLidarScanPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(SimulatedLidarScanPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       ranges_.set(other.ranges_);
       sensor_id_ = other.sensor_id_;
 
       controller_msgs.msg.dds.LidarScanParametersMessagePubSubType.staticCopy(other.lidar_scan_parameters_, lidar_scan_parameters_);
+   }
+
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
+   {
+      return header_;
    }
 
    public us.ihmc.idl.IDLSequence.Float getRanges()
@@ -36,14 +51,14 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       return ranges_;
    }
 
-   public int getSensorId()
-   {
-      return sensor_id_;
-   }
-
    public void setSensorId(int sensor_id)
    {
       sensor_id_ = sensor_id;
+   }
+
+   public int getSensorId()
+   {
+      return sensor_id_;
    }
 
    public controller_msgs.msg.dds.LidarScanParametersMessage getLidarScanParameters()
@@ -59,6 +74,8 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.ranges_, other.ranges_, epsilon))
          return false;
 
@@ -83,9 +100,10 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 
       SimulatedLidarScanPacket otherMyClass = (SimulatedLidarScanPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (!this.ranges_.equals(otherMyClass.ranges_))
          return false;
-
       if (this.sensor_id_ != otherMyClass.sensor_id_)
          return false;
 
@@ -101,17 +119,17 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
       StringBuilder builder = new StringBuilder();
 
       builder.append("SimulatedLidarScanPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("ranges=");
       builder.append(this.ranges_);
-
       builder.append(", ");
       builder.append("sensor_id=");
       builder.append(this.sensor_id_);
-
       builder.append(", ");
       builder.append("lidar_scan_parameters=");
       builder.append(this.lidar_scan_parameters_);
-
       builder.append("}");
       return builder.toString();
    }

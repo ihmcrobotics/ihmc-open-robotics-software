@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * This message is part of the IHMC footstep planning module.
@@ -17,6 +17,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public static final byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = (byte) 4;
    public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = (byte) 5;
    public static final int NO_PLAN_ID = -1;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public controller_msgs.msg.dds.FootstepDataListMessage footstep_data_list_;
    public byte footstep_planning_result_ = (byte) 255;
    public int plan_id_ = -1;
@@ -26,22 +30,24 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
    public FootstepPlanningToolboxOutputStatus()
    {
+      header_ = new std_msgs.msg.dds.Header();
       footstep_data_list_ = new controller_msgs.msg.dds.FootstepDataListMessage();
-
       planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
       body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>(100, us.ihmc.euclid.tuple3D.Point3D.class,
                                                                                       new geometry_msgs.msg.dds.PointPubSubType());
-
       low_level_planner_goal_ = new us.ihmc.euclid.geometry.Pose2D();
+
    }
 
    public FootstepPlanningToolboxOutputStatus(FootstepPlanningToolboxOutputStatus other)
    {
+      this();
       set(other);
    }
 
    public void set(FootstepPlanningToolboxOutputStatus other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.staticCopy(other.footstep_data_list_, footstep_data_list_);
       footstep_planning_result_ = other.footstep_planning_result_;
 
@@ -52,14 +58,17 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       geometry_msgs.msg.dds.Pose2DPubSubType.staticCopy(other.low_level_planner_goal_, low_level_planner_goal_);
    }
 
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
+   {
+      return header_;
+   }
+
    public controller_msgs.msg.dds.FootstepDataListMessage getFootstepDataList()
    {
       return footstep_data_list_;
-   }
-
-   public byte getFootstepPlanningResult()
-   {
-      return footstep_planning_result_;
    }
 
    public void setFootstepPlanningResult(byte footstep_planning_result)
@@ -67,14 +76,19 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       footstep_planning_result_ = footstep_planning_result;
    }
 
-   public int getPlanId()
+   public byte getFootstepPlanningResult()
    {
-      return plan_id_;
+      return footstep_planning_result_;
    }
 
    public void setPlanId(int plan_id)
    {
       plan_id_ = plan_id;
+   }
+
+   public int getPlanId()
+   {
+      return plan_id_;
    }
 
    public controller_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsList()
@@ -100,9 +114,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!this.footstep_data_list_.epsilonEquals(other.footstep_data_list_, epsilon))
          return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_planning_result_, other.footstep_planning_result_, epsilon))
          return false;
 
@@ -111,7 +126,6 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       if (!this.planar_regions_list_.epsilonEquals(other.planar_regions_list_, epsilon))
          return false;
-
       if (this.body_path_.size() == other.body_path_.size())
       {
          return false;
@@ -143,9 +157,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       FootstepPlanningToolboxOutputStatus otherMyClass = (FootstepPlanningToolboxOutputStatus) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (!this.footstep_data_list_.equals(otherMyClass.footstep_data_list_))
          return false;
-
       if (this.footstep_planning_result_ != otherMyClass.footstep_planning_result_)
          return false;
 
@@ -154,10 +169,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
       if (!this.planar_regions_list_.equals(otherMyClass.planar_regions_list_))
          return false;
-
       if (!this.body_path_.equals(otherMyClass.body_path_))
          return false;
-
       if (!this.low_level_planner_goal_.equals(otherMyClass.low_level_planner_goal_))
          return false;
 
@@ -170,29 +183,26 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanningToolboxOutputStatus {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("footstep_data_list=");
       builder.append(this.footstep_data_list_);
-
       builder.append(", ");
       builder.append("footstep_planning_result=");
       builder.append(this.footstep_planning_result_);
-
       builder.append(", ");
       builder.append("plan_id=");
       builder.append(this.plan_id_);
-
       builder.append(", ");
       builder.append("planar_regions_list=");
       builder.append(this.planar_regions_list_);
-
       builder.append(", ");
       builder.append("body_path=");
       builder.append(this.body_path_);
-
       builder.append(", ");
       builder.append("low_level_planner_goal=");
       builder.append(this.low_level_planner_goal_);
-
       builder.append("}");
       return builder.toString();
    }

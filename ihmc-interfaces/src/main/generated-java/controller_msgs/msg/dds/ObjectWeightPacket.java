@@ -1,8 +1,8 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * This message is part the IHMC humanoid behavior module.
@@ -11,29 +11,39 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Se
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header header_;
    public byte robot_side_ = (byte) 255;
    public double weight_;
 
    public ObjectWeightPacket()
    {
-
+      header_ = new std_msgs.msg.dds.Header();
    }
 
    public ObjectWeightPacket(ObjectWeightPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(ObjectWeightPacket other)
    {
+      std_msgs.msg.dds.HeaderPubSubType.staticCopy(other.header_, header_);
       robot_side_ = other.robot_side_;
 
       weight_ = other.weight_;
+
    }
 
-   public byte getRobotSide()
+   /**
+    * As of March 2018, the header for this message is only use for its sequence ID.
+    */
+   public std_msgs.msg.dds.Header getHeader()
    {
-      return robot_side_;
+      return header_;
    }
 
    public void setRobotSide(byte robot_side)
@@ -41,14 +51,19 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Se
       robot_side_ = robot_side;
    }
 
-   public double getWeight()
+   public byte getRobotSide()
    {
-      return weight_;
+      return robot_side_;
    }
 
    public void setWeight(double weight)
    {
       weight_ = weight;
+   }
+
+   public double getWeight()
+   {
+      return weight_;
    }
 
    @Override
@@ -59,6 +74,8 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Se
       if (other == this)
          return true;
 
+      if (!this.header_.epsilonEquals(other.header_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -80,6 +97,8 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Se
 
       ObjectWeightPacket otherMyClass = (ObjectWeightPacket) other;
 
+      if (!this.header_.equals(otherMyClass.header_))
+         return false;
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -95,13 +114,14 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Se
       StringBuilder builder = new StringBuilder();
 
       builder.append("ObjectWeightPacket {");
+      builder.append("header=");
+      builder.append(this.header_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("weight=");
       builder.append(this.weight_);
-
       builder.append("}");
       return builder.toString();
    }

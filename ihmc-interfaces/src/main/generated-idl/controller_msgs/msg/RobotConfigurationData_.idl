@@ -5,6 +5,7 @@
 #include "controller_msgs/msg/./SpatialVectorMessage_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
+#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
@@ -21,6 +22,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::RobotConfigurationData_")
       struct RobotConfigurationData
       {
+        /**
+         * As of March 2018, the header for this message is only use for its sequence ID.
+         */
+        std_msgs::msg::dds::Header header;
         long long timestamp;
         long long sensor_head_pps_timestamp;
         long joint_name_hash;
