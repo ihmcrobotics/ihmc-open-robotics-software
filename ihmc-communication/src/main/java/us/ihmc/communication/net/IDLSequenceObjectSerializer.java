@@ -49,7 +49,7 @@ public class IDLSequenceObjectSerializer extends Serializer<IDLSequence.Object>
       int length = collection.size();
       output.writeInt(length, true);
       TopicDataType topicDataType = collection.getTopicDataType().newInstance();
-      kryo.writeObject(output, topicDataType);
+      kryo.writeClassAndObject(output, topicDataType);
       Serializer serializer = this.serializer;
       if (genericType != null)
       {
@@ -87,7 +87,7 @@ public class IDLSequenceObjectSerializer extends Serializer<IDLSequence.Object>
       }
 
       int length = input.readInt(true);
-      TopicDataType topicDataType = kryo.readObject(input, TopicDataType.class);
+      TopicDataType topicDataType = (TopicDataType) kryo.readClassAndObject(input);
       IDLSequence.Object resultList = new IDLSequence.Object(length, topicDataType.createData().getClass(), topicDataType);
 
       if (serializer != null)
