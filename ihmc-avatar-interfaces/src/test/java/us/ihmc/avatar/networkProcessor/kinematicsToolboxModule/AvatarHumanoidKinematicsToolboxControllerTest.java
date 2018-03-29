@@ -527,9 +527,9 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
    {
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
       if (isLeftFootInSupport)
-         capturabilityBasedStatus.leftFootSupportPolygon.add();
+         capturabilityBasedStatus.leftFootSupportPolygon2D.add();
       if (isRightFootInSupport)
-         capturabilityBasedStatus.rightFootSupportPolygon.add();
+         capturabilityBasedStatus.rightFootSupportPolygon2D.add();
       return capturabilityBasedStatus;
    }
 }
