@@ -6,6 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 
 public class GetLidarScanExampleBehavior extends AbstractBehavior
@@ -30,7 +31,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    {
       if (pointCloudQueue.isNewPacketAvailable())
       {
-         processPointCloud(pointCloudQueue.getLatestPacket().getDecayingWorldScan());
+         processPointCloud(HumanoidMessageTools.getDecayingWorldScan(pointCloudQueue.getLatestPacket()));
       }
    }
 

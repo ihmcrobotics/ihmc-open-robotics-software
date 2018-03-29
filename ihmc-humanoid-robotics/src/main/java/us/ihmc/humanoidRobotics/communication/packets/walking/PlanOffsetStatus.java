@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import us.ihmc.communication.packets.SettablePacket;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class PlanOffsetStatus extends SettablePacket<PlanOffsetStatus>
+public class PlanOffsetStatus extends Packet<PlanOffsetStatus>
 {
    public Vector3D offsetVector = new Vector3D();
 

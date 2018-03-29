@@ -23,53 +23,54 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 public interface JointAccelerationIntegrationParametersReadOnly
 {
    /**
-    * The alpha position parameter, referred below as &alpha;<sub>P</sub>, is used as a leak ratio
-    * for the second step of the acceleration integration: <br>
-    * q<sub>des</sub><sup>t</sup> = (1 - &alpha;<sub>P</sub>) q<sub>cur</sub><sup>t</sup> +
-    * &alpha;<sub>P</sub> (q<sub>des</sub><sup>t - &Delta;t</sup> + &Delta;t
-    * qDot<sub>des</sub><sup>t</sup>)<br>
-    * where &Delta;t is the duration of a control tick, q<sub>des</sub><sup>t</sup> is the newly
-    * computed desired joint position, q<sub>des</sub><sup>t - &Delta;t</sup> is the previous value
-    * of the desired joint position, q<sub>cur</sub><sup>t</sup> is the current joint position, and
-    * qDot<sub>des</sub><sup>t</sup> is the desired joint velocity.
+    * The break frequency for the position filter used in the acceleration integration. Increasing
+    * this break frequency will cause the integration process to leak more heavily towards the
+    * current joint position. Setting this to positive infinity will cause the integration to be
+    * turned off and the desired joint position value to match the current joint position. Setting
+    * this to zero will do a pure integration of the desired velocity.
     * <p>
-    * The leak ratio &alpha;<sub>P</sub> has to be &in; [0, 1].
+    * The integrated position is computed as follows:</br>
+    * q<sub>des</sub><sup>t</sup> = [(1 - &alpha;<sub>P</sub>) q<sub>cur</sub><sup>t</sup> +
+    * &alpha;<sub>P</sub> q<sub>des</sub><sup>t - &Delta;t</sup>] + &Delta;t
+    * qDot<sub>des</sub><sup>t</sup> </br>
+    * Where &alpha;<sub>P</sub> is the decay rate computed from the integration timestep and the
+    * break frequency defined here.
     * </p>
     * <p>
-    * A high value for the leak ratio &alpha;<sub>P</sub> will cause the joint to never settle by
+    * A low value for the break frequency will cause the joint to never settle by
     * having a stick-slip behavior around the "true" desired position the high-level controller is
-    * trying to achieve. It can simply be downtuned until this undesirable effect disappear. The
-    * following default value can be used as starting point for tuning a joint: &alpha;<sub>P</sub>
-    * = {@link JointAccelerationIntegrationCalculator#DEFAULT_ALPHA_POSITION}.
+    * trying to achieve. It can simply be increased until this undesirable effect disappears. The
+    * following default value can be used as starting point for tuning a joint:<br>
+    * {@link JointAccelerationIntegrationCalculator#DEFAULT_POSITION_BREAK_FREQUENCY}.
     * </p>
     *
-    * @return alphaPosition the leak ratio &alpha;<sub>P</sup> used to compute the desired position.
+    * @return positionBreakFrequency the break frequency used to compute the desired position.
     */
-   double getAlphaPosition();
+   double getPositionBreakFrequency();
 
    /**
-    * The alpha velocity parameter, referred below as &alpha;<sub>V</sub>, is used as a leak ratio
-    * for the first step of the acceleration integration: <br>
-    * qDot<sub>des</sub><sup>t</sup> = &alpha;<sub>V</sub> qDot<sub>des</sub><sup>t - &Delta;t</sup>
+    * The break frequency for the velocity filter used in the acceleration integration. Increasing
+    * this break frequency will cause the integration process to leak more heavily towards a zero
+    * velocity. Setting this to positive infinity will cause the integration to be
+    * turned off and the desired joint velocity value to be zero. Setting
+    * this to zero will do a pure integration of the desired acceleration.
+    * <p>
+    * The integrated position is computed as follows:<br>
+    * qDot<sub>des</sub><sup>t</sup> = [&alpha;<sub>V</sub> qDot<sub>des</sub><sup>t - &Delta;t</sup>]
     * + &Delta;t qDDot<sub>des</sub><sup>t</sup> <br>
-    * where &Delta;t is the duration of a control tick, qDot<sub>des</sub><sup>t</sup> is the newly
-    * computed desired joint velocity, qDot<sub>des</sub><sup>t - &Delta;t</sup> is the previous
-    * value of the desired joint velocity, and qDDot<sub>des</sub><sup>t</sup> is the desired joint
-    * acceleration.
+    * Where &alpha;<sub>V</sub> is the decay rate computed from the integration timestep and the
+    * break frequency defined here.
     * <p>
-    * The leak ratio &alpha;<sub>V</sub> has to be &in; [0, 1].
-    * </p>
-    * <p>
-    * Decreasing the leak ratio &alpha;<sub>V</sub> used to compute the desired velocity appears to
-    * be equivalent to inserting damping to the joint. A low value will cause a loss of precision on
-    * the resulting q<sub>des</sub> such it does impair the tracking that high-level controller is
-    * performing. The following default value can be used as starting point for tuning a joint:
-    * &alpha;<sub>V</sub> = {@link JointAccelerationIntegrationCalculator#DEFAULT_ALPHA_VELOCITY}.
+    * Increasing the break frequency used to compute the desired velocity appears to
+    * be equivalent to inserting damping to the joint. A high value will cause a loss of precision on
+    * the resulting q<sub>des</sub> such that does impair the tracking that high-level controller is
+    * trying to achieve. The following default value can be used as starting point for tuning a joint:<br>
+    * {@link JointAccelerationIntegrationCalculator#DEFAULT_VELOCITY_BREAK_FREQUENCY}.
     * </p>
     *
-    * @return alphaVelocity the leak ratio &alpha;<sub>V</sup> used to compute the desired velocity.
+    * @return velocityBreakFrequency the break frequency used to compute the desired velocity.
     */
-   double getAlphaVelocity();
+   double getVelocityBreakFrequency();
 
    /**
     * This is a safety parameter that is relevant to the tuning process for a joint. The default

@@ -27,13 +27,15 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    /**
     * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
     */
-   public float privileged_joint_angles_;
+   public us.ihmc.idl.IDLSequence.Float privileged_joint_angles_;
 
    public KinematicsToolboxConfigurationMessage()
    {
       privileged_root_joint_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       privileged_root_joint_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       privileged_joint_name_based_hash_codes_ = new us.ihmc.idl.IDLSequence.Long(100, "type_11");
+
+      privileged_joint_angles_ = new us.ihmc.idl.IDLSequence.Float(100, "type_5");
    }
 
    public KinematicsToolboxConfigurationMessage(KinematicsToolboxConfigurationMessage other)
@@ -46,7 +48,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.privileged_root_joint_position_, privileged_root_joint_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.privileged_root_joint_orientation_, privileged_root_joint_orientation_);
       privileged_joint_name_based_hash_codes_.set(other.privileged_joint_name_based_hash_codes_);
-      privileged_joint_angles_ = other.privileged_joint_angles_;
+      privileged_joint_angles_.set(other.privileged_joint_angles_);
    }
 
    /**
@@ -77,17 +79,9 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
    /**
     * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
     */
-   public float getPrivilegedJointAngles()
+   public us.ihmc.idl.IDLSequence.Float getPrivilegedJointAngles()
    {
       return privileged_joint_angles_;
-   }
-
-   /**
-    * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-    */
-   public void setPrivilegedJointAngles(float privileged_joint_angles)
-   {
-      privileged_joint_angles_ = privileged_joint_angles;
    }
 
    @Override
@@ -107,7 +101,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.privileged_joint_name_based_hash_codes_, other.privileged_joint_name_based_hash_codes_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.privileged_joint_angles_, other.privileged_joint_angles_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.privileged_joint_angles_, other.privileged_joint_angles_, epsilon))
          return false;
 
       return true;
@@ -134,7 +128,7 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
       if (!this.privileged_joint_name_based_hash_codes_.equals(otherMyClass.privileged_joint_name_based_hash_codes_))
          return false;
 
-      if (this.privileged_joint_angles_ != otherMyClass.privileged_joint_angles_)
+      if (!this.privileged_joint_angles_.equals(otherMyClass.privileged_joint_angles_))
          return false;
 
       return true;

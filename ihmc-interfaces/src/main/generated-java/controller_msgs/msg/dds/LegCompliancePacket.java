@@ -24,12 +24,12 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
     * gives decent tracking for slow motion and yet still compliant. The numbers in the array
     * correspond to joints HPZ, HPX, HPY, KNY, AKY, AKX, respectively.
     */
-   public us.ihmc.idl.IDLSequence.Double max_velocity_deltas_;
+   public us.ihmc.idl.IDLSequence.Float max_velocity_deltas_;
    public byte robot_side_ = (byte) 255;
 
    public LegCompliancePacket()
    {
-      max_velocity_deltas_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
+      max_velocity_deltas_ = new us.ihmc.idl.IDLSequence.Float(100, "type_5");
    }
 
    public LegCompliancePacket(LegCompliancePacket other)
@@ -50,7 +50,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
     * gives decent tracking for slow motion and yet still compliant. The numbers in the array
     * correspond to joints HPZ, HPX, HPY, KNY, AKY, AKX, respectively.
     */
-   public us.ihmc.idl.IDLSequence.Double getMaxVelocityDeltas()
+   public us.ihmc.idl.IDLSequence.Float getMaxVelocityDeltas()
    {
       return max_velocity_deltas_;
    }
@@ -73,7 +73,7 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
       if (other == this)
          return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.max_velocity_deltas_, other.max_velocity_deltas_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.max_velocity_deltas_, other.max_velocity_deltas_, epsilon))
          return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))

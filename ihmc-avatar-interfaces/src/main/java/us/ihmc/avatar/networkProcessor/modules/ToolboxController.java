@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.SettablePacket;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class ToolboxController
@@ -54,7 +54,7 @@ public abstract class ToolboxController
       }
    }
 
-   protected <T extends SettablePacket<T>> void reportMessage(T statusMessage)
+   protected <T extends Packet<T>> void reportMessage(T statusMessage)
    {
       if (packetDestination == null)
          return;

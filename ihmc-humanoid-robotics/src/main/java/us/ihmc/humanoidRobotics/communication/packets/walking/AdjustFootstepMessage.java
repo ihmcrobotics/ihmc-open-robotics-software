@@ -1,9 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -12,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 @RosMessagePacket(documentation = "The intent of this message is to adjust a footstep when the robot is executing it (a foot is currently swinging to reach the footstep to be adjusted).", rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
@@ -23,16 +22,16 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
    public byte robotSide;
    @RosExportedField(documentation = "Specifies the adjusted position of the footstep. It is expressed in world frame.")
-   public Point3D location;
+   public Point3D location = new Point3D();
    @RosExportedField(documentation = "Specifies the adjusted orientation of the footstep. It is expressed in world frame.")
-   public Quaternion orientation;
+   public Quaternion orientation = new Quaternion();
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
          + "the world. A value of null or an empty list will default to keep the contact points used for the original footstep. Contact points  are expressed in sole frame. This ordering does not matter.\n"
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public List<Point2D> predictedContactPoints;
+   public RecyclingArrayListPubSub<Point2D> predictedContactPoints = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 10);
 
    @RosExportedField(documentation = "The time to delay this command on the controller side before being executed.")
    public double executionDelayTime;
@@ -58,22 +57,11 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       orientation = new Quaternion(other.orientation);
       executionDelayTime = other.executionDelayTime;
       orientation.checkIfUnitary();
-      if (other.predictedContactPoints == null || other.predictedContactPoints.isEmpty())
-      {
-         predictedContactPoints = null;
-      }
-      else
-      {
-         predictedContactPoints = new ArrayList<>();
-         for (Point2D contactPoint : other.predictedContactPoints)
-         {
-            predictedContactPoints.add(new Point2D(contactPoint));
-         }
-      }
+      MessageTools.copyData(other.predictedContactPoints, predictedContactPoints);
       setPacketInformation(other);
    }
 
-   public List<Point2D> getPredictedContactPoints()
+   public RecyclingArrayListPubSub<Point2D> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
@@ -83,19 +71,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       return location;
    }
 
-   public void getLocation(Point3D locationToPack)
-   {
-      locationToPack.set(location);
-   }
-
    public Quaternion getOrientation()
    {
       return orientation;
-   }
-
-   public void getOrientation(Quaternion orientationToPack)
-   {
-      orientationToPack.set(orientation);
    }
 
    public byte getRobotSide()
@@ -120,11 +98,6 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       if (this.orientation == null)
          this.orientation = new Quaternion();
       this.orientation.set(orientation);
-   }
-
-   public void setPredictedContactPoints(List<Point2D> predictedContactPoints)
-   {
-      this.predictedContactPoints = predictedContactPoints;
    }
 
    /**
@@ -209,12 +182,5 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       }
 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateFootstepDataMessage(this);
    }
 }

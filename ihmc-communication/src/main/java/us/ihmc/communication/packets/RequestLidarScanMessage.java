@@ -17,7 +17,7 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage>
       setPacketInformation(other);
    }
 
-   public boolean isRemoveShadows()
+   public boolean getRemoveShadows()
    {
       return removeShadows;
    }
@@ -27,7 +27,7 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage>
       this.removeShadows = removeShadows;
    }
 
-   public boolean isRemoveSelfCollisions()
+   public boolean getRemoveSelfCollisions()
    {
       return removeSelfCollisions;
    }

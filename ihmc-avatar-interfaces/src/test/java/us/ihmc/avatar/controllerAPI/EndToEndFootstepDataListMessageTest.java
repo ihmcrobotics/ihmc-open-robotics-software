@@ -89,7 +89,8 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
          // between 0.75 and 1.25 times the nominal time:
          double swingTime = (1.0 + 0.5 * (random.nextDouble() + 0.5)) * nominalSwingTime;
          double transferTime = (1.0 + 0.5 * (random.nextDouble() + 0.5)) * nominalTransferTime;
-         footstep.setTimings(swingTime, transferTime);
+         footstep.setSwingDuration(swingTime);
+         footstep.setTransferDuration(transferTime);
 
          footstepList.add(footstep);
          totalTime += swingTime + transferTime;
@@ -108,13 +109,16 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
                break;
             }
 
-            message.add(footstepList.get(stepsPackedInMessage));
+            message.footstepDataList.add().set(footstepList.get(stepsPackedInMessage));
             stepsPackedInMessage++;
          }
-         message.setExecutionMode(ExecutionMode.QUEUE);
+         message.queueingProperties.setExecutionMode(ExecutionMode.QUEUE.toByte());
+         message.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
          messages.add(message);
       }
-      messages.get(0).setExecutionMode(ExecutionMode.OVERRIDE);
+      FootstepDataListMessage r = messages.get(0);
+      r.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      r.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
 
       YoVariable<?> numberOfStepsInController = drcSimulationTestHelper.getSimulationConstructionSet().getVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
       int expectedNumberOfSteps = 0;
@@ -124,7 +128,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       for (int messageIdx = 0; messageIdx < messages.size(); messageIdx++)
       {
          drcSimulationTestHelper.send(messages.get(messageIdx));
-         expectedNumberOfSteps += messages.get(messageIdx).getDataList().size();
+         expectedNumberOfSteps += messages.get(messageIdx).getFootstepDataList().size();
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeBetweenSendingMessages));
          assertEquals(expectedNumberOfSteps, (int) numberOfStepsInController.getValueAsLongBits());
          timeUntilDone -= timeBetweenSendingMessages;

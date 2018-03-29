@@ -1,9 +1,9 @@
 package us.ihmc.quadrupedRobotics.controller.position.states;
 
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
@@ -35,7 +35,12 @@ public class QuadrupedPositionDoNothingController implements QuadrupedController
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
+   {
+   }
+
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
    {
       return null;
    }

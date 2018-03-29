@@ -11,6 +11,7 @@ import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.communication.packets.LidarScanMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -95,12 +96,13 @@ public class LidarScanViewer implements Runnable
 
       Point3D32 scanPoint = new Point3D32();
       meshBuilder.clear();
-      for (int i = 0; i < message.getNumberOfScanPoints(); i++)
+      int numberOfScanPoints = message.scan.size() / 3;
+      for (int i = 0; i < numberOfScanPoints; i++)
       {
-         double alpha = i / (double) message.getNumberOfScanPoints();
+         double alpha = i / (double) numberOfScanPoints;
          Color color = Color.hsb(alpha * 240.0, 1.0, 1.0);
 
-         message.getScanPoint(i, scanPoint);
+         MessageTools.unpackScanPoint(message, i, scanPoint);
 
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, color);
       }

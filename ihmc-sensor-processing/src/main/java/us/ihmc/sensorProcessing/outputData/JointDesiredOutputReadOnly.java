@@ -99,42 +99,34 @@ public abstract class JointDesiredOutputReadOnly
    public abstract double getVelocityScaling();
 
    /**
-    * Returns true if a leak rate for the integration of the desired acceleration to a desired
+    * Returns true if a break frequency for the integration of the desired acceleration to a desired
     * velocity was set for this joint.
-    * @see #getVelocityIntegrationLeakRate()
+    * @see #getVelocityIntegrationBreakFrequency()
     */
-   public abstract boolean hasVelocityIntegrationLeakRate();
+   public abstract boolean hasVelocityIntegrationBreakFrequency();
 
    /**
-    * <p>
     * If the integration of desired accelerations is handled on the joint level this value allows
-    * to specify a leak rate for the integration of the desired acceleration to a desired velocity.
-    * In its simplest form the integration equation might look like this:</br>
-    * qd_desired(T+dt) = velocityLeak * qd(T) + dt * qdd_desired
-    * </p>
-    * The value of this parameter needs to be between 0.0 and 1.0.
+    * to specify a break frequency for the integration of the desired acceleration to a desired velocity.
+    *
+    * @return the value of this parameter needs to be between 0.0 and infinity.
     */
-   public abstract double getVelocityIntegrationLeakRate();
+   public abstract double getVelocityIntegrationBreakFrequency();
 
    /**
-    * Returns true if a leak rate for the integration of the desired acceleration to a desired
+    * Returns true if a break frequency for the integration of the desired acceleration to a desired
     * position was set for this joint.
-    * @see #getPositionIntegrationLeakRate()
+    * @see #getPositionIntegrationBreakFrequency()
     */
-   public abstract boolean hasPositionIntegrationLeakRate();
+   public abstract boolean hasPositionIntegrationBreakFrequency();
 
    /**
-    * <p>
     * If the integration of desired accelerations is handled on the joint level this value allows
-    * to specify a leak rate for the integration of the desired acceleration and the desired
-    * velocity to a desired position. In its simplest form the integration equation might look like
-    * this:</br>
-    * q_desired(T+dt) = leakPosition * (q_desired(T) + dt * qd_desired(T)) + (1.0 - leakPosition) * q(T)</br>
-    * Here, the desired position is leaking towards the actual (measured) joint position.
-    * </p>
-    * The value of this parameter needs to be between 0.0 and 1.0.
+    * to specify a break frequency for the integration of the desired velocity to a desired position.
+    *
+    * @return the value of this parameter needs to be between 0.0 and infinity.
     */
-   public abstract double getPositionIntegrationLeakRate();
+   public abstract double getPositionIntegrationBreakFrequency();
 
    @Override
    public String toString()
@@ -154,10 +146,10 @@ public abstract class JointDesiredOutputReadOnly
          ret += "masterGain = " + getMasterGain() + "\n";
       if (hasVelocityScaling())
          ret += "velocityScaling = " + getVelocityScaling() + "\n";
-      if (hasVelocityIntegrationLeakRate())
-         ret += "velocityIntegrationLeakRate = " + getVelocityIntegrationLeakRate() + "\n";
-      if (hasPositionIntegrationLeakRate())
-         ret += "positionIntegrationLeakRate = " + getPositionIntegrationLeakRate() + "\n";
+      if (hasVelocityIntegrationBreakFrequency())
+         ret += "velocityIntegrationBreakFrequency = " + getVelocityIntegrationBreakFrequency() + "\n";
+      if (hasPositionIntegrationBreakFrequency())
+         ret += "positionIntegrationBreakFrequency = " + getPositionIntegrationBreakFrequency() + "\n";
       return ret;
    }
 }

@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import java.util.ArrayList;
-
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 {
@@ -10,11 +10,11 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_STOP_SEARCH = 1;
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_UPDATE_START = 2;
 
-   public FootstepDataMessage startFootstep;
+   public FootstepDataMessage startFootstep = new FootstepDataMessage();
    public double thetaStart;
    public double maxSuboptimality = 1;
 
-   public ArrayList<FootstepDataMessage> goals = new ArrayList<FootstepDataMessage>();
+   public RecyclingArrayListPubSub<FootstepDataMessage> goals = new RecyclingArrayListPubSub<>(FootstepDataMessage.class, FootstepDataMessage::new, 5);
 
    public byte footstepPlanRequestType;
 
@@ -26,19 +26,10 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    @Override
    public void set(FootstepPlanRequestPacket other)
    {
-      startFootstep = new FootstepDataMessage();
       startFootstep.set(other.startFootstep);
       thetaStart = other.thetaStart;
       maxSuboptimality = other.maxSuboptimality;
-
-      goals = new ArrayList<>();
-      for (int i = 0; i < other.goals.size(); i++)
-      {
-         FootstepDataMessage footstep = new FootstepDataMessage();
-         footstep.set(other.goals.get(i));
-         goals.add(footstep);
-      }
-
+      MessageTools.copyData(other.goals, goals);
       footstepPlanRequestType = other.footstepPlanRequestType;
 
       setPacketInformation(other);
@@ -55,13 +46,8 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
          return false;
       if (!this.startFootstep.epsilonEquals(other.startFootstep, epsilon))
          return false;
-      if (this.goals.size() != other.goals.size())
+      if (!MessageTools.epsilonEquals(goals, other.goals, epsilon))
          return false;
-      for (int i = 0; i < goals.size(); i++)
-      {
-         if (!goals.get(i).epsilonEquals(other.goals.get(i), epsilon))
-            return false;
-      }
       return true;
    }
 }

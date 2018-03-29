@@ -1,15 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.humanoidRobotics.communication.packets.JointspaceTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
 {
    @RosExportedField(documentation = "Trajectories for each joint.")
-   public JointspaceTrajectoryMessage jointspaceTrajectory;
+   public JointspaceTrajectoryMessage jointspaceTrajectory = new JointspaceTrajectoryMessage();
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -28,7 +26,6 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
    public SpineTrajectoryMessage(SpineTrajectoryMessage spineTrajectoryMessage)
    {
       jointspaceTrajectory = new JointspaceTrajectoryMessage(spineTrajectoryMessage.jointspaceTrajectory);
-      setUniqueId(spineTrajectoryMessage.getUniqueId());
    }
 
    @Override
@@ -37,14 +34,6 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
       jointspaceTrajectory = new JointspaceTrajectoryMessage();
       jointspaceTrajectory.set(other.jointspaceTrajectory);
       setPacketInformation(other);
-   }
-
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (jointspaceTrajectory != null)
-         jointspaceTrajectory.setUniqueId(uniqueId);
    }
 
    public void setJointspaceTrajectory(JointspaceTrajectoryMessage jointspaceTrajectory)
@@ -57,22 +46,11 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage>
       return jointspaceTrajectory;
    }
 
-   public QueueableMessage getQueueingProperties()
-   {
-      return jointspaceTrajectory.getQueueingProperties();
-   }
-
    @Override
    public boolean epsilonEquals(SpineTrajectoryMessage other, double epsilon)
    {
       if (!jointspaceTrajectory.epsilonEquals(other.jointspaceTrajectory, epsilon))
          return false;
       return true;
-   }
-
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateSpineTrajectoryMessage(this);
    }
 }

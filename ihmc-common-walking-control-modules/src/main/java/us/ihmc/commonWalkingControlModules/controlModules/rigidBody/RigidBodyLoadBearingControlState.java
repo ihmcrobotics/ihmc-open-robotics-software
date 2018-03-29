@@ -191,8 +191,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       bodyFixedControlledPose.setToZero(contactFrame);
       bodyFixedControlledPose.changeFrame(bodyFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-      spatialFeedbackControlCommand.set(desiredContactPosition, zeroInWorld, zeroInWorld);
-      spatialFeedbackControlCommand.set(desiredContactOrientation, zeroInWorld, zeroInWorld);
+      spatialFeedbackControlCommand.set(desiredContactPosition, zeroInWorld);
+      spatialFeedbackControlCommand.set(desiredContactOrientation, zeroInWorld);
+      spatialFeedbackControlCommand.setFeedForwardAction(zeroInWorld, zeroInWorld);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
 
       spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);

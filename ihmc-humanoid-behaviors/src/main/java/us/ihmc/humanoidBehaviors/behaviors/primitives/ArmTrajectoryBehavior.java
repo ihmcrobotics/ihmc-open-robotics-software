@@ -6,6 +6,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -60,7 +61,7 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
 
       robotSide = RobotSide.fromByte(armTrajectoryMessage.getRobotSide());
       startTime.set(yoTime.getDoubleValue());
-      trajectoryTime.set(armTrajectoryMessage.getJointspaceTrajectory().getTrajectoryTime());
+      trajectoryTime.set(HumanoidMessageTools.unpackTrajectoryTime(armTrajectoryMessage.getJointspaceTrajectory()));
 
       hasInputBeenSet.set(true);
    }

@@ -9,7 +9,6 @@ import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -151,7 +150,7 @@ public class SimpleLidarRobotController implements RobotController
          lidarScanMessage.robotTimestamp = -1L;
          lidarScanMessage.lidarPosition = lidarPosition;
          lidarScanMessage.lidarOrientation = lidarOrientation;
-         lidarScanMessage.scan = newScan.toArray();
+         MessageTools.copyData(newScan, lidarScanMessage.scan);
          executorService.execute(() -> packetCommunicator.send(lidarScanMessage));
       }
 

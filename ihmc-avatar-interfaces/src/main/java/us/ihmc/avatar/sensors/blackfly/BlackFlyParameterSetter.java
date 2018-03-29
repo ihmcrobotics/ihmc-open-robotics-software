@@ -47,9 +47,9 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
 
       PrintTools.debug(DEBUG, this, "packet fr UI " + packet);
       Map<String, Object> parameters = new HashMap<>();
-      parameters.put("auto_exposure", packet.isAutoExposure());
-      parameters.put("auto_gain", packet.isAutoGain());
-      parameters.put("auto_shutter", packet.isAutoShutter());
+      parameters.put("auto_exposure", packet.getAutoExposure());
+      parameters.put("auto_gain", packet.getAutoGain());
+      parameters.put("auto_shutter", packet.getAutoShutter());
       parameters.put("exposure", packet.getExposure());
       parameters.put("gain", packet.getGain());
       parameters.put("shutter_speed", packet.getShutter());
@@ -76,7 +76,7 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
 
       if (dynamicReconfigureClient.isConnected())
       {
-         if (packet.isFromUI() && packet.getSide() == BlackFlyParameterSetter.this.side.toByte()) //avoid hearing my own packet
+         if (packet.getFromUI() && packet.getRobotSide() == BlackFlyParameterSetter.this.side.toByte()) //avoid hearing my own packet
          {
             new Thread("BlackflyDynamicReconfigureSetter")
             {

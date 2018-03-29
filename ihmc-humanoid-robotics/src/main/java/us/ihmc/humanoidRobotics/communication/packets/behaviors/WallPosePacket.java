@@ -11,8 +11,8 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 public class WallPosePacket extends Packet<WallPosePacket>
 {
    public double cuttingRadius = 0.20;
-   public Point3D centerPosition;
-   public Quaternion centerOrientation;
+   public Point3D centerPosition = new Point3D();
+   public Quaternion centerOrientation = new Quaternion();
 
    public WallPosePacket()
    {

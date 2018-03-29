@@ -33,6 +33,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTestInterface
@@ -62,7 +63,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       Quaternion desiredOrientation = new Quaternion(desiredRandomChestOrientation);
       ReferenceFrame chestCoMFrame = chest.getBodyFixedFrame();
       HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredOrientation, chestCoMFrame);
-      headTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrame(ReferenceFrame.getWorldFrame());
+      headTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       drcSimulationTestHelper.send(headTrajectoryMessage);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.

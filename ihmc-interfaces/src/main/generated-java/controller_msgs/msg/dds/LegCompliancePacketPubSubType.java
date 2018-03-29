@@ -27,7 +27,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -44,7 +44,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getMaxVelocityDeltas().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += (data.getMaxVelocityDeltas().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 

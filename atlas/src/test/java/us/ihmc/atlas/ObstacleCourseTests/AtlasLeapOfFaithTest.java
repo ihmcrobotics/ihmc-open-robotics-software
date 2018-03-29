@@ -1,5 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasJointMap;
@@ -20,45 +21,51 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
 {
    private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
-   @ContinuousIntegrationTest(estimatedDuration = 90.0)
-   @Test(timeout = 230000)
    /** {@inheritDoc} */
+   @ContinuousIntegrationTest(estimatedDuration = 90.0)
+   @Ignore("Revisit when there are contact patches.")
+   @Test(timeout = 230000)
    public void testUnknownStepDownTwoFeetOnEachStep() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.08;
       super.testUnknownStepDownTwoFeetOnEachStep(stepDownHeight);
    }
 
+   /** {@inheritDoc} */
    @ContinuousIntegrationTest(estimatedDuration = 90.0)
    @Test(timeout = 230000)
-   /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.08;
-      super.testUnknownStepDownOneFootOnEachStep(stepDownHeight);
+      double stepLength = 0.31;
+      double stairLength = 0.35;
+      super.testUnknownStepDownOneFootOnEachStep(stepLength, stairLength, stepDownHeight);
    }
 
+   /** {@inheritDoc} */
    @ContinuousIntegrationTest(estimatedDuration = 90.0)
    @Test(timeout = 230000)
-   /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStepLong() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.10;
-      super.testUnknownStepDownOneFootOnEachStepLong(stepDownHeight);
+      double stepLength = 0.37;
+      double stairLength = 0.5;
+      super.testUnknownStepDownOneFootOnEachStepLong(stepLength, stairLength, stepDownHeight);
    }
 
+   /** {@inheritDoc} */
    @ContinuousIntegrationTest(estimatedDuration = 90.0)
    @Test(timeout = 230000)
-   /** {@inheritDoc} */
    public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.07;
       super.testUnknownStepDownOneFootOnEachStepWithUncertainty(stepDownHeight);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 110.0)
-   @Test(timeout = 230000)
    /** {@inheritDoc} */
+   @ContinuousIntegrationTest(estimatedDuration = 110.0)
+   @Ignore("Re-enable when planar region constraints are used.")
+   @Test(timeout = 230000)
    public void testRandomHeightField() throws SimulationExceededMaximumTimeException
    {
       double maxStepIncrease = 0.07;
@@ -67,9 +74,9 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
       super.testRandomHeightField(maxStepHeight, minStepHeight, maxStepIncrease);
    }
 
+   /** {@inheritDoc} */
    @ContinuousIntegrationTest(estimatedDuration = 90.0)
    @Test(timeout = 230000)
-   /** {@inheritDoc} */
    public void testDropOffsWhileWalking() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.10;
@@ -160,11 +167,5 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
          return true;
       }
 
-   }
-
-   public static void main(String[] args) throws Exception
-   {
-      AtlasLeapOfFaithTest test = new AtlasLeapOfFaithTest();
-      test.testUnknownStepDownOneFootOnEachStep();
    }
 }

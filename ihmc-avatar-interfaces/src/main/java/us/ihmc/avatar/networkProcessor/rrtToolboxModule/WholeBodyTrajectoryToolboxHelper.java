@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.NormOps;
 
+import us.ihmc.communication.packets.SelectionMatrix3DMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -129,7 +130,11 @@ public class WholeBodyTrajectoryToolboxHelper
       }
 
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-      trajectory.getSelectionMatrix(selectionMatrix);
+      selectionMatrix.resetSelection();
+      SelectionMatrix3DMessage angularSelection = trajectory.getAngularSelectionMatrix();
+      SelectionMatrix3DMessage linearSelection = trajectory.getLinearSelectionMatrix();
+      selectionMatrix.setAngularAxisSelection(angularSelection.xSelected, angularSelection.ySelected, angularSelection.zSelected);
+      selectionMatrix.setLinearAxisSelection(linearSelection.xSelected, linearSelection.ySelected, linearSelection.zSelected);
       if (!selectionMatrix.isLinearXSelected() || !selectionMatrix.isLinearYSelected() || !selectionMatrix.isLinearZSelected())
          positionErrorQ.zero();
       if (!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())
@@ -171,7 +176,11 @@ public class WholeBodyTrajectoryToolboxHelper
       }
 
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-      trajectory.getSelectionMatrix(selectionMatrix);
+      selectionMatrix.resetSelection();
+      SelectionMatrix3DMessage angularSelection = trajectory.getAngularSelectionMatrix();
+      SelectionMatrix3DMessage linearSelection = trajectory.getLinearSelectionMatrix();
+      selectionMatrix.setAngularAxisSelection(angularSelection.xSelected, angularSelection.ySelected, angularSelection.zSelected);
+      selectionMatrix.setLinearAxisSelection(linearSelection.xSelected, linearSelection.ySelected, linearSelection.zSelected);
       if (!selectionMatrix.isLinearXSelected() || !selectionMatrix.isLinearYSelected() || !selectionMatrix.isLinearZSelected())
          positionErrorQ.zero();
       if (!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())

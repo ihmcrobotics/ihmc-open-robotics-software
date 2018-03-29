@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 
 public class DoorLocationPacket extends Packet<DoorLocationPacket>
 {
-   public Pose3D doorTransformToWorld;
+   public Pose3D doorTransformToWorld = new Pose3D();
 
    public DoorLocationPacket()
    {
@@ -15,19 +15,17 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket>
    @Override
    public void set(DoorLocationPacket other)
    {
-      doorTransformToWorld = new Pose3D(other.doorTransformToWorld);
+      doorTransformToWorld.set(other.doorTransformToWorld);
       setPacketInformation(other);
    }
 
-   public Pose3D getValveTransformToWorld()
+   public Pose3D getDoorTransformToWorld()
    {
       return doorTransformToWorld;
    }
 
    public boolean epsilonEquals(DoorLocationPacket doorPacket, double epsilon)
    {
-      boolean transformEquals = doorTransformToWorld.epsilonEquals(doorPacket.getValveTransformToWorld(), epsilon);
-
-      return transformEquals;
+      return doorTransformToWorld.epsilonEquals(doorPacket.getDoorTransformToWorld(), epsilon);
    }
 }

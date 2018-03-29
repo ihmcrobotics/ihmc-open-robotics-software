@@ -40,7 +40,9 @@ public interface FeedbackControllerDataReadOnly
       LINEAR_VELOCITY("LinearVelocity"),
       ANGULAR_VELOCITY("AngularVelocity"),
       LINEAR_ACCELERATION("LinearAcceleration"),
-      ANGULAR_ACCELERATION("AngularAcceleration");
+      ANGULAR_ACCELERATION("AngularAcceleration"),
+      LINEAR_FORCE("LinearForce"),
+      ANGULAR_TORQUE("AngularTorque");
 
       private final String name;
 

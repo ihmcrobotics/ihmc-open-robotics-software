@@ -427,7 +427,7 @@ public class KinematicsToolboxController extends ToolboxController
       KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, oneDoFJoints);
       updateVisualization();
 
-      inverseKinematicsSolution.setDesiredJointState(rootJoint, oneDoFJoints, false);
+      MessageTools.packDesiredJointState(inverseKinematicsSolution, rootJoint, oneDoFJoints, false);
       inverseKinematicsSolution.setSolutionQuality(solutionQuality.getDoubleValue());
 
       if (tickCount++ == numberOfTicksToSendSolution)

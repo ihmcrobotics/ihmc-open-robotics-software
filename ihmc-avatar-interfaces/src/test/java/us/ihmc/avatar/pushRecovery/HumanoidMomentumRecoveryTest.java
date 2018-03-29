@@ -174,7 +174,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       footstepData.setLocation(stepLocation);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide.toByte());
-      message.add(footstepData);
+      message.footstepDataList.add().set(footstepData);
    }
 
    private boolean standAndPush() throws SimulationExceededMaximumTimeException
@@ -200,7 +200,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       footstepData.setLocation(placeToStepInWorld);
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(stepSide.toByte());
-      message.add(footstepData);
+      message.footstepDataList.add().set(footstepData);
 
       drcSimulationTestHelper.send(message);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));

@@ -715,7 +715,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
    {
       doActionTimer.startMeasurement();
 
@@ -741,6 +741,11 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       updateFeedForwardModelAndFrames();
 
       doActionTimer.stopMeasurement();
+   }
+
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
+   {
       return null;
    }
 

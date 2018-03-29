@@ -200,7 +200,8 @@ public class KinematicsToolboxControllerTest
          FramePoint3D desiredPosition = new FramePoint3D(hand.getBodyFixedFrame());
          desiredPosition.changeFrame(worldFrame);
          KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, desiredPosition);
-         message.setWeight(20.0);
+         message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+         message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
          commandInputManager.submitMessage(message);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
@@ -239,7 +240,8 @@ public class KinematicsToolboxControllerTest
          randomizeJointPositions(random, randomizedFullRobotModel, 0.3);
          RigidBody hand = ScrewTools.findRigidBodiesWithNames(ScrewTools.computeRigidBodiesAfterThisJoint(randomizedFullRobotModel.getRight()), "handLink")[0];
          KinematicsToolboxRigidBodyMessage message = holdRigidBodyCurrentPose(hand);
-         message.setWeight(20.0);
+         message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+         message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
          commandInputManager.submitMessage(message);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
@@ -398,7 +400,7 @@ public class KinematicsToolboxControllerTest
    {
       OneDoFJoint[] joints = initialFullRobotModel.getRight();
       RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], new IMUDefinition[0]);
-      robotConfigurationData.setJointState(Arrays.stream(joints).collect(Collectors.toList()));
+      RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
 
       FloatingInverseDynamicsJoint rootJoint = initialFullRobotModel.getLeft();
       if (rootJoint != null)

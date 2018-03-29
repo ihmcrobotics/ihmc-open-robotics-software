@@ -3,7 +3,6 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 
 @RosMessagePacket(documentation = "This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points."
@@ -13,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
 public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
 {
    @RosExportedField(documentation = "The orientation trajectory information.")
-   public SO3TrajectoryMessage so3Trajectory;
+   public SO3TrajectoryMessage so3Trajectory = new SO3TrajectoryMessage();
 
    /**
     * Empty constructor for serialization. Set the id of the message to
@@ -21,7 +20,6 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
     */
    public ChestTrajectoryMessage()
    {
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -31,28 +29,18 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
     */
    public ChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
    {
-      so3Trajectory = new SO3TrajectoryMessage(chestTrajectoryMessage.so3Trajectory);
-      setUniqueId(chestTrajectoryMessage.getUniqueId());
+      so3Trajectory.set(chestTrajectoryMessage.so3Trajectory);
       setDestination(chestTrajectoryMessage.getDestination());
    }
 
    @Override
    public void set(ChestTrajectoryMessage other)
    {
-      so3Trajectory = new SO3TrajectoryMessage();
       so3Trajectory.set(other.so3Trajectory);
       setPacketInformation(other);
    }
 
-   @Override
-   public void setUniqueId(long uniqueId)
-   {
-      super.setUniqueId(uniqueId);
-      if (so3Trajectory != null)
-         so3Trajectory.setUniqueId(uniqueId);
-   }
-
-   public SO3TrajectoryMessage getSO3Trajectory()
+   public SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3Trajectory;
    }
@@ -63,11 +51,5 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage>
       if (!so3Trajectory.epsilonEquals(other.so3Trajectory, epsilon))
          return false;
       return true;
-   }
-
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateChestTrajectoryMessage(this);
    }
 }

@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTool
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -358,9 +359,9 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       double trajectoryTime = 0.5;
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPose);
       footTrajectoryMessage.getSe3Trajectory().setUseCustomControlFrame(true);
-      footTrajectoryMessage.getSe3Trajectory().setControlFrameOrientation(new Quaternion(controlFrameTransform.getRotationMatrix()));
-      footTrajectoryMessage.getSe3Trajectory().setControlFramePosition(new Point3D(controlFrameTransform.getTranslationVector()));
-      footTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(trajectoryFrame);
+      footTrajectoryMessage.getSe3Trajectory().controlFramePose.setOrientation(new Quaternion(controlFrameTransform.getRotationMatrix()));
+      footTrajectoryMessage.getSe3Trajectory().controlFramePose.setPosition(new Point3D(controlFrameTransform.getTranslationVector()));
+      footTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(trajectoryFrame));
 
       drcSimulationTestHelper.send(footTrajectoryMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime));
@@ -484,8 +485,9 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
       for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
       {
-         FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, numberOfTrajectoryPointsPerMessage);
-         footTrajectoryMessage.setUniqueId(id);
+         FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage();
+         footTrajectoryMessage.setRobotSide(robotSide.toByte());
+         footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setMessageId(id);
          if (messageIndex > 0)
          {
             footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
@@ -508,8 +510,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
             sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
             scs.addStaticLinkGraphics(sphere);
 
-            footTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity,
-                  desiredAngularVelocity, ReferenceFrame.getWorldFrame());
+            footTrajectoryMessage.getSe3Trajectory().taskspaceTrajectoryPoints.add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity));
 
             FrameSE3TrajectoryPoint framePoint = new FrameSE3TrajectoryPoint(ReferenceFrame.getWorldFrame());
             framePoint.set(time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
@@ -572,13 +573,14 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          sendQueuedFootTrajectoryMessages(scs, robotSide, numberOfMessages, trajectoryPoints);
 
-         FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 5);
-         footTrajectoryMessage.setUniqueId(100);
+         FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage();
+         footTrajectoryMessage.setRobotSide(robotSide.toByte());
+         footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setMessageId(100);
          footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
          footTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setPreviousMessageId((long) 500); //not the right ID
          for(int i = 0; i < 5; i++)
          {
-            footTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(i, i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());
+            footTrajectoryMessage.getSe3Trajectory().taskspaceTrajectoryPoints.add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage((double) i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
          }
          drcSimulationTestHelper.send(footTrajectoryMessage);
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2);

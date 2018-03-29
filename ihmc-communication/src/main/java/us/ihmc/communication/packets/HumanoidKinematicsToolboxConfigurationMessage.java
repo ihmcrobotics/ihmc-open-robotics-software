@@ -49,12 +49,12 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       this.holdSupportFootPositions = holdSupportFootPositions;
    }
 
-   public boolean holdCurrentCenterOfMassXYPosition()
+   public boolean getHoldCurrentCenterOfMassXYPosition()
    {
       return holdCurrentCenterOfMassXYPosition;
    }
 
-   public boolean holdSupportFootPositions()
+   public boolean getHoldSupportFootPositions()
    {
       return holdSupportFootPositions;
    }

@@ -1,0 +1,2 @@
+float64 beep_rate
+bool enable_tone

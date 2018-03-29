@@ -18,7 +18,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.idl.PreallocatedList;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
@@ -104,7 +107,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       chestTrajectoryBehavior.setInput(chestTrajectoryMessage);
       assertTrue(chestTrajectoryBehavior.hasInputBeenSet());
 
-      double totalSimTime = chestTrajectoryMessage.getSO3Trajectory().getTrajectoryTime();
+      double totalSimTime = chestTrajectoryMessage.getSo3Trajectory().taskspaceTrajectoryPoints.getLast().time;
       totalSimTime += 1.0;
 
       FramePose3D initialChestPose = getCurrentChestPose();
@@ -115,7 +118,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       PrintTools.debug(this, " final Chest Pose :\n" + finalChestPose);
       FramePose3D desiredChestPose = new FramePose3D();
 
-      desiredChestPose.set(initialChestPose.getPosition(), chestTrajectoryMessage.getSO3Trajectory().getLastTrajectoryPoint().orientation);
+      desiredChestPose.set(initialChestPose.getPosition(), chestTrajectoryMessage.getSo3Trajectory().taskspaceTrajectoryPoints.getLast().orientation);
       assertPosesAreWithinThresholds(desiredChestPose, finalChestPose);
 
       assertTrue(success);

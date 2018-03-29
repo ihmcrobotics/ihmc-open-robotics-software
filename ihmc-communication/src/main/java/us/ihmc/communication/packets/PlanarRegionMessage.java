@@ -1,21 +1,17 @@
 package us.ihmc.communication.packets;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
 {
    public int regionId = PlanarRegion.NO_REGION_ID;
-   public Point3D32 regionOrigin;
-   public Vector3D32 regionNormal;
-   public Point2D32[] concaveHullVertices;
-   public List<Point2D32[]> convexPolygonsVertices;
+   public Point3D32 regionOrigin = new Point3D32();
+   public Vector3D32 regionNormal = new Vector3D32();
+   public Polygon2DMessage concaveHull = new Polygon2DMessage();
+   public RecyclingArrayListPubSub<Polygon2DMessage> convexPolygons = new RecyclingArrayListPubSub<>(Polygon2DMessage.class, Polygon2DMessage::new, 5);
 
    public PlanarRegionMessage()
    {
@@ -27,13 +23,8 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
       regionId = other.regionId;
       regionOrigin = new Point3D32(other.regionOrigin);
       regionNormal = new Vector3D32(other.regionNormal);
-      concaveHullVertices = Arrays.stream(other.concaveHullVertices).map(Point2D32::new).toArray(Point2D32[]::new);
-      convexPolygonsVertices = new ArrayList<>(other.convexPolygonsVertices.size());
-      for (int i = 0; i < other.convexPolygonsVertices.size(); i++)
-      {
-         Point2D32[] vertices = Arrays.stream(other.convexPolygonsVertices.get(i)).map(Point2D32::new).toArray(Point2D32[]::new);
-         convexPolygonsVertices.add(vertices);
-      }
+      concaveHull.set(other.concaveHull);
+      MessageTools.copyData(other.convexPolygons, convexPolygons);
       setPacketInformation(other);
    }
 
@@ -57,19 +48,14 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
       return regionNormal;
    }
 
-   public int getConcaveHullSize()
+   public Polygon2DMessage getConcaveHull()
    {
-      return concaveHullVertices.length;
+      return concaveHull;
    }
 
-   public Point2D32[] getConcaveHullVertices()
+   public RecyclingArrayListPubSub<Polygon2DMessage> getConvexPolygons()
    {
-      return concaveHullVertices;
-   }
-
-   public List<Point2D32[]> getConvexPolygonsVertices()
-   {
-      return convexPolygonsVertices;
+      return convexPolygons;
    }
 
    @Override
@@ -81,33 +67,11 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage>
          return false;
       if (!regionNormal.epsilonEquals(other.regionNormal, (float) epsilon))
          return false;
-      if (convexPolygonsVertices.size() != other.convexPolygonsVertices.size())
+      if (!concaveHull.epsilonEquals(other.concaveHull, epsilon))
          return false;
-      if (concaveHullVertices.length != other.concaveHullVertices.length)
+      if (!MessageTools.epsilonEquals(convexPolygons, other.convexPolygons, epsilon))
          return false;
 
-      for (int vertexIndex = 0; vertexIndex < concaveHullVertices.length; vertexIndex++)
-      {
-         Point2D32 thisVertex = concaveHullVertices[vertexIndex];
-         Point2D32 otherVertex = other.concaveHullVertices[vertexIndex];
-         if (!thisVertex.epsilonEquals(otherVertex, (float) epsilon))
-            return false;
-      }
-
-      for (int polygonIndex = 0; polygonIndex < convexPolygonsVertices.size(); polygonIndex++)
-      {
-         Point2D32[] thisPolygon = convexPolygonsVertices.get(polygonIndex);
-         Point2D32[] otherPolygon = other.convexPolygonsVertices.get(polygonIndex);
-
-         if (thisPolygon.length != otherPolygon.length)
-            return false;
-
-         for (int vertexIndex = 0; vertexIndex < thisPolygon.length; vertexIndex++)
-         {
-            if (!thisPolygon[vertexIndex].epsilonEquals(otherPolygon[polygonIndex], (float) epsilon))
-               return false;
-         }
-      }
       return true;
    }
 }

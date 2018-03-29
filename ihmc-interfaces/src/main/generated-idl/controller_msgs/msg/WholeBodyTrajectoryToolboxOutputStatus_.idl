@@ -16,6 +16,13 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::WholeBodyTrajectoryToolboxOutputStatus_")
       struct WholeBodyTrajectoryToolboxOutputStatus
       {
+        /**
+         * 0: not completed.
+         * 1: fail to find initial guess.
+         * 2: fail to complete expanding tree.
+         * 3: fail to optimize path.
+         * 4: solution is available.
+         */
         long planning_result;
         sequence<double, 50> trajectory_times;
         sequence<controller_msgs::msg::dds::KinematicsToolboxOutputStatus, 50> robot_configurations;

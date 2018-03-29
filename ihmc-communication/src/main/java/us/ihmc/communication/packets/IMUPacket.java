@@ -26,19 +26,6 @@ public class IMUPacket extends Packet<IMUPacket>
       setPacketInformation(other);
    }
 
-   public void set(Vector3D32 linearAcceleration, Quaternion32 orientation, Vector3D32 angularVelocity)
-   {
-      set(linearAcceleration, orientation, angularVelocity, 0.0);
-   }
-
-   public void set(Vector3D32 linearAcceleration, Quaternion32 orientation, Vector3D32 angularVelocity, double time)
-   {
-      this.linearAcceleration.set(linearAcceleration);
-      this.orientation.set(orientation);
-      this.angularVelocity.set(angularVelocity);
-      this.time = time;
-   }
-
    public Vector3D32 getLinearAcceleration()
    {
       return linearAcceleration;

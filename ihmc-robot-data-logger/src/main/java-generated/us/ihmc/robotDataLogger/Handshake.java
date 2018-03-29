@@ -1,182 +1,280 @@
 package us.ihmc.robotDataLogger;
-/**
-* 
-* Definition of the class "Handshake" defined in Handshake.idl. 
-*
-* This file was automatically generated from Handshake.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit Handshake.idl instead.
-*
-*/
-public class Handshake
+
+import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
+
+public class Handshake extends Packet<Handshake> implements Settable<Handshake>, EpsilonComparable<Handshake>
 {
-    public Handshake()
-    {
-        	registries_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> (1024, us.ihmc.robotDataLogger.YoRegistryDefinition.class, new us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType());
+   public double dt_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> registries_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> variables_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> joints_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> graphicObjects_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> artifacts_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> enumTypes_;
+   public us.ihmc.robotDataLogger.Summary summary_;
 
-        	variables_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> (32767, us.ihmc.robotDataLogger.YoVariableDefinition.class, new us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType());
+   public Handshake()
+   {
 
-        	joints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> (128, us.ihmc.robotDataLogger.JointDefinition.class, new us.ihmc.robotDataLogger.JointDefinitionPubSubType());
+      registries_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>(1024, us.ihmc.robotDataLogger.YoRegistryDefinition.class,
+                                                                                                     new us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType());
 
-        	graphicObjects_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
+      variables_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>(32767, us.ihmc.robotDataLogger.YoVariableDefinition.class,
+                                                                                                    new us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType());
 
-        	artifacts_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> (2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class, new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
+      joints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>(128, us.ihmc.robotDataLogger.JointDefinition.class,
+                                                                                            new us.ihmc.robotDataLogger.JointDefinitionPubSubType());
 
-        	enumTypes_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> (1024, us.ihmc.robotDataLogger.EnumType.class, new us.ihmc.robotDataLogger.EnumTypePubSubType());
+      graphicObjects_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>(2048,
+                                                                                                         us.ihmc.robotDataLogger.GraphicObjectMessage.class,
+                                                                                                         new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
 
-        	summary_ = new us.ihmc.robotDataLogger.Summary();
-        
-        
-    }
+      artifacts_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>(2048, us.ihmc.robotDataLogger.GraphicObjectMessage.class,
+                                                                                                    new us.ihmc.robotDataLogger.GraphicObjectMessagePubSubType());
 
-    public void set(Handshake other)
-    {
-        	dt_ = other.dt_;
-            registries_.set(other.registries_);	variables_.set(other.variables_);	joints_.set(other.joints_);	graphicObjects_.set(other.graphicObjects_);	artifacts_.set(other.artifacts_);	enumTypes_.set(other.enumTypes_);	us.ihmc.robotDataLogger.SummaryPubSubType.staticCopy(other.summary_, summary_);
-    }
+      enumTypes_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>(1024, us.ihmc.robotDataLogger.EnumType.class,
+                                                                                        new us.ihmc.robotDataLogger.EnumTypePubSubType());
 
-    public void setDt(double dt)
-    {
-        dt_ = dt;
-    }
+      summary_ = new us.ihmc.robotDataLogger.Summary();
+   }
 
-    public double getDt()
-    {
-        return dt_;
-    }
+   public Handshake(Handshake other)
+   {
+      set(other);
+   }
 
-        
+   public void set(Handshake other)
+   {
+      dt_ = other.dt_;
 
-    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>  getRegistries()
-    {
-        return registries_;
-    }
+      registries_.set(other.registries_);
+      variables_.set(other.variables_);
+      joints_.set(other.joints_);
+      graphicObjects_.set(other.graphicObjects_);
+      artifacts_.set(other.artifacts_);
+      enumTypes_.set(other.enumTypes_);
+      us.ihmc.robotDataLogger.SummaryPubSubType.staticCopy(other.summary_, summary_);
+   }
 
-        
+   public double getDt()
+   {
+      return dt_;
+   }
 
-    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>  getVariables()
-    {
-        return variables_;
-    }
+   public void setDt(double dt)
+   {
+      dt_ = dt;
+   }
 
-        
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> getRegistries()
+   {
+      return registries_;
+   }
 
-    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>  getJoints()
-    {
-        return joints_;
-    }
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> getVariables()
+   {
+      return variables_;
+   }
 
-        
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> getJoints()
+   {
+      return joints_;
+   }
 
-    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  getGraphicObjects()
-    {
-        return graphicObjects_;
-    }
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> getGraphicObjects()
+   {
+      return graphicObjects_;
+   }
 
-        
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage> getArtifacts()
+   {
+      return artifacts_;
+   }
 
-    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  getArtifacts()
-    {
-        return artifacts_;
-    }
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> getEnumTypes()
+   {
+      return enumTypes_;
+   }
 
-        
+   public us.ihmc.robotDataLogger.Summary getSummary()
+   {
+      return summary_;
+   }
 
-    public us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  getEnumTypes()
-    {
-        return enumTypes_;
-    }
+   @Override
+   public boolean epsilonEquals(Handshake other, double epsilon)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
 
-        
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.dt_, other.dt_, epsilon))
+         return false;
 
-    public us.ihmc.robotDataLogger.Summary getSummary()
-    {
-        return summary_;
-    }
+      if (this.registries_.size() == other.registries_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.registries_.size(); i++)
+         {
+            if (!this.registries_.get(i).epsilonEquals(other.registries_.get(i), epsilon))
+               return false;
+         }
+      }
 
-        
+      if (this.variables_.size() == other.variables_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.variables_.size(); i++)
+         {
+            if (!this.variables_.get(i).epsilonEquals(other.variables_.get(i), epsilon))
+               return false;
+         }
+      }
 
+      if (this.joints_.size() == other.joints_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.joints_.size(); i++)
+         {
+            if (!this.joints_.get(i).epsilonEquals(other.joints_.get(i), epsilon))
+               return false;
+         }
+      }
 
+      if (this.graphicObjects_.size() == other.graphicObjects_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.graphicObjects_.size(); i++)
+         {
+            if (!this.graphicObjects_.get(i).epsilonEquals(other.graphicObjects_.get(i), epsilon))
+               return false;
+         }
+      }
 
+      if (this.artifacts_.size() == other.artifacts_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.artifacts_.size(); i++)
+         {
+            if (!this.artifacts_.get(i).epsilonEquals(other.artifacts_.get(i), epsilon))
+               return false;
+         }
+      }
 
-    @Override
-    public boolean equals(java.lang.Object other)
-    {
-        if(other == null) return false;
-        if(other == this) return true;
-        if(!(other instanceof Handshake)) return false;
-        Handshake otherMyClass = (Handshake)other;
-        boolean returnedValue = true;
+      if (this.enumTypes_.size() == other.enumTypes_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.enumTypes_.size(); i++)
+         {
+            if (!this.enumTypes_.get(i).epsilonEquals(other.enumTypes_.get(i), epsilon))
+               return false;
+         }
+      }
 
-        returnedValue &= this.dt_ == otherMyClass.dt_;
+      if (!this.summary_.epsilonEquals(other.summary_, epsilon))
+         return false;
 
-                
-        returnedValue &= this.registries_.equals(otherMyClass.registries_);
-                
-        returnedValue &= this.variables_.equals(otherMyClass.variables_);
-                
-        returnedValue &= this.joints_.equals(otherMyClass.joints_);
-                
-        returnedValue &= this.graphicObjects_.equals(otherMyClass.graphicObjects_);
-                
-        returnedValue &= this.artifacts_.equals(otherMyClass.artifacts_);
-                
-        returnedValue &= this.enumTypes_.equals(otherMyClass.enumTypes_);
-                
-        returnedValue &= this.summary_.equals(otherMyClass.summary_);
-                
+      return true;
+   }
 
-        return returnedValue;
-    }
-    
-     @Override
-    public java.lang.String toString()
-    {
-		StringBuilder builder = new StringBuilder();
-		
-      	builder.append("Handshake {");
-        builder.append("dt=");
-        builder.append(this.dt_);
+   @Override
+   public boolean equals(Object other)
+   {
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+      if (!(other instanceof Handshake))
+         return false;
 
-                builder.append(", ");
-        builder.append("registries=");
-        builder.append(this.registries_);
+      Handshake otherMyClass = (Handshake) other;
 
-                builder.append(", ");
-        builder.append("variables=");
-        builder.append(this.variables_);
+      if (this.dt_ != otherMyClass.dt_)
+         return false;
 
-                builder.append(", ");
-        builder.append("joints=");
-        builder.append(this.joints_);
+      if (!this.registries_.equals(otherMyClass.registries_))
+         return false;
 
-                builder.append(", ");
-        builder.append("graphicObjects=");
-        builder.append(this.graphicObjects_);
+      if (!this.variables_.equals(otherMyClass.variables_))
+         return false;
 
-                builder.append(", ");
-        builder.append("artifacts=");
-        builder.append(this.artifacts_);
+      if (!this.joints_.equals(otherMyClass.joints_))
+         return false;
 
-                builder.append(", ");
-        builder.append("enumTypes=");
-        builder.append(this.enumTypes_);
+      if (!this.graphicObjects_.equals(otherMyClass.graphicObjects_))
+         return false;
 
-                builder.append(", ");
-        builder.append("summary=");
-        builder.append(this.summary_);
+      if (!this.artifacts_.equals(otherMyClass.artifacts_))
+         return false;
 
-                
-        builder.append("}");
-		return builder.toString();
-    }
+      if (!this.enumTypes_.equals(otherMyClass.enumTypes_))
+         return false;
 
-    private double dt_; 
-    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>  registries_; 
-    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>  variables_; 
-    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>  joints_; 
-    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  graphicObjects_; 
-    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  artifacts_; 
-    private us.ihmc.idl.IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  enumTypes_; 
-    private us.ihmc.robotDataLogger.Summary summary_; 
+      if (!this.summary_.equals(otherMyClass.summary_))
+         return false;
 
+      return true;
+   }
+
+   @Override
+   public java.lang.String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("Handshake {");
+      builder.append("dt=");
+      builder.append(this.dt_);
+
+      builder.append(", ");
+      builder.append("registries=");
+      builder.append(this.registries_);
+
+      builder.append(", ");
+      builder.append("variables=");
+      builder.append(this.variables_);
+
+      builder.append(", ");
+      builder.append("joints=");
+      builder.append(this.joints_);
+
+      builder.append(", ");
+      builder.append("graphicObjects=");
+      builder.append(this.graphicObjects_);
+
+      builder.append(", ");
+      builder.append("artifacts=");
+      builder.append(this.artifacts_);
+
+      builder.append(", ");
+      builder.append("enumTypes=");
+      builder.append(this.enumTypes_);
+
+      builder.append(", ");
+      builder.append("summary=");
+      builder.append(this.summary_);
+
+      builder.append("}");
+      return builder.toString();
+   }
 }
