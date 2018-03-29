@@ -10,4 +10,4 @@ float32[] desired_joint_angles
 geometry_msgs/Vector3 desired_root_translation
 geometry_msgs/Quaternion desired_root_orientation
 
-float64 solution_quality
+float64 solution_quality -1

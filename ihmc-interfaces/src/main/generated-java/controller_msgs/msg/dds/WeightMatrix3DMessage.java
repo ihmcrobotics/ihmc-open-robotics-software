@@ -22,20 +22,20 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
     */
    public long weight_frame_id_;
    /**
-    * Specifies the qp weight for the x-axis, if set to NaN the controller will use the default
-    * weight for this axis. The weight is NaN by default.
+    * Specifies the qp weight for the x-axis, if set to NaN or to a negative value the controller
+    * will use the default weight for this axis. The weight is -1 by default.
     */
-   public double x_weight_;
+   public double x_weight_ = -1.0;
    /**
-    * Specifies the qp weight for the y-axis, if set to NaN the controller will use the default
-    * weight for this axis. The weight is NaN by default.
+    * Specifies the qp weight for the y-axis, if set to NaN or to a negative value the controller
+    * will use the default weight for this axis. The weight is -1 by default.
     */
-   public double y_weight_;
+   public double y_weight_ = -1.0;
    /**
-    * Specifies the qp weight for the z-axis, if set to NaN the controller will use the default
-    * weight for this axis. The weight is NaN by default.
+    * Specifies the qp weight for the z-axis, if set to NaN or to a negative value the controller
+    * will use the default weight for this axis. The weight is -1 by default.
     */
-   public double z_weight_;
+   public double z_weight_ = -1.0;
 
    public WeightMatrix3DMessage()
    {
@@ -100,8 +100,8 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
    }
 
    /**
-    * Specifies the qp weight for the x-axis, if set to NaN the controller will use the default
-    * weight for this axis. The weight is NaN by default.
+    * Specifies the qp weight for the x-axis, if set to NaN or to a negative value the controller
+    * will use the default weight for this axis. The weight is -1 by default.
     */
    public void setXWeight(double x_weight)
    {
@@ -109,8 +109,8 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
    }
 
    /**
-    * Specifies the qp weight for the x-axis, if set to NaN the controller will use the default
-    * weight for this axis. The weight is NaN by default.
+    * Specifies the qp weight for the x-axis, if set to NaN or to a negative value the controller
+    * will use the default weight for this axis. The weight is -1 by default.
     */
    public double getXWeight()
    {
@@ -118,8 +118,8 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
    }
 
    /**
-    * Specifies the qp weight for the y-axis, if set to NaN the controller will use the default
-    * weight for this axis. The weight is NaN by default.
+    * Specifies the qp weight for the y-axis, if set to NaN or to a negative value the controller
+    * will use the default weight for this axis. The weight is -1 by default.
     */
    public void setYWeight(double y_weight)
    {
@@ -127,8 +127,8 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
    }
 
    /**
-    * Specifies the qp weight for the y-axis, if set to NaN the controller will use the default
-    * weight for this axis. The weight is NaN by default.
+    * Specifies the qp weight for the y-axis, if set to NaN or to a negative value the controller
+    * will use the default weight for this axis. The weight is -1 by default.
     */
    public double getYWeight()
    {
@@ -136,8 +136,8 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
    }
 
    /**
-    * Specifies the qp weight for the z-axis, if set to NaN the controller will use the default
-    * weight for this axis. The weight is NaN by default.
+    * Specifies the qp weight for the z-axis, if set to NaN or to a negative value the controller
+    * will use the default weight for this axis. The weight is -1 by default.
     */
    public void setZWeight(double z_weight)
    {
@@ -145,8 +145,8 @@ public class WeightMatrix3DMessage extends Packet<WeightMatrix3DMessage> impleme
    }
 
    /**
-    * Specifies the qp weight for the z-axis, if set to NaN the controller will use the default
-    * weight for this axis. The weight is NaN by default.
+    * Specifies the qp weight for the z-axis, if set to NaN or to a negative value the controller
+    * will use the default weight for this axis. The weight is -1 by default.
     */
    public double getZWeight()
    {

@@ -30,6 +30,7 @@ module controller_msgs
         controller_msgs::msg::dds::SelectionMatrix3DMessage linear_selection_matrix;
         geometry_msgs::msg::dds::Point control_frame_position_in_end_effector;
         geometry_msgs::msg::dds::Quaternion control_frame_orientation_in_end_effector;
+        @defaultValue(value=-1.0)
         double weight;
       };
     };

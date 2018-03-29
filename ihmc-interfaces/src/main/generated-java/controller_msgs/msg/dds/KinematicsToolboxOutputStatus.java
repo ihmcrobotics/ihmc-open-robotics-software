@@ -19,7 +19,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    public us.ihmc.idl.IDLSequence.Float desired_joint_angles_;
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_translation_;
    public us.ihmc.euclid.tuple4D.Quaternion desired_root_orientation_;
-   public double solution_quality_;
+   public double solution_quality_ = -1.0;
 
    public KinematicsToolboxOutputStatus()
    {
