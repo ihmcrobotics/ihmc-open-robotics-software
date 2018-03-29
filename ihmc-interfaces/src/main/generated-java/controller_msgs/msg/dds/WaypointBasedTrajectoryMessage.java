@@ -22,7 +22,7 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    public controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
    public us.ihmc.euclid.tuple3D.Point3D control_frame_position_in_end_effector_;
    public us.ihmc.euclid.tuple4D.Quaternion control_frame_orientation_in_end_effector_;
-   public double weight_;
+   public double weight_ = -1.0;
 
    public WaypointBasedTrajectoryMessage()
    {

@@ -13,4 +13,4 @@ SelectionMatrix3DMessage linear_selection_matrix
 geometry_msgs/Point control_frame_position_in_end_effector
 geometry_msgs/Quaternion control_frame_orientation_in_end_effector
 
-float64 weight
+float64 weight -1
