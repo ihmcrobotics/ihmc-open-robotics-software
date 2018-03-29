@@ -11,6 +11,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::ExoskeletonBehaviorStatePacket_")
       struct ExoskeletonBehaviorStatePacket
       {
+        /**
+         * This message is used to switch the control scheme between force and position control.
+         * WARNING: When in position control, the IHMC balance algorithms will be disabled and it is up to the user to ensure stability.
+         */
         octet exoskeleton_behavior_state;
       };
     };

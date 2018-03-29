@@ -7,6 +7,11 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class ExoskeletonBehaviorStatePacket extends Packet<ExoskeletonBehaviorStatePacket>
       implements Settable<ExoskeletonBehaviorStatePacket>, EpsilonComparable<ExoskeletonBehaviorStatePacket>
 {
+   /**
+    * This message is used to switch the control scheme between force and position control. WARNING:
+    * When in position control, the IHMC balance algorithms will be disabled and it is up to the
+    * user to ensure stability.
+    */
    public byte exoskeleton_behavior_state_;
 
    public ExoskeletonBehaviorStatePacket()
@@ -24,11 +29,21 @@ public class ExoskeletonBehaviorStatePacket extends Packet<ExoskeletonBehaviorSt
 
    }
 
+   /**
+    * This message is used to switch the control scheme between force and position control. WARNING:
+    * When in position control, the IHMC balance algorithms will be disabled and it is up to the
+    * user to ensure stability.
+    */
    public void setExoskeletonBehaviorState(byte exoskeleton_behavior_state)
    {
       exoskeleton_behavior_state_ = exoskeleton_behavior_state;
    }
 
+   /**
+    * This message is used to switch the control scheme between force and position control. WARNING:
+    * When in position control, the IHMC balance algorithms will be disabled and it is up to the
+    * user to ensure stability.
+    */
    public byte getExoskeletonBehaviorState()
    {
       return exoskeleton_behavior_state_;
