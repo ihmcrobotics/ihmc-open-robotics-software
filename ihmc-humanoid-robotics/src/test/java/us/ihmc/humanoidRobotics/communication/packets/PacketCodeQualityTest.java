@@ -30,14 +30,12 @@ import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 import org.reflections.Reflections;
 
+import com.google.common.base.CaseFormat;
+
+import controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket;
+import controller_msgs.msg.dds.PilotInterfaceActionPacket;
 import controller_msgs.msg.dds.SnapFootstepPacket;
 import controller_msgs.msg.dds.VideoPacket;
-import gnu.trove.list.TByteList;
-import gnu.trove.list.array.TByteArrayList;
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -48,6 +46,8 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.Orientation2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -55,12 +55,12 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.idl.IDLSequence;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.HEALTH)
 public class PacketCodeQualityTest
 {
+   private static final String PACKETS_LOCATION = "controller_msgs.msg.dds";
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
 
@@ -71,7 +71,7 @@ public class PacketCodeQualityTest
    { // This test won't fail on Arrays or Lists
       boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
       allPacketTypes.remove(MessageOfMessages.class);
@@ -120,6 +120,7 @@ public class PacketCodeQualityTest
 
          if (field.getType().isPrimitive())
             continue;
+         field.setAccessible(true);
          if (field.get(object) == null)
             return false;
          if (thirdPartySerializableClasses.contains(field.getType()))
@@ -139,7 +140,7 @@ public class PacketCodeQualityTest
    { // This test won't fail for setUniqueId(long) or validateMessage()
       boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
       allPacketTypes.remove(MessageOfMessages.class);
@@ -158,7 +159,7 @@ public class PacketCodeQualityTest
 
             for (Field field : packetType.getDeclaredFields())
             {
-               String methodSuffix = StringUtils.capitalize(field.getName());
+               String methodSuffix = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, field.getName());
                setterNames.put("set" + methodSuffix, field.getType());
                getterNames.put("get" + methodSuffix, field.getType());
 
@@ -251,11 +252,11 @@ public class PacketCodeQualityTest
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
    @Test(timeout = Integer.MAX_VALUE)
-   public void testPacketsUseRecyclingArrayListPubSubOnly()
+   public void testPacketsUseIDLSequenceObjectOnly()
    { // This test won't fail on Arrays or Lists
       boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
       allPacketTypes.remove(MessageOfMessages.class);
@@ -274,7 +275,8 @@ public class PacketCodeQualityTest
 
                Class<?> typeToCheck = field.getType();
 
-               if (typeToCheck.isArray() || (Iterable.class.isAssignableFrom(typeToCheck) && !RecyclingArrayListPubSub.class.isAssignableFrom(typeToCheck)))
+               if (Iterable.class.isAssignableFrom(typeToCheck) && !IDLSequence.Object.class.isAssignableFrom(typeToCheck)
+                     && !IDLSequence.StringBuilderHolder.class.isAssignableFrom(typeToCheck))
                {
                   if (!packetTypesWithIterableOrArrayField.containsKey(packetType))
                      packetTypesWithIterableOrArrayField.put(packetType, new ArrayList<>());
@@ -312,7 +314,7 @@ public class PacketCodeQualityTest
    {
       boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
 
       Set<Class<? extends Packet>> packetTypesWithAdditionalSuperTypes = new HashSet<>();
@@ -324,8 +326,11 @@ public class PacketCodeQualityTest
             if (packetType.getSuperclass() != Packet.class)
                packetTypesWithAdditionalSuperTypes.add(packetType);
 
-            if (packetType.getInterfaces().length != 0)
+            if (Arrays.stream(packetType.getInterfaces()).filter(i -> !i.equals(EpsilonComparable.class)).filter(i -> !i.equals(Settable.class)).findAny()
+                      .isPresent())
+            {
                packetTypesWithAdditionalSuperTypes.add(packetType);
+            }
          }
          catch (Exception e)
          {
@@ -355,7 +360,7 @@ public class PacketCodeQualityTest
    {
       boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
 
       Set<Class<? extends Packet>> packetTypesWithNestedType = new HashSet<>();
@@ -397,7 +402,7 @@ public class PacketCodeQualityTest
    { // This test won't fail on Arrays or Lists
       boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       TIntObjectHashMap<Class> allPacketSimpleNameBasedHashCode = new TIntObjectHashMap<>();
       int numberOfCollisions = 0;
@@ -426,11 +431,11 @@ public class PacketCodeQualityTest
    { // This test won't fail on Arrays or Lists
       boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
       allPacketTypes.remove(LocalVideoPacket.class); // That guy is a packet but does not make it to the network. It will stay on Kryo.
-      allPacketTypes.remove(MessageOfMessages.class); // This guy has its own ticket to get converted. 
+      allPacketTypes.remove(MessageOfMessages.class); // This guy has its own ticket to get converted.
 
       Map<Class<? extends Packet>, List<Class>> packetTypesWithIllegalFieldTypes = new HashMap<>();
 
@@ -446,11 +451,11 @@ public class PacketCodeQualityTest
 
                Class<?> typeToCheck = field.getType();
 
-               if (RecyclingArrayListPubSub.class.isAssignableFrom(typeToCheck))
+               if (IDLSequence.Object.class.isAssignableFrom(typeToCheck))
                {
                   Packet packetInstance = packetType.newInstance();
                   Object fieldInstance = field.get(packetInstance);
-                  Field clazzField = typeToCheck.getDeclaredField("clazz");
+                  Field clazzField = typeToCheck.getSuperclass().getDeclaredField("clazz");
                   clazzField.setAccessible(true);
                   typeToCheck = (Class<?>) clazzField.get(fieldInstance);
                }
@@ -507,7 +512,7 @@ public class PacketCodeQualityTest
    {
       boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
 
       Set<Class<? extends Packet>> packetTypesWithNonFinalStaticFields = new HashSet<>();
@@ -551,7 +556,7 @@ public class PacketCodeQualityTest
    {
       boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
 
       Set<Class<? extends Packet>> packetTypesWithEnumFields = new HashSet<>();
@@ -597,12 +602,14 @@ public class PacketCodeQualityTest
    @Test(timeout = Integer.MAX_VALUE)
    public void testPacketByteFieldNameRefersToEnumType() throws NoSuchFieldException, SecurityException
    {
-      boolean verbose = false;
+      boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
-      Set<String> enumLowerCaseNames = reflections.getSubTypesOf(Enum.class).stream().map(Class::getSimpleName).map(name -> name.toLowerCase())
-                                                  .collect(Collectors.toSet());
+      Reflections packetReflections = new Reflections(PACKETS_LOCATION);
+      Reflections enumReflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = packetReflections.getSubTypesOf(Packet.class);
+      Set<String> enumLowerCaseNames = enumReflections.getSubTypesOf(Enum.class).stream().map(Class::getSimpleName).map(name -> name.toLowerCase())
+                                                      .collect(Collectors.toSet());
+      enumLowerCaseNames.add("pilotaction"); // In exo land
 
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
@@ -626,11 +633,11 @@ public class PacketCodeQualityTest
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
 
-               boolean isEnum = byte.class == typeToCheck || TByteList.class.isAssignableFrom(typeToCheck);
+               boolean isEnum = byte.class == typeToCheck || IDLSequence.Byte.class.isAssignableFrom(typeToCheck);
 
                if (isEnum)
                {
-                  String expectedToContainEnumName = field.getName().toLowerCase();
+                  String expectedToContainEnumName = field.getName().toLowerCase().replace("_", "");
                   boolean foundMatchingEnum = enumLowerCaseNames.stream().filter(enumName -> expectedToContainEnumName.contains(enumName)).findFirst()
                                                                 .isPresent();
                   if (!foundMatchingEnum)
@@ -670,16 +677,19 @@ public class PacketCodeQualityTest
    {
       boolean verbose = true;
 
-      Reflections reflections = new Reflections("us.ihmc");
-      Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
+      Reflections packetReflections = new Reflections(PACKETS_LOCATION);
+      Reflections enumReflections = new Reflections("us.ihmc");
+      Set<Class<? extends Packet>> allPacketTypes = packetReflections.getSubTypesOf(Packet.class);
       Map<String, Class<? extends Enum>> nameToEnumMap = new HashMap<>();
-      reflections.getSubTypesOf(Enum.class).forEach(type -> nameToEnumMap.put(type.getSimpleName().toLowerCase(), type));
+      enumReflections.getSubTypesOf(Enum.class).forEach(type -> nameToEnumMap.put(type.getSimpleName().toLowerCase(), type));
 
       Set<Class<? extends Packet>> packetTypesWithByteFieldNameNotMatchingEnum = new HashSet<>();
 
       Set<Field> fieldsToIngore = new HashSet<>();
       fieldsToIngore.add(VideoPacket.class.getField("data_"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
+      fieldsToIngore.add(PilotInterfaceActionPacket.class.getField("pilot_action_")); // In exo land
+      fieldsToIngore.add(ExoskeletonBehaviorStatePacket.class.getField("exoskeleton_behavior_state_")); // In exo land
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {
@@ -698,9 +708,9 @@ public class PacketCodeQualityTest
                Class<?> typeToCheck = field.getType();
                while (typeToCheck.isArray())
                   typeToCheck = typeToCheck.getComponentType();
-               if (byte.class != typeToCheck &&  !TByteList.class.isAssignableFrom(typeToCheck))
+               if (byte.class != typeToCheck && !IDLSequence.Byte.class.isAssignableFrom(typeToCheck))
                   continue;
-               String expectedToContainEnumName = field.getName().toLowerCase();
+               String expectedToContainEnumName = field.getName().toLowerCase().replace("_", "");
                Set<Entry<String, Class<? extends Enum>>> potentialMatchingEnums = nameToEnumMap.entrySet().stream()
                                                                                                .filter(entry -> expectedToContainEnumName.contains(entry.getKey()))
                                                                                                .collect(Collectors.toSet());
@@ -740,11 +750,11 @@ public class PacketCodeQualityTest
                      System.out.println("Example 1:");
                      for (Enum enumConstant2 : enumConstants)
                         System.out.println("public static final byte " + toUpperCaseWithUnderscore(matchingEnum.getSimpleName()) + "_" + enumConstant2.name()
-                              + " = " + ((byte) enumConstant2.ordinal()) + ";");
+                              + " = " + (byte) enumConstant2.ordinal() + ";");
                      System.out.println("");
                      System.out.println("Example 2:");
                      for (Enum enumConstant2 : enumConstants)
-                        System.out.println("public static final byte " + enumConstant2.name() + " = " + ((byte) enumConstant2.ordinal()) + ";");
+                        System.out.println("public static final byte " + enumConstant2.name() + " = " + (byte) enumConstant2.ordinal() + ";");
 
                      fail(errorMessage);
                   }
@@ -806,7 +816,7 @@ public class PacketCodeQualityTest
    {
       boolean verbose = false;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
 
       Set<Class<? extends Packet>> packetTypesWithoutEmptyConstructor = new HashSet<>();
@@ -864,7 +874,7 @@ public class PacketCodeQualityTest
    {
       boolean printPacketTypesWithRandomConstructor = false;
 
-      Reflections reflections = new Reflections("us.ihmc");
+      Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
 
       Set<Class<? extends Packet>> packetTypesWithRandomConstructor = new HashSet<>();
@@ -887,47 +897,6 @@ public class PacketCodeQualityTest
       assertTrue("Packet sub-types should not implement a random constructor.", packetTypesWithRandomConstructor.isEmpty());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = Integer.MAX_VALUE)
-   public void testAllPacketFieldsArePublic()
-   {
-      IHMCCommunicationKryoNetClassList classList = new IHMCCommunicationKryoNetClassList();
-
-      for (Class<?> clazz : classList.getPacketClassList())
-      {
-         checkIfAllFieldsArePublic(clazz);
-      }
-
-      for (Class<?> clazz : classList.getPacketFieldList())
-      {
-         checkIfAllFieldsArePublic(clazz);
-      }
-   }
-
-   private void checkIfAllFieldsArePublic(Class<?> clazz)
-   {
-      if (List.class.isAssignableFrom(clazz))
-         return;
-
-      if (thirdPartySerializableClasses.contains(clazz) || allowedEuclidTypes.contains(clazz))
-         return;
-
-      for (Field field : clazz.getDeclaredFields())
-      {
-         if (Modifier.isStatic(field.getModifiers()))
-            continue;
-         if (Modifier.isTransient(field.getModifiers()))
-            continue;
-         if (field.isSynthetic())
-            continue;
-
-         assertTrue("Class " + clazz.getCanonicalName() + " has non-public field " + field.getName() + " declared by "
-               + field.getDeclaringClass().getCanonicalName(), Modifier.isPublic(field.getModifiers()));
-         assertFalse("Class " + clazz.getCanonicalName() + " has final field " + field.getName() + " declared by "
-               + field.getDeclaringClass().getCanonicalName(), Modifier.isFinal(field.getModifiers()));
-      }
-   }
-
    @SuppressWarnings("rawtypes")
    private static final Set<Class<? extends Packet>> reaInternalComms;
    static
@@ -939,12 +908,14 @@ public class PacketCodeQualityTest
    private static final Set<Class<?>> thirdPartySerializableClasses = new HashSet<>();
    static
    {
-      thirdPartySerializableClasses.add(RecyclingArrayListPubSub.class);
-      thirdPartySerializableClasses.add(TByteArrayList.class);
-      thirdPartySerializableClasses.add(TFloatArrayList.class);
-      thirdPartySerializableClasses.add(TDoubleArrayList.class);
-      thirdPartySerializableClasses.add(TIntArrayList.class);
-      thirdPartySerializableClasses.add(TLongArrayList.class);
+      thirdPartySerializableClasses.add(IDLSequence.Object.class);
+      thirdPartySerializableClasses.add(IDLSequence.Byte.class);
+      thirdPartySerializableClasses.add(IDLSequence.Float.class);
+      thirdPartySerializableClasses.add(IDLSequence.Double.class);
+      thirdPartySerializableClasses.add(IDLSequence.Integer.class);
+      thirdPartySerializableClasses.add(IDLSequence.Boolean.class);
+      thirdPartySerializableClasses.add(IDLSequence.Long.class);
+      thirdPartySerializableClasses.add(IDLSequence.StringBuilderHolder.class);
       thirdPartySerializableClasses.add(StringBuilder.class);
    }
 
