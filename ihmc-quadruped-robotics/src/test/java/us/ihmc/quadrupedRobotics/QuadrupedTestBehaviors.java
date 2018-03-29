@@ -81,8 +81,8 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
       conductor.simulate();
 
-      double initialDoubleSupportDuration = variables.getXGaitEndDoubleSupportDurationInput().getDoubleValue();
-      double initialEndPhaseShift = variables.getXGaitEndPhaseShiftInput().getDoubleValue();
+      double initialDoubleSupportDuration = stepTeleopManager.getXGaitSettings().getEndDoubleSupportDuration();
+      double initialEndPhaseShift = stepTeleopManager.getXGaitSettings().getEndPhaseShift();
 
       stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.1);
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
