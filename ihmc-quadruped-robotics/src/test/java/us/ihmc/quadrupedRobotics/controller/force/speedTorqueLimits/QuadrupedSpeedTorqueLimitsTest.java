@@ -98,7 +98,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    {
       double originalHeight = standupPrecisely();
       
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));

@@ -14,12 +14,6 @@ import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOriented
 
 public class QuadrupedTestBehaviors
 {
-   public static void readyXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
-   {
-      standUp(conductor, variables);
-      squareUp(conductor, variables);
-   }
-
    public static void readyXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedStepTeleopManager stepTeleopManager) throws AssertionFailedError
    {
       standUp(conductor, variables, stepTeleopManager);
@@ -41,15 +35,6 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(YoVariableTestGoal.doubleWithinEpsilon(variables.getRobotBodyZ(), variables.getYoComPositionInputZ().getDoubleValue(), 0.1));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getPositionControllerState(), QuadrupedPositionControllerState.CRAWL));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
-      conductor.simulate();
-   }
-
-   public static void enterXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
-   {
-      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
-      conductor.addTimeLimit(variables.getYoTime(), 2.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.XGAIT));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
    }
 
@@ -91,29 +76,6 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
    }
 
-   public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables)
-   {
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
-      conductor.simulate();
-      
-      double initialDoubleSupportDuration = variables.getXGaitEndDoubleSupportDurationInput().getDoubleValue();
-      double initialEndPhaseShift = variables.getXGaitEndPhaseShiftInput().getDoubleValue();
-      
-      variables.getXGaitEndDoubleSupportDurationInput().set(0.1);
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
-      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.5));
-      conductor.simulate();
-
-      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_STAND);
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
-      conductor.simulate();
-      
-      variables.getXGaitEndDoubleSupportDurationInput().set(initialDoubleSupportDuration);
-      variables.getXGaitEndPhaseShiftInput().set(initialEndPhaseShift);
-   }
-
    public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedStepTeleopManager stepTeleopManager)
    {
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
@@ -130,7 +92,7 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.5));
       conductor.simulate();
 
-      variables.getStepTrigger().set(QuadrupedSteppingRequestedEvent.REQUEST_STAND);
+      stepTeleopManager.stopWalking();
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
