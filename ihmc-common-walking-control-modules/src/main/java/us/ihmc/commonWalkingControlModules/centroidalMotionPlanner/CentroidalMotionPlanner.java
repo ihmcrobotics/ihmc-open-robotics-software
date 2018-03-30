@@ -5,8 +5,6 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.ForceTrajectory;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.PositionTrajectory;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotionPlanner;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -56,7 +54,7 @@ public class CentroidalMotionPlanner
       this.positionTrajectory = new PositionTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments, LinearControlModuleHelper.positionCoefficients);
 
       this.yoNumberOfNodesSubmitted = new YoInteger(getClass().getSimpleName() + "", registry);
-      this.tempTrajectory = new FrameTrajectory3D(LinearControlModuleHelper.forceCoefficients, plannerFrame);
+      this.tempTrajectory = new FrameTrajectory3D(LinearControlModuleHelper.positionCoefficients, plannerFrame);
       reset();
    }
 
@@ -187,8 +185,8 @@ public class CentroidalMotionPlanner
    {
       positionTrajectory.reset();
       DenseMatrix64F[] forceValues = helper.getOptimizedForceValues();
-      DenseMatrix64F[] velocityValues = helper.getOptimizedForceValues();
-      DenseMatrix64F[] positionValues = helper.getOptimizedForceRateValues();
+      DenseMatrix64F[] velocityValues = helper.getOptimizedVelocityValues();
+      DenseMatrix64F[] positionValues = helper.getOptimizedPositionValues();
       double robotMassInverse = 1.0 / robotMass;
       RecycledLinkedListBuilder<CentroidalMotionNode>.RecycledLinkedListEntry<CentroidalMotionNode> entry = nodeList.getFirstEntry();
       tempInitialForce.set(plannerFrame, forceValues[0].get(0, 0) * robotMassInverse, forceValues[1].get(0, 0) * robotMassInverse, forceValues[2].get(0, 0) * robotMassInverse);

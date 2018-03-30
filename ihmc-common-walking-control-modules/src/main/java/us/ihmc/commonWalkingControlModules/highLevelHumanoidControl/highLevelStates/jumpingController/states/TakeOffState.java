@@ -11,7 +11,10 @@ import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotion
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.Wrench;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public class TakeOffState extends AbstractJumpState
 {
@@ -22,9 +25,15 @@ public class TakeOffState extends AbstractJumpState
    private final PelvisControlManager pelvisControlManager;
    private final SideDependentList<RigidBodyControlManager> handManagers;
    private final FeetJumpManager feetManager;
-   private final Map<String, RigidBodyControlManager> bodyManagerMap;
-   private final FullHumanoidRobotModel fullRobotModel;
+   private final RigidBodyControlManager headManager;
+   private final RigidBodyControlManager chestManager;
    private final WholeBodyMotionPlanner motionPlanner;
+   private final SideDependentList<FootSwitchInterface> footSwitches;
+   
+   private double zGroundReactionThreshold = 100;
+   private double heightThreshold = 0.45;
+   private double velocityThreshold = 0.1;
+   private final Wrench tempWrench = new Wrench();
 
    public TakeOffState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                        CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
@@ -38,14 +47,15 @@ public class TakeOffState extends AbstractJumpState
       this.pelvisControlManager = pelvisControlManager;
       this.handManagers = handManagers;
       this.feetManager = feetManager;
-      this.bodyManagerMap = bodyManagerMap;
-      this.fullRobotModel = fullRobotModel;
+      this.headManager = bodyManagerMap.get(fullRobotModel.getHead().getName());
+      this.chestManager = bodyManagerMap.get(fullRobotModel.getChest().getName());
+      this.footSwitches = controllerToolbox.getFootSwitches();
    }
 
    @Override
    public boolean isDone()
    {
-      return false;
+      return checkIfTakeOffIsComplete();
    }
 
    @Override
@@ -53,8 +63,28 @@ public class TakeOffState extends AbstractJumpState
    {
       double timeInCurrentState = getTimeInCurrentState();
       centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(timeInCurrentState);
-   }
+      gravityCompensationManager.setRootJointAccelerationForStandardGravitationalForce();
+      pelvisControlManager.maintainDesiredPositionAndOrientation();
+      feetManager.makeFeetFullyConstrained();
+      feetManager.computeForDampedCompliantMode();
 
+      headManager.compute();
+      chestManager.compute();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         handManager.compute();
+      }
+   }
+   
+   private boolean checkIfTakeOffIsComplete()
+   {
+      double totalForceZ = feetManager.getGroundReactionForceZ();
+      double comHeightAboveGround = centroidalMomentumManager.getEstimatedCoMPositionZ(); // TODO subtract ground height. Presently works for flat ground only
+      double comVelocity = centroidalMomentumManager.getEstimatedCoMVelocityZ();
+      return (totalForceZ < zGroundReactionThreshold) & (comHeightAboveGround > heightThreshold) & (comVelocity > velocityThreshold);
+   }
+   
    @Override
    public void doStateSpecificTransitionIntoAction()
    {

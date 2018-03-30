@@ -50,7 +50,7 @@ public class FeetJumpManager implements JumpControlManagerInterface
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         footControlModules.get(robotSide).setToDampedCompliantMode();
+         footControlModules.get(robotSide).complyAndDamp();
       }
    }
 
@@ -86,5 +86,13 @@ public class FeetJumpManager implements JumpControlManagerInterface
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return null;
+   }
+
+   public double getGroundReactionForceZ()
+   {
+      double totalForceZ = 0.0;
+      for(RobotSide robotSide : RobotSide.values)
+         totalForceZ += footControlModules.get(robotSide).getGroundReactionForceZ();
+      return totalForceZ;
    }
 }

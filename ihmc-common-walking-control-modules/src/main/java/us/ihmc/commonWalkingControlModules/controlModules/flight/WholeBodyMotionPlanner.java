@@ -106,6 +106,7 @@ public class WholeBodyMotionPlanner
       motionNode.reset();
       motionNode.setTime(nodeTime);
       motionNode.setPositionConstraint(initialPosition);
+      PrintTools.debug("Initial velocity: " + initialVelocity.toString());
       motionNode.setLinearVelocityConstraint(initialVelocity);
       motionNode.setForceConstraint(initialGroundReactionForce);
       motionNode.setZeroForceRateConstraint();

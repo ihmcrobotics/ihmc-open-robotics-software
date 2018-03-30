@@ -204,12 +204,13 @@ public class JumpHighLevelHumanoidController
       stateMachine.addState(takeOffState);
 
       FlightState flightState = new FlightState(motionPlanner, messageHandler, controllerToolbox, controlCoreToolbox, centroidalMomentumManager,
-                                                gravityCompensationManager, handManagers, feetManager, rigidBodyManagersByName);
-      FlightToLandingCondition flightToLandingCondition = new FlightToLandingCondition(footSwitches);
+                                                gravityCompensationManager, handManagers, feetManager, rigidBodyManagersByName, registry);
+      FlightToLandingCondition flightToLandingCondition = new FlightToLandingCondition(flightState, footSwitches);
       flightState.addStateTransition(JumpStateEnum.LANDING, flightToLandingCondition);
       stateMachine.addState(flightState);
 
-      LandingState landingState = new LandingState(motionPlanner, messageHandler, controllerToolbox);
+      LandingState landingState = new LandingState(motionPlanner, messageHandler, controllerToolbox, centroidalMomentumManager, gravityCompensationManager,
+                                                   handManagers, feetManager, pelvisControlManager, rigidBodyManagersByName, registry);
       LandingToStandingCondition landingToStandingCondition = new LandingToStandingCondition(landingState);
       landingState.addStateTransition(JumpStateEnum.STANDING, landingToStandingCondition);
       stateMachine.addState(landingState);
@@ -249,8 +250,8 @@ public class JumpHighLevelHumanoidController
          RigidBodyControlManager manager = bodyManagers.get(i);
          if (manager != null)
          {
-            controllerCoreCommand.addFeedbackControlCommand(manager.getFeedbackControlCommand());
             controllerCoreCommand.addInverseDynamicsCommand(manager.getInverseDynamicsCommand());
+            controllerCoreCommand.addFeedbackControlCommand(manager.getFeedbackControlCommand());
          }
       }
    }

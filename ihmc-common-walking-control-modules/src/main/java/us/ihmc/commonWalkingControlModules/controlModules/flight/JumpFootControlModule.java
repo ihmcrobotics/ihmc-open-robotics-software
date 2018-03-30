@@ -15,6 +15,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.weightMatrices.SolverWeightLevels;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -36,7 +37,9 @@ public class JumpFootControlModule
    private final RigidBody pelvis;
    private final Vector3D angularWeight = new Vector3D();
    private final Vector3D linearWeight = new Vector3D();
-
+   
+   private final Wrench footWrench = new Wrench();
+   
    public JumpFootControlModule(RobotSide robotSide, YoPlaneContactState footContactState, FootSwitchInterface footSwitch, ContactableFoot contactableFoot,
                                 RigidBody rootBody, RigidBody pelvis, JumpControllerParameters jumpControlParameters, YoVariableRegistry registry)
    {
@@ -64,7 +67,7 @@ public class JumpFootControlModule
       spatialAccelerationCommand.setPrimaryBase(pelvis);
    }
 
-   public void setToDampedCompliantMode()
+   public void complyAndDamp()
    {
       footSwitch.computeAndPackCoP(cop2d);
       if (cop2d.containsNaN())
@@ -80,9 +83,20 @@ public class JumpFootControlModule
       //spatialAccelerationCommand.setWeights(angularWeight, linearWeight);
    }
 
+   public void holdPositionInJointSpace()
+   {
+
+   }
+
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return spatialAccelerationCommand;
+   }
+
+   public double getGroundReactionForceZ()
+   {
+      footSwitch.computeAndPackFootWrench(footWrench);
+      return footWrench.getLinearPartZ();
    }
 
 }
