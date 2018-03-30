@@ -21,6 +21,10 @@ module controller_msgs
       struct AtlasWristSensorCalibrationRequestPacket
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * The robot side (left or right) for the wrist sensor you would like to request calibration for.
          */
         @defaultValue(value=255)

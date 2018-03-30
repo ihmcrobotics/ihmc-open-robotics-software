@@ -42,6 +42,8 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -58,6 +60,8 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -67,6 +71,8 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(controller_msgs.msg.dds.PilotAlarmPacket data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_6(data.getBeepRate());
 
       cdr.write_type_7(data.getEnableTone());
@@ -75,6 +81,8 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(controller_msgs.msg.dds.PilotAlarmPacket data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
+
       data.setBeepRate(cdr.read_type_6());
 
       data.setEnableTone(cdr.read_type_7());
@@ -84,6 +92,7 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(controller_msgs.msg.dds.PilotAlarmPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("beep_rate", data.getBeepRate());
       ser.write_type_7("enable_tone", data.getEnableTone());
    }
@@ -91,6 +100,7 @@ public class PilotAlarmPacketPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PilotAlarmPacket data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setBeepRate(ser.read_type_6("beep_rate"));
       data.setEnableTone(ser.read_type_7("enable_tone"));
    }

@@ -19,6 +19,10 @@ module controller_msgs
       struct ChestHybridJointspaceTaskspaceTrajectoryMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * The taskspace trajectory information.
          */
         controller_msgs::msg::dds::SO3TrajectoryMessage taskspace_trajectory_message;

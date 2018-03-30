@@ -44,6 +44,8 @@ public class PilotInterfaceActionPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       return current_alignment - initial_alignment;
@@ -58,6 +60,8 @@ public class PilotInterfaceActionPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       return current_alignment - initial_alignment;
@@ -65,12 +69,16 @@ public class PilotInterfaceActionPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.PilotInterfaceActionPacket data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_9(data.getPilotAction());
 
    }
 
    public static void read(controller_msgs.msg.dds.PilotInterfaceActionPacket data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
+
       data.setPilotAction(cdr.read_type_9());
 
    }
@@ -78,12 +86,14 @@ public class PilotInterfaceActionPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.PilotInterfaceActionPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("pilot_action", data.getPilotAction());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PilotInterfaceActionPacket data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setPilotAction(ser.read_type_9("pilot_action"));
    }
 

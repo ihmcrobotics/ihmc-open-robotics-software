@@ -1,3 +1,7 @@
+
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 int32 behaviour_state
 int32 requested_behavior_state
 int32 desired_step_type

@@ -10,12 +10,16 @@ module controller_msgs
     module dds
     {
 
+      /**
+       * Old message used for the VRC? Needs to be revised, maybe deleted?
+       */
       @TypeCode(type="controller_msgs::msg::dds_::VehiclePosePacket_")
       struct VehiclePosePacket
       {
         /**
-         * Old message used for the VRC? Needs to be revised, maybe deleted?
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
+        unsigned long sequence_id;
         geometry_msgs::msg::dds::Point position;
         geometry_msgs::msg::dds::Quaternion orientation;
         long index;

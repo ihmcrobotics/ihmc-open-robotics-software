@@ -101,7 +101,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
    {
       Point3D[] points = pointCloudData.getPoints();
       LocalizationPointMapPacket localizationMapPacket = new LocalizationPointMapPacket();
-      HumanoidMessageTools.packLocalizationPointMap(localizationMapPacket, points);
+      HumanoidMessageTools.packLocalizationPointMap(points, localizationMapPacket);
       rosModulePacketCommunicator.send(localizationMapPacket);
    }
 

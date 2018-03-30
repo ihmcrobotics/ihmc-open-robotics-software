@@ -8,10 +8,17 @@ module controller_msgs
     module dds
     {
 
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * Stop the execution of any trajectory being executed.
+       */
       @TypeCode(type="controller_msgs::msg::dds_::StopAllTrajectoryMessage_")
       struct StopAllTrajectoryMessage
       {
-        boolean unused_placeholder_field;
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
       };
     };
   };

@@ -25,6 +25,10 @@ module controller_msgs
       struct FootstepDataListMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Defines the list of footstep to perform.
          */
         sequence<controller_msgs::msg::dds::FootstepDataMessage> footstep_data_list;

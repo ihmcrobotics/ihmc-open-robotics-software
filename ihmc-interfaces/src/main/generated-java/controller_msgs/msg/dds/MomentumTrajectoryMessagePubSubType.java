@@ -1,67 +1,21 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "MomentumTrajectoryMessage" defined in "MomentumTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "MomentumTrajectoryMessage" defined in
+ * "MomentumTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
  *
- * This file was automatically generated from MomentumTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit MomentumTrajectoryMessage_.idl instead.
+ * This file was automatically generated from MomentumTrajectoryMessage_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * MomentumTrajectoryMessage_.idl instead.
+ *
  */
 public class MomentumTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.MomentumTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::MomentumTrajectoryMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
-
-   public MomentumTrajectoryMessagePubSubType()
-   {
-
-   }
-
-   public static int getMaxCdrSerializedSize()
-   {
-      return getMaxCdrSerializedSize(0);
-   }
-
-   public static int getMaxCdrSerializedSize(int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.MomentumTrajectoryMessage data)
-   {
-      return getCdrSerializedSize(data, 0);
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.MomentumTrajectoryMessage data, int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType
-            .getCdrSerializedSize(data.getAngularMomentumTrajectory(), current_alignment);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public static void write(controller_msgs.msg.dds.MomentumTrajectoryMessage data, us.ihmc.idl.CDR cdr)
-   {
-
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getAngularMomentumTrajectory(), cdr);
-   }
-
-   public static void read(controller_msgs.msg.dds.MomentumTrajectoryMessage data, us.ihmc.idl.CDR cdr)
-   {
-
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getAngularMomentumTrajectory(), cdr);
-   }
-
-   public static void staticCopy(controller_msgs.msg.dds.MomentumTrajectoryMessage src, controller_msgs.msg.dds.MomentumTrajectoryMessage dest)
-   {
-      dest.set(src);
-   }
 
    @Override
    public void serialize(controller_msgs.msg.dds.MomentumTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
@@ -81,16 +35,73 @@ public class MomentumTrajectoryMessagePubSubType implements us.ihmc.pubsub.Topic
       deserializeCDR.finishDeserialize();
    }
 
+   public static int getMaxCdrSerializedSize()
+   {
+      return getMaxCdrSerializedSize(0);
+   }
+
+   public static int getMaxCdrSerializedSize(int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.MomentumTrajectoryMessage data)
+   {
+      return getCdrSerializedSize(data, 0);
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.MomentumTrajectoryMessage data, int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getAngularMomentumTrajectory(),
+                                                                                                             current_alignment);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public static void write(controller_msgs.msg.dds.MomentumTrajectoryMessage data, us.ihmc.idl.CDR cdr)
+   {
+      cdr.write_type_4(data.getSequenceId());
+
+      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getAngularMomentumTrajectory(), cdr);
+   }
+
+   public static void read(controller_msgs.msg.dds.MomentumTrajectoryMessage data, us.ihmc.idl.CDR cdr)
+   {
+      data.setSequenceId(cdr.read_type_4());
+
+      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getAngularMomentumTrajectory(), cdr);
+
+   }
+
    @Override
    public final void serialize(controller_msgs.msg.dds.MomentumTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("angular_momentum_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getAngularMomentumTrajectory());
+
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MomentumTrajectoryMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("angular_momentum_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getAngularMomentumTrajectory());
+
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.MomentumTrajectoryMessage src, controller_msgs.msg.dds.MomentumTrajectoryMessage dest)
+   {
+      dest.set(src);
    }
 
    @Override

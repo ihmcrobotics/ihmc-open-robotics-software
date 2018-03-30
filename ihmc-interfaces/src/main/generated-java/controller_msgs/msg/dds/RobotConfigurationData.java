@@ -1,14 +1,18 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class RobotConfigurationData extends Packet<RobotConfigurationData>
       implements Settable<RobotConfigurationData>, EpsilonComparable<RobotConfigurationData>
 {
    public static final byte ROBOT_MOTION_STATUS_STANDING = (byte) 0;
    public static final byte ROBOT_MOTION_STATUS_IN_MOTION = (byte) 1;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    public long timestamp_;
    public long sensor_head_pps_timestamp_;
    public int joint_name_hash_;
@@ -29,7 +33,6 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
 
    public RobotConfigurationData()
    {
-
       joint_angles_ = new us.ihmc.idl.IDLSequence.Float(50, "type_5");
 
       joint_velocities_ = new us.ihmc.idl.IDLSequence.Float(50, "type_5");
@@ -44,18 +47,21 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       force_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SpatialVectorMessage>(50,
                                                                                                             controller_msgs.msg.dds.SpatialVectorMessage.class,
                                                                                                             new controller_msgs.msg.dds.SpatialVectorMessagePubSubType());
-
       imu_sensor_data_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.IMUPacket>(10, controller_msgs.msg.dds.IMUPacket.class,
                                                                                                new controller_msgs.msg.dds.IMUPacketPubSubType());
+
    }
 
    public RobotConfigurationData(RobotConfigurationData other)
    {
+      this();
       set(other);
    }
 
    public void set(RobotConfigurationData other)
    {
+      sequence_id_ = other.sequence_id_;
+
       timestamp_ = other.timestamp_;
 
       sensor_head_pps_timestamp_ = other.sensor_head_pps_timestamp_;
@@ -79,11 +85,23 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       last_received_packet_unique_id_ = other.last_received_packet_unique_id_;
 
       last_received_packet_robot_timestamp_ = other.last_received_packet_robot_timestamp_;
+
    }
 
-   public long getTimestamp()
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
    {
-      return timestamp_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setTimestamp(long timestamp)
@@ -91,9 +109,9 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       timestamp_ = timestamp;
    }
 
-   public long getSensorHeadPpsTimestamp()
+   public long getTimestamp()
    {
-      return sensor_head_pps_timestamp_;
+      return timestamp_;
    }
 
    public void setSensorHeadPpsTimestamp(long sensor_head_pps_timestamp)
@@ -101,14 +119,19 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       sensor_head_pps_timestamp_ = sensor_head_pps_timestamp;
    }
 
-   public int getJointNameHash()
+   public long getSensorHeadPpsTimestamp()
    {
-      return joint_name_hash_;
+      return sensor_head_pps_timestamp_;
    }
 
    public void setJointNameHash(int joint_name_hash)
    {
       joint_name_hash_ = joint_name_hash;
+   }
+
+   public int getJointNameHash()
+   {
+      return joint_name_hash_;
    }
 
    public us.ihmc.idl.IDLSequence.Float getJointAngles()
@@ -161,19 +184,14 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       return imu_sensor_data_;
    }
 
-   public byte getRobotMotionStatus()
-   {
-      return robot_motion_status_;
-   }
-
    public void setRobotMotionStatus(byte robot_motion_status)
    {
       robot_motion_status_ = robot_motion_status;
    }
 
-   public int getLastReceivedPacketTypeId()
+   public byte getRobotMotionStatus()
    {
-      return last_received_packet_type_id_;
+      return robot_motion_status_;
    }
 
    public void setLastReceivedPacketTypeId(int last_received_packet_type_id)
@@ -181,9 +199,9 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       last_received_packet_type_id_ = last_received_packet_type_id;
    }
 
-   public long getLastReceivedPacketUniqueId()
+   public int getLastReceivedPacketTypeId()
    {
-      return last_received_packet_unique_id_;
+      return last_received_packet_type_id_;
    }
 
    public void setLastReceivedPacketUniqueId(long last_received_packet_unique_id)
@@ -191,14 +209,19 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       last_received_packet_unique_id_ = last_received_packet_unique_id;
    }
 
-   public long getLastReceivedPacketRobotTimestamp()
+   public long getLastReceivedPacketUniqueId()
    {
-      return last_received_packet_robot_timestamp_;
+      return last_received_packet_unique_id_;
    }
 
    public void setLastReceivedPacketRobotTimestamp(long last_received_packet_robot_timestamp)
    {
       last_received_packet_robot_timestamp_ = last_received_packet_robot_timestamp;
+   }
+
+   public long getLastReceivedPacketRobotTimestamp()
+   {
+      return last_received_packet_robot_timestamp_;
    }
 
    @Override
@@ -208,6 +231,9 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon))
          return false;
@@ -229,19 +255,14 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
 
       if (!this.root_translation_.epsilonEquals(other.root_translation_, epsilon))
          return false;
-
       if (!this.root_orientation_.epsilonEquals(other.root_orientation_, epsilon))
          return false;
-
       if (!this.pelvis_linear_velocity_.epsilonEquals(other.pelvis_linear_velocity_, epsilon))
          return false;
-
       if (!this.pelvis_angular_velocity_.epsilonEquals(other.pelvis_angular_velocity_, epsilon))
          return false;
-
       if (!this.pelvis_linear_acceleration_.epsilonEquals(other.pelvis_linear_acceleration_, epsilon))
          return false;
-
       if (this.force_sensor_data_.size() == other.force_sensor_data_.size())
       {
          return false;
@@ -295,6 +316,9 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
 
       RobotConfigurationData otherMyClass = (RobotConfigurationData) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.timestamp_ != otherMyClass.timestamp_)
          return false;
 
@@ -306,34 +330,24 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
 
       if (!this.joint_angles_.equals(otherMyClass.joint_angles_))
          return false;
-
       if (!this.joint_velocities_.equals(otherMyClass.joint_velocities_))
          return false;
-
       if (!this.joint_torques_.equals(otherMyClass.joint_torques_))
          return false;
-
       if (!this.root_translation_.equals(otherMyClass.root_translation_))
          return false;
-
       if (!this.root_orientation_.equals(otherMyClass.root_orientation_))
          return false;
-
       if (!this.pelvis_linear_velocity_.equals(otherMyClass.pelvis_linear_velocity_))
          return false;
-
       if (!this.pelvis_angular_velocity_.equals(otherMyClass.pelvis_angular_velocity_))
          return false;
-
       if (!this.pelvis_linear_acceleration_.equals(otherMyClass.pelvis_linear_acceleration_))
          return false;
-
       if (!this.force_sensor_data_.equals(otherMyClass.force_sensor_data_))
          return false;
-
       if (!this.imu_sensor_data_.equals(otherMyClass.imu_sensor_data_))
          return false;
-
       if (this.robot_motion_status_ != otherMyClass.robot_motion_status_)
          return false;
 
@@ -355,73 +369,59 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData>
       StringBuilder builder = new StringBuilder();
 
       builder.append("RobotConfigurationData {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("timestamp=");
       builder.append(this.timestamp_);
-
       builder.append(", ");
       builder.append("sensor_head_pps_timestamp=");
       builder.append(this.sensor_head_pps_timestamp_);
-
       builder.append(", ");
       builder.append("joint_name_hash=");
       builder.append(this.joint_name_hash_);
-
       builder.append(", ");
       builder.append("joint_angles=");
       builder.append(this.joint_angles_);
-
       builder.append(", ");
       builder.append("joint_velocities=");
       builder.append(this.joint_velocities_);
-
       builder.append(", ");
       builder.append("joint_torques=");
       builder.append(this.joint_torques_);
-
       builder.append(", ");
       builder.append("root_translation=");
       builder.append(this.root_translation_);
-
       builder.append(", ");
       builder.append("root_orientation=");
       builder.append(this.root_orientation_);
-
       builder.append(", ");
       builder.append("pelvis_linear_velocity=");
       builder.append(this.pelvis_linear_velocity_);
-
       builder.append(", ");
       builder.append("pelvis_angular_velocity=");
       builder.append(this.pelvis_angular_velocity_);
-
       builder.append(", ");
       builder.append("pelvis_linear_acceleration=");
       builder.append(this.pelvis_linear_acceleration_);
-
       builder.append(", ");
       builder.append("force_sensor_data=");
       builder.append(this.force_sensor_data_);
-
       builder.append(", ");
       builder.append("imu_sensor_data=");
       builder.append(this.imu_sensor_data_);
-
       builder.append(", ");
       builder.append("robot_motion_status=");
       builder.append(this.robot_motion_status_);
-
       builder.append(", ");
       builder.append("last_received_packet_type_id=");
       builder.append(this.last_received_packet_type_id_);
-
       builder.append(", ");
       builder.append("last_received_packet_unique_id=");
       builder.append(this.last_received_packet_unique_id_);
-
       builder.append(", ");
       builder.append("last_received_packet_robot_timestamp=");
       builder.append(this.last_received_packet_robot_timestamp_);
-
       builder.append("}");
       return builder.toString();
    }

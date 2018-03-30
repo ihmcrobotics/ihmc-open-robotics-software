@@ -1,6 +1,9 @@
 # This message is part of the IHMC hole-body inverse kinematics module.
 # It contains auxiliary information that allows to further customized the behavior of the solver.
 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 # When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
 geometry_msgs/Point privileged_root_joint_position
 # When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.

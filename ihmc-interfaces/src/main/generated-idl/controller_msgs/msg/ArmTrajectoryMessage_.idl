@@ -23,6 +23,10 @@ module controller_msgs
       struct ArmTrajectoryMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Specifies the side of the robot that will execute the trajectory.
          */
         @defaultValue(value=255)
