@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -12,18 +13,17 @@ import us.ihmc.exampleSimulations.collidingArms.SingleCylinderRobotDescription;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
-import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.physics.collision.HybridImpulseSpringDamperCollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class NewtonsCradleSimulation
 {
@@ -48,12 +48,11 @@ public class NewtonsCradleSimulation
       scs.setDT(0.0001, 100);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      CollisionHandler collisionHandler = createCollisionHandler(0.99, 0.15, scs.getRootRegistry(), yoGraphicsListRegistry);
-
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(4.0, 4.0, 0.01, scs, 100);
-
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      
+      CollisionHandler collisionHandler = createCollisionHandler(0.99, 0.15, scs.getRootRegistry(), yoGraphicsListRegistry);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
       scs.startOnAThread();
    }
 
@@ -82,9 +81,8 @@ public class NewtonsCradleSimulation
       double epsilon = 0.3;
       double mu = 0.7;
       CollisionHandler collisionHandler = createCollisionHandler(epsilon, mu, scs.getRootRegistry(), yoGraphicsListRegistry);
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(10.0, 10.0, 0.01, scs, 100);
-
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       scs.startOnAThread();
@@ -127,7 +125,6 @@ public class NewtonsCradleSimulation
       scs.setDT(0.0001, 100);
       scs.setGroundVisible(false);
 
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(0.1, 0.1, 0.01, scs, 100);
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       double coefficientOfRestitution = 0.9;
@@ -138,8 +135,8 @@ public class NewtonsCradleSimulation
       //      CollisionHandler collisionHandler = new SpringCollisionHandler(1, 1000, 10.0, robot.getRobotsYoVariableRegistry());
       //      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.98, 0.1, robot);
       //      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.3, 0.7, robot);
-
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       scs.startOnAThread();
@@ -205,7 +202,6 @@ public class NewtonsCradleSimulation
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(boxTerrain.getLinkGraphics());
 
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(0.1, 0.1, 0.01, scs, 100);
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction, scs.getRootRegistry(),
@@ -215,7 +211,8 @@ public class NewtonsCradleSimulation
       //      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.98, 0.1, robot);
       //      CollisionHandler collisionHandler = new DefaultCollisionHandler(0.3, 0.7, robot);
 
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       scs.startOnAThread();
@@ -283,8 +280,6 @@ public class NewtonsCradleSimulation
       scs.setFastSimulate(true);
       scs.setGroundVisible(false);
 
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(50.0, 100.0, 0.003, scs, 100);
-      //      DefaultCollisionVisualizer collisionVisualizer = null;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       double coefficientOfRestitution = 0.3;
@@ -292,7 +287,8 @@ public class NewtonsCradleSimulation
       CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction, scs.getRootRegistry(),
                                                                  yoGraphicsListRegistry);
 
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       scs.startOnAThread();
@@ -348,8 +344,6 @@ public class NewtonsCradleSimulation
       scs.setFastSimulate(true);
       scs.setGroundVisible(false);
 
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(50.0, 100.0, 0.003, scs, 100);
-      //      DefaultCollisionVisualizer collisionVisualizer = null;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       double coefficientOfRestitution = 0.3;
@@ -357,7 +351,8 @@ public class NewtonsCradleSimulation
       CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction, scs.getRootRegistry(),
                                                                  yoGraphicsListRegistry);
 
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       scs.startOnAThread();
@@ -468,8 +463,6 @@ public class NewtonsCradleSimulation
       scs.setFastSimulate(true);
       scs.setGroundVisible(false);
 
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(50.0, 100.0, 0.003, scs, 100);
-      //      DefaultCollisionVisualizer collisionVisualizer = null;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       double coefficientOfRestitution = 0.3;
@@ -477,7 +470,8 @@ public class NewtonsCradleSimulation
       CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction, scs.getRootRegistry(),
                                                                  yoGraphicsListRegistry);
 
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       scs.startOnAThread();
@@ -603,8 +597,6 @@ public class NewtonsCradleSimulation
       scs.setFastSimulate(true);
       scs.setGroundVisible(false);
 
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(50.0, 100.0, 0.003, scs, 100);
-      //      DefaultCollisionVisualizer collisionVisualizer = null;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       double coefficientOfRestitution = 0.3;
@@ -615,7 +607,8 @@ public class NewtonsCradleSimulation
       CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction, scs.getRootRegistry(),
                                                                  yoGraphicsListRegistry);
 
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       scs.startOnAThread();
@@ -647,7 +640,6 @@ public class NewtonsCradleSimulation
       scs.setGroundVisible(false);
       scs.setSimulateDuration(2.0);
 
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(100.0, 100.0, 0.01, scs, 1000);
       //      DefaultCollisionVisualizer collisionVisualizer = null;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
@@ -655,7 +647,8 @@ public class NewtonsCradleSimulation
       double coefficientOfFriction = 0.7;
       CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction, scs.getRootRegistry(),
                                                                  yoGraphicsListRegistry);
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       scs.startOnAThread();
@@ -686,15 +679,14 @@ public class NewtonsCradleSimulation
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotArray, parameters);
 
-      //    DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(100.0, 100.0, scs, 1000);
-      DefaultCollisionVisualizer collisionVisualizer = null;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       double coefficientOfRestitution = 0.3;
       double coefficientOfFriction = 0.7;
       CollisionHandler collisionHandler = createCollisionHandler(coefficientOfRestitution, coefficientOfFriction, scs.getRootRegistry(),
                                                                  yoGraphicsListRegistry);
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       scs.setDT(0.00025, 10);
