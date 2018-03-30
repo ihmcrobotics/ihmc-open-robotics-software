@@ -35,7 +35,7 @@ public class QuadrupedStepMessageHandler
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
    private final ArrayList<YoQuadrupedTimedStep> activeSteps = new ArrayList<>();
    private final YoDouble robotTimestamp;
-   private final DoubleParameter haltTransitionDurationParameter = new DoubleParameter("haltTransitionDuration", registry, 1.0);
+   private final DoubleParameter haltTransitionDurationParameter = new DoubleParameter("haltTransitionDuration", registry, 0.0);
 
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
@@ -82,6 +82,9 @@ public class QuadrupedStepMessageHandler
          updateStepSequence();
          adjustStepQueue(stepAdjustment);
       }
+
+      if(haltFlag.getBooleanValue())
+         pruneHaltedSteps();
    }
 
    private void updateStepSequence()
@@ -97,12 +100,7 @@ public class QuadrupedStepMessageHandler
       {
          double timeShift = isExpressedInAbsoluteTime ? 0.0 : currentTime;
          double touchdownTime = steps.get(i).getTimeInterval().getEndTime();
-         double shiftedTouchdownTime = touchdownTime + timeShift;
-
-         boolean shouldNotBeHalted = !haltFlag.getBooleanValue() || shiftedTouchdownTime < haltTime.getDoubleValue();
-         boolean isFutureStep = shiftedTouchdownTime >= currentTime;
-
-         if (shouldNotBeHalted && isFutureStep)
+         if (touchdownTime + timeShift >= currentTime)
          {
             stepSequence.add();
             YoQuadrupedTimedStep step = stepSequence.get(stepSequence.size() - 1);
@@ -114,6 +112,15 @@ public class QuadrupedStepMessageHandler
       TimeIntervalTools.sortByEndTime(stepSequence);
       bodyOrientation.setFromReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
       updateActiveSteps();
+   }
+
+   private void pruneHaltedSteps()
+   {
+      for (int i = stepSequence.size() - 1; i >=0; i--)
+      {
+         if(stepSequence.get(i).getTimeInterval().getStartTime() > haltTime.getDoubleValue())
+            stepSequence.remove(i);
+      }
    }
 
    public void initialize()
@@ -140,7 +147,7 @@ public class QuadrupedStepMessageHandler
 
    public void halt()
    {
-      if (haltFlag.getBooleanValue() == false)
+      if (!haltFlag.getBooleanValue())
       {
          haltFlag.set(true);
          haltTime.set(robotTimestamp.getDoubleValue() + haltTransitionDurationParameter.getValue());
@@ -176,6 +183,7 @@ public class QuadrupedStepMessageHandler
 
    public void reset()
    {
+      haltFlag.set(false);
       inputTimedStepPacket.set(null);
       stepSequence.clear();
    }
