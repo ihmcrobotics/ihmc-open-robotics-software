@@ -2,12 +2,11 @@ package us.ihmc.quadrupedRobotics.communication;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.DetectedFacesPacket;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-
-import us.ihmc.communication.packets.DetectedFacesPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;

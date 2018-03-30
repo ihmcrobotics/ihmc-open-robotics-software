@@ -2,8 +2,10 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredVelocityControlModule;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,15 +17,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFootstepCalculator
 {
@@ -120,8 +120,8 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
 
       FootstepDataMessage predictedFootstep = new FootstepDataMessage();
       predictedFootstep.setRobotSide(futureSwingLegSide.toByte());
-      predictedFootstep.setLocation(footstepPosition);
-      predictedFootstep.setOrientation(footstepOrientation);
+      predictedFootstep.getLocation().set(footstepPosition);
+      predictedFootstep.getOrientation().set(footstepOrientation);
       return predictedFootstep;
    }
 

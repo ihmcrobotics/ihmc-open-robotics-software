@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.CenterOfMassTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.CenterOfMassTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class CenterOfMassTrajectoryCommand implements Command<CenterOfMassTrajectoryCommand, CenterOfMassTrajectoryMessage>, FrameBasedCommand<CenterOfMassTrajectoryMessage>
@@ -22,7 +22,7 @@ public class CenterOfMassTrajectoryCommand implements Command<CenterOfMassTrajec
    @Override
    public void set(CenterOfMassTrajectoryMessage message)
    {
-      euclideanTrajectory.set(message.euclideanTrajectory);
+      euclideanTrajectory.set(message.getEuclideanTrajectory());
    }
 
    @Override
@@ -34,7 +34,7 @@ public class CenterOfMassTrajectoryCommand implements Command<CenterOfMassTrajec
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, CenterOfMassTrajectoryMessage message)
    {
-      euclideanTrajectory.set(resolver, message.euclideanTrajectory);
+      euclideanTrajectory.set(resolver, message.getEuclideanTrajectory());
    }
 
    @Override

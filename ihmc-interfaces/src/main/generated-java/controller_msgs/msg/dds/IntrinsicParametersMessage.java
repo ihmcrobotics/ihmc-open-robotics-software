@@ -205,8 +205,16 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cy_, other.cy_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.radial_, other.radial_, epsilon))
+      if (radial_.size() != other.radial_.size())
          return false;
+      else
+         for (int i = 0; i < radial_.size(); i++)
+         {
+            if (!us.ihmc.idl.IDLTools.epsilonEquals(radial_.get(i), other.radial_.get(i), epsilon))
+            {
+               return false;
+            }
+         }
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.t1_, other.t1_, epsilon))
          return false;

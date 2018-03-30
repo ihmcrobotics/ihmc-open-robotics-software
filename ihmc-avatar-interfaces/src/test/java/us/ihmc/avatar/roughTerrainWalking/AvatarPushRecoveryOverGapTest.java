@@ -5,6 +5,9 @@ import static junit.framework.TestCase.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -14,14 +17,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -178,15 +178,15 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       message.setAreFootstepsAdjustable(true);
       Point3D location = new Point3D(0.3, 0.15, 0.0);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      message.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
 
       location = new Point3D(0.75, -0.15, 0.0);
-      message.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       location = new Point3D(1.05, 0.15, 0.0);
-      message.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
+      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, location, orientation));
       location = new Point3D(1.05, -0.15, 0.0);
-      message.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
+      message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, location, orientation));
 
       return message;
    }

@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.martiansoftware.jsap.JSAPException;
 
+import controller_msgs.msg.dds.PointCloudWorldPacket;
 import optiTrack.IHMCMocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
@@ -22,7 +23,6 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;

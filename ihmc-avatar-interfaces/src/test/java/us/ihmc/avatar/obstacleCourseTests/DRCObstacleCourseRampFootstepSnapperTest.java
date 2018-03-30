@@ -9,6 +9,8 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -28,8 +30,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.BasicFootstepMask;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnappingParameters;
@@ -125,14 +125,14 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       for (int i = 0; i < corruptedFootstepDataList.getFootstepDataList().size(); i++)
       {
          FootstepDataMessage footstepData = corruptedFootstepDataList.getFootstepDataList().get(i);
-         footstepData.location.setZ(footstepData.location.getZ() + 1.0);
+         footstepData.getLocation().setZ(footstepData.getLocation().getZ() + 1.0);
          tempFrameOrientation.set(footstepData.getOrientation());
          double[] yawPitchRoll = new double[3];
          tempFrameOrientation.getYawPitchRoll(yawPitchRoll);
          yawPitchRoll[1] = RandomNumbers.nextDouble(random, Math.PI / 4.0);
          yawPitchRoll[2] = RandomNumbers.nextDouble(random, Math.PI / 4.0);
          tempFrameOrientation.setYawPitchRoll(yawPitchRoll);
-         footstepData.setOrientation(tempFrameOrientation);
+         footstepData.getOrientation().set(tempFrameOrientation);
       }
 
       vidualizeCorruptedFootsteps(corruptedFootstepDataList, scs);
@@ -196,7 +196,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          FrameQuaternion orientation = new FrameQuaternion();
          footstep.getPose(position, orientation);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, position, orientation);
-         snappedFootstepDataList.footstepDataList.add().set(footstepData);
+         snappedFootstepDataList.getFootstepDataList().add().set(footstepData);
       }
 
       // Send footsteps to controller
@@ -221,7 +221,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       {
          FootstepDataMessage footstepData = dataList.get(i);
          Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-         staticLinkGraphics.translate(new Vector3D(footstepData.location));
+         staticLinkGraphics.translate(new Vector3D(footstepData.getLocation()));
          RotationMatrix rotationMatrix = new RotationMatrix();
          rotationMatrix.set(footstepData.getOrientation());
          staticLinkGraphics.rotate(rotationMatrix);

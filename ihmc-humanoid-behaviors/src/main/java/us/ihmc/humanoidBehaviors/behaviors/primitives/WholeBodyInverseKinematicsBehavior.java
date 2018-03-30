@@ -1,11 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -16,7 +17,6 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -287,7 +287,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       if (!yoDesiredPelvisOrientation.containsNaN())
       {
-         pelvisMessage.setDesiredOrientationInWorld(yoDesiredPelvisOrientation);
+         pelvisMessage.getDesiredOrientationInWorld().set(yoDesiredPelvisOrientation);
          pelvisMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
          pelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
       }
@@ -296,7 +296,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       {
          Point3D desiredPelvisPosition = new Point3D();
          desiredPelvisPosition.set(yoDesiredPelvisPosition);
-         pelvisMessage.setDesiredPositionInWorld(desiredPelvisPosition);
+         pelvisMessage.getDesiredPositionInWorld().set(desiredPelvisPosition);
          pelvisMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
          pelvisMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0.02));
       }

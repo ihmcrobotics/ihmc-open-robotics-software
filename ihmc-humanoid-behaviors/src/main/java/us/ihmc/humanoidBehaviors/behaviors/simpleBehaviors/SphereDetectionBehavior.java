@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import controller_msgs.msg.dds.PointCloudWorldPacket;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
 import us.ihmc.commons.PrintTools;
@@ -22,7 +23,6 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;

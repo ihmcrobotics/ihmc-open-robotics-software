@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -18,9 +20,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -132,7 +132,7 @@ public class QueuedControllerCommandGenerator implements Updatable
          @Override
          public void receivedNewMessageStatus(FootstepStatusMessage footstepStatus)
          {
-            switch (FootstepStatus.fromByte(footstepStatus.footstepStatus))
+            switch (FootstepStatus.fromByte(footstepStatus.getFootstepStatus()))
             {
             case COMPLETED:
             {

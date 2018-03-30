@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.modules;
 
 import java.io.IOException;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -13,7 +14,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
@@ -48,15 +48,15 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
 
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {
-         robotConfigurationData.imuSensorData.add();
+         robotConfigurationData.getImuSensorData().add();
       }
       
       robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING.toByte());
       robotConfigurationData.setTimestamp(totalNsecs);
       Vector3D translation = new Vector3D();
       Quaternion orientation = new Quaternion();
-      robotConfigurationData.setRootTranslation(translation);
-      robotConfigurationData.setRootOrientation(orientation);
+      robotConfigurationData.getRootTranslation().set(translation);
+      robotConfigurationData.getRootOrientation().set(orientation);
       
       packetCommunicator.send(robotConfigurationData);
    }

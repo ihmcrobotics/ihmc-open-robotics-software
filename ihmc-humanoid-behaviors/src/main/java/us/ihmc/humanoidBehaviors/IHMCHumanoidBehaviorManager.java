@@ -3,6 +3,10 @@ package us.ihmc.humanoidBehaviors;
 import java.io.IOException;
 import java.util.Arrays;
 
+import controller_msgs.msg.dds.BehaviorControlModePacket;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -38,10 +42,7 @@ import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
 import us.ihmc.humanoidBehaviors.utilities.CapturePointUpdatable;
 import us.ihmc.humanoidBehaviors.utilities.WristForceSensorFilteredUpdatable;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModePacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorTypePacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -55,7 +56,6 @@ import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
@@ -256,7 +256,7 @@ public class IHMCHumanoidBehaviorManager
 
       dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateGoalBehavior(behaviorCommunicationBridge, fiducialDetectorBehaviorService));
       dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50, new FollowFiducialBehavior(behaviorCommunicationBridge, fullRobotModel, referenceFrames, fiducialDetectorBehaviorService));
-      dispatcher.addBehavior(HumanoidBehaviorType.WAlK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, wholeBodyControllerParameters, referenceFrames));
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_OVER_TERRAIN, new WalkOverTerrainStateMachineBehavior(behaviorCommunicationBridge, yoTime, wholeBodyControllerParameters, referenceFrames));
 
       if (objectDetectorBehaviorService != null)
       {

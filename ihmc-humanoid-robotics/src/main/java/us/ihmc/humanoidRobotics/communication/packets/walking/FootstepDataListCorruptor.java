@@ -2,6 +2,8 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Random;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -26,11 +28,11 @@ public class FootstepDataListCorruptor
    
    public FootstepDataListMessage corruptDataList(FootstepDataListMessage footstepDataList)
    {
-      FootstepDataListMessage ret = HumanoidMessageTools.createFootstepDataListMessage(footstepDataList.defaultSwingDuration, footstepDataList.defaultTransferDuration);
+      FootstepDataListMessage ret = HumanoidMessageTools.createFootstepDataListMessage(footstepDataList.getDefaultSwingDuration(), footstepDataList.getDefaultTransferDuration());
       
-      for (int i = 0; i < footstepDataList.footstepDataList.size(); i++)
+      for (int i = 0; i < footstepDataList.getFootstepDataList().size(); i++)
       {
-         ret.footstepDataList.add().set(corruptFootstepData(footstepDataList.footstepDataList.get(i)));
+         ret.getFootstepDataList().add().set(corruptFootstepData(footstepDataList.getFootstepDataList().get(i)));
       }
       
       return ret;
@@ -44,10 +46,10 @@ public class FootstepDataListCorruptor
       Quaternion orientation = new Quaternion(ret.getOrientation());
       
       corruptOrientation(orientation);
-      ret.setOrientation(orientation);
+      ret.getOrientation().set(orientation);
       
       corruptLocationVector(location);
-      ret.setLocation(location);
+      ret.getLocation().set(location);
       return ret;
    }
    

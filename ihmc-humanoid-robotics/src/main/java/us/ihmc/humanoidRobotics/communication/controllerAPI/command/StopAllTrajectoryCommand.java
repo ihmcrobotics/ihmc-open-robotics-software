@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 
 public class StopAllTrajectoryCommand implements Command<StopAllTrajectoryCommand, StopAllTrajectoryMessage>
 {

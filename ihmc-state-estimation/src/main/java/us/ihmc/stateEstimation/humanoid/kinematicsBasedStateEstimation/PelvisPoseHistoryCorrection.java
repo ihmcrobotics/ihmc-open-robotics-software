@@ -6,10 +6,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PelvisPoseErrorPacket;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
+import controller_msgs.msg.dds.PelvisPoseErrorPacket;
+import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -367,7 +367,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    {
       StampedPosePacket newPacket = pelvisPoseCorrectionCommunicator.getNewExternalPose();
       timeStampedExternalPose.setTransform3D(newPacket.getPose());
-      timeStampedExternalPose.setTimeStamp(newPacket.getTimeStamp());
+      timeStampedExternalPose.setTimeStamp(newPacket.getTimestamp());
 
       if (stateEstimatorPelvisPoseBuffer.isInRange(timeStampedExternalPose.getTimeStamp()))
       {

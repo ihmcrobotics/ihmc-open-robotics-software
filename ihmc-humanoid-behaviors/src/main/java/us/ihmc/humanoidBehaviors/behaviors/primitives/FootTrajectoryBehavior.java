@@ -2,10 +2,10 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controller_msgs.msg.dds.FootTrajectoryMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -65,7 +65,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
          outgoingFootTrajectoryMessage.setDestination(PacketDestination.UI);
          sendPacketToController(outgoingFootTrajectoryMessage);
          hasPacketBeenSent.set(true);
-         trajectoryTime.set(outgoingFootTrajectoryMessage.getSe3Trajectory().taskspaceTrajectoryPoints.getLast().time);
+         trajectoryTime.set(outgoingFootTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime());
       }
    }
 

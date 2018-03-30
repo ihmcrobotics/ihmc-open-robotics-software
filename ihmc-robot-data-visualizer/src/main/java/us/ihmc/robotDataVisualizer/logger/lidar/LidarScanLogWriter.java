@@ -12,12 +12,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.RequestLidarScanMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
-import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.commons.thread.ThreadTools;
@@ -173,20 +173,20 @@ public class LidarScanLogWriter
 
       try
       {
-         logDataOutputStream.writeLong(lidarScanMessage.robotTimestamp);
+         logDataOutputStream.writeLong(lidarScanMessage.getRobotTimestamp());
 
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarPosition.getX32());
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarPosition.getY32());
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarPosition.getZ32());
+         logDataOutputStream.writeFloat(lidarScanMessage.getLidarPosition().getX32());
+         logDataOutputStream.writeFloat(lidarScanMessage.getLidarPosition().getY32());
+         logDataOutputStream.writeFloat(lidarScanMessage.getLidarPosition().getZ32());
 
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.getX32());
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.getY32());
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.getZ32());
-         logDataOutputStream.writeFloat(lidarScanMessage.lidarOrientation.getS32());
+         logDataOutputStream.writeFloat(lidarScanMessage.getLidarOrientation().getX32());
+         logDataOutputStream.writeFloat(lidarScanMessage.getLidarOrientation().getY32());
+         logDataOutputStream.writeFloat(lidarScanMessage.getLidarOrientation().getZ32());
+         logDataOutputStream.writeFloat(lidarScanMessage.getLidarOrientation().getS32());
 
-         logDataOutputStream.writeInt(lidarScanMessage.scan.size());
+         logDataOutputStream.writeInt(lidarScanMessage.getScan().size());
 
-         for (float scanPoint : lidarScanMessage.scan.toArray())
+         for (float scanPoint : lidarScanMessage.getScan().toArray())
          {
             logDataOutputStream.writeFloat(scanPoint);
          }

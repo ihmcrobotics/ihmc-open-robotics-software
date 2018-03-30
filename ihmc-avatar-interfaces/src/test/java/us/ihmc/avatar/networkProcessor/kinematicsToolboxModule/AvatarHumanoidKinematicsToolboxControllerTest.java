@@ -12,6 +12,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
@@ -21,8 +25,6 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
-import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,7 +32,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotController.RobotController;
@@ -43,7 +44,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -518,8 +518,8 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
       OneDoFJoint[] joints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       RobotConfigurationData robotConfigurationData = RobotConfigurationDataFactory.create(joints, new ForceSensorDefinition[0], new IMUDefinition[0]);
       RobotConfigurationDataFactory.packJointState(robotConfigurationData, Arrays.stream(joints).collect(Collectors.toList()));
-      robotConfigurationData.setRootTranslation(fullRobotModel.getRootJoint().getTranslationForReading());
-      robotConfigurationData.setRootOrientation(fullRobotModel.getRootJoint().getRotationForReading());
+      robotConfigurationData.getRootTranslation().set(fullRobotModel.getRootJoint().getTranslationForReading());
+      robotConfigurationData.getRootOrientation().set(fullRobotModel.getRootJoint().getRotationForReading());
       return robotConfigurationData;
    }
 
@@ -527,9 +527,9 @@ public abstract class AvatarHumanoidKinematicsToolboxControllerTest implements M
    {
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
       if (isLeftFootInSupport)
-         capturabilityBasedStatus.leftFootSupportPolygon2D.add();
+         capturabilityBasedStatus.getLeftFootSupportPolygon2d().add();
       if (isRightFootInSupport)
-         capturabilityBasedStatus.rightFootSupportPolygon2D.add();
+         capturabilityBasedStatus.getRightFootSupportPolygon2d().add();
       return capturabilityBasedStatus;
    }
 }

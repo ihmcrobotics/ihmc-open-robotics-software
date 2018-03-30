@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import controller_msgs.msg.dds.ObjectWeightPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ObjectWeightPacket;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ObjectWeightBehavior extends AbstractBehavior

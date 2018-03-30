@@ -7,14 +7,14 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 import com.thoughtworks.xstream.XStream;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.idl.IDLSequence;
+import us.ihmc.pubsub.TopicDataType;
 
 public class ScriptFileSaver
 {
@@ -43,8 +43,8 @@ public class ScriptFileSaver
    }
 
    /**
-    * @deprecated This method is highly inefficient. The whole scripting needs to be redone to
-    *             better implement the transform.
+    * @deprecated This method is highly inefficient. The whole scripting needs to be redone to better
+    *             implement the transform.
     */
    public void recordObject(long timestamp, Object object, RigidBodyTransform objectTransform) throws IOException
    {
@@ -101,13 +101,14 @@ public class ScriptFileSaver
          for (Field field : messageClass.getDeclaredFields())
          {
             Class<?> fieldType = field.getType();
+
             if (Packet.class.isAssignableFrom(fieldType))
             {
                field.set(copy, createCopyTrimmedToCurrentSize((Packet) field.get(message)));
             }
-            else if (RecyclingArrayListPubSub.class.isAssignableFrom(fieldType))
+            else if (IDLSequence.Object.class.isAssignableFrom(fieldType))
             {
-               field.set(copy, trimRecyclingArrayListPubSub((RecyclingArrayListPubSub) field.get(message)));
+               field.set(copy, trimIDLSequenceObject((IDLSequence.Object) field.get(message)));
             }
          }
 
@@ -121,31 +122,30 @@ public class ScriptFileSaver
    }
 
    @SuppressWarnings({"rawtypes", "unchecked"})
-   private static <T> RecyclingArrayListPubSub<T> trimRecyclingArrayListPubSub(RecyclingArrayListPubSub<T> list)
+   private static <T> IDLSequence.Object<T> trimIDLSequenceObject(IDLSequence.Object<T> list)
          throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException
    {
-      Field clazzField = list.getClass().getDeclaredField("clazz");
-      clazzField.setAccessible(true);
-      RecyclingArrayListPubSub<T> trimmed = new RecyclingArrayListPubSub<>((Class<T>) clazzField.get(list), (Supplier<T>) null, 0);
-      Field sizeField = list.getClass().getDeclaredField("size");
+      TopicDataType<T> topicDataType = list.getTopicDataType();
+      Class clazz = topicDataType.createData().getClass();
+      IDLSequence.Object<T> trimmed = new IDLSequence.Object<>(list.size(), clazz, topicDataType);
+      Field allocatorField = trimmed.getClass().getSuperclass().getDeclaredField("allocator");
+      allocatorField.setAccessible(true);
+      allocatorField.set(trimmed, null); // The allocator is a lambda that can not be recorded
+      Field sizeField = trimmed.getClass().getSuperclass().getDeclaredField("size");
       sizeField.setAccessible(true);
-      sizeField.setInt(trimmed, list.size());
-      Field valuesField = list.getClass().getDeclaredField("values");
+      sizeField.set(trimmed, list.size());
+      Field valuesField = trimmed.getClass().getSuperclass().getDeclaredField("values");
       valuesField.setAccessible(true);
-      valuesField.set(trimmed, list.toArray());
-
-      if (list.size() == 0)
-         return trimmed;
-      
-      if (Packet.class.isAssignableFrom((Class<?>) clazzField.get(list)))
+      Object[] array = list.toArray();
+      if (Packet.class.isAssignableFrom(clazz))
       {
-         Object[] values = (Object[]) valuesField.get(trimmed);
-
-         for (int i = 0; i < values.length; i++)
+         for (int i = 0; i < array.length; i++)
          {
-            values[i] = createCopyTrimmedToCurrentSize((Packet) values[i]);
+            array[i] = createCopyTrimmedToCurrentSize((Packet) array[i]);
          }
       }
+      valuesField.set(trimmed, array);
+
       return trimmed;
    }
 

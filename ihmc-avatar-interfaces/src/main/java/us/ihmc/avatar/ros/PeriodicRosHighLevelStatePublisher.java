@@ -2,8 +2,8 @@ package us.ihmc.avatar.ros;
 
 import java.util.concurrent.TimeUnit;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.utilities.ros.RosMainNode;

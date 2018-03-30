@@ -1,11 +1,16 @@
 package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 
+import controller_msgs.msg.dds.AdjustFootstepMessage;
+import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.idl.PreallocatedList;
 
 /**
@@ -16,8 +21,11 @@ import us.ihmc.idl.PreallocatedList;
  * transformation method. This class should be used as little as possible and eventually deleted.
  * </p>
  */
+@SuppressWarnings("rawtypes")
 public final class MessageTransformer
 {
+   private static final Map<Class, CustomTransformer> customTransformers = createCustomTransformers();
+
    private MessageTransformer()
    {
    }
@@ -33,19 +41,15 @@ public final class MessageTransformer
     * @param message the object to be transformed. Modified.
     * @param rigidBodyTransformToApply the transform to apply on the given message. Not modified.
     */
-   @SuppressWarnings("rawtypes")
+   @SuppressWarnings({"unchecked"})
    public static void transform(Object message, RigidBodyTransform rigidBodyTransformToApply)
    {
       if (message == null || isPrimitive(message.getClass()))
          return;
 
-      if (message instanceof AdjustFootstepMessage)
+      if (customTransformers.containsKey(message.getClass()))
       {
-         transform((AdjustFootstepMessage) message, rigidBodyTransformToApply);
-      }
-      else if (message instanceof FootstepDataMessage)
-      {
-         transform((FootstepDataMessage) message, rigidBodyTransformToApply);
+         customTransformers.get(message.getClass()).transform(message, rigidBodyTransformToApply);
       }
       else if (message instanceof PreallocatedList)
       {
@@ -91,26 +95,66 @@ public final class MessageTransformer
       }
    }
 
-   private static void transform(AdjustFootstepMessage message, RigidBodyTransform rigidBodyTransformToApply)
+   private static Map<Class, CustomTransformer> createCustomTransformers()
    {
-      if (message.location != null)
-         message.location.applyTransform(rigidBodyTransformToApply);
-      if (message.orientation != null)
-         message.orientation.applyTransform(rigidBodyTransformToApply);
-   }
+      Map<Class, CustomTransformer> customTransformers = new HashMap<>();
 
-   private static void transform(FootstepDataMessage message, RigidBodyTransform rigidBodyTransformToApply)
-   {
-      if (message.location != null)
-         message.location.applyTransform(rigidBodyTransformToApply);
-      if (message.orientation != null)
-         message.orientation.applyTransform(rigidBodyTransformToApply);
-
-      if (message.customPositionWaypoints != null)
+      customTransformers.put(AdjustFootstepMessage.class, new CustomTransformer<AdjustFootstepMessage>()
       {
-         for (int i = 0; i < message.customPositionWaypoints.size(); i++)
-            message.customPositionWaypoints.get(i).applyTransform(rigidBodyTransformToApply);
-      }
+         @Override
+         public void transform(AdjustFootstepMessage object, RigidBodyTransform rigidBodyTransformToApply)
+         {
+            object.getLocation().applyTransform(rigidBodyTransformToApply);
+            object.getOrientation().applyTransform(rigidBodyTransformToApply);
+         }
+      });
+
+      customTransformers.put(FootstepDataMessage.class, new CustomTransformer<FootstepDataMessage>()
+      {
+         @Override
+         public void transform(FootstepDataMessage message, RigidBodyTransform rigidBodyTransformToApply)
+         {
+            if (message.getLocation() != null)
+               message.getLocation().applyTransform(rigidBodyTransformToApply);
+            if (message.getOrientation() != null)
+               message.getOrientation().applyTransform(rigidBodyTransformToApply);
+
+            if (message.getCustomPositionWaypoints() != null)
+            {
+               for (int i = 0; i < message.getCustomPositionWaypoints().size(); i++)
+                  message.getCustomPositionWaypoints().get(i).applyTransform(rigidBodyTransformToApply);
+            }
+         }
+      });
+
+      customTransformers.put(SE3TrajectoryMessage.class, new CustomTransformer<SE3TrajectoryMessage>()
+      {
+         @Override
+         public void transform(SE3TrajectoryMessage object, RigidBodyTransform rigidBodyTransformToApply)
+         {
+            MessageTransformer.transform(object.getTaskspaceTrajectoryPoints(), rigidBodyTransformToApply);
+         }
+      });
+
+      customTransformers.put(SO3TrajectoryMessage.class, new CustomTransformer<SO3TrajectoryMessage>()
+      {
+         @Override
+         public void transform(SO3TrajectoryMessage object, RigidBodyTransform rigidBodyTransformToApply)
+         {
+            MessageTransformer.transform(object.getTaskspaceTrajectoryPoints(), rigidBodyTransformToApply);
+         }
+      });
+
+      customTransformers.put(EuclideanTrajectoryMessage.class, new CustomTransformer<EuclideanTrajectoryMessage>()
+      {
+         @Override
+         public void transform(EuclideanTrajectoryMessage object, RigidBodyTransform rigidBodyTransformToApply)
+         {
+            MessageTransformer.transform(object.getTaskspaceTrajectoryPoints(), rigidBodyTransformToApply);
+         }
+      });
+
+      return customTransformers;
    }
 
    private static boolean isPrimitive(Class<?> clazz)
@@ -132,5 +176,10 @@ public final class MessageTransformer
       if (clazz.equals(double.class) || clazz.equals(double[].class) || clazz.equals(Double.class))
          return true;
       return false;
+   }
+
+   private static interface CustomTransformer<T>
+   {
+      void transform(T object, RigidBodyTransform rigidBodyTransformToApply);
    }
 }

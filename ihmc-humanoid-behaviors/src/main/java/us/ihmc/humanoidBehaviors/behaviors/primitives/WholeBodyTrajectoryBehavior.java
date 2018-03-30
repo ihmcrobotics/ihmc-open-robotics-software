@@ -1,10 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -63,9 +63,9 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
          
          double getTrajectoryTime = 0;
          if(outgoingMessage.getRightHandTrajectoryMessage() != null)
-            getTrajectoryTime = outgoingMessage.getRightHandTrajectoryMessage().getSe3Trajectory().taskspaceTrajectoryPoints.getLast().time;
+            getTrajectoryTime = outgoingMessage.getRightHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
          if(outgoingMessage.getLeftHandTrajectoryMessage() != null)
-            getTrajectoryTime = outgoingMessage.getLeftHandTrajectoryMessage().getSe3Trajectory().taskspaceTrajectoryPoints.getLast().time;
+            getTrajectoryTime = outgoingMessage.getLeftHandTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().getLast().getTime();
          
          trajectoryTime.set(getTrajectoryTime);
       }

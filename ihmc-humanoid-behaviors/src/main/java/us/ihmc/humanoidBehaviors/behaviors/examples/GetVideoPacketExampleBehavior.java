@@ -1,11 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 
 public class GetVideoPacketExampleBehavior extends AbstractBehavior
 {

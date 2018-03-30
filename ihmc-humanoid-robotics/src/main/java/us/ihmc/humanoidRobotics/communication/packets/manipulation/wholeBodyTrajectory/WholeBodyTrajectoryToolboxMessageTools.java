@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
+import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -28,13 +29,13 @@ public class WholeBodyTrajectoryToolboxMessageTools
             double t0 = Double.NaN;
             double tf = Double.NaN;
 
-            for (int i = 1; i < message.waypoints.size(); i++)
+            for (int i = 1; i < message.getWaypoints().size(); i++)
             {
-               t0 = message.waypointTimes.get(i - 1);
-               tf = message.waypointTimes.get(i);
-               previous = message.waypoints.get(i - 1);
-               next = message.waypoints.get(i);
-               if (time < message.waypointTimes.get(i))
+               t0 = message.getWaypointTimes().get(i - 1);
+               tf = message.getWaypointTimes().get(i);
+               previous = message.getWaypoints().get(i - 1);
+               next = message.getWaypoints().get(i);
+               if (time < message.getWaypointTimes().get(i))
                   break;
             }
 

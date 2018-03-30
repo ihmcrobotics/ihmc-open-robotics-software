@@ -4,6 +4,29 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.BoundingBox3DMessage;
+import controller_msgs.msg.dds.BoundingBoxesPacket;
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.DetectedFacesPacket;
+import controller_msgs.msg.dds.HeatMapPacket;
+import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
+import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.LidarScanParametersMessage;
+import controller_msgs.msg.dds.ObjectDetectorResultPacket;
+import controller_msgs.msg.dds.PlanarRegionMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import controller_msgs.msg.dds.SelectionMatrix3DMessage;
+import controller_msgs.msg.dds.SimulatedLidarScanPacket;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.UIPositionCheckerPacket;
+import controller_msgs.msg.dds.WeightMatrix3DMessage;
 import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
@@ -19,7 +42,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -51,20 +74,19 @@ public class MessageTools
    public static SimulatedLidarScanPacket createSimulatedLidarScanPacket(int sensorId, LidarScanParameters params, float[] ranges)
    {
       SimulatedLidarScanPacket message = new SimulatedLidarScanPacket();
-      message.ranges.add(ranges);
-      message.sensorId = sensorId;
-      message.lidarScanParameters = new LidarScanParametersMessage();
-      message.lidarScanParameters.timestamp = params.timestamp;
-      message.lidarScanParameters.sweepYawMax = params.sweepYawMax;
-      message.lidarScanParameters.sweepYawMin = params.sweepYawMin;
-      message.lidarScanParameters.heightPitchMax = params.heightPitchMax;
-      message.lidarScanParameters.heightPitchMin = params.heightPitchMin;
-      message.lidarScanParameters.timeIncrement = params.timeIncrement;
-      message.lidarScanParameters.scanTime = params.scanTime;
-      message.lidarScanParameters.minRange = params.minRange;
-      message.lidarScanParameters.maxRange = params.maxRange;
-      message.lidarScanParameters.pointsPerSweep = params.pointsPerSweep;
-      message.lidarScanParameters.scanHeight = params.scanHeight;
+      message.getRanges().add(ranges);
+      message.setSensorId(sensorId);
+      message.getLidarScanParameters().setTimestamp(params.timestamp);
+      message.getLidarScanParameters().setSweepYawMax(params.sweepYawMax);
+      message.getLidarScanParameters().setSweepYawMin(params.sweepYawMin);
+      message.getLidarScanParameters().setHeightPitchMax(params.heightPitchMax);
+      message.getLidarScanParameters().setHeightPitchMin(params.heightPitchMin);
+      message.getLidarScanParameters().setTimeIncrement(params.timeIncrement);
+      message.getLidarScanParameters().setScanTime(params.scanTime);
+      message.getLidarScanParameters().setMinRange(params.minRange);
+      message.getLidarScanParameters().setMaxRange(params.maxRange);
+      message.getLidarScanParameters().setPointsPerSweep(params.pointsPerSweep);
+      message.getLidarScanParameters().setScanHeight(params.scanHeight);
       return message;
    }
 
@@ -79,34 +101,34 @@ public class MessageTools
    public static LidarScanMessage createLidarScanMessage(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scan)
    {
       LidarScanMessage message = new LidarScanMessage();
-      message.robotTimestamp = timestamp;
-      message.lidarPosition = lidarPosition;
-      message.lidarOrientation = lidarOrientation;
-      message.scan.add(scan);
+      message.setRobotTimestamp(timestamp);
+      message.getLidarPosition().set(lidarPosition);
+      message.getLidarOrientation().set(lidarOrientation);
+      message.getScan().add(scan);
       return message;
    }
 
    public static ObjectDetectorResultPacket createObjectDetectorResultPacket(HeatMapPacket heatMap, BoundingBoxesPacket boundingBoxes)
    {
       ObjectDetectorResultPacket message = new ObjectDetectorResultPacket();
-      message.heatMap = heatMap;
-      message.boundingBoxes = boundingBoxes;
+      message.getHeatMap().set(heatMap);
+      message.getBoundingBoxes().set(boundingBoxes);
       return message;
    }
 
    public static UIPositionCheckerPacket createUIPositionCheckerPacket(Point3DReadOnly position)
    {
       UIPositionCheckerPacket message = new UIPositionCheckerPacket();
-      message.position = new Point3D(position);
-      message.orientation = null;
+      message.getPosition().set(position);
+      message.getOrientation().setToNaN();
       return message;
    }
 
    public static UIPositionCheckerPacket createUIPositionCheckerPacket(Point3DReadOnly position, Quaternion orientation)
    {
       UIPositionCheckerPacket message = new UIPositionCheckerPacket();
-      message.position = new Point3D(position);
-      message.orientation = orientation;
+      message.getPosition().set(position);
+      message.getOrientation().set(orientation);
       return message;
    }
 
@@ -124,15 +146,15 @@ public class MessageTools
    public static KinematicsToolboxCenterOfMassMessage createKinematicsToolboxCenterOfMassMessage(Point3DReadOnly desiredPosition)
    {
       KinematicsToolboxCenterOfMassMessage message = new KinematicsToolboxCenterOfMassMessage();
-      message.desiredPositionInWorld.set(desiredPosition);
+      message.getDesiredPositionInWorld().set(desiredPosition);
       return message;
    }
 
    public static DetectedFacesPacket createDetectedFacesPacket(String[] ids, Point3D[] positions)
    {
       DetectedFacesPacket message = new DetectedFacesPacket();
-      copyData(ids, message.ids);
-      copyData(positions, message.positions);
+      copyData(ids, message.getIds());
+      copyData(positions, message.getPositions());
       return message;
    }
 
@@ -148,7 +170,7 @@ public class MessageTools
    public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
+      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
       return message;
    }
 
@@ -170,14 +192,14 @@ public class MessageTools
    public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector, Point3DReadOnly desiredPosition)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      message.setDesiredPositionInWorld(desiredPosition);
-      message.angularSelectionMatrix.xSelected = false;
-      message.angularSelectionMatrix.ySelected = false;
-      message.angularSelectionMatrix.zSelected = false;
-      message.linearSelectionMatrix.xSelected = true;
-      message.linearSelectionMatrix.ySelected = true;
-      message.linearSelectionMatrix.zSelected = true;
+      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.getDesiredPositionInWorld().set(desiredPosition);
+      message.getAngularSelectionMatrix().setXSelected(false);
+      message.getAngularSelectionMatrix().setYSelected(false);
+      message.getAngularSelectionMatrix().setZSelected(false);
+      message.getLinearSelectionMatrix().setXSelected(true);
+      message.getLinearSelectionMatrix().setYSelected(true);
+      message.getLinearSelectionMatrix().setZSelected(true);
       return message;
    }
 
@@ -199,14 +221,14 @@ public class MessageTools
    public static KinematicsToolboxRigidBodyMessage createKinematicsToolboxRigidBodyMessage(RigidBody endEffector, QuaternionReadOnly desiredOrientation)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      message.setDesiredOrientationInWorld(desiredOrientation);
-      message.angularSelectionMatrix.xSelected = true;
-      message.angularSelectionMatrix.ySelected = true;
-      message.angularSelectionMatrix.zSelected = true;
-      message.linearSelectionMatrix.xSelected = false;
-      message.linearSelectionMatrix.ySelected = false;
-      message.linearSelectionMatrix.zSelected = false;
+      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.getDesiredOrientationInWorld().set(desiredOrientation);
+      message.getAngularSelectionMatrix().setXSelected(true);
+      message.getAngularSelectionMatrix().setYSelected(true);
+      message.getAngularSelectionMatrix().setZSelected(true);
+      message.getLinearSelectionMatrix().setXSelected(false);
+      message.getLinearSelectionMatrix().setYSelected(false);
+      message.getLinearSelectionMatrix().setZSelected(false);
       return message;
    }
 
@@ -228,9 +250,9 @@ public class MessageTools
                                                                                            QuaternionReadOnly desiredOrientation)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      message.setDesiredPositionInWorld(desiredPosition);
-      message.setDesiredOrientationInWorld(desiredOrientation);
+      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.getDesiredPositionInWorld().set(desiredPosition);
+      message.getDesiredOrientationInWorld().set(desiredOrientation);
       return message;
    }
 
@@ -255,13 +277,13 @@ public class MessageTools
                                                                                            QuaternionReadOnly desiredOrientation)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-      message.endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
-      message.setDesiredPositionInWorld(desiredPosition);
-      message.setDesiredOrientationInWorld(desiredOrientation);
+      message.setEndEffectorNameBasedHashCode(endEffector.getNameBasedHashCode());
+      message.getDesiredPositionInWorld().set(desiredPosition);
+      message.getDesiredOrientationInWorld().set(desiredOrientation);
       RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
       controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
-      message.setControlFramePositionInEndEffector(transformToBodyFixedFrame.getTranslationVector());
-      message.controlFrameOrientationInEndEffector.set(transformToBodyFixedFrame.getRotationMatrix());
+      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslationVector());
+      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotationMatrix());
       return message;
    }
 
@@ -273,37 +295,37 @@ public class MessageTools
    public static SelectionMatrix3DMessage createSelectionMatrix3DMessage(SelectionMatrix3D selectionMatrix3D)
    {
       SelectionMatrix3DMessage message = new SelectionMatrix3DMessage();
-      message.selectionFrameId = MessageTools.toFrameId(selectionMatrix3D.getSelectionFrame());
-      message.xSelected = selectionMatrix3D.isXSelected();
-      message.ySelected = selectionMatrix3D.isYSelected();
-      message.zSelected = selectionMatrix3D.isZSelected();
+      message.setSelectionFrameId(MessageTools.toFrameId(selectionMatrix3D.getSelectionFrame()));
+      message.setXSelected(selectionMatrix3D.isXSelected());
+      message.setYSelected(selectionMatrix3D.isYSelected());
+      message.setZSelected(selectionMatrix3D.isZSelected());
       return message;
    }
 
    public static WeightMatrix3DMessage createWeightMatrix3DMessage(WeightMatrix3D weightMatrix)
    {
       WeightMatrix3DMessage message = new WeightMatrix3DMessage();
-      message.weightFrameId = MessageTools.toFrameId(weightMatrix.getWeightFrame());
-      message.xWeight = weightMatrix.getXAxisWeight();
-      message.yWeight = weightMatrix.getYAxisWeight();
-      message.zWeight = weightMatrix.getZAxisWeight();
+      message.setWeightFrameId(MessageTools.toFrameId(weightMatrix.getWeightFrame()));
+      message.setXWeight(weightMatrix.getXAxisWeight());
+      message.setYWeight(weightMatrix.getYAxisWeight());
+      message.setZWeight(weightMatrix.getZAxisWeight());
       return message;
    }
 
    public static WeightMatrix3DMessage createWeightMatrix3DMessage(double weight)
    {
       WeightMatrix3DMessage message = new WeightMatrix3DMessage();
-      message.weightFrameId = MessageTools.toFrameId(null);
-      message.xWeight = weight;
-      message.yWeight = weight;
-      message.zWeight = weight;
+      message.setWeightFrameId(MessageTools.toFrameId(null));
+      message.setXWeight(weight);
+      message.setYWeight(weight);
+      message.setZWeight(weight);
       return message;
    }
 
    public static KinematicsToolboxOutputStatus createKinematicsToolboxOutputStatus(OneDoFJoint[] joints)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
-      message.jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(joints);
+      message.setJointNameHash((int) NameBasedHashCodeTools.computeArrayHashCode(joints));
       return message;
    }
 
@@ -311,7 +333,7 @@ public class MessageTools
                                                                                    boolean useQDesired)
    {
       KinematicsToolboxOutputStatus message = new KinematicsToolboxOutputStatus();
-      message.jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(newJointData);
+      message.setJointNameHash((int) NameBasedHashCodeTools.computeArrayHashCode(newJointData));
       MessageTools.packDesiredJointState(message, rootJoint, newJointData, useQDesired);
       return message;
    }
@@ -319,15 +341,15 @@ public class MessageTools
    public static BoundingBoxesPacket createBoundingBoxesPacket(int[] packedBoxes, String[] labels)
    {
       BoundingBoxesPacket message = new BoundingBoxesPacket();
-      MessageTools.copyData(labels, message.labels);
+      MessageTools.copyData(labels, message.getLabels());
       int n = packedBoxes.length / 4;
 
       for (int i = 0; i < n; i++)
       {
-         message.boundingBoxXCoordinates.add(packedBoxes[i * 4]);
-         message.boundingBoxYCoordinates.add(packedBoxes[i * 4 + 1]);
-         message.boundingBoxWidths.add(packedBoxes[i * 4 + 2]);
-         message.boundingBoxHeights.add(packedBoxes[i * 4 + 3]);
+         message.getBoundingBoxesXCoordinates().add(packedBoxes[i * 4]);
+         message.getBoundingBoxesYCoordinates().add(packedBoxes[i * 4 + 1]);
+         message.getBoundingBoxesWidths().add(packedBoxes[i * 4 + 2]);
+         message.getBoundingBoxesHeights().add(packedBoxes[i * 4 + 3]);
       }
       return message;
    }
@@ -335,24 +357,24 @@ public class MessageTools
    public static ControllerCrashNotificationPacket createControllerCrashNotificationPacket(ControllerCrashLocation location, String stackTrace)
    {
       ControllerCrashNotificationPacket message = new ControllerCrashNotificationPacket();
-      message.controllerCrashLocation = location.toByte();
-      message.stacktrace.append(stackTrace);
+      message.setControllerCrashLocation(location.toByte());
+      message.setStacktrace(stackTrace);
       return message;
    }
 
    public static StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors)
    {
       StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
-      message.robotTimestamp = timestamp;
-      message.pointCloud.add(pointCloud);
-      message.colors.add(colors);
+      message.setRobotTimestamp(timestamp);
+      message.getPointCloud().add(pointCloud);
+      message.getColors().add(colors);
       return message;
    }
 
    public static ToolboxStateMessage createToolboxStateMessage(ToolboxState requestedState)
    {
       ToolboxStateMessage message = new ToolboxStateMessage();
-      message.requestedToolboxState = requestedState.toByte();
+      message.setRequestedToolboxState(requestedState.toByte());
       return message;
    }
 
@@ -377,12 +399,12 @@ public class MessageTools
                                                                                        PacketDestination destination)
    {
       RequestPlanarRegionsListMessage message = new RequestPlanarRegionsListMessage();
-      message.planarRegionsRequestType = requestType.toByte();
-      message.boundingBoxInWorldForRequest = new BoundingBox3DMessage();
+      message.setPlanarRegionsRequestType(requestType.toByte());
+      message.getBoundingBoxInWorldForRequest().set(new BoundingBox3DMessage());
       if (boundingBoxInWorldForRequest != null)
       {
-         message.boundingBoxInWorldForRequest.minPoint.set(boundingBoxInWorldForRequest.getMinPoint());
-         message.boundingBoxInWorldForRequest.maxPoint.set(boundingBoxInWorldForRequest.getMaxPoint());
+         message.getBoundingBoxInWorldForRequest().getMinPoint().set(boundingBoxInWorldForRequest.getMinPoint());
+         message.getBoundingBoxInWorldForRequest().getMaxPoint().set(boundingBoxInWorldForRequest.getMaxPoint());
       }
       if (destination != null)
          message.setDestination(destination);
@@ -392,7 +414,7 @@ public class MessageTools
    public static PlanarRegionsListMessage createPlanarRegionsListMessage(List<PlanarRegionMessage> planarRegions)
    {
       PlanarRegionsListMessage message = new PlanarRegionsListMessage();
-      copyData(planarRegions, message.planarRegions);
+      copyData(planarRegions, message.getPlanarRegions());
       return message;
    }
 
@@ -403,8 +425,8 @@ public class MessageTools
 
    public static LidarScanParameters toLidarScanParameters(LidarScanParametersMessage message)
    {
-      return new LidarScanParameters(message.pointsPerSweep, message.scanHeight, message.sweepYawMin, message.sweepYawMax, message.heightPitchMin,
-                                     message.heightPitchMax, message.timeIncrement, message.minRange, message.maxRange, message.scanTime, message.timestamp);
+      return new LidarScanParameters(message.getPointsPerSweep(), message.getScanHeight(), message.getSweepYawMin(), message.getSweepYawMax(), message.getHeightPitchMin(),
+                                     message.getHeightPitchMax(), message.getTimeIncrement(), message.getMinRange(), message.getMaxRange(), message.getScanTime(), message.getTimestamp());
    }
 
    /**
@@ -681,13 +703,13 @@ public class MessageTools
 
    public static Point3D32[] unpackPointCloud32(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
    {
-      Point3D32[] points = new Point3D32[stereoVisionPointCloudMessage.pointCloud.size() / 3];
-      for (int index = 0; index < stereoVisionPointCloudMessage.pointCloud.size() / 3; index++)
+      Point3D32[] points = new Point3D32[stereoVisionPointCloudMessage.getPointCloud().size() / 3];
+      for (int index = 0; index < stereoVisionPointCloudMessage.getPointCloud().size() / 3; index++)
       {
          Point3D32 scanPoint = new Point3D32();
-         scanPoint.setX(stereoVisionPointCloudMessage.pointCloud.get(3 * index + 0));
-         scanPoint.setY(stereoVisionPointCloudMessage.pointCloud.get(3 * index + 1));
-         scanPoint.setZ(stereoVisionPointCloudMessage.pointCloud.get(3 * index + 2));
+         scanPoint.setX(stereoVisionPointCloudMessage.getPointCloud().get(3 * index + 0));
+         scanPoint.setY(stereoVisionPointCloudMessage.getPointCloud().get(3 * index + 1));
+         scanPoint.setZ(stereoVisionPointCloudMessage.getPointCloud().get(3 * index + 2));
          points[index] = scanPoint;
       }
       return points;
@@ -695,11 +717,11 @@ public class MessageTools
 
    public static Color[] unpackPointCloudColors(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
    {
-      Color[] colors = new Color[stereoVisionPointCloudMessage.colors.size()];
+      Color[] colors = new Color[stereoVisionPointCloudMessage.getColors().size()];
 
-      for (int i = 0; i < stereoVisionPointCloudMessage.colors.size(); i++)
+      for (int i = 0; i < stereoVisionPointCloudMessage.getColors().size(); i++)
       {
-         colors[i] = new Color(stereoVisionPointCloudMessage.colors.get(i));
+         colors[i] = new Color(stereoVisionPointCloudMessage.getColors().get(i));
       }
 
       return colors;
@@ -710,14 +732,14 @@ public class MessageTools
    {
       int jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(jointsToUpdate);
 
-      if (jointNameHash != kinematicsToolboxOutputStatus.jointNameHash)
+      if (jointNameHash != kinematicsToolboxOutputStatus.getJointNameHash())
          throw new RuntimeException("The robots are different.");
 
-      for (int i = 0; i < kinematicsToolboxOutputStatus.desiredJointAngles.size(); i++)
-         jointsToUpdate[i].setQ(kinematicsToolboxOutputStatus.desiredJointAngles.get(i));
+      for (int i = 0; i < kinematicsToolboxOutputStatus.getDesiredJointAngles().size(); i++)
+         jointsToUpdate[i].setQ(kinematicsToolboxOutputStatus.getDesiredJointAngles().get(i));
 
-      rootJointToUpdate.setPosition(kinematicsToolboxOutputStatus.desiredRootTranslation);
-      rootJointToUpdate.setRotation(kinematicsToolboxOutputStatus.desiredRootOrientation);
+      rootJointToUpdate.setPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
+      rootJointToUpdate.setRotation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
    }
 
    public static void packDesiredJointState(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus, FloatingInverseDynamicsJoint rootJoint,
@@ -725,37 +747,37 @@ public class MessageTools
    {
       int jointNameHash = (int) NameBasedHashCodeTools.computeArrayHashCode(newJointData);
       
-      if (jointNameHash != kinematicsToolboxOutputStatus.jointNameHash)
+      if (jointNameHash != kinematicsToolboxOutputStatus.getJointNameHash())
          throw new RuntimeException("The robots are different.");
       
-      kinematicsToolboxOutputStatus.desiredJointAngles.reset();
+      kinematicsToolboxOutputStatus.getDesiredJointAngles().reset();
       
       if (useQDesired)
       {
          for (int i = 0; i < newJointData.length; i++)
          {
-            kinematicsToolboxOutputStatus.desiredJointAngles.add((float) newJointData[i].getqDesired());
+            kinematicsToolboxOutputStatus.getDesiredJointAngles().add((float) newJointData[i].getqDesired());
          }
       }
       else
       {
          for (int i = 0; i < newJointData.length; i++)
          {
-            kinematicsToolboxOutputStatus.desiredJointAngles.add((float) newJointData[i].getQ());
+            kinematicsToolboxOutputStatus.getDesiredJointAngles().add((float) newJointData[i].getQ());
          }
       }
       
       if (rootJoint != null)
       {
-         rootJoint.getTranslation(kinematicsToolboxOutputStatus.desiredRootTranslation);
-         rootJoint.getRotation(kinematicsToolboxOutputStatus.desiredRootOrientation);
+         rootJoint.getTranslation(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
+         rootJoint.getRotation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
       }
    }
 
    public static KinematicsToolboxOutputStatus interpolateMessages(KinematicsToolboxOutputStatus outputStatusOne, KinematicsToolboxOutputStatus outputStatusTwo,
                                                                    double alpha)
    {
-      if (outputStatusOne.jointNameHash != outputStatusTwo.jointNameHash)
+      if (outputStatusOne.getJointNameHash() != outputStatusTwo.getJointNameHash())
          throw new RuntimeException("Output status are not compatible.");
       
       KinematicsToolboxOutputStatus interplateOutputStatus = new KinematicsToolboxOutputStatus();
@@ -765,18 +787,18 @@ public class MessageTools
       
       for (int i = 0; i < jointAngles1.size(); i++)
       {
-         interplateOutputStatus.desiredJointAngles.add((float) EuclidCoreTools.interpolate(jointAngles1.get(i), jointAngles2.get(i), alpha));
+         interplateOutputStatus.getDesiredJointAngles().add((float) EuclidCoreTools.interpolate(jointAngles1.get(i), jointAngles2.get(i), alpha));
       }
       
-      Vector3D32 rootTranslation1 = outputStatusOne.getDesiredRootTranslation();
-      Vector3D32 rootTranslation2 = outputStatusTwo.getDesiredRootTranslation();
-      Quaternion32 rootOrientation1 = outputStatusOne.getDesiredRootOrientation();
-      Quaternion32 rootOrientation2 = outputStatusTwo.getDesiredRootOrientation();
+      Vector3D rootTranslation1 = outputStatusOne.getDesiredRootTranslation();
+      Vector3D rootTranslation2 = outputStatusTwo.getDesiredRootTranslation();
+      Quaternion rootOrientation1 = outputStatusOne.getDesiredRootOrientation();
+      Quaternion rootOrientation2 = outputStatusTwo.getDesiredRootOrientation();
       
-      interplateOutputStatus.desiredRootTranslation.interpolate(rootTranslation1, rootTranslation2, alpha);
-      interplateOutputStatus.desiredRootOrientation.interpolate(rootOrientation1, rootOrientation2, alpha);
+      interplateOutputStatus.getDesiredRootTranslation().interpolate(rootTranslation1, rootTranslation2, alpha);
+      interplateOutputStatus.getDesiredRootOrientation().interpolate(rootOrientation1, rootOrientation2, alpha);
       
-      interplateOutputStatus.jointNameHash = outputStatusOne.jointNameHash;
+      interplateOutputStatus.setJointNameHash(outputStatusOne.getJointNameHash());
       
       return interplateOutputStatus;
    }
@@ -806,8 +828,8 @@ public class MessageTools
                                                        Tuple3DReadOnly rootJointPosition, QuaternionReadOnly rootJointOrientation,
                                                        long[] jointNameBasedHashCodes, float[] jointAngles)
    {
-      kinematicsToolboxConfigurationMessage.setPrivilegedRootJointPosition(rootJointPosition);
-      kinematicsToolboxConfigurationMessage.setPrivilegedRootJointOrientation(rootJointOrientation);
+      kinematicsToolboxConfigurationMessage.getPrivilegedRootJointPosition().set(rootJointPosition);
+      kinematicsToolboxConfigurationMessage.getPrivilegedRootJointOrientation().set(rootJointOrientation);
       MessageTools.packPrivilegedJointAngles(kinematicsToolboxConfigurationMessage, jointNameBasedHashCodes, jointAngles);
    }
 
@@ -836,35 +858,35 @@ public class MessageTools
       if (jointNameBasedHashCodes.length != jointAngles.length)
          throw new IllegalArgumentException("The two arrays jointAngles and jointNameBasedHashCodes have to be of same length.");
       
-      kinematicsToolboxConfigurationMessage.privilegedJointNameBasedHashCodes.reset();
-      kinematicsToolboxConfigurationMessage.privilegedJointNameBasedHashCodes.add(jointNameBasedHashCodes);
-      kinematicsToolboxConfigurationMessage.privilegedJointAngles.reset();
-      kinematicsToolboxConfigurationMessage.privilegedJointAngles.add(jointAngles);
+      kinematicsToolboxConfigurationMessage.getPrivilegedJointNameBasedHashCodes().reset();
+      kinematicsToolboxConfigurationMessage.getPrivilegedJointNameBasedHashCodes().add(jointNameBasedHashCodes);
+      kinematicsToolboxConfigurationMessage.getPrivilegedJointAngles().reset();
+      kinematicsToolboxConfigurationMessage.getPrivilegedJointAngles().add(jointAngles);
    }
 
    public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
    {
-      lidarScanMessage.scan.reset();
+      lidarScanMessage.getScan().reset();
       
       for (Point3DReadOnly scanPoint : scan)
       {
-         lidarScanMessage.scan.add((float) scanPoint.getX());
-         lidarScanMessage.scan.add((float) scanPoint.getY());
-         lidarScanMessage.scan.add((float) scanPoint.getZ());
+         lidarScanMessage.getScan().add((float) scanPoint.getX());
+         lidarScanMessage.getScan().add((float) scanPoint.getY());
+         lidarScanMessage.getScan().add((float) scanPoint.getZ());
       }
    }
 
    public static void unpackScanPoint(LidarScanMessage lidarScanMessage, int index, Point3DBasics scanPointToPack)
    {
       index *= 3;
-      scanPointToPack.setX(lidarScanMessage.scan.get(index++));
-      scanPointToPack.setY(lidarScanMessage.scan.get(index++));
-      scanPointToPack.setZ(lidarScanMessage.scan.get(index++));
+      scanPointToPack.setX(lidarScanMessage.getScan().get(index++));
+      scanPointToPack.setY(lidarScanMessage.getScan().get(index++));
+      scanPointToPack.setZ(lidarScanMessage.getScan().get(index++));
    }
 
    public static Point3D[] unpackScanPoint3ds(LidarScanMessage lidarScanMessage)
    {
-      int numberOfScanPoints = lidarScanMessage.scan.size() / 3;
+      int numberOfScanPoints = lidarScanMessage.getScan().size() / 3;
       Point3D[] scanPoints = new Point3D[numberOfScanPoints];
       for (int index = 0; index < numberOfScanPoints; index++)
       {

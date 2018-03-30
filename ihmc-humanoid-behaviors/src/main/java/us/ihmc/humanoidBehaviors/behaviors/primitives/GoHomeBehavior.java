@@ -2,13 +2,13 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import org.apache.commons.lang3.StringUtils;
 
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 

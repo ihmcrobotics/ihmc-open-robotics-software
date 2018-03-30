@@ -1,6 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,8 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -16,15 +19,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -34,7 +36,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotTestInterface
@@ -109,16 +110,16 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
                break;
             }
 
-            message.footstepDataList.add().set(footstepList.get(stepsPackedInMessage));
+            message.getFootstepDataList().add().set(footstepList.get(stepsPackedInMessage));
             stepsPackedInMessage++;
          }
-         message.queueingProperties.setExecutionMode(ExecutionMode.QUEUE.toByte());
-         message.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+         message.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+         message.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
          messages.add(message);
       }
       FootstepDataListMessage r = messages.get(0);
-      r.queueingProperties.setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-      r.queueingProperties.setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
+      r.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      r.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
 
       YoVariable<?> numberOfStepsInController = drcSimulationTestHelper.getSimulationConstructionSet().getVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
       int expectedNumberOfSteps = 0;
