@@ -49,6 +49,7 @@ public class WholeBodyMotionPlanner
    private final FrameVector3D nominalForceRate;
    private final FramePoint3D positionLowerBound;
    private final FramePoint3D positionUpperBound;
+   private final FramePoint3D positionJumpUpperBound;
    private final FrameVector3D positionWeight;
    private final FrameVector3D velocityWeight;
 
@@ -58,7 +59,7 @@ public class WholeBodyMotionPlanner
       this.gravityZ = parameters.getGravityZ();
       this.robotMass = parameters.getRobotMass();
       this.maxStandingHeight = 0.45;
-      this.minStandingHeight = 0.25;
+      this.minStandingHeight = 0.15;
       this.motionPlanner = new CentroidalMotionPlanner(parameters, registry);
       this.motionNode = new CentroidalMotionNode(planningFrame);
       this.initialPosition = new FramePoint3D(planningFrame);
@@ -71,6 +72,7 @@ public class WholeBodyMotionPlanner
       this.nominalForceRate = new FrameVector3D(planningFrame);
       this.positionLowerBound = new FramePoint3D(planningFrame, Double.NaN, Double.NaN, minStandingHeight);
       this.positionUpperBound = new FramePoint3D(planningFrame, Double.NaN, Double.NaN, maxStandingHeight);
+      this.positionJumpUpperBound = new FramePoint3D(planningFrame, Double.NaN, Double.NaN, maxStandingHeight * 0.9);
       double defaultPositionWeight = parameters.getDefaultMotionPlanningPositionObjecitveWeight();
       this.positionWeight = new FrameVector3D(planningFrame, defaultPositionWeight, defaultPositionWeight, defaultPositionWeight);
       double defaultVelocityweight = parameters.getDefaultMotionPlanningVelocityObjecitveWeight();
@@ -106,7 +108,6 @@ public class WholeBodyMotionPlanner
       motionNode.reset();
       motionNode.setTime(nodeTime);
       motionNode.setPositionConstraint(initialPosition);
-      PrintTools.debug("Initial velocity: " + initialVelocity.toString());
       motionNode.setLinearVelocityConstraint(initialVelocity);
       motionNode.setForceConstraint(initialGroundReactionForce);
       motionNode.setZeroForceRateConstraint();
@@ -147,6 +148,7 @@ public class WholeBodyMotionPlanner
          {
             motionNode.setZeroForceConstraint();
             motionNode.setZeroForceRateConstraint();
+            motionNode.setPositionInequalities(positionJumpUpperBound, positionLowerBound);
          }
          else
          {

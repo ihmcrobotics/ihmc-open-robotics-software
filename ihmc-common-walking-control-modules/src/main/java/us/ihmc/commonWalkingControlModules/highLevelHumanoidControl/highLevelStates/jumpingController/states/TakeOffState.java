@@ -64,7 +64,7 @@ public class TakeOffState extends AbstractJumpState
       double timeInCurrentState = getTimeInCurrentState();
       centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(timeInCurrentState);
       gravityCompensationManager.setRootJointAccelerationForStandardGravitationalForce();
-      pelvisControlManager.maintainDesiredPositionAndOrientation();
+      pelvisControlManager.maintainDesiredOrientationOnly();
       feetManager.makeFeetFullyConstrained();
       feetManager.computeForDampedCompliantMode();
 

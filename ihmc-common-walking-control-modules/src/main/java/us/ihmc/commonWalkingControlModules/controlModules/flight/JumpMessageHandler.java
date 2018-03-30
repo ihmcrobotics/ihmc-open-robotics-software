@@ -47,21 +47,21 @@ public class JumpMessageHandler
          break;
       case TAKE_OFF:
          ContactState launchState = new ContactState(worldFrame);
-         launchState.setDuration(1.0);
+         launchState.setDuration(0.4);
          createRectangle(currentPosition.getReferenceFrame(), currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
          launchState.setSupportPolygon(tempPolygon);
          launchState.setContactType(ContactType.DOUBLE_SUPPORT);
          contactStateList.add(launchState);
       case FLIGHT:
          ContactState flightState = new ContactState(worldFrame);
-         flightState.setDuration(0.2);
+         flightState.setDuration(0.3);
          tempPolygon.clear();
          flightState.setSupportPolygon(tempPolygon);
          flightState.setContactType(ContactType.NO_SUPPORT);
          contactStateList.add(flightState);
       case LANDING:
          ContactState landingState = new ContactState(worldFrame);
-         landingState.setDuration(1.0);
+         landingState.setDuration(0.4);
          createRectangle(currentPosition.getReferenceFrame(), currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
          landingState.setSupportPolygon(tempPolygon);
          landingState.setContactType(ContactType.DOUBLE_SUPPORT);

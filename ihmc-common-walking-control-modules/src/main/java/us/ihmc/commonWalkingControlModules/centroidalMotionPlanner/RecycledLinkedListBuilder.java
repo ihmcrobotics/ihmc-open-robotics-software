@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 
 /**

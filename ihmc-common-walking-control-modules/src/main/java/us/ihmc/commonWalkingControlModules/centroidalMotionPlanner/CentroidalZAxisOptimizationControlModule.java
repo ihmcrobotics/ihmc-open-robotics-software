@@ -5,6 +5,9 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.Axis;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
  * Optimized linear motion along the Z axis to obtain a feasible CoM height trajectory
@@ -34,10 +37,12 @@ public class CentroidalZAxisOptimizationControlModule
    private double maxForce;
    private double minForceRate;
    private double maxForceRate;
+   private final YoInteger numberOfQPIterations;
+   private final YoInteger numberOfQPFailures;
 
    private DenseMatrix64F tempMatrixForComputation = new DenseMatrix64F(0, 1);
 
-   public CentroidalZAxisOptimizationControlModule(LinearControlModuleHelper helper, CentroidalMotionPlannerParameters parameters)
+   public CentroidalZAxisOptimizationControlModule(LinearControlModuleHelper helper, CentroidalMotionPlannerParameters parameters, YoVariableRegistry registry)
    {
       this.helper = helper;
 
@@ -58,6 +63,11 @@ public class CentroidalZAxisOptimizationControlModule
       maxForce = parameters.getRobotMass() * parameters.getGravityZ() * -2.0;
       minForceRate = -0.2;
       maxForceRate = 0.2;
+
+      this.numberOfQPFailures = new YoInteger(getClass().getSimpleName() + "NumberOfQPFailures", registry);
+      this.numberOfQPIterations = new YoInteger(getClass().getSimpleName() + "NumberOfQPIterations", registry);
+      this.numberOfQPFailures.set(0);
+      this.numberOfQPIterations.set(0);
       reset();
    }
 
@@ -77,13 +87,26 @@ public class CentroidalZAxisOptimizationControlModule
       qpSolver.setUpperBounds(solverInput_ub);
       try
       {
-         qpSolver.solve(qpSolution);
+         int iterations = qpSolver.solve(qpSolution);
+         numberOfQPIterations.add(iterations);
+         if (solutionContainsNaN())
+            numberOfQPFailures.increment();
       }
       catch (RuntimeException exception)
       {
          PrintTools.debug("Got runtime exception from QP solver");
+         numberOfQPFailures.increment();
       }
       helper.setDecisionVariableValues(axis, qpSolution);
+   }
+
+   private boolean solutionContainsNaN()
+   {
+      for (int i = 0; i < qpSolution.numRows; i++)
+         if (!Double.isFinite(qpSolution.get(i, 0)))
+            return true;
+
+      return false;
    }
 
    private void processQPInputs()
@@ -96,15 +119,15 @@ public class CentroidalZAxisOptimizationControlModule
       DenseMatrix64F helperInequalitiesbin = helper.getConstraintbinMatrix(axis);
       solverInput_Ain.set(helperInequalitiesAin);
       solverInput_bin.set(helperInequalitiesbin);
-      
-//      PrintTools.debug("H:" + solverInput_H.toString());
-//      PrintTools.debug("f:" + solverInput_f.toString());
-//      PrintTools.debug("Aeq:" + solverInput_Aeq.toString());
-//      PrintTools.debug("beq:" + solverInput_beq.toString());
-//      PrintTools.debug("Ain:" + solverInput_Ain.toString());
-//      PrintTools.debug("bin:" + solverInput_bin.toString());
-//      PrintTools.debug("ub:" + solverInput_ub.toString());
-//      PrintTools.debug("lb:" + solverInput_lb.toString());
+
+      //      PrintTools.debug("H:" + solverInput_H.toString());
+      //      PrintTools.debug("f:" + solverInput_f.toString());
+      //      PrintTools.debug("Aeq:" + solverInput_Aeq.toString());
+      //      PrintTools.debug("beq:" + solverInput_beq.toString());
+      //      PrintTools.debug("Ain:" + solverInput_Ain.toString());
+      //      PrintTools.debug("bin:" + solverInput_bin.toString());
+      //      PrintTools.debug("ub:" + solverInput_ub.toString());
+      //      PrintTools.debug("lb:" + solverInput_lb.toString());
 
    }
 }

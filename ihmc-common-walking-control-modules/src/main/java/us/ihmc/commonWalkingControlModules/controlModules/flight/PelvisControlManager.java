@@ -64,7 +64,7 @@ public class PelvisControlManager implements JumpControlManagerInterface
       this.angularWeights = angularWeights;
    }
 
-   public void mainDesiredOrientationOnly()
+   public void maintainDesiredOrientationOnly()
    {
       spatialFeedbackControlCommand.set(desiredPelvisPosition);
       spatialFeedbackControlCommand.set(desiredPelvisOrientation);

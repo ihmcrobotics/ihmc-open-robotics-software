@@ -64,7 +64,7 @@ public class FlightState extends AbstractJumpState
       wholeBodyMomentumManager.computeMomentumRateOfChangeForFreeFall();
       gravityCompensationManager.setRootJointAccelerationForFreeFall();
       feetManager.makeFeetFullyUnconstrained();
-
+      feetManager.computeForDampedCompliantMode();
       for (RobotSide side : RobotSide.values)
          handManagers.get(side).compute();
       chestManager.compute();

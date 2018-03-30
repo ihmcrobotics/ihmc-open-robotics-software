@@ -5,6 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.ForceTrajectory;
 import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.trajectories.PositionTrajectory;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotionPlanner;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -48,7 +49,7 @@ public class CentroidalMotionPlanner
       this.Izz = parameters.getNominalIzz();
       this.deltaTMin = parameters.getDeltaTMin();
       this.helper = new LinearControlModuleHelper(parameters);
-      this.heightControlModule = new CentroidalZAxisOptimizationControlModule(helper, parameters);
+      this.heightControlModule = new CentroidalZAxisOptimizationControlModule(helper, parameters, registry);
       this.transversePlaneControlModule = new CentroidalXYAxisOptimizationControlModule(helper, parameters);
       this.forceTrajectory = new ForceTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments, LinearControlModuleHelper.forceCoefficients);
       this.positionTrajectory = new PositionTrajectory(WholeBodyMotionPlanner.maxNumberOfSegments, LinearControlModuleHelper.positionCoefficients);
