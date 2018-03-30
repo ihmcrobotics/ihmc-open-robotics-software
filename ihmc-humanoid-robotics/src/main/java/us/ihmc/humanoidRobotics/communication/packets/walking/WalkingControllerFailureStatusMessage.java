@@ -1,23 +1,23 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.tuple2D.Vector2D32;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class WalkingControllerFailureStatusMessage extends Packet<WalkingControllerFailureStatusMessage>
 {
-   public Vector2D32 fallingDirection = new Vector2D32();
+   public Vector3D fallingDirection = new Vector3D();
 
    public WalkingControllerFailureStatusMessage()
    {
    }
 
-   public void setFallingDirection(Vector2DReadOnly fallingDirection)
+   public void setFallingDirection(Vector3DReadOnly fallingDirection)
    {
       this.fallingDirection.set(fallingDirection);
    }
 
-   public Vector2D32 getFallingDirection()
+   public Vector3D getFallingDirection()
    {
       return fallingDirection;
    }
@@ -25,12 +25,7 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
    @Override
    public void set(WalkingControllerFailureStatusMessage other)
    {
-      if (other.fallingDirection != null)
-      {
-         if (fallingDirection == null)
-            fallingDirection = new Vector2D32();
-         fallingDirection.set(other.fallingDirection);
-      }
+      fallingDirection.set(other.fallingDirection);
       setPacketInformation(other);
    }
 

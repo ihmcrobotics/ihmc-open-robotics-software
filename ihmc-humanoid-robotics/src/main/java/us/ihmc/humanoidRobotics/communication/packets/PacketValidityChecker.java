@@ -71,11 +71,11 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if (message.getPredictedContactPoints() != null)
+      if (message.getPredictedContactPoint2Ds() != null)
       {
-         for (int arrayListIndex = 0; arrayListIndex < message.getPredictedContactPoints().size(); arrayListIndex++)
+         for (int arrayListIndex = 0; arrayListIndex < message.getPredictedContactPoint2Ds().size(); arrayListIndex++)
          {
-            packetFieldErrorType = ObjectValidityChecker.validateTuple2d(message.getPredictedContactPoints().get(arrayListIndex));
+            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getPredictedContactPoint2Ds().get(arrayListIndex));
 
             if (packetFieldErrorType != null)
             {
@@ -254,7 +254,7 @@ public abstract class PacketValidityChecker
       {
          for (int arrayListIndex = 0; arrayListIndex < message.getPredictedContactPoints().size(); arrayListIndex++)
          {
-            packetFieldErrorType = ObjectValidityChecker.validateTuple2d(message.getPredictedContactPoints().get(arrayListIndex));
+            packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getPredictedContactPoints().get(arrayListIndex));
 
             if (packetFieldErrorType != null)
             {

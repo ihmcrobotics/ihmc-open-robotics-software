@@ -40,6 +40,10 @@ module controller_msgs
       struct HighLevelStateMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Specifies the which state the controller should transition into.
          */
         @defaultValue(value=255)

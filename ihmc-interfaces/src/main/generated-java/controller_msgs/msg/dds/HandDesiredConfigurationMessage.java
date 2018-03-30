@@ -1,13 +1,12 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message is old will be refreshed in a future release.
- * Message for commanding the hands to perform various predefined grasps.
+ * This message is part of the IHMC whole-body controller API. This message is old will be refreshed
+ * in a future release. Message for commanding the hands to perform various predefined grasps.
  */
 public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigurationMessage>
       implements Settable<HandDesiredConfigurationMessage>, EpsilonComparable<HandDesiredConfigurationMessage>
@@ -46,6 +45,10 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    public static final byte HAND_CONFIGURATION_CREEPY_GRASPING_HARD = (byte) 29;
    public static final byte HAND_CONFIGURATION_SLOW_CLOSE = (byte) 30;
    /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   /**
     * Specifies the side of the robot that will execute the trajectory
     */
    public byte robot_side_ = (byte) 255;
@@ -56,27 +59,38 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
 
    public HandDesiredConfigurationMessage()
    {
-
    }
 
    public HandDesiredConfigurationMessage(HandDesiredConfigurationMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(HandDesiredConfigurationMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       desired_hand_configuration_ = other.desired_hand_configuration_;
+
    }
 
    /**
-    * Specifies the side of the robot that will execute the trajectory
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public byte getRobotSide()
+   public void setSequenceId(long sequence_id)
    {
-      return robot_side_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -88,11 +102,11 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    }
 
    /**
-    * Specifies the grasp to perform
+    * Specifies the side of the robot that will execute the trajectory
     */
-   public byte getDesiredHandConfiguration()
+   public byte getRobotSide()
    {
-      return desired_hand_configuration_;
+      return robot_side_;
    }
 
    /**
@@ -103,6 +117,14 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
       desired_hand_configuration_ = desired_hand_configuration;
    }
 
+   /**
+    * Specifies the grasp to perform
+    */
+   public byte getDesiredHandConfiguration()
+   {
+      return desired_hand_configuration_;
+   }
+
    @Override
    public boolean epsilonEquals(HandDesiredConfigurationMessage other, double epsilon)
    {
@@ -110,6 +132,9 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
@@ -132,6 +157,9 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
 
       HandDesiredConfigurationMessage otherMyClass = (HandDesiredConfigurationMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -147,13 +175,14 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandDesiredConfigurationMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("desired_hand_configuration=");
       builder.append(this.desired_hand_configuration_);
-
       builder.append("}");
       return builder.toString();
    }

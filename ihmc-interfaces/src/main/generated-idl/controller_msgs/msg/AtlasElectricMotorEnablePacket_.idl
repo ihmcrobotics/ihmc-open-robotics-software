@@ -33,6 +33,10 @@ module controller_msgs
       struct AtlasElectricMotorEnablePacket
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * The Enum value of the motor to enable
          */
         @defaultValue(value=255)

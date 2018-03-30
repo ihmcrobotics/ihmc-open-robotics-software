@@ -25,6 +25,10 @@ module controller_msgs
       struct AdjustFootstepMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Specifies which foot is expected to be executing the footstep to be adjusted.
          */
         @defaultValue(value=255)

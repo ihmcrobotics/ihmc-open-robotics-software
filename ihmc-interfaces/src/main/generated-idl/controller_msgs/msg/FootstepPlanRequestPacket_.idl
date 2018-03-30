@@ -24,6 +24,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::FootstepPlanRequestPacket_")
       struct FootstepPlanRequestPacket
       {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
         controller_msgs::msg::dds::FootstepDataMessage start_footstep;
         double theta_start;
         @defaultValue(value=1.0)

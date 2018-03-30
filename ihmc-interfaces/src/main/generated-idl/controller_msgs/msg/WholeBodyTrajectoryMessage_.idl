@@ -22,6 +22,10 @@ module controller_msgs
       struct WholeBodyTrajectoryMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Trajectory for the left hand
          */
         controller_msgs::msg::dds::HandTrajectoryMessage left_hand_trajectory_message;

@@ -37,6 +37,10 @@ module controller_msgs
       struct FootstepDataMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Specifies which foot will swing to reach the footstep.
          */
         @defaultValue(value=255)

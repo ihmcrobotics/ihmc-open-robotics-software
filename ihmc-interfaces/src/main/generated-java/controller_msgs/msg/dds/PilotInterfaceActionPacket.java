@@ -7,6 +7,10 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class PilotInterfaceActionPacket extends Packet<PilotInterfaceActionPacket>
       implements Settable<PilotInterfaceActionPacket>, EpsilonComparable<PilotInterfaceActionPacket>
 {
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    public byte pilot_action_;
 
    public PilotInterfaceActionPacket()
@@ -15,13 +19,32 @@ public class PilotInterfaceActionPacket extends Packet<PilotInterfaceActionPacke
 
    public PilotInterfaceActionPacket(PilotInterfaceActionPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(PilotInterfaceActionPacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       pilot_action_ = other.pilot_action_;
 
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setPilotAction(byte pilot_action)
@@ -42,6 +65,9 @@ public class PilotInterfaceActionPacket extends Packet<PilotInterfaceActionPacke
       if (other == this)
          return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pilot_action_, other.pilot_action_, epsilon))
          return false;
 
@@ -60,6 +86,9 @@ public class PilotInterfaceActionPacket extends Packet<PilotInterfaceActionPacke
 
       PilotInterfaceActionPacket otherMyClass = (PilotInterfaceActionPacket) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.pilot_action_ != otherMyClass.pilot_action_)
          return false;
 
@@ -72,6 +101,9 @@ public class PilotInterfaceActionPacket extends Packet<PilotInterfaceActionPacke
       StringBuilder builder = new StringBuilder();
 
       builder.append("PilotInterfaceActionPacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("pilot_action=");
       builder.append(this.pilot_action_);
       builder.append("}");

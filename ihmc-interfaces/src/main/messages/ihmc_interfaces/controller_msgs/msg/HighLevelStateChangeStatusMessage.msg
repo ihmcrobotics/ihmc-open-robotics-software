@@ -11,6 +11,9 @@ byte WALKING = 5
 byte DIAGNOSTICS = 6
 byte CALIBRATION = 7
 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 # Specifies the controller's state prior to transition.
 byte initial_high_level_controller_name 255
 # Specifies the state the controller has transitioned into.

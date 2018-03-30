@@ -25,6 +25,10 @@ module controller_msgs
       struct ArmDesiredAccelerationsMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Specifies the side of the robot that will execute the command.
          */
         @defaultValue(value=255)

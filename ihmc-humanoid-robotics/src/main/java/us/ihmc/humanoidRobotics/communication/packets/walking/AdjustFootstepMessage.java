@@ -8,7 +8,6 @@ import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.RecyclingArrayListPubSub;
@@ -31,7 +30,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public RecyclingArrayListPubSub<Point2D> predictedContactPoints = new RecyclingArrayListPubSub<>(Point2D.class, Point2D::new, 10);
+   public RecyclingArrayListPubSub<Point3D> predictedContactPoints = new RecyclingArrayListPubSub<>(Point3D.class, Point3D::new, 10);
 
    @RosExportedField(documentation = "The time to delay this command on the controller side before being executed.")
    public double executionDelayTime;
@@ -61,7 +60,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
       setPacketInformation(other);
    }
 
-   public RecyclingArrayListPubSub<Point2D> getPredictedContactPoints()
+   public RecyclingArrayListPubSub<Point3D> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
@@ -172,8 +171,8 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage>
          {
             for (int i = 0; i < size; i++)
             {
-               Point2D pointOne = predictedContactPoints.get(i);
-               Point2D pointTwo = footstepData.predictedContactPoints.get(i);
+               Point3D pointOne = predictedContactPoints.get(i);
+               Point3D pointTwo = footstepData.predictedContactPoints.get(i);
 
                if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
                   contactPointsEqual = false;

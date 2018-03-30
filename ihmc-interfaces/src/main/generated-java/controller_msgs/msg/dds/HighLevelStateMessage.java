@@ -1,12 +1,12 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message is used to switch the control scheme between different control mode.
+ * This message is part of the IHMC whole-body controller API. This message is used to switch the
+ * control scheme between different control mode.
  */
 public class HighLevelStateMessage extends Packet<HighLevelStateMessage> implements Settable<HighLevelStateMessage>, EpsilonComparable<HighLevelStateMessage>
 {
@@ -19,6 +19,10 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
    public static final byte DIAGNOSTICS = (byte) 6;
    public static final byte CALIBRATION = (byte) 7;
    /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   /**
     * Specifies the which state the controller should transition into.
     */
    public byte high_level_controller_name_ = (byte) 255;
@@ -29,20 +33,32 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
 
    public HighLevelStateMessage(HighLevelStateMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(HighLevelStateMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       high_level_controller_name_ = other.high_level_controller_name_;
+
    }
 
    /**
-    * Specifies the which state the controller should transition into.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public byte getHighLevelControllerName()
+   public void setSequenceId(long sequence_id)
    {
-      return high_level_controller_name_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -53,6 +69,14 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
       high_level_controller_name_ = high_level_controller_name;
    }
 
+   /**
+    * Specifies the which state the controller should transition into.
+    */
+   public byte getHighLevelControllerName()
+   {
+      return high_level_controller_name_;
+   }
+
    @Override
    public boolean epsilonEquals(HighLevelStateMessage other, double epsilon)
    {
@@ -60,6 +84,9 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.high_level_controller_name_, other.high_level_controller_name_, epsilon))
          return false;
@@ -79,6 +106,9 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
 
       HighLevelStateMessage otherMyClass = (HighLevelStateMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.high_level_controller_name_ != otherMyClass.high_level_controller_name_)
          return false;
 
@@ -91,9 +121,11 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("HighLevelStateMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("high_level_controller_name=");
       builder.append(this.high_level_controller_name_);
-
       builder.append("}");
       return builder.toString();
    }
