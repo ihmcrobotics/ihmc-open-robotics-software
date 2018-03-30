@@ -16,6 +16,10 @@ module controller_msgs
       struct PrepareForLocomotionMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * When true, the controller will cancel any arm trajectory in progress, if any, before starting to walk.
          */
         @defaultValue(value=True)

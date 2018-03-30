@@ -3,6 +3,9 @@
 # to the current balance status of the robot.
 # All the information here is expressed in the world frame.
 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 geometry_msgs/Point capture_point_2d
 geometry_msgs/Point desired_capture_point_2d
 geometry_msgs/Point center_of_mass_3d

@@ -1,19 +1,25 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points.
- * A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations.
- * To execute a single straight line trajectory to reach a desired hand pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+ * This message is part of the IHMC whole-body controller API. This message commands the controller
+ * to move in taskspace a hand to the desired pose (position & orientation) while going through the
+ * specified trajectory points. A third order polynomial function is used to interpolate positions
+ * and a hermite based curve (third order) is used to interpolate the orientations. To execute a
+ * single straight line trajectory to reach a desired hand pose, set only one trajectory point with
+ * zero velocity and its time to be equal to the desired trajectory time.
  */
 public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> implements Settable<HandTrajectoryMessage>, EpsilonComparable<HandTrajectoryMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    /**
     * Specifies which hand will execute the trajectory.
     */
@@ -25,28 +31,38 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
    public HandTrajectoryMessage()
    {
-
       se3_trajectory_ = new controller_msgs.msg.dds.SE3TrajectoryMessage();
    }
 
    public HandTrajectoryMessage(HandTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(HandTrajectoryMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
    }
 
    /**
-    * Specifies which hand will execute the trajectory.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public byte getRobotSide()
+   public void setSequenceId(long sequence_id)
    {
-      return robot_side_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -55,6 +71,14 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
+   }
+
+   /**
+    * Specifies which hand will execute the trajectory.
+    */
+   public byte getRobotSide()
+   {
+      return robot_side_;
    }
 
    /**
@@ -72,6 +96,9 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
@@ -94,6 +121,9 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
       HandTrajectoryMessage otherMyClass = (HandTrajectoryMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -109,13 +139,14 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandTrajectoryMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("se3_trajectory=");
       builder.append(this.se3_trajectory_);
-
       builder.append("}");
       return builder.toString();
    }

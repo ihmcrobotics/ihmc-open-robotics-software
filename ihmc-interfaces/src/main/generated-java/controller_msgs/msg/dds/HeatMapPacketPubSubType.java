@@ -1,20 +1,36 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "HeatMapPacket" defined in "HeatMapPacket_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "HeatMapPacket" defined in "HeatMapPacket_.idl". Use this class to
+ * provide the TopicDataType to a Participant.
  *
- * This file was automatically generated from HeatMapPacket_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit HeatMapPacket_.idl instead.
+ * This file was automatically generated from HeatMapPacket_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit HeatMapPacket_.idl
+ * instead.
+ *
  */
 public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HeatMapPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HeatMapPacket_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public HeatMapPacketPubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HeatMapPacket data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -25,6 +41,8 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    public static int getMaxCdrSerializedSize(int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -48,6 +66,8 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getData().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -61,6 +81,7 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
 
    public static void write(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
       if (data.getData().size() <= 100)
          cdr.write_type_e(data.getData());
@@ -75,63 +96,45 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
          cdr.write_type_d(data.getName());
       else
          throw new RuntimeException("name field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
 
       cdr.read_type_e(data.getData());
-
       data.setWidth(cdr.read_type_2());
 
       data.setHeight(cdr.read_type_2());
 
       cdr.read_type_d(data.getName());
-   }
 
-   public static void staticCopy(controller_msgs.msg.dds.HeatMapPacket src, controller_msgs.msg.dds.HeatMapPacket dest)
-   {
-      dest.set(src);
-   }
-
-   @Override
-   public void serialize(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HeatMapPacket data) throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
    }
 
    @Override
    public final void serialize(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("data", data.getData());
-
       ser.write_type_2("width", data.getWidth());
-
       ser.write_type_2("height", data.getHeight());
-
       ser.write_type_d("name", data.getName());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HeatMapPacket data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("data", data.getData());
-
       data.setWidth(ser.read_type_2("width"));
-
       data.setHeight(ser.read_type_2("height"));
-
       ser.read_type_d("name", data.getName());
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.HeatMapPacket src, controller_msgs.msg.dds.HeatMapPacket dest)
+   {
+      dest.set(src);
    }
 
    @Override

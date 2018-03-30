@@ -1,20 +1,37 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "PlanarRegionMessage" defined in "PlanarRegionMessage_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "PlanarRegionMessage" defined in "PlanarRegionMessage_.idl". Use
+ * this class to provide the TopicDataType to a Participant.
  *
- * This file was automatically generated from PlanarRegionMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit PlanarRegionMessage_.idl instead.
+ * This file was automatically generated from PlanarRegionMessage_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * PlanarRegionMessage_.idl instead.
+ *
  */
 public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PlanarRegionMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PlanarRegionMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public PlanarRegionMessagePubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PlanarRegionMessage data)
+         throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -28,9 +45,14 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += controller_msgs.msg.dds.Polygon2DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < 100; ++i0)
       {
@@ -51,9 +73,14 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRegionOrigin(), current_alignment);
+
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRegionNormal(), current_alignment);
+
       current_alignment += controller_msgs.msg.dds.Polygon2DMessagePubSubType.getCdrSerializedSize(data.getConcaveHull(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for (int i0 = 0; i0 < data.getConvexPolygons().size(); ++i0)
       {
@@ -65,62 +92,38 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(controller_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
       cdr.write_type_2(data.getRegionId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRegionOrigin(), cdr);
-
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
-
       controller_msgs.msg.dds.Polygon2DMessagePubSubType.write(data.getConcaveHull(), cdr);
-
       if (data.getConvexPolygons().size() <= 100)
          cdr.write_type_e(data.getConvexPolygons());
       else
          throw new RuntimeException("convex_polygons field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
 
       data.setRegionId(cdr.read_type_2());
 
       geometry_msgs.msg.dds.PointPubSubType.read(data.getRegionOrigin(), cdr);
-
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRegionNormal(), cdr);
-
       controller_msgs.msg.dds.Polygon2DMessagePubSubType.read(data.getConcaveHull(), cdr);
-
       cdr.read_type_e(data.getConvexPolygons());
-   }
 
-   public static void staticCopy(controller_msgs.msg.dds.PlanarRegionMessage src, controller_msgs.msg.dds.PlanarRegionMessage dest)
-   {
-      dest.set(src);
-   }
-
-   @Override
-   public void serialize(controller_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PlanarRegionMessage data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
    }
 
    @Override
    public final void serialize(controller_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_2("region_id", data.getRegionId());
-
       ser.write_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
 
       ser.write_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
@@ -133,8 +136,8 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PlanarRegionMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRegionId(ser.read_type_2("region_id"));
-
       ser.read_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
 
       ser.read_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
@@ -142,6 +145,11 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.read_type_a("concave_hull", new controller_msgs.msg.dds.Polygon2DMessagePubSubType(), data.getConcaveHull());
 
       ser.read_type_e("convex_polygons", data.getConvexPolygons());
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.PlanarRegionMessage src, controller_msgs.msg.dds.PlanarRegionMessage dest)
+   {
+      dest.set(src);
    }
 
    @Override

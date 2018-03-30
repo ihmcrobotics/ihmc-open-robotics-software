@@ -1,16 +1,20 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message pauses the execution of a list of footsteps.
- * If this message is in the middle of executing a footstep, the robot will finish the step and pause when back in double support.
+ * This message is part of the IHMC whole-body controller API. This message pauses the execution of
+ * a list of footsteps. If this message is in the middle of executing a footstep, the robot will
+ * finish the step and pause when back in double support.
  */
 public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements Settable<PauseWalkingMessage>, EpsilonComparable<PauseWalkingMessage>
 {
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    /**
     * True to pause walking, false to unpause and resume an existing footstep plan.
     */
@@ -22,20 +26,32 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
    public PauseWalkingMessage(PauseWalkingMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(PauseWalkingMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       pause_ = other.pause_;
+
    }
 
    /**
-    * True to pause walking, false to unpause and resume an existing footstep plan.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public boolean getPause()
+   public void setSequenceId(long sequence_id)
    {
-      return pause_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -46,6 +62,14 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
       pause_ = pause;
    }
 
+   /**
+    * True to pause walking, false to unpause and resume an existing footstep plan.
+    */
+   public boolean getPause()
+   {
+      return pause_;
+   }
+
    @Override
    public boolean epsilonEquals(PauseWalkingMessage other, double epsilon)
    {
@@ -53,6 +77,9 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.pause_, other.pause_, epsilon))
          return false;
@@ -72,6 +99,9 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
       PauseWalkingMessage otherMyClass = (PauseWalkingMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.pause_ != otherMyClass.pause_)
          return false;
 
@@ -84,9 +114,11 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("PauseWalkingMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("pause=");
       builder.append(this.pause_);
-
       builder.append("}");
       return builder.toString();
    }

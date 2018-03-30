@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -89,8 +90,8 @@ public class FootstepTestHelper
       RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
       FramePose3D solePose = new FramePose3D(worldFrame, footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
       Footstep footstep = new Footstep(robotSide, solePose);
-      if (footstepDataMessage.getPredictedContactPoints() != null && !footstepDataMessage.getPredictedContactPoints().isEmpty())
-         footstep.setPredictedContactPoints(footstepDataMessage.getPredictedContactPoints());
+      if (footstepDataMessage.getPredictedContactPoint2Ds() != null && !footstepDataMessage.getPredictedContactPoint2Ds().isEmpty())
+         footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(footstepDataMessage));
       else
          footstep.setPredictedContactPoints(contactableFeet.get(robotSide).getContactPoints2d());
 

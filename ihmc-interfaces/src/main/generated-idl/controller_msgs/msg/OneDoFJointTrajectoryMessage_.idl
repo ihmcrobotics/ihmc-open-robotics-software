@@ -19,6 +19,10 @@ module controller_msgs
       struct OneDoFJointTrajectoryMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * The list of trajectory points to go through while executing the trajectory.
          * The time has to be strictly increasing.
          */
@@ -27,9 +31,10 @@ module controller_msgs
          * Weight used to encode the priority for achieving this trajectory:
          * - if too low, in the event the controller can't achieve all of the objectives it may lower the trajectory tracking quality.
          * - if too high, the controller will favor this trajectory over other objectives.
-         * - if set to NaN, the controller will use the default weight for that trajectory.
+         * - if set to NaN or to a negative value, the controller will use the default weight for that trajectory.
          * The priority of this trajectory is determined from the relative weight of this trajectory and the weight of the other objectives.
          */
+        @defaultValue(value=-1.0)
         double weight;
       };
     };

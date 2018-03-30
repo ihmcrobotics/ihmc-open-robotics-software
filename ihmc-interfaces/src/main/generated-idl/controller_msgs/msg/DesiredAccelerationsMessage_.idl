@@ -18,6 +18,10 @@ module controller_msgs
       struct DesiredAccelerationsMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Specifies the desired joint accelerations.
          */
         sequence<double> desired_joint_accelerations;

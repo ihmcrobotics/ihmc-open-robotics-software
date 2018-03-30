@@ -87,7 +87,7 @@ public class MultisenseHeadOnAStickManualTestMinimalNetworkProcessor  extends Ro
       }
       
       PointCloudWorldPacket pointCloudPacket = new PointCloudWorldPacket();
-      HumanoidMessageTools.setDecayingWorldScan(pointCloudPacket, points);
+      HumanoidMessageTools.setDecayingWorldScan(points, pointCloudPacket);
       uiPacketServer.send(pointCloudPacket);
    }
    

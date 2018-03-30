@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -153,7 +152,7 @@ public class CreateFootstepScript
       footstep.location = new Point3D(x, y, ankleHeight);
       footstep.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       // set contact points
-      MessageTools.copyData(contactPoints, footstep.predictedContactPoints);
+      HumanoidMessageTools.packPredictedContactPoints(contactPoints, footstep);
 
       return footstep;
    }

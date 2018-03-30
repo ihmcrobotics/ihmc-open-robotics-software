@@ -29,7 +29,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -446,11 +445,7 @@ public class DesiredFootstepTest
             FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
             Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable);
 
-            List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
-            if (contactPoints != null && contactPoints.isEmpty())
-               footstep.setPredictedContactPoints((Point2DReadOnly[]) null);
-            else
-               footstep.setPredictedContactPoints(contactPoints);
+            footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(footstepData));
                
             footstep.setTrajectoryType(TrajectoryType.fromByte(footstepData.getTrajectoryType()));
             footstep.setSwingHeight(footstepData.getSwingHeight());

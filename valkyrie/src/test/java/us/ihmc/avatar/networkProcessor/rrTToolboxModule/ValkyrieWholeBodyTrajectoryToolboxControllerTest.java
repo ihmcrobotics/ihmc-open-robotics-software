@@ -299,7 +299,7 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
       ConfigurationSpaceName[] manifoldSpaces = {YAW, PITCH, ConfigurationSpaceName.X};
       double[] lowerLimits = new double[] {-Math.PI * 0.5, -Math.PI * 0.5, -0.1};
       double[] upperLimits = new double[] {Math.PI * 0.5, Math.PI * 0.5, 0.0};
-      HumanoidMessageTools.packManifold(reachingManifold, ConfigurationSpaceName.toBytes(manifoldSpaces), lowerLimits, upperLimits);
+      HumanoidMessageTools.packManifold(ConfigurationSpaceName.toBytes(manifoldSpaces), lowerLimits, upperLimits, reachingManifold);
       reachingManifolds.add(reachingManifold);
 
       List<RigidBodyExplorationConfigurationMessage> rigidBodyConfigurations = new ArrayList<>();

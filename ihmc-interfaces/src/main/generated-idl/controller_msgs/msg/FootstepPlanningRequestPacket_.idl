@@ -41,6 +41,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::FootstepPlanningRequestPacket_")
       struct FootstepPlanningRequestPacket
       {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
         @defaultValue(value=255)
         octet initial_stance_robot_side;
         geometry_msgs::msg::dds::Point stance_foot_position_in_world;

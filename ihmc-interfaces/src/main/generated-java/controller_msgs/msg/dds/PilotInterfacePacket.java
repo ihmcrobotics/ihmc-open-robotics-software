@@ -6,6 +6,10 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implements Settable<PilotInterfacePacket>, EpsilonComparable<PilotInterfacePacket>
 {
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    public int behaviour_state_;
    public int requested_behavior_state_;
    public int desired_step_type_;
@@ -23,11 +27,14 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
 
    public PilotInterfacePacket(PilotInterfacePacket other)
    {
+      this();
       set(other);
    }
 
    public void set(PilotInterfacePacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       behaviour_state_ = other.behaviour_state_;
 
       requested_behavior_state_ = other.requested_behavior_state_;
@@ -48,6 +55,22 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
 
       current_pilot_state_ = other.current_pilot_state_;
 
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setBehaviourState(int behaviour_state)
@@ -158,6 +181,9 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
       if (other == this)
          return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.behaviour_state_, other.behaviour_state_, epsilon))
          return false;
 
@@ -203,6 +229,9 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
 
       PilotInterfacePacket otherMyClass = (PilotInterfacePacket) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.behaviour_state_ != otherMyClass.behaviour_state_)
          return false;
 
@@ -242,6 +271,9 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("PilotInterfacePacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("behaviour_state=");
       builder.append(this.behaviour_state_);
       builder.append(", ");
