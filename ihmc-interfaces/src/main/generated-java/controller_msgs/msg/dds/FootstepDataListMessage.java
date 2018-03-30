@@ -61,7 +61,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
     * Contains information on whether the robot can automatically adjust its footsteps to retain
     * balance.
     */
-   public boolean are_footsteps_adjustable_ = true;
+   public boolean are_footsteps_adjustable_;
    /**
     * If true the controller will adjust upcoming footsteps with the location error of previous
     * steps.

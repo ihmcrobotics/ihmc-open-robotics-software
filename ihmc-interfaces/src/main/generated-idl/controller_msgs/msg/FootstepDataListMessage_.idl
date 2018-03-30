@@ -73,7 +73,6 @@ module controller_msgs
         /**
          * Contains information on whether the robot can automatically adjust its footsteps to retain balance.
          */
-        @defaultValue(value=True)
         boolean are_footsteps_adjustable;
         /**
          * If true the controller will adjust upcoming footsteps with the location error of previous steps.
