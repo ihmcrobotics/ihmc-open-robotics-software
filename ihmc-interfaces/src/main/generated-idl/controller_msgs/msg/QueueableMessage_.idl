@@ -41,7 +41,7 @@ module controller_msgs
         /**
          * Defines a unique ID for this message. Only needed when you want to queue another message to this message.
          */
-        @defaultValue(value=1)
+        @defaultValue(value=-1)
         long long message_id;
         /**
          * Only needed when using EXECUTION_MODE_QUEUE mode, it refers to the message_id to which this message should be queued to.
