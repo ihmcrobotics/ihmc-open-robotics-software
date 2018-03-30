@@ -298,7 +298,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
 
-      if (this.footstep_data_list_.size() == other.footstep_data_list_.size())
+      if (this.footstep_data_list_.size() != other.footstep_data_list_.size())
       {
          return false;
       }
