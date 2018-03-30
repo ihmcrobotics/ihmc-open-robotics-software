@@ -3,8 +3,6 @@ package us.ihmc.avatar.controllerAPI;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Random;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +21,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -50,8 +47,6 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       
-      Random random = new Random(564574L);
-      
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotJointMap jointMap = robotModel.getJointMap();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
@@ -61,8 +56,6 @@ public abstract class EndToEndMessageDelayTest implements MultiRobotTestInterfac
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
-      
-      MessageOfMessages messageOfMessages = new MessageOfMessages();
       
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
