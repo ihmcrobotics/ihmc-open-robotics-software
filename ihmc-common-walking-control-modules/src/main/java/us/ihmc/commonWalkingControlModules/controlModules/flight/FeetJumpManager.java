@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -146,5 +147,10 @@ public class FeetJumpManager implements JumpControlManagerInterface
       for (RobotSide robotSide : RobotSide.values)
          totalForceZ += footControlModules.get(robotSide).getGroundReactionForceZ();
       return totalForceZ;
+   }
+
+   public double getFootPosition(RobotSide robotSide, Axis axis)
+   {
+      return footControlModules.get(robotSide).getFootPosition(axis);
    }
 }

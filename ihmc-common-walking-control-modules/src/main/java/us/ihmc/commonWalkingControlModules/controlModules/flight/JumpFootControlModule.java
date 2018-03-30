@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -214,6 +215,14 @@ public class JumpFootControlModule
       templateFeedbackCommand.addCommand(taskspaceControlState.getFeedbackControlCommand());
       templateFeedbackCommand.addCommand(jointspaceControlState.getFeedbackControlCommand());
       return templateFeedbackCommand;
+   }
+   
+   private final FramePoint3D tempPoint = new FramePoint3D();
+
+   public double getFootPosition(Axis axis)
+   {
+      tempPoint.setToZero(contactableFoot.getSoleFrame());
+      return tempPoint.getElement(axis.ordinal());
    }
 
 }
