@@ -13,8 +13,8 @@ int64 RIGHT_SOLE_FRAME = -106
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-# The ID of the reference frame that a trajectory is executed in.
-int64 trajectory_reference_frame_id
+# The ID of the reference frame that a trajectory is executed in. Default value is WORLD_FRAME
+int64 trajectory_reference_frame_id 83766130
 # The ID of the reference frame that trajectory data in a packet is expressed in. The frame of the
 # trajectory data will be switched to the trajectory frame immediately when the message is received
 # by the controller. If set to the value 1 it will be

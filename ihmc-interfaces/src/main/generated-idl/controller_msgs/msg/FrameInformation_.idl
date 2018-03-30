@@ -45,8 +45,9 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
-         * The ID of the reference frame that a trajectory is executed in.
+         * The ID of the reference frame that a trajectory is executed in. Default value is WORLD_FRAME
          */
+        @defaultValue(value=83766130)
         long long trajectory_reference_frame_id;
         /**
          * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of the
