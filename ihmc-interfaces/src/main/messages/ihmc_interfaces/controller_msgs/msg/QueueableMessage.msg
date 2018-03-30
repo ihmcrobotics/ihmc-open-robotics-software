@@ -19,7 +19,7 @@ uint32 sequence_id
 #   - When joint-space trajectory: the controller will queue the joint trajectory messages as a per joint basis.
 byte execution_mode 0
 # Defines a unique ID for this message. Only needed when you want to queue another message to this message.
-int64 message_id 1
+int64 message_id -1
 # Only needed when using EXECUTION_MODE_QUEUE mode, it refers to the message_id to which this message should be queued to.
 # It is used by the controller to ensure that no message has been lost on the way.
 # If a message appears to be missing (previous_message_id different from the last message_id received by the controller), the motion is aborted.

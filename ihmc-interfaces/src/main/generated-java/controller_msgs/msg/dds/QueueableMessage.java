@@ -32,7 +32,7 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
     * Defines a unique ID for this message. Only needed when you want to queue another message to
     * this message.
     */
-   public long message_id_ = 1;
+   public long message_id_ = -1;
    /**
     * Only needed when using EXECUTION_MODE_QUEUE mode, it refers to the message_id to which this
     * message should be queued to. It is used by the controller to ensure that no message has been
