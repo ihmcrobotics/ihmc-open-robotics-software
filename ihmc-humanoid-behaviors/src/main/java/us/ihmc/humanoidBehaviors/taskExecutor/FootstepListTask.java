@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 
 public class FootstepListTask extends BehaviorAction
 {

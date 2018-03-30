@@ -173,7 +173,7 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
 
-      if (this.taskspace_trajectory_points_.size() == other.taskspace_trajectory_points_.size())
+      if (this.taskspace_trajectory_points_.size() != other.taskspace_trajectory_points_.size())
       {
          return false;
       }

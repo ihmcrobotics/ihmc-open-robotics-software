@@ -7,6 +7,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.AdjustFootstepMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -23,8 +25,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -163,7 +163,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          framePosition.add(stepLength, side.negateIfRightSide(stepWidth), 0.0);
          Point3D position = new Point3D(framePosition);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         footstepDataListMessage.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(side, position, orientation));
+         footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, position, orientation));
          side = side.getOppositeSide();
       }
 

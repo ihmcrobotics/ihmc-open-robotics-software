@@ -2,9 +2,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Random;
 
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 

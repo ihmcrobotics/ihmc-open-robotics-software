@@ -4,11 +4,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootLoadBearingMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.robotics.robotSide.RobotSide;
 

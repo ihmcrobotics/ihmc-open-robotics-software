@@ -1,5 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
@@ -17,11 +21,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -122,8 +122,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
       if (statusQueue.isNewPacketAvailable())
       {
          CapturabilityBasedStatus latestPacket = statusQueue.getLatestPacket();
-         FramePoint2D desiredCapturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.desiredCapturePoint2D);
-         FramePoint2D capturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.capturePoint2D);
+         FramePoint2D desiredCapturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.getDesiredCapturePoint2d());
+         FramePoint2D capturePoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), latestPacket.getCapturePoint2d());
 
          boolean doubleSupport = true;
          for (RobotSide robotSide : RobotSide.values)
@@ -211,7 +211,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(swingSide, location, orientation);
-      footsteps.footstepDataList.add().set(footstep);
+      footsteps.getFootstepDataList().add().set(footstep);
       sendPacketToController(footsteps);
    }
 

@@ -9,6 +9,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -23,8 +25,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.allocations.AllocationTest;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -100,8 +100,8 @@ public class AtlasAllocationTest implements AllocationTest
       {
          xLocation += stepLength;
          FootstepDataMessage footstepMessage = footstepListMessage.getFootstepDataList().add();
-         footstepMessage.setLocation(new Point3D(xLocation, robotSide.negateIfRightSide(0.15), 0.0));
-         footstepMessage.setOrientation(new Quaternion());
+         footstepMessage.getLocation().set(new Point3D(xLocation, robotSide.negateIfRightSide(0.15), 0.0));
+         footstepMessage.getOrientation().set(new Quaternion());
          footstepMessage.setRobotSide(robotSide.toByte());
          robotSide = robotSide.getOppositeSide();
       }

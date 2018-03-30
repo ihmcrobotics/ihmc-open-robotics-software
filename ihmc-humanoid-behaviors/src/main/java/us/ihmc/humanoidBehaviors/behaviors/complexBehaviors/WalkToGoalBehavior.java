@@ -1,10 +1,14 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.WalkToGoalBehaviorPacket;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,10 +18,6 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.FootstepListBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.WalkToGoalBehaviorPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -167,10 +167,10 @@ public class WalkToGoalBehavior extends AbstractBehavior
          if (newPacketAvailable)
          {
             FootstepPlanningToolboxOutputStatus latestPacket = planningOutputStatusQueue.getLatestPacket();
-            boolean validForExecution = FootstepPlanningResult.fromByte(latestPacket.footstepPlanningResult).validForExecution();
+            boolean validForExecution = FootstepPlanningResult.fromByte(latestPacket.getFootstepPlanningResult()).validForExecution();
             if (validForExecution)
             {
-               planToExecute = latestPacket.footstepDataList;
+               planToExecute = latestPacket.getFootstepDataList();
                havePlanToExecute.set(true);
             }
             else
@@ -200,12 +200,12 @@ public class WalkToGoalBehavior extends AbstractBehavior
 
          WalkToGoalBehaviorPacket walkToGoalBehaviorPacket = walkToGoalPacketQueue.poll();
          referenceFrames.updateFrames();
-         RobotSide goalSide = RobotSide.fromByte(walkToGoalBehaviorPacket.goalRobotSide);
+         RobotSide goalSide = RobotSide.fromByte(walkToGoalBehaviorPacket.getGoalRobotSide());
          FramePose3D initialPose = new FramePose3D(referenceFrames.getSoleFrame(goalSide));
          tempFinalPose.setToZero();
-         tempFinalPose.setX(walkToGoalBehaviorPacket.xGoal);
-         tempFinalPose.setY(walkToGoalBehaviorPacket.yGoal);
-         tempFinalPose.setOrientationYawPitchRoll(walkToGoalBehaviorPacket.thetaGoal, 0.0, 0.0);
+         tempFinalPose.setX(walkToGoalBehaviorPacket.getXGoal());
+         tempFinalPose.setY(walkToGoalBehaviorPacket.getYGoal());
+         tempFinalPose.setOrientationYawPitchRoll(walkToGoalBehaviorPacket.getThetaGoal(), 0.0, 0.0);
          FramePose3D finalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), tempFinalPose);
          FootstepPlanningRequestPacket tempPlanningRequestPacket = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialPose, goalSide, finalPose);
          tempPlanningRequestPacket.setTimeout(3.0);

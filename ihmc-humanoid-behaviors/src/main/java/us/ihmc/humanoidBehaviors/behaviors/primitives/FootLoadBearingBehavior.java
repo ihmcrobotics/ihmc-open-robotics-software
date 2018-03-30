@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import controller_msgs.msg.dds.FootLoadBearingMessage;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FootLoadBearingBehavior extends AbstractBehavior

@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 

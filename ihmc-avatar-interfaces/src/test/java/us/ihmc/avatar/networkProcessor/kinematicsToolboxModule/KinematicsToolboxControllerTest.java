@@ -14,13 +14,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -40,7 +41,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
@@ -405,8 +405,8 @@ public class KinematicsToolboxControllerTest
       FloatingInverseDynamicsJoint rootJoint = initialFullRobotModel.getLeft();
       if (rootJoint != null)
       {
-         robotConfigurationData.setRootTranslation(rootJoint.getTranslationForReading());
-         robotConfigurationData.setRootOrientation(rootJoint.getRotationForReading());
+         robotConfigurationData.getRootTranslation().set(rootJoint.getTranslationForReading());
+         robotConfigurationData.getRootOrientation().set(rootJoint.getRotationForReading());
       }
       return robotConfigurationData;
    }

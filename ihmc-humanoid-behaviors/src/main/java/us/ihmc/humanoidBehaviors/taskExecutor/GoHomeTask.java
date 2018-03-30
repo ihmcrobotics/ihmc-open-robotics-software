@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
+import controller_msgs.msg.dds.GoHomeMessage;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.GoHomeBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 
 public class GoHomeTask extends BehaviorAction
 {

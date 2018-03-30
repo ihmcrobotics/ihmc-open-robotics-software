@@ -3,6 +3,10 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
@@ -15,18 +19,13 @@ import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.SimpleDesir
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -94,7 +93,7 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
          @Override
          public void receivedNewMessageStatus(FootstepStatusMessage footstepStatus)
          {
-            switch (FootstepStatus.fromByte(footstepStatus.footstepStatus))
+            switch (FootstepStatus.fromByte(footstepStatus.getFootstepStatus()))
             {
             case COMPLETED:
                computeAndSubmitFootsteps();
@@ -134,9 +133,9 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
             .predictFootstepAfterDesiredFootstep(supportLeg.getOppositeSide(), nextFootstep, 2.0 * stepTime, stepTime);
 
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(Double.NaN, Double.NaN);
-      footsteps.footstepDataList.add().set(footstep);
-      footsteps.footstepDataList.add().set(nextFootstep);
-      footsteps.footstepDataList.add().set(nextNextFootstep);
+      footsteps.getFootstepDataList().add().set(footstep);
+      footsteps.getFootstepDataList().add().set(nextFootstep);
+      footsteps.getFootstepDataList().add().set(nextNextFootstep);
 
       return footsteps;
    }

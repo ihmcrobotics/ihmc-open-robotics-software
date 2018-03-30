@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 
+import controller_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class HeightQuadTreeToolboxRequestCommand implements Command<HeightQuadTreeToolboxRequestCommand, HeightQuadTreeToolboxRequestMessage>
@@ -25,8 +26,8 @@ public class HeightQuadTreeToolboxRequestCommand implements Command<HeightQuadTr
    public void set(HeightQuadTreeToolboxRequestMessage message)
    {
       
-      requestClearQuadTree = message.requestClearQuadTree;
-      requestQuadTreeUpdate = message.requestQuadTreeUpdate;
+      requestClearQuadTree = message.getRequestClearQuadTree();
+      requestQuadTreeUpdate = message.getRequestQuadTreeUpdate();
    }
 
    public boolean isClearQuadTreeRequested()

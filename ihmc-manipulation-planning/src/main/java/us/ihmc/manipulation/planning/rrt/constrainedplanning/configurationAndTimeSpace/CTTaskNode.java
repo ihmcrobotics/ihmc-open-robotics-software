@@ -2,8 +2,8 @@ package us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTi
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 
 public class CTTaskNode
 {

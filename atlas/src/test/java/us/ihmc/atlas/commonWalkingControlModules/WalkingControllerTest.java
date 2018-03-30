@@ -9,6 +9,13 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
@@ -51,13 +58,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -227,7 +227,7 @@ public class WalkingControllerTest
          location.changeFrame(ReferenceFrame.getWorldFrame());
          orientation.changeFrame(ReferenceFrame.getWorldFrame());
          FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
-         footsteps.footstepDataList.add().set(footstep);
+         footsteps.getFootstepDataList().add().set(footstep);
       }
       commandInputManager.submitMessage(footsteps);
    }
@@ -240,14 +240,14 @@ public class WalkingControllerTest
       orientation.appendRollRotation(Math.toRadians(10.0));
       SO3TrajectoryMessage so3Trajectory = message.getSo3Trajectory();
       so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(referenceFrames.getPelvisZUpFrame()));
-      SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.taskspaceTrajectoryPoints.add();
+      SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
       trajectoryPoint.setTime(0.5);
-      trajectoryPoint.setOrientation(orientation);
-      trajectoryPoint.setAngularVelocity(new Vector3D());
-      trajectoryPoint = so3Trajectory.taskspaceTrajectoryPoints.add();
+      trajectoryPoint.getOrientation().set(orientation);
+      trajectoryPoint.getAngularVelocity().set(new Vector3D());
+      trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
       trajectoryPoint.setTime(1.0);
-      trajectoryPoint.setOrientation(new Quaternion());
-      trajectoryPoint.setAngularVelocity(new Vector3D());
+      trajectoryPoint.getOrientation().set(new Quaternion());
+      trajectoryPoint.getAngularVelocity().set(new Vector3D());
       commandInputManager.submitMessage(message);
    }
 
@@ -265,9 +265,9 @@ public class WalkingControllerTest
             OneDoFJoint joint = joints[jointIdx];
             double angle1 = MathTools.clamp(Math.toRadians(45.0), joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
             double angle2 = MathTools.clamp(0.0, joint.getJointLimitLower() + 0.05, joint.getJointLimitUpper() - 0.05);
-            OneDoFJointTrajectoryMessage jointTrajectoryMessage = message.jointspaceTrajectory.jointTrajectoryMessages.add();
-            jointTrajectoryMessage.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(0.5, angle1, 0.0));
-            jointTrajectoryMessage.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(1.0, angle2, 0.0));
+            OneDoFJointTrajectoryMessage jointTrajectoryMessage = message.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+            jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(0.5, angle1, 0.0));
+            jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(1.0, angle2, 0.0));
          }
          commandInputManager.submitMessage(message);
       }

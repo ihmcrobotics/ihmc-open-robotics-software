@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import java.util.Collection;
 import java.util.List;
 
+import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -46,7 +47,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesired
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;

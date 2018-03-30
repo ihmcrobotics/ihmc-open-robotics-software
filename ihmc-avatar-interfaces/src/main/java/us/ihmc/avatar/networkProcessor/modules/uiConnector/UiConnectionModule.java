@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
@@ -11,7 +12,6 @@ import us.ihmc.communication.packetCommunicator.FilteredPacketSendingForwarder;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 
 public class UiConnectionModule implements PacketConsumer<RobotConfigurationData>
 {

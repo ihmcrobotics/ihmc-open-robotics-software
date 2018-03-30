@@ -168,7 +168,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
          return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
          return false;
-      if (this.predicted_contact_points_2d_.size() == other.predicted_contact_points_2d_.size())
+      if (this.predicted_contact_points_2d_.size() != other.predicted_contact_points_2d_.size())
       {
          return false;
       }

@@ -9,6 +9,8 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
+import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -17,8 +19,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynami
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;

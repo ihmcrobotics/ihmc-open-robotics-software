@@ -10,6 +10,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -18,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
@@ -35,12 +40,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -128,17 +127,17 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       for (RobotSide robotSide : RobotSide.values)
       {
          ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-         armTrajectoryMessage.robotSide = robotSide.toByte();
+         armTrajectoryMessage.setRobotSide(robotSide.toByte());
          double[] armConfig = straightArmConfigs.get(robotSide);
 
          for (int i = 0; i < armConfig.length; i++)
          {
             TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
-            trajectoryPoint.position = armConfig[i];
-            trajectoryPoint.time = 1.0;
+            trajectoryPoint.setPosition(armConfig[i]);
+            trajectoryPoint.setTime(1.0);
             OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
-            jointTrajectory.trajectoryPoints.add().set(trajectoryPoint);
-            armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages.add().set(jointTrajectory);
+            jointTrajectory.getTrajectoryPoints().add().set(trajectoryPoint);
+            armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(jointTrajectory);
          }
          drcSimulationTestHelper.send(armTrajectoryMessage);
       }
@@ -196,7 +195,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       stepLocation.setIncludingFrame(fullRobotModel.getSoleFrame(RobotSide.RIGHT), stepLength, 0.0, 0.0);
       contacts = generateContactPointsForAllOfFoot();
       FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, RobotSide.RIGHT, contacts, stepLocation, true);
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       drcSimulationTestHelper.send(message);
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1);
 
@@ -725,7 +724,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       {
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide.getOppositeSide()), stepLength, robotSide.negateIfRightSide(stepWidth), 0.0);
          FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, robotSide, null, stepLocation, false);
-         message.footstepDataList.add().set(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          robotSide = robotSide.getOppositeSide();
       }
 
@@ -890,74 +889,74 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.setLocation(new Point3D(0.50, 0.10, 0.0));
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.getLocation().set(new Point3D(0.50, 0.10, 0.0));
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.LEFT;
       footstepData.setRobotSide(robotSide.toByte());
       ankleFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
       soleFrame = fullRobotModel.getSoleFrame(robotSide);
       HumanoidMessageTools.packPredictedContactPoints(transformFromAnkleFrameToSoleFrame(generateContactPointsForRandomRotatedLineOfContact(random), ankleFrame, soleFrame), footstepData);
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       messages.add(message);
 
       message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       footstepData = new FootstepDataMessage();
-      footstepData.setLocation(new Point3D(1.0, -0.10, 0.0));
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.getLocation().set(new Point3D(1.0, -0.10, 0.0));
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.RIGHT;
       footstepData.setRobotSide(robotSide.toByte());
       ankleFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
       soleFrame = fullRobotModel.getSoleFrame(robotSide);
       HumanoidMessageTools.packPredictedContactPoints(transformFromAnkleFrameToSoleFrame(generateContactPointsForRandomRotatedLineOfContact(random), ankleFrame, soleFrame), footstepData);
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       messages.add(message);
 
       message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       footstepData = new FootstepDataMessage();
-      footstepData.setLocation(new Point3D(1.5, 0.10, 0.0));
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.getLocation().set(new Point3D(1.5, 0.10, 0.0));
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.LEFT;
       footstepData.setRobotSide(robotSide.toByte());
       ankleFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
       soleFrame = fullRobotModel.getSoleFrame(robotSide);
       HumanoidMessageTools.packPredictedContactPoints(transformFromAnkleFrameToSoleFrame(generateContactPointsForRandomRotatedLineOfContact(random), ankleFrame, soleFrame), footstepData);
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       messages.add(message);
 
       message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       footstepData = new FootstepDataMessage();
-      footstepData.setLocation(new Point3D(1.5, -0.1, 0.0));
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.getLocation().set(new Point3D(1.5, -0.1, 0.0));
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.RIGHT;
       footstepData.setRobotSide(robotSide.toByte());
       ankleFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
       soleFrame = fullRobotModel.getSoleFrame(robotSide);
       HumanoidMessageTools.packPredictedContactPoints(transformFromAnkleFrameToSoleFrame(generateContactPointsForRandomRotatedLineOfContact(random), ankleFrame, soleFrame), footstepData);
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       messages.add(message);
 
       message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       footstepData = new FootstepDataMessage();
-      footstepData.setLocation(new Point3D(1.5, 0.4, 0.0));
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.getLocation().set(new Point3D(1.5, 0.4, 0.0));
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.LEFT;
       footstepData.setRobotSide(robotSide.toByte());
       ankleFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
       soleFrame = fullRobotModel.getSoleFrame(robotSide);
       HumanoidMessageTools.packPredictedContactPoints(transformFromAnkleFrameToSoleFrame(generateContactPointsForRandomRotatedLineOfContact(random), ankleFrame, soleFrame), footstepData);
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       messages.add(message);
 
       message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       footstepData = new FootstepDataMessage();
-      footstepData.setLocation(new Point3D(1.5, 0.2, 0.0));
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.getLocation().set(new Point3D(1.5, 0.2, 0.0));
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.RIGHT;
       footstepData.setRobotSide(robotSide.toByte());
       ankleFrame = fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG);
       soleFrame = fullRobotModel.getSoleFrame(robotSide);
       HumanoidMessageTools.packPredictedContactPoints(transformFromAnkleFrameToSoleFrame(generateContactPointsForRandomRotatedLineOfContact(random), ankleFrame, soleFrame), footstepData);
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
       messages.add(message);
 
       return messages;
@@ -995,7 +994,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, robotSide, predictedContactPointsInAnkleFrame, placeToStep, setPredictedContactPoints);
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
 
       drcSimulationTestHelper.send(message);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.2);
@@ -1016,8 +1015,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.setLocation(placeToStepInWorld);
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.getLocation().set(placeToStepInWorld);
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide.toByte());
 
       if (setPredictedContactPoints && (contactPointsInAnkleFrame != null))

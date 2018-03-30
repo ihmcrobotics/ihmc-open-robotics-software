@@ -12,6 +12,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.RequestLidarScanMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
@@ -20,11 +24,8 @@ import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.RequestLidarScanMessage;
-import us.ihmc.communication.packets.SimulatedLidarScanPacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -40,7 +41,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -208,7 +208,7 @@ public class LidarScanPublisher
             // Set the world transforms to nothing, so points are in lidar scan frame
             scan.setWorldTransforms(identityTransform, identityTransform);
             List<Point3D> scanPoints = scan.getAllPoints();
-            long timestamp = packet.lidarScanParameters.getTimestamp();
+            long timestamp = packet.getLidarScanParameters().getTimestamp();
 
             scanDataToPublish.set(new ScanData(timestamp, scanPoints));
          }

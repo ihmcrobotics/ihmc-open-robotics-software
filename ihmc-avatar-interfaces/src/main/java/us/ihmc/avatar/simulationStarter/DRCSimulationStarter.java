@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import controller_msgs.msg.dds.HighLevelStateMessage;
 import us.ihmc.avatar.DRCLidar;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -39,7 +40,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;

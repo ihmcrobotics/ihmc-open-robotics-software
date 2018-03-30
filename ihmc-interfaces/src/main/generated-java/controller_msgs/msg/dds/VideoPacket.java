@@ -126,8 +126,16 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.data_, other.data_, epsilon))
+      if (data_.size() != other.data_.size())
          return false;
+      else
+         for (int i = 0; i < data_.size(); i++)
+         {
+            if (!us.ihmc.idl.IDLTools.epsilonEquals(data_.get(i), other.data_.get(i), epsilon))
+            {
+               return false;
+            }
+         }
 
       if (!this.position_.epsilonEquals(other.position_, epsilon))
          return false;

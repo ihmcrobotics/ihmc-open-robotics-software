@@ -3,12 +3,12 @@ package us.ihmc.avatar.sensors.blackfly;
 import java.util.HashMap;
 import java.util.Map;
 
+import controller_msgs.msg.dds.BlackFlyParameterPacket;
+import controller_msgs.msg.dds.UIConnectedPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.BlackFlyParameterPacket;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.UIConnectedPacket;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.utilities.ros.RosDynamicReconfigure;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -76,7 +76,7 @@ public class BlackFlyParameterSetter implements PacketConsumer<BlackFlyParameter
 
       if (dynamicReconfigureClient.isConnected())
       {
-         if (packet.getFromUI() && packet.getRobotSide() == BlackFlyParameterSetter.this.side.toByte()) //avoid hearing my own packet
+         if (packet.getFromUi() && packet.getRobotSide() == BlackFlyParameterSetter.this.side.toByte()) //avoid hearing my own packet
          {
             new Thread("BlackflyDynamicReconfigureSetter")
             {
