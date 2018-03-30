@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.Map;
 
-public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
+public class QuadrupedStepTeleopMode
 {
    private static final double DT = 0.01;
 
@@ -57,12 +57,6 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       parentRegistry.addChild(registry);
    }
 
-   @Override
-   public void onEntry()
-   {
-   }
-
-   @Override
    public void update(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimates estimates)
    {
       double bodyRoll = 0.0;
@@ -94,7 +88,6 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
       stepTeleopManager.update();
    }
 
-   @Override
    public void onInputEvent(Map<XBoxOneMapping, Double> channels, QuadrupedTaskSpaceEstimates estimates, Event event)
    {
       if (event.getValue() < 0.5)
@@ -126,10 +119,5 @@ public class QuadrupedStepTeleopMode implements QuadrupedTeleopMode
          xGaitSettings.setEndPhaseShift(xGaitEndPhaseShift[1].getValue());
          break;
       }
-   }
-
-   @Override
-   public void onExit()
-   {
    }
 }
