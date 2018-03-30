@@ -19,6 +19,10 @@ module controller_msgs
       struct PelvisHeightTrajectoryMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
          */
         boolean enable_user_pelvis_control;

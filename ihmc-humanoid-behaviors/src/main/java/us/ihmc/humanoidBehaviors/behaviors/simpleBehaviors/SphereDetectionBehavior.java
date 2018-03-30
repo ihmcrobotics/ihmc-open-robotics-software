@@ -136,10 +136,10 @@ public class SphereDetectionBehavior extends AbstractBehavior
       {
          points3d[i] = new Point3D(points[i]);
       }
-      HumanoidMessageTools.setDecayingWorldScan(pointCloudWorldPacket, points3d);
+      HumanoidMessageTools.setDecayingWorldScan(points3d, pointCloudWorldPacket);
       Point3D[] groundQuadTree = new Point3D[1];
       groundQuadTree[0] = new Point3D();
-      HumanoidMessageTools.setGroundQuadTreeSupport(pointCloudWorldPacket, groundQuadTree);
+      HumanoidMessageTools.setGroundQuadTreeSupport(groundQuadTree, pointCloudWorldPacket);
 
       sendPacket(pointCloudWorldPacket);
    }

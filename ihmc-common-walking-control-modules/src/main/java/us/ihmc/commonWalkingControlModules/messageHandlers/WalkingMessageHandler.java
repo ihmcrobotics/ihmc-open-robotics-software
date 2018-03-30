@@ -13,7 +13,6 @@ import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -583,7 +582,7 @@ public class WalkingMessageHandler
 //      statusOutputManager.reportStatusMessage(reusableSpeechPacket);
    }
 
-   public void reportControllerFailure(FrameVector2D fallingDirection)
+   public void reportControllerFailure(FrameVector3D fallingDirection)
    {
       fallingDirection.changeFrame(worldFrame);
       failureStatusMessage.setFallingDirection(fallingDirection);

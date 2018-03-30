@@ -1,17 +1,22 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message gives the user the option to bypass IHMC feedback controllers for the neck joints by sending desired neck joint accelerations.
- * One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations.
+ * This message is part of the IHMC whole-body controller API. This message gives the user the
+ * option to bypass IHMC feedback controllers for the neck joints by sending desired neck joint
+ * accelerations. One needs experience in control when activating the bypass as it can result in
+ * unexpected behaviors for unreasonable accelerations.
  */
 public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerationsMessage>
       implements Settable<NeckDesiredAccelerationsMessage>, EpsilonComparable<NeckDesiredAccelerationsMessage>
 {
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    /**
     * The desired joint acceleration information.
     */
@@ -24,12 +29,31 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
 
    public NeckDesiredAccelerationsMessage(NeckDesiredAccelerationsMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(NeckDesiredAccelerationsMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.DesiredAccelerationsMessagePubSubType.staticCopy(other.desired_accelerations_, desired_accelerations_);
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -47,6 +71,9 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!this.desired_accelerations_.epsilonEquals(other.desired_accelerations_, epsilon))
          return false;
@@ -66,6 +93,9 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
 
       NeckDesiredAccelerationsMessage otherMyClass = (NeckDesiredAccelerationsMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (!this.desired_accelerations_.equals(otherMyClass.desired_accelerations_))
          return false;
 
@@ -78,9 +108,11 @@ public class NeckDesiredAccelerationsMessage extends Packet<NeckDesiredAccelerat
       StringBuilder builder = new StringBuilder();
 
       builder.append("NeckDesiredAccelerationsMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("desired_accelerations=");
       builder.append(this.desired_accelerations_);
-
       builder.append("}");
       return builder.toString();
    }

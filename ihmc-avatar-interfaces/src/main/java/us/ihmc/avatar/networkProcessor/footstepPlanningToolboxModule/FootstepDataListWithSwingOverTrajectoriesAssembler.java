@@ -102,7 +102,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                fourPartialFootholdCorners.add(new Point2D(partialFootholdPolygon.getVertex(j)));
             }
 
-            MessageTools.copyData(fourPartialFootholdCorners, footstepDataMessage.predictedContactPoints);
+            HumanoidMessageTools.packPredictedContactPoints(fourPartialFootholdCorners, footstepDataMessage);
          }
 
          double maxSpeed = maxSpeedDimensionless / swingTime;
@@ -168,7 +168,8 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                fourPartialFootholdCorners.add(new Point2D(partialFootholdPolygon.getVertex(j)));
             }
 
-            MessageTools.copyData(fourPartialFootholdCorners, footstepDataMessage.predictedContactPoints);
+            
+            HumanoidMessageTools.packPredictedContactPoints(fourPartialFootholdCorners, footstepDataMessage);
          }
 
          footstepDataListMessage.footstepDataList.add().set(footstepDataMessage);

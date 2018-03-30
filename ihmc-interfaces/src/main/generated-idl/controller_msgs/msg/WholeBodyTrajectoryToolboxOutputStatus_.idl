@@ -17,6 +17,10 @@ module controller_msgs
       struct WholeBodyTrajectoryToolboxOutputStatus
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * 0: not completed.
          * 1: fail to find initial guess.
          * 2: fail to complete expanding tree.

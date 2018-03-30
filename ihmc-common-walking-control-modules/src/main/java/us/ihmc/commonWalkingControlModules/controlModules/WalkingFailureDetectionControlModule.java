@@ -3,15 +3,16 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingFailureDetectionControlModule
 {
@@ -30,7 +31,8 @@ public class WalkingFailureDetectionControlModule
    private final YoDouble icpDistanceFromFootPolygon;
    private final YoDouble icpDistanceFromFootPolygonThreshold;
    private final YoBoolean isRobotFalling;
-   private final FrameVector2D fallingDirection = new FrameVector2D();
+   private final FrameVector2D fallingDirection2D = new FrameVector2D();
+   private final FrameVector3D fallingDirection3D = new FrameVector3D();
 
    public WalkingFailureDetectionControlModule(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry)
    {
@@ -115,7 +117,8 @@ public class WalkingFailureDetectionControlModule
          tempFallingDirection.changeFrame(ReferenceFrame.getWorldFrame());
          footCenter.changeFrame(ReferenceFrame.getWorldFrame());
          tempFallingDirection.sub(footCenter);
-         fallingDirection.set(tempFallingDirection);
+         fallingDirection2D.set(tempFallingDirection);
+         fallingDirection3D.setIncludingFrame(fallingDirection2D, 0.0);
       }
    }
 
@@ -127,9 +130,14 @@ public class WalkingFailureDetectionControlModule
       return isRobotFalling.getBooleanValue();
    }
 
-   public FrameVector2D getFallingDirection()
+   public FrameVector2D getFallingDirection2D()
    {
-      return fallingDirection;
+      return fallingDirection2D;
+   }
+   
+   public FrameVector3D getFallingDirection3D()
+   {
+      return fallingDirection3D;
    }
 
    public FrameConvexPolygon2d getCombinedFootPolygon()

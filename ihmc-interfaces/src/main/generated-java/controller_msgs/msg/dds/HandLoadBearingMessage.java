@@ -1,18 +1,22 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * Request the controller to use a hand to help supporting the robot weight.
+ * This message is part of the IHMC whole-body controller API. Request the controller to use a hand
+ * to help supporting the robot weight.
  */
 public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       implements Settable<HandLoadBearingMessage>, EpsilonComparable<HandLoadBearingMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    /**
     * The robot side of the hand that will be load bearing.
     */
@@ -22,8 +26,9 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
     */
    public boolean use_jointspace_command_;
    /**
-    * The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
-    * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+    * The arm desired jointspace trajectory that will be used for hybrid control if
+    * use_jointspace_command is true. The indexing for the joints goes increasingly from the first
+    * shoulder joint to the last arm joint.
     */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
    /**
@@ -37,19 +42,20 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
 
    public HandLoadBearingMessage()
    {
-
       jointspace_trajectory_ = new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
-
       load_bearing_message_ = new controller_msgs.msg.dds.LoadBearingMessage();
    }
 
    public HandLoadBearingMessage(HandLoadBearingMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(HandLoadBearingMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       use_jointspace_command_ = other.use_jointspace_command_;
@@ -61,11 +67,19 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
    }
 
    /**
-    * The robot side of the hand that will be load bearing.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public byte getRobotSide()
+   public void setSequenceId(long sequence_id)
    {
-      return robot_side_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -77,11 +91,11 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
    }
 
    /**
-    * Determines whether hybrid load bearing and jointspace control will be used.
+    * The robot side of the hand that will be load bearing.
     */
-   public boolean getUseJointspaceCommand()
+   public byte getRobotSide()
    {
-      return use_jointspace_command_;
+      return robot_side_;
    }
 
    /**
@@ -93,8 +107,17 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
    }
 
    /**
-    * The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
-    * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+    * Determines whether hybrid load bearing and jointspace control will be used.
+    */
+   public boolean getUseJointspaceCommand()
+   {
+      return use_jointspace_command_;
+   }
+
+   /**
+    * The arm desired jointspace trajectory that will be used for hybrid control if
+    * use_jointspace_command is true. The indexing for the joints goes increasingly from the first
+    * shoulder joint to the last arm joint.
     */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
@@ -104,17 +127,17 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
    /**
     * The time to delay this message on the controller side before being executed.
     */
-   public double getExecutionDelayTime()
+   public void setExecutionDelayTime(double execution_delay_time)
    {
-      return execution_delay_time_;
+      execution_delay_time_ = execution_delay_time;
    }
 
    /**
     * The time to delay this message on the controller side before being executed.
     */
-   public void setExecutionDelayTime(double execution_delay_time)
+   public double getExecutionDelayTime()
    {
-      execution_delay_time_ = execution_delay_time;
+      return execution_delay_time_;
    }
 
    /**
@@ -133,6 +156,9 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       if (other == this)
          return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
 
@@ -141,7 +167,6 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
 
       if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon))
          return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_delay_time_, other.execution_delay_time_, epsilon))
          return false;
 
@@ -163,6 +188,9 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
 
       HandLoadBearingMessage otherMyClass = (HandLoadBearingMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -171,7 +199,6 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
 
       if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_))
          return false;
-
       if (this.execution_delay_time_ != otherMyClass.execution_delay_time_)
          return false;
 
@@ -187,25 +214,23 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandLoadBearingMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("use_jointspace_command=");
       builder.append(this.use_jointspace_command_);
-
       builder.append(", ");
       builder.append("jointspace_trajectory=");
       builder.append(this.jointspace_trajectory_);
-
       builder.append(", ");
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);
-
       builder.append(", ");
       builder.append("load_bearing_message=");
       builder.append(this.load_bearing_message_);
-
       builder.append("}");
       return builder.toString();
    }

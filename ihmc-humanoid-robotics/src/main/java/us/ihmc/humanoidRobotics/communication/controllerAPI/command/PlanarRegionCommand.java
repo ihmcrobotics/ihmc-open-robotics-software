@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -65,7 +66,10 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
          Polygon2DMessage convexPolygonMessage = convexPolygonsMessage.get(i);
          ConvexPolygon2D convexPolygon = convexPolygons.add();
          for (int vertexIndex = 0; vertexIndex < convexPolygonMessage.getVertices().size(); vertexIndex++)
-            convexPolygon.addVertex(convexPolygonMessage.getVertices().get(vertexIndex));
+         {
+            Point3D vertex = convexPolygonMessage.getVertices().get(vertexIndex);
+            convexPolygon.addVertex(vertex.getX(), vertex.getY());
+         }
          convexPolygons.getLast().update();
       }
 
