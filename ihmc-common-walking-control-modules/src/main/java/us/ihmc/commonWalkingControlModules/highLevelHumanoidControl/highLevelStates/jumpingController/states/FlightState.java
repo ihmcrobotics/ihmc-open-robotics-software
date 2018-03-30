@@ -63,8 +63,7 @@ public class FlightState extends AbstractJumpState
    {
       wholeBodyMomentumManager.computeMomentumRateOfChangeForFreeFall();
       gravityCompensationManager.setRootJointAccelerationForFreeFall();
-      feetManager.makeFeetFullyUnconstrained();
-      feetManager.computeForDampedCompliantMode();
+      feetManager.compute();
       for (RobotSide side : RobotSide.values)
          handManagers.get(side).compute();
       chestManager.compute();
@@ -108,10 +107,12 @@ public class FlightState extends AbstractJumpState
    {
       resetGlitchBooleans();
       controllerToolbox.clearContacts();
-      for (RobotSide side : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBodyControlManager handManager = handManagers.get(side);
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
          handManager.holdInTaskspace();
+         feetManager.holdInJointspace(robotSide);
+         feetManager.makeFeetFullyUnconstrained(robotSide);
       }
       headManager.holdInJointspace();
       chestManager.holdInJointspace();

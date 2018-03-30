@@ -29,11 +29,10 @@ public class TakeOffState extends AbstractJumpState
    private final RigidBodyControlManager chestManager;
    private final WholeBodyMotionPlanner motionPlanner;
    private final SideDependentList<FootSwitchInterface> footSwitches;
-   
-   private double zGroundReactionThreshold = 100;
-   private double heightThreshold = 0.45;
+
+   private double zGroundReactionThreshold = 10;
+   private double heightThreshold = 0.35;
    private double velocityThreshold = 0.1;
-   private final Wrench tempWrench = new Wrench();
 
    public TakeOffState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                        CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
@@ -65,9 +64,7 @@ public class TakeOffState extends AbstractJumpState
       centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(timeInCurrentState);
       gravityCompensationManager.setRootJointAccelerationForStandardGravitationalForce();
       pelvisControlManager.maintainDesiredOrientationOnly();
-      feetManager.makeFeetFullyConstrained();
-      feetManager.computeForDampedCompliantMode();
-
+      feetManager.compute();
       headManager.compute();
       chestManager.compute();
       for (RobotSide robotSide : RobotSide.values)
@@ -76,7 +73,7 @@ public class TakeOffState extends AbstractJumpState
          handManager.compute();
       }
    }
-   
+
    private boolean checkIfTakeOffIsComplete()
    {
       double totalForceZ = feetManager.getGroundReactionForceZ();
@@ -84,12 +81,19 @@ public class TakeOffState extends AbstractJumpState
       double comVelocity = centroidalMomentumManager.getEstimatedCoMVelocityZ();
       return (totalForceZ < zGroundReactionThreshold) & (comHeightAboveGround > heightThreshold) & (comVelocity > velocityThreshold);
    }
-   
+
    @Override
    public void doStateSpecificTransitionIntoAction()
    {
       centroidalMomentumManager.setGroundReactionForceProfile(motionPlanner.getGroundReactionForceProfile());
       centroidalMomentumManager.setCoMTrajectory(motionPlanner.getPositionTrajectory());
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         handManager.holdInJointspace();
+         feetManager.makeFeetFullyConstrained(robotSide);
+         feetManager.complyAndDamp(robotSide);
+      }
    }
 
    @Override

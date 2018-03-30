@@ -62,13 +62,10 @@ public class LandingState extends AbstractJumpState
    @Override
    public void doAction()
    {
-      double timeInCurrentState = getTimeInCurrentState();
       centroidalMomentumManager.computeForZeroMomentumRateOfChange();
       gravityCompensationManager.setRootJointAccelerationForStandardGravitationalForce();
       pelvisControlManager.maintainDesiredPositionAndOrientation();
-      feetManager.makeFeetFullyConstrained();
-      feetManager.computeForDampedCompliantMode();
-
+      feetManager.compute();
       headManager.compute();
       chestManager.compute();
       for (RobotSide robotSide : RobotSide.values)
@@ -93,8 +90,9 @@ public class LandingState extends AbstractJumpState
       {
          RigidBodyControlManager handManager = handManagers.get(robotSide);
          handManager.holdInJointspace();
+         feetManager.makeFeetFullyConstrained(robotSide);
+         feetManager.complyAndDamp(robotSide);
       }
-
    }
 
    @Override

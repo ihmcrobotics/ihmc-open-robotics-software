@@ -133,4 +133,10 @@ public class PelvisControlManager implements JumpControlManagerInterface
    {
       return spatialFeedbackControlCommand;
    }
+   
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return spatialFeedbackControlCommand;
+   }
 }

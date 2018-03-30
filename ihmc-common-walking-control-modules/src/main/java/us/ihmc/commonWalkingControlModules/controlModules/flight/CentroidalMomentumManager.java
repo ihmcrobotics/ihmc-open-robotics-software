@@ -15,9 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
  * Generates a feasible momentum command for jumping depending on the state 
@@ -215,6 +213,12 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
 
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
+   {
+      return null;
+   }
+   
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       return null;
    }

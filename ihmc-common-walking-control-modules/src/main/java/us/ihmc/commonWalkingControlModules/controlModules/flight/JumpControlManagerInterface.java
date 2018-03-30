@@ -7,4 +7,5 @@ public interface JumpControlManagerInterface
 {
    InverseDynamicsCommand<?> getInverseDynamicsCommand();
    FeedbackControlCommand<?> getFeedbackControlCommand();
+   FeedbackControlCommand<?> createFeedbackControlTemplate();
 }

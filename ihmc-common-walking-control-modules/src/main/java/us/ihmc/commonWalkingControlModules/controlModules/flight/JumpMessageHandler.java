@@ -54,7 +54,7 @@ public class JumpMessageHandler
          contactStateList.add(launchState);
       case FLIGHT:
          ContactState flightState = new ContactState(worldFrame);
-         flightState.setDuration(0.3);
+         flightState.setDuration(0.28);
          tempPolygon.clear();
          flightState.setSupportPolygon(tempPolygon);
          flightState.setContactType(ContactType.NO_SUPPORT);

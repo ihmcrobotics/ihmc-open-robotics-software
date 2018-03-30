@@ -29,8 +29,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -114,8 +116,26 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
          return null;
       if (!hasMomentumOptimizationSettings(FeetManager.class))
          return null;
+      TObjectDoubleHashMap<String> homeConfiguration = jumpControllerParameters.getOrCreateJointHomeConfiguration();
+      YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
+      Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
 
-      feetManager = new FeetJumpManager(controllerToolbox, jumpControllerParameters, registry);
+      feetManager = new FeetJumpManager(controllerToolbox, jumpControllerParameters, trajectoryFrames, homeConfiguration, graphicsListRegistry, registry);
+
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String bodyName = fullRobotModel.getFoot(robotSide).getName();
+         PID3DGainsReadOnly taskspaceOrientationGains = taskspaceOrientationGainMap.get(bodyName);
+         PID3DGainsReadOnly taskspacePositionGains = taskspacePositionGainMap.get(bodyName);
+
+         Vector3DReadOnly taskspaceAngularWeight = taskspaceAngularWeightMap.get(bodyName);
+         Vector3DReadOnly taskspaceLinearWeight = taskspaceLinearWeightMap.get(bodyName);
+         feetManager.setGains(robotSide, jointGainMap, taskspaceOrientationGains, taskspacePositionGains, taskspaceOrientationGains,
+                              taskspacePositionGains);
+         feetManager.setWeights(robotSide, jointspaceWeightMap, taskspaceAngularWeight, taskspaceLinearWeight, taskspaceAngularWeight,
+                                taskspaceLinearWeight);
+      }
       controlManagers.add(feetManager);
       return feetManager;
    }
@@ -235,9 +255,11 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       }
       for (JumpControlManagerInterface controlManager : controlManagers)
       {
-         FeedbackControlCommand<?> feedbackControlCommand = controlManager.getFeedbackControlCommand();
+         FeedbackControlCommand<?> feedbackControlCommand = controlManager.createFeedbackControlTemplate();
          if (feedbackControlCommand != null)
+         {
             templateFeedbackCommandList.addCommand(feedbackControlCommand);
+         }
       }
       return templateFeedbackCommandList;
    }

@@ -65,4 +65,10 @@ public class GravityCompensationManager implements JumpControlManagerInterface
    {
       return null;
    }
+   
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return null;
+   }
 }
