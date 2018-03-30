@@ -27,14 +27,22 @@ public class CollisionShapeBasedWrenchCalculator implements WrenchCalculatorInte
    private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F corruptionMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
 
+   private final PoseReferenceFrame sensorFrame;
+
+   private final RigidBodyTransform transformToOriginFrame = new RigidBodyTransform();
+   private final Vector3D force = new Vector3D();
+   private final Point3D contactPointOriginFrame = new Point3D();
+   private final Vector3D contactVectorOriginFrame = new Vector3D();
+   private final Vector3D tau = new Vector3D();
+
    public CollisionShapeBasedWrenchCalculator(String forceSensorName, List<ExternalForcePoint> contactPoints, Joint forceTorqueSensorJoint,
                                               RigidBodyTransform transformToParentJoint, YoVariableRegistry registry)
    {
       this.forceSensorName = forceSensorName;
       this.contactPoints = contactPoints;
       this.forceTorqueSensorJoint = forceTorqueSensorJoint;
-      this.transformToParentJoint = new RigidBodyTransform(transformToParentJoint);
-      
+      this.transformToParentJoint = transformToParentJoint;
+
       this.sensorFrame = new PoseReferenceFrame(forceSensorName + "Frame", ReferenceFrame.getWorldFrame());
    }
 
@@ -55,22 +63,12 @@ public class CollisionShapeBasedWrenchCalculator implements WrenchCalculatorInte
    {
       transformToPack.set(transformToParentJoint);
    }
-   
-   private final PoseReferenceFrame sensorFrame;
 
-   private final RigidBodyTransform transformToOriginFrame = new RigidBodyTransform();
-   private final Vector3D force = new Vector3D();
-   private final Point3D contactPointOriginFrame = new Point3D();
-   private final Vector3D contactVectorOriginFrame = new Vector3D();
-   private final Vector3D tau = new Vector3D();
-
-   private final Point3D tempContactPoint = new Point3D();
-   
    @Override
    public void calculate()
    {
       wrenchMatrix.zero();
-      
+
       forceTorqueSensorJoint.getTransformToWorld(transformToOriginFrame);
       transformToOriginFrame.multiply(transformToParentJoint);
       sensorFrame.setPoseAndUpdate(transformToOriginFrame);
@@ -79,16 +77,14 @@ public class CollisionShapeBasedWrenchCalculator implements WrenchCalculatorInte
       for (int i = 0; i < contactPoints.size(); i++)
       {
          ExternalForcePoint contactPoint = contactPoints.get(i);
-         Vector3D force = new Vector3D();
-         Vector3D position = new Vector3D();
+         Point3D tempContactPoint = new Point3D();
 
          contactPoint.getForce(force);
-         contactPoint.getPosition(position);
 
          wrenchMatrix.set(3, 0, wrenchMatrix.get(3, 0) + force.getX());
          wrenchMatrix.set(4, 0, wrenchMatrix.get(4, 0) + force.getY());
          wrenchMatrix.set(5, 0, wrenchMatrix.get(5, 0) + force.getZ());
-         
+
          transformToOriginFrame.transform(force);
 
          contactPointOriginFrame.set(0.0, 0.0, 0.0);
