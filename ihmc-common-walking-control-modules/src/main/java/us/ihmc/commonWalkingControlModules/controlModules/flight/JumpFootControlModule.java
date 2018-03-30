@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.flight;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -112,7 +114,7 @@ public class JumpFootControlModule
    {
       taskspaceControlState.setWeights(taskspceAngularWeight, taskSpaceLinearWeight);
       jointspaceControlState.setDefaultWeights(jointspaceWeights);
-      this.inverseDynamicsAngularWeight = inverseDynamicsAngularWeight; 
+      this.inverseDynamicsAngularWeight = inverseDynamicsAngularWeight;
       this.inverseDynamicsLinearWeight = inverseDynamicsLinearWeight;
    }
 
@@ -216,7 +218,7 @@ public class JumpFootControlModule
       templateFeedbackCommand.addCommand(jointspaceControlState.getFeedbackControlCommand());
       return templateFeedbackCommand;
    }
-   
+
    private final FramePoint3D tempPoint = new FramePoint3D();
 
    public double getFootPosition(Axis axis)
@@ -225,4 +227,17 @@ public class JumpFootControlModule
       return tempPoint.getElement(axis.ordinal());
    }
 
+   public double getHeightOfLowestPointInFoot()
+   {
+      double lowestPointInFoot = Double.POSITIVE_INFINITY;
+      List<FramePoint2D> contactPoints = contactableFoot.getContactPoints2d();
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         tempPoint.setIncludingFrame(contactPoints.get(i), 0.0);
+         tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+         if (lowestPointInFoot > tempPoint.getZ())
+            lowestPointInFoot = tempPoint.getZ();
+      }
+      return lowestPointInFoot;
+   }
 }

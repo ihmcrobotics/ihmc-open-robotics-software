@@ -204,7 +204,7 @@ public class JumpHighLevelHumanoidController
       stateMachine.addState(takeOffState);
 
       FlightState flightState = new FlightState(motionPlanner, messageHandler, controllerToolbox, controlCoreToolbox, centroidalMomentumManager,
-                                                gravityCompensationManager, handManagers, feetManager, rigidBodyManagersByName, registry);
+                                                gravityCompensationManager, pelvisControlManager, handManagers, feetManager, rigidBodyManagersByName, registry);
       FlightToLandingCondition flightToLandingCondition = new FlightToLandingCondition(flightState, footSwitches);
       flightState.addStateTransition(JumpStateEnum.LANDING, flightToLandingCondition);
       stateMachine.addState(flightState);

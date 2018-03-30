@@ -62,9 +62,10 @@ public class LandingState extends AbstractJumpState
    @Override
    public void doAction()
    {
-      centroidalMomentumManager.computeForZeroMomentumRateOfChange();
+      double time = getTimeInCurrentState();
+      centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(time);
       gravityCompensationManager.setRootJointAccelerationForStandardGravitationalForce();
-      pelvisControlManager.maintainDesiredPositionAndOrientation();
+      pelvisControlManager.maintainDesiredOrientationOnly();
       feetManager.compute();
       headManager.compute();
       chestManager.compute();
@@ -99,7 +100,5 @@ public class LandingState extends AbstractJumpState
    public void doTransitionOutOfAction()
    {
       // TODO Auto-generated method stub
-
    }
-
 }

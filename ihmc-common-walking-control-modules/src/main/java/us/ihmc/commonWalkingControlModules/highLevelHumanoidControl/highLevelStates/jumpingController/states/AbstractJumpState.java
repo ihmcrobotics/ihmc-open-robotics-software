@@ -18,13 +18,17 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState
 
 public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
 {
+   private final ReferenceFrame plannerFrame;
    private final WholeBodyMotionPlanner motionPlanner;
    private final JumpMessageHandler messageHandler;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    protected FramePoint3D initialPositionInState = new FramePoint3D();
    protected FrameVector3D initialVelocityInState = new FrameVector3D();
    protected FrameVector3D initialGroundReactionForceInState = new FrameVector3D();
-   
+   protected FramePoint3D finalPosition = new FramePoint3D();
+   protected FrameVector3D finalVelocity = new FrameVector3D();
+   protected FrameVector3D finalGroundReactionForce = new FrameVector3D();
+
    private final Wrench tempWrench = new Wrench();
 
    public AbstractJumpState(JumpStateEnum stateEnum, WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler,
@@ -32,10 +36,11 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
    {
       super(stateEnum);
       this.motionPlanner = motionPlanner;
+      this.plannerFrame = motionPlanner.getPlanningFrame();
       this.messageHandler = messageHandler;
       this.controllerToolbox = controllerToolbox;
    }
-   
+
    public abstract void doStateSpecificTransitionIntoAction();
 
    @Override
@@ -46,9 +51,8 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
       controllerToolbox.getCenterOfMassPosition(initialPositionInState);
       controllerToolbox.getCenterOfMassVelocity(initialVelocityInState);
       SideDependentList<FootSwitchInterface> footSwitches = controllerToolbox.getFootSwitches();
-      ReferenceFrame plannerFrame = motionPlanner.getPlanningFrame();
       initialGroundReactionForceInState.setToZero(plannerFrame);
-      for(RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
          FootSwitchInterface footSwitch = footSwitches.get(robotSide);
          footSwitch.computeAndPackFootWrench(tempWrench);
@@ -57,11 +61,25 @@ public abstract class AbstractJumpState extends FinishableState<JumpStateEnum>
       }
       messageHandler.createJumpSequenceForTesting(initialPositionInState, getStateEnum());
       List<ContactState> contactStateList = messageHandler.getContactStateList();
+      if (getStateEnum() == JumpStateEnum.LANDING)
+         initialGroundReactionForceInState.setToZero();
       motionPlanner.setInitialState(initialPositionInState, initialVelocityInState, initialGroundReactionForceInState);
-      if(getStateEnum() == JumpStateEnum.STANDING)
-         motionPlanner.setFinalState(initialPositionInState, initialVelocityInState, initialGroundReactionForceInState);
+      updateFinalPositionFromInitial();
+      motionPlanner.setFinalState(finalPosition, finalVelocity, finalGroundReactionForce);
       motionPlanner.processContactStatesAndGenerateMotionNodesForPlanning(contactStateList);
       motionPlanner.computeMotionPlan();
       doStateSpecificTransitionIntoAction();
+   }
+
+   private void updateFinalPositionFromInitial()
+   {
+      if (getStateEnum() == JumpStateEnum.LANDING)
+         finalPosition.setX(initialPositionInState.getX() - 0.000);
+      else
+         finalPosition.setX(initialPositionInState.getX() - 0.000);
+
+      finalPosition.setY(initialPositionInState.getY());
+      finalPosition.setZ(motionPlanner.getNominalHeight());
+      motionPlanner.getNominalState(finalVelocity, finalGroundReactionForce);
    }
 }

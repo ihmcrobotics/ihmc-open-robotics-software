@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.centroidalMotionPlanner;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class CentroidalMotionPlannerParameters
 {
@@ -127,7 +128,7 @@ public class CentroidalMotionPlannerParameters
       maxForceToPack.set(this.maximumForce);
    }
 
-   public void setMaxForce(Vector3D maxForce)
+   public void setMaxForce(Vector3DReadOnly maxForce)
    {
       this.maximumForce.set(maxForce);
    }
@@ -137,7 +138,7 @@ public class CentroidalMotionPlannerParameters
       minForceToPack.set(this.minimumForce);
    }
 
-   public void setMinForce(Vector3D minForce)
+   public void setMinForce(Vector3DReadOnly minForce)
    {
       this.minimumForce.set(minForce);
    }
@@ -147,7 +148,7 @@ public class CentroidalMotionPlannerParameters
       maxForceRateToPack.set(this.maximumForceRate);
    }
 
-   public void setMaxForceRate(Vector3D maxForceRate)
+   public void setMaxForceRate(Vector3DReadOnly maxForceRate)
    {
       this.maximumForceRate.set(maxForceRate);
    }
@@ -157,7 +158,7 @@ public class CentroidalMotionPlannerParameters
       minForceRateToPack.set(this.minimumForceRate);
    }
 
-   public void setMinForceRate(Vector3D minForceRate)
+   public void setMinForceRate(Vector3DReadOnly minForceRate)
    {
       this.minimumForceRate.set(minForceRate);
    }

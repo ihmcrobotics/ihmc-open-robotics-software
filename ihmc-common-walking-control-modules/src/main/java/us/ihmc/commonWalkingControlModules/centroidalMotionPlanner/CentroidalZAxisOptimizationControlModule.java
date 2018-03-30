@@ -39,6 +39,7 @@ public class CentroidalZAxisOptimizationControlModule
    private double maxForceRate;
    private final YoInteger numberOfQPIterations;
    private final YoInteger numberOfQPFailures;
+   private final YoInteger numberOfPlansRequested;
 
    private DenseMatrix64F tempMatrixForComputation = new DenseMatrix64F(0, 1);
 
@@ -66,8 +67,10 @@ public class CentroidalZAxisOptimizationControlModule
 
       this.numberOfQPFailures = new YoInteger(getClass().getSimpleName() + "NumberOfQPFailures", registry);
       this.numberOfQPIterations = new YoInteger(getClass().getSimpleName() + "NumberOfQPIterations", registry);
+      this.numberOfPlansRequested = new YoInteger(getClass().getSimpleName() + "NumberOfPlansRequested", registry);
       this.numberOfQPFailures.set(0);
       this.numberOfQPIterations.set(0);
+      this.numberOfPlansRequested.set(0);
       reset();
    }
 
@@ -78,6 +81,7 @@ public class CentroidalZAxisOptimizationControlModule
 
    public void compute()
    {
+      numberOfPlansRequested.increment();
       processQPInputs();
       qpSolution.reshape(helper.getNumberOfDecisionVariables(axis), 1);
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);

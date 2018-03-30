@@ -81,7 +81,7 @@ public class WholeBodyMotionPlanner
 
    public void setInitialState(FramePoint3D positionToSet, FrameVector3D velocityToSet, FrameVector3D groundReactionForceToSet)
    {
-      PrintTools.debug(initialPosition.toString());
+      PrintTools.debug("Got new intial conditions: Position: " + positionToSet.toString() + ", Velocity: " + velocityToSet.toString() + ", GroundReaction: " + groundReactionForceToSet.toString());
       this.initialPosition.setIncludingFrame(positionToSet);
       this.initialPosition.changeFrame(planningFrame);
       this.initialVelocity.setIncludingFrame(velocityToSet);
@@ -92,6 +92,7 @@ public class WholeBodyMotionPlanner
 
    public void setFinalState(FramePoint3D positionToSet, FrameVector3D velocityToSet, FrameVector3D groundReactionForce)
    {
+      PrintTools.debug("Got new final conditions: Position: " + positionToSet.toString() + ", Velocity: " + velocityToSet.toString() + ", GroundReaction: " + groundReactionForce.toString());
       this.finalPosition.setIncludingFrame(positionToSet);
       this.finalPosition.changeFrame(planningFrame);
       this.finalVelocity.setIncludingFrame(velocityToSet);
@@ -196,8 +197,8 @@ public class WholeBodyMotionPlanner
       }
       else
       {
-         motionNode.setForceObjective(nominalForce);
-         motionNode.setForceRateObjective(nominalForceRate);
+         motionNode.setForceConstraint(nominalForce);
+         motionNode.setForceRateConstraint(nominalForceRate);
          motionNode.setPositionObjective(finalPosition, positionWeight, positionUpperBound, positionLowerBound);
          motionNode.setLinearVelocityObjective(finalVelocity, velocityWeight);
       }
@@ -234,4 +235,20 @@ public class WholeBodyMotionPlanner
       return planningFrame;
    }
 
+   public void setFinalPosition(FramePoint3D positionToSet)
+   {
+      this.finalPosition.setIncludingFrame(positionToSet);
+      this.finalPosition.changeFrame(planningFrame);
+   }
+
+   public void getNominalState(FrameVector3D velocity, FrameVector3D groundReactionForce)
+   {
+      velocity.setToZero(planningFrame);
+      groundReactionForce.setIncludingFrame(nominalForce);
+   }
+
+   public double getNominalHeight()
+   {
+      return 0.437;
+   }
 }

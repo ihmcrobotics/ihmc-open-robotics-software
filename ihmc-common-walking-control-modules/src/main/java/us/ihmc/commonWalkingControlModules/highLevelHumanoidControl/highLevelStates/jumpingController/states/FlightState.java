@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomen
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpMessageHandler;
+import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotionPlanner;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -14,6 +15,7 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FlightState extends AbstractJumpState
 {
@@ -22,31 +24,38 @@ public class FlightState extends AbstractJumpState
    private final CentroidalMomentumManager wholeBodyMomentumManager;
    private final GravityCompensationManager gravityCompensationManager;
    private final FeetJumpManager feetManager;
+   private final PelvisControlManager pelvisManager;
    private final SideDependentList<RigidBodyControlManager> handManagers;
    private final RigidBodyControlManager chestManager;
    private final RigidBodyControlManager headManager;
-   private final double contactThreshold = 100.0;
+   private final double contactThreshold = 30.0;
    private final double footHeightThresholdForCollisionChecking = 0.005;
+   private final YoBoolean isDone;
 
    public FlightState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                       WholeBodyControlCoreToolbox controlCoreToolbox, CentroidalMomentumManager centroidalMomentumManager,
-                      GravityCompensationManager gravityCompensationManager, SideDependentList<RigidBodyControlManager> handManagers,
-                      FeetJumpManager feetManager, Map<String, RigidBodyControlManager> bodyManagerMap, YoVariableRegistry registry)
+                      GravityCompensationManager gravityCompensationManager, PelvisControlManager pelvisManager,
+                      SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager, Map<String, RigidBodyControlManager> bodyManagerMap,
+                      YoVariableRegistry registry)
    {
       super(stateEnum, motionPlanner, messageHandler, controllerToolbox);
       this.controllerToolbox = controllerToolbox;
       this.wholeBodyMomentumManager = centroidalMomentumManager;
       this.gravityCompensationManager = gravityCompensationManager;
       this.feetManager = feetManager;
+      this.pelvisManager = pelvisManager;
       this.handManagers = handManagers;
       this.chestManager = bodyManagerMap.get(controllerToolbox.getFullRobotModel().getChest().getName());
       this.headManager = bodyManagerMap.get(controllerToolbox.getFullRobotModel().getHead().getName());
+
+      isDone = new YoBoolean(getClass().getSimpleName() + "isDone", registry);
    }
 
    @Override
    public boolean isDone()
    {
-      return checkIfFeetHaveCollidedWithGround();
+      isDone.set(checkIfFeetHaveCollidedWithGround());
+      return isDone.getBooleanValue();
    }
 
    @Override
@@ -54,6 +63,7 @@ public class FlightState extends AbstractJumpState
    {
       wholeBodyMomentumManager.computeMomentumRateOfChangeForFreeFall();
       gravityCompensationManager.setRootJointAccelerationForFreeFall();
+      pelvisManager.maintainDesiredOrientationOnly();
       feetManager.compute();
       for (RobotSide side : RobotSide.values)
          handManagers.get(side).compute();
@@ -64,15 +74,15 @@ public class FlightState extends AbstractJumpState
    private boolean checkIfFeetHaveCollidedWithGround()
    {
       boolean checkForCollision = false;
-      for(RobotSide robotSide: RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         double footHeightAboveGround = feetManager.getFootPosition(robotSide, Axis.Z);
+         double footHeightAboveGround = feetManager.getHeightOfLowestPointInFoot(robotSide);
          checkForCollision |= (footHeightAboveGround < footHeightThresholdForCollisionChecking);
       }
-      if(checkForCollision)
+      if (checkForCollision)
       {
          double totalGroundReactionZ = feetManager.getGroundReactionForceZ();
-         if(totalGroundReactionZ > contactThreshold)
+         if (totalGroundReactionZ > contactThreshold)
             return true;
          else
             return false;
@@ -92,8 +102,8 @@ public class FlightState extends AbstractJumpState
          feetManager.holdInJointspace(robotSide);
          feetManager.makeFeetFullyUnconstrained(robotSide);
       }
-      headManager.holdInJointspace();
-      chestManager.holdInJointspace();
+      headManager.holdInTaskspace();
+      chestManager.holdInTaskspace();
    }
 
    @Override

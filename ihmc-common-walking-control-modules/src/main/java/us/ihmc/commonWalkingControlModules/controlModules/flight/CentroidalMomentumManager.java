@@ -16,6 +16,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Generates a feasible momentum command for jumping depending on the state 
@@ -30,7 +32,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
    private final double gravityZ;
    private final ReferenceFrame controlFrame;
    private final MomentumRateCommand momentumCommand;
-   
+
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private Vector3D linearMomentumWeight = new Vector3D();
@@ -63,8 +65,11 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
    private final FrameVector3D estimatedCoMVelocity = new FrameVector3D();
    private final FramePoint3D comPositionError = new FramePoint3D();
    private final FrameVector3D comVelocityError = new FrameVector3D();
-   private final double positionErrorGain;
-   private final double velocityErrorGain;
+   private final Vector3DReadOnly positionErrorGain;
+   private final Vector3DReadOnly velocityErrorGain;
+
+   private final YoDouble timeInState;
+   private final YoBoolean clippingTime;
 
    public CentroidalMomentumManager(HighLevelHumanoidControllerToolbox controllerToolbox, JumpControllerParameters parameters, YoVariableRegistry registry)
    {
@@ -79,7 +84,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
 
       positionErrorGain = parameters.getPositionErrorGain();
       velocityErrorGain = parameters.getVelocityErrorGain();
-      
+
       String namePrefix = getClass().getSimpleName();
       yoDesiredAngularMomentumRateOfChange = new YoFrameVector(namePrefix + "DesiredAngularMomentumRateOfChange", controlFrame, registry);
       yoDesiredLinearMomentumRateOfChange = new YoFrameVector(namePrefix + "DesiredLinearMomentumRateOfChange", controlFrame, registry);
@@ -89,6 +94,9 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       yoPlannedCoMVelocity = new YoFrameVector(namePrefix + "PlannedCoMVelocity", controlFrame, registry);
       yoEstimatedCoMPosition = new YoFramePoint(namePrefix + "EstimatedCoMPosition", controlFrame, registry);
       yoEstimatedCoMVelocity = new YoFrameVector(namePrefix + "EstimatedCoMVelocity", controlFrame, registry);
+
+      timeInState = new YoDouble(getClass().getSimpleName() + "TimeInState", registry);
+      clippingTime = new YoBoolean(getClass().getSimpleName() + "ClippingTime", registry);
 
       setMomentumCommandWeights();
    }
@@ -116,7 +124,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
       momentumCommand.setAngularWeights(angularMomentumWeight);
       momentumCommand.setLinearWeights(linearMomentumWeight);
    }
-   
+
    private void updateCoMState()
    {
       controllerToolbox.getCenterOfMassPosition(estimatedCoMPosition);
@@ -183,18 +191,28 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
 
    private void computeDesiredGroundReactionForce(double time)
    {
-      groundReactionForceProfile.update(time, plannedGroundReactionForce);
-      plannedCoMPositionTrajectory.update(time, plannedCoMPosition, plannedCoMVelocity);
+      timeInState.set(time);
+      double trajectoryFinalTime = groundReactionForceProfile.getFinalTime();
+      double clippedTime = time;
+      if(trajectoryFinalTime < time)
+      {
+         clippingTime.set(true);
+         clippedTime = trajectoryFinalTime;
+      }
+      else
+         clippingTime.set(false);
+      groundReactionForceProfile.update(clippedTime, plannedGroundReactionForce);
+      plannedCoMPositionTrajectory.update(clippedTime, plannedCoMPosition, plannedCoMVelocity);
       comPositionError.sub(plannedCoMPosition, estimatedCoMPosition);
       comVelocityError.sub(plannedCoMVelocity, estimatedCoMVelocity);
       desiredGroundReactionForce.setIncludingFrame(plannedGroundReactionForce);
-      comPositionError.scale(positionErrorGain);
-      comVelocityError.scale(velocityErrorGain);
+      comPositionError.scale(positionErrorGain.getX(), positionErrorGain.getY(), positionErrorGain.getZ());
+      comVelocityError.scale(velocityErrorGain.getX(), velocityErrorGain.getY(), velocityErrorGain.getZ());
       desiredGroundReactionForce.add(comPositionError);
       desiredGroundReactionForce.add(comVelocityError);
       desiredGroundReactionForce.changeFrame(controlFrame);
    }
-   
+
    public void setGroundReactionForceProfile(ForceTrajectory forceTrajectory)
    {
       this.groundReactionForceProfile.set(forceTrajectory);
@@ -216,7 +234,7 @@ public class CentroidalMomentumManager implements JumpControlManagerInterface
    {
       return null;
    }
-   
+
    @Override
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {

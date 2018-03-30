@@ -153,4 +153,9 @@ public class FeetJumpManager implements JumpControlManagerInterface
    {
       return footControlModules.get(robotSide).getFootPosition(axis);
    }
+
+   public double getHeightOfLowestPointInFoot(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getHeightOfLowestPointInFoot();
+   }
 }
