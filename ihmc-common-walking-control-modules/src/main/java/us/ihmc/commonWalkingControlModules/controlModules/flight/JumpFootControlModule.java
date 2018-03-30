@@ -16,7 +16,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -174,6 +176,12 @@ public class JumpFootControlModule
    {
       controlState.set(FootControlState.TASKSPACE);
       taskspaceControlState.holdCurrent();
+   }
+
+   public void setDesiredPose(FramePose3D desiredPose, double trajectoryTime)
+   {
+      controlState.set(FootControlState.TASKSPACE);
+      taskspaceControlState.goToPoseFromCurrent(desiredPose, trajectoryTime);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()

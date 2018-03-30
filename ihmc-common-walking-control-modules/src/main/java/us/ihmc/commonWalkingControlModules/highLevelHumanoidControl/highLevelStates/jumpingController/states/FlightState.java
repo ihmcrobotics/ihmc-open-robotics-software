@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotion
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.Axis;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -47,7 +46,6 @@ public class FlightState extends AbstractJumpState
       this.handManagers = handManagers;
       this.chestManager = bodyManagerMap.get(controllerToolbox.getFullRobotModel().getChest().getName());
       this.headManager = bodyManagerMap.get(controllerToolbox.getFullRobotModel().getHead().getName());
-
       isDone = new YoBoolean(getClass().getSimpleName() + "isDone", registry);
    }
 
@@ -94,7 +92,6 @@ public class FlightState extends AbstractJumpState
    @Override
    public void doStateSpecificTransitionIntoAction()
    {
-      controllerToolbox.clearContacts();
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyControlManager handManager = handManagers.get(robotSide);

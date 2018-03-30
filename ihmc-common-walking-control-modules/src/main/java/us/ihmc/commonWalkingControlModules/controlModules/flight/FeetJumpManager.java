@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -93,6 +94,11 @@ public class FeetJumpManager implements JumpControlManagerInterface
    public void holdInTaskspace(RobotSide robotSide)
    {
       footControlModules.get(robotSide).holdInTaskspace();
+   }
+
+   public void setDesiredPose(RobotSide robotSide, FramePose3D desiredPose, double trajectoryTime)
+   {
+      footControlModules.get(robotSide).setDesiredPose(desiredPose, trajectoryTime);
    }
 
    public void makeFeetFullyConstrained(RobotSide robotSide)
