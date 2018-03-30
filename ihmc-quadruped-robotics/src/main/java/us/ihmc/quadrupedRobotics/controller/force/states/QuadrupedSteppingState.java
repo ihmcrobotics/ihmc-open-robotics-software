@@ -25,6 +25,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPreplannedStepStream;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStreamMultiplexer;
@@ -47,10 +48,8 @@ public class QuadrupedSteppingState implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
-
-   private final QuadrupedPreplannedStepStream preplannedStepStream;
+   private final QuadrupedStepMessageHandler stepMessageHandler;
 
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedForceControllerToolbox controllerToolbox;
@@ -99,12 +98,8 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
 
       // Initialize input providers.
-      preplannedStepProvider = new QuadrupedPreplannedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), controllerToolbox.getReferenceFrames(), runtimeEnvironment.getGlobalDataProducer(), registry);
       soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
-
-      // Initialize input step streams.
-      preplannedStepStream = new QuadrupedPreplannedStepStream(preplannedStepProvider, controllerToolbox.getReferenceFrames(),
-                                                               runtimeEnvironment.getRobotTimestamp(), registry);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
 
@@ -131,7 +126,7 @@ public class QuadrupedSteppingState implements QuadrupedController
    {
       // Initialize controllers.
       final QuadrupedController standController = new QuadrupedStandController(controllerToolbox, controlManagerFactory, registry);
-      final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, preplannedStepStream, registry);
+      final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, stepMessageHandler, registry);
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(controllerToolbox, controlManagerFactory,
                                                                                                        soleWaypointInputProvider, registry);
 
@@ -183,7 +178,7 @@ public class QuadrupedSteppingState implements QuadrupedController
          trigger.fireEvent(reqEvent);
       }
 
-      if (preplannedStepProvider.isStepPlanAvailable())
+      if (stepMessageHandler.isStepPlanAvailable())
       {
          if (stateMachine.getCurrentStateKey() == QuadrupedSteppingStateEnum.STAND)
          {
