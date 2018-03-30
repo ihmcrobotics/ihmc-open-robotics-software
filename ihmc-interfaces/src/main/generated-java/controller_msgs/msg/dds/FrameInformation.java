@@ -24,9 +24,9 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
     */
    public long sequence_id_;
    /**
-    * The ID of the reference frame that a trajectory is executed in.
+    * The ID of the reference frame that a trajectory is executed in. Default value is WORLD_FRAME
     */
-   public long trajectory_reference_frame_id_;
+   public long trajectory_reference_frame_id_ = 83766130;
    /**
     * The ID of the reference frame that trajectory data in a packet is expressed in. The frame of
     * the trajectory data will be switched to the trajectory frame immediately when the message is
@@ -83,7 +83,7 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
    }
 
    /**
-    * The ID of the reference frame that a trajectory is executed in.
+    * The ID of the reference frame that a trajectory is executed in. Default value is WORLD_FRAME
     */
    public void setTrajectoryReferenceFrameId(long trajectory_reference_frame_id)
    {
@@ -91,7 +91,7 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
    }
 
    /**
-    * The ID of the reference frame that a trajectory is executed in.
+    * The ID of the reference frame that a trajectory is executed in. Default value is WORLD_FRAME
     */
    public long getTrajectoryReferenceFrameId()
    {

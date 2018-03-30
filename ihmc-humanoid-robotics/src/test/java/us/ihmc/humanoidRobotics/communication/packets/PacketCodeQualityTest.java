@@ -33,6 +33,7 @@ import org.reflections.Reflections;
 import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket;
+import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.PilotInterfaceActionPacket;
 import controller_msgs.msg.dds.SnapFootstepPacket;
 import controller_msgs.msg.dds.VideoPacket;
@@ -48,12 +49,14 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.idl.IDLSequence;
 
@@ -63,6 +66,16 @@ public class PacketCodeQualityTest
    private static final String PACKETS_LOCATION = "controller_msgs.msg.dds";
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = Integer.MAX_VALUE)
+   public void testFrameInformationDefaultValues()
+   {
+      FrameInformation frameInformation = new FrameInformation();
+      assertEquals(NameBasedHashCodeTools.DEFAULT_HASHCODE, frameInformation.getDataReferenceFrameId());
+      assertEquals(ReferenceFrame.getWorldFrame().getNameBasedHashCode(), frameInformation.getTrajectoryReferenceFrameId());
+      assertEquals(ReferenceFrame.getWorldFrame().getNameBasedHashCode(), FrameInformation.WORLD_FRAME);
+   }
 
    @SuppressWarnings("rawtypes")
    @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
