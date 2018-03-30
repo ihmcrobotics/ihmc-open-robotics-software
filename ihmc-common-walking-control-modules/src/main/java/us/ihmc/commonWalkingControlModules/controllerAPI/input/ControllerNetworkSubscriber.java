@@ -8,6 +8,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
+import controller_msgs.msg.dds.MessageCollection;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -17,8 +19,6 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
-import us.ihmc.humanoidRobotics.communication.util.MessageUnpackingTools;
 import us.ihmc.humanoidRobotics.communication.util.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.util.PeriodicThreadScheduler;
@@ -49,6 +49,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final AtomicReference<MessageFilter> messageFilter;
    /** Used to filter messages coming in and report an error. */
    private final AtomicReference<MessageValidator> messageValidator;
+   /** Used to synchronize the execution of a message collection. */
+   private MessageCollector messageCollector = MessageCollector.createDummyCollector();
 
    /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends Packet<?>>> listOfSupportedStatusMessages;
@@ -85,8 +87,6 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       createAllSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();
       createAllStatusMessageBuffers();
-
-      registerSubcriberWithMessageUnpacker(MessageOfMessages.class, 20, MessageUnpackingTools.createMessageOfMessagesUnpacker());
 
       if (scheduler != null)
          scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
@@ -127,6 +127,12 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
          }
       };
       packetCommunicator.attachListener(multipleMessageHolderClass, packetConsumer);
+   }
+
+   public void addMessageCollector(MessageIDExtractor messageIDExtractor)
+   {
+      messageCollector = new MessageCollector(messageIDExtractor, listOfSupportedControlMessages);
+      packetCommunicator.attachListener(MessageCollection.class, messageCollector::startCollecting);
    }
 
    public void addMessageFilter(MessageFilter newFilter)
@@ -176,6 +182,24 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    {
       if (DEBUG)
          PrintTools.debug(ControllerNetworkSubscriber.this, "Received message: " + message.getClass().getSimpleName() + ", " + message);
+
+      if (messageCollector.isCollecting() && messageCollector.interceptMessage(message))
+      {
+         if (DEBUG)
+            PrintTools.debug(ControllerNetworkSubscriber.this, "Collecting message: " + message.getClass().getSimpleName() + ", " + message);
+
+         if (!messageCollector.isCollecting())
+         {
+            List<Packet<?>> collectedMessages = messageCollector.getCollectedMessages();
+            for (int i = 0; i < collectedMessages.size(); i++)
+            {
+               receivedMessage(collectedMessages.get(i));
+            }
+            messageCollector.reset();
+         }
+
+         return;
+      }
 
       String errorMessage = messageValidator.get().validate(message);
 

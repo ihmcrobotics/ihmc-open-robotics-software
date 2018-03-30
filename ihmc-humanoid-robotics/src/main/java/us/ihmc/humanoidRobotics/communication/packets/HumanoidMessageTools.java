@@ -144,7 +144,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanReques
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -908,25 +907,6 @@ public class HumanoidMessageTools
                                                                              ReferenceFrame trajectoryReferenceFrame)
    {
       return createEuclideanTrajectoryMessage(trajectoryTime, desiredPosition, trajectoryReferenceFrame.getNameBasedHashCode());
-   }
-
-   public static MessageOfMessages createMessageOfMessages(List<Packet<?>> messages)
-   {
-      MessageOfMessages message = new MessageOfMessages();
-      message.packets.clear();
-      message.addPacket(messages.toArray(new Packet[0]));
-      return message;
-   }
-
-   public static MessageOfMessages createMessageOfMessages(Packet<?>... messages)
-   {
-      MessageOfMessages message = new MessageOfMessages();
-      message.packets.clear();
-      for (Packet<?> packet : messages)
-      {
-         message.packets.add(packet);
-      }
-      return message;
    }
 
    public static LocalizationPacket createLocalizationPacket(boolean reset, boolean toggle)
