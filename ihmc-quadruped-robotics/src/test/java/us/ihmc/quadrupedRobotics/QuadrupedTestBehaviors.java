@@ -3,12 +3,10 @@ package us.ihmc.quadrupedRobotics;
 import junit.framework.AssertionFailedError;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerState;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
-import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 
@@ -92,7 +90,7 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.5));
       conductor.simulate();
 
-      stepTeleopManager.stopWalking();
+      stepTeleopManager.requestStanding();
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
