@@ -260,7 +260,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       chestTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       messageCollectionMessenger.addMessage(chestTrajectoryMessage);
 
-      messageCollectionMessenger.sendMessageCollection(drcSimulationTestHelper::send);
+      messageCollectionMessenger.sendMessageCollectionSafe(drcSimulationTestHelper.getControllerCommunicator(), false);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
@@ -381,7 +381,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       chestTrajectoryMessage.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(ReferenceFrame.getWorldFrame()));
       messageCollectionMessenger.addMessage(chestTrajectoryMessage);
 
-      messageCollectionMessenger.sendMessageCollection(drcSimulationTestHelper::send);
+      messageCollectionMessenger.sendMessageCollectionSafe(drcSimulationTestHelper.getControllerCommunicator(), false);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);

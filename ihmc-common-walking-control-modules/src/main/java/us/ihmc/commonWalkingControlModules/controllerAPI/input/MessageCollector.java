@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import controller_msgs.msg.dds.MessageCollection;
+import controller_msgs.msg.dds.MessageCollectionNotification;
 import gnu.trove.set.hash.TLongHashSet;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
@@ -19,6 +20,7 @@ public class MessageCollector
    private final List<Packet<?>> interceptedMessagesView;
    private final MessagePool messagePool;
    private final MessageIDExtractor messageIDExtractor;
+   private final MessageCollectionNotification notification;
 
    public static MessageCollector createDummyCollector()
    {
@@ -32,6 +34,7 @@ public class MessageCollector
       expectedMessageIDs = null;
       interceptedMessages = null;
       interceptedMessagesView = Collections.emptyList();
+      notification = null;
    }
 
    public MessageCollector(MessageIDExtractor messageIDExtractor, List<Class<? extends Packet<?>>> supportedMessages)
@@ -41,6 +44,7 @@ public class MessageCollector
       expectedMessageIDs = new TLongHashSet();
       interceptedMessages = new ArrayList<>();
       interceptedMessagesView = Collections.unmodifiableList(interceptedMessages);
+      notification = new MessageCollectionNotification();
    }
 
    public void reset()
@@ -54,21 +58,23 @@ public class MessageCollector
       messagePool.reset();
    }
 
-   public void startCollecting(MessageCollection collection)
+   public MessageCollectionNotification startCollecting(MessageCollection collection)
    {
       if (messagePool == null)
       {
          PrintTools.error("This is a dummy collector, it cannot collect messages.");
-         return;
+         return null;
       }
       reset();
       isCollecting = true;
+      notification.setMessageCollectionSequenceId(collection.getSequenceId());
 
       IDLSequence.Long sequences = collection.getSequences();
       for (int i = 0; i < sequences.size(); i++)
       {
          expectedMessageIDs.add(sequences.get(i));
       }
+      return notification;
    }
 
    @SuppressWarnings({"unchecked", "rawtypes"})
@@ -118,6 +124,7 @@ public class MessageCollector
    public static interface MessageIDExtractor
    {
       static final long NO_ID = 0;
+
       public long getMessageID(Packet<?> message);
    }
 }
