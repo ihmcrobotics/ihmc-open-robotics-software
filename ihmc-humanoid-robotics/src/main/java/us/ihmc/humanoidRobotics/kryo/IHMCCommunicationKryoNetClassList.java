@@ -341,6 +341,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(DetectedFacesPacketPubSubType.class);
       registerPacketField(RobotConfigurationDataPubSubType.class);
       registerPacketField(MessageCollectionPubSubType.class);
+      registerPacketField(MessageCollectionNotificationPubSubType.class);
       registerPacketField(GoHomeMessagePubSubType.class);
       registerPacketField(KinematicsToolboxOutputStatusPubSubType.class);
       registerPacketField(AccelWithCovariancePubSubType.class);
@@ -517,11 +518,11 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(TransitionPubSubType.class);
       registerPacketField(InteractiveMarkerPosePubSubType.class);
       registerPacketField(DrillDetectionPacketPubSubType.class);
-      registerPacketField(MessageCollectionPubSubType.class);
 
       registerPacketClass(Packet.class);
 
       registerPacketClass(MessageCollection.class);
+      registerPacketClass(MessageCollectionNotification.class);
 
       registerPacketField(StringBuilder.class);
       registerPacketField(StringBuilder[].class);
