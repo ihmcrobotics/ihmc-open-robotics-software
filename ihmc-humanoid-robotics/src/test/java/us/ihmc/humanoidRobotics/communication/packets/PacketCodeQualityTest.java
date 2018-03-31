@@ -57,7 +57,6 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.idl.IDLSequence;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.HEALTH)
@@ -87,7 +86,6 @@ public class PacketCodeQualityTest
       Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
-      allPacketTypes.remove(MessageOfMessages.class);
       allPacketTypes.remove(LocalVideoPacket.class);
 
       Set<Class<? extends Packet>> packetTypesWithNullFields = new TreeSet<>((o1, o2) -> o1.getSimpleName().compareTo(o2.getSimpleName()));
@@ -156,7 +154,6 @@ public class PacketCodeQualityTest
       Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
-      allPacketTypes.remove(MessageOfMessages.class);
 
       Map<Class<? extends Packet>, List<Method>> packetTypesWithConvenienceMethods = new TreeMap<>((o1, o2) -> o1.getSimpleName()
                                                                                                                  .compareTo(o2.getSimpleName()));
@@ -272,7 +269,6 @@ public class PacketCodeQualityTest
       Reflections reflections = new Reflections(PACKETS_LOCATION);
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
-      allPacketTypes.remove(MessageOfMessages.class);
 
       Map<Class<? extends Packet>, List<Class>> packetTypesWithIterableOrArrayField = new HashMap<>();
 
@@ -448,7 +444,6 @@ public class PacketCodeQualityTest
       Set<Class<? extends Packet>> allPacketTypes = reflections.getSubTypesOf(Packet.class);
       allPacketTypes.removeAll(reaInternalComms);
       allPacketTypes.remove(LocalVideoPacket.class); // That guy is a packet but does not make it to the network. It will stay on Kryo.
-      allPacketTypes.remove(MessageOfMessages.class); // This guy has its own ticket to get converted.
 
       Map<Class<? extends Packet>, List<Class>> packetTypesWithIllegalFieldTypes = new HashMap<>();
 

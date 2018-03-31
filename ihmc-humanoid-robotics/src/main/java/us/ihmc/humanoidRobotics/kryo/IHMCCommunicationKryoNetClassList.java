@@ -184,7 +184,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.idl.generated.Chat.ChatMessagePubSubType;
@@ -342,6 +341,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(DetectedFacesPacketPubSubType.class);
       registerPacketField(RobotConfigurationDataPubSubType.class);
       registerPacketField(MessageCollectionPubSubType.class);
+      registerPacketField(MessageCollectionNotificationPubSubType.class);
       registerPacketField(GoHomeMessagePubSubType.class);
       registerPacketField(KinematicsToolboxOutputStatusPubSubType.class);
       registerPacketField(AccelWithCovariancePubSubType.class);
@@ -521,6 +521,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketClass(Packet.class);
 
+      registerPacketClass(MessageCollection.class);
+      registerPacketClass(MessageCollectionNotification.class);
+
       registerPacketField(StringBuilder.class);
       registerPacketField(StringBuilder[].class);
 
@@ -584,7 +587,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(PelvisTrajectoryMessage.class);
       registerPacketClass(PelvisOrientationTrajectoryMessage.class);
       registerPacketClass(FootTrajectoryMessage.class);
-      registerPacketClass(MessageOfMessages.class);
       registerPacketClass(WholeBodyTrajectoryMessage.class);
       registerPacketClass(PelvisHeightTrajectoryMessage.class);
       registerPacketClass(StopAllTrajectoryMessage.class);
