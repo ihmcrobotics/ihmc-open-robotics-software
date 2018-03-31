@@ -95,6 +95,7 @@ public class NetClassList
       kryo.addDefaultSerializer(IDLSequence.Float.class, IDLSequenceFloatSerializer.class);
       kryo.addDefaultSerializer(IDLSequence.Integer.class, IDLSequenceIntegerSerializer.class);
       kryo.addDefaultSerializer(IDLSequence.Byte.class, IDLSequenceByteSerializer.class);
+      kryo.addDefaultSerializer(IDLSequence.Long.class, IDLSequenceLongSerializer.class);
 
       for (Class<?> clazz : getPacketClassList())
       {

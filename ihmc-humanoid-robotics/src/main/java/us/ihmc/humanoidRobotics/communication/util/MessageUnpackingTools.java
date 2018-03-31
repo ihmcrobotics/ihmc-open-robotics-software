@@ -5,7 +5,6 @@ import java.util.List;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
 
 public final class MessageUnpackingTools
 {
@@ -38,23 +37,6 @@ public final class MessageUnpackingTools
                messagesToPack.add(multipleMessageHolder.getLeftFootTrajectoryMessage());
             if (multipleMessageHolder.getRightFootTrajectoryMessage() != null && !multipleMessageHolder.getRightFootTrajectoryMessage().getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
                messagesToPack.add(multipleMessageHolder.getRightFootTrajectoryMessage());
-         }
-      };
-   }
-
-   public static MessageUnpacker<MessageOfMessages> createMessageOfMessagesUnpacker()
-   {
-      return new MessageUnpacker<MessageOfMessages>()
-      {
-         @Override
-         public void unpackMessage(MessageOfMessages multipleMessageHolder, List<Packet<?>> messagesToPack)
-         {
-            List<Packet<?>> packets = multipleMessageHolder.getPackets();
-            for (int i = 0; i < packets.size(); i++)
-            {
-               Packet<?> unpackedMessage = packets.get(i);
-               messagesToPack.add(unpackedMessage);
-            }
          }
       };
    }
