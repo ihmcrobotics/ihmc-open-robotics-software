@@ -4,6 +4,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
@@ -14,7 +15,7 @@ public class InteriorAngleFrictionConeCalculator implements FrictionConeRotation
    @Override
    public double computeYawOffset(List<Point2D> contactPoints, int contactIdx, int vectors, int vectorIdx)
    {
-      supportPolygon.setAndUpdate(contactPoints, contactPoints.size());
+      supportPolygon.set(Vertex2DSupplier.asVertex2DSupplier(contactPoints));
       Point2D contactPoint = contactPoints.get(contactIdx);
       int vertexIndex = supportPolygon.getClosestVertexIndex(contactPoint);
 

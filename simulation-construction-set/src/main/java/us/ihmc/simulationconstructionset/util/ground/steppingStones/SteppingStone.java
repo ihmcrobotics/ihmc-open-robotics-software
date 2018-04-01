@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -38,7 +39,7 @@ public class SteppingStone
       this.name = name;
       this.baseZ = baseZ;
       this.height = height;
-      convexPolygon2d = new ConvexPolygon2D(points);
+      convexPolygon2d = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
       polygonToShrink = new ConvexPolygon2D(footPolygon);
       shrunkenPolygon = ConvexPolygonTools.shrinkInto(polygonToShrink, new Point2D(0.0, 0.0), convexPolygon2d);
    }
@@ -94,7 +95,7 @@ public class SteppingStone
            double radius, ConvexPolygon2D shrunkenPolygon)
    {
       ArrayList<Point2D> points = generateRandomCircularPoints(xCenter, yCenter, radius, 40);
-      ConvexPolygon2D polygon2d = new ConvexPolygon2D(points);
+      ConvexPolygon2D polygon2d = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
       SteppingStone steppingStone = new SteppingStone(name, baseZ, height, polygon2d, shrunkenPolygon);
 
       return steppingStone;

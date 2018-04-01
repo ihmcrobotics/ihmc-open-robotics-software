@@ -266,7 +266,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       command.getFeedForwardActionIncludingFrame(feedForwardAngularAction, feedForwardLinearAction);
 
       yoDesiredPose.setAndMatchFrame(desiredPosition, desiredOrientation);
-      yoDesiredPose.getOrientation().get(yoDesiredRotationVector);
+      yoDesiredPose.getOrientation().getRotationVector(yoDesiredRotationVector);
       yoDesiredVelocity.setAndMatchFrame(desiredLinearVelocity, desiredAngularVelocity);
 
       if (yoFeedForwardVelocity != null)
@@ -453,7 +453,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       currentPose.setToZero(controlFrame);
       currentPose.changeFrame(worldFrame);
       yoCurrentPose.set(currentPose);
-      yoCurrentPose.getOrientation().get(yoCurrentRotationVector);
+      yoCurrentPose.getOrientation().getRotationVector(yoCurrentRotationVector);
 
       desiredPose.setIncludingFrame(yoDesiredPose);
       desiredPose.changeFrame(controlFrame);
@@ -469,7 +469,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       angularFeedbackTermToPack.clipToMaxLength(orientationGains.getMaximumProportionalError());
 
       yoErrorVector.setAndMatchFrame(linearFeedbackTermToPack, angularFeedbackTermToPack);
-      yoErrorOrientation.set(yoErrorVector.getYoAngularPart());
+      yoErrorOrientation.setRotationVector(yoErrorVector.getYoAngularPart());
 
       if (linearGainsFrame != null)
          linearFeedbackTermToPack.changeFrame(linearGainsFrame);
@@ -617,7 +617,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoErrorOrientationCumulated.set(errorOrientationCumulated);
          errorOrientationCumulated.normalizeAndLimitToPi();
 
-         errorOrientationCumulated.get(angularFeedbackTermToPack);
+         errorOrientationCumulated.getRotationVector(angularFeedbackTermToPack);
          angularFeedbackTermToPack.scale(dt);
          selectionMatrix.applyAngularSelection(angularFeedbackTermToPack);
          angularFeedbackTermToPack.clipToMaxLength(maximumAngularIntegralError);

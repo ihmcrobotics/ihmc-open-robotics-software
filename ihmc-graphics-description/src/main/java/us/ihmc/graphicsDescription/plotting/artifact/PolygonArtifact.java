@@ -6,6 +6,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -150,7 +151,7 @@ public class PolygonArtifact extends Artifact
       else
       {
          graphics.setColor(color);
-         tempPolygon.setAndUpdate(pointsCopy, pointsCopy.size());
+         tempPolygon.set(Vertex2DSupplier.asVertex2DSupplier(pointsCopy));
 
          if (FILL_POLYGON)
          {

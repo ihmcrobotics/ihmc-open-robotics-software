@@ -141,7 +141,7 @@ public final class SpatialFeedbackControllerTest
 
          differenceOrientation.difference(desiredOrientation, currentOrientation);
          differenceOrientation.normalizeAndLimitToPi();
-         differenceOrientation.get(rotationError);
+         differenceOrientation.getRotationVector(rotationError);
 
          errorMagnitude = Math.sqrt(positionError.lengthSquared() + rotationError.lengthSquared());
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;
@@ -282,7 +282,7 @@ public final class SpatialFeedbackControllerTest
 
          differenceOrientation.difference(desiredOrientation, currentOrientation);
          differenceOrientation.normalizeAndLimitToPi();
-         differenceOrientation.get(rotationError);
+         differenceOrientation.getRotationVector(rotationError);
 
          errorMagnitude = Math.sqrt(positionError.lengthSquared() + rotationError.lengthSquared());
          boolean isErrorReducing = errorMagnitude < previousErrorMagnitude;

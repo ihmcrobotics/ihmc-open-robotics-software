@@ -2,19 +2,23 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.Line2DBasics;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools.Bound;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -263,13 +267,13 @@ public class ConvexPolygonTools
       }
 
       // Find left most point on polygon1
-      int currentPPolygonPointIndex = polygonP.getMinXIndex();
-      int initialPolygonPIndex = polygonP.getMinXIndex();
+      int currentPPolygonPointIndex = EuclidGeometryPolygonTools.findVertexIndex(polygonP, true, Bound.MIN, Bound.MIN);
+      int initialPolygonPIndex = currentPPolygonPointIndex;
       Point2DReadOnly currentPolygonPPoint = polygonP.getVertex(currentPPolygonPointIndex);
 
       // Find left most point on polygon2
-      int currentQPolygonPointIndex = polygonQ.getMinXIndex();
-      int initialPolygonQIndex = polygonQ.getMinXIndex();
+      int currentQPolygonPointIndex = EuclidGeometryPolygonTools.findVertexIndex(polygonQ, true, Bound.MIN, Bound.MIN);
+      int initialPolygonQIndex = currentQPolygonPointIndex;
       Point2DReadOnly currentPolygonQPoint = polygonQ.getVertex(currentQPolygonPointIndex);
 
       // At each of those two vertices, place a vertical line passing through it. Associate that line to the polygon to which the vertex belongs.
@@ -429,12 +433,12 @@ public class ConvexPolygonTools
          // check to see if a polygons is contained in another.
          if (polygonP.isPointInside(polygonQ.getVertex(0)))
          {
-            intersectingPolygonToPack.setAndUpdate(polygonQ);
+            intersectingPolygonToPack.set(polygonQ);
          }
 
          if (polygonQ.isPointInside(polygonP.getVertex(0)))
          {
-            intersectingPolygonToPack.setAndUpdate(polygonP);
+            intersectingPolygonToPack.set(polygonP);
          }
       }
       else
@@ -456,7 +460,7 @@ public class ConvexPolygonTools
    {
       if (otherPolygon.pointIsOnPerimeter(polygonWithExactlyOneVertex.getVertex(0)))
       {
-         intersectingPolygon.setAndUpdate(polygonWithExactlyOneVertex);
+         intersectingPolygon.set(polygonWithExactlyOneVertex);
          return false;
       }
       else
@@ -472,7 +476,7 @@ public class ConvexPolygonTools
    {
       LineSegment2D polygonWithTwoVerticesAsLineSegment = new LineSegment2D(polygonWithExactlyTwoVertices.getVertex(0),
                                                                             polygonWithExactlyTwoVertices.getVertex(1));
-      Point2D[] intersection = polygonWithAtLeastTwoVertices.intersectionWith(polygonWithTwoVerticesAsLineSegment);
+      Point2DBasics[] intersection = polygonWithAtLeastTwoVertices.intersectionWith(polygonWithTwoVerticesAsLineSegment);
 
       if (intersection == null)
       {
@@ -481,7 +485,7 @@ public class ConvexPolygonTools
       }
       else
       {
-         intersectingPolygon.setAndUpdate(intersection, intersection.length);
+         intersectingPolygon.set(Vertex2DSupplier.asVertex2DSupplier(intersection));
          return true;
       }
    }
@@ -692,12 +696,12 @@ public class ConvexPolygonTools
 
       Point2D referencePointInPCopy = new Point2D(referencePointInP);
 
-      int leftMostIndexOnPolygonQ = polygonQ.getMinXIndex();
+      int leftMostIndexOnPolygonQ = EuclidGeometryPolygonTools.findVertexIndex(polygonQ, true, Bound.MIN, Bound.MIN);
       Point2DReadOnly vertexQ = polygonQ.getVertex(leftMostIndexOnPolygonQ);
       int nextVertexQIndex = polygonQ.getNextVertexIndex(leftMostIndexOnPolygonQ);
       Point2DReadOnly nextVertexQ = polygonQ.getVertex(nextVertexQIndex);
 
-      int leftMostIndexOnPolygonP = polygonP.getMinXIndex();
+      int leftMostIndexOnPolygonP = EuclidGeometryPolygonTools.findVertexIndex(polygonP, true, Bound.MIN, Bound.MIN);
       Point2DReadOnly vertexP = polygonP.getVertex(leftMostIndexOnPolygonP);
       int nextVertexPIndex = polygonP.getNextVertexIndex(leftMostIndexOnPolygonP);
       Point2DReadOnly nextVertexP = polygonP.getVertex(nextVertexPIndex);
@@ -837,7 +841,7 @@ public class ConvexPolygonTools
    // TODO Needs to be extracted to Euclid and improved such that it is garbage free.
    public static int cutPolygonWithLine(Line2DBasics cuttingLine, ConvexPolygon2D polygonToCut, RobotSide sideOfLineToCut)
    {
-      Point2D[] intersectionPoints = polygonToCut.intersectionWith(cuttingLine);
+      Point2DBasics[] intersectionPoints = polygonToCut.intersectionWith(cuttingLine);
 
       if (intersectionPoints == null || intersectionPoints.length == 1)
       {
@@ -861,7 +865,7 @@ public class ConvexPolygonTools
                index++;
             }
          }
-         polygonToCut.addVertices(intersectionPoints, intersectionPoints.length);
+         polygonToCut.addVertices(Vertex2DSupplier.asVertex2DSupplier(intersectionPoints));
          polygonToCut.update();
          return numberOfVerticesRemoved;
       }

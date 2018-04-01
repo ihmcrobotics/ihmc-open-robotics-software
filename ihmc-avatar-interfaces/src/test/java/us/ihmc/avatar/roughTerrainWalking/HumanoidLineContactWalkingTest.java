@@ -24,12 +24,14 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -249,7 +251,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       soleVertices.add(new Point2D(footForwardOffset, -toeWidth / 2.0));
       soleVertices.add(new Point2D(-footBackwardOffset, -footWidth / 2.0));
       soleVertices.add(new Point2D(-footBackwardOffset, footWidth / 2.0));
-      ConvexPolygon2D solePolygon = new ConvexPolygon2D(soleVertices);
+      ConvexPolygon2D solePolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(soleVertices));
       solePolygon.update();
 
       // shrink polygon and project line origin inside
@@ -269,15 +271,15 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       line.applyTransform(transform);
 
       line.shiftToLeft(lineWidth/2.0);
-      Point2D[] leftIntersections = solePolygon.intersectionWith(line);
+      Point2DBasics[] leftIntersections = solePolygon.intersectionWith(line);
       line.shiftToRight(lineWidth);
-      Point2D[] rightIntersections = solePolygon.intersectionWith(line);
+      Point2DBasics[] rightIntersections = solePolygon.intersectionWith(line);
 
       ArrayList<Point2D> ret = new ArrayList<Point2D>();
-      ret.add(leftIntersections[0]);
-      ret.add(leftIntersections[1]);
-      ret.add(rightIntersections[0]);
-      ret.add(rightIntersections[1]);
+      ret.add(new Point2D(leftIntersections[0]));
+      ret.add(new Point2D(leftIntersections[1]));
+      ret.add(new Point2D(rightIntersections[0]));
+      ret.add(new Point2D(rightIntersections[1]));
       return ret;
    }
 

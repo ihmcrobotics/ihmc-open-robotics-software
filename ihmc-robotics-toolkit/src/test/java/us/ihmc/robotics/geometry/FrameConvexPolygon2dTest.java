@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class FrameConvexPolygon2dTest
@@ -36,7 +37,7 @@ public class FrameConvexPolygon2dTest
                {0.12219695435431865, -0.041946248489056696}, {0.12163937361471142, -0.1435447184761526}, {-0.05107802536335154, -0.14259683121882027}
             };
 
-      ConvexPolygon2D polygon = new ConvexPolygon2D(polygonPoints);
+      ConvexPolygon2D polygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(polygonPoints));
       return polygon;
    }
 
