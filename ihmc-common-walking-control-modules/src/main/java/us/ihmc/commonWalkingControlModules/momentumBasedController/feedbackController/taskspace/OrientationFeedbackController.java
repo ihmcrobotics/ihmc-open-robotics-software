@@ -1,12 +1,24 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_ACCELERATION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_TORQUE;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ANGULAR_VELOCITY;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.ROTATION_VECTOR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ACHIEVED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.CURRENT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.DESIRED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_CUMULATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.ERROR_INTEGRATED;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDBACK;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.FEEDFORWARD;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -16,13 +28,15 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
 
 public class OrientationFeedbackController implements FeedbackControllerInterface
 {
@@ -218,7 +232,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       command.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration);
 
       yoDesiredOrientation.setAndMatchFrame(desiredOrientation);
-      desiredOrientation.get(yoDesiredRotationVector);
+      desiredOrientation.getRotationVector(yoDesiredRotationVector);
 
       yoDesiredAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
 
@@ -359,17 +373,17 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       currentOrientation.setToZero(endEffectorFrame);
       currentOrientation.changeFrame(worldFrame);
       yoCurrentOrientation.set(currentOrientation);
-      yoCurrentOrientation.get(yoCurrentRotationVector);
+      yoCurrentOrientation.getRotationVector(yoCurrentRotationVector);
 
       desiredOrientation.setIncludingFrame(yoDesiredOrientation);
       desiredOrientation.changeFrame(endEffectorFrame);
 
       desiredOrientation.normalizeAndLimitToPi();
-      desiredOrientation.get(feedbackTermToPack);
+      desiredOrientation.getRotationVector(feedbackTermToPack);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
       yoErrorRotationVector.setAndMatchFrame(feedbackTermToPack);
-      yoErrorOrientation.set(yoErrorRotationVector);
+      yoErrorOrientation.setRotationVector(yoErrorRotationVector);
 
       if (angularGainsFrame != null)
          feedbackTermToPack.changeFrame(angularGainsFrame);
@@ -453,7 +467,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       yoErrorOrientationCumulated.set(errorOrientationCumulated);
       errorOrientationCumulated.normalizeAndLimitToPi();
 
-      errorOrientationCumulated.get(feedbackTermToPack);
+      errorOrientationCumulated.getRotationVector(feedbackTermToPack);
       feedbackTermToPack.scale(dt);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(maximumIntegralError);

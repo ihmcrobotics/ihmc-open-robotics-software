@@ -362,7 +362,7 @@ public class SmartCMPProjectorTest
 
       Point2D expectedCMP = new Point2D();
       ConvexPolygon2D projectionArea = makeRandomPolygon(0.01);
-      projectionArea.getCentroid(expectedCMP);
+      expectedCMP.set(projectionArea.getCentroid());
 
       doTest(projectionArea, capturePoint, desiredCMP, expectedCMP, null, null);
    }

@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
@@ -653,7 +654,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
 
    public List<Point2D> reduceListOfPointsByArea(List<? extends Point2DReadOnly> listOfPoints, int maxNumPoints)
    {
-      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(listOfPoints);
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
       supportPolygon.update();
       Point2DReadOnly polygonCentroid = supportPolygon.getCentroid();
 
@@ -696,7 +697,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
    {
 
       ConvexPolygon2D basePolygon = parameters.getCollisionPolygon();
-      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(listOfPoints);
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(listOfPoints));
       supportPolygon.update();
 
       ArrayList<Point2D> finalListOfSupportPoints = new ArrayList<Point2D>();

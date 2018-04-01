@@ -3,11 +3,12 @@ package us.ihmc.simulationconstructionset.util.ground;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -45,7 +46,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       Point3D centroid = new Point3D(convexPolygon.getCentroid().getX(), convexPolygon.getCentroid().getY(), centroidHeight);
       this.topPlane = new Plane3D(centroid, normal);
 
-      BoundingBox2D polygonBoundingBox = convexPolygon.getBoundingBoxCopy();
+      BoundingBox2DReadOnly polygonBoundingBox = convexPolygon.getBoundingBox();
       double highest = Double.NEGATIVE_INFINITY;
       double lowest = 0.0;
 
@@ -232,7 +233,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       Point2D pointToCheck = new Point2D(u, v);
 
       // Check if it is inside
-      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(faceVertices2d);
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(faceVertices2d));
 
       return convexPolygon.isPointInside(pointToCheck);
    }

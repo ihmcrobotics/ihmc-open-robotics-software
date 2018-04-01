@@ -281,7 +281,7 @@ public class PlanarRegionConstraintProvider
             activePlanarRegion = planarRegion;
 
             icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon);
-            activePlanarRegionConvexHullInControlFrame.setAndUpdate(tempProjectedPolygon);
+            activePlanarRegionConvexHullInControlFrame.set(tempProjectedPolygon);
             break;
          }
 
@@ -341,7 +341,7 @@ public class PlanarRegionConstraintProvider
             activePlanarRegion = planarRegion;
 
             icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, tempProjectedPolygon);
-            activePlanarRegionConvexHullInControlFrame.setAndUpdate(tempProjectedPolygon);
+            activePlanarRegionConvexHullInControlFrame.set(tempProjectedPolygon);
          }
       }
 

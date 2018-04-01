@@ -15,6 +15,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -85,7 +86,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
       {
-         footPolygons.set(side, new ConvexPolygon2D(contactPointParameters.getFootContactPoints().get(side)));
+         footPolygons.set(side, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPointParameters.getFootContactPoints().get(side))));
       }
 
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);

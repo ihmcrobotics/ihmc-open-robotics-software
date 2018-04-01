@@ -508,13 +508,13 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    private QuaternionReadOnly exp(double alpha, Vector3DReadOnly rotation)
    {
       tempLogExpVector3D.setAndScale(alpha, rotation);
-      tempLogExpQuaternion.set(tempLogExpVector3D);
+      tempLogExpQuaternion.setRotationVector(tempLogExpVector3D);
       return tempLogExpQuaternion;
    }
 
    private Vector3DReadOnly log(QuaternionReadOnly q)
    {
-      q.get(tempLogExpVector3D);
+      q.getRotationVector(tempLogExpVector3D);
       return tempLogExpVector3D;
    }
 

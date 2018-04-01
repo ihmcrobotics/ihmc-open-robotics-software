@@ -80,7 +80,7 @@ public class PolygonWiggler
       RigidBodyTransform wiggleTransform = findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters);
       if (wiggleTransform == null)
          return null;
-      wiggledPolygon.applyTransformAndProjectToXYPlane(wiggleTransform);
+      wiggledPolygon.applyTransform(wiggleTransform, false);
       return wiggledPolygon;
    }
 

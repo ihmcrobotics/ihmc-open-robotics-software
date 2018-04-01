@@ -54,7 +54,7 @@ public class SnapAndWiggleSingleStep
 
       RigidBodyTransform soleToRegion = soleFrameBeforeWiggle.getTransformToDesiredFrame(regionFrame);
       ConvexPolygon2D footPolygonInRegion = new ConvexPolygon2D(footStepPolygon);
-      footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
+      footPolygonInRegion.applyTransform(soleToRegion, false);
 
       // TODO: make the delta inside value part of the optimization.
       wiggleParameters.deltaInside = 0.0;
@@ -79,11 +79,11 @@ public class SnapAndWiggleSingleStep
       {
          PoseReferenceFrame soleFrameAfterWiggle = new PoseReferenceFrame("SoleFrameAfterWiggle", solePose);
          soleToRegion = soleFrameAfterWiggle.getTransformToDesiredFrame(regionFrame);
-         footPolygonInRegion.setAndUpdate(footStepPolygon);
-         footPolygonInRegion.applyTransformAndProjectToXYPlane(soleToRegion);
+         footPolygonInRegion.set(footStepPolygon);
+         footPolygonInRegion.applyTransform(soleToRegion, false);
          ConvexPolygon2D foothold = ConvexPolygonTools.computeIntersectionOfPolygons(regionToMoveTo.getConvexHull(), footPolygonInRegion);
          soleToRegion.invert();
-         foothold.applyTransformAndProjectToXYPlane(soleToRegion);
+         foothold.applyTransform(soleToRegion, false);
          return foothold;
       }
       return null;
