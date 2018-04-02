@@ -25,17 +25,18 @@ import java.util.concurrent.atomic.AtomicReference;
 public class QuadrupedStepMessageHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final int STEP_QUEUE_SIZE = 10;
+   private static final int STEP_QUEUE_SIZE = 40;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final AtomicReference<QuadrupedTimedStepPacket> inputTimedStepPacket = new AtomicReference<>();
    private final QuadrupedReferenceFrames referenceFrames;
    private final YoFrameOrientation bodyOrientation;
-   private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
    private final ArrayList<YoQuadrupedTimedStep> activeSteps = new ArrayList<>();
    private final YoDouble robotTimestamp;
    private final DoubleParameter haltTransitionDurationParameter = new DoubleParameter("haltTransitionDuration", registry, 0.0);
+   private final YoPreallocatedList<YoQuadrupedTimedStep> receivedStepSequence;
+   private final YoPreallocatedList<YoQuadrupedTimedStep> adjustedStepSequence;
 
    private final YoDouble haltTime = new YoDouble("haltTime", registry);
    private final YoBoolean haltFlag = new YoBoolean("haltFlag", registry);
@@ -45,7 +46,8 @@ public class QuadrupedStepMessageHandler
    public QuadrupedStepMessageHandler(YoDouble robotTimestamp, QuadrupedReferenceFrames referenceFrames, GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
       this.robotTimestamp = robotTimestamp;
-      this.stepSequence = new YoPreallocatedList<>("stepSequence", registry, STEP_QUEUE_SIZE, YoQuadrupedTimedStep::new);
+      this.receivedStepSequence = new YoPreallocatedList<>("receivedStepSequence", registry, STEP_QUEUE_SIZE, YoQuadrupedTimedStep::new);
+      this.adjustedStepSequence = new YoPreallocatedList<>("adjustedStepSequence", registry, STEP_QUEUE_SIZE, YoQuadrupedTimedStep::new);
       this.referenceFrames = referenceFrames;
       this.bodyOrientation = new YoFrameOrientation("bodyOrientation", ReferenceFrame.getWorldFrame(), registry);
 
@@ -80,11 +82,13 @@ public class QuadrupedStepMessageHandler
       if(isStepPlanAvailable())
       {
          updateStepSequence();
-         adjustStepQueue(stepAdjustment);
       }
 
       if(haltFlag.getBooleanValue())
          pruneHaltedSteps();
+
+      updateAdjustedStepQueue(stepAdjustment);
+      updateActiveSteps();
    }
 
    private void updateStepSequence()
@@ -95,31 +99,30 @@ public class QuadrupedStepMessageHandler
       boolean isExpressedInAbsoluteTime = stepPacket.isExpressedInAbsoluteTime;
       ArrayList<QuadrupedTimedStep> steps = stepPacket.getSteps();
 
-      stepSequence.clear();
+      receivedStepSequence.clear();
       for (int i = 0; i < Math.min(steps.size(), STEP_QUEUE_SIZE) ; i++)
       {
          double timeShift = isExpressedInAbsoluteTime ? 0.0 : currentTime;
          double touchdownTime = steps.get(i).getTimeInterval().getEndTime();
          if (touchdownTime + timeShift >= currentTime)
          {
-            stepSequence.add();
-            YoQuadrupedTimedStep step = stepSequence.get(stepSequence.size() - 1);
+            receivedStepSequence.add();
+            YoQuadrupedTimedStep step = receivedStepSequence.get(receivedStepSequence.size() - 1);
             step.set(steps.get(i));
             step.getTimeInterval().shiftInterval(timeShift);
          }
       }
 
-      TimeIntervalTools.sortByEndTime(stepSequence);
+      TimeIntervalTools.sortByEndTime(receivedStepSequence);
       bodyOrientation.setFromReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
-      updateActiveSteps();
    }
 
    private void pruneHaltedSteps()
    {
-      for (int i = stepSequence.size() - 1; i >=0; i--)
+      for (int i = receivedStepSequence.size() - 1; i >=0; i--)
       {
-         if(stepSequence.get(i).getTimeInterval().getStartTime() > haltTime.getDoubleValue())
-            stepSequence.remove(i);
+         if(receivedStepSequence.get(i).getTimeInterval().getStartTime() > haltTime.getDoubleValue())
+            receivedStepSequence.remove(i);
       }
    }
 
@@ -128,21 +131,26 @@ public class QuadrupedStepMessageHandler
       haltFlag.set(false);
    }
 
-   private void adjustStepQueue(FrameVector3DReadOnly stepAdjustment)
+   private void updateAdjustedStepQueue(FrameVector3DReadOnly stepAdjustment)
    {
-      for (int i = 0; i < stepSequence.size(); i++)
+      adjustedStepSequence.clear();
+      for (int i = 0; i < receivedStepSequence.size(); i++)
       {
-         YoQuadrupedTimedStep step = stepSequence.get(i);
-         step.getGoalPosition(tempPoint);
+         adjustedStepSequence.add();
+         YoQuadrupedTimedStep receivedStep = receivedStepSequence.get(i);
+         YoQuadrupedTimedStep adjustedStep = adjustedStepSequence.get(i);
+         adjustedStep.set(receivedStep);
+
+         adjustedStep.getGoalPosition(tempPoint);
          tempPoint.changeFrame(worldFrame);
          tempPoint.add(stepAdjustment);
-         step.setGoalPosition(tempPoint);
+         adjustedStep.setGoalPosition(tempPoint);
       }
    }
 
    public boolean isDoneWithStepSequence()
    {
-      return stepSequence.size() == 0 || stepSequence.get(stepSequence.size() - 1).getTimeInterval().getEndTime() < robotTimestamp.getDoubleValue();
+      return receivedStepSequence.size() == 0 || receivedStepSequence.get(receivedStepSequence.size() - 1).getTimeInterval().getEndTime() < robotTimestamp.getDoubleValue();
    }
 
    public void halt()
@@ -156,7 +164,7 @@ public class QuadrupedStepMessageHandler
 
    public YoPreallocatedList<YoQuadrupedTimedStep> getStepSequence()
    {
-      return stepSequence;
+      return adjustedStepSequence;
    }
 
    public ArrayList<YoQuadrupedTimedStep> getActiveSteps()
@@ -168,15 +176,15 @@ public class QuadrupedStepMessageHandler
    {
       activeSteps.clear();
 
-      for (int i = 0; i < stepSequence.size(); i++)
+      for (int i = 0; i < adjustedStepSequence.size(); i++)
       {
          double currentTime = robotTimestamp.getDoubleValue();
-         double startTime = stepSequence.get(i).getTimeInterval().getStartTime();
-         double endTime = stepSequence.get(i).getTimeInterval().getEndTime();
+         double startTime = adjustedStepSequence.get(i).getTimeInterval().getStartTime();
+         double endTime = adjustedStepSequence.get(i).getTimeInterval().getEndTime();
 
          if (MathTools.intervalContains(currentTime, startTime, endTime))
          {
-            activeSteps.add(stepSequence.get(i));
+            activeSteps.add(adjustedStepSequence.get(i));
          }
       }
    }
@@ -185,6 +193,7 @@ public class QuadrupedStepMessageHandler
    {
       haltFlag.set(false);
       inputTimedStepPacket.set(null);
-      stepSequence.clear();
+      receivedStepSequence.clear();
+      adjustedStepSequence.clear();
    }
 }
