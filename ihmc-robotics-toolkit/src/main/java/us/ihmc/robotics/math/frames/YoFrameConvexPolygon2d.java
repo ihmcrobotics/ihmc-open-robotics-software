@@ -169,6 +169,7 @@ public class YoFrameConvexPolygon2d implements FixedFrameConvexPolygon2DBasics
       numberOfVertices.set(0);
       area = Double.NaN;
       centroid.setToNaN();
+      boundingBox.setToNaN();
       isUpToDate = false;
    }
 
