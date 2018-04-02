@@ -33,7 +33,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 public class CommandInputManager
 {
    private final String printStatementPrefix;
-   private final int buffersCapacity = 16;
+   private final int buffersCapacity;
 
    /**
     * List of all the buffers that allows the user to easily flush all new commands using {@link #flushAllCommands()}.
@@ -77,14 +77,28 @@ public class CommandInputManager
 
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
-    * 
-    * @param name name used when printing statements. It should preferably be unique to distinguish the 
+    *
+    * @param name name used when printing statements. It should preferably be unique to distinguish the
     * different modules using this class.
     * @param commandsToRegister list of the commands that this API should support.
     */
    public CommandInputManager(String name, List<Class<? extends Command<?, ?>>> commandsToRegister)
    {
+      this(name, commandsToRegister, 16);
+   }
+
+   /**
+    * Only constructor to build a new API. No new constructors will be tolerated.
+    * 
+    * @param name name used when printing statements. It should preferably be unique to distinguish the 
+    * different modules using this class.
+    * @param commandsToRegister list of the commands that this API should support.
+    * @param buffersCapacity the capacity of the internal buffers, should be a power of 2.
+    */
+   public CommandInputManager(String name, List<Class<? extends Command<?, ?>>> commandsToRegister, int buffersCapacity)
+   {
       this.printStatementPrefix = name == null ? "" : name + ": ";
+      this.buffersCapacity = buffersCapacity;
       registerNewCommands(commandsToRegister);
    }
 
