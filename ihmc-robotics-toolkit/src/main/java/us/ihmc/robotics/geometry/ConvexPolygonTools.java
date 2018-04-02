@@ -809,7 +809,7 @@ public class ConvexPolygonTools
       return ret;
    }
 
-   public static int cutPolygonWithLine(FrameLine2DReadOnly cuttingLine, FrameConvexPolygon2DBasics polygonToCut, FrameConvexPolygonWithLineIntersector2d lineIntersector2d,
+   public static int cutPolygonWithLine(FrameLine2DReadOnly cuttingLine, FixedFrameConvexPolygon2DBasics polygonToCut, FrameConvexPolygonWithLineIntersector2d lineIntersector2d,
                                         RobotSide sideOfLineToCut)
    {
       lineIntersector2d.intersectWithLine(polygonToCut, cuttingLine);

@@ -1355,7 +1355,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
             }
 
             footSupport.update();
-            supportPolygons.get(robotSide).setFrameConvexPolygon2d(footSupport);
+            supportPolygons.get(robotSide).set(footSupport);
          }
       }
 

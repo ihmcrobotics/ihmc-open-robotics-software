@@ -532,7 +532,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FramePoint2D center = new FramePoint2D(midFeetZUpFrame);
       FrameVector2D shiftScaleVector = new FrameVector2D(midFeetZUpFrame, 0.1, 0.7);
 
-      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(yoSupportPolygon.getFrameConvexPolygon2d());
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(yoSupportPolygon);
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
 
       FramePoint2D desiredPelvisOffset = new FramePoint2D(midFeetZUpFrame);
@@ -570,7 +570,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       sequencePelvisRotations(0.55);
 
       //get the 4 corners of the double support polygon (the feet are supposedly aligned)
-      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(yoSupportPolygon.getFrameConvexPolygon2d());
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(yoSupportPolygon);
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
       int numberOfVertices = supportPolygon.getNumberOfVertices();
       ArrayList<FramePoint2D> supportCornerPoints = new ArrayList<>();
@@ -999,7 +999,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       FramePoint2D center = new FramePoint2D(midFeetZUpFrame);
 
-      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(yoSupportPolygon.getFrameConvexPolygon2d());
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(yoSupportPolygon);
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
 
       FramePoint2D desiredPelvisOffset = new FramePoint2D(midFeetZUpFrame);

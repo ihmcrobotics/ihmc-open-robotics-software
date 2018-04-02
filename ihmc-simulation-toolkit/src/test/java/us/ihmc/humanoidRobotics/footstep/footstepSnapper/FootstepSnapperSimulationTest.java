@@ -627,7 +627,7 @@ public class FootstepSnapperSimulationTest
             }));
 
             YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("plane", "", worldFrame, 4, registry);
-            yoFrameConvexPolygon2d.setConvexPolygon2d(polygon2d);
+            yoFrameConvexPolygon2d.set(polygon2d);
 
 //          YoGraphicPolygon polygonViz = new YoGraphicPolygon("plane", yoFrameConvexPolygon2d, planePose, 1.0, YoAppearance.Gold());
 //          yoGraphicsListRegistry.registerYoGraphic("Plane", polygonViz);

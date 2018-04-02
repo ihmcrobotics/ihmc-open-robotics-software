@@ -113,13 +113,13 @@ public class SmartCMPProjector extends CMPProjector
       projectedCMP.changeFrameAndProjectToXYPlane(worldFrame);
       if (cmpWasProjected.getBooleanValue())
       {
-         yoProjectionArea.setFrameConvexPolygon2d(this.projectionArea);
+         yoProjectionArea.set(this.projectionArea);
          yoDesiredCMP.set(this.desiredCMP);
          yoProjectedCMP.set(projectedCMP);
       }
       else
       {
-         yoProjectionArea.setFrameConvexPolygon2d(null);
+         yoProjectionArea.clear();
          yoDesiredCMP.setToNaN();
          yoProjectedCMP.setToNaN();
       }

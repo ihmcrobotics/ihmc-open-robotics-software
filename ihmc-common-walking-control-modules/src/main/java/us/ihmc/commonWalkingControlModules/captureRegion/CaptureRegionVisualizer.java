@@ -43,7 +43,7 @@ public class CaptureRegionVisualizer
 
    public void hide()
    {
-      yoCaptureRegionPolygon.hide();
+      yoCaptureRegionPolygon.clear();
    }
 
    public void update()
@@ -55,7 +55,7 @@ public class CaptureRegionVisualizer
       {
          try
          {
-            yoCaptureRegionPolygon.setFrameConvexPolygon2d(captureRegionPolygon);
+            yoCaptureRegionPolygon.set(captureRegionPolygon);
          }
          catch (Exception e)
          {

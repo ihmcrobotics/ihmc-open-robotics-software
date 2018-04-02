@@ -171,16 +171,16 @@ public class BipedSupportPolygons
 
    private void visualize()
    {
-      supportPolygonViz.setFrameConvexPolygon2d(supportPolygonInWorld);
+      supportPolygonViz.set(supportPolygonInWorld);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          YoFrameConvexPolygon2d footPolygonViz = footPolygonsViz.get(robotSide);
          FrameConvexPolygon2D footPolygon = footPolygonsInWorldFrame.get(robotSide);
          if (footPolygon.isEmpty())
-            footPolygonViz.hide();
+            footPolygonViz.clear();
          else
-            footPolygonViz.setFrameConvexPolygon2d(footPolygon);
+            footPolygonViz.set(footPolygon);
       }
    }
 

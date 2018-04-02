@@ -1201,7 +1201,7 @@ public class QuadrupedSupportPolygonTest
       for (int i = 0; i < 4; i++)
       {
          FramePoint3D polyPoint = poly.getFootstep(RobotQuadrant.getQuadrantNameFromOrdinal(i));
-         FramePoint2DReadOnly convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
+         FramePoint2DReadOnly convexPoint = yoFrameConvexPolygon2d.getVertex(i);
          polyPoint.checkReferenceFrameMatch(convexPoint);
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, MathTools.epsilonEquals(polyPoint.getX(), convexPoint.getX(), 1e-7));
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, MathTools.epsilonEquals(polyPoint.getY(), convexPoint.getY(), 1e-7));
@@ -1224,7 +1224,7 @@ public class QuadrupedSupportPolygonTest
 
       for (int i = 0; i < 3; i++)
       {
-         FramePoint2DReadOnly convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
+         FramePoint2DReadOnly convexPoint = yoFrameConvexPolygon2d.getVertex(i);
          FramePoint2D polyPoint = new FramePoint2D(expected.getVertex(i));
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, polyPoint.epsilonEquals(convexPoint, 1e-7));
       }

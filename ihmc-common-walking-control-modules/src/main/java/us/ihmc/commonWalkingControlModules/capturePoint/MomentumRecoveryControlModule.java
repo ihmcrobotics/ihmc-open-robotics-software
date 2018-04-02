@@ -190,7 +190,7 @@ public class MomentumRecoveryControlModule
       }
 
       if (yoSafeArea != null)
-         yoSafeArea.setFrameConvexPolygon2d(safeArea);
+         yoSafeArea.set(safeArea);
       if (yoCapturePoint != null)
          yoCapturePoint.set(capturePoint2d);
    }
@@ -350,9 +350,9 @@ public class MomentumRecoveryControlModule
       }
 
       if (yoSafeCMPArea != null)
-         yoSafeCMPArea.setFrameConvexPolygon2d(safeArea);
+         yoSafeCMPArea.set(safeArea);
       if (yoProjectionArea != null)
-         yoProjectionArea.setFrameConvexPolygon2d(areaToProjectInto);
+         yoProjectionArea.set(areaToProjectInto);
    }
 
    public boolean getUseHighMomentumWeight()

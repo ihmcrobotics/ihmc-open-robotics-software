@@ -355,7 +355,7 @@ public class LIPMDDPCalculatorVisualizer
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      convexPolygon2d.setFrameConvexPolygon2d(footstepPolygon);
+      convexPolygon2d.set(footstepPolygon);
 
       FramePose3D nextNextNextFootstepPose = new FramePose3D(footstep.getSoleReferenceFrame());
       framePose.setAndMatchFrame(nextNextNextFootstepPose);

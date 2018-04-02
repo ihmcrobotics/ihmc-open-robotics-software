@@ -71,7 +71,7 @@ public class FootstepVisualizer
 
       foothold.set(Vertex2DSupplier.asVertex2DSupplier(contactPointsToVisualize));
 
-      yoFoothold.setConvexPolygon2d(foothold);
+      yoFoothold.set(foothold);
 
       poseViz.update();
       footholdViz.update();
