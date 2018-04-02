@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
-import sun.java2d.xr.MutableInteger;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -91,8 +91,8 @@ public class QuadrupedBalanceManager
    private static final int maxNumberOfFootstepGraphicsPerQuadrant = 4;
    private final FramePoint3D stepSequenceVisualizationPosition = new FramePoint3D();
    private final QuadrantDependentList<BagOfBalls> stepSequenceVisualization = new QuadrantDependentList<>();
-   private final QuadrantDependentList<MutableInteger> stepVisualizationCounter = new QuadrantDependentList<>(new MutableInteger(0), new MutableInteger(0),
-                                                                                                              new MutableInteger(0), new MutableInteger(0));
+   private final QuadrantDependentList<MutableInt> stepVisualizationCounter = new QuadrantDependentList<>(new MutableInt(0), new MutableInt(0),
+                                                                                                          new MutableInt(0), new MutableInt(0));
    private static final QuadrantDependentList<AppearanceDefinition> stepSequenceAppearance = new QuadrantDependentList<>(YoAppearance.Red(),
                                                                                                                          YoAppearance.Blue(),
                                                                                                                          YoAppearance.RGBColor(1, 0.5, 0.0),
