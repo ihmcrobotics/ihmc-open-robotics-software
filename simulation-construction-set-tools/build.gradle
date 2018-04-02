@@ -22,7 +22,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid', version: '0.8.0'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.8.1'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.9'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
    compile group: "us.ihmc", name: "simulation-construction-set", version: "source"
