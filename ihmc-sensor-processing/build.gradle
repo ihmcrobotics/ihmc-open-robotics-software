@@ -22,7 +22,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid', version: '0.8.0'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.8.1'
    compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.9'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
    compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
