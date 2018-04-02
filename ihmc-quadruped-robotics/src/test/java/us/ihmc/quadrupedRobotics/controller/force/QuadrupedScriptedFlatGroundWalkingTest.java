@@ -12,6 +12,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerS
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingStatePacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -29,6 +30,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
+   private QuadrupedStepTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -42,6 +44,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       conductor.concludeTesting();
       conductor = null;
       variables = null;
+      stepTeleopManager = null;
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -54,8 +57,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
-
-      QuadrupedTestBehaviors.standUp(conductor, variables);
+      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
       PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new QuadrupedNetClassList());
       AtomicReference<QuadrupedForceControllerEnum> controllerState = new AtomicReference<>();
@@ -66,6 +68,8 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
 
       QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING);
       packetCommunicator.send(eventPacket);
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
 
       List<QuadrupedTimedStep> steps = getSteps();
       QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps, false);
