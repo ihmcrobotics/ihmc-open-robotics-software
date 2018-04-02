@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import sun.java2d.xr.MutableInteger;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -30,6 +31,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ import static us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicTy
 public class QuadrupedBalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final int NUMBER_OF_STEPS_TO_CONSIDER = 8;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -67,6 +70,7 @@ public class QuadrupedBalanceManager
    private final YoFramePoint yoDesiredCMP = new YoFramePoint("desiredCMP", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint2d yoAchievedCMP = new YoFramePoint2d("achievedCMP", worldFrame, registry);
 
+   private final YoInteger numberOfStepsToConsider = new YoInteger("numberOfStepsToConsider", registry);
 
    private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", worldFrame, registry);
 
@@ -87,15 +91,20 @@ public class QuadrupedBalanceManager
    private static final int maxNumberOfFootstepGraphicsPerQuadrant = 4;
    private final FramePoint3D stepSequenceVisualizationPosition = new FramePoint3D();
    private final QuadrantDependentList<BagOfBalls> stepSequenceVisualization = new QuadrantDependentList<>();
-   private final QuadrantDependentList<Integer> stepVisualizationCounter = new QuadrantDependentList<>();
-   private static final QuadrantDependentList<AppearanceDefinition> stepSequenceAppearance = new QuadrantDependentList<>(YoAppearance.Red(), YoAppearance.Blue(),
-                                                                                                                         YoAppearance.RGBColor(1, 0.5, 0.0), YoAppearance.RGBColor(0.0, 0.5, 1.0));
+   private final QuadrantDependentList<MutableInteger> stepVisualizationCounter = new QuadrantDependentList<>(new MutableInteger(0), new MutableInteger(0),
+                                                                                                              new MutableInteger(0), new MutableInteger(0));
+   private static final QuadrantDependentList<AppearanceDefinition> stepSequenceAppearance = new QuadrantDependentList<>(YoAppearance.Red(),
+                                                                                                                         YoAppearance.Blue(),
+                                                                                                                         YoAppearance.RGBColor(1, 0.5, 0.0),
+                                                                                                                         YoAppearance.RGBColor(0.0, 0.5, 1.0));
 
    public QuadrupedBalanceManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
                                   YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.postureProvider = postureProvider;
+
+      numberOfStepsToConsider.set(NUMBER_OF_STEPS_TO_CONSIDER);
 
       QuadrupedRuntimeEnvironment runtimeEnvironment = controllerToolbox.getRuntimeEnvironment();
       robotTimestamp = runtimeEnvironment.getRobotTimestamp();
@@ -139,11 +148,12 @@ public class QuadrupedBalanceManager
       YoGraphicsList graphicsList = new YoGraphicsList(graphicsListName);
       ArtifactList artifactList = new ArtifactList(graphicsListName);
 
-      YoGraphicPosition desiredDCMViz = new YoGraphicPosition("Desired DCM", yoDesiredDCMPosition, 0.01, Yellow(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoGraphicPosition finalDesiredDCMViz = new YoGraphicPosition("Final Desired DCM", yoFinalDesiredDCM, 0.01, Beige(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition desiredDCMViz = new YoGraphicPosition("Desired DCM", yoDesiredDCMPosition, 0.01, Yellow(),
+                                                              YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition finalDesiredDCMViz = new YoGraphicPosition("Final Desired DCM", yoFinalDesiredDCM, 0.01, Beige(),
+                                                                   YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
       YoGraphicPosition yoCmpPositionSetpointViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, YoAppearance.Purple(), BALL_WITH_CROSS);
       YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-
 
       graphicsList.add(desiredDCMViz);
       graphicsList.add(finalDesiredDCMViz);
@@ -158,7 +168,8 @@ public class QuadrupedBalanceManager
       {
          AppearanceDefinition appearance = stepSequenceAppearance.get(robotQuadrant);
          String prefix = "timedStepController" + robotQuadrant.getPascalCaseName() + "GoalPositions";
-         stepSequenceVisualization.set(robotQuadrant, new BagOfBalls(maxNumberOfFootstepGraphicsPerQuadrant, 0.015, prefix, appearance, registry, yoGraphicsListRegistry));
+         stepSequenceVisualization
+               .set(robotQuadrant, new BagOfBalls(maxNumberOfFootstepGraphicsPerQuadrant, 0.015, prefix, appearance, registry, yoGraphicsListRegistry));
       }
 
       yoGraphicsListRegistry.registerYoGraphicsList(graphicsList);
@@ -170,20 +181,20 @@ public class QuadrupedBalanceManager
       for (RobotQuadrant quadrant : RobotQuadrant.values)
       {
          stepSequenceVisualization.get(quadrant).hideAll();
-         stepVisualizationCounter.put(quadrant, 0);
+         stepVisualizationCounter.get(quadrant).setValue(0);
       }
 
-      for (int i = 0; i < steps.size(); i++)
+      for (int i = 0; i < Math.min(steps.size(), numberOfStepsToConsider.getValue()); i++)
       {
          QuadrupedTimedStep step = steps.get(i);
          RobotQuadrant quadrant = step.getRobotQuadrant();
-         int count = stepVisualizationCounter.get(quadrant);
-         if(count == maxNumberOfFootstepGraphicsPerQuadrant)
+         int count = stepVisualizationCounter.get(quadrant).getValue();
+         if (count == maxNumberOfFootstepGraphicsPerQuadrant)
             continue;
 
          step.getGoalPosition(stepSequenceVisualizationPosition);
          stepSequenceVisualization.get(quadrant).setBall(stepSequenceVisualizationPosition, count);
-         stepVisualizationCounter.put(quadrant, count + 1);
+         stepVisualizationCounter.get(quadrant).setValue(count + 1);
       }
    }
 
@@ -204,14 +215,11 @@ public class QuadrupedBalanceManager
       dcmPlanner.clearStepSequence();
    }
 
-   public void addStepToSequence(QuadrupedTimedStep step)
-   {
-      dcmPlanner.addStepToSequence(step);
-   }
-
    public void addStepsToSequence(List<? extends QuadrupedTimedStep> steps)
    {
-      dcmPlanner.addStepsToSequence(steps);
+      for (int i = 0; i < Math.min(steps.size(), numberOfStepsToConsider.getIntegerValue()); i++)
+         dcmPlanner.addStepToSequence(steps.get(i));
+
       updateFootstepGraphics(steps);
    }
 
@@ -241,10 +249,9 @@ public class QuadrupedBalanceManager
    public void initializeForStepping(QuadrantDependentList<ContactState> contactStates)
    {
       initialize();
-
       dcmPlanner.initializeForStepping(contactStates, dcmPositionEstimate);
-   }
 
+   }
 
    public void compute(QuadrantDependentList<ContactState> contactStates)
    {
@@ -259,8 +266,8 @@ public class QuadrupedBalanceManager
       dcmPlanner.computeDcmSetpoints(contactStates, yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
 
-      momentumRateOfChangeModule.compute(momentumRateForCommand, yoVrpPositionSetpoint, yoDesiredCMP, dcmPositionEstimate,
-                                         yoDesiredDCMPosition, yoDesiredDCMVelocity);
+      momentumRateOfChangeModule
+            .compute(momentumRateForCommand, yoVrpPositionSetpoint, yoDesiredCMP, dcmPositionEstimate, yoDesiredDCMPosition, yoDesiredDCMVelocity);
 
       momentumRateForCommand.changeFrame(worldFrame);
       momentumRateForCommand.subZ(controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getRuntimeEnvironment().getGravity());
