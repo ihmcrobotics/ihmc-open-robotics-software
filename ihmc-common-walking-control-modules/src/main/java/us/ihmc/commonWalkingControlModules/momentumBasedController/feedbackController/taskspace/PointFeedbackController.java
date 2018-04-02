@@ -208,12 +208,12 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       command.getIncludingFrame(desiredPosition, desiredLinearVelocity);
       command.getFeedForwardActionIncludingFrame(feedForwardLinearAcceleration);
-      yoDesiredPosition.setAndMatchFrame(desiredPosition);
-      yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+      yoDesiredPosition.setMatchingFrame(desiredPosition);
+      yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
       if (yoFeedForwardLinearVelocity != null)
-         yoFeedForwardLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+         yoFeedForwardLinearVelocity.setMatchingFrame(desiredLinearVelocity);
       if (yoFeedForwardLinearAcceleration != null)
-         yoFeedForwardLinearAcceleration.setAndMatchFrame(feedForwardLinearAcceleration);
+         yoFeedForwardLinearAcceleration.setMatchingFrame(feedForwardLinearAcceleration);
    }
 
    @Override
@@ -251,14 +251,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearAcceleration.add(derivativeFeedback);
       desiredLinearAcceleration.add(integralFeedback);
       desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
+      yoFeedbackLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
       rateLimitedFeedbackLinearAcceleration.update();
       desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackLinearAcceleration);
 
       desiredLinearAcceleration.changeFrame(controlFrame);
       desiredLinearAcceleration.add(feedForwardLinearAcceleration);
 
-      yoDesiredLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
+      yoDesiredLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
 
       addCoriolisAcceleration(desiredLinearAcceleration);
 
@@ -280,13 +280,13 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearVelocity.setIncludingFrame(proportionalFeedback);
       desiredLinearVelocity.add(integralFeedback);
       desiredLinearVelocity.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+      yoFeedbackLinearVelocity.setMatchingFrame(desiredLinearVelocity);
       rateLimitedFeedbackLinearVelocity.update();
       desiredLinearVelocity.setIncludingFrame(rateLimitedFeedbackLinearVelocity);
 
       desiredLinearVelocity.add(feedForwardLinearVelocity);
 
-      yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+      yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
 
       desiredLinearVelocity.changeFrame(controlFrame);
       inverseKinematicsOutput.setLinearVelocity(controlFrame, desiredLinearVelocity);
@@ -308,13 +308,13 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearForce.add(derivativeFeedback);
       desiredLinearForce.add(integralFeedback);
       desiredLinearForce.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackLinearForce.setAndMatchFrame(desiredLinearForce);
+      yoFeedbackLinearForce.setMatchingFrame(desiredLinearForce);
       rateLimitedFeedbackLinearForce.update();
       desiredLinearForce.setIncludingFrame(rateLimitedFeedbackLinearForce);
 
       desiredLinearForce.changeFrame(controlFrame);
 
-      yoDesiredLinearForce.setAndMatchFrame(desiredLinearForce);
+      yoDesiredLinearForce.setMatchingFrame(desiredLinearForce);
 
       virtualModelControlOutput.setLinearForce(controlFrame, desiredLinearForce);
    }
@@ -328,7 +328,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       achievedSpatialAccelerationVector.changeFrameNoRelativeMotion(controlFrame);
       achievedSpatialAccelerationVector.getLinearPart(achievedLinearAcceleration);
       subtractCoriolisAcceleration(achievedLinearAcceleration);
-      yoAchievedLinearAcceleration.setAndMatchFrame(achievedLinearAcceleration);
+      yoAchievedLinearAcceleration.setMatchingFrame(achievedLinearAcceleration);
    }
 
    /**

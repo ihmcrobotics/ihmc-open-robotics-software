@@ -230,7 +230,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          {
             RigidBody foot = allFeet.get(i);
             footPosition.setToZero(footSoleFrames.get(foot));
-            referenceFootPositions.get(foot).setAndMatchFrame(footPosition);
+            referenceFootPositions.get(foot).setMatchingFrame(footPosition);
          }
 
          referenceAverageFootPosition.setToZero();
@@ -268,7 +268,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
          {
             RigidBody foot = allFeet.get(i);
             footPosition.setToZero(footSoleFrames.get(foot));
-            currentFootPositions.get(foot).setAndMatchFrame(footPosition);
+            currentFootPositions.get(foot).setMatchingFrame(footPosition);
          }
 
          currentAverageFootPosition.setToZero();

@@ -1191,7 +1191,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       desiredFootPositionInBody.setIncludingFrame(feedForwardCenterOfMassFrame, desiredFootPosition);
       desiredFootPositionInBody.changeFrame(feedForwardReferenceFrames.getLegAttachmentFrame(robotQuadrant));
 
-      desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).setAndMatchFrame(desiredFootPositionInBody);
+      desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).setMatchingFrame(desiredFootPositionInBody);
    }
 
 
@@ -2003,7 +2003,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          currentDesiredInTrajectory.changeFrame(ReferenceFrame.getWorldFrame());
          currentSwingTarget.set(currentDesiredInTrajectory);
 
-         desiredFeetLocations.get(swingQuadrant).setAndMatchFrame(currentDesiredInTrajectory);
+         desiredFeetLocations.get(swingQuadrant).setMatchingFrame(currentDesiredInTrajectory);
 
          computeCurrentSupportPolygonAndDistanceInside(swingQuadrant);
 

@@ -54,7 +54,7 @@ public class QuadrupedDebugFootSwitch implements FootSwitchInterface
       MatrixTools.extractFrameTupleFromEJMLVector(measuredForce, wrenchCalculatorInterface.getWrench(), measurementFrame, 3);
       measuredForceWorld.setIncludingFrame(measuredForce);
       measuredForceWorld.changeFrame(worldFrame);
-      yoMeasuredForceWorld.setAndMatchFrame(measuredForce);
+      yoMeasuredForceWorld.setMatchingFrame(measuredForce);
    }
 
    @Override

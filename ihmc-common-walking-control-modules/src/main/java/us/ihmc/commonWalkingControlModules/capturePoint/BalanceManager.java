@@ -752,7 +752,7 @@ public class BalanceManager
    public void update()
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
-      yoCenterOfMass.setAndMatchFrame(centerOfMassPosition);
+      yoCenterOfMass.setMatchingFrame(centerOfMassPosition);
       double omega0 = controllerToolbox.getOmega0();
       CapturePointTools.computeDesiredCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
       yoPerfectCoP.set(yoPerfectCMP);
@@ -762,7 +762,7 @@ public class BalanceManager
    public void computeAchievedCMP(FrameVector3DReadOnly achievedLinearMomentumRate)
    {
       linearMomentumRateOfChangeControlModule.computeAchievedCMP(achievedLinearMomentumRate, achievedCMP);
-      yoAchievedCMP.setAndMatchFrame(achievedCMP);
+      yoAchievedCMP.setMatchingFrame(achievedCMP);
    }
 
    public CapturabilityBasedStatus updateAndReturnCapturabilityBasedStatus()

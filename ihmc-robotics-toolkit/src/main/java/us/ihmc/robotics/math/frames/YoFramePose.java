@@ -81,7 +81,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
 
    public void setAndMatchFrame(FramePose3D framePose)
    {
-      position.setAndMatchFrame(framePose.getPosition());
+      position.setMatchingFrame(framePose.getPosition());
       orientation.setAndMatchFrame(framePose.getOrientation());
    }
 
@@ -129,7 +129,7 @@ public class YoFramePose implements ReferenceFrameHolder, Clearable
 
    public void setAndMatchFrame(FramePoint3DReadOnly framePoint, FrameQuaternionReadOnly frameOrientation)
    {
-      position.setAndMatchFrame(framePoint);
+      position.setMatchingFrame(framePoint);
       orientation.setAndMatchFrame(frameOrientation);
    }
 

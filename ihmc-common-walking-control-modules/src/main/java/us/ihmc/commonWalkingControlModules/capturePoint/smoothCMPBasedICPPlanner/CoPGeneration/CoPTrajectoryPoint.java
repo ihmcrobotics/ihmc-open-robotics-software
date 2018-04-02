@@ -68,7 +68,7 @@ public class CoPTrajectoryPoint extends YoFrameEuclideanTrajectoryPoint
             public void notifyOfVariableChange(YoVariable<?> v)
             {
                localFramePoint.setIncludingFrame(getPosition());
-               yoFramePointInWorld.setAndMatchFrame(localFramePoint);
+               yoFramePointInWorld.setMatchingFrame(localFramePoint);
             }
          });
          

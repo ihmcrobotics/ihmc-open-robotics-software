@@ -451,8 +451,8 @@ public class SwingState extends AbstractFootControlState
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
       spatialFeedbackControlCommand.setGains(gains);
 
-      yoDesiredPosition.setAndMatchFrame(desiredPosition);
-      yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+      yoDesiredPosition.setMatchingFrame(desiredPosition);
+      yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
    }
 
    private void computeAndPackTrajectory(double timeInState)
@@ -530,10 +530,10 @@ public class SwingState extends AbstractFootControlState
          desiredAngularAcceleration.scale(speedUpFactorSquared);
       }
 
-      yoDesiredSolePosition.setAndMatchFrame(desiredPosition);
-      yoDesiredSoleOrientation.setAndMatchFrame(desiredOrientation);
-      yoDesiredSoleLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
-      yoDesiredSoleAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
+      yoDesiredSolePosition.setMatchingFrame(desiredPosition);
+      yoDesiredSoleOrientation.setMatchingFrame(desiredOrientation);
+      yoDesiredSoleLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+      yoDesiredSoleAngularVelocity.setMatchingFrame(desiredAngularVelocity);
       currentTrajectoryWaypoint.set(blendedSwingTrajectory.getCurrentPositionWaypointIndex());
 
       transformDesiredsFromSoleFrameToControlFrame();

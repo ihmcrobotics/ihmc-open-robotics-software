@@ -250,8 +250,8 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void updateCircleFrame(FramePoint3D circleCenter, FrameVector3D circleNormal)
    {
-      circleOrigin.setAndMatchFrame(circleCenter);
-      rotationAxis.setAndMatchFrame(circleNormal);
+      circleOrigin.setMatchingFrame(circleCenter);
+      rotationAxis.setMatchingFrame(circleNormal);
       rotationAxis.normalize();
       circleFrame.update();
    }
@@ -325,7 +325,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double yFinal = initialRadius.getDoubleValue() * Math.sin(finalAngle.getDoubleValue());
       double zFinal = initialZ.getDoubleValue();
       finalPosition.setIncludingFrame(circleFrame, xFinal, yFinal, zFinal);
-      yoFinalPosition.setAndMatchFrame(finalPosition);
+      yoFinalPosition.setMatchingFrame(finalPosition);
 
       rotateInitialOrientation(finalOrientation, finalAngle.getDoubleValue());
 
@@ -362,7 +362,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double z = initialZ.getDoubleValue();
 
       currentPosition.setIncludingFrame(circleFrame, x, y, z);
-      yoCurrentPositionWorld.setAndMatchFrame(currentPosition);
+      yoCurrentPositionWorld.setMatchingFrame(currentPosition);
 
       currentRelativeAngle.set(computeAngleDifferenceMinusPiToPi(angle, initialAngle.getDoubleValue()));
       if (adjustAngle)
@@ -410,15 +410,15 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          currentAngularAcceleration.setIncludingFrame(circleFrame, 0.0, 0.0, 0.0);
       }
 
-      yoCurrentPosition.setAndMatchFrame(currentPosition);
-      yoCurrentAdjustedPositionWorld.setAndMatchFrame(currentPosition);
-      yoCurrentVelocity.setAndMatchFrame(currentVelocity);
-      yoCurrentAcceleration.setAndMatchFrame(currentAcceleration);
+      yoCurrentPosition.setMatchingFrame(currentPosition);
+      yoCurrentAdjustedPositionWorld.setMatchingFrame(currentPosition);
+      yoCurrentVelocity.setMatchingFrame(currentVelocity);
+      yoCurrentAcceleration.setMatchingFrame(currentAcceleration);
 
       currentOrientation.changeFrame(trajectoryFrame);
       yoCurrentOrientation.set(currentOrientation);
-      yoCurrentAngularVelocity.setAndMatchFrame(currentAngularVelocity);
-      yoCurrentAngularAcceleration.setAndMatchFrame(currentAngularAcceleration);
+      yoCurrentAngularVelocity.setMatchingFrame(currentAngularVelocity);
+      yoCurrentAngularAcceleration.setMatchingFrame(currentAngularAcceleration);
 
       updateTangentialCircleFrame();
    }
@@ -498,9 +498,9 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private void visualizeTrajectory()
    {
       initialPosition.setIncludingFrame(yoInitialPosition);
-      yoInitialPositionWorld.setAndMatchFrame(initialPosition);
+      yoInitialPositionWorld.setMatchingFrame(initialPosition);
       finalPosition.setIncludingFrame(yoFinalPosition);
-      yoFinalPositionWorld.setAndMatchFrame(finalPosition);
+      yoFinalPositionWorld.setMatchingFrame(finalPosition);
 
       for (int i = 0; i < numberOfBalls; i++)
       {

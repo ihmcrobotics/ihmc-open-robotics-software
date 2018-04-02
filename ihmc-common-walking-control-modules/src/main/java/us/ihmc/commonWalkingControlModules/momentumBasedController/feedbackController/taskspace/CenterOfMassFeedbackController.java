@@ -156,12 +156,12 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       command.getMomentumRateCommand().getSelectionMatrix(selectionMatrix);
 
       command.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      yoDesiredPosition.setAndMatchFrame(desiredPosition);
-      yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+      yoDesiredPosition.setMatchingFrame(desiredPosition);
+      yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
       if (yoFeedForwardLinearVelocity != null)
-         yoFeedForwardLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+         yoFeedForwardLinearVelocity.setMatchingFrame(desiredLinearVelocity);
       if (yoFeedForwardLinearAcceleration != null)
-         yoFeedForwardLinearAcceleration.setAndMatchFrame(feedForwardLinearAcceleration);
+         yoFeedForwardLinearAcceleration.setMatchingFrame(feedForwardLinearAcceleration);
    }
 
    @Override
@@ -199,14 +199,14 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearAcceleration.add(derivativeFeedback);
       desiredLinearAcceleration.add(integralFeedback);
       desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
+      yoFeedbackLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
       rateLimitedFeedbackLinearAcceleration.update();
       desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackLinearAcceleration);
 
       desiredLinearAcceleration.changeFrame(centerOfMassFrame);
       desiredLinearAcceleration.add(feedForwardLinearAcceleration);
 
-      yoDesiredLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
+      yoDesiredLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
 
       desiredLinearAcceleration.scale(totalRobotMass);
       desiredLinearAcceleration.changeFrame(worldFrame);
@@ -228,13 +228,13 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearVelocity.setIncludingFrame(proportionalFeedback);
       desiredLinearVelocity.add(integralFeedback);
       desiredLinearVelocity.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+      yoFeedbackLinearVelocity.setMatchingFrame(desiredLinearVelocity);
       rateLimitedFeedbackLinearVelocity.update();
       desiredLinearVelocity.setIncludingFrame(rateLimitedFeedbackLinearVelocity);
 
       desiredLinearVelocity.add(feedForwardLinearVelocity);
 
-      yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+      yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
 
       desiredLinearVelocity.scale(totalRobotMass);
       desiredLinearVelocity.changeFrame(worldFrame);
@@ -259,14 +259,14 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       desiredLinearAcceleration.add(derivativeFeedback);
       desiredLinearAcceleration.add(integralFeedback);
       desiredLinearAcceleration.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
+      yoFeedbackLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
       rateLimitedFeedbackLinearAcceleration.update();
       desiredLinearAcceleration.setIncludingFrame(rateLimitedFeedbackLinearAcceleration);
 
       desiredLinearAcceleration.changeFrame(centerOfMassFrame);
       desiredLinearAcceleration.add(feedForwardLinearAcceleration);
 
-      yoDesiredLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
+      yoDesiredLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
 
       desiredLinearAcceleration.scale(totalRobotMass);
       desiredLinearAcceleration.changeFrame(worldFrame);

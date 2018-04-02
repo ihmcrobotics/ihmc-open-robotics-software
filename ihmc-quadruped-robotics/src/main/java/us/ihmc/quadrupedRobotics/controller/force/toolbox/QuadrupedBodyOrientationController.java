@@ -106,8 +106,8 @@ public class QuadrupedBodyOrientationController
 
       // update log variables
       yoBodyOrientationSetpoint.setAndMatchFrame(bodyOrientationSetpoint);
-      yoBodyAngularVelocitySetpoint.setAndMatchFrame(bodyAngularVelocitySetpoint);
-      yoComTorqueFeedforwardSetpoint.setAndMatchFrame(comTorqueFeedforwardSetpoint);
+      yoBodyAngularVelocitySetpoint.setMatchingFrame(bodyAngularVelocitySetpoint);
+      yoComTorqueFeedforwardSetpoint.setMatchingFrame(comTorqueFeedforwardSetpoint);
 
       bodyOrientationSetpoint.changeFrame(bodyOrientationSetpointFrame);
       bodyAngularVelocitySetpoint.changeFrame(bodyAngularVelocitySetpointFrame);

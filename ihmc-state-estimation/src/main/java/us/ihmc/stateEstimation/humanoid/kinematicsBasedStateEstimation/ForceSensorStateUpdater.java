@@ -344,8 +344,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          tempWrench.getLinearPartIncludingFrame(tempForce);
          tempWrench.getAngularPartIncludingFrame(tempTorque);
 
-         wristForcesSubtreeWeightCancelled.get(robotSide).setAndMatchFrame(tempForce);
-         wristTorquesSubtreeWeightCancelled.get(robotSide).setAndMatchFrame(tempTorque);
+         wristForcesSubtreeWeightCancelled.get(robotSide).setMatchingFrame(tempForce);
+         wristTorquesSubtreeWeightCancelled.get(robotSide).setMatchingFrame(tempTorque);
 
          if (wrenches != null)
             wrenches.get(measurementLink).set(tempWrench);
@@ -364,8 +364,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          tempWrench.getLinearPartIncludingFrame(tempForce);
          tempWrench.getAngularPartIncludingFrame(tempTorque);
 
-         footForceCalibrationOffsets.get(robotSide).setAndMatchFrame(tempForce);
-         footTorqueCalibrationOffsets.get(robotSide).setAndMatchFrame(tempTorque);
+         footForceCalibrationOffsets.get(robotSide).setMatchingFrame(tempForce);
+         footTorqueCalibrationOffsets.get(robotSide).setMatchingFrame(tempTorque);
       }
       calibrateFootForceSensors.set(false);
    }
@@ -383,8 +383,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
          tempWrench.getLinearPartIncludingFrame(tempForce);
          tempWrench.getAngularPartIncludingFrame(tempTorque);
 
-         wristForceCalibrationOffsets.get(robotSide).setAndMatchFrame(tempForce);
-         wristTorqueCalibrationOffsets.get(robotSide).setAndMatchFrame(tempTorque);
+         wristForceCalibrationOffsets.get(robotSide).setMatchingFrame(tempForce);
+         wristTorqueCalibrationOffsets.get(robotSide).setMatchingFrame(tempTorque);
       }
       calibrateWristForceSensors.set(false);
    }

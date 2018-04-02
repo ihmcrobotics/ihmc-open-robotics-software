@@ -178,7 +178,7 @@ public class MovingBaseRobotArmController implements RobotController
       FrameQuaternion initialHandOrientation = new FrameQuaternion(robotArm.getHandControlFrame());
       initialHandOrientation.changeFrame(worldFrame);
 
-      handTargetPosition.setAndMatchFrame(initialHandPosition);
+      handTargetPosition.setMatchingFrame(initialHandPosition);
       handTargetOrientation.setAndMatchFrame(initialHandOrientation);
 
       FramePoint3D initialBasePosition = new FramePoint3D(robotArm.getBase().getBodyFixedFrame());

@@ -262,9 +262,9 @@ public class QuadrupedVirtualModelController
       // update yo variables
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoSoleVirtualForce.get(robotQuadrant).setAndMatchFrame(soleVirtualForce.get(robotQuadrant));
-         yoSoleContactForce.get(robotQuadrant).setAndMatchFrame(soleContactForce.get(robotQuadrant));
-         yoSolePosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
+         yoSoleVirtualForce.get(robotQuadrant).setMatchingFrame(soleVirtualForce.get(robotQuadrant));
+         yoSoleContactForce.get(robotQuadrant).setMatchingFrame(soleContactForce.get(robotQuadrant));
+         yoSolePosition.get(robotQuadrant).setMatchingFrame(solePosition.get(robotQuadrant));
          for (int i = 0; i < legJointNames.length; i++)
          {
             yoJointTorques.get(robotQuadrant)[i].set((Tuple3DReadOnly) jointTorques.get(robotQuadrant)[i]);
@@ -276,12 +276,12 @@ public class QuadrupedVirtualModelController
       {
          // move graphics off screen if visible is set to false
          if (yoSoleVirtualForceGraphicVisible.get(robotQuadrant).getBooleanValue())
-            yoSoleVirtualForceGraphicPosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
+            yoSoleVirtualForceGraphicPosition.get(robotQuadrant).setMatchingFrame(solePosition.get(robotQuadrant));
          else
             yoSoleVirtualForceGraphicPosition.get(robotQuadrant).set(1E6, 1E6, 1E6);
 
          if (yoSoleContactForceGraphicVisible.get(robotQuadrant).getBooleanValue())
-            yoSoleContactForceGraphicPosition.get(robotQuadrant).setAndMatchFrame(solePosition.get(robotQuadrant));
+            yoSoleContactForceGraphicPosition.get(robotQuadrant).setMatchingFrame(solePosition.get(robotQuadrant));
          else
             yoSoleContactForceGraphicPosition.get(robotQuadrant).set(1E6, 1E6, 1E6);
          for (int i = 0; i < legJointNames.length; i++)

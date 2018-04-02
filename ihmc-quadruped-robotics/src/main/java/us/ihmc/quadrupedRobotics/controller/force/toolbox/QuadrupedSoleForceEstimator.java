@@ -142,8 +142,8 @@ public class QuadrupedSoleForceEstimator
                .set(soleForceMatrix.get(robotQuadrant).get(0), soleForceMatrix.get(robotQuadrant).get(1), soleForceMatrix.get(robotQuadrant).get(2));
          soleContactForce.get(robotQuadrant)
                .set(-soleForceMatrix.get(robotQuadrant).get(0), -soleForceMatrix.get(robotQuadrant).get(1), -soleForceMatrix.get(robotQuadrant).get(2));
-         yoSoleVirtualForce.get(robotQuadrant).setAndMatchFrame(soleVirtualForce.get(robotQuadrant));
-         yoSoleContactForce.get(robotQuadrant).setAndMatchFrame(soleContactForce.get(robotQuadrant));
+         yoSoleVirtualForce.get(robotQuadrant).setMatchingFrame(soleVirtualForce.get(robotQuadrant));
+         yoSoleContactForce.get(robotQuadrant).setMatchingFrame(soleContactForce.get(robotQuadrant));
       }
    }
 

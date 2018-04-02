@@ -615,8 +615,8 @@ public class TaskspaceToJointspaceCalculator
    private void getAngularAndLinearPartsFromSpatialVector(YoFrameVector angularPartToPack, YoFrameVector linearPartToPack, DenseMatrix64F spatialVector)
    {
       getAngularAndLinearPartsFromSpatialVector(angularPart, linearPart, spatialVector);
-      angularPartToPack.setAndMatchFrame(angularPart);
-      linearPartToPack.setAndMatchFrame(linearPart);
+      angularPartToPack.setMatchingFrame(angularPart);
+      linearPartToPack.setMatchingFrame(linearPart);
    }
 
    private void getAngularAndLinearPartsFromSpatialVector(FrameVector3D angularPartToPack, FrameVector3D linearPartToPack, DenseMatrix64F spatialVector)
