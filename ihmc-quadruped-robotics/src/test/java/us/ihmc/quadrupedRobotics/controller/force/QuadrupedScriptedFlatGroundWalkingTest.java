@@ -59,8 +59,6 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
-      QuadrupedTestBehaviors.standUp(conductor, variables, stepTeleopManager);
-
       PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new QuadrupedNetClassList());
       AtomicReference<QuadrupedForceControllerEnum> controllerState = new AtomicReference<>();
       AtomicReference<QuadrupedSteppingStateEnum> steppingState = new AtomicReference<>();
@@ -70,6 +68,8 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
 
       QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING);
       packetCommunicator.send(eventPacket);
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
 
       List<QuadrupedTimedStep> steps = getSteps();
       QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps, false);

@@ -58,6 +58,7 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
+      stepTeleopManager.requestXGait();
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(90.0);
       stepTeleopManager.setDesiredVelocity(1.0, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
