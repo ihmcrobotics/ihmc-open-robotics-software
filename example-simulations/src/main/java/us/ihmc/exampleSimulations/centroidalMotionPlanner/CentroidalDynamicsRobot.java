@@ -558,8 +558,8 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       {
          PrintTools.debug("Replanning");
          zeroForceConstraint.set(worldFrame, 0.0, 0.0, 0.0);
-         minPosition.set(worldFrame, -0.1, -0.1, -0.75);
-         maxPosition.set(worldFrame, 0.1, 0.1, 0.10);
+         minPosition.set(worldFrame, Double.NaN, Double.NaN, -0.75);
+         maxPosition.set(worldFrame, Double.NaN, Double.NaN, 0.10);
          
          initialForceConstraint.set(worldFrame, 0.0, 0.0, -robotMass * gravity.getZ());
          initialForceRateConstraint.set(worldFrame, 0.0, 0.0, 0.0);
