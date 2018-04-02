@@ -21,9 +21,10 @@ public class QuadrupedBodyPoseTeleopManager
    private final ComPositionPacket comPositionPacket = new ComPositionPacket();
    private final BodyOrientationPacket bodyOrientationPacket = new BodyOrientationPacket();
 
-   public QuadrupedBodyPoseTeleopManager(PacketCommunicator packetCommunicator)
+   public QuadrupedBodyPoseTeleopManager(double initialCoMHeight, PacketCommunicator packetCommunicator)
    {
       this.packetCommunicator = packetCommunicator;
+      desiredCoMHeight.set(initialCoMHeight);
    }
 
    public void setDesiredCoMHeight(double desiredCoMHeight)

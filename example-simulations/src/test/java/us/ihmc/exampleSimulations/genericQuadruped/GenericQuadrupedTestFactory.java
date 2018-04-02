@@ -144,7 +144,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
          packetCommunicator.connect();
          stepTeleopManager = new QuadrupedStepTeleopManager(packetCommunicator, xGaitSettings, referenceFrames, teleopRegistry);
-         bodyPoseTeleopManager = new QuadrupedBodyPoseTeleopManager(packetCommunicator);
+         bodyPoseTeleopManager = new QuadrupedBodyPoseTeleopManager(physicalProperties.getNominalCoMHeight(), packetCommunicator);
 
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
       }

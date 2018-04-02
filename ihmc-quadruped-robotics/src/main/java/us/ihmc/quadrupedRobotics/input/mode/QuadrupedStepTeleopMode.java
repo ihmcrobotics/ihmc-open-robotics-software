@@ -44,7 +44,7 @@ public class QuadrupedStepTeleopMode
                                   QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.stepTeleopManager = new QuadrupedStepTeleopManager(packetCommunicator, defaultXGaitSettings, referenceFrames, registry);
-      this.bodyPoseTeleopManager = new QuadrupedBodyPoseTeleopManager(packetCommunicator);
+      this.bodyPoseTeleopManager = new QuadrupedBodyPoseTeleopManager(physicalProperties.getNominalCoMHeight(), packetCommunicator);
       this.comZ = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
 
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);
