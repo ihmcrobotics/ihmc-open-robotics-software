@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -11,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex3DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -35,7 +33,6 @@ public class QuadrupedFeetManager
    private final QuadrupedForceControllerToolbox toolbox;
 
    // support polygon
-   private final List<FramePoint3D> contactPoints = new ArrayList<>();
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("supportPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoArtifactPolygon supportPolygonVisualizer = new YoArtifactPolygon("supportPolygonVisualizer", supportPolygon, Color.black, false, 1);
 
@@ -53,14 +50,15 @@ public class QuadrupedFeetManager
 
    public void updateSupportPolygon()
    {
-      contactPoints.clear();
+      supportPolygon.clear();
+
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          if(footControlModules.get(quadrant).getContactState() == ContactState.IN_CONTACT)
-            contactPoints.add(toolbox.getTaskSpaceEstimates().getSolePosition(quadrant));
+            supportPolygon.addVertexMatchingFrame(toolbox.getTaskSpaceEstimates().getSolePosition(quadrant));
       }
 
-      supportPolygon.set(FrameVertex3DSupplier.asFrameVertex3DSupplier(contactPoints));
+      supportPolygon.update();
    }
 
    public void hideSupportPolygon()
