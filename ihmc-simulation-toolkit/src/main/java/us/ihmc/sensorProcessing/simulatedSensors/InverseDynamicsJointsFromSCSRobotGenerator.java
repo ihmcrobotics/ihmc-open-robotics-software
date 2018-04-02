@@ -8,9 +8,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -232,16 +230,18 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
    }
 
    /**
-    * updates an SCS Robot with the results from the Inverse Dynamics Model
-    * @param updateRootJoints update from Inverse Dynamics Model
-    * @param updateAccelerations update from Inverse Dynamics Model
-    * @param useDesiredAcceleration should SCS robot acceleration should be updated from the Inverse Dynamics Model
-    * @param updatePositions update from Inverse Dynamics Model
-    * @param updateVelocities update from Inverse Dynamics Model
-    * @param updateTorques update from Inverse Dynamics Model
-    * @param useDesiredTorque should torques be copied to the SCS Robot
+    * Updates an SCS Robot state with the state from the Inverse Dynamics Model
+    *
+    * @param updateRootJoints whether the root joints' state should also be updated.
+    * @param updatePositions whether the joint positions should be copied over to the SCS robot or not.
+    * @param updateVelocities whether the joint velocities should be copied over to the SCS robot or not.
+    * @param updateAccelerations whether the joint accelerations should be copied over to the SCS robot or not.
+    * @param useDesiredAcceleration whether to extract the desired or measured joint accelerations. Unused when {@code updateAccelerations == false}.
+    * @param updateTorques whether the joint forces/torques should be copied over to the SCS robot or not.
+    * @param useDesiredTorque whether to extract the desired or measured joint forces/torques. Unused when {@code updateTorques == false}.
     */
-   public void updateRobotFromInverseDynamicsRobotModel(boolean updateRootJoints, boolean updateAccelerations, boolean useDesiredAcceleration, boolean updatePositions, boolean updateVelocities, boolean updateTorques, boolean useDesiredTorque)
+   public void updateRobotFromInverseDynamicsRobotModel(boolean updateRootJoints, boolean updatePositions, boolean updateVelocities, boolean updateAccelerations,
+                                                        boolean useDesiredAcceleration, boolean updateTorques, boolean useDesiredTorque)
    {
 
       Collection<OneDegreeOfFreedomJoint> pinJoints = scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints(); //pinToRevoluteJointMap.keySet();
@@ -255,6 +255,13 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             double jointVelocity;
             double jointAcceleration;
             double jointTorque;
+
+            if (updatePositions)
+            {
+               jointPosition = revoluteJoint.getQ();
+               pinJoint.setQ(jointPosition);
+            }
+
             if (updateAccelerations)
             {
                if (useDesiredAcceleration)
@@ -262,12 +269,6 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
                else
                   jointAcceleration = revoluteJoint.getQdd();
                pinJoint.setQdd(jointAcceleration);
-            }
-
-            if (updatePositions)
-            {
-               jointPosition = revoluteJoint.getQ();
-               pinJoint.setQ(jointPosition);
             }
 
             if (updateVelocities)
@@ -279,9 +280,9 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
             if (updateTorques)
             {
                if (useDesiredTorque)
-                  jointTorque = revoluteJoint.getTauMeasured();
-               else
                   jointTorque = revoluteJoint.getTau();
+               else
+                  jointTorque = revoluteJoint.getTauMeasured();
                pinJoint.setTau(jointTorque);
             }
 
