@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex3DSupplier;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -87,7 +88,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
       FramePoint3D p3 = new FramePoint3D(WORLD_FRAME, 1.0, -1.0, 0.0);
       FramePoint3D[] framePoints = new FramePoint3D[]{p0, p1, p2, p3};
       
-      yoFrameConvexPolygon2d.setConvexPolygon2d(framePoints);
+      yoFrameConvexPolygon2d.set(FrameVertex3DSupplier.asFrameVertex3DSupplier(framePoints));
       
       floorGraphic = new YoGraphicPolygon("floorGraphic", yoFrameConvexPolygon2d, yoPlanePose, 3.0, YoAppearance.DimGrey());
       graphicsRegistry.registerYoGraphic("ground", floorGraphic);

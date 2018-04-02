@@ -62,7 +62,7 @@ public class SingleFootstepVisualizer
       }
 
       footPolygon = new YoFrameConvexPolygon2d(namePrefix + "yoPolygon", "", ReferenceFrame.getWorldFrame(), maxContactPoints, registry);
-      footPolygon.setConvexPolygon2d(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(polyPoints)));
+      footPolygon.set(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(polyPoints)));
 
       soleFramePose = new YoFramePose(namePrefix + "polygonPose", "", ReferenceFrame.getWorldFrame(), registry);
       soleFramePose.setXYZ(0.0, 0.0, -1.0);
@@ -117,7 +117,7 @@ public class SingleFootstepVisualizer
          yoContactPoints[i].set(pointInWorld);
       }
 
-      footPolygon.setConvexPolygon2d(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(predictedContactPoints)));
+      footPolygon.set(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(predictedContactPoints)));
       footPolygonViz.update();
    }
 }

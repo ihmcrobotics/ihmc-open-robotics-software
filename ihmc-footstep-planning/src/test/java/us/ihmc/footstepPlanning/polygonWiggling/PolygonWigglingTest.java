@@ -1892,7 +1892,7 @@ public class PolygonWigglingTest
    {
       YoFrameConvexPolygon2d yoPlanePolygon = new YoFrameConvexPolygon2d(name + "Polygon", worldFrame, 10, registry);
       artifacts.add(new YoArtifactPolygon(name, yoPlanePolygon , color, false));
-      yoPlanePolygon.setConvexPolygon2d(polygon);
+      yoPlanePolygon.set(polygon);
    }
 
    private static void showPlotterAndSleep(ArtifactList artifacts)

@@ -68,7 +68,12 @@ public class YoArtifactPolygon extends YoArtifact
       graphics.setColor(color);
       graphics.setStroke(stroke);
 
-      tempConvexPolygon.set(convexPolygon.getFrameConvexPolygon2d());
+      tempConvexPolygon.clear();
+      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
+      { // Accessing directly the vertex buffer to avoid internal checks. Due asynchronous read/write, these check can throw exceptions.
+         tempConvexPolygon.addVertex(convexPolygon.getVertexBuffer().get(i));
+      }
+      tempConvexPolygon.update();
 
       if (fill)
       {
@@ -91,9 +96,9 @@ public class YoArtifactPolygon extends YoArtifact
    {
       YoVariable<?>[] vars = new YoVariable[1 + 2 * convexPolygon.getMaxNumberOfVertices()];
       int i = 0;
-      vars[i++] = convexPolygon.getYoNumberVertices();
+      vars[i++] = convexPolygon.getYoNumberOfVertices();
 
-      for (YoFramePoint2d p : convexPolygon.getYoFramePoints())
+      for (YoFramePoint2d p : convexPolygon.getVertexBuffer())
       {
          vars[i++] = p.getYoX();
          vars[i++] = p.getYoY();

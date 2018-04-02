@@ -136,7 +136,7 @@ public class QuadrupedPathPreview
          }
       }
       polygon.update();
-      yoPolygon.setConvexPolygon2d(polygon);
+      yoPolygon.set(polygon);
    }
 
    private void updateFeetLocations()

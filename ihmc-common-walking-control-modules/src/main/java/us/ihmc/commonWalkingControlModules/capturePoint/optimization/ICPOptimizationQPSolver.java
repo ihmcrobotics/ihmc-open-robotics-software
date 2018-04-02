@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -321,10 +322,10 @@ public class ICPOptimizationQPSolver
       hasPlanarRegionConstraint = false;
    }
 
-   public void addReachabilityPolygon(FrameConvexPolygon2D polygon)
+   public void addReachabilityPolygon(FrameConvexPolygon2DReadOnly polygon)
    {
-      polygon.changeFrame(worldFrame);
-      polygon.update();
+      polygon.checkReferenceFrameMatch(worldFrame);
+      polygon.checkIfUpToDate();
       reachabilityConstraint.addPolygon(polygon);
    }
 

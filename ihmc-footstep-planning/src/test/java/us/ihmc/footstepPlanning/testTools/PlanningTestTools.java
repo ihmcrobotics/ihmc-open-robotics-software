@@ -138,7 +138,7 @@ public class PlanningTestTools
       if (footseps != null)
       {
          YoFrameConvexPolygon2d yoDefaultFootPolygon = new YoFrameConvexPolygon2d("DefaultFootPolygon", worldFrame, 4, vizRegistry);
-         yoDefaultFootPolygon.setConvexPolygon2d(createDefaultFootPolygon());
+         yoDefaultFootPolygon.set(createDefaultFootPolygon());
 
          int numberOfSteps = footseps.getNumberOfSteps();
 
@@ -167,7 +167,7 @@ public class PlanningTestTools
                footstep.getFoothold(foothold);
                ConvexPolygonTools.limitVerticesConservative(foothold, 4);
                YoFrameConvexPolygon2d yoFoothold = new YoFrameConvexPolygon2d("Foothold" + i, worldFrame, 4, vizRegistry);
-               yoFoothold.setConvexPolygon2d(foothold);
+               yoFoothold.set(foothold);
                YoGraphicPolygon footstepViz = new YoGraphicPolygon("footstep" + i, yoFoothold, yoFootstepPose, 1.0, appearance);
                vizGraphicsListRegistry.registerYoGraphic("viz", footstepViz);
             }

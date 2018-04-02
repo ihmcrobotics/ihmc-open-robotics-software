@@ -323,8 +323,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.areaToProjectInto.setIncludingFrame(areaToProjectInto);
       this.safeArea.setIncludingFrame(safeArea);
 
-      yoSafeAreaPolygon.setFrameConvexPolygon2d(safeArea);
-      yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);
+      yoSafeAreaPolygon.set(safeArea);
+      yoProjectionPolygon.set(areaToProjectInto);
    }
 
    public void minimizeAngularMomentumRateZ(boolean enable)

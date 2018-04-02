@@ -474,7 +474,7 @@ public class MomentumRecoveryControlModuleTest
          String Prefix = robotSide.getCamelCaseNameForMiddleOfExpression();
          YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(prefix + "FootPolygon", worldFrame, 10, registry);
          artifacts.add(new YoArtifactPolygon(Prefix + " Foot Polygon", yoFootPolygon, Color.BLACK, false, 1));
-         yoFootPolygon.setFrameConvexPolygon2d(footPolygonInWorld);
+         yoFootPolygon.set(footPolygonInWorld);
       }
       yoGraphicsListRegistry.registerArtifactList(artifacts);
    }

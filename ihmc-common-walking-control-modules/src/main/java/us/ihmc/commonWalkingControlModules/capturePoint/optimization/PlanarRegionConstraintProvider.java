@@ -135,9 +135,9 @@ public class PlanarRegionConstraintProvider
       }
       else
       {
-         yoActivePlanarRegion.clearAndHide();
-         yoShrunkActivePlanarRegion.clearAndHide();
-         yoActivePlanarRegionInControlPlane.clearAndHide();
+         yoActivePlanarRegion.clear();
+         yoShrunkActivePlanarRegion.clear();
+         yoActivePlanarRegionInControlPlane.clear();
       }
    }
 
@@ -193,9 +193,9 @@ public class PlanarRegionConstraintProvider
       captureRegionCalculator.hideCaptureRegion();
       solver.resetPlanarRegionConstraint();
 
-      yoActivePlanarRegion.clearAndHide();
-      yoActivePlanarRegionInControlPlane.clearAndHide();
-      yoShrunkActivePlanarRegion.clearAndHide();
+      yoActivePlanarRegion.clear();
+      yoActivePlanarRegionInControlPlane.clear();
+      yoShrunkActivePlanarRegion.clear();
    }
 
 
@@ -257,7 +257,7 @@ public class PlanarRegionConstraintProvider
          footstepPolygon.update();
       }
       icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, footstepPolygon, projectedAndShrunkConvexHull, distanceFromEdgeForStepping);
-      yoShrunkActivePlanarRegion.setConvexPolygon2d(projectedAndShrunkConvexHull);
+      yoShrunkActivePlanarRegion.set(projectedAndShrunkConvexHull);
 
       return projectedAndShrunkConvexHull;
    }
@@ -306,10 +306,10 @@ public class PlanarRegionConstraintProvider
          activePlanarRegionConvexHull.setIncludingFrame(planeReferenceFrame, activePlanarRegion.getConvexHull());
          activePlanarRegionConvexHull.changeFrameAndProjectToXYPlane(worldFrame);
 
-         yoActivePlanarRegion.setConvexPolygon2d(activePlanarRegionConvexHull);
+         yoActivePlanarRegion.set(activePlanarRegionConvexHull);
 
          icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, activePlanarRegionConvexHullInControlFrame);
-         yoActivePlanarRegionInControlPlane.setConvexPolygon2d(activePlanarRegionConvexHullInControlFrame);
+         yoActivePlanarRegionInControlPlane.set(activePlanarRegionConvexHullInControlFrame);
          return false;
       }
 
@@ -356,14 +356,14 @@ public class PlanarRegionConstraintProvider
          activePlanarRegionConvexHull.setIncludingFrame(planeReferenceFrame, activePlanarRegion.getConvexHull());
          activePlanarRegionConvexHull.changeFrameAndProjectToXYPlane(worldFrame);
 
-         yoActivePlanarRegion.setConvexPolygon2d(activePlanarRegionConvexHull);
-         yoActivePlanarRegionInControlPlane.setConvexPolygon2d(activePlanarRegionConvexHullInControlFrame);
+         yoActivePlanarRegion.set(activePlanarRegionConvexHull);
+         yoActivePlanarRegionInControlPlane.set(activePlanarRegionConvexHullInControlFrame);
       }
       else
       {
-         yoActivePlanarRegion.clearAndHide();
-         yoShrunkActivePlanarRegion.clearAndHide();
-         yoActivePlanarRegionInControlPlane.clearAndHide();
+         yoActivePlanarRegion.clear();
+         yoShrunkActivePlanarRegion.clear();
+         yoActivePlanarRegionInControlPlane.clear();
       }
 
       return activePlanarRegion;
@@ -379,9 +379,9 @@ public class PlanarRegionConstraintProvider
       activePlanarRegion = null;
       activePlanarRegionConvexHullInControlFrame.clear();
 
-      yoActivePlanarRegion.clearAndHide();
-      yoShrunkActivePlanarRegion.clearAndHide();
-      yoActivePlanarRegionInControlPlane.clearAndHide();
+      yoActivePlanarRegion.clear();
+      yoShrunkActivePlanarRegion.clear();
+      yoActivePlanarRegionInControlPlane.clear();
    }
 
    private final FramePose3D footstepPose = new FramePose3D();

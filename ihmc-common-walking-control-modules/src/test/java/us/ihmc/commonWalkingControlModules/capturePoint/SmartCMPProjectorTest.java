@@ -661,7 +661,7 @@ public class SmartCMPProjectorTest
          YoFrameConvexPolygon2d yoProjectionArea = new YoFrameConvexPolygon2d("CMPProjectionArea", worldFrame, 10, registry);
          YoArtifactPolygon projectionAreaViz = new YoArtifactPolygon("CMP Projection Area", yoProjectionArea, Blue().getAwtColor(), false);
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), projectionAreaViz);
-         yoProjectionArea.setFrameConvexPolygon2d(projectionArea);
+         yoProjectionArea.set(projectionArea);
 
          if (expectedProjection != null)
          {
@@ -677,7 +677,7 @@ public class SmartCMPProjectorTest
             YoFrameConvexPolygon2d yoExpectedArea = new YoFrameConvexPolygon2d("ExpectedArea", worldFrame, 10, registry);
             YoArtifactPolygon expectedAreaViz = new YoArtifactPolygon("Expected CMP Area", yoExpectedArea, LawnGreen().getAwtColor(), false, 4);
             graphicsListRegistry.registerArtifact(getClass().getSimpleName(), expectedAreaViz);
-            yoExpectedArea.setFrameConvexPolygon2d(expectedArea);
+            yoExpectedArea.set(expectedArea);
          }
 
          if (finalCapturePoint != null)

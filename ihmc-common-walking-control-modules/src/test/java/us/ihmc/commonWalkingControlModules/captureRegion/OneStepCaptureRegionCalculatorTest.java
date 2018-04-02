@@ -449,7 +449,7 @@ public class OneStepCaptureRegionCalculatorTest
          YoFrameConvexPolygon2d yoFootPolygon = new YoFrameConvexPolygon2d(robotSide.getCamelCaseNameForStartOfExpression() + "Foot", "", worldFrame, 4,
                registry);
          footConvexPolygon2d.changeFrame(worldFrame);
-         yoFootPolygon.setFrameConvexPolygon2d(footConvexPolygon2d);
+         yoFootPolygon.set(footConvexPolygon2d);
          footConvexPolygon2d.changeFrame(ankleZUpFrame);
          yoFootPolygons.put(robotSide, yoFootPolygon);
          Color footColor;
@@ -481,9 +481,9 @@ public class OneStepCaptureRegionCalculatorTest
          {
             FramePoint2D icp = new FramePoint2D(yoICP);
             RobotSide supportSide = yoSupportSide.getEnumValue();
-            yoFootPolygons.get(supportSide.getOppositeSide()).hide();
+            yoFootPolygons.get(supportSide.getOppositeSide()).clear();
             footPolygons.get(supportSide).changeFrame(worldFrame);
-            yoFootPolygons.get(supportSide).setFrameConvexPolygon2d(footPolygons.get(supportSide));
+            yoFootPolygons.get(supportSide).set(footPolygons.get(supportSide));
             footPolygons.get(supportSide).changeFrame(ankleZUpFrames.get(supportSide));
             oneStepCaptureRegionCalculator.calculateCaptureRegion(supportSide.getOppositeSide(), swingTimeRemaining.getDoubleValue(), icp, omega0,
                   footPolygons.get(supportSide));
@@ -491,7 +491,7 @@ public class OneStepCaptureRegionCalculatorTest
             FrameConvexPolygon2D frameConvexPolygon2d = new FrameConvexPolygon2D();
             frameConvexPolygon2d.setIncludingFrame(oneStepCaptureRegionCalculator.getCaptureRegion());
             frameConvexPolygon2d.changeFrame(worldFrame);
-            yoCaptureRegion.setFrameConvexPolygon2d(frameConvexPolygon2d);
+            yoCaptureRegion.set(frameConvexPolygon2d);
 
             simulationOverheadPlotter.update();
          }

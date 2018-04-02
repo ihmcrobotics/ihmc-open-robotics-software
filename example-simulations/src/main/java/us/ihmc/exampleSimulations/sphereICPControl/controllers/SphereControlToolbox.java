@@ -497,9 +497,9 @@ public class SphereControlToolbox
          yoNextFootstepPose.setToNaN();
          yoNextNextFootstepPose.setToNaN();
          yoNextNextNextFootstepPose.setToNaN();
-         yoNextFootstepPolygon.hide();
-         yoNextNextFootstepPolygon.hide();
-         yoNextNextNextFootstepPolygon.hide();
+         yoNextFootstepPolygon.clear();
+         yoNextNextFootstepPolygon.clear();
+         yoNextNextNextFootstepPolygon.clear();
          return;
       }
 
@@ -512,7 +512,7 @@ public class SphereControlToolbox
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      yoNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
+      yoNextFootstepPolygon.set(footstepPolygon);
 
       FramePose3D nextFootstepPose = new FramePose3D(nextFootstep.getSoleReferenceFrame());
       yoNextFootstepPose.setAndMatchFrame(nextFootstepPose);
@@ -521,8 +521,8 @@ public class SphereControlToolbox
       {
          yoNextNextFootstepPose.setToNaN();
          yoNextNextNextFootstepPose.setToNaN();
-         yoNextNextFootstepPolygon.hide();
-         yoNextNextNextFootstepPolygon.hide();
+         yoNextNextFootstepPolygon.clear();
+         yoNextNextNextFootstepPolygon.clear();
          return;
       }
 
@@ -533,7 +533,7 @@ public class SphereControlToolbox
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      yoNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
+      yoNextNextFootstepPolygon.set(footstepPolygon);
 
       FramePose3D nextNextFootstepPose = new FramePose3D(nextNextFootstep.getSoleReferenceFrame());
       yoNextNextFootstepPose.setAndMatchFrame(nextNextFootstepPose);
@@ -541,7 +541,7 @@ public class SphereControlToolbox
       if (nextNextNextFootstep == null)
       {
          yoNextNextNextFootstepPose.setToNaN();
-         yoNextNextNextFootstepPolygon.hide();
+         yoNextNextNextFootstepPolygon.clear();
          return;
       }
 
@@ -552,7 +552,7 @@ public class SphereControlToolbox
       convexPolygonShrinker.scaleConvexPolygon(tempFootstepPolygonForShrinking, polygonShrinkAmount, footstepPolygon);
 
       footstepPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      yoNextNextNextFootstepPolygon.setFrameConvexPolygon2d(footstepPolygon);
+      yoNextNextNextFootstepPolygon.set(footstepPolygon);
 
       FramePose3D nextNextNextFootstepPose = new FramePose3D(nextNextNextFootstep.getSoleReferenceFrame());
       yoNextNextNextFootstepPose.setAndMatchFrame(nextNextNextFootstepPose);

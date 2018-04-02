@@ -149,16 +149,16 @@ public class ICPControlPolygons
 
    private void updateVisualize()
    {
-      controlPolygonViz.setFrameConvexPolygon2d(controlPolygonInWorld);
+      controlPolygonViz.set(controlPolygonInWorld);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          YoFrameConvexPolygon2d footPolygonViz = controlFootPolygonsViz.get(robotSide);
          FrameConvexPolygon2D footPolygon = footControlPolygonsInWorldFrame.get(robotSide);
          if (footPolygon.isEmpty())
-            footPolygonViz.hide();
+            footPolygonViz.clear();
          else
-            footPolygonViz.setFrameConvexPolygon2d(footPolygon);
+            footPolygonViz.set(footPolygon);
       }
    }
 

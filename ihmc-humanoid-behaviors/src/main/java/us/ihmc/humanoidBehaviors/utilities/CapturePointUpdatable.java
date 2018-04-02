@@ -98,7 +98,7 @@ public class CapturePointUpdatable implements Updatable
          FrameConvexPolygon2D footSupportPolygon = capturabilityBasedStatusSubsrciber.getFootSupportPolygon(robotSide);
          if (footSupportPolygon != null)
          {
-            yoFootSupportPolygons.get(robotSide).setFrameConvexPolygon2d(footSupportPolygon);
+            yoFootSupportPolygons.get(robotSide).set(footSupportPolygon);
             footSupportPolygons.put(robotSide, footSupportPolygon);
          }
       }
@@ -108,18 +108,18 @@ public class CapturePointUpdatable implements Updatable
       if (footSupportPolygons.get(RobotSide.LEFT).isEmpty())
       {
          supportLeg = RobotSide.RIGHT;
-         yoSupportPolygon.setFrameConvexPolygon2d(footSupportPolygons.get(supportLeg));
+         yoSupportPolygon.set(footSupportPolygons.get(supportLeg));
       }
       else if (footSupportPolygons.get(RobotSide.RIGHT).isEmpty())
       {
          supportLeg = RobotSide.LEFT;
-         yoSupportPolygon.setFrameConvexPolygon2d(footSupportPolygons.get(supportLeg));
+         yoSupportPolygon.set(footSupportPolygons.get(supportLeg));
       }
       else
       {
          supportLeg = null;
          supportPolygon.setIncludingFrame(footSupportPolygons.get(RobotSide.LEFT), footSupportPolygons.get(RobotSide.RIGHT));
-         yoSupportPolygon.setFrameConvexPolygon2d(supportPolygon);
+         yoSupportPolygon.set(supportPolygon);
       }
 
       yoSupportLeg.set(supportLeg);
@@ -201,9 +201,7 @@ public class CapturePointUpdatable implements Updatable
    {
       icp.set(yoCapturePoint);
 
-      ConvexPolygon2DReadOnly supportPolygon = yoSupportPolygon.getConvexPolygon2d();
-
-      double distanceToClosestEdgeOfSupportPolygon = computeDistanceToClosestEdge(icp, supportPolygon);
+      double distanceToClosestEdgeOfSupportPolygon = computeDistanceToClosestEdge(icp, yoSupportPolygon);
 
       minIcpDistanceToSupportPolygon.set(distanceToClosestEdgeOfSupportPolygon);
    }

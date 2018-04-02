@@ -34,8 +34,8 @@ public class PolygonSnapperVisualizer
       polygonToSnap = new YoFrameConvexPolygon2d("polygonToSnap", ReferenceFrame.getWorldFrame(), 4, registry);
       snappedPolygon = new YoFrameConvexPolygon2d("snappedPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
 
-      polygonToSnap.setConvexPolygon2d(snappingPolygonShape);
-      snappedPolygon.setConvexPolygon2d(snappingPolygonShape);
+      polygonToSnap.set(snappingPolygonShape);
+      snappedPolygon.set(snappingPolygonShape);
 
       polygonToSnapPose = new YoFramePose("polygonToSnapPose", ReferenceFrame.getWorldFrame(), registry);
       snappedPolygonPose = new YoFramePose("snappedPolygonPose", ReferenceFrame.getWorldFrame(), registry);
@@ -122,7 +122,7 @@ public class PolygonSnapperVisualizer
       }
       else
       {
-         snappedPolygonViz.updateConvexPolygon2d(snappedPolygon.getConvexPolygon2d());
+         snappedPolygonViz.updateConvexPolygon2d(snappedPolygon);
       }
 
       scs.setTime(scs.getTime() + 1.0);

@@ -137,7 +137,7 @@ public class ControllerBasedBodyPathTest
          }
 
          YoFrameConvexPolygon2d yoDefaultFootPolygon = new YoFrameConvexPolygon2d("DefaultFootPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
-         yoDefaultFootPolygon.setConvexPolygon2d(PlanningTestTools.createDefaultFootPolygon());
+         yoDefaultFootPolygon.set(PlanningTestTools.createDefaultFootPolygon());
 
          for (RobotSide side : RobotSide.values)
          {

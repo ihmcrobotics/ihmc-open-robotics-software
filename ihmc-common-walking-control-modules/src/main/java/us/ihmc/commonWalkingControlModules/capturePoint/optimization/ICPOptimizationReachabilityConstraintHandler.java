@@ -94,7 +94,7 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    public void initializeReachabilityConstraintForDoubleSupport(ICPOptimizationQPSolver solver)
    {
-      contractedReachabilityPolygon.clearAndHide();
+      contractedReachabilityPolygon.clear();
       motionLimitLine.setToNaN();
       adjustmentLineSegment.setToNaN();
       solver.resetReachabilityConstraint();
@@ -105,13 +105,11 @@ public class ICPOptimizationReachabilityConstraintHandler
    {
       solver.resetReachabilityConstraint();
 
-      FrameConvexPolygon2D reachabilityPolygon = reachabilityPolygons.get(supportSide).getFrameConvexPolygon2d();
-      reachabilityPolygon.changeFrame(ReferenceFrame.getWorldFrame());
-      contractedReachabilityPolygon.setConvexPolygon2d(reachabilityPolygon);
+      reachabilityPolygons.get(supportSide).update();
+      contractedReachabilityPolygon.setMatchingFrame(reachabilityPolygons.get(supportSide), false);
 
-      FrameConvexPolygon2D polygon2d = contractedReachabilityPolygon.getFrameConvexPolygon2d();
-      polygon2d.update();
-      solver.addReachabilityPolygon(polygon2d);
+      contractedReachabilityPolygon.update();
+      solver.addReachabilityPolygon(contractedReachabilityPolygon);
       solver.resetPlanarRegionConstraint();
    }
 
@@ -138,21 +136,17 @@ public class ICPOptimizationReachabilityConstraintHandler
       motionLine.setPoint(adjustedLocation);
       motionLine.setDirection(adjustmentDirection);
 
-      FrameConvexPolygon2D polygon2d = contractedReachabilityPolygon.getFrameConvexPolygon2d();
-      polygon2d.update();
-      ConvexPolygonTools.cutPolygonWithLine(motionLine, polygon2d, lineIntersector2d, RobotSide.LEFT);
+      contractedReachabilityPolygon.update();
+      ConvexPolygonTools.cutPolygonWithLine(motionLine, contractedReachabilityPolygon, lineIntersector2d, RobotSide.LEFT);
 
       adjustmentLineSegment.set(referenceLocation, adjustedLocation);
       motionLimitLine.set(lineIntersector2d.getIntersectionPointOne(), lineIntersector2d.getIntersectionPointTwo());
-
-      contractedReachabilityPolygon.setConvexPolygon2d(polygon2d);
    }
 
    public void updateReachabilityConstraint(ICPOptimizationQPSolver solver)
    {
       solver.resetReachabilityConstraint();
-      FrameConvexPolygon2D polygon2d = contractedReachabilityPolygon.getFrameConvexPolygon2d();
-      polygon2d.update();
-      solver.addReachabilityPolygon(polygon2d);
+      contractedReachabilityPolygon.update();
+      solver.addReachabilityPolygon(contractedReachabilityPolygon);
    }
 }

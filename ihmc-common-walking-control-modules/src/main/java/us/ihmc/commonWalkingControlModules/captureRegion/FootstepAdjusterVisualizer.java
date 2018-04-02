@@ -41,7 +41,7 @@ public class FootstepAdjusterVisualizer
 
    public void hide()
    {
-      yoNextFootstepPolygon.hide();
+      yoNextFootstepPolygon.clear();
    }
 
    public void update()
@@ -51,7 +51,7 @@ public class FootstepAdjusterVisualizer
 
       try
       {
-         yoNextFootstepPolygon.setFrameConvexPolygon2d(nextFootstepPolygon);
+         yoNextFootstepPolygon.set(nextFootstepPolygon);
       }
       catch (Exception e)
       {

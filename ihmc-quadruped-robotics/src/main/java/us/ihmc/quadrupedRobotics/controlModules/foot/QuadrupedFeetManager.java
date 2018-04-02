@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex3DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
@@ -59,12 +60,12 @@ public class QuadrupedFeetManager
             contactPoints.add(toolbox.getTaskSpaceEstimates().getSolePosition(quadrant));
       }
 
-      supportPolygon.setConvexPolygon2d(contactPoints);
+      supportPolygon.set(FrameVertex3DSupplier.asFrameVertex3DSupplier(contactPoints));
    }
 
    public void hideSupportPolygon()
    {
-      supportPolygon.hide();
+      supportPolygon.clear();
    }
 
    public YoFrameConvexPolygon2d getSupportPolygon()

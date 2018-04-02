@@ -258,10 +258,10 @@ public class PartialFootholdControlModule
    private void doNothing()
    {
       footholdState.set(PartialFootholdState.FULL);
-      yoUnsafePolygon.hide();
+      yoUnsafePolygon.clear();
       shrunkFootPolygonInWorld.setIncludingFrame(shrunkFootPolygon);
       shrunkFootPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
-      yoShrunkFootPolygon.setFrameConvexPolygon2d(shrunkFootPolygonInWorld);
+      yoShrunkFootPolygon.set(shrunkFootPolygonInWorld);
       unsafeArea.set(0.0);
    }
 
@@ -285,11 +285,11 @@ public class PartialFootholdControlModule
          backupFootPolygon.set(shrunkFootPolygon);
          ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkFootPolygon, RobotSide.RIGHT);
          unsafePolygon.changeFrameAndProjectToXYPlane(worldFrame);
-         yoUnsafePolygon.setFrameConvexPolygon2d(unsafePolygon);
+         yoUnsafePolygon.set(unsafePolygon);
 
          shrunkFootPolygonInWorld.setIncludingFrame(shrunkFootPolygon);
          shrunkFootPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
-         yoShrunkFootPolygon.setFrameConvexPolygon2d(shrunkFootPolygonInWorld);
+         yoShrunkFootPolygon.set(shrunkFootPolygonInWorld);
       }
       else
       {
@@ -348,7 +348,7 @@ public class PartialFootholdControlModule
       fullSupportAfterShrinking.addVertices(controllerFootPolygonInWorld);
       fullSupportAfterShrinking.update();
       controllerToolbox.getCapturePoint(capturePoint);
-      yoFullSupportAfterShrinking.setFrameConvexPolygon2d(fullSupportAfterShrinking);
+      yoFullSupportAfterShrinking.set(fullSupportAfterShrinking);
 //      boolean icpInPolygon = fullSupportAfterShrinking.isPointInside(capturePoint);
 //      if (!icpInPolygon)
 //      {
@@ -406,9 +406,9 @@ public class PartialFootholdControlModule
    {
       shrinkCounter.set(0);
       footholdState.set(null);
-      yoUnsafePolygon.hide();
-      yoShrunkFootPolygon.hide();
-      yoFullSupportAfterShrinking.hide();
+      yoUnsafePolygon.clear();
+      yoShrunkFootPolygon.clear();
+      yoFullSupportAfterShrinking.clear();
       for (RotationCalculatorType calculatorType : RotationCalculatorType.values)
       {
          if (!rotationCalculators.containsKey(calculatorType)) continue;

@@ -448,7 +448,7 @@ public class QuadrupedSupportPolygon implements Serializable
    public void packYoFrameConvexPolygon2d(YoFrameConvexPolygon2d yoFrameConvexPolygon2d)
    {      
       updateTempFrameConvexPolygon();
-      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(tempFrameConvexPolygon2d);
+      yoFrameConvexPolygon2d.set(tempFrameConvexPolygon2d);
    }
 
    private void updateTempFrameConvexPolygon()

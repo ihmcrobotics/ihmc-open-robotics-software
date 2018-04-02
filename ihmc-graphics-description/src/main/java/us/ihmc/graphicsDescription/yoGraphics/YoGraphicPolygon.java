@@ -1,6 +1,5 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -72,7 +71,7 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
       super(name, framePoint, orientation, scale);
 
       if (yoFrameConvexPolygon2d.getNumberOfVertices() <= 0)
-         yoFrameConvexPolygon2d.setConvexPolygon2d(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new Point2D[] {new Point2D()})));
+         yoFrameConvexPolygon2d.set(Vertex2DSupplier.asVertex2DSupplier(new Point2D[] {new Point2D()}));
 
       this.yoFrameConvexPolygon2d = yoFrameConvexPolygon2d;
       this.appearance = appearance;
@@ -81,8 +80,7 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
       graphics3dObject = new Graphics3DObject();
       graphics3dObject.setChangeable(true);
 
-      ConvexPolygon2DReadOnly convexPolygon2d = yoFrameConvexPolygon2d.getConvexPolygon2d();
-      MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon2d, height);
+      MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(yoFrameConvexPolygon2d, height);
       instruction = new Graphics3DAddMeshDataInstruction(meshDataHolder, appearance);
       graphics3dObject.addInstruction(instruction);
    }
@@ -98,7 +96,7 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
    {
       if (yoFrameConvexPolygon2d.getHasChangedAndReset())
       {
-         instruction.setMesh(MeshDataGenerator.ExtrudedPolygon(yoFrameConvexPolygon2d.getConvexPolygon2d(), height));
+         instruction.setMesh(MeshDataGenerator.ExtrudedPolygon(yoFrameConvexPolygon2d, height));
       }
    }
 
@@ -109,13 +107,13 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
 
    public void updateConvexPolygon2d(FrameConvexPolygon2DReadOnly frameConvexPolygon2d)
    {
-      yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d);
+      yoFrameConvexPolygon2d.set(frameConvexPolygon2d);
       update();
    }
 
    public void updateConvexPolygon2d(ConvexPolygon2DReadOnly convexPolygon2d)
    {
-      yoFrameConvexPolygon2d.setConvexPolygon2d(convexPolygon2d);
+      yoFrameConvexPolygon2d.set(convexPolygon2d);
       update();
    }
 
@@ -137,9 +135,9 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
       //poly + framePoint + frameOrientation
       YoVariable<?>[] vars = new YoVariable[1 + 2 * yoFrameConvexPolygon2d.getMaxNumberOfVertices() + 6];
       int i = 0;
-      vars[i++] = yoFrameConvexPolygon2d.getYoNumberVertices();
+      vars[i++] = yoFrameConvexPolygon2d.getYoNumberOfVertices();
 
-      for (YoFramePoint2d p : yoFrameConvexPolygon2d.getYoFramePoints())
+      for (YoFramePoint2d p : yoFrameConvexPolygon2d.getVertexBuffer())
       {
          vars[i++] = p.getYoX();
          vars[i++] = p.getYoY();
@@ -159,7 +157,7 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
    @Override
    public double[] getConstants()
    {
-      return new double[] { scale, yoFrameConvexPolygon2d.getYoFramePoints().size() };
+      return new double[] { scale, yoFrameConvexPolygon2d.getVertexBuffer().size() };
    }
 
    @Override
