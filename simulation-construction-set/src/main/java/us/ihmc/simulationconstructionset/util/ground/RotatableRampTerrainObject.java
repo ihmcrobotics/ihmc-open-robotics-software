@@ -1,7 +1,12 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Ramp3D;
+import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -26,6 +31,8 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
    Point3D pointToTransform = new Point3D();
 
    private Graphics3DObject linkGraphics;
+   
+   private final ArrayList<Shape3D<?>> terrainCollisionShapes = new ArrayList<>();
 
    /**
     * @param xStartBeforeYaw
@@ -77,6 +84,10 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
       Point3D maxPoint = new Point3D(xGlobalMax, yGlobalMax, height);
 
       boundingBox = new BoundingBox3D(minPoint, maxPoint);
+      
+      Ramp3D ramp3DShape = new Ramp3D(transform, run, width, height);
+      
+      this.terrainCollisionShapes.add(ramp3DShape);
    }
 
    public RotatableRampTerrainObject(double xCenter, double yCenter, double run, double width, double height, double degreesYaw)
@@ -232,5 +243,11 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;
+   }
+   
+   @Override
+   public List<Shape3D<?>> getTerrainCollisionShapes()
+   {
+      return terrainCollisionShapes;
    }
 }
