@@ -1,14 +1,18 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -16,7 +20,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -24,8 +27,6 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 public abstract class LinearMomentumRateOfChangeControlModule
 {
@@ -66,8 +67,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
    protected final FramePoint2D perfectCoP = new FramePoint2D();
    protected final FramePoint2D desiredCMP = new FramePoint2D();
 
-   protected final FrameConvexPolygon2d areaToProjectInto = new FrameConvexPolygon2d();
-   protected final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+   protected final FrameConvexPolygon2D areaToProjectInto = new FrameConvexPolygon2D();
+   protected final FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
 
    private boolean controlHeightWithMomentum;
 
@@ -317,10 +318,10 @@ public abstract class LinearMomentumRateOfChangeControlModule
                                      linearMomentumRateWeight.getX(), linearMomentumRateWeight.getY(), linearMomentumRateWeight.getZ());
    }
 
-   public void setCMPProjectionArea(FrameConvexPolygon2d areaToProjectInto, FrameConvexPolygon2d safeArea)
+   public void setCMPProjectionArea(FrameConvexPolygon2DReadOnly areaToProjectInto, FrameConvexPolygon2DReadOnly safeArea)
    {
-      this.areaToProjectInto.setIncludingFrameAndUpdate(areaToProjectInto);
-      this.safeArea.setIncludingFrameAndUpdate(safeArea);
+      this.areaToProjectInto.setIncludingFrame(areaToProjectInto);
+      this.safeArea.setIncludingFrame(safeArea);
 
       yoSafeAreaPolygon.setFrameConvexPolygon2d(safeArea);
       yoProjectionPolygon.setFrameConvexPolygon2d(areaToProjectInto);

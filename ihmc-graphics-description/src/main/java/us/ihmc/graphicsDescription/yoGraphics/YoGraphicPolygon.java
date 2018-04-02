@@ -1,8 +1,10 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.GraphicsUpdatable;
@@ -11,7 +13,6 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -80,7 +81,7 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
       graphics3dObject = new Graphics3DObject();
       graphics3dObject.setChangeable(true);
 
-      ConvexPolygon2D convexPolygon2d = yoFrameConvexPolygon2d.getConvexPolygon2d();
+      ConvexPolygon2DReadOnly convexPolygon2d = yoFrameConvexPolygon2d.getConvexPolygon2d();
       MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon2d, height);
       instruction = new Graphics3DAddMeshDataInstruction(meshDataHolder, appearance);
       graphics3dObject.addInstruction(instruction);
@@ -106,13 +107,13 @@ public class YoGraphicPolygon extends YoGraphicAbstractShape implements RemoteYo
       instruction.setAppearance(appearance);
    }
 
-   public void updateConvexPolygon2d(FrameConvexPolygon2d frameConvexPolygon2d)
+   public void updateConvexPolygon2d(FrameConvexPolygon2DReadOnly frameConvexPolygon2d)
    {
       yoFrameConvexPolygon2d.setFrameConvexPolygon2d(frameConvexPolygon2d);
       update();
    }
 
-   public void updateConvexPolygon2d(ConvexPolygon2D convexPolygon2d)
+   public void updateConvexPolygon2d(ConvexPolygon2DReadOnly convexPolygon2d)
    {
       yoFrameConvexPolygon2d.setConvexPolygon2d(convexPolygon2d);
       update();

@@ -4,7 +4,8 @@ import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -16,15 +17,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class CapturePointUpdatable implements Updatable
 {
@@ -45,8 +45,8 @@ public class CapturePointUpdatable implements Updatable
    private final YoBoolean tippingDetected = new YoBoolean("tippingDetected", registry);
    private final double MAX_CAPTURE_POINT_ERROR_M = 0.5 * 0.075; // Reasonable value < 0.01   Max < 0.02
 
-   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
-   private final SideDependentList<FrameConvexPolygon2d> footSupportPolygons = new SideDependentList<>(new FrameConvexPolygon2d(), new FrameConvexPolygon2d());
+   private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
+   private final SideDependentList<FrameConvexPolygon2D> footSupportPolygons = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
 
    private final CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber;
 
@@ -95,7 +95,7 @@ public class CapturePointUpdatable implements Updatable
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FrameConvexPolygon2d footSupportPolygon = capturabilityBasedStatusSubsrciber.getFootSupportPolygon(robotSide);
+         FrameConvexPolygon2D footSupportPolygon = capturabilityBasedStatusSubsrciber.getFootSupportPolygon(robotSide);
          if (footSupportPolygon != null)
          {
             yoFootSupportPolygons.get(robotSide).setFrameConvexPolygon2d(footSupportPolygon);
@@ -118,7 +118,7 @@ public class CapturePointUpdatable implements Updatable
       else
       {
          supportLeg = null;
-         supportPolygon.setIncludingFrameAndUpdate(footSupportPolygons.get(RobotSide.LEFT), footSupportPolygons.get(RobotSide.RIGHT));
+         supportPolygon.setIncludingFrame(footSupportPolygons.get(RobotSide.LEFT), footSupportPolygons.get(RobotSide.RIGHT));
          yoSupportPolygon.setFrameConvexPolygon2d(supportPolygon);
       }
 
@@ -201,14 +201,14 @@ public class CapturePointUpdatable implements Updatable
    {
       icp.set(yoCapturePoint);
 
-      ConvexPolygon2D supportPolygon = yoSupportPolygon.getConvexPolygon2d();
+      ConvexPolygon2DReadOnly supportPolygon = yoSupportPolygon.getConvexPolygon2d();
 
       double distanceToClosestEdgeOfSupportPolygon = computeDistanceToClosestEdge(icp, supportPolygon);
 
       minIcpDistanceToSupportPolygon.set(distanceToClosestEdgeOfSupportPolygon);
    }
 
-   private double computeDistanceToClosestEdge(Point2D pointInsideConvexPolygon, ConvexPolygon2D convexPolygon)
+   private double computeDistanceToClosestEdge(Point2D pointInsideConvexPolygon, ConvexPolygon2DReadOnly convexPolygon)
    {
       double minDistanceToEdge = Double.POSITIVE_INFINITY;
 

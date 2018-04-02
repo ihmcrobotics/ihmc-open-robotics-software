@@ -25,6 +25,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -39,7 +40,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotController.RobotController;
@@ -424,7 +424,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
 
    private class VizUpdater implements RobotController
    {
-      FrameConvexPolygon2d footSupport = new FrameConvexPolygon2d(worldFrame);
+      FrameConvexPolygon2D footSupport = new FrameConvexPolygon2D(worldFrame);
       FramePoint2D point = new FramePoint2D(worldFrame);
       FramePoint3D point3d = new FramePoint3D();
 

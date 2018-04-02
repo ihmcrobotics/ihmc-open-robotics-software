@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools.Bound;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -56,7 +59,7 @@ public class ConvexPolygonScaler
     * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
     * polygonQ is a point, a square is returned around the point. polygonQ is not changed. 
     */
-   public boolean scaleConvexPolygon(ConvexPolygon2D polygonQ, double distance, ConvexPolygon2D polygonToPack)
+   public boolean scaleConvexPolygon(ConvexPolygon2DReadOnly polygonQ, double distance, ConvexPolygon2DBasics polygonToPack)
    {
       if (Math.abs(distance) < 1.0e-10)
       {
@@ -353,19 +356,17 @@ public class ConvexPolygonScaler
     * If the distance is negative it grows the polygon. If polygonQ is a line and the distance is negative, a 6 point polygon is returned around the line. If
     * polygonQ is a point, a square is returned around the point. polygonQ is not changed. 
     */
-   public void scaleConvexPolygon(FrameConvexPolygon2d polygonQ, double distance, FrameConvexPolygon2d framePolygonToPack)
+   public void scaleConvexPolygon(FrameConvexPolygon2D polygonQ, double distance, FrameConvexPolygon2D framePolygonToPack)
    {      
       if (Math.abs(distance) < 1.0e-10)
       {
-         framePolygonToPack.setIncludingFrameAndUpdate(polygonQ);
+         framePolygonToPack.setIncludingFrame(polygonQ);
          return;
       }
       
       framePolygonToPack.clear(polygonQ.getReferenceFrame());
       framePolygonToPack.update();
-      ConvexPolygon2D polygon2dToPack = framePolygonToPack.getConvexPolygon2d();
-      scaleConvexPolygon(polygonQ.getConvexPolygon2d(), distance, polygon2dToPack);
-//      framePolygonToPack.updateFramePoints();
+      scaleConvexPolygon((ConvexPolygon2DReadOnly) polygonQ, distance, (ConvexPolygon2DBasics) framePolygonToPack);
       framePolygonToPack.update();
    }
 }
