@@ -15,6 +15,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
@@ -29,6 +30,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
    private QuadrupedStepTeleopManager stepTeleopManager;
+   private QuadrupedBodyPoseTeleopManager poseTeleopManager;
    private PushRobotTestConductor pusher;
 
    @Before
@@ -44,6 +46,7 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor = null;
       variables = null;
       stepTeleopManager = null;
+      poseTeleopManager = null;
       pusher = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -226,7 +229,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
-      
+      poseTeleopManager = quadrupedTestFactory.getBodyPoseTeleopManager();
+
       QuadrupedTestBehaviors.standUp(conductor, variables, stepTeleopManager);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
@@ -243,10 +247,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
 
    private void testMovingCoM(double comPositionZ, double bodyOrientationYaw, double bodyOrientationPitch, double bodyOrientationRoll, double translationDelta, double orientationDelta)
    {
-      variables.getYoComPositionInputZ().set(comPositionZ);
-      variables.getYoBodyOrientationInputYaw().set(bodyOrientationYaw);
-      variables.getYoBodyOrientationInputPitch().set(bodyOrientationPitch);
-      variables.getYoBodyOrientationInputRoll().set(bodyOrientationRoll);
+      poseTeleopManager.setDesiredCoMHeight(comPositionZ);
+      poseTeleopManager.setDesiredBodyOrientation(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
