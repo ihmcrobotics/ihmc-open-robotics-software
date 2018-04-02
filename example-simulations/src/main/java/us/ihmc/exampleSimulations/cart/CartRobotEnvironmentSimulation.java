@@ -57,7 +57,7 @@ public class CartRobotEnvironmentSimulation
       double coefficientOfRestitution = 0.2;
       double coefficientOfFriction = 0.7;
       CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
-      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(environment.getTerrainObject3D(), collisionHandler);
       scs.initializeShapeCollision(collisionManager);
 
       scs.setDT(dt, 1);
