@@ -225,16 +225,16 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    {
       initialPose.get(tempPosition, tempOrientation);
 
-      initialPosition.setAndMatchFrame(tempPosition);
-      initialOrientation.setAndMatchFrame(tempOrientation);
+      initialPosition.setMatchingFrame(tempPosition);
+      initialOrientation.setMatchingFrame(tempOrientation);
 
       initialOrientationForViz.setAndMatchFrame(tempOrientation);
    }
 
    public void setInitialPose(FramePoint3D initialPosition, FrameQuaternion initialOrientation)
    {
-      this.initialPosition.setAndMatchFrame(initialPosition);
-      this.initialOrientation.setAndMatchFrame(initialOrientation);
+      this.initialPosition.setMatchingFrame(initialPosition);
+      this.initialOrientation.setMatchingFrame(initialOrientation);
 
       initialOrientationForViz.setAndMatchFrame(initialOrientation);
    }
@@ -243,16 +243,16 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    {
       finalPose.get(tempPosition, tempOrientation);
 
-      finalPosition.setAndMatchFrame(tempPosition);
-      finalOrientation.setAndMatchFrame(tempOrientation);
+      finalPosition.setMatchingFrame(tempPosition);
+      finalOrientation.setMatchingFrame(tempOrientation);
 
       finalOrientationForViz.setAndMatchFrame(tempOrientation);
    }
 
    public void setFinalPose(FramePoint3D finalPosition, FrameQuaternion finalOrientation)
    {
-      this.finalPosition.setAndMatchFrame(finalPosition);
-      this.finalOrientation.setAndMatchFrame(finalOrientation);
+      this.finalPosition.setMatchingFrame(finalPosition);
+      this.finalOrientation.setMatchingFrame(finalOrientation);
 
       finalOrientationForViz.setAndMatchFrame(finalOrientation);
 

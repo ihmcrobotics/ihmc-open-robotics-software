@@ -99,9 +99,9 @@ public class QuadrupedComPositionController
       comPositionController.compute(comForceCommand, comPositionSetpoint, comVelocitySetpoint, comVelocityEstimate, comForceFeedforwardSetpoint);
 
       // update log variables
-      yoComPositionSetpoint.setAndMatchFrame(comPositionSetpoint);
-      yoComVelocitySetpoint.setAndMatchFrame(comVelocitySetpoint);
-      yoComForceFeedforwardSetpoint.setAndMatchFrame(comForceFeedforwardSetpoint);
+      yoComPositionSetpoint.setMatchingFrame(comPositionSetpoint);
+      yoComVelocitySetpoint.setMatchingFrame(comVelocitySetpoint);
+      yoComForceFeedforwardSetpoint.setMatchingFrame(comForceFeedforwardSetpoint);
 
       comPositionSetpoint.changeFrame(comPositionSetpointFrame);
       comVelocitySetpoint.changeFrame(comVelocitySetpointFrame);

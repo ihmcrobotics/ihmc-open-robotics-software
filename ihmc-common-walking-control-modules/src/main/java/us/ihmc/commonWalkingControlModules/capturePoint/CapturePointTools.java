@@ -79,7 +79,7 @@ public class CapturePointTools
       {
          YoFramePoint constantCMP = constantCMPsToPack.get(i);
          // Put the constant CMP at the footstep location
-         constantCMP.setAndMatchFrame(footstepList.get(i));
+         constantCMP.setMatchingFrame(footstepList.get(i));
       }
    }
 
@@ -92,7 +92,7 @@ public class CapturePointTools
     */
    public static void putConstantCMPBetweenFeet(YoFramePoint constantCMPToPack, FramePoint3DReadOnly firstFootstep, FramePoint3DReadOnly secondFootstep)
    {
-      constantCMPToPack.setAndMatchFrame(firstFootstep);
+      constantCMPToPack.setMatchingFrame(firstFootstep);
       constantCMPToPack.add(secondFootstep);
       constantCMPToPack.scale(0.5);
    }
@@ -770,7 +770,7 @@ public class CapturePointTools
    public static void computeDesiredCapturePointAcceleration(double omega0, FrameVector3DReadOnly desiredCapturePointVelocity,
                                                              YoFrameVector desiredCapturePointAccelerationToPack)
    {
-      desiredCapturePointAccelerationToPack.setAndMatchFrame(desiredCapturePointVelocity);
+      desiredCapturePointAccelerationToPack.setMatchingFrame(desiredCapturePointVelocity);
       desiredCapturePointAccelerationToPack.scale(omega0);
    }
 

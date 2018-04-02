@@ -684,16 +684,16 @@ public class HighLevelHumanoidControllerToolbox
          wristTempWrench.getLinearPartIncludingFrame(tempWristForce);
          wristTempWrench.getAngularPartIncludingFrame(tempWristTorque);
 
-         wristRawMeasuredForces.get(robotSide).setAndMatchFrame(tempWristForce);
-         wristRawMeasuredTorques.get(robotSide).setAndMatchFrame(tempWristTorque);
+         wristRawMeasuredForces.get(robotSide).setMatchingFrame(tempWristForce);
+         wristRawMeasuredTorques.get(robotSide).setMatchingFrame(tempWristTorque);
 
          cancelHandWeight(robotSide, wristTempWrench, measurementFrame);
 
          wristTempWrench.getLinearPartIncludingFrame(tempWristForce);
          wristTempWrench.getAngularPartIncludingFrame(tempWristTorque);
 
-         wristForcesHandWeightCancelled.get(robotSide).setAndMatchFrame(tempWristForce);
-         wristTorquesHandWeightCancelled.get(robotSide).setAndMatchFrame(tempWristTorque);
+         wristForcesHandWeightCancelled.get(robotSide).setMatchingFrame(tempWristForce);
+         wristTorquesHandWeightCancelled.get(robotSide).setMatchingFrame(tempWristTorque);
       }
    }
 

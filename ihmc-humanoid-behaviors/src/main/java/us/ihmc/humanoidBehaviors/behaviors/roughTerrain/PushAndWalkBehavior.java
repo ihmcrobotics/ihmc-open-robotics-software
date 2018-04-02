@@ -146,8 +146,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
             takeSteps(direction);
          }
 
-         yoDesiredCapturePoint.setAndMatchFrame(desiredCapturePoint);
-         yoCapturePoint.setAndMatchFrame(capturePoint);
+         yoDesiredCapturePoint.setMatchingFrame(desiredCapturePoint);
+         yoCapturePoint.setMatchingFrame(capturePoint);
          if (desiredCapturePointViz != null)
          {
             desiredCapturePointViz.update();

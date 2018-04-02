@@ -406,7 +406,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       this.finalPosition.set(finalPosition);
       this.finalOrientation.set(finalOrientation);
 
-      finalPositionForViz.setAndMatchFrame(finalPosition);
+      finalPositionForViz.setMatchingFrame(finalPosition);
       finalOrientationForViz.setAndMatchFrame(finalOrientation);
 
       this.finalVelocity.setToZero();

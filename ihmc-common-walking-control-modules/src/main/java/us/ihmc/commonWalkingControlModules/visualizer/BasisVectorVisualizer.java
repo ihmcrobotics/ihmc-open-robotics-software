@@ -62,11 +62,11 @@ public class BasisVectorVisualizer
       for (int i = 0; i < rhoSize; i++)
       {
          YoFrameVector yoBasisVector = yoBasisVectors.get(i);
-         yoBasisVector.setAndMatchFrame(basisVectors.get(i));
+         yoBasisVector.setMatchingFrame(basisVectors.get(i));
          yoBasisVector.scale(BASIS_VECTOR_SCALE);
 
          YoFramePoint pointOfBasis = pointOfBases.get(i);
-         pointOfBasis.setAndMatchFrame(contactPoints.get(i));
+         pointOfBasis.setMatchingFrame(contactPoints.get(i));
       }
    }
 }

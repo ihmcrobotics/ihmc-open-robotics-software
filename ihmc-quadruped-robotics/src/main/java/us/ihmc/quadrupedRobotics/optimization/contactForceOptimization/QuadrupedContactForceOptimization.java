@@ -200,15 +200,15 @@ public class QuadrupedContactForceOptimization
       comForceSolution.setZ(comWrenchSolutionVector.get(5, 0));
 
       // update yo variables
-      yoComTorqueCommand.setAndMatchFrame(comTorqueCommand);
-      yoComTorqueSolution.setAndMatchFrame(comTorqueSolution);
-      yoComForceCommand.setAndMatchFrame(comForceCommand);
-      yoComForceSolution.setAndMatchFrame(comForceSolution);
+      yoComTorqueCommand.setMatchingFrame(comTorqueCommand);
+      yoComTorqueSolution.setMatchingFrame(comTorqueSolution);
+      yoComForceCommand.setMatchingFrame(comForceCommand);
+      yoComForceSolution.setMatchingFrame(comForceSolution);
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoContactForceCommand.get(robotQuadrant).setAndMatchFrame(contactForceCommand.get(robotQuadrant));
-         yoContactForceSolution.get(robotQuadrant).setAndMatchFrame(contactForceSolution.get(robotQuadrant));
-         yoContactPosition.get(robotQuadrant).setAndMatchFrame(contactPosition.get(robotQuadrant));
+         yoContactForceCommand.get(robotQuadrant).setMatchingFrame(contactForceCommand.get(robotQuadrant));
+         yoContactForceSolution.get(robotQuadrant).setMatchingFrame(contactForceSolution.get(robotQuadrant));
+         yoContactPosition.get(robotQuadrant).setMatchingFrame(contactPosition.get(robotQuadrant));
          yoContactState.get(robotQuadrant).set(contactState.get(robotQuadrant));
       }
    }

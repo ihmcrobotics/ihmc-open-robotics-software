@@ -148,8 +148,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setDesiredHandPose(RobotSide robotSide, FramePoint3D desiredHandPosition, FrameQuaternion desiredHandOrientation)
    {
-      yoDesiredHandPositions.get(robotSide).setAndMatchFrame(desiredHandPosition);
-      yoDesiredHandOrientations.get(robotSide).setAndMatchFrame(desiredHandOrientation);
+      yoDesiredHandPositions.get(robotSide).setMatchingFrame(desiredHandPosition);
+      yoDesiredHandOrientations.get(robotSide).setMatchingFrame(desiredHandOrientation);
    }
 
    public void setHandLinearControlOnly(RobotSide robotSide)
@@ -166,13 +166,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    public void holdCurrentChestOrientation()
    {
       FrameQuaternion currentChestOrientation = new FrameQuaternion(fullRobotModel.getChest().getBodyFixedFrame());
-      yoDesiredChestOrientation.setAndMatchFrame(currentChestOrientation);
+      yoDesiredChestOrientation.setMatchingFrame(currentChestOrientation);
       chestSelectionMatrix.setToAngularSelectionOnly();
    }
 
    public void setDesiredChestOrientation(FrameQuaternion desiredChestOrientation)
    {
-      yoDesiredChestOrientation.setAndMatchFrame(desiredChestOrientation);
+      yoDesiredChestOrientation.setMatchingFrame(desiredChestOrientation);
    }
 
    public void setChestAngularControl(boolean roll, boolean pitch, boolean yaw)
@@ -184,13 +184,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    public void holdCurrentPelvisOrientation()
    {
       FrameQuaternion currentPelvisOrientation = new FrameQuaternion(fullRobotModel.getPelvis().getBodyFixedFrame());
-      yoDesiredPelvisOrientation.setAndMatchFrame(currentPelvisOrientation);
+      yoDesiredPelvisOrientation.setMatchingFrame(currentPelvisOrientation);
       pelvisSelectionMatrix.setToAngularSelectionOnly();
    }
 
    public void setDesiredPelvisOrientation(FrameQuaternion desiredPelvisOrientation)
    {
-      yoDesiredPelvisOrientation.setAndMatchFrame(desiredPelvisOrientation);
+      yoDesiredPelvisOrientation.setMatchingFrame(desiredPelvisOrientation);
    }
 
    public void setPelvisAngularControl(boolean roll, boolean pitch, boolean yaw)
@@ -209,7 +209,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setDesiredPelvisHeight(FramePoint3D pointContainingDesiredHeight)
    {
-      yoDesiredPelvisPosition.setAndMatchFrame(pointContainingDesiredHeight);
+      yoDesiredPelvisPosition.setMatchingFrame(pointContainingDesiredHeight);
       pelvisSelectionMatrix.clearLinearSelection();
       pelvisSelectionMatrix.selectLinearZ(true);
       pelvisSelectionMatrix.setSelectionFrame(worldFrame);

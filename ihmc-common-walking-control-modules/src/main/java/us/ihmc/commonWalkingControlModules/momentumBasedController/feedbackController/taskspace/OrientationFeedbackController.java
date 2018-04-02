@@ -231,16 +231,16 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       command.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
       command.getFeedForwardActionIncludingFrame(feedForwardAngularAcceleration);
 
-      yoDesiredOrientation.setAndMatchFrame(desiredOrientation);
+      yoDesiredOrientation.setMatchingFrame(desiredOrientation);
       desiredOrientation.getRotationVector(yoDesiredRotationVector);
 
-      yoDesiredAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
+      yoDesiredAngularVelocity.setMatchingFrame(desiredAngularVelocity);
 
       if (yoFeedForwardAngularVelocity != null)
-         yoFeedForwardAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
+         yoFeedForwardAngularVelocity.setMatchingFrame(desiredAngularVelocity);
 
       if (yoFeedForwardAngularAcceleration != null)
-         yoFeedForwardAngularAcceleration.setAndMatchFrame(feedForwardAngularAcceleration);
+         yoFeedForwardAngularAcceleration.setMatchingFrame(feedForwardAngularAcceleration);
    }
 
    @Override
@@ -278,14 +278,14 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularAcceleration.add(derivativeFeedback);
       desiredAngularAcceleration.add(integralFeedback);
       desiredAngularAcceleration.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackAngularAcceleration.setAndMatchFrame(desiredAngularAcceleration);
+      yoFeedbackAngularAcceleration.setMatchingFrame(desiredAngularAcceleration);
       rateLimitedFeedbackAngularAcceleration.update();
       desiredAngularAcceleration.setIncludingFrame(rateLimitedFeedbackAngularAcceleration);
 
       desiredAngularAcceleration.changeFrame(endEffectorFrame);
       desiredAngularAcceleration.add(feedForwardAngularAcceleration);
 
-      yoDesiredAngularAcceleration.setAndMatchFrame(desiredAngularAcceleration);
+      yoDesiredAngularAcceleration.setMatchingFrame(desiredAngularAcceleration);
 
       inverseDynamicsOutput.setAngularAcceleration(endEffectorFrame, desiredAngularAcceleration);
    }
@@ -305,13 +305,13 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularVelocity.setIncludingFrame(proportionalFeedback);
       desiredAngularVelocity.add(integralFeedback);
       desiredAngularVelocity.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
+      yoFeedbackAngularVelocity.setMatchingFrame(desiredAngularVelocity);
       rateLimitedFeedbackAngularVelocity.update();
       desiredAngularVelocity.setIncludingFrame(rateLimitedFeedbackAngularVelocity);
 
       desiredAngularVelocity.add(feedForwardAngularVelocity);
 
-      yoDesiredAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
+      yoDesiredAngularVelocity.setMatchingFrame(desiredAngularVelocity);
 
       desiredAngularVelocity.changeFrame(endEffectorFrame);
       inverseKinematicsOutput.setAngularVelocity(endEffectorFrame, desiredAngularVelocity);
@@ -333,12 +333,12 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredAngularTorque.add(derivativeFeedback);
       desiredAngularTorque.add(integralFeedback);
       desiredAngularTorque.clipToMaxLength(gains.getMaximumFeedback());
-      yoFeedbackAngularTorque.setAndMatchFrame(desiredAngularTorque);
+      yoFeedbackAngularTorque.setMatchingFrame(desiredAngularTorque);
       rateLimitedFeedbackAngularTorque.update();
       desiredAngularTorque.setIncludingFrame(rateLimitedFeedbackAngularTorque);
 
       desiredAngularTorque.changeFrame(endEffectorFrame);
-      yoDesiredAngularTorque.setAndMatchFrame(desiredAngularTorque);
+      yoDesiredAngularTorque.setMatchingFrame(desiredAngularTorque);
 
       virtualModelControlOutput.setAngularTorque(endEffectorFrame, desiredAngularTorque);
    }
@@ -349,7 +349,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, endEffectorAchievedAcceleration);
       endEffectorAchievedAcceleration.getAngularPart(achievedAngularAcceleration);
 
-      yoAchievedAngularAcceleration.setAndMatchFrame(achievedAngularAcceleration);
+      yoAchievedAngularAcceleration.setMatchingFrame(achievedAngularAcceleration);
    }
 
    /**
@@ -382,7 +382,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       desiredOrientation.getRotationVector(feedbackTermToPack);
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxLength(gains.getMaximumProportionalError());
-      yoErrorRotationVector.setAndMatchFrame(feedbackTermToPack);
+      yoErrorRotationVector.setMatchingFrame(feedbackTermToPack);
       yoErrorOrientation.setRotationVector(yoErrorRotationVector);
 
       if (angularGainsFrame != null)

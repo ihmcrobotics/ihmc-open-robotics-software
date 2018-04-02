@@ -170,27 +170,27 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 
    public void setInitialOrientation(FrameQuaternionReadOnly initialOrientation)
    {
-      this.initialOrientation.setAndMatchFrame(initialOrientation);
+      this.initialOrientation.setMatchingFrame(initialOrientation);
    }
 
    public void setFinalOrientation(FrameQuaternionReadOnly finalOrientation)
    {
-      this.finalOrientation.setAndMatchFrame(finalOrientation);
+      this.finalOrientation.setMatchingFrame(finalOrientation);
    }
 
    public void setFinalOrientation(FramePose3D finalPose)
    {
-      this.finalOrientation.setAndMatchFrame(finalPose.getOrientation());
+      this.finalOrientation.setMatchingFrame(finalPose.getOrientation());
    }
 
    public void setInitialAngularVelocity(FrameVector3DReadOnly initialAngularVelocity)
    {
-      this.initialAngularVelocity.setAndMatchFrame(initialAngularVelocity);
+      this.initialAngularVelocity.setMatchingFrame(initialAngularVelocity);
    }
 
    public void setFinalAngularVelocity(FrameVector3DReadOnly finalAngularVelocity)
    {
-      this.finalAngularVelocity.setAndMatchFrame(finalAngularVelocity);
+      this.finalAngularVelocity.setMatchingFrame(finalAngularVelocity);
    }
 
    public void setInitialVelocityToZero()
