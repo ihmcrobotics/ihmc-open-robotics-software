@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -69,7 +68,10 @@ public class FootstepVisualizer
       else
          contactPointsToVisualize = predictedContactPoints;
 
-      foothold.set(Vertex2DSupplier.asVertex2DSupplier(contactPointsToVisualize));
+      foothold.clear();
+      for (int i = 0; i < contactPointsToVisualize.size(); i++)
+         foothold.addVertex(contactPointsToVisualize.get(i));
+      foothold.update();
 
       yoFoothold.set(foothold);
 
