@@ -23,6 +23,7 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
@@ -64,6 +65,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<Boolean> useNetworking = new OptionalFactoryField<>("useNetworking");
 
    private QuadrupedStepTeleopManager stepTeleopManager;
+   private QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager;
 
    @Override
    public GoalOrientedTestConductor createTestConductor() throws IOException
@@ -142,6 +144,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
          PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
          packetCommunicator.connect();
          stepTeleopManager = new QuadrupedStepTeleopManager(packetCommunicator, xGaitSettings, referenceFrames, teleopRegistry);
+         bodyPoseTeleopManager = new QuadrupedBodyPoseTeleopManager(packetCommunicator);
+
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
       }
       else
@@ -155,7 +159,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       if(useNetworking.get())
       {
-         goalOrientedTestConductor.getScs().addScript(t -> stepTeleopManager.update());
+         goalOrientedTestConductor.getScs().addScript(t ->
+                                                      {
+                                                         stepTeleopManager.update();
+                                                         bodyPoseTeleopManager.update();
+                                                      });
       }
 
       FactoryTools.disposeFactory(this);
@@ -209,5 +217,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public QuadrupedStepTeleopManager getStepTeleopManager()
    {
       return stepTeleopManager;
+   }
+
+   @Override
+   public QuadrupedBodyPoseTeleopManager getBodyPoseTeleopManager()
+   {
+      return bodyPoseTeleopManager;
    }
 }
