@@ -68,7 +68,7 @@ public class YoArtifactPolygon extends YoArtifact
       graphics.setColor(color);
       graphics.setStroke(stroke);
 
-      convexPolygon.getFrameConvexPolygon2d().get(tempConvexPolygon);
+      tempConvexPolygon.set(convexPolygon.getFrameConvexPolygon2d());
 
       if (fill)
       {

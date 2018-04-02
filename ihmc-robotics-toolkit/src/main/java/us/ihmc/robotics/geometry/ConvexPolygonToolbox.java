@@ -5,11 +5,16 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -34,8 +39,8 @@ public class ConvexPolygonToolbox
     *           the second connecting edge.
     * @return success (false = failed, true = succeeded)
     */
-   public static boolean findConnectingEdgesVerticesIndexes(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, VerticesIndices polygon1VerticesIndicesToPack,
-         VerticesIndices polygon2VerticesIndicesToPack)
+   public static boolean findConnectingEdgesVerticesIndexes(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2,
+                                                            VerticesIndices polygon1VerticesIndicesToPack, VerticesIndices polygon2VerticesIndicesToPack)
    {
       boolean success = false;
 
@@ -153,6 +158,7 @@ public class ConvexPolygonToolbox
 
    private final VerticesIndices polygon1VerticesIndices = new VerticesIndices();
    private final VerticesIndices polygon2VerticesIndices = new VerticesIndices();
+
    /**
     * Efficiently combines two Disjoint Polygons. Returns false if not disjoint.
     *
@@ -166,8 +172,8 @@ public class ConvexPolygonToolbox
     *           polygon2.
     * @return true if succeeded, false if failed
     */
-   public boolean combineDisjointPolygons(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, ConvexPolygon2D combinedPolygonToPack,
-                                                 LineSegment2D connectingEdge1ToPack, LineSegment2D connectingEdge2ToPack)
+   public boolean combineDisjointPolygons(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, ConvexPolygon2DBasics combinedPolygonToPack,
+                                          LineSegment2DBasics connectingEdge1ToPack, LineSegment2DBasics connectingEdge2ToPack)
    {
       boolean success = findConnectingEdgesVerticesIndexes(polygon1, polygon2, polygon1VerticesIndices, polygon2VerticesIndices);
       if (!success)
@@ -183,19 +189,17 @@ public class ConvexPolygonToolbox
       return true;
    }
 
-
-   static void getConnectingEdges(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, LineSegment2D connectingEdge1ToPack,
-                                          LineSegment2D connectingEdge2ToPack, VerticesIndices polygon1VerticesIndices,
-                                          VerticesIndices polygon2VerticesIndices)
+   static void getConnectingEdges(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, LineSegment2DBasics connectingEdge1ToPack,
+                                  LineSegment2DBasics connectingEdge2ToPack, VerticesIndices polygon1VerticesIndices, VerticesIndices polygon2VerticesIndices)
    {
       connectingEdge1ToPack.set(polygon1.getVertex(polygon1VerticesIndices.getIndex(0)), polygon2.getVertex(polygon2VerticesIndices.getIndex(0)));
       connectingEdge2ToPack.set(polygon2.getVertex(polygon2VerticesIndices.getIndex(1)), polygon1.getVertex(polygon1VerticesIndices.getIndex(1)));
    }
 
-
    private final ConvexPolygon2D combinedPolygon = new ConvexPolygon2D();
    private final LineSegment2D connectingEdge1 = new LineSegment2D();
    private final LineSegment2D connectingEdge2 = new LineSegment2D();
+
    /**
     * Efficiently combines two Disjoint Polygons. Returns null if not disjoint. Note: Generates
     * garbage!
@@ -204,7 +208,8 @@ public class ConvexPolygonToolbox
     * @param polygon2 ConvexPolygon2d
     * @return ConvexPolygon2dAndConnectingEdges
     */
-   public boolean combineDisjointPolygons(ConvexPolygon2D polygon1, ConvexPolygon2D polygon2, ConvexPolygon2dAndConnectingEdges combinedPolygonAndEdgesToPack)
+   public boolean combineDisjointPolygons(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2,
+                                          ConvexPolygon2dAndConnectingEdges combinedPolygonAndEdgesToPack)
    {
       if (!combineDisjointPolygons(polygon1, polygon2, combinedPolygon, connectingEdge1, connectingEdge2))
          return false;
@@ -227,11 +232,10 @@ public class ConvexPolygonToolbox
    private final RecyclingArrayList<MutableInt> bridgeIndicesQ = new RecyclingArrayList<>(initialCapacity, MutableInt.class);
    private final RecyclingArrayList<MutableBoolean> bridgeWasOnLeft = new RecyclingArrayList<>(initialCapacity, MutableBoolean.class);
 
-
    private final ConvexPolygon2D intersectionToThrowAway = new ConvexPolygon2D();
 
    //TODO do something smarter here
-   public double computeIntersectionAreaOfPolygons(ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ)
+   public double computeIntersectionAreaOfPolygons(ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ)
    {
       if (computeIntersectionOfPolygons(polygonP, polygonQ, intersectionToThrowAway))
          return intersectionToThrowAway.getArea();
@@ -248,7 +252,8 @@ public class ConvexPolygonToolbox
     * @param polygonQ ConvexPolygon2d
     * @return ConvexPolygon2d Intersection of polygonP and polygonQ
     */
-   public boolean computeIntersectionOfPolygons(ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ, ConvexPolygon2D intersectingPolygonToPack)
+   public boolean computeIntersectionOfPolygons(ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ,
+                                                ConvexPolygon2DBasics intersectingPolygonToPack)
    {
       // return false if either polygon null
       if (polygonP == null || polygonP.isEmpty())
@@ -372,7 +377,6 @@ public class ConvexPolygonToolbox
          lineEnd.add(caliperForPolygonP);
          isOnLeft = EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(currentPolygonQPoint, lineStart, lineEnd);
 
-
          if (wasOnLeft != isOnLeft)
          {
             // find all of the bridges
@@ -455,8 +459,9 @@ public class ConvexPolygonToolbox
       return true;
    }
 
-   private static boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyOneVertex(ConvexPolygon2D polygonWithExactlyOneVertex,
-                                                                                       ConvexPolygon2D otherPolygon, ConvexPolygon2D intersectingPolygon)
+   private static boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyOneVertex(ConvexPolygon2DReadOnly polygonWithExactlyOneVertex,
+                                                                                       ConvexPolygon2DReadOnly otherPolygon,
+                                                                                       ConvexPolygon2DBasics intersectingPolygon)
    {
       if (otherPolygon.pointIsOnPerimeter(polygonWithExactlyOneVertex.getVertex(0)))
       {
@@ -472,9 +477,9 @@ public class ConvexPolygonToolbox
 
    private final LineSegment2D polygonWithTwoVerticesAsLineSegment = new LineSegment2D();
 
-   private boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2D polygonWithExactlyTwoVertices,
-                                                                                                                  ConvexPolygon2D polygonWithAtLeastTwoVertices,
-                                                                                                                  ConvexPolygon2D intersectingPolygon)
+   private boolean computeIntersectionOfPolygonsIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2DReadOnly polygonWithExactlyTwoVertices,
+                                                                                                                  ConvexPolygon2DReadOnly polygonWithAtLeastTwoVertices,
+                                                                                                                  ConvexPolygon2DBasics intersectingPolygon)
    {
       polygonWithTwoVerticesAsLineSegment.set(polygonWithExactlyTwoVertices.getVertex(0), polygonWithExactlyTwoVertices.getVertex(1));
       Point2DBasics[] intersection = polygonWithAtLeastTwoVertices.intersectionWith(polygonWithTwoVerticesAsLineSegment);
@@ -492,7 +497,7 @@ public class ConvexPolygonToolbox
    }
 
    private static boolean findCrossingIndices(StartAndEndIndices crossingIndices, boolean decrementP, int bridgeIndexForPolygonP, int bridgeIndexForPolygonQ,
-         ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ)
+                                              ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ)
    {
       int incrementP = 1, incrementQ = 1;
       if (decrementP)
@@ -568,8 +573,8 @@ public class ConvexPolygonToolbox
       return true;
    }
 
-   static boolean constructPolygonForIntersection(RecyclingArrayList<StartAndEndIndices> crossingIndicesList, ConvexPolygon2D polygonP,
-                                                  ConvexPolygon2D polygonQ, ConvexPolygon2D intersectingPolygonToPack)
+   static boolean constructPolygonForIntersection(RecyclingArrayList<StartAndEndIndices> crossingIndicesList, ConvexPolygon2DReadOnly polygonP,
+                                                  ConvexPolygon2DReadOnly polygonQ, ConvexPolygon2DBasics intersectingPolygonToPack)
    {
       StartAndEndIndices crossingIndices = crossingIndicesList.getFirst();
       int startIndexP1 = crossingIndices.getIndex1Start();
@@ -665,7 +670,8 @@ public class ConvexPolygonToolbox
    private final RecyclingArrayList<StartAndEndIndices> crossingIndices = new RecyclingArrayList<>(initialCapacity, new StartAndEndIndicesBuilder());
 
    private boolean buildCommonPolygonFromBridges(RecyclingArrayList<MutableInt> bridgeIndicesP, RecyclingArrayList<MutableInt> bridgeIndicesQ,
-         RecyclingArrayList<MutableBoolean> bridgeWasOnLeft, ConvexPolygon2D polygonP, ConvexPolygon2D polygonQ, ConvexPolygon2D intersectingPolygonToPack)
+                                                 RecyclingArrayList<MutableBoolean> bridgeWasOnLeft, ConvexPolygon2DReadOnly polygonP,
+                                                 ConvexPolygon2DReadOnly polygonQ, ConvexPolygon2DBasics intersectingPolygonToPack)
    {
       crossingIndices.clear();
 
@@ -687,29 +693,28 @@ public class ConvexPolygonToolbox
       return constructPolygonForIntersection(crossingIndices, polygonP, polygonQ, intersectingPolygonToPack);
    }
 
-
    private final ConvexPolygon2dAndConnectingEdges combinedPolygonAndEdges = new ConvexPolygon2dAndConnectingEdges();
+
    /**
     * @param polygon1
     * @param polygon2
     * @return success
     */
    //this should throw away points that are inside of the other polygon
-   public boolean combineDisjointPolygons(FrameConvexPolygon2d polygon1, FrameConvexPolygon2d polygon2,
-         FrameConvexPolygon2dAndConnectingEdges combinedPolygonToPack)
+   public boolean combineDisjointPolygons(FrameConvexPolygon2DReadOnly polygon1, FrameConvexPolygon2DReadOnly polygon2,
+                                          FrameConvexPolygon2dAndConnectingEdges combinedPolygonToPack)
    {
       ReferenceFrame referenceFrame = polygon1.getReferenceFrame();
       polygon2.checkReferenceFrameMatch(referenceFrame);
 
-      if (!combineDisjointPolygons(polygon1.convexPolygon, polygon2.convexPolygon, combinedPolygonAndEdges))
+      if (!combineDisjointPolygons((ConvexPolygon2DReadOnly) polygon1, (ConvexPolygon2DReadOnly) polygon2, combinedPolygonAndEdges))
          return false;// Return false if not disjoint
 
-      combinedPolygonToPack.setIncludingFrameAndUpdate(referenceFrame, polygon1, polygon2, combinedPolygonAndEdges.getConvexPolygon2d(), combinedPolygonAndEdges.getConnectingEdge1(),
-            combinedPolygonAndEdges.getConnectingEdge2());
+      combinedPolygonToPack.setIncludingFrame(referenceFrame, polygon1, polygon2, combinedPolygonAndEdges.getConvexPolygon2d(),
+                                              combinedPolygonAndEdges.getConnectingEdge1(), combinedPolygonAndEdges.getConnectingEdge2());
 
       return true;
    }
-
 
    /**
     * This function changes the polygon given, such that it has the desired number of vertices. It
@@ -719,7 +724,7 @@ public class ConvexPolygonToolbox
     * @param polygon: modified to have the desired number of vertices
     * @param desiredVertices: number of vertices that the polygon should have
     */
-   public static void limitVerticesConservative(ConvexPolygon2D polygon, int desiredVertices)
+   public static void limitVerticesConservative(ConvexPolygon2DBasics polygon, int desiredVertices)
    {
       polygon.checkNonEmpty();
 
@@ -792,11 +797,10 @@ public class ConvexPolygonToolbox
     * @param polygon: modified to have the desired number of vertices
     * @param desiredVertices: number of vertices that the polygon should have
     */
-   public static void limitVerticesConservative(FrameConvexPolygon2d polygon, int desiredVertices)
+   public static void limitVerticesConservative(FixedFrameConvexPolygon2DBasics polygon, int desiredVertices)
    {
-      limitVerticesConservative(polygon.getConvexPolygon2d(), desiredVertices);
+      limitVerticesConservative((ConvexPolygon2DBasics) polygon, desiredVertices);
    }
-
 
    public class StartAndEndIndicesBuilder extends GenericTypeBuilder<StartAndEndIndices>
    {
@@ -816,7 +820,6 @@ public class ConvexPolygonToolbox
    {
       return new StartAndEndIndicesBuilder();
    }
-
 
    class StartAndEndIndices
    {

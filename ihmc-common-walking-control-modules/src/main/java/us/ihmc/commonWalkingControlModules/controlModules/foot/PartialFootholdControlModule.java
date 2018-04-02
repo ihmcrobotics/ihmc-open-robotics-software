@@ -8,15 +8,16 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -55,17 +56,17 @@ public class PartialFootholdControlModule
 
    private final ReferenceFrame soleFrame;
 
-   private final FrameConvexPolygon2d defaultFootPolygon;
-   private final FrameConvexPolygon2d shrunkFootPolygon;
-   private final FrameConvexPolygon2d shrunkFootPolygonInWorld;
+   private final FrameConvexPolygon2D defaultFootPolygon;
+   private final FrameConvexPolygon2D shrunkFootPolygon;
+   private final FrameConvexPolygon2D shrunkFootPolygonInWorld;
    private final YoFrameConvexPolygon2d yoShrunkFootPolygon;
-   private final FrameConvexPolygon2d controllerFootPolygon;
-   private final FrameConvexPolygon2d controllerFootPolygonInWorld;
-   private final FrameConvexPolygon2d backupFootPolygon;
-   private final FrameConvexPolygon2d unsafePolygon;
+   private final FrameConvexPolygon2D controllerFootPolygon;
+   private final FrameConvexPolygon2D controllerFootPolygonInWorld;
+   private final FrameConvexPolygon2D backupFootPolygon;
+   private final FrameConvexPolygon2D unsafePolygon;
    private final YoFrameConvexPolygon2d yoUnsafePolygon;
 
-   private final FrameConvexPolygon2d fullSupportAfterShrinking = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D fullSupportAfterShrinking = new FrameConvexPolygon2D();
    private final YoFrameConvexPolygon2d yoFullSupportAfterShrinking;
 
    private final YoInteger shrinkMaxLimit;
@@ -111,13 +112,13 @@ public class PartialFootholdControlModule
 
       footCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
       soleFrame = contactableFoot.getSoleFrame();
-      defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
-      shrunkFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
-      shrunkFootPolygonInWorld = new FrameConvexPolygon2d(defaultFootPolygon);
-      controllerFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
-      controllerFootPolygonInWorld = new FrameConvexPolygon2d(defaultFootPolygon);
-      backupFootPolygon = new FrameConvexPolygon2d(defaultFootPolygon);
-      unsafePolygon = new FrameConvexPolygon2d(defaultFootPolygon);
+      defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
+      shrunkFootPolygon = new FrameConvexPolygon2D(defaultFootPolygon);
+      shrunkFootPolygonInWorld = new FrameConvexPolygon2D(defaultFootPolygon);
+      controllerFootPolygon = new FrameConvexPolygon2D(defaultFootPolygon);
+      controllerFootPolygonInWorld = new FrameConvexPolygon2D(defaultFootPolygon);
+      backupFootPolygon = new FrameConvexPolygon2D(defaultFootPolygon);
+      unsafePolygon = new FrameConvexPolygon2D(defaultFootPolygon);
       lineOfRotation = new FrameLine2D(soleFrame);
 
       registry = new YoVariableRegistry(namePrefix + name);
@@ -194,7 +195,7 @@ public class PartialFootholdControlModule
          return;
       }
 
-      unsafePolygon.setIncludingFrameAndUpdate(shrunkFootPolygon);
+      unsafePolygon.setIncludingFrame(shrunkFootPolygon);
       footCoPOccupancyGrid.registerCenterOfPressureLocation(centerOfPressure);
 
       boolean atLeastOneTriggered = false;
@@ -251,7 +252,7 @@ public class PartialFootholdControlModule
 
    public void getShrunkPolygonCentroid(FramePoint2D centroidToPack)
    {
-      shrunkFootPolygon.getCentroid(centroidToPack);
+      centroidToPack.setIncludingFrame(shrunkFootPolygon.getCentroid());
    }
 
    private void doNothing()
@@ -337,12 +338,12 @@ public class PartialFootholdControlModule
       // make sure the foot has the right number of contact points
       controllerFootPolygon.setIncludingFrame(shrunkFootPolygon);
       ConvexPolygonTools.limitVerticesConservative(controllerFootPolygon, footCornerPoints);
-      controllerFootPolygonInWorld.setIncludingFrameAndUpdate(controllerFootPolygon);
+      controllerFootPolygonInWorld.setIncludingFrame(controllerFootPolygon);
       controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       // if the icp is in the area that would be cut off exit
-      FrameConvexPolygon2d oppositeFootPolygon = controllerToolbox.getBipedSupportPolygons().getFootPolygonInWorldFrame(robotSide.getOppositeSide());
-      fullSupportAfterShrinking.setIncludingFrameAndUpdate(oppositeFootPolygon);
+      FrameConvexPolygon2D oppositeFootPolygon = controllerToolbox.getBipedSupportPolygons().getFootPolygonInWorldFrame(robotSide.getOppositeSide());
+      fullSupportAfterShrinking.setIncludingFrame(oppositeFootPolygon);
       fullSupportAfterShrinking.changeFrameAndProjectToXYPlane(worldFrame);
       fullSupportAfterShrinking.addVertices(controllerFootPolygonInWorld);
       fullSupportAfterShrinking.update();
@@ -358,7 +359,7 @@ public class PartialFootholdControlModule
       List<YoContactPoint> contactPoints = contactStateToModify.getContactPoints();
       for (int i = 0; i < controllerFootPolygon.getNumberOfVertices(); i++)
       {
-         controllerFootPolygon.getFrameVertexXY(i, tempPosition);
+         tempPosition.setIncludingFrame(controllerFootPolygon.getVertex(i), 0.0);
          YoContactPoint contactPoint = contactPoints.get(i);
          contactPoint.setPosition(tempPosition);
          contactPoint.setInContact(true);
@@ -391,8 +392,8 @@ public class PartialFootholdControlModule
 
       backupFootPolygon.set(shrunkFootPolygon);
       shrunkFootPolygon.clear();
-      shrunkFootPolygon.addVertices(defaultFootPolygon.intersectionWith(lineL));
-      shrunkFootPolygon.addVertices(defaultFootPolygon.intersectionWith(lineR));
+      shrunkFootPolygon.addVertices(FrameVertex2DSupplier.asFrameVertex2DSupplier(defaultFootPolygon.intersectionWith(lineL)));
+      shrunkFootPolygon.addVertices(FrameVertex2DSupplier.asFrameVertex2DSupplier(defaultFootPolygon.intersectionWith(lineR)));
       shrunkFootPolygon.update();
    }
 
@@ -414,8 +415,8 @@ public class PartialFootholdControlModule
          rotationCalculators.get(calculatorType).reset();
       }
       footCoPOccupancyGrid.reset();
-      shrunkFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
-      backupFootPolygon.setIncludingFrameAndUpdate(defaultFootPolygon);
+      shrunkFootPolygon.setIncludingFrame(defaultFootPolygon);
+      backupFootPolygon.setIncludingFrame(defaultFootPolygon);
    }
 
    public void projectOntoShrunkenPolygon(FramePoint2D pointToProject)
@@ -423,7 +424,7 @@ public class PartialFootholdControlModule
       shrunkFootPolygon.orthogonalProjection(pointToProject);
    }
 
-   public void getSupportPolygon(FrameConvexPolygon2d polygonToPack)
+   public void getSupportPolygon(FrameConvexPolygon2D polygonToPack)
    {
       polygonToPack.setIncludingFrame(shrunkFootPolygon);
    }

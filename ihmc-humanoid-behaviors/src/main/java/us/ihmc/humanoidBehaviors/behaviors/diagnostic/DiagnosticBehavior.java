@@ -19,6 +19,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
@@ -66,7 +67,6 @@ import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBu
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -532,14 +532,14 @@ public class DiagnosticBehavior extends AbstractBehavior
       FramePoint2D center = new FramePoint2D(midFeetZUpFrame);
       FrameVector2D shiftScaleVector = new FrameVector2D(midFeetZUpFrame, 0.1, 0.7);
 
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(yoSupportPolygon.getFrameConvexPolygon2d());
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
 
       FramePoint2D desiredPelvisOffset = new FramePoint2D(midFeetZUpFrame);
 
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
-         supportPolygon.getFrameVertex(i, desiredPelvisOffset);
+         desiredPelvisOffset.setIncludingFrame(supportPolygon.getVertex(i));
          desiredPelvisOffset.sub(center);
          submitDesiredPelvisPositionOffset(false, shiftScaleVector.getX() * desiredPelvisOffset.getX(), shiftScaleVector.getY() * desiredPelvisOffset.getY(),
                0.0);
@@ -548,7 +548,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          sequencePelvisRotations(0.3); //TODO increase/decrease limit?
       }
       // Get back to the first vertex again
-      supportPolygon.getFrameVertex(0, desiredPelvisOffset);
+      desiredPelvisOffset.setIncludingFrame(supportPolygon.getVertex(0));
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
             pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
@@ -570,16 +570,16 @@ public class DiagnosticBehavior extends AbstractBehavior
       sequencePelvisRotations(0.55);
 
       //get the 4 corners of the double support polygon (the feet are supposedly aligned)
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(yoSupportPolygon.getFrameConvexPolygon2d());
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
       int numberOfVertices = supportPolygon.getNumberOfVertices();
       ArrayList<FramePoint2D> supportCornerPoints = new ArrayList<>();
 
       for (int i = 0; i < numberOfVertices; i++)
       {
-         supportPolygon.getFrameVertex(i, frameVertexBefore);
-         supportPolygon.getFrameVertex((i + 1) % numberOfVertices, frameVertexCurrentlyChecked);
-         supportPolygon.getFrameVertex((i + 2) % numberOfVertices, frameVertexAfter);
+         frameVertexBefore.setIncludingFrame(supportPolygon.getVertex(i));
+         frameVertexCurrentlyChecked.setIncludingFrame(supportPolygon.getVertex((i + 1) % numberOfVertices));
+         frameVertexAfter.setIncludingFrame(supportPolygon.getVertex((i + 2) % numberOfVertices));
 
          FrameVector2D frameVector1 = new FrameVector2D(midFeetZUpFrame);
          frameVector1.sub(frameVertexCurrentlyChecked, frameVertexBefore);
@@ -999,20 +999,20 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       FramePoint2D center = new FramePoint2D(midFeetZUpFrame);
 
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(yoSupportPolygon.getFrameConvexPolygon2d());
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(yoSupportPolygon.getFrameConvexPolygon2d());
       supportPolygon.changeFrameAndProjectToXYPlane(midFeetZUpFrame);
 
       FramePoint2D desiredPelvisOffset = new FramePoint2D(midFeetZUpFrame);
 
       for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
-         supportPolygon.getFrameVertex(i, desiredPelvisOffset);
+         desiredPelvisOffset.setIncludingFrame(supportPolygon.getVertex(i));
          desiredPelvisOffset.sub(center);
          submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
                pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);
       }
       // Get back to the first vertex again
-      supportPolygon.getFrameVertex(0, desiredPelvisOffset);
+      desiredPelvisOffset.setIncludingFrame(supportPolygon.getVertex(0));
       desiredPelvisOffset.sub(center);
       submitDesiredPelvisPositionOffset(false, pelvisShiftScaleFactor.getX() * desiredPelvisOffset.getX(),
             pelvisShiftScaleFactor.getY() * desiredPelvisOffset.getY(), 0.0);

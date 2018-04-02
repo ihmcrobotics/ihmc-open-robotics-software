@@ -6,6 +6,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -205,7 +206,7 @@ public class PolygonWiggler
     * @param A
     * @param b
     */
-   public static void convertToInequalityConstraints(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraints(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       int constraints = polygon.getNumberOfVertices();
 
@@ -217,7 +218,7 @@ public class PolygonWiggler
          convertToInequalityConstraintsPoint(polygon, A, b);
    }
 
-   public static void convertToInequalityConstraintsPoint(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b)
+   public static void convertToInequalityConstraintsPoint(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b)
    {
       A.reshape(4, 2);
       b.reshape(4, 1);
@@ -239,7 +240,7 @@ public class PolygonWiggler
       b.set(3, 0, -point.getY());
    }
 
-   public static void convertToInequalityConstraintsLine(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraintsLine(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       A.reshape(4, 2);
       b.reshape(4, 1);
@@ -276,7 +277,7 @@ public class PolygonWiggler
       b.set(3, -deltaInside + secondPoint.getX() * tempVector.getX() + secondPoint.getY() * tempVector.getY());
    }
 
-   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2D polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void convertToInequalityConstraintsPolygon(ConvexPolygon2DReadOnly polygon, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       int constraints = polygon.getNumberOfVertices();
       A.reshape(constraints, 2);
@@ -303,7 +304,7 @@ public class PolygonWiggler
       }
    }
 
-   public static void constrainPolygonInsideOtherPolygon(ConvexPolygon2D polygonExteriorInWorld, ConvexPolygon2D polygonInteriorRelative, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
+   public static void constrainPolygonInsideOtherPolygon(ConvexPolygon2DReadOnly polygonExteriorInWorld, ConvexPolygon2DReadOnly polygonInteriorRelative, DenseMatrix64F A, DenseMatrix64F b, double deltaInside)
    {
       int constraints = polygonExteriorInWorld.getNumberOfVertices();
       A.reshape(constraints, 2);

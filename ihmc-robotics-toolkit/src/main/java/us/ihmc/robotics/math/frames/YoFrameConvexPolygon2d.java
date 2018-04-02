@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -20,8 +22,8 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
    private final ArrayList<YoFramePoint2d> yoFramePoints = new ArrayList<YoFramePoint2d>();
    private final YoInteger numVertices;
    private final ReferenceFrame referenceFrame;
-   private final FrameConvexPolygon2d convexPolygon2dForReading;
-   private final FrameConvexPolygon2d convexPolygon2dForWriting;
+   private final FrameConvexPolygon2D convexPolygon2dForReading;
+   private final FrameConvexPolygon2D convexPolygon2dForWriting;
 
    private AtomicBoolean hasChanged = new AtomicBoolean(true);
 
@@ -39,8 +41,8 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
          yoFramePoints.add(point);
       }
 
-      convexPolygon2dForReading = new FrameConvexPolygon2d(referenceFrame);
-      convexPolygon2dForWriting = new FrameConvexPolygon2d(referenceFrame);
+      convexPolygon2dForReading = new FrameConvexPolygon2D(referenceFrame);
+      convexPolygon2dForWriting = new FrameConvexPolygon2D(referenceFrame);
    }
    
    public YoFrameConvexPolygon2d(String namePrefix, ReferenceFrame referenceFrame, int maxNumberOfVertices, YoVariableRegistry registry)
@@ -61,11 +63,11 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
          this.yoFramePoints.add(point);
       }
 
-      convexPolygon2dForReading = new FrameConvexPolygon2d(referenceFrame);
-      convexPolygon2dForWriting = new FrameConvexPolygon2d(referenceFrame);
+      convexPolygon2dForReading = new FrameConvexPolygon2D(referenceFrame);
+      convexPolygon2dForWriting = new FrameConvexPolygon2D(referenceFrame);
    }
 
-   public void setFrameConvexPolygon2d(FrameConvexPolygon2d polygon)
+   public void setFrameConvexPolygon2d(FrameConvexPolygon2DReadOnly polygon)
    {
       if (polygon == null)
       {
@@ -77,7 +79,7 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       try
       {
          polygon.checkReferenceFrameMatch(referenceFrame);
-         convexPolygon2dForWriting.setAndUpdate(polygon);
+         convexPolygon2dForWriting.set(polygon);
          getYoValuesFromFrameConvexPolygon2d();
       }
       catch (Exception e)
@@ -86,7 +88,7 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       }
    }
 
-   public void setConvexPolygon2d(ConvexPolygon2D polygon)
+   public void setConvexPolygon2d(ConvexPolygon2DReadOnly polygon)
    {
       if (polygon == null)
       {
@@ -98,7 +100,7 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       try
       {
          convexPolygon2dForWriting.clear(referenceFrame);
-         convexPolygon2dForWriting.setAndUpdate(polygon);
+         convexPolygon2dForWriting.set(polygon);
          getYoValuesFromFrameConvexPolygon2d();
       }
       catch (Exception e)
@@ -119,7 +121,8 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       try
       {
          convexPolygon2dForWriting.clear(referenceFrame);
-         convexPolygon2dForWriting.setAndUpdate(framePoints);
+         for (int i = 0; i < framePoints.size(); i++)
+            convexPolygon2dForWriting.addVertexMatchingFrame(framePoints.get(i));
          getYoValuesFromFrameConvexPolygon2d();
       }
       catch (Exception e)
@@ -140,7 +143,8 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       try
       {
          convexPolygon2dForWriting.clear(referenceFrame);
-         convexPolygon2dForWriting.setAndUpdate(framePoints);
+         for (int i = 0; i < framePoints.length; i++)
+            convexPolygon2dForWriting.addVertex(framePoints[i]);
          getYoValuesFromFrameConvexPolygon2d();
       }
       catch (Exception e)
@@ -161,7 +165,8 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       try
       {
          convexPolygon2dForWriting.clear(referenceFrame);
-         convexPolygon2dForWriting.setAndUpdate(framePoints);
+         for (int i = 0; i < framePoints.length; i++)
+            convexPolygon2dForWriting.addVertexMatchingFrame(framePoints[i]);
          getYoValuesFromFrameConvexPolygon2d();
       }
       catch (Exception e)
@@ -213,22 +218,22 @@ public class YoFrameConvexPolygon2d implements ReferenceFrameHolder, VariableCha
       return yoFramePoints.size();
    }
 
-   public FrameConvexPolygon2d getFrameConvexPolygon2d()
+   public FrameConvexPolygon2D getFrameConvexPolygon2d()
    {
       putYoValuesIntoFrameConvexPolygon2d();
       return this.convexPolygon2dForReading;
    }
    
-   public void getFrameConvexPolygon2d(FrameConvexPolygon2d polygonToPack)
+   public void getFrameConvexPolygon2d(FixedFrameConvexPolygon2DBasics polygonToPack)
    {
       putYoValuesIntoFrameConvexPolygon2d();
-      polygonToPack.setAndUpdate(convexPolygon2dForReading);
+      polygonToPack.set(convexPolygon2dForReading);
    }
 
-   public ConvexPolygon2D getConvexPolygon2d()
+   public ConvexPolygon2DReadOnly getConvexPolygon2d()
    {
       putYoValuesIntoFrameConvexPolygon2d();
-      return this.convexPolygon2dForReading.getConvexPolygon2d();
+      return this.convexPolygon2dForReading;
    }
 
    public ArrayList<YoFramePoint2d> getYoFramePoints()

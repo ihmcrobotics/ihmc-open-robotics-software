@@ -25,9 +25,11 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -55,8 +57,8 @@ public class ConvexPolygonToolboxTest
       double xMin2 = 2.0, xMax2 = 3.0, yMin2 = 0.0, yMax2 = 2.0;
       ArrayList<FramePoint2D> points2 = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin2, xMax2, yMin2, yMax2, 100);
 
-      FrameConvexPolygon2d polygon1 = new FrameConvexPolygon2d(points1);
-      FrameConvexPolygon2d polygon2 = new FrameConvexPolygon2d(points2);
+      FrameConvexPolygon2D polygon1 = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(points1));
+      FrameConvexPolygon2D polygon2 = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(points2));
 
       FrameConvexPolygon2dAndConnectingEdges frameConvexPolygon2dAndConnectingEdges = new FrameConvexPolygon2dAndConnectingEdges();
 
@@ -101,7 +103,7 @@ public class ConvexPolygonToolboxTest
       for (int i = 0; i < numTests; i++)
       {
          @SuppressWarnings("unused")
-         FrameConvexPolygon2d combinedPolygon = new FrameConvexPolygon2d(polygon1, polygon2);
+         FrameConvexPolygon2D combinedPolygon = new FrameConvexPolygon2D(polygon1, polygon2);
       }
 
       endTime = System.currentTimeMillis();
@@ -110,7 +112,7 @@ public class ConvexPolygonToolboxTest
       System.out.println("timePer = " + timePer + " milliseconds per test using combineWith.");
       assertTrue(timePer < 2.0);
 
-      FrameConvexPolygon2d combinedPolygon = frameConvexPolygon2dAndConnectingEdges.getFrameConvexPolygon2d();
+      FrameConvexPolygon2D combinedPolygon = frameConvexPolygon2dAndConnectingEdges.getFrameConvexPolygon2d();
 
       FrameLineSegment2D connectingEdge1 = frameConvexPolygon2dAndConnectingEdges.getConnectingEdge1();
       FrameLineSegment2D connectingEdge2 = frameConvexPolygon2dAndConnectingEdges.getConnectingEdge2();
@@ -923,7 +925,7 @@ public class ConvexPolygonToolboxTest
 
       for (int test = 0; test < tests; test++)
       {
-         FrameConvexPolygon2d polygon = new FrameConvexPolygon2d();
+         FrameConvexPolygon2D polygon = new FrameConvexPolygon2D();
          int n = random.nextInt(30) + 1;
          for (int i = 0; i < n; i++)
          {
@@ -934,7 +936,7 @@ public class ConvexPolygonToolboxTest
          polygon.update();
 
          int desiredNumberOfVertices = random.nextInt(10);
-         FrameConvexPolygon2d originalPolygon = new FrameConvexPolygon2d(polygon);
+         FrameConvexPolygon2D originalPolygon = new FrameConvexPolygon2D(polygon);
 
          //         if (desiredNumberOfVertices > polygon.getNumberOfVertices()) increase++;
          //         if (desiredNumberOfVertices < polygon.getNumberOfVertices()) decrease++;
@@ -967,7 +969,7 @@ public class ConvexPolygonToolboxTest
          // check if the number of vertices is correct
          Assert.assertTrue(desiredNumberOfVertices >= polygon.getNumberOfVertices());
          // check if the new polygon is contained in the old one
-         Assert.assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygon.getConvexPolygon2d(), 10E-10, originalPolygon.getConvexPolygon2d()));
+         Assert.assertTrue(ConvexPolygon2dCalculator.isPolygonInside(polygon, 10E-10, originalPolygon));
       }
 
       //      System.out.println("Tested " + increase + " point increases");
@@ -1106,7 +1108,7 @@ public class ConvexPolygonToolboxTest
       int numberOfPoints = 20;
       int numberOfPolygons = 30;
 
-      ArrayList<FrameConvexPolygon2d> randomPolygons = ConvexPolygon2dTestHelpers.generateRandomPolygons(random, zUpFrame, xMin, xMax, yMin, yMax, widthMax,
+      ArrayList<FrameConvexPolygon2D> randomPolygons = ConvexPolygon2dTestHelpers.generateRandomPolygons(random, zUpFrame, xMin, xMax, yMin, yMax, widthMax,
             heightMax, numberOfPoints, numberOfPolygons);
 
       FrameGeometryTestFrame testFrame = null;
@@ -1127,11 +1129,11 @@ public class ConvexPolygonToolboxTest
       {
          for (int j = 0; j < n; j++)
          {
-            FrameConvexPolygon2d polygon1 = randomPolygons.get(i);
-            FrameConvexPolygon2d polygon2 = randomPolygons.get(j);
+            FrameConvexPolygon2D polygon1 = randomPolygons.get(i);
+            FrameConvexPolygon2D polygon2 = randomPolygons.get(j);
 
-            ConvexPolygon2D convexPolygon1 = polygon1.getConvexPolygon2dCopy();
-            ConvexPolygon2D convexPolygon2 = polygon2.getConvexPolygon2dCopy();
+            ConvexPolygon2D convexPolygon1 = new ConvexPolygon2D(polygon1);
+            ConvexPolygon2D convexPolygon2 = new ConvexPolygon2D(polygon2);
 
             ConvexPolygon2D intersectingPolygon = new ConvexPolygon2D();
             boolean success = toolbox.computeIntersectionOfPolygons(convexPolygon1, convexPolygon2, intersectingPolygon);
@@ -1143,7 +1145,7 @@ public class ConvexPolygonToolboxTest
             {
                if (PLOT_RESULTS)
                {
-                  plotter.addPolygon(new FrameConvexPolygon2d(zUpFrame, intersectingPolygon), Color.BLACK);
+                  plotter.addPolygon(new FrameConvexPolygon2D(zUpFrame, intersectingPolygon), Color.BLACK);
                   plotter.repaint();
                }
             }
@@ -1167,8 +1169,8 @@ public class ConvexPolygonToolboxTest
          {
             for (int j = 0; j < n; j++)
             {
-               FrameConvexPolygon2d polygon1 = randomPolygons.get(i);
-               FrameConvexPolygon2d polygon2 = randomPolygons.get(j);
+               FrameConvexPolygon2D polygon1 = randomPolygons.get(i);
+               FrameConvexPolygon2D polygon2 = randomPolygons.get(j);
 
                boolean inside1 = polygon1.isPointInside(testPoint);
                boolean inside2 = polygon2.isPointInside(testPoint);

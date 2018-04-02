@@ -6,6 +6,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public class FrameConvexPolygon2dTest
@@ -13,13 +14,13 @@ public class FrameConvexPolygon2dTest
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private ConvexPolygon2D convexPolygon2d;
-   private FrameConvexPolygon2d frameConvexPolygon2d;
+   private FrameConvexPolygon2D frameConvexPolygon2d;
 
    @Before
    public void setUp()
    {
       convexPolygon2d = createSomeValidPolygon();
-      frameConvexPolygon2d = new FrameConvexPolygon2d(worldFrame, convexPolygon2d);
+      frameConvexPolygon2d = new FrameConvexPolygon2D(worldFrame, convexPolygon2d);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

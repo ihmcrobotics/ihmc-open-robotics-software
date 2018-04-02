@@ -6,14 +6,13 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.jcodec.common.Assert;
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -117,7 +116,7 @@ public class ICPOptimizationQPSolverTest
 
       // create support polygon constraint
       double sideLength = 0.1;
-      FrameConvexPolygon2d supportPolygon = createSupportPolygon(sideLength);
+      FrameConvexPolygon2D supportPolygon = createSupportPolygon(sideLength);
 
       solver.setFeedbackConditions(0.1, 3.0, 1000.0);
       solver.addSupportPolygon(supportPolygon);
@@ -159,7 +158,7 @@ public class ICPOptimizationQPSolverTest
 
       // create support polygon constraint
       double sideLength = 0.1;
-      FrameConvexPolygon2d supportPolygon = createSupportPolygon(sideLength);
+      FrameConvexPolygon2D supportPolygon = createSupportPolygon(sideLength);
 
       solver.setFeedbackConditions(0.1, 3.0, 10000.0);
       solver.setCMPFeedbackConditions(10.0, true);
@@ -491,7 +490,7 @@ public class ICPOptimizationQPSolverTest
       solver.setFeedbackConditions(feedbackWeight, feedbackGain, 100000.0);
 
       double sideLength = 0.1;
-      FrameConvexPolygon2d supportPolygon = createSupportPolygon(sideLength);
+      FrameConvexPolygon2D supportPolygon = createSupportPolygon(sideLength);
       solver.addSupportPolygon(supportPolygon);
 
       double timeRemainingInState = 1.0;
@@ -545,10 +544,10 @@ public class ICPOptimizationQPSolverTest
       solver.setFeedbackConditions(feedbackWeight, feedbackGain, 100000.0);
 
       double sideLength = 0.1;
-      FrameConvexPolygon2d supportPolygon = createSupportPolygon(sideLength);
+      FrameConvexPolygon2D supportPolygon = createSupportPolygon(sideLength);
       solver.addSupportPolygon(supportPolygon);
 
-      FrameConvexPolygon2d reachabilityPolygon = createReachabilityPolygon();
+      FrameConvexPolygon2D reachabilityPolygon = createReachabilityPolygon();
       solver.addReachabilityPolygon(reachabilityPolygon);
 
       double timeRemainingInState = 1.0;
@@ -591,9 +590,9 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   private FrameConvexPolygon2d createSupportPolygon(double sideLength)
+   private FrameConvexPolygon2D createSupportPolygon(double sideLength)
    {
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
       FramePoint2D backLeft = new FramePoint2D(worldFrame, -sideLength, sideLength);
       FramePoint2D frontLeft = new FramePoint2D(worldFrame, sideLength, sideLength);
       FramePoint2D frontRight = new FramePoint2D(worldFrame, sideLength, -sideLength);
@@ -609,9 +608,9 @@ public class ICPOptimizationQPSolverTest
       return supportPolygon;
    }
 
-   private FrameConvexPolygon2d createReachabilityPolygon()
+   private FrameConvexPolygon2D createReachabilityPolygon()
    {
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
       FramePoint2D backLeft = new FramePoint2D(worldFrame, 0.35, 0.08);
       FramePoint2D frontLeft = new FramePoint2D(worldFrame, 0.35, 0.13);
       FramePoint2D frontRight = new FramePoint2D(worldFrame, 0.05, 0.13);
@@ -660,14 +659,14 @@ public class ICPOptimizationQPSolverTest
          solver.resetFeedbackRate(previousFeedbackDeltaSolution);
 
          // set constraints
-         FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(worldFrame);
+         FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(worldFrame);
          supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.12497345851902948, 0.22376754760881368));
          supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.10434696885177858, 0.2110446302571209));
          supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.10438193051572264, 0.12238795176076478));
          supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.12418538788019835, 0.10913840779165224));
          supportPolygon.update();
 
-         FrameConvexPolygon2d reachabilityPolygon = new FrameConvexPolygon2d(worldFrame);
+         FrameConvexPolygon2D reachabilityPolygon = new FrameConvexPolygon2D(worldFrame);
          reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, -0.5065556308152076, -0.0163509564360857));
          reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.893444112012186, -0.015502379303478447));
          reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.8938502168058939, -0.6855022562280167));
@@ -727,14 +726,14 @@ public class ICPOptimizationQPSolverTest
       solver.resetFeedbackRate(previousFeedbackDeltaSolution);
 
       // set constraints
-      FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d(worldFrame);
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D(worldFrame);
       supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.125, 0.224));
       supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.104, 0.211));
       supportPolygon.addVertex(new FramePoint2D(worldFrame, 0.104, 0.122));
       supportPolygon.addVertex(new FramePoint2D(worldFrame, -0.124, 0.109));
       supportPolygon.update();
 
-      FrameConvexPolygon2d reachabilityPolygon = new FrameConvexPolygon2d(worldFrame);
+      FrameConvexPolygon2D reachabilityPolygon = new FrameConvexPolygon2D(worldFrame);
       reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, -0.507, -0.016));
       reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.893, -0.016));
       reachabilityPolygon.addVertex(new FramePoint2D(worldFrame, 0.894, -0.686));

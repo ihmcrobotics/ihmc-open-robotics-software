@@ -13,7 +13,9 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -140,18 +142,18 @@ public class ConvexPolygonShrinkerTest
       int numberOfPoints = random.nextInt(20);
       int numberOfPolygons = 100;
 
-      ArrayList<FrameConvexPolygon2d> randomPolygons = ConvexPolygon2dTestHelpers.generateRandomPolygons(random, zUpFrame, xMin, xMax, yMin, yMax, widthMax, heightMax, numberOfPoints, numberOfPolygons);
+      ArrayList<FrameConvexPolygon2D> randomPolygons = ConvexPolygon2dTestHelpers.generateRandomPolygons(random, zUpFrame, xMin, xMax, yMin, yMax, widthMax, heightMax, numberOfPoints, numberOfPolygons);
 
       ConvexPolygonScaler shrinker = new ConvexPolygonScaler();
-      FrameConvexPolygon2d shrunkenPolygon = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D shrunkenPolygon = new FrameConvexPolygon2D();
 
-      for (FrameConvexPolygon2d randomPolygon : randomPolygons)
+      for (FrameConvexPolygon2D randomPolygon : randomPolygons)
       {
          double distance = RandomNumbers.nextDouble(random, 0.001, 5.0);
          shrinker.scaleConvexPolygon(randomPolygon, distance, shrunkenPolygon);
 
-         ConvexPolygon2D bigPolygon = randomPolygon.getConvexPolygon2dCopy();
-         ConvexPolygon2D smallPolygon = shrunkenPolygon.getConvexPolygon2dCopy();
+         ConvexPolygon2DReadOnly bigPolygon = randomPolygon;
+         ConvexPolygon2DReadOnly smallPolygon = shrunkenPolygon;
 
          boolean completelyInside = ConvexPolygon2dCalculator.isPolygonInside(smallPolygon, bigPolygon);
          assertTrue(completelyInside);
