@@ -39,7 +39,7 @@ public class GenericQuadrupedSimulationFactory
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
    private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = false;
-   private static final boolean USE_NETWORKING = false;
+   private static final boolean USE_NETWORKING = true;
 
    private QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
 

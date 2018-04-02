@@ -19,7 +19,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 800000)
    public void testWalkingForwardFast()
    {
       super.testWalkingForwardFast();
@@ -27,7 +27,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 800000)
    public void testWalkingForwardSlow()
    {
       super.testWalkingForwardSlow();
@@ -35,7 +35,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 800000)
    public void testWalkingBackwardsFast()
    {
       super.testWalkingBackwardsFast();
@@ -43,7 +43,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 800000)
    public void testWalkingBackwardsSlow()
    {
       super.testWalkingBackwardsSlow();
@@ -51,7 +51,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 70.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 800000)
    public void testWalkingInAForwardLeftCircle()
    {
       super.testWalkingInAForwardLeftCircle();
@@ -59,7 +59,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 70.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 800000)
    public void testWalkingInAForwardRightCircle()
    {
       super.testWalkingInAForwardRightCircle();
@@ -67,7 +67,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 75.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 800000)
    public void testWalkingInABackwardLeftCircle()
    {
       super.testWalkingInABackwardLeftCircle();
@@ -75,7 +75,7 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
    
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 70.0)
-   @Test(timeout = 300000)
+   @Test(timeout = 800000)
    public void testWalkingInABackwardRightCircle()
    {
       super.testWalkingInABackwardRightCircle();

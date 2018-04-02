@@ -26,7 +26,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 public class QuadrupedStepController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final QuadrupedStepStream stepStream;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -52,11 +51,10 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
    public QuadrupedStepController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
-                                  QuadrupedStepStream stepStream, YoVariableRegistry parentRegistry)
+                                  QuadrupedStepMessageHandler stepMessageHandler, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
-      this.stepStream = stepStream;
-      stepMessageHandler = new QuadrupedStepMessageHandler(stepStream, controllerToolbox.getRuntimeEnvironment().getRobotTimestamp(), registry);
+      this.stepMessageHandler = stepMessageHandler;
 
       // feedback controllers
       feetManager = controlManagerFactory.getOrCreateFeetManager();
@@ -93,9 +91,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    @Override
    public void onEntry()
    {
-      // initialize step stream
-      stepStream.onEntry();
-
       // initialize state
       stepMessageHandler.initialize();
       onLiftOffTriggered.set(false);
@@ -129,10 +124,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       }
       groundPlaneEstimator.compute();
 
-      // compute step plan
-      stepMessageHandler.consumeIncomingSteps();
-      stepMessageHandler.adjustStepQueue(balanceManager.getAccumulatedStepAdjustment());
-
+      stepMessageHandler.process(balanceManager.getAccumulatedStepAdjustment());
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
 
@@ -146,7 +138,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    @Override
    public void doAction(double timeInState)
    {
-      stepStream.process();
+      stepMessageHandler.process(balanceManager.getAccumulatedStepAdjustment());
 
       // update task space estimates
       controllerToolbox.update();
@@ -163,10 +155,6 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       }
       groundPlaneEstimator.compute();
 
-      // update step plan
-      stepMessageHandler.consumeIncomingSteps();
-      stepMessageHandler.adjustStepQueue(balanceManager.getAccumulatedStepAdjustment());
-
       balanceManager.clearStepSequence();
       balanceManager.addStepsToSequence(stepMessageHandler.getStepSequence());
 
@@ -178,7 +166,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       balanceManager.compute(contactStates);
 
       // update desired body orientation, angular velocity, and torque
-      bodyOrientationManager.compute(stepStream.getBodyOrientation());
+      bodyOrientationManager.compute(stepMessageHandler.getBodyOrientation());
 
       // update desired contact state and sole forces
       feetManager.compute();
@@ -214,9 +202,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    @Override
    public void onExit()
    {
-      // clean up step stream
-      stepStream.onExit();
-
+      stepMessageHandler.reset();
       feetManager.registerStepTransitionCallback(null);
    }
 

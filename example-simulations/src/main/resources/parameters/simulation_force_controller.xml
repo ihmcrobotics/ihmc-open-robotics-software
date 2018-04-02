@@ -196,7 +196,7 @@
                 </registry>
                 <registry name="QuadrupedStepController">
                     <registry name="QuadrupedStepMessageHandler">
-                        <parameter name="haltTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        <parameter name="haltTransitionDuration" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                     </registry>
                     <parameter name="jointDamping" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                     <parameter name="jointPositionLimitDampingParameter" type="DoubleParameter" min="0.0" max="1.0" value="10.0"/>
