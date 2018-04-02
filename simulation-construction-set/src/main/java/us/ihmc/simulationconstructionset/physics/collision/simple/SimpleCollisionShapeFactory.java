@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Cylinder3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.Ramp3D;
 import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
@@ -49,6 +50,8 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
          return createCylinder(shape3D);
       if ((shape3D instanceof Capsule3D))
          return createCapsule(shape3D);
+      if ((shape3D instanceof Ramp3D))
+         return createRamp(shape3D);
       
       throw new IllegalArgumentException("The type of "+ shape3D.getClass() + " is not matched among the simple shape Box3D, Sphere3D, Cylinder3D, Capsule3D");      
    } 
@@ -83,6 +86,15 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
          throw new IllegalArgumentException("Check Shape3D is Capsule3D");
       Capsule3D capsule3D = (Capsule3D) shape3D;
       return createCapsule(capsule3D.getRadius(), capsule3D.getLineSegment());
+   }
+   
+   private CollisionShapeDescription<?> createRamp(Shape3D<?> shape3D)
+   {
+      if (!(shape3D instanceof Ramp3D))
+         throw new IllegalArgumentException("Check Shape3D is Ramp3D");
+      Ramp3D ramp3D = (Ramp3D) shape3D;
+      ConvexPolytope polytope = ConvexPolytopeConstructor.constructRamp(ramp3D);
+      return new PolytopeShapeDescription<>(polytope);
    }
 
    @Override
