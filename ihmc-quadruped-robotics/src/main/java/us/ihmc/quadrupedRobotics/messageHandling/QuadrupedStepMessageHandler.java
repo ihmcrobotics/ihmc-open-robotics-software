@@ -11,6 +11,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
+import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
@@ -84,6 +85,7 @@ public class QuadrupedStepMessageHandler
          updateStepSequence();
       }
 
+      TimeIntervalTools.removeEndTimesLessThan(robotTimestamp.getDoubleValue(), receivedStepSequence);
       if(haltFlag.getBooleanValue())
          pruneHaltedSteps();
 
