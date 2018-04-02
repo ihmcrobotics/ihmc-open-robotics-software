@@ -2,7 +2,7 @@ package us.ihmc.geometry.polytope;
 
 import java.util.Random;
 
-import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.Ramp3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -107,6 +107,39 @@ public class ConvexPolytopeConstructor
       {
          polytope.addVertex(vertex);
       }
+
+      return polytope;
+   }
+
+   public static ConvexPolytope constructRamp(Ramp3D ramp3D)
+   {
+      double length = ramp3D.getLength();
+      double width = ramp3D.getWidth();
+      double height = ramp3D.getHeight();
+
+      ConvexPolytope polytope = new ConvexPolytope();
+
+      PolytopeVertex vertex0 = polytope.addVertex(new Point3D(-0.5 * length, 0.5 * width, 0.0));
+      PolytopeVertex vertex1 = polytope.addVertex(new Point3D(-0.5 * length, -0.5 * width, 0.0));
+
+      PolytopeVertex vertex2 = polytope.addVertex(new Point3D(0.5 * length, -0.5 * width, 0.0));
+      PolytopeVertex vertex3 = polytope.addVertex(new Point3D(0.5 * length, 0.5 * width, 0.0));
+
+      PolytopeVertex vertex4 = polytope.addVertex(new Point3D(0.5 * length, -0.5 * width, height));
+      PolytopeVertex vertex5 = polytope.addVertex(new Point3D(0.5 * length, 0.5 * width, height));
+
+      polytope.addEdge(vertex0, vertex1);
+      polytope.addEdge(vertex1, vertex2);
+      polytope.addEdge(vertex2, vertex3);
+      polytope.addEdge(vertex3, vertex0);
+
+      polytope.addEdge(vertex4, vertex0);
+      polytope.addEdge(vertex1, vertex5);
+
+      polytope.addEdge(vertex3, vertex4);
+      polytope.addEdge(vertex2, vertex5);
+
+      polytope.addEdge(vertex4, vertex5);
 
       return polytope;
    }
