@@ -1,11 +1,14 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import org.junit.After;
 import org.junit.Before;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.quadrupedRobotics.*;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerStatePacket;
@@ -63,6 +66,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       AtomicReference<QuadrupedForceControllerEnum> controllerState = new AtomicReference<>();
       AtomicReference<QuadrupedSteppingStateEnum> steppingState = new AtomicReference<>();
       packetCommunicator.attachListener(QuadrupedForceControllerStatePacket.class, packet -> controllerState.set(packet.get()));
+
       packetCommunicator.attachListener(QuadrupedSteppingStatePacket.class, packet -> steppingState.set(packet.get()));
       packetCommunicator.connect();
 
@@ -71,9 +75,9 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
-      List<QuadrupedTimedStep> steps = getSteps();
-      QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps, false);
-      packetCommunicator.send(timedStepPacket);
+      List<QuadrupedTimedStepMessage> steps = getSteps();
+      QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
+      packetCommunicator.send(message);
 
       boolean isStanding = true;
       while(isStanding)
@@ -103,7 +107,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
    /**
     * Steps to execute, not expressed in absolute time
     */
-   public abstract List<QuadrupedTimedStep> getSteps();
+   public abstract List<QuadrupedTimedStepMessage> getSteps();
 
    /**
     * Expected final planar position, given as x, y, yaw

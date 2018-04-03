@@ -101,13 +101,14 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(), registry);
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
 
+      GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
+
       // Initialize input providers.
-      stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), controllerToolbox.getReferenceFrames(), runtimeEnvironment.getGlobalDataProducer(), registry);
-      soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), controllerToolbox.getReferenceFrames(), globalDataProducer, registry);
+      soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(globalDataProducer, registry);
 
       commandConsumer = new QuadrupedStepCommandConsumer(commandInputManager, stepMessageHandler, controllerToolbox, controlManagerFactory);
 
-      GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
 
       if (globalDataProducer != null)
       {

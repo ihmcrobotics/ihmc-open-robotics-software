@@ -1,9 +1,12 @@
 package us.ihmc.quadrupedRobotics.input.managers;
 
 import com.google.common.util.concurrent.AtomicDouble;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
@@ -19,6 +22,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -119,8 +123,12 @@ public class QuadrupedStepTeleopManager
    private void sendSteps()
    {
       List<? extends QuadrupedTimedStep> steps = stepStream.getSteps();
-      QuadrupedTimedStepPacket timedStepPacket = new QuadrupedTimedStepPacket(steps, true);
-      packetCommunicator.send(timedStepPacket);
+      List<QuadrupedTimedStepMessage> stepMessages = new ArrayList<>();
+      for (int i = 0; i < steps.size(); i++)
+         stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(steps.get(i)));
+
+      QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);
+      packetCommunicator.send(message);
    }
 
    public YoQuadrupedXGaitSettings getXGaitSettings()
