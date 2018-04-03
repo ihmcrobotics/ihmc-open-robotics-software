@@ -85,7 +85,7 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
 
       boundingBox = new BoundingBox3D(minPoint, maxPoint);
       
-      Ramp3D ramp3DShape = new Ramp3D(transform, run, width, height);
+      Ramp3D ramp3DShape = new Ramp3D(transform, absRun, width, height);
       
       this.terrainCollisionShapes.add(ramp3DShape);
    }
