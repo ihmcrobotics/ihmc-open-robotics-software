@@ -60,8 +60,8 @@ public class ValkyrieWholeBodyTrajectoryToolboxControllerTest extends AvatarWhol
    }
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 10.6, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 53000)
    public void testOneBigCircle() throws Exception, UnreasonableAccelerationException
    {
       super.testOneBigCircle();

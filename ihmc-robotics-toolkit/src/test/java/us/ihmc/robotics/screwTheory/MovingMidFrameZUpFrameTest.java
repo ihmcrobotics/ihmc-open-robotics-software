@@ -17,7 +17,7 @@ import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 
 public class MovingMidFrameZUpFrameTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAgainstFiniteDifferenceWithChainRobot()
    {
@@ -73,7 +73,7 @@ public class MovingMidFrameZUpFrameTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testConsistencyWithMidFrameZUpFrameWithChainRobot()
    {

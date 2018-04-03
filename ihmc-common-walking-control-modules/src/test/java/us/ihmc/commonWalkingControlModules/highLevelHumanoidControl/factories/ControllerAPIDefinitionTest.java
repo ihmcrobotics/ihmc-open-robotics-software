@@ -17,7 +17,7 @@ import us.ihmc.robotics.lists.GenericTypeBuilder;
 public class ControllerAPIDefinitionTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCommandSetters()
    {

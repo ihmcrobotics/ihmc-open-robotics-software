@@ -20,7 +20,7 @@ import us.ihmc.robotics.lists.PriorityQueue;
 public class GarbageFreePriorityQueueTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testQueueableCommandPriorityQueue()
    {
@@ -39,7 +39,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSameDelay()
    {
@@ -62,7 +62,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(10, index);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAddingInOrder()
    {
@@ -84,7 +84,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(10, index);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPop()
    {
@@ -106,7 +106,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPopExtended()
    {
@@ -152,7 +152,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPeek()
    { 
@@ -164,7 +164,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(1, commandPriorityQueue.getSize());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPopWhenEmpty()
    { 
@@ -173,7 +173,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(0, commandPriorityQueue.getSize());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClear()
    { 

@@ -63,7 +63,7 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       assertEquals(-1, fourBar.getAngleDtCDA(), eps);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testRandomQuadrilatteral()
    {
@@ -106,7 +106,7 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       assertEquals(D, fourBar.getAngleCDA(), eps);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testRandomConvenientLinkageDerivatives()
    {
@@ -258,7 +258,7 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.3)
+	@ContinuousIntegrationTest(estimatedDuration = 1.1)
 	@Test(timeout = 30000)
    public void testAccelerationsWithRandomQuadrilateral()
    {

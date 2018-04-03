@@ -25,8 +25,8 @@ public class GenericQuadrupedScriptedFlatGroundWalkingTest extends QuadrupedScri
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 2000.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 74.7)
+   @Test(timeout = 370000)
    public void testScriptedFlatGroundWalking() throws IOException, BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       super.testScriptedFlatGroundWalking();

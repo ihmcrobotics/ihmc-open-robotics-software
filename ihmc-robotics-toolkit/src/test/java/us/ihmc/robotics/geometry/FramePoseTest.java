@@ -201,7 +201,7 @@ public class FramePoseTest
       assertEquals("Change in FramePose Orientation after rotation is wrong.", 0.0, orientationDistance, Math.toRadians(0.1));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRotatePoseLockOrientation()
    {

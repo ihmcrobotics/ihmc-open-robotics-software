@@ -23,8 +23,8 @@ public class RateLimitedYoFrameQuaternionTest
 {
    private static final double EPSILON = 1.0e-12;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 10000)
+   @ContinuousIntegrationTest(estimatedDuration = 2.0)
+   @Test(timeout = 30000)
    public void testConvergenceWithConstantInput() throws Exception
    {
       Random random = new Random(46363);

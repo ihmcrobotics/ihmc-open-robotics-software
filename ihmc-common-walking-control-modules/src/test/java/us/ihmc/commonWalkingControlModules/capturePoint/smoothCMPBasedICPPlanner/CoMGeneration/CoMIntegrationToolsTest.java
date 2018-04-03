@@ -23,7 +23,7 @@ public class CoMIntegrationToolsTest
    private static final double integrationDT = 0.0001;
    private static final double epsilon = 0.005;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testTransferIntegration()
    {
@@ -92,7 +92,7 @@ public class CoMIntegrationToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSwingIntegration()
    {
@@ -177,7 +177,7 @@ public class CoMIntegrationToolsTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSwingIntegrationWithSpline()
    {

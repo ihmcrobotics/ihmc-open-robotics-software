@@ -26,14 +26,14 @@ public class ConvexPolygon2dCalculatorTest
    private static final double epsilon = 1.0e-10;
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testConstruction()
    {
       new ConvexPolygon2dCalculator();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testIsPolygonInside1()
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
@@ -70,7 +70,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testTranslatePolygon1()
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
@@ -91,7 +91,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testGetMiddleIndexCounterClockwise1()
    {
       Random random = new Random(234);
@@ -164,7 +164,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testGetLineOfSightVertices1()
    {
       Point2D vertex1 = new Point2D(0.0, 1.0);
@@ -204,7 +204,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testGetLineOfSightVertices2()
    {
       // empty polygon
@@ -215,7 +215,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testGetLineOfSightVertexIndices1()
    {
       Point2D vertex = new Point2D(-0.5, 0.5);
@@ -235,7 +235,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testGetLineOfSightVertexIndices4()
    {
       // add vertices in clockwise order so updating the polygon does not change indices
@@ -261,7 +261,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testDoesLineIntersectEdge1()
    {
       // add in order so update does not change indices:
@@ -303,7 +303,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testDoesLineIntersectEdge2()
    {
       // add in order so update does not change indices:
@@ -338,7 +338,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testDoesLineIntersectEdge3()
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
@@ -348,7 +348,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testGetIntersectingEdges1()
    {
       Point2D vertex1 = new Point2D(0.0, 1.0);
@@ -427,7 +427,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testGetIntersectingEdges2()
    {
       // line polygon
@@ -464,7 +464,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testGetIntersectingEdges3()
    {
       // point polygon
@@ -489,7 +489,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testGetIntersectingEdges4()
    {
       // empty polygon
@@ -504,7 +504,7 @@ public class ConvexPolygon2dCalculatorTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 3000)
+   @Test(timeout = 30000)
    public void testGetEdgeNormal()
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
