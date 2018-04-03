@@ -19,12 +19,17 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
     * If true, the times are expressed in absolute time relative to the robot start
     */
    public boolean is_expressed_in_absolute_time_ = true;
+   /**
+    * Properties for queueing footstep lists.
+    */
+   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public QuadrupedTimedStepListMessage()
    {
       quadruped_step_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QuadrupedTimedStepMessage>(100,
                                                                                                                    controller_msgs.msg.dds.QuadrupedTimedStepMessage.class,
                                                                                                                    new controller_msgs.msg.dds.QuadrupedTimedStepMessagePubSubType());
+      queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
 
    }
 
@@ -41,6 +46,7 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       quadruped_step_list_.set(other.quadruped_step_list_);
       is_expressed_in_absolute_time_ = other.is_expressed_in_absolute_time_;
 
+      controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
    }
 
    /**
@@ -83,6 +89,14 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       return is_expressed_in_absolute_time_;
    }
 
+   /**
+    * Properties for queueing footstep lists.
+    */
+   public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
+   {
+      return queueing_properties_;
+   }
+
    @Override
    public boolean epsilonEquals(QuadrupedTimedStepListMessage other, double epsilon)
    {
@@ -110,6 +124,9 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_expressed_in_absolute_time_, other.is_expressed_in_absolute_time_, epsilon))
          return false;
 
+      if (!this.queueing_properties_.epsilonEquals(other.queueing_properties_, epsilon))
+         return false;
+
       return true;
    }
 
@@ -133,6 +150,9 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       if (this.is_expressed_in_absolute_time_ != otherMyClass.is_expressed_in_absolute_time_)
          return false;
 
+      if (!this.queueing_properties_.equals(otherMyClass.queueing_properties_))
+         return false;
+
       return true;
    }
 
@@ -150,6 +170,9 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       builder.append(", ");
       builder.append("is_expressed_in_absolute_time=");
       builder.append(this.is_expressed_in_absolute_time_);
+      builder.append(", ");
+      builder.append("queueing_properties=");
+      builder.append(this.queueing_properties_);
       builder.append("}");
       return builder.toString();
    }
