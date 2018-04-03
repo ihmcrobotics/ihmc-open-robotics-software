@@ -2,7 +2,6 @@ package us.ihmc.geometry.polytope;
 
 import java.util.Random;
 
-import us.ihmc.euclid.geometry.Ramp3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -111,12 +110,8 @@ public class ConvexPolytopeConstructor
       return polytope;
    }
 
-   public static ConvexPolytope constructRamp(Ramp3D ramp3D)
+   public static ConvexPolytope constructRamp(double length, double width, double height)
    {
-      double length = ramp3D.getLength();
-      double width = ramp3D.getWidth();
-      double height = ramp3D.getHeight();
-
       ConvexPolytope polytope = new ConvexPolytope();
 
       PolytopeVertex vertex0 = polytope.addVertex(new Point3D(-0.5 * length, 0.5 * width, 0.0));

@@ -93,7 +93,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
       if (!(shape3D instanceof Ramp3D))
          throw new IllegalArgumentException("Check Shape3D is Ramp3D");
       Ramp3D ramp3D = (Ramp3D) shape3D;
-      ConvexPolytope polytope = ConvexPolytopeConstructor.constructRamp(ramp3D);
+      ConvexPolytope polytope = ConvexPolytopeConstructor.constructRamp(ramp3D.getLength(), ramp3D.getWidth(), ramp3D.getHeight());
       return new PolytopeShapeDescription<>(polytope);
    }
 
