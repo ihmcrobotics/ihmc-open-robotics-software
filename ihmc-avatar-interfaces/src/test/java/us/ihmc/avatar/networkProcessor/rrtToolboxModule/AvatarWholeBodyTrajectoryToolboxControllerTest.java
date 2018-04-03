@@ -110,8 +110,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
    private HumanoidFloatingRootJointRobot ghost;
    private RobotController toolboxUpdater;
 
-   protected SideDependentList<Pose3D> handControlFrames;
-
    private WholeBodyTrajectoryToolboxCommandConverter commandConversionHelper;
    private KinematicsToolboxOutputConverter converter;
 
@@ -262,7 +260,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
             selectionMatrix.resetSelection();
             selectionMatrix.clearAngularSelection();
             WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
-            Pose3D controlFramePose = handControlFrames.get(robotSide);
+            Pose3D controlFramePose = new Pose3D();
 
             trajectory.getControlFramePositionInEndEffector().set(controlFramePose.getPosition());
             trajectory.getControlFrameOrientationInEndEffector().set(controlFramePose.getOrientation());
@@ -325,7 +323,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
          selectionMatrix.resetSelection();
          WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
-         Pose3D controlFramePose = handControlFrames.get(robotSide);
+         Pose3D controlFramePose = new Pose3D();
 
          trajectory.getControlFramePositionInEndEffector().set(controlFramePose.getPosition());
          trajectory.getControlFrameOrientationInEndEffector().set(controlFramePose.getOrientation());
@@ -387,7 +385,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
          SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
          selectionMatrix.resetSelection();
          WaypointBasedTrajectoryMessage trajectory = createTrajectoryMessage(hand, 0.0, trajectoryTime, timeResolution, handFunction, selectionMatrix);
-         Pose3D controlFramePose = handControlFrames.get(robotSide);
+         Pose3D controlFramePose = new Pose3D();
 
          trajectory.getControlFramePositionInEndEffector().set(controlFramePose.getPosition());
          trajectory.getControlFrameOrientationInEndEffector().set(controlFramePose.getOrientation());
