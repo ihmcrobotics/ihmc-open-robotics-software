@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.subscribers;
 
-import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
+import controller_msgs.msg.dds.DrillDetectionPacket;
 
 public interface DrillDetectionStatusListener
 {

@@ -1,22 +1,25 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * Atlas specific message.
- * This packet controls the stiffness of LegJoints. i.e., the maximum force a joint puts out when it
- * is (pushed) away from a desired position. This is useful to prevent robot from falling when leg
- * hit things unexpectedly. However, low stiffness (high compliance) can lead to poor joint tracking
- * in the presence of natural joint stiction. Finding a good balance is application specific. In our
- * hybrid velocity+force controller, most force comes from velocity control, therefore, only
- * parameter related to velocity control is exposed.
+ * Atlas specific message. This packet controls the stiffness of LegJoints. i.e., the maximum force
+ * a joint puts out when it is (pushed) away from a desired position. This is useful to prevent
+ * robot from falling when leg hit things unexpectedly. However, low stiffness (high compliance) can
+ * lead to poor joint tracking in the presence of natural joint stiction. Finding a good balance is
+ * application specific. In our hybrid velocity+force controller, most force comes from velocity
+ * control, therefore, only parameter related to velocity control is exposed.
  */
 public class LegCompliancePacket extends Packet<LegCompliancePacket> implements Settable<LegCompliancePacket>, EpsilonComparable<LegCompliancePacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    /**
     * maximum allowed force (ratio) from velocity control in the range of [0.0, 1.0]. 1.0 is the
     * maximum stiffness (default) value tuned for fast walking, 0.0 refers to zero velocity control
@@ -30,17 +33,38 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
    public LegCompliancePacket()
    {
       max_velocity_deltas_ = new us.ihmc.idl.IDLSequence.Float(100, "type_5");
+
    }
 
    public LegCompliancePacket(LegCompliancePacket other)
    {
+      this();
       set(other);
    }
 
    public void set(LegCompliancePacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       max_velocity_deltas_.set(other.max_velocity_deltas_);
       robot_side_ = other.robot_side_;
+
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -55,14 +79,14 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
       return max_velocity_deltas_;
    }
 
-   public byte getRobotSide()
-   {
-      return robot_side_;
-   }
-
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
+   }
+
+   public byte getRobotSide()
+   {
+      return robot_side_;
    }
 
    @Override
@@ -72,6 +96,9 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.max_velocity_deltas_, other.max_velocity_deltas_, epsilon))
          return false;
@@ -94,9 +121,11 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
 
       LegCompliancePacket otherMyClass = (LegCompliancePacket) other;
 
-      if (!this.max_velocity_deltas_.equals(otherMyClass.max_velocity_deltas_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
 
+      if (!this.max_velocity_deltas_.equals(otherMyClass.max_velocity_deltas_))
+         return false;
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -109,13 +138,14 @@ public class LegCompliancePacket extends Packet<LegCompliancePacket> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("LegCompliancePacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("max_velocity_deltas=");
       builder.append(this.max_velocity_deltas_);
-
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append("}");
       return builder.toString();
    }

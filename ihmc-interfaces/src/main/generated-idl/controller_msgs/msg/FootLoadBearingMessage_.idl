@@ -29,6 +29,10 @@ module controller_msgs
       struct FootLoadBearingMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Needed to identify a side dependent end-effector.
          */
         @defaultValue(value=255)

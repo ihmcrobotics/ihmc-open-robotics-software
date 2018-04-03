@@ -8,6 +8,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
@@ -35,10 +36,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -777,12 +777,12 @@ public class BalanceManager
 
       SideDependentList<FrameConvexPolygon2d> footSupportPolygons = bipedSupportPolygons.getFootPolygonsInWorldFrame();
 
-      capturabilityBasedStatus.capturePoint.set(capturePoint2d);
-      capturabilityBasedStatus.desiredCapturePoint.set(desiredCapturePoint2d);
-      capturabilityBasedStatus.centerOfMass.set(centerOfMassPosition);
+      capturabilityBasedStatus.getCapturePoint2d().set(capturePoint2d);
+      capturabilityBasedStatus.getDesiredCapturePoint2d().set(desiredCapturePoint2d);
+      capturabilityBasedStatus.getCenterOfMass3d().set(centerOfMassPosition);
       for (RobotSide robotSide : RobotSide.values)
       {
-         capturabilityBasedStatus.setSupportPolygon(robotSide, footSupportPolygons.get(robotSide));
+         HumanoidMessageTools.packFootSupportPolygon(robotSide, footSupportPolygons.get(robotSide), capturabilityBasedStatus);
       }
 
       return capturabilityBasedStatus;

@@ -1,20 +1,25 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This class is used to build trajectory messages in taskspace.
- * It holds the necessary information for one trajectory point.
- * Feel free to look at EuclideanTrajectoryPointMessage (translational) and SE3TrajectoryPointMessage (rotational).
+ * This message is part of the IHMC whole-body controller API. This class is used to build
+ * trajectory messages in taskspace. It holds the necessary information for one trajectory point.
+ * Feel free to look at EuclideanTrajectoryPointMessage (translational) and
+ * SE3TrajectoryPointMessage (rotational).
  */
 public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       implements Settable<SE3TrajectoryPointMessage>, EpsilonComparable<SE3TrajectoryPointMessage>
 {
    /**
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   /**
+    * Time at which the trajectory point has to be reached. The time is relative to when the
+    * trajectory starts.
     */
    public double time_;
    /**
@@ -36,7 +41,6 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
 
    public SE3TrajectoryPointMessage()
    {
-
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
@@ -45,11 +49,14 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
 
    public SE3TrajectoryPointMessage(SE3TrajectoryPointMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(SE3TrajectoryPointMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       time_ = other.time_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
@@ -59,19 +66,37 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
    }
 
    /**
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public double getTime()
+   public void setSequenceId(long sequence_id)
    {
-      return time_;
+      sequence_id_ = sequence_id;
    }
 
    /**
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
+   }
+
+   /**
+    * Time at which the trajectory point has to be reached. The time is relative to when the
+    * trajectory starts.
     */
    public void setTime(double time)
    {
       time_ = time;
+   }
+
+   /**
+    * Time at which the trajectory point has to be reached. The time is relative to when the
+    * trajectory starts.
+    */
+   public double getTime()
+   {
+      return time_;
    }
 
    /**
@@ -114,18 +139,18 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       if (other == this)
          return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon))
          return false;
 
       if (!this.position_.epsilonEquals(other.position_, epsilon))
          return false;
-
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
          return false;
-
       if (!this.linear_velocity_.epsilonEquals(other.linear_velocity_, epsilon))
          return false;
-
       if (!this.angular_velocity_.epsilonEquals(other.angular_velocity_, epsilon))
          return false;
 
@@ -144,18 +169,18 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
 
       SE3TrajectoryPointMessage otherMyClass = (SE3TrajectoryPointMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.time_ != otherMyClass.time_)
          return false;
 
       if (!this.position_.equals(otherMyClass.position_))
          return false;
-
       if (!this.orientation_.equals(otherMyClass.orientation_))
          return false;
-
       if (!this.linear_velocity_.equals(otherMyClass.linear_velocity_))
          return false;
-
       if (!this.angular_velocity_.equals(otherMyClass.angular_velocity_))
          return false;
 
@@ -168,25 +193,23 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("SE3TrajectoryPointMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("time=");
       builder.append(this.time_);
-
       builder.append(", ");
       builder.append("position=");
       builder.append(this.position_);
-
       builder.append(", ");
       builder.append("orientation=");
       builder.append(this.orientation_);
-
       builder.append(", ");
       builder.append("linear_velocity=");
       builder.append(this.linear_velocity_);
-
       builder.append(", ");
       builder.append("angular_velocity=");
       builder.append(this.angular_velocity_);
-
       builder.append("}");
       return builder.toString();
    }

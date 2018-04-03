@@ -11,6 +11,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepDataMessagePubSubType;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.QueueableMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType;
+import geometry_msgs.msg.dds.PointPubSubType;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.net.NetClassList;
@@ -20,7 +30,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -30,14 +39,14 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.idl.IDLSequence;
+import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
@@ -293,8 +302,17 @@ public class DesiredFootstepTest
       netClassList.registerPacketClass(ExecutionMode.class);
       netClassList.registerPacketClass(ExecutionTiming.class);
 
+      netClassList.registerPacketField(FootstepDataMessage.class);
+      netClassList.registerPacketField(FootstepDataMessage[].class);
+      netClassList.registerPacketField(Class.class);
+      netClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      netClassList.registerPacketField(SE3TrajectoryPointMessage.class);
+      netClassList.registerPacketField(SE3TrajectoryPointMessage[].class);
       netClassList.registerPacketField(QueueableMessage.class);
       netClassList.registerPacketField(ArrayList.class);
+      netClassList.registerPacketField(Vector3D.class);
+      netClassList.registerPacketField(Point2D.class);
+      netClassList.registerPacketField(Point2D[].class);
       netClassList.registerPacketField(Point3D.class);
       netClassList.registerPacketField(Point3D[].class);
       netClassList.registerPacketField(Quaternion.class);
@@ -302,6 +320,22 @@ public class DesiredFootstepTest
       netClassList.registerPacketField(FootstepStatus.class);
       netClassList.registerPacketField(TrajectoryType.class);
       netClassList.registerPacketField(RobotSide.class);
+
+      netClassList.registerPacketField(IDLSequence.Object.class);
+      netClassList.registerPacketField(IDLSequence.Float.class);
+      netClassList.registerPacketField(IDLSequence.Boolean.class);
+      netClassList.registerPacketField(IDLSequence.Double.class);
+      netClassList.registerPacketField(IDLSequence.Integer.class);
+      netClassList.registerPacketField(IDLSequence.Byte.class);
+      netClassList.registerPacketField(IDLSequence.Long.class);
+      netClassList.registerPacketField(IDLSequence.StringBuilderHolder.class);
+      netClassList.registerPacketField(TopicDataType.class);
+      netClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      netClassList.registerPacketField(us.ihmc.idl.CDR.class);
+      netClassList.registerPacketField(PointPubSubType.class);
+      netClassList.registerPacketField(SE3TrajectoryMessagePubSubType.class);
+      netClassList.registerPacketField(SE3TrajectoryPointMessagePubSubType.class);
+      netClassList.registerPacketField(FootstepDataMessagePubSubType.class);
 
       return netClassList;
    }
@@ -382,7 +416,7 @@ public class DesiredFootstepTest
       {
          FootstepStatusMessage footstepStatus = sentFootstepStatus.get(i);
          FootstepStatusMessage reconstructedFootstepStatus = receivedFootsteps.get(i);
-         assertTrue(footstepStatus.getStatus() == reconstructedFootstepStatus.getStatus());
+         assertTrue(footstepStatus.getFootstepStatus() == reconstructedFootstepStatus.getFootstepStatus());
       }
    }
 
@@ -392,7 +426,7 @@ public class DesiredFootstepTest
 
       for (Footstep footstep : footsteps)
       {
-         footstepsData.add(HumanoidMessageTools.createFootstepDataMessage(footstep));
+         footstepsData.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(footstep));
       }
 
       return footstepsData;
@@ -425,15 +459,16 @@ public class DesiredFootstepTest
       @Override
       public void receivedPacket(FootstepDataListMessage packet)
       {
-         boolean adjustable = packet.areFootstepsAdjustable;
-         for (FootstepDataMessage footstepData : packet.footstepDataList)
+         boolean adjustable = packet.getAreFootstepsAdjustable();
+         List<FootstepDataMessage> footstepDataList = packet.getFootstepDataList();
+         for (int i = 0; i < footstepDataList.size(); i++)
          {
-            List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
-            if (contactPoints != null && contactPoints.size() == 0)
-               contactPoints = null;
+            FootstepDataMessage footstepData = footstepDataList.get(i);
             FramePose3D footstepPose = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
+            Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable);
 
-            Footstep footstep = new Footstep(robotSide, footstepPose, true, adjustable, contactPoints);
+            footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(footstepData));
+               
             footstep.setTrajectoryType(TrajectoryType.fromByte(footstepData.getTrajectoryType()));
             footstep.setSwingHeight(footstepData.getSwingHeight());
             reconstructedFootstepPath.add(footstep);
@@ -453,7 +488,7 @@ public class DesiredFootstepTest
       @Override
       public void receivedPacket(PauseWalkingMessage packet)
       {
-         reconstructedCommands.add(packet.isPaused());
+         reconstructedCommands.add(packet.getPause());
       }
 
       public ArrayList<Boolean> getReconstructedCommands()

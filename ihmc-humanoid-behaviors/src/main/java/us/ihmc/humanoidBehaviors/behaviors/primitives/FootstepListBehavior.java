@@ -1,7 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -14,11 +19,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -63,7 +64,7 @@ public class FootstepListBehavior extends AbstractBehavior
    public void set(FootstepDataListMessage footStepList)
    {
       outgoingFootstepDataList = footStepList;
-      numberOfFootsteps.set(outgoingFootstepDataList.getDataList().size());
+      numberOfFootsteps.set(outgoingFootstepDataList.getFootstepDataList().size());
       packetHasBeenSent.set(false);
    }
 
@@ -81,7 +82,7 @@ public class FootstepListBehavior extends AbstractBehavior
 
          RobotSide footstepSide = footstep.getRobotSide();
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(footstepSide, position, orientation);
-         footstepDataList.add(footstepData);
+         footstepDataList.getFootstepDataList().add().set(footstepData);
       }
       set(footstepDataList);
    }
@@ -267,7 +268,12 @@ public class FootstepListBehavior extends AbstractBehavior
          WalkingControllerParameters walkingControllerParameters)
    {
       ArrayList<Double> footStepLengths = new ArrayList<Double>();
-      footstepDataList.addAll(footStepList.getDataList());
+      List<FootstepDataMessage> dataList = footStepList.getFootstepDataList();
+      for (int i = 0; i < dataList.size(); i++)
+      {
+         FootstepDataMessage step = dataList.get(i);
+         footstepDataList.add(step);
+      }
 
       FootstepDataMessage firstStepData = footstepDataList.remove(footstepDataList.size() - 1);
 
@@ -276,13 +282,13 @@ public class FootstepListBehavior extends AbstractBehavior
       firstSingleSupportFootTransformToWorld.getTranslation(firstSingleSupportFootTranslationFromWorld);
 
       previousFootStepLocation.set(firstSingleSupportFootTranslationFromWorld);
-      firstStepData.getLocation(nextFootStepLocation);
+      nextFootStepLocation.set(firstStepData.getLocation());
 
       while (!footstepDataList.isEmpty())
       {
          footStepLengths.add(previousFootStepLocation.distance(nextFootStepLocation));
          previousFootStepLocation.set(nextFootStepLocation);
-         footstepDataList.remove(footstepDataList.size() - 1).getLocation(nextFootStepLocation);
+         nextFootStepLocation.set(footstepDataList.remove(footstepDataList.size() - 1).getLocation());
       }
 
       double lastStepLength = previousFootStepLocation.distance(nextFootStepLocation);

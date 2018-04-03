@@ -2,6 +2,9 @@
 # This message contains all the information needed to configure the objectives/constraints to apply on 
 # a given end-effector in the solver.
 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 # The is the unique hash code of the end-effector to be solved for.
 # It is used on the solver side to retrieve the desired end-effector to be controlled.
 # See RigidBody.getNameBasedHashCode() for the computation of a rigid-body hash code.

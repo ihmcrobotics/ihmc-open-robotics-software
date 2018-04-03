@@ -1,16 +1,17 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -36,8 +37,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
    {
       if (!sentPlanningRequest.getBooleanValue())
       {
-         FootstepPlanningRequestPacket request = new FootstepPlanningRequestPacket();
-         request.set(new FramePose3D(ReferenceFrame.getWorldFrame()), RobotSide.LEFT.toByte(), goalPose, plannerToUse.toByte());
+         FootstepPlanningRequestPacket request = HumanoidMessageTools.createFootstepPlanningRequestPacket(new FramePose3D(ReferenceFrame.getWorldFrame()), RobotSide.LEFT, goalPose, plannerToUse);
          request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
          sendPacket(request);
       }
@@ -45,11 +45,11 @@ public class WalkToFiducialBehavior extends AbstractBehavior
       if (!recievedPlan.getBooleanValue() && footstepPlanQueue.isNewPacketAvailable())
       {
          FootstepPlanningToolboxOutputStatus latestPacket = footstepPlanQueue.getLatestPacket();
-         planValid.set(FootstepPlanningResult.fromByte(latestPacket.footstepPlanningResult).validForExecution());
+         planValid.set(FootstepPlanningResult.fromByte(latestPacket.getFootstepPlanningResult()).validForExecution());
 
          if (planValid.getBooleanValue())
          {
-            FootstepDataListMessage footstepDataList = latestPacket.footstepDataList;
+            FootstepDataListMessage footstepDataList = latestPacket.getFootstepDataList();
             sendPacketToUI(footstepDataList);
          }
 

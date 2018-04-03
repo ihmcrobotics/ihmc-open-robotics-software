@@ -6,6 +6,9 @@ import static org.junit.Assert.assertTrue;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.ClearDelayQueueMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -14,16 +17,11 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -58,15 +56,16 @@ public abstract class EndToEndClearDelayQueueMessageTest implements MultiRobotTe
       YoVariable<?> handTrajectoryPoints = scs.getVariable(handName + "TaskspaceControlModule", handName + "TaskspaceNumberOfPoints");
 
       // send hand trajectory and footstep list
-      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.LEFT, 10);
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
+      handTrajectoryMessage.setRobotSide(RobotSide.LEFT.toByte());
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       for (int i = 0; i < 10; i++)
       {
-         handTrajectoryMessage.getSe3Trajectory().setTrajectoryPoint(i, i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());
-         footstepDataListMessage.add(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(), new Quaternion()));
+         handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage((double) i, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D()));
+         footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(), new Quaternion()));
       }
       handTrajectoryMessage.getSe3Trajectory().getQueueingProperties().setExecutionDelayTime(0.1);
-      footstepDataListMessage.setExecutionDelayTime(0.1);
+      footstepDataListMessage.getQueueingProperties().setExecutionDelayTime(0.1);
       drcSimulationTestHelper.send(handTrajectoryMessage);
       drcSimulationTestHelper.send(footstepDataListMessage);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05));

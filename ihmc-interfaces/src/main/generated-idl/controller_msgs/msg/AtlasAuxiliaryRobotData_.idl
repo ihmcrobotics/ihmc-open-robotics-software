@@ -15,6 +15,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::AtlasAuxiliaryRobotData_")
       struct AtlasAuxiliaryRobotData
       {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
         sequence<float, 6> electric_joint_temperatures;
         sequence<float, 6> electric_joint_currents;
         sequence<boolean, 6> electric_joint_enabled_array;

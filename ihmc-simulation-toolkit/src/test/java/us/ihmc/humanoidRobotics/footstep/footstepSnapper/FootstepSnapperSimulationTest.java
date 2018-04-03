@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -34,7 +36,6 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -55,7 +56,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -75,6 +75,7 @@ public class FootstepSnapperSimulationTest
 
       FootstepPointsDataReader dataReader = new FootstepPointsDataReader(resourceAsStream);
       FootstepDataMessage footstepData = new FootstepDataMessage();
+      footstepData.setRobotSide(RobotSide.LEFT.toByte());
       FootSpoof spoof = new FootSpoof("basicSpoof");
       FramePose2D desiredPose = new FramePose2D(ReferenceFrame.getWorldFrame());
 
@@ -542,9 +543,9 @@ public class FootstepSnapperSimulationTest
 
                   String footside = tokenizer.nextToken();
                   if (footside == "l_foot")
-                     footstepData.robotSide = RobotSide.LEFT.toByte();
+                     footstepData.setRobotSide(RobotSide.LEFT.toByte());
                   if (footside == "r_foot")
-                     footstepData.robotSide = RobotSide.RIGHT.toByte();
+                     footstepData.setRobotSide(RobotSide.RIGHT.toByte());
 
                   for (int i = 5; i < 8; i++)
                   {
@@ -554,7 +555,7 @@ public class FootstepSnapperSimulationTest
                   position.setX(Double.parseDouble(tokenizer.nextToken()));
                   position.setY(Double.parseDouble(tokenizer.nextToken()));
                   position.setZ(Double.parseDouble(tokenizer.nextToken()));
-                  footstepData.location = position;
+                  footstepData.getLocation().set(position);
                }
 
                if (numberOfTokens == 9)
@@ -562,7 +563,7 @@ public class FootstepSnapperSimulationTest
                   tokenizer.nextToken();
                   yaw = Double.parseDouble(tokenizer.nextToken());
                   RotationTools.computeQuaternionFromYawAndZNormal(yaw, new Vector3D(0.0, 0.0, 1.0), orientation);
-                  footstepData.setOrientation(orientation);
+                  footstepData.getOrientation().set(orientation);
                }
             }
 

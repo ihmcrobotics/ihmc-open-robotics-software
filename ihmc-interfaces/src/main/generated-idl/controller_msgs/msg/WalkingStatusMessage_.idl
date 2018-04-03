@@ -25,6 +25,10 @@ module controller_msgs
       struct WalkingStatusMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Status of walking.
          */
         @defaultValue(value=255)

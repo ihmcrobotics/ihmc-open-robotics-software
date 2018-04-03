@@ -110,6 +110,7 @@ public class ExternalForcePoint extends KinematicPoint
 
 
    private final Vector3D otherObjectVelocity = new Vector3D();
+
    public boolean resolveCollision(ExternalForcePoint externalForcePoint, Vector3DReadOnly collisionNormalInWorld, double epsilon, double mu, Vector3DBasics impulseInWorldToPack)
    {
 //      System.out.println("Resolving collision with other object");

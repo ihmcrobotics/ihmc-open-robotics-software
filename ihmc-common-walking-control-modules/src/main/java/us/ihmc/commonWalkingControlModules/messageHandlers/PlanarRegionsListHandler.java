@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;

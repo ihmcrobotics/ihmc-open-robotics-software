@@ -7,21 +7,23 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.HandLoadBearingMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -83,32 +85,36 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       handOrientation.appendYawRotation(-Math.PI / 2.0);
       handOrientation.appendPitchRotation(Math.PI / 2.0);
 
-      HandTrajectoryMessage handTrajectoryMessage1 = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage1.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
-      handTrajectoryMessage1.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
-      handTrajectoryMessage1.getSe3Trajectory().setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage();
+      handTrajectoryMessage1.setRobotSide(RobotSide.LEFT.toByte());
+      SE3TrajectoryMessage se3Trajectory1 = handTrajectoryMessage1.getSe3Trajectory();
+      se3Trajectory1.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
+      se3Trajectory1.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+      se3Trajectory1.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D()));
       drcSimulationTestHelper.send(handTrajectoryMessage1);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
-      HandTrajectoryMessage handTrajectoryMessage2 = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage2.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(chestFrame);
-      handTrajectoryMessage2.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
-      handTrajectoryMessage2.getSe3Trajectory().setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage();
+      handTrajectoryMessage2.setRobotSide(RobotSide.LEFT.toByte());
+      SE3TrajectoryMessage se3Trajectory2 = handTrajectoryMessage2.getSe3Trajectory();
+      se3Trajectory2.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
+      se3Trajectory2.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
+      se3Trajectory2.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D()));
       drcSimulationTestHelper.send(handTrajectoryMessage2);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       assertTrue(success);
 
       // Activate load bearing
-      RigidBodyTransform transformToContactFrame = new RigidBodyTransform();
-      transformToContactFrame.setTranslation(0.0, 0.09, 0.0);
+      Pose3D transformToContactFrame = new Pose3D();
+      transformToContactFrame.setPosition(0.0, 0.09, 0.0);
       transformToContactFrame.appendRollRotation(Math.PI);
 
       HandLoadBearingMessage loadBearingMessage = HumanoidMessageTools.createHandLoadBearingMessage(RobotSide.LEFT);
       loadBearingMessage.getLoadBearingMessage().setLoad(true);
       loadBearingMessage.getLoadBearingMessage().setCoefficientOfFriction(0.8);
-      loadBearingMessage.getLoadBearingMessage().setContactNormalInWorldFrame(new Vector3D(0.0, 0.0, 1.0));
-      loadBearingMessage.getLoadBearingMessage().setBodyFrameToContactFrame(transformToContactFrame);
+      loadBearingMessage.getLoadBearingMessage().getContactNormalInWorldFrame().set(0.0, 0.0, 1.0);
+      loadBearingMessage.getLoadBearingMessage().getBodyFrameToContactFrame().set(transformToContactFrame);
       drcSimulationTestHelper.send(loadBearingMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);

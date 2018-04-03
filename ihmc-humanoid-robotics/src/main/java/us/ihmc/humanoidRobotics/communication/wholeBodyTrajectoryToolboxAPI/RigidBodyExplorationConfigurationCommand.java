@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -82,11 +82,11 @@ public class RigidBodyExplorationConfigurationCommand implements Command<RigidBo
       else
          rigidBody = rigidBodyNamedBasedHashMap.get(rigidBodyNameBasedashCode);
 
-      for (int i = 0; i < message.getNumberOfDegreesOfFreedomToExplore(); i++)
+      for (int i = 0; i < message.getConfigurationSpaceNamesToExplore().size(); i++)
       {
-         degreesOfFreedomToExplore.add(ConfigurationSpaceName.fromByte(message.getDegreeOfFreedomToExplore(i)));
-         explorationRangeUpperLimits.add(message.getExplorationRangeUpperLimits(i));
-         explorationRangeLowerLimits.add(message.getExplorationRangeLowerLimits(i));
+         degreesOfFreedomToExplore.add(ConfigurationSpaceName.fromByte(message.getConfigurationSpaceNamesToExplore().get(i)));
+         explorationRangeUpperLimits.add(message.getExplorationRangeUpperLimits().get(i));
+         explorationRangeLowerLimits.add(message.getExplorationRangeLowerLimits().get(i));
       }
    }
 

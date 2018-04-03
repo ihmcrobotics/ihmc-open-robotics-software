@@ -63,7 +63,7 @@ public class IHMCROSTranslationRuntimeToolsTest
       Packet<?> ihmcMessage = null;
       Random random = new Random(1976L);
 
-      for (int i = 0; i < 5000; i++)
+      for (int i = 0; i < 1000; i++)
       {
          int packetsFailed = 0;
          for (Class<?> concreteType : concreteTypes)
