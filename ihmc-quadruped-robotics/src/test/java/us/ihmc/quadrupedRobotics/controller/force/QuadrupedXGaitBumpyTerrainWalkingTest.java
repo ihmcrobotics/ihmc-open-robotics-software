@@ -11,6 +11,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -24,6 +25,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
    private QuadrupedStepTeleopManager stepTeleopManager;
+   private QuadrupedBodyPoseTeleopManager poseTeleopManager;
 
    @Before
    public void setup()
@@ -38,6 +40,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor = null;
       variables = null;
       stepTeleopManager = null;
+      poseTeleopManager = null;
       
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
@@ -55,6 +58,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+      poseTeleopManager = quadrupedTestFactory.getBodyPoseTeleopManager();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
@@ -106,7 +110,7 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       
-      variables.getYoComPositionInputZ().set(0.55);
+      poseTeleopManager.setDesiredCoMHeight(0.55);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
       conductor.simulate();
       
