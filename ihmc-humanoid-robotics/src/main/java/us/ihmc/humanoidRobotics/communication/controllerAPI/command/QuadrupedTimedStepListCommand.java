@@ -61,6 +61,11 @@ public class QuadrupedTimedStepListCommand extends QueueableCommand<QuadrupedTim
       return stepCommands;
    }
 
+   public boolean isExpressedInAbsoluteTime()
+   {
+      return isExpressedInAbsoluteTime;
+   }
+
    public int getNumberOfSteps()
    {
       return stepCommands.size();

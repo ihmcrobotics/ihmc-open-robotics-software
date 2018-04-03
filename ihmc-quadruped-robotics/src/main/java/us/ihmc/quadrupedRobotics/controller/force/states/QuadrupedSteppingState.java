@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -25,6 +26,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepCommandConsumer;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPreplannedStepStream;
@@ -51,6 +53,8 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
    private final QuadrupedStepMessageHandler stepMessageHandler;
 
+   private final QuadrupedStepCommandConsumer commandConsumer;
+
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedForceControllerToolbox controllerToolbox;
    private final QuadrupedControlManagerFactory controlManagerFactory;
@@ -74,7 +78,7 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final WholeBodyControllerCore controllerCore;
 
    public QuadrupedSteppingState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
-                                 QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
+                                 CommandInputManager commandInputManager, QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
    {
       this.runtimeEnvironment = runtimeEnvironment;
       this.controllerToolbox = controllerToolbox;
@@ -100,6 +104,8 @@ public class QuadrupedSteppingState implements QuadrupedController
       // Initialize input providers.
       stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), controllerToolbox.getReferenceFrames(), runtimeEnvironment.getGlobalDataProducer(), registry);
       soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+
+      commandConsumer = new QuadrupedStepCommandConsumer(commandInputManager, stepMessageHandler, controllerToolbox, controlManagerFactory);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
 
@@ -170,6 +176,8 @@ public class QuadrupedSteppingState implements QuadrupedController
    {
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
+
+      commandConsumer.consumeFootCommands();
 
       QuadrupedSteppingRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)

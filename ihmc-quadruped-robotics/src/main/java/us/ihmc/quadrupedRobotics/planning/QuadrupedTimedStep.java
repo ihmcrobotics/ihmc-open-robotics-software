@@ -4,6 +4,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
 import us.ihmc.commons.MathTools;
@@ -52,10 +54,21 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
       this.timeInterval.set(timeInterval);
    }
 
+   public void setTimeInterval(TimeIntervalCommand command)
+   {
+      this.timeInterval.set(command);
+   }
+
    public void set(QuadrupedTimedStep other)
    {
       super.set(other);
       setTimeInterval(other.getTimeInterval());
+   }
+
+   public void set(QuadrupedTimedStepCommand command)
+   {
+      super.set(command.getStepCommand());
+      setTimeInterval(command.getTimeIntervalCommand());
    }
 
    public void get(QuadrupedTimedStep other)
@@ -66,12 +79,12 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
 
    public boolean epsilonEquals(QuadrupedTimedStep other, double epsilon)
    {
-      return super.epsilonEquals(other, epsilon) &&
-             getTimeInterval().epsilonEquals(other.getTimeInterval(), epsilon);
+      return super.epsilonEquals(other, epsilon) && getTimeInterval().epsilonEquals(other.getTimeInterval(), epsilon);
 
    }
 
-   @Override public String toString()
+   @Override
+   public String toString()
    {
       String string = super.toString();
       string += "\nstartTime: " + getTimeInterval().getStartTime();

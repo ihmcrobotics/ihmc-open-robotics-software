@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedStepCommand;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedStep
@@ -96,6 +97,13 @@ public class QuadrupedStep
       setRobotQuadrant(other.getRobotQuadrant());
       setGoalPosition(other.getGoalPosition());
       setGroundClearance(other.getGroundClearance());
+   }
+
+   public void set(QuadrupedStepCommand command)
+   {
+      setRobotQuadrant(command.getRobotQuadrant());
+      setGoalPosition(command.getGoalPosition());
+      setGroundClearance(command.getGroundClearance());
    }
 
    public void get(QuadrupedTimedStep other)
