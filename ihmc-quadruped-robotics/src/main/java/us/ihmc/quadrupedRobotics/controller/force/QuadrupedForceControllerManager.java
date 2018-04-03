@@ -47,7 +47,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final YoEnum<QuadrupedForceControllerRequestedEvent> lastEvent = new YoEnum<>("lastEvent", registry, QuadrupedForceControllerRequestedEvent.class);
 
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
-   private final QuadrupedPostureInputProviderInterface postureProvider;
 
    private final QuadrupedForceControllerStatePacket quadrupedForceControllerStatePacket;
 
@@ -71,12 +70,9 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry, runtimeEnvironment.getGraphicsListRegistry());
       this.runtimeEnvironment = runtimeEnvironment;
 
-      // Initialize input providers.
-      postureProvider = new QuadrupedPostureInputProvider(physicalProperties, runtimeEnvironment.getGlobalDataProducer(), registry);
-
-
       // Initialize control modules
-      this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, postureProvider, runtimeEnvironment.getGraphicsListRegistry(), registry);
+      this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, physicalProperties, runtimeEnvironment.getGlobalDataProducer(),
+                                                                      runtimeEnvironment.getGraphicsListRegistry(), registry);
 
       controlManagerFactory.getOrCreateFeetManager();
       controlManagerFactory.getOrCreateBodyOrientationManager();

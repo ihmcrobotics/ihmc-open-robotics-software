@@ -432,6 +432,28 @@ public class Link implements java.io.Serializable
       
       collisionHandler.addContactingExternalForcePoints(this, contactingExternalForcePoints);
    }
+   
+   public void enableContactingExternalForcePoints(int maximumNumberOfPotentialContacts, YoVariableRegistry registry)
+   {
+      if (parentJoint == null)
+      {
+         throw new RuntimeException("Need to attach link to joint before enabling collisions!");
+      }
+
+      contactingExternalForcePoints = new ArrayList<>();
+
+      for (int i=0; i<maximumNumberOfPotentialContacts; i++)
+      {
+         ContactingExternalForcePoint contactingExternalForcePoint = new ContactingExternalForcePoint(this.name + "ContactingPoint" + i, parentJoint, registry);
+         contactingExternalForcePoints.add(contactingExternalForcePoint);
+         parentJoint.addExternalForcePoint(contactingExternalForcePoint);
+      }
+   }
+   
+   public void enableCollisions(CollisionHandler collisionHandler)
+   {
+      collisionHandler.addContactingExternalForcePoints(this, contactingExternalForcePoints);
+   }
 
    // ////////// Graphics from Mass Properties Here ///////////////////////
 

@@ -19,7 +19,6 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Wayp
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNode;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class ConstrainedRigidBodyTrajectory
@@ -70,7 +69,7 @@ public class ConstrainedRigidBodyTrajectory
          controlFramePose.changeFrame(trajectoryCommand.getEndEffector().getBodyFixedFrame());
          this.controlFramePose.set(controlFramePose);
          this.hasTrajectoryCommand = true;
-         if (Double.isNaN(trajectoryCommand.getWeight()))
+         if (Double.isNaN(trajectoryCommand.getWeight()) || trajectoryCommand.getWeight() < 0.0)
             weight = DEFAULT_WEIGHT;
          else
             weight = trajectoryCommand.getWeight();
