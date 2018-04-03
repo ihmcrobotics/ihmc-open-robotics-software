@@ -5,3 +5,5 @@ uint32 sequence_id
 QuadrupedTimedStepMessage[] quadruped_step_list
 # If true, the times are expressed in absolute time relative to the robot start
 bool is_expressed_in_absolute_time true
+# Properties for queueing footstep lists.
+QueueableMessage queueing_properties
