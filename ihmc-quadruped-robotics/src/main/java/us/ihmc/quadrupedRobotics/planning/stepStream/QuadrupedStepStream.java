@@ -3,7 +3,8 @@ package us.ihmc.quadrupedRobotics.planning.stepStream;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
-import us.ihmc.quadrupedRobotics.util.PreallocatedList;
+
+import java.util.List;
 
 public interface QuadrupedStepStream
 {
@@ -26,7 +27,7 @@ public interface QuadrupedStepStream
     * Get the queue of ongoing and upcoming steps.
     * @return timed step queue
     */
-   PreallocatedList<? extends QuadrupedTimedStep> getSteps();
+   List<? extends QuadrupedTimedStep> getSteps();
 
    /**
     * Get the nominal body orientation at the current time step.

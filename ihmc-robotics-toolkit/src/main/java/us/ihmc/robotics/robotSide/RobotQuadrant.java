@@ -650,6 +650,11 @@ public enum RobotQuadrant implements RobotSegment<RobotQuadrant>
       return getCamelCaseName();
    }
 
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
    public static RobotQuadrant fromByte(byte enumAsByte)
    {
       if (enumAsByte == -1)

@@ -10,11 +10,11 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
+import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
 {
@@ -49,7 +49,7 @@ public class QuadrupedPreplannedStepStream implements QuadrupedStepStream
    {
       double currentTime = timestamp.getDoubleValue();
       boolean isExpressedInAbsoluteTime = preplannedStepProvider.isStepPlanExpressedInAbsoluteTime();
-      ArrayList<QuadrupedTimedStep> steps = preplannedStepProvider.getAndClearSteps();
+      List<QuadrupedTimedStep> steps = preplannedStepProvider.getAndClearSteps();
 
       stepSequence.clear();
       for (int i = 0; i < steps.size(); i++)
