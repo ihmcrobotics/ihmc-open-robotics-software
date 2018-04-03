@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,6 +30,7 @@ public class LandingState extends AbstractJumpState
    private final RigidBodyControlManager headManager;
    private final RigidBodyControlManager chestManager;
    private final PelvisControlManager pelvisControlManager;
+   private final Vector3D linearWeights = new Vector3D(50.0, 50.0, 0.0);
    
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
@@ -61,7 +63,7 @@ public class LandingState extends AbstractJumpState
    {
       double time = getTimeInCurrentState();
       centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(time);
-      pelvisControlManager.maintainDesiredPositionAndOrientation();
+      pelvisControlManager.maintainDesiredPositionAndOrientation(linearWeights);
       feetManager.compute();
       headManager.compute();
       chestManager.compute();

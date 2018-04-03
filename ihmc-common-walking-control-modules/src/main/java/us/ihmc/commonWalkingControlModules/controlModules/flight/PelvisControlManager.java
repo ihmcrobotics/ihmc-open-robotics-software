@@ -75,6 +75,11 @@ public class PelvisControlManager implements JumpControlManagerInterface
 
    public void maintainDesiredPositionAndOrientation()
    {
+      maintainDesiredPositionAndOrientation(linearWeights);
+   }
+
+   public void maintainDesiredPositionAndOrientation(Vector3DReadOnly linearWeights)
+   {
       spatialFeedbackControlCommand.set(desiredPelvisPosition);
       spatialFeedbackControlCommand.set(desiredPelvisOrientation);
       spatialFeedbackControlCommand.setPositionGains(linearGains);
@@ -133,7 +138,7 @@ public class PelvisControlManager implements JumpControlManagerInterface
    {
       return spatialFeedbackControlCommand;
    }
-   
+
    @Override
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
