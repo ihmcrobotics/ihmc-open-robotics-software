@@ -18,7 +18,7 @@ public class ConstrainedQPSolverTest
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("root");
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testSolveContrainedQP() throws NoConvergenceException
    {
@@ -128,7 +128,7 @@ public class ConstrainedQPSolverTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testSolveProblemWithParallelConstraints() throws NoConvergenceException
    {

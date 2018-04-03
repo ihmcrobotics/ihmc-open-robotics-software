@@ -37,7 +37,7 @@ public class JUnitToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testAssertDenseMatrix64FEquals()
    {

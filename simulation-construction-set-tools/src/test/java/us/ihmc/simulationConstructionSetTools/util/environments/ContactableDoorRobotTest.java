@@ -49,7 +49,7 @@ public class ContactableDoorRobotTest
       assertTrue(door.isPointOnOrInside(diagonal));
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 2.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.4)
    @Test(timeout=300000)
    public void testDoorIsClosing()
    {

@@ -9,7 +9,7 @@ import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 public class SingleStepGroundProfileTest extends GroundProfileTest
 {
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testSurfaceNormalGridForSmoothTerrainUsingHeightMap()
    {

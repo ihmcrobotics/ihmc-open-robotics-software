@@ -45,7 +45,7 @@ public class ContactableValveRobotTest
 
    private YoVariableRegistry valveTestRegistry;
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.4)
+   @ContinuousIntegrationTest(estimatedDuration = 2.3)
    @Test(timeout = 30000)
    public void testValveIsClosing()
    {

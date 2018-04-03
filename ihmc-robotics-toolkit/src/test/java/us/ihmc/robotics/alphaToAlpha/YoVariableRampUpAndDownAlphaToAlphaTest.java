@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class YoVariableRampUpAndDownAlphaToAlphaTest
 {
    private double EPSILON = 1e-6;
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testInvalidYoVariables()
    {
@@ -50,7 +50,7 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
 
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testValidYoVariables()
    {
@@ -119,7 +119,7 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
       assertEquals(value, 0.0, EPSILON);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testOneQuaterOfTheWay()
    {
@@ -169,7 +169,7 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSmallDifferences()
    {

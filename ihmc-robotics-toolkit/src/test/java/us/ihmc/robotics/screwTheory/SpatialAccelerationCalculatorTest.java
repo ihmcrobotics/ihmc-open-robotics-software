@@ -26,7 +26,7 @@ public class SpatialAccelerationCalculatorTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final int ITERATIONS = 1000;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWithChainComposedOfPrismaticJoints() throws Exception
    {
@@ -91,7 +91,7 @@ public class SpatialAccelerationCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWithChainComposedOfRevoluteJointsAssertAngularAccelerationOnly() throws Exception
    {
@@ -208,7 +208,7 @@ public class SpatialAccelerationCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWithChainRobotAgainstFiniteDifference() throws Exception
    {
@@ -271,7 +271,7 @@ public class SpatialAccelerationCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 3.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testWithFloatingJointRobotAgainstFiniteDifference() throws Exception
    {
@@ -362,8 +362,8 @@ public class SpatialAccelerationCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 7.5)
-   @Test(timeout = 38000)
+   @ContinuousIntegrationTest(estimatedDuration = 1.4)
+   @Test(timeout = 30000)
    public void testRelativeAccelerationWithFloatingJointRobotAgainstFiniteDifference() throws Exception
    {
       Random random = new Random(435345L);

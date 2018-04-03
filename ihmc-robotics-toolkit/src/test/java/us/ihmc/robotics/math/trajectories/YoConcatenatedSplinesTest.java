@@ -95,7 +95,7 @@ public class YoConcatenatedSplinesTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 3.6)
+	@ContinuousIntegrationTest(estimatedDuration = 3.3)
 	@Test(timeout = 30000)
    public void testQuinticsFromCubicQuinticCubic()
    {
@@ -134,7 +134,7 @@ public class YoConcatenatedSplinesTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.9)
+	@ContinuousIntegrationTest(estimatedDuration = 1.4)
 	@Test(timeout = 30000)
    public void testTimeFromArcLength()
    {

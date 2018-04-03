@@ -19,28 +19,28 @@ public class PlanThenSnapPlannerTest extends FootstepPlannerOnRoughTerrainTest
    private final PlanThenSnapPlanner planner = new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), PlanningTestTools.createDefaultFootPolygons());
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 300000)
    public void testOnStaircase()
    {
       super.testOnStaircase(new Vector3D(), true);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 300000)
    public void testSimpleStepOnBox()
    {
       super.testSimpleStepOnBox();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 300000)
    public void testRandomEnvironment()
    {
       super.testRandomEnvironment();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 300000)
    public void testPartialGaps()
    {
       super.testPartialGaps();

@@ -116,7 +116,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testDoubleSupportWithoutAngularMomentum()
    {
@@ -126,7 +126,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForCopy();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testSingleSupportWithoutAngularMomentum()
    {
@@ -137,7 +137,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testDoubleSupportWithAngularMomentum()
    {
@@ -148,7 +148,7 @@ public class ReferenceCMPTrajectoryGeneratorTest
       checkSwingTrajectoriesForAddition();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testSingleSupportWithAngularMomentum()
    {

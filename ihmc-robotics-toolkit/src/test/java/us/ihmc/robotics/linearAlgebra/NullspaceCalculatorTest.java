@@ -221,7 +221,7 @@ public abstract class NullspaceCalculatorTest
       assertEquals(0.0, projectedVector.get(1, 4), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRandomProblemsAgainstTrueLeastSquaresProjection()
    {

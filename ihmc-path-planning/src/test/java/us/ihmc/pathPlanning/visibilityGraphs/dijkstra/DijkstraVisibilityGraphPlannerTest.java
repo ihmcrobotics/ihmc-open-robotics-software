@@ -17,8 +17,8 @@ import static junit.framework.TestCase.assertTrue;
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class DijkstraVisibilityGraphPlannerTest
 {
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 3000)
    public void testSimplePlanarGraph()
    {
       DijkstraVisibilityGraphPlanner planner = new DijkstraVisibilityGraphPlanner();

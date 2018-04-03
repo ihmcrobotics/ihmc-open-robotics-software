@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 
 public class SimpleLIPMDynamicsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testNextStateComputation()
    {
@@ -120,7 +120,7 @@ public class SimpleLIPMDynamicsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDynamicsStateGradient()
    {
@@ -241,7 +241,7 @@ public class SimpleLIPMDynamicsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDynamicsControlGradient()
    {

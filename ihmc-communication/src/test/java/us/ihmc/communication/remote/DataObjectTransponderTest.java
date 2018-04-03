@@ -132,7 +132,7 @@ public class DataObjectTransponderTest
       assertAllTestsPassed();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testServerClientStringPacketCommunication() throws InterruptedException
    {

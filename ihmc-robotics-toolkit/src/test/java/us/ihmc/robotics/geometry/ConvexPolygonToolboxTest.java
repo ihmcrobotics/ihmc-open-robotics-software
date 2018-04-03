@@ -203,7 +203,7 @@ public class ConvexPolygonToolboxTest
       ConvexPolygon2dTestHelpers.verifyPointsAreNotInside(polygon2, pointsThatShouldNotBeInOriginals, 0.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testCombineDisjointPolygons2() throws Exception
    {
@@ -252,7 +252,7 @@ public class ConvexPolygonToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testCombinedDisjointPolygons()
    {
@@ -305,7 +305,7 @@ public class ConvexPolygonToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testFindConnectingEdgesVerticesIndexes()
    {
@@ -353,7 +353,7 @@ public class ConvexPolygonToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testVerticesIndices()
    {
@@ -375,7 +375,7 @@ public class ConvexPolygonToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testGetConnectingEdges()
    {
@@ -1093,7 +1093,7 @@ public class ConvexPolygonToolboxTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 3.6)
+   @ContinuousIntegrationTest(estimatedDuration = 3.0)
    @Test(timeout = 30000)
    public void testPolygonIntersections()
    {

@@ -16,8 +16,8 @@ public class AtlasEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTrajecto
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 24.3)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 17.9)
+   @Test(timeout = 89000)
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleWaypoint();

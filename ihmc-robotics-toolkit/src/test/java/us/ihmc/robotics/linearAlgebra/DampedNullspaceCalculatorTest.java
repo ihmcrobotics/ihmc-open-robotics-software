@@ -248,7 +248,7 @@ public abstract class DampedNullspaceCalculatorTest extends NullspaceCalculatorT
       assertEquals(-2.93631, projectedVector.get(1, 3), epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 5.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRandomProblemsAgainstTrueDampedLeastSquaresProjection()
    {

@@ -119,7 +119,7 @@ public class PlanarRegionsListPolygonSnapperTest
       doATest(planarRegionsList, xyYawToTest, visualize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.8)
+   @ContinuousIntegrationTest(estimatedDuration = 2.0)
    @Test(timeout = 30000)
    public void testRandomPlanarRegions()
    {
@@ -147,7 +147,7 @@ public class PlanarRegionsListPolygonSnapperTest
       doATest(planarRegionsList, xyYawToTest, visualize);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 2.0)
    @Test(timeout = 30000)
    public void testBumpyGround()
    {

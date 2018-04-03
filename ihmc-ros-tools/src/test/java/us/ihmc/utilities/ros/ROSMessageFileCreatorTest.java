@@ -25,7 +25,7 @@ import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
  */
 public class ROSMessageFileCreatorTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAllExportedPacketsWithTopicsAreFormattedCorrectly()
    {

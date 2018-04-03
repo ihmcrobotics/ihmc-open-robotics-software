@@ -14,7 +14,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 public class PopulationTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testPopulation()
    {

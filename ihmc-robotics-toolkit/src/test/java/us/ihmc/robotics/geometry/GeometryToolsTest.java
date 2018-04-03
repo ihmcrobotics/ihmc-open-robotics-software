@@ -260,7 +260,7 @@ public class GeometryToolsTest
       /** @todo fill in the test code */
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testClipToBoundingBox()
    {
@@ -326,7 +326,7 @@ public class GeometryToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testNormalizeSafeZUp() throws Exception
    {
@@ -354,7 +354,7 @@ public class GeometryToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testIsZero() throws Exception
    {

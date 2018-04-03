@@ -22,7 +22,7 @@ public class AtlasInverseDynamicsCalculatorTest extends DRCInverseDynamicsCalcul
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testInverseDynamicsStartingWithRandomTorquesInSCS() throws UnreasonableAccelerationException
    {

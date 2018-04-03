@@ -19,7 +19,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class CoactiveElementYoWhiteBoardSynchronizerTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCoactiveElementTCPYoWhiteBoardSynchronizer() throws IOException, InterruptedException
    {

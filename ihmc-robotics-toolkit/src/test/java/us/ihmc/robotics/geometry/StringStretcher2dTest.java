@@ -142,7 +142,7 @@ public class StringStretcher2dTest
       EuclidCoreTestTools.assertTuple2DEquals(endPoint, waypoints.get(1), 1e-7);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testRandomExample()
    {

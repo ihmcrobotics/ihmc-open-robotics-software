@@ -41,7 +41,7 @@ public class MatrixYoVariableConversionToolsTest
       EjmlUnitTests.assertEquals(matrix, matrixBack, 1e-12);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout=300000)
    public void testBackAndForthMatrix()
    {
@@ -63,7 +63,7 @@ public class MatrixYoVariableConversionToolsTest
       EjmlUnitTests.assertEquals(matrix, matrixBack, 1e-12);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testBackAndForthSymmetricMatrix()
    {

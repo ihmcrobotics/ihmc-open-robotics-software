@@ -10,7 +10,7 @@ import us.ihmc.commons.thread.ThreadTools;
 
 public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 2.6)
+	@ContinuousIntegrationTest(estimatedDuration = 2.7)
 	@Test(timeout=300000)
    public void testUDPWhiteBoardOne() throws IOException
    {
@@ -33,7 +33,7 @@ public class UDPYoWhiteBoardTest extends YoWhiteBoardTest
       doASynchronizedWriteThenReadTest(leftWhiteBoard, rightWhiteBoard, numberOfTests, 203, 207);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 3.8)
+	@ContinuousIntegrationTest(estimatedDuration = 3.9)
 	@Test(timeout=300000)
    public void testUDPWhiteBoardTwo() throws IOException
    {

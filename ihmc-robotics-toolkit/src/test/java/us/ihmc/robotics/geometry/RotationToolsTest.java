@@ -375,7 +375,7 @@ public class RotationToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testIntegrateToQuaternion() throws Exception
    {

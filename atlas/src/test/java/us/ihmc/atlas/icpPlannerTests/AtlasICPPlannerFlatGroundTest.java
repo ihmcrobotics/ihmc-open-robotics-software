@@ -30,7 +30,7 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 74.4, categoriesOverride = {IntegrationCategory.FAST})
+   @ContinuousIntegrationTest(estimatedDuration = 74.3, categoriesOverride = {IntegrationCategory.FAST})
    @Test(timeout = 370000)
    /** {@inheritDoc} */
    public void testPauseWalkingInSwing() throws SimulationExceededMaximumTimeException, RuntimeException
@@ -39,8 +39,8 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 78.9, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 390000)
+   @ContinuousIntegrationTest(estimatedDuration = 74.3, categoriesOverride = {IntegrationCategory.FAST})
+   @Test(timeout = 370000)
    /** {@inheritDoc} */
    public void testPauseWalkingInTransferFirstStep() throws SimulationExceededMaximumTimeException, RuntimeException
    {
@@ -48,8 +48,8 @@ public class AtlasICPPlannerFlatGroundTest extends AvatarICPPlannerFlatGroundTes
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 77.0, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 390000)
+   @ContinuousIntegrationTest(estimatedDuration = 74.3, categoriesOverride = {IntegrationCategory.FAST})
+   @Test(timeout = 370000)
    /** {@inheritDoc} */
    public void testPauseWalkingInTransfer() throws SimulationExceededMaximumTimeException, RuntimeException
    {

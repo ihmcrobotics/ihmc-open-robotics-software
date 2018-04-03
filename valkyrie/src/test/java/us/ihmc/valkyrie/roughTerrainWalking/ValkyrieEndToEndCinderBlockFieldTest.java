@@ -41,8 +41,8 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 176.7)
-   @Test(timeout = 880000)
+   @ContinuousIntegrationTest(estimatedDuration = 167.7)
+   @Test(timeout = 600000)
    public void testWalkingOverCinderBlockField() throws Exception
    {
       super.testWalkingOverCinderBlockField();

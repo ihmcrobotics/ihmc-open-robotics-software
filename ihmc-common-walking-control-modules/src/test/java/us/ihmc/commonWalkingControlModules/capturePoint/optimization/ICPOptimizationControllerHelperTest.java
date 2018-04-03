@@ -12,7 +12,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 public class ICPOptimizationControllerHelperTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 21000)
    public void testTransformFromDynamicsFrame()
    {
       ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();

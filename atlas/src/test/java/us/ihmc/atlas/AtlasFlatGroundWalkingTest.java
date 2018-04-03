@@ -21,8 +21,8 @@ public class AtlasFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
 
-   @ContinuousIntegrationTest(estimatedDuration = 369.9)
-   @Test(timeout = 1800000)
+   @ContinuousIntegrationTest(estimatedDuration = 189.1)
+   @Test(timeout = 950000)
    public void testAtlasFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);

@@ -62,7 +62,7 @@ public class YoVariableSideFourbarCalculatorWithDerivativesTest
       assertEquals(-1, calculator.getAngleDtCDA(), eps);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRandomQuadrilatteral()
    {

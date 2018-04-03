@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class CaptureRegionMathToolsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0)
    @Test(timeout = 30000)
    public void testGetPointBetweenVectorsAtDistanceFromOriginCircular() throws Exception
    {

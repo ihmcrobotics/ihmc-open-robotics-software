@@ -43,7 +43,7 @@ public class RobotTest
       System.err.flush();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.8)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void testSwitchingRootJoint() throws InterruptedException, UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -955,7 +955,7 @@ public class RobotTest
       assertEquals(joint2.getQDDYoVariable().getDoubleValue(), joint2B.getQDDYoVariable().getDoubleValue(), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout=300000)
    public void testConservationOfEnergyAndMomentum() throws UnreasonableAccelerationException
    {

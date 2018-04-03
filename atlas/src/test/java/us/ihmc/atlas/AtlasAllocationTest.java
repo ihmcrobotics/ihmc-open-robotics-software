@@ -46,8 +46,8 @@ public class AtlasAllocationTest implements AllocationTest
 
    private DRCSimulationTestHelper testHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 63.2, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 320000)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 500000)
    public void testForAllocationsStanding() throws SimulationExceededMaximumTimeException
    {
       testInternal(() -> {
@@ -62,8 +62,8 @@ public class AtlasAllocationTest implements AllocationTest
       });
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 82.3, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 410000)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 500000)
    public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
    {
       double defaultSwingDuration = 0.5;

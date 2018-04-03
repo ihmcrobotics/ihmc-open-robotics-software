@@ -32,7 +32,7 @@ public class OverheadPathTest
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void turningOverheadPath_UsageTest()
    {
@@ -94,7 +94,7 @@ public class OverheadPathTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout = 30000)
    public void straightLineOverheadPath_UsageTest()
    {
@@ -262,7 +262,7 @@ public class OverheadPathTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.6)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void turnStraightTurnOverheadPath_turnInPlaceTest()
    {
@@ -337,7 +337,7 @@ public class OverheadPathTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void turningPathInterpolationExtrapolationTest()
    {

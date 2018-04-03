@@ -16,7 +16,7 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GradientTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCreateGradient()
    {

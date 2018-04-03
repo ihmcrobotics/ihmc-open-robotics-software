@@ -25,7 +25,7 @@ import us.ihmc.robotics.testing.JUnitTools;
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 2.5)
+	@ContinuousIntegrationTest(estimatedDuration = 2.2)
 	@Test(timeout = 30000)
    public void testChangeFrameUsingNumericalDifferentiationVersusAnalytical()
    {

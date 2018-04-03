@@ -36,7 +36,7 @@ public class CapturabilityBasedStatusTest
       FileTools.deleteQuietly(TEST_FILE_PATH);
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testSerializeAndDeserialize() throws IOException
    {
@@ -57,7 +57,7 @@ public class CapturabilityBasedStatusTest
       assertPacketsEqual(cbs, cbsOut);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSerializeToFileAndDeserialize() throws IOException
    {

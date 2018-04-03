@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class LocalYoWhiteBoardTest extends YoWhiteBoardTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.3)
+	@ContinuousIntegrationTest(estimatedDuration = 1.2)
 	@Test(timeout=300000)
    public void testLocalYoWhiteBoardOne() throws IOException
    {

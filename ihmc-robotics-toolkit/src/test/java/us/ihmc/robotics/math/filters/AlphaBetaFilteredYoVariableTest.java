@@ -40,7 +40,7 @@ public class AlphaBetaFilteredYoVariableTest
 
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.8)
+	@ContinuousIntegrationTest(estimatedDuration = 1.9)
 	@Test(timeout=300000)
    public void testAlphaBetaFilteredVelocityAndPositionEstimatesWithConstantVelocity()
    {

@@ -13,8 +13,8 @@ public class SphereIntersectionToolsTest
    private static final double epsilon = 0.000001;
    private static final int iters = 1000;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 2.0)
+   @Test(timeout = 2000)
    public void testFlatCenterComputation()
    {
       Random random = new Random();
@@ -37,8 +37,8 @@ public class SphereIntersectionToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 2.0)
+   @Test(timeout = 2000)
    public void testComputation()
    {
       Random random = new Random();
@@ -92,8 +92,8 @@ public class SphereIntersectionToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 2.0)
+   @Test(timeout = 2000)
    public void testRadiusOfIntersection()
    {
       Random random = new Random();

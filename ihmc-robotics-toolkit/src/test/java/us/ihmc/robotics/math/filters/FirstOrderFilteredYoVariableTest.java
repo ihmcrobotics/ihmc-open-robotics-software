@@ -16,7 +16,7 @@ public class FirstOrderFilteredYoVariableTest
 
    private final double DT = 0.001;
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.1)
+	@ContinuousIntegrationTest(estimatedDuration = 1.0)
 	@Test(timeout=300000)
    public void testHighPassAttenuationForSinusoidalInput()
    {

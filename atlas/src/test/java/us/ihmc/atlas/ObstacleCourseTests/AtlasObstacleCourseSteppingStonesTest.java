@@ -30,8 +30,8 @@ public class AtlasObstacleCourseSteppingStonesTest extends DRCObstacleCourseStep
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 69.3)
-   @Test(timeout = 350000)
+   @ContinuousIntegrationTest(estimatedDuration = 48.9)
+   @Test(timeout = 160000)
    public void testWalkingOverEasySteppingStones() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOverEasySteppingStones();

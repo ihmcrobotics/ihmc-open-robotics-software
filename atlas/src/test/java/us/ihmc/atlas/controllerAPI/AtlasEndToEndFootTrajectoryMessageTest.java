@@ -15,48 +15,48 @@ public class AtlasEndToEndFootTrajectoryMessageTest extends EndToEndFootTrajecto
 {
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.1)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
+   @Test(timeout = 200000)
    @Override
    public void testCustomControlPoint() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlPoint();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 61.3)
-   @Test(timeout = 310000)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 200000)
    @Override
    public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
       super.testSingleWaypoint();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 71.6)
-   @Test(timeout = 360000)
+   @ContinuousIntegrationTest(estimatedDuration = 80.5)
+   @Test(timeout = 200000)
    @Override
    public void testMultipleTrajectoryPoints() throws SimulationExceededMaximumTimeException
    {
       super.testMultipleTrajectoryPoints();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 75.8)
-   @Test(timeout = 380000)
+   @ContinuousIntegrationTest(estimatedDuration = 90.0)
+   @Test(timeout = 200000)
    @Override
    public void testQueuedMessages() throws SimulationExceededMaximumTimeException
    {
       super.testQueuedMessages();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 62.9)
-   @Test(timeout = 310000)
+   @ContinuousIntegrationTest(estimatedDuration = 70.0)
+   @Test(timeout = 200000)
    @Override
    public void testQueueStoppedWithOverrideMessage() throws SimulationExceededMaximumTimeException
    {
       super.testQueueStoppedWithOverrideMessage();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 50.3)
-   @Test(timeout = 250000)
+   @ContinuousIntegrationTest(estimatedDuration = 60.0)
+   @Test(timeout = 200000)
    @Override
    public void testQueueWithWrongPreviousId() throws SimulationExceededMaximumTimeException
    {

@@ -46,7 +46,7 @@ public class GeometricJacobianTest
    {
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorChainRobot() throws Exception
    {
@@ -92,7 +92,7 @@ public class GeometricJacobianTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorFloatingJointRobot() throws Exception
    {

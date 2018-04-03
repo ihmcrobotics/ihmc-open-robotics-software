@@ -2,8 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -29,7 +28,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class SimplePlanarRegionFootstepNodeSnapperTest
 {
    private final Random random = new Random(1209L);
@@ -58,7 +57,6 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       unitSquare.update();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIdentity()
    {
@@ -71,7 +69,6 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testVerticalTranslation()
    {
@@ -85,7 +82,6 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleRotation()
    {
@@ -99,7 +95,6 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleTranslationAndRotation()
    {
@@ -114,7 +109,6 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimplePartialFoothold()
    {
@@ -146,7 +140,6 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       PlanarRegionPolygonSnapperTest.assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapData.getSnapTransform(), transformToWorld);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRandomFullFootholds()
    {

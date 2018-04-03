@@ -22,7 +22,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 {
    private static final boolean DEBUG = false;
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
    @Test(timeout = 30000)
    public void testDerivativesConsistency() throws Exception
    {
@@ -85,7 +85,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testLimitConditions() throws Exception
    {
@@ -185,7 +185,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.4)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testContinuityForSlowTrajectory() throws Exception
    {
@@ -292,7 +292,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testContinuityForFastishTrajectory() throws Exception
    {
@@ -406,7 +406,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
    }
 
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
    @Test(timeout = 30000)
    public void testMostBasicTrajectory() throws Exception
    {

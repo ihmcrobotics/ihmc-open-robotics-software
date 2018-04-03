@@ -27,8 +27,8 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 138.9)
-   @Test(timeout = 690000)
+   @ContinuousIntegrationTest(estimatedDuration = 95.7)
+   @Test(timeout = 520000)
    @Override
    public void testDRCBumpyGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
@@ -44,8 +44,8 @@ public class AtlasBumpyAndShallowRampsWalkingTest extends DRCBumpyAndShallowRamp
       super.testDRCOverRandomBlocks();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 95.1)
-   @Test(timeout = 480000)
+   @ContinuousIntegrationTest(estimatedDuration = 71.3)
+   @Test(timeout = 420000)
    @Override
    public void testDRCOverShallowRamp() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
