@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.MomentumTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.momentum.MomentumTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class MomentumTrajectoryCommand implements Command<MomentumTrajectoryCommand, MomentumTrajectoryMessage>, FrameBasedCommand<MomentumTrajectoryMessage>
@@ -22,13 +22,13 @@ public class MomentumTrajectoryCommand implements Command<MomentumTrajectoryComm
    @Override
    public void set(MomentumTrajectoryMessage message)
    {
-      angularMomentumTrajectory.set(message.angularMomentumTrajectory);
+      angularMomentumTrajectory.set(message.getAngularMomentumTrajectory());
    }
    
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, MomentumTrajectoryMessage message)
    {
-      angularMomentumTrajectory.set(resolver, message.angularMomentumTrajectory);
+      angularMomentumTrajectory.set(resolver, message.getAngularMomentumTrajectory());
    }
 
    @Override

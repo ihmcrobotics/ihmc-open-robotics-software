@@ -10,13 +10,25 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Test;
+import org.reflections.Reflections;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.PreallocatedList;
 import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.pubsub.TopicDataType;
 
 public class IHMCCommunicationKryoNetClassListTest
 {
+   public static void main(String[] args)
+   {
+      Reflections ref = new Reflections();
+      Set<Class<? extends TopicDataType>> subTypesOf = ref.getSubTypesOf(TopicDataType.class);
+      
+      for (Class<? extends TopicDataType> subTypeOf : subTypesOf)
+         System.out.println("                         registerPacketField(" + subTypeOf.getSimpleName() + ".class);");
+   }
+
    @Test(timeout = 30000)
    public void testAllClassesRegisteredArePackets()
    {
@@ -50,7 +62,7 @@ public class IHMCCommunicationKryoNetClassListTest
    private static void assertAllFieldsAreInSetRecursively(Object holder, Field field, Set<Class<?>> setWithRegisteredFields)
          throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InstantiationException
    {
-      if (Modifier.isStatic(field.getModifiers()))
+      if (Modifier.isStatic(field.getModifiers()) || field.getType().isPrimitive())
          return;
 
       Class<?> typeToCheck = field.getType();
@@ -93,7 +105,7 @@ public class IHMCCommunicationKryoNetClassListTest
          }
       }
 
-      assertTrue("The field " + field.getDeclaringClass().getSimpleName() + "." + field.getName() + " is not registered.",
+      assertTrue("The field " + field.getDeclaringClass().getSimpleName() + "." + field.getName() + " is not registered, field type: " + field.getType() + ".",
                  setWithRegisteredFields.contains(typeToCheck));
 
       while (typeToCheck.isArray())

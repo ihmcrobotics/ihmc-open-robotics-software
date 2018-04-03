@@ -7,9 +7,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,9 +20,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
@@ -28,7 +28,7 @@ import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInterface
 {
@@ -161,7 +161,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       addFootstep(new Point3D(xOffset, 0.0, -0.02), RobotSide.RIGHT, message);
 
       drcSimulationTestHelper.send(message);
-      double simulationTime = 1.0 * message.footstepDataList.size() + 2.0;
+      double simulationTime = 1.0 * message.getFootstepDataList().size() + 2.0;
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
       assertFalse(controllerSpy.wasMomentumTriggered());
@@ -171,10 +171,10 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    private void addFootstep(Point3D stepLocation, RobotSide robotSide, FootstepDataListMessage message)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.setLocation(stepLocation);
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.getLocation().set(stepLocation);
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide.toByte());
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
    }
 
    private boolean standAndPush() throws SimulationExceededMaximumTimeException
@@ -197,10 +197,10 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       FramePoint3D placeToStepInWorld = new FramePoint3D(soleFrame, 0.3, 0.0, 0.0);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.setLocation(placeToStepInWorld);
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.getLocation().set(placeToStepInWorld);
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(stepSide.toByte());
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
 
       drcSimulationTestHelper.send(message);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));

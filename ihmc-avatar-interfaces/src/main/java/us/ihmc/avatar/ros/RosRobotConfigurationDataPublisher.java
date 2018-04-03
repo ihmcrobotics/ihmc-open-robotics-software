@@ -8,10 +8,11 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.ros.message.Time;
 
+import controller_msgs.msg.dds.IMUPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -24,7 +25,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -206,7 +206,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(robotConfigurationData.getTimestamp());
             Time t = Time.fromNano(timeStamp);
 
-            if (robotConfigurationData.jointNameHash != jointNameHash)
+            if (robotConfigurationData.getJointNameHash() != jointNameHash)
             {
                throw new RuntimeException("Joint names do not match for RobotConfigurationData");
             }
@@ -225,16 +225,16 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             for (RobotSide robotSide : RobotSide.values())
             {
                float[] arrayToPublish = new float[6];
-               robotConfigurationData.momentAndForceDataAllForceSensors.get(feetForceSensorIndexes.get(robotSide)).angularPart.get(0, arrayToPublish);
-               robotConfigurationData.momentAndForceDataAllForceSensors.get(feetForceSensorIndexes.get(robotSide)).linearPart.get(3, arrayToPublish);
+               robotConfigurationData.getForceSensorData().get(feetForceSensorIndexes.get(robotSide)).getAngularPart().get(0, arrayToPublish);
+               robotConfigurationData.getForceSensorData().get(feetForceSensorIndexes.get(robotSide)).getLinearPart().get(3, arrayToPublish);
                footForceSensorWrenches.put(robotSide, arrayToPublish);
                footForceSensorPublishers.get(robotSide).publish(timeStamp, footForceSensorWrenches.get(robotSide));
 
                if(!handForceSensorIndexes.isEmpty())
                {
                   arrayToPublish = new float[6];
-                  robotConfigurationData.momentAndForceDataAllForceSensors.get(handForceSensorIndexes.get(robotSide)).angularPart.get(0, arrayToPublish);
-                  robotConfigurationData.momentAndForceDataAllForceSensors.get(handForceSensorIndexes.get(robotSide)).linearPart.get(3, arrayToPublish);
+                  robotConfigurationData.getForceSensorData().get(handForceSensorIndexes.get(robotSide)).getAngularPart().get(0, arrayToPublish);
+                  robotConfigurationData.getForceSensorData().get(handForceSensorIndexes.get(robotSide)).getLinearPart().get(3, arrayToPublish);
                   wristForceSensorWrenches.put(robotSide, arrayToPublish);
                   wristForceSensorPublishers.get(robotSide).publish(timeStamp, wristForceSensorWrenches.get(robotSide));
                }
@@ -243,7 +243,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             for (int sensorNumber = 0; sensorNumber < imuDefinitions.length; sensorNumber++)
             {
                RosImuPublisher rosImuPublisher = this.imuPublishers[sensorNumber];
-               IMUPacket imuPacket = robotConfigurationData.imuSensorData.get(sensorNumber);
+               IMUPacket imuPacket = robotConfigurationData.getImuSensorData().get(sensorNumber);
                ReferenceFrame imuFrame = imuDefinitions[sensorNumber].getIMUFrame();
                rosImuPublisher.publish(timeStamp, imuPacket, imuFrame.getName());
             }
@@ -268,13 +268,13 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
                }
             }
 
-            if(robotConfigurationData.getLastReceivedPacketTypeID() != -1)
+            if(robotConfigurationData.getLastReceivedPacketTypeId() != -1)
             {
-               Class<?> packetClass = netClassList.getClass(robotConfigurationData.getLastReceivedPacketTypeID());
+               Class<?> packetClass = netClassList.getClass(robotConfigurationData.getLastReceivedPacketTypeId());
 
                if(packetClass == null)
                {
-                  System.err.println("Could not get packet class for ID " + robotConfigurationData.getLastReceivedPacketTypeID());
+                  System.err.println("Could not get packet class for ID " + robotConfigurationData.getLastReceivedPacketTypeId());
                }
                else
                {

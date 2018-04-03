@@ -3,13 +3,16 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -30,10 +33,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalking
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
@@ -521,10 +521,10 @@ public class WalkingMessageHandler
       footstepStatus.setFootstepStatus(FootstepStatus.STARTED.toByte());
       footstepStatus.setRobotSide(robotSide.toByte());
       footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
-      footstepStatus.setActualFootOrientationInWorld(actualFootOrientationInWorld);
-      footstepStatus.setActualFootPositionInWorld(actualFootPositionInWorld);
-      footstepStatus.setDesiredFootOrientationInWorld(desiredFootOrientationInWorld);
-      footstepStatus.setDesiredFootPositionInWorld(desiredFootPositionInWorld);
+      footstepStatus.getActualFootOrientationInWorld().set(actualFootOrientationInWorld);
+      footstepStatus.getActualFootPositionInWorld().set(actualFootPositionInWorld);
+      footstepStatus.getDesiredFootOrientationInWorld().set(desiredFootOrientationInWorld);
+      footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPositionInWorld);
       statusOutputManager.reportStatusMessage(footstepStatus);
 
       executingFootstep.set(true);
@@ -542,10 +542,10 @@ public class WalkingMessageHandler
       footstepStatus.setFootstepStatus(FootstepStatus.COMPLETED.toByte());
       footstepStatus.setRobotSide(robotSide.toByte());
       footstepStatus.setFootstepIndex(currentFootstepIndex.getIntegerValue());
-      footstepStatus.setActualFootOrientationInWorld(actualFootOrientationInWorld);
-      footstepStatus.setActualFootPositionInWorld(actualFootPositionInWorld);
-      footstepStatus.setDesiredFootOrientationInWorld(desiredFootOrientationInWorld);
-      footstepStatus.setDesiredFootPositionInWorld(desiredFootPositionInWorld);
+      footstepStatus.getActualFootOrientationInWorld().set(actualFootOrientationInWorld);
+      footstepStatus.getActualFootPositionInWorld().set(actualFootPositionInWorld);
+      footstepStatus.getDesiredFootOrientationInWorld().set(desiredFootOrientationInWorld);
+      footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPositionInWorld);
       statusOutputManager.reportStatusMessage(footstepStatus);
 
 //      reusableSpeechPacket.setTextToSpeak(TextToSpeechPacket.FOOTSTEP_COMPLETED);
@@ -585,7 +585,7 @@ public class WalkingMessageHandler
    public void reportControllerFailure(FrameVector3D fallingDirection)
    {
       fallingDirection.changeFrame(worldFrame);
-      failureStatusMessage.setFallingDirection(fallingDirection);
+      failureStatusMessage.getFallingDirection().set(fallingDirection);
       statusOutputManager.reportStatusMessage(failureStatusMessage);
    }
 

@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -193,6 +193,6 @@ public class REAOcTreeUpdater
 
    private void handlePacket(LidarScanMessage lidarScanMessage)
    {
-      latestLidarPoseReference.set(new Pose3D(lidarScanMessage.lidarPosition, lidarScanMessage.lidarOrientation));
+      latestLidarPoseReference.set(new Pose3D(lidarScanMessage.getLidarPosition(), lidarScanMessage.getLidarOrientation()));
    }
 }

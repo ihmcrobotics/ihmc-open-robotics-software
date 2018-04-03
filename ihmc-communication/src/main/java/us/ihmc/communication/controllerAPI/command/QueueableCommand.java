@@ -1,8 +1,8 @@
 package us.ihmc.communication.controllerAPI.command;
 
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
+import controller_msgs.msg.dds.QueueableMessage;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.Packet;
 
 /**
  * A QueueableCommand is a {@link Command} that can be queued for execution inside the controller. It implements command

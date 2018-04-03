@@ -2,10 +2,10 @@ package us.ihmc.robotBehaviors.watson;
 
 import java.io.IOException;
 
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 

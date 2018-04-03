@@ -9,6 +9,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -20,8 +22,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -163,7 +163,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       drcSimulationTestHelper.send(footMessage);
-      double simulationTime = 1 * footMessage.footstepDataList.size() + 1.0;
+      double simulationTime = 1 * footMessage.getFootstepDataList().size() + 1.0;
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
       controllerSpy.assertCheckpointsReached();
@@ -202,7 +202,7 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       drcSimulationTestHelper.send(footMessage);
-      double simulationTime = 1 * footMessage.footstepDataList.size() + 1.0;
+      double simulationTime = 1 * footMessage.getFootstepDataList().size() + 1.0;
 
       boolean success;
       // Push:
@@ -231,10 +231,10 @@ public abstract class AvatarFlatGroundSideSteppingTest implements MultiRobotTest
    private void addFootstep(Point3D stepLocation, Quaternion orient, RobotSide robotSide, FootstepDataListMessage message)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.setLocation(stepLocation);
-      footstepData.setOrientation(orient);
+      footstepData.getLocation().set(stepLocation);
+      footstepData.getOrientation().set(orient);
       footstepData.setRobotSide(robotSide.toByte());
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
    }
 
    private void setupCameraBackView()

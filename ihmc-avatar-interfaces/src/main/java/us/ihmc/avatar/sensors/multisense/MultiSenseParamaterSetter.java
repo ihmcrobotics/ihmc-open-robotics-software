@@ -12,6 +12,7 @@ import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
+import controller_msgs.msg.dds.MultisenseParameterPacket;
 import dynamic_reconfigure.BoolParameter;
 import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.Reconfigure;
@@ -22,7 +23,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.MultisenseParameterPacket;
 import us.ihmc.tools.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;

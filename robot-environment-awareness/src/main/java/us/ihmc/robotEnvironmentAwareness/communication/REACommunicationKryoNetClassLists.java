@@ -2,14 +2,14 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.PlanarRegionMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestLidarScanMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionMessage;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.RequestLidarScanMessage;
-import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple3D.Point3D;

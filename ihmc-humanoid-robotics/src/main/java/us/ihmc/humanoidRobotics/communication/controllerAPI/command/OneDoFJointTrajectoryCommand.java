@@ -3,9 +3,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
 public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList implements Command<OneDoFJointTrajectoryCommand, OneDoFJointTrajectoryMessage>
@@ -48,7 +48,7 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
       for (int i = 0; i < numberOfPoints; i++)
       {
          TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPointMessages.get(i);
-         this.addTrajectoryPoint(trajectoryPoint1DMessage.time, trajectoryPoint1DMessage.position, trajectoryPoint1DMessage.velocity);
+         this.addTrajectoryPoint(trajectoryPoint1DMessage.getTime(), trajectoryPoint1DMessage.getPosition(), trajectoryPoint1DMessage.getVelocity());
       }
       setWeight(message.getWeight());
    }

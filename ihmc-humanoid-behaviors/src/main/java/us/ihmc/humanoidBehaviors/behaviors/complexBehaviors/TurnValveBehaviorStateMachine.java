@@ -1,5 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import controller_msgs.msg.dds.ValveLocationPacket;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -14,11 +18,7 @@ import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -215,7 +215,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
    @Override
    public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)
    {
-      System.out.println("BEHAVIOR RECIEVED " + data.key + " " + data.value);
+      System.out.println("BEHAVIOR RECIEVED " + data.getKeyAsString() + " " + data.getValue());
    }
 
 }

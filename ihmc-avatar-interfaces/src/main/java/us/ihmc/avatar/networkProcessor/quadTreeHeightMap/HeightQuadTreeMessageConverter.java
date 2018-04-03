@@ -3,11 +3,11 @@ package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.HeightQuadTreeLeafMessage;
+import controller_msgs.msg.dds.HeightQuadTreeMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeLeafMessage;
-import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGround;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundNode;
@@ -27,12 +27,12 @@ public class HeightQuadTreeMessageConverter
       fullDepthCopy(rootNode, boundingCircleCenter, boundingCircleRadius, leaves);
 
       HeightQuadTreeMessage heightQuadTreeMessage = new HeightQuadTreeMessage();
-      MessageTools.copyData(leaves, heightQuadTreeMessage.leaves);
-      heightQuadTreeMessage.defaultHeight = (float) rootNode.getDefaultHeightWhenNoPoints();
-      heightQuadTreeMessage.resolution = (float) quadTreeToConvert.getQuadTreeParameters().getResolution();
+      MessageTools.copyData(leaves, heightQuadTreeMessage.getLeaves());
+      heightQuadTreeMessage.setDefaultHeight((float) rootNode.getDefaultHeightWhenNoPoints());
+      heightQuadTreeMessage.setResolution((float) quadTreeToConvert.getQuadTreeParameters().getResolution());
       Box bounds = quadTreeToConvert.getRootNode().getBounds();
-      heightQuadTreeMessage.sizeX = (float) (bounds.maxX - bounds.minX);
-      heightQuadTreeMessage.sizeY = (float) (bounds.maxY - bounds.minY);
+      heightQuadTreeMessage.setSizeX((float) (bounds.maxX - bounds.minX));
+      heightQuadTreeMessage.setSizeY((float) (bounds.maxY - bounds.minY));
       return heightQuadTreeMessage;
    }
 
@@ -45,9 +45,9 @@ public class HeightQuadTreeMessageConverter
       {
          HeightQuadTreeLeafMessage leaf = new HeightQuadTreeLeafMessage();
          Box bounds = original.getBounds();
-         leaf.centerX = (float) bounds.centreX;
-         leaf.centerY = (float) bounds.centreY;
-         leaf.height = (float) original.getLeaf().getAveragePoint().getZ();
+         leaf.setCenterX((float) bounds.centreX);
+         leaf.setCenterY((float) bounds.centreY);
+         leaf.setHeight((float) original.getLeaf().getAveragePoint().getZ());
          copyToPack.add(leaf);
          return;
       }
@@ -101,22 +101,22 @@ public class HeightQuadTreeMessageConverter
    public static HeightQuadTree convertMessage(HeightQuadTreeMessage messageToConvert)
    {
       HeightQuadTree heightQuadTree = new HeightQuadTree();
-      heightQuadTree.setDefaultHeight(messageToConvert.defaultHeight);
-      heightQuadTree.setResolution(messageToConvert.resolution);
-      heightQuadTree.setSizeX(messageToConvert.sizeX);
-      heightQuadTree.setSizeY(messageToConvert.sizeY);
+      heightQuadTree.setDefaultHeight(messageToConvert.getDefaultHeight());
+      heightQuadTree.setResolution(messageToConvert.getResolution());
+      heightQuadTree.setSizeX(messageToConvert.getSizeX());
+      heightQuadTree.setSizeY(messageToConvert.getSizeY());
 
-      if (messageToConvert.leaves.isEmpty())
+      if (messageToConvert.getLeaves().isEmpty())
          return heightQuadTree;
 
       HeightQuadTreeNode root = new HeightQuadTreeNode();
       root.setCenterX(0.0f);
       root.setCenterY(0.0f);
-      root.setSizeX(messageToConvert.sizeX);
-      root.setSizeY(messageToConvert.sizeY);
+      root.setSizeX(messageToConvert.getSizeX());
+      root.setSizeY(messageToConvert.getSizeY());
 
-      for (int i = 0; i < messageToConvert.leaves.size(); i++)
-         insertLeafRecursive(root, messageToConvert.leaves.get(i));
+      for (int i = 0; i < messageToConvert.getLeaves().size(); i++)
+         insertLeafRecursive(root, messageToConvert.getLeaves().get(i));
 
       heightQuadTree.setRoot(root);
 
@@ -126,9 +126,9 @@ public class HeightQuadTreeMessageConverter
    private static void insertLeafRecursive(HeightQuadTreeNode node, HeightQuadTreeLeafMessage leaf)
    {
       double epsilon = 1.0e-3;
-      if (MathTools.epsilonEquals(node.getCenterX(), leaf.centerX, epsilon) && MathTools.epsilonEquals(node.getCenterY(), leaf.centerY, epsilon))
+      if (MathTools.epsilonEquals(node.getCenterX(), leaf.getCenterX(), epsilon) && MathTools.epsilonEquals(node.getCenterY(), leaf.getCenterY(), epsilon))
       {
-         node.setHeight(leaf.height);
+         node.setHeight(leaf.getHeight());
          return;
       }
 
@@ -137,9 +137,9 @@ public class HeightQuadTreeMessageConverter
 
       // Computing the morton code to make sure that the indexing is correct.
       int mortonCode = 0;
-      if (leaf.centerX > node.getCenterX())
+      if (leaf.getCenterX() > node.getCenterX())
          mortonCode |= 1;
-      if (leaf.centerY > node.getCenterY())
+      if (leaf.getCenterY() > node.getCenterY())
          mortonCode |= 2;
 
       HeightQuadTreeNode child = node.getChild(mortonCode);

@@ -7,19 +7,19 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
+import controller_msgs.msg.dds.MessageCollection;
+import controller_msgs.msg.dds.MessageCollectionNotification;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.GlobalStatusMessageListener;
+import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.MessageOfMessages;
-import us.ihmc.humanoidRobotics.communication.util.MessageUnpackingTools;
-import us.ihmc.humanoidRobotics.communication.util.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.util.PeriodicThreadScheduler;
 
@@ -49,6 +49,8 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    private final AtomicReference<MessageFilter> messageFilter;
    /** Used to filter messages coming in and report an error. */
    private final AtomicReference<MessageValidator> messageValidator;
+   /** Used to synchronize the execution of a message collection. */
+   private MessageCollector messageCollector = MessageCollector.createDummyCollector();
 
    /** All the possible status message that can be sent to the communicator. */
    private final List<Class<? extends Packet<?>>> listOfSupportedStatusMessages;
@@ -85,8 +87,6 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       createAllSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();
       createAllStatusMessageBuffers();
-
-      registerSubcriberWithMessageUnpacker(MessageOfMessages.class, 20, MessageUnpackingTools.createMessageOfMessagesUnpacker());
 
       if (scheduler != null)
          scheduler.schedule(this, 1, TimeUnit.MILLISECONDS);
@@ -129,6 +129,17 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
       packetCommunicator.attachListener(multipleMessageHolderClass, packetConsumer);
    }
 
+   public void addMessageCollector(MessageIDExtractor messageIDExtractor)
+   {
+      messageCollector = new MessageCollector(messageIDExtractor, listOfSupportedControlMessages);
+      createStatusMessageBuffer(MessageCollectionNotification.class);
+      listOfSupportedStatusMessages.add(MessageCollectionNotification.class);
+      packetCommunicator.attachListener(MessageCollection.class, message -> {
+         MessageCollectionNotification notification = messageCollector.startCollecting(message);
+         copyAndCommitStatusMessage(notification);
+      });
+   }
+
    public void addMessageFilter(MessageFilter newFilter)
    {
       messageFilter.set(newFilter);
@@ -154,11 +165,15 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    {
       for (int i = 0; i < listOfSupportedStatusMessages.size(); i++)
       {
-         Class<T> statusMessageClass = (Class<T>) listOfSupportedStatusMessages.get(i);
-         Builder<T> builder = CommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
-         ConcurrentRingBuffer<T> newBuffer = new ConcurrentRingBuffer<>(builder, buffersCapacity);
-         statusMessageClassToBufferMap.put(statusMessageClass, newBuffer);
+         createStatusMessageBuffer((Class<T>) listOfSupportedStatusMessages.get(i));
       }
+   }
+
+   private <T extends Packet<T>> void createStatusMessageBuffer(Class<T> statusMessageClass)
+   {
+      Builder<T> builder = CommandInputManager.createBuilderWithEmptyConstructor(statusMessageClass);
+      ConcurrentRingBuffer<T> newBuffer = new ConcurrentRingBuffer<>(builder, buffersCapacity);
+      statusMessageClassToBufferMap.put(statusMessageClass, newBuffer);
    }
 
    @SuppressWarnings("unchecked")
@@ -176,6 +191,24 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
    {
       if (DEBUG)
          PrintTools.debug(ControllerNetworkSubscriber.this, "Received message: " + message.getClass().getSimpleName() + ", " + message);
+
+      if (messageCollector.isCollecting() && messageCollector.interceptMessage(message))
+      {
+         if (DEBUG)
+            PrintTools.debug(ControllerNetworkSubscriber.this, "Collecting message: " + message.getClass().getSimpleName() + ", " + message);
+
+         if (!messageCollector.isCollecting())
+         {
+            List<Packet<?>> collectedMessages = messageCollector.getCollectedMessages();
+            for (int i = 0; i < collectedMessages.size(); i++)
+            {
+               receivedMessage(collectedMessages.get(i));
+            }
+            messageCollector.reset();
+         }
+
+         return;
+      }
 
       String errorMessage = messageValidator.get().validate(message);
 
@@ -220,27 +253,19 @@ public class ControllerNetworkSubscriber implements Runnable, CloseableAndDispos
 
    private void createGlobalStatusMessageListener()
    {
-      GlobalStatusMessageListener globalStatusMessageListener = new GlobalStatusMessageListener()
-      {
-         @Override
-         public void receivedNewMessageStatus(Packet<?> statusMessage)
-         {
-            copyData(statusMessage);
-         }
+      controllerStatusOutputManager.attachGlobalStatusMessageListener(statusMessage -> copyAndCommitStatusMessage(statusMessage));
+   }
 
-         @SuppressWarnings("unchecked")
-         private <T extends Packet<T>> void copyData(Packet<?> statusMessage)
-         {
-            ConcurrentRingBuffer<T> buffer = (ConcurrentRingBuffer<T>) statusMessageClassToBufferMap.get(statusMessage.getClass());
-            T next = buffer.next();
-            if (next != null)
-            {
-               next.set((T) statusMessage);
-               buffer.commit();
-            }
-         }
-      };
-      controllerStatusOutputManager.attachGlobalStatusMessageListener(globalStatusMessageListener);
+   @SuppressWarnings("unchecked")
+   private <T extends Packet<T>> void copyAndCommitStatusMessage(Packet<?> statusMessage)
+   {
+      ConcurrentRingBuffer<T> buffer = (ConcurrentRingBuffer<T>) statusMessageClassToBufferMap.get(statusMessage.getClass());
+      T next = buffer.next();
+      if (next != null)
+      {
+         next.set((T) statusMessage);
+         buffer.commit();
+      }
    }
 
    @Override

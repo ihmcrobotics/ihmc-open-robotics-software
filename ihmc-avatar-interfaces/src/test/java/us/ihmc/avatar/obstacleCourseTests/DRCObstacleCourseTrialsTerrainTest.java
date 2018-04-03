@@ -8,6 +8,8 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -22,8 +24,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -232,7 +232,7 @@ public abstract class DRCObstacleCourseTrialsTerrainTest implements MultiRobotTe
       drcSimulationTestHelper.send(footstepDataList);
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footstepDataList.footstepDataList.size() * stepTime + 2.0);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(footstepDataList.getFootstepDataList().size() * stepTime + 2.0);
       assertTrue(success);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);

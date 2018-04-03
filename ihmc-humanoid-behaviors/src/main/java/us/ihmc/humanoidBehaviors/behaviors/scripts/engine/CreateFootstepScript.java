@@ -7,14 +7,14 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class CreateFootstepScript
@@ -128,14 +128,14 @@ public class CreateFootstepScript
 
    private void addFootsteps(FootstepDataListMessage footsteps)
    {
-      footsteps.footstepDataList.clear();
+      footsteps.getFootstepDataList().clear();
       int idx = 0;
       for (ContactType contactType : contactSequence)
       {
-         footsteps.footstepDataList.add().set(createFootstep(contactType, idx++));
+         footsteps.getFootstepDataList().add().set(createFootstep(contactType, idx++));
       }
-      footsteps.footstepDataList.add().set(createFootstep(ContactType.FULL, idx++));
-      footsteps.footstepDataList.add().set(createFootstep(ContactType.FULL, idx++));
+      footsteps.getFootstepDataList().add().set(createFootstep(ContactType.FULL, idx++));
+      footsteps.getFootstepDataList().add().set(createFootstep(ContactType.FULL, idx++));
    }
 
    private FootstepDataMessage createFootstep(ContactType contactType, int idx)
@@ -147,10 +147,10 @@ public class CreateFootstepScript
       Point2D[] contactPoints = contactPointMap.get(contactType);
 
       // set robot side
-      footstep.robotSide = robotSide.toByte();
+      footstep.setRobotSide(robotSide.toByte());
       // set pose
-      footstep.location = new Point3D(x, y, ankleHeight);
-      footstep.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstep.getLocation().set(new Point3D(x, y, ankleHeight));
+      footstep.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       // set contact points
       HumanoidMessageTools.packPredictedContactPoints(contactPoints, footstep);
 

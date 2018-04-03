@@ -2,9 +2,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.PlanarRegionMessage;
+import controller_msgs.msg.dds.Polygon2DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.communication.packets.PlanarRegionMessage;
-import us.ihmc.communication.packets.Polygon2DMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;

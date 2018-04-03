@@ -3,11 +3,11 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -19,7 +19,6 @@ import us.ihmc.humanoidRobotics.communication.wholeBodyTrajectoryToolboxAPI.Wayp
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialData;
 import us.ihmc.manipulation.planning.rrt.constrainedplanning.configurationAndTimeSpace.SpatialNode;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 
 public class ConstrainedRigidBodyTrajectory
@@ -70,7 +69,7 @@ public class ConstrainedRigidBodyTrajectory
          controlFramePose.changeFrame(trajectoryCommand.getEndEffector().getBodyFixedFrame());
          this.controlFramePose.set(controlFramePose);
          this.hasTrajectoryCommand = true;
-         if (Double.isNaN(trajectoryCommand.getWeight()))
+         if (Double.isNaN(trajectoryCommand.getWeight()) || trajectoryCommand.getWeight() < 0.0)
             weight = DEFAULT_WEIGHT;
          else
             weight = trajectoryCommand.getWeight();
@@ -191,10 +190,10 @@ public class ConstrainedRigidBodyTrajectory
       Pose3D desiredEndEffectorPose = appendPoseToTrajectory(timeInTrajectory, poseToAppend);
 
       KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody);
-      message.setDesiredPositionInWorld(desiredEndEffectorPose.getPosition());
-      message.setDesiredOrientationInWorld(desiredEndEffectorPose.getOrientation());
-      message.setControlFramePositionInEndEffector(controlFramePose.getPosition());
-      message.setControlFrameOrientationInEndEffector(controlFramePose.getOrientation());
+      message.getDesiredPositionInWorld().set(desiredEndEffectorPose.getPosition());
+      message.getDesiredOrientationInWorld().set(desiredEndEffectorPose.getOrientation());
+      message.getControlFramePositionInEndEffector().set(controlFramePose.getPosition());
+      message.getControlFrameOrientationInEndEffector().set(controlFramePose.getOrientation());
       message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(getSelectionMatrix().getAngularPart()));
       message.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(getSelectionMatrix().getLinearPart()));
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(weight));

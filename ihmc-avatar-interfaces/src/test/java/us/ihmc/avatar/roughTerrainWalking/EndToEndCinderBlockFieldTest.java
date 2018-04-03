@@ -8,6 +8,8 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -18,9 +20,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -89,7 +88,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = simulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.footstepDataList.size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      success = simulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
    }
@@ -116,7 +115,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
             cinderBlockPose.get(location, orientation);
             location.setZ(location.getZ() + zOffset);
             FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
-            footsteps.footstepDataList.add().set(footstep);
+            footsteps.getFootstepDataList().add().set(footstep);
          }
       }
 

@@ -1,5 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.debug;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -8,12 +14,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.SO3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.YoStopwatch;
@@ -57,12 +57,12 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
 
       for (int jointIdx = 0; jointIdx < leftArmHome.length; jointIdx++)
       {
-         OneDoFJointTrajectoryMessage jointTrajectoryMessage = armTrajectory.jointspaceTrajectory.jointTrajectoryMessages.add();
+         OneDoFJointTrajectoryMessage jointTrajectoryMessage = armTrajectory.getJointspaceTrajectory().getJointTrajectoryMessages().add();
 
          for (int i = 0; i < trajectoryPoints; i++)
          {
             double percent = i / (double) (trajectoryPoints - 1);
-            jointTrajectoryMessage.trajectoryPoints.add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(percent, leftArmHome[jointIdx], 0.0));
+            jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(percent, leftArmHome[jointIdx], 0.0));
          }
       }
 
@@ -80,10 +80,10 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
       for (int i = 0; i < trajectoryPoints; i++)
       {
          double percent = i / (double) (trajectoryPoints - 1);
-         SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.taskspaceTrajectoryPoints.add();
+         SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
          trajectoryPoint.setTime(percent);
-         trajectoryPoint.setOrientation(new Quaternion());
-         trajectoryPoint.setAngularVelocity(new Vector3D());
+         trajectoryPoint.getOrientation().set(new Quaternion());
+         trajectoryPoint.getAngularVelocity().set(new Vector3D());
       }
 
       sendPacketToController(chestTrajectory);
@@ -115,8 +115,8 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(1.2, 0.8);
       for (int i = 0; i < steps / 2; i++)
       {
-         footsteps.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, stepPoseLeft.getPosition(), stepPoseLeft.getOrientation()));
-         footsteps.footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, stepPoseRight.getPosition(), stepPoseRight.getOrientation()));
+         footsteps.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, stepPoseLeft.getPosition(), stepPoseLeft.getOrientation()));
+         footsteps.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, stepPoseRight.getPosition(), stepPoseRight.getOrientation()));
       }
 
       sendPacketToController(footsteps);

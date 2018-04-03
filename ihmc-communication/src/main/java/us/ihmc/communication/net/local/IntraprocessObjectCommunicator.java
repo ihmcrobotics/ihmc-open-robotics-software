@@ -11,9 +11,7 @@ import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.NetworkedObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
-import us.ihmc.communication.net.RecyclingArrayListPubSubSerializer;
 import us.ihmc.communication.net.TcpNetStateListener;
-import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicator
 {
@@ -33,18 +31,11 @@ public class IntraprocessObjectCommunicator implements NetworkedObjectCommunicat
    public IntraprocessObjectCommunicator(int port, NetClassList classList)
    {
       this.port = port;
-
-      kryo.addDefaultSerializer(RecyclingArrayListPubSub.class, RecyclingArrayListPubSubSerializer.class);
+      classList.registerWithKryo(kryo);
 
       for (Class<?> clazz : classList.getPacketClassList())
       {
-         kryo.register(clazz);
          listeners.put(clazz, new ArrayList<ObjectConsumer<?>>());
-      }
-
-      for (Class<?> type : classList.getPacketFieldList())
-      {
-         kryo.register(type);
       }
    }
 

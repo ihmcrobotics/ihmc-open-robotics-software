@@ -2,16 +2,17 @@ package us.ihmc.avatar.angularMomentumTest;
 
 import java.util.ArrayList;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
@@ -23,7 +24,6 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInterface
@@ -101,12 +101,12 @@ public abstract class HumanoidAngularMomentumTest implements MultiRobotTestInter
                             FootstepDataListMessage message)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.setLocation(stepLocation);
-      footstepData.setOrientation(orient);
+      footstepData.getLocation().set(stepLocation);
+      footstepData.getOrientation().set(orient);
       footstepData.setRobotSide(robotSide.toByte());
       footstepData.setSwingDuration(swingTime);
       footstepData.setTransferDuration(transferTime);
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
    }
 
    protected double getStepLength()

@@ -13,6 +13,7 @@ import nav_msgs.Odometry;
 import std_msgs.Header;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.utilities.ros.RosTools;
 
 public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
@@ -23,7 +24,7 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       super(nav_msgs.Odometry._TYPE,latched);
    }
    
-   public void publish(long timestamp, RigidBodyTransform transform, Vector3D32 linearVelocity, Vector3D32 angularVelocity, String childFrame, String frameId)
+   public void publish(long timestamp, RigidBodyTransform transform, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity, String childFrame, String frameId)
    {
       Odometry message = getMessage();
 
@@ -42,7 +43,7 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       publish(message);
    }
 
-   private TwistWithCovariance createTwistWithCovariance(Vector3D32 linearVelocity, Vector3D32 angularVelocity)
+   private TwistWithCovariance createTwistWithCovariance(Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       TwistWithCovariance twistWithCovariance = newMessageFromType(TwistWithCovariance._TYPE);
       Twist twist = createTwistMsg(linearVelocity, angularVelocity);
@@ -50,7 +51,7 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       return twistWithCovariance;
    }
 
-   private Twist createTwistMsg(Vector3D32 linearVelocity, Vector3D32 angularVelocity)
+   private Twist createTwistMsg(Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       Twist twist = newMessageFromType(Twist._TYPE);
       
@@ -63,10 +64,10 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       return twist;
    }
 
-   private Vector3 getVector3(Vector3D32 angularVelocity)
+   private Vector3 getVector3(Vector3DReadOnly angularVelocity)
    {
       Vector3 rosVector3 = newMessageFromType(Vector3._TYPE);
-      RosTools.packVector3fToGeometry_msgsVector3(angularVelocity, rosVector3);
+      RosTools.packEuclidTuple3DToGeometry_msgsVector3(angularVelocity, rosVector3);
       return rosVector3;
    }
 
@@ -94,7 +95,7 @@ public class RosOdometryPublisher extends RosTopicPublisher<nav_msgs.Odometry>
       Quaternion rotation = newMessageFromType(Quaternion._TYPE);
       pose.setPosition(point);
       pose.setOrientation(rotation);
-      RosTools.packRigidBodyTransformToGeometry_msgsPose(transform, pose);
+      RosTools.packEuclidRigidBodyTransformToGeometry_msgsPose(transform, pose);
       return pose;
    }
 }

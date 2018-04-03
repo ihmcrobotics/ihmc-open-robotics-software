@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAccelerationsCommand, ArmDesiredAccelerationsMessage>
@@ -25,7 +25,7 @@ public class ArmDesiredAccelerationsCommand implements Command<ArmDesiredAcceler
    public void set(ArmDesiredAccelerationsMessage message)
    {
       robotSide = RobotSide.fromByte(message.getRobotSide());
-      desiredAccelerations.set(message.desiredAccelerations);
+      desiredAccelerations.set(message.getDesiredAccelerations());
    }
 
    @Override

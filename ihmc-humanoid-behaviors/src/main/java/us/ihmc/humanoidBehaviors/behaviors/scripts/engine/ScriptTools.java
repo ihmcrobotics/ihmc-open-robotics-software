@@ -7,11 +7,11 @@ import java.util.Collections;
 
 import com.thoughtworks.xstream.io.StreamException;
 
+import controller_msgs.msg.dds.FootTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 
 /**
  * Created with IntelliJ IDEA.
@@ -77,7 +77,7 @@ public class ScriptTools
       {
          if (listToEdit.get(i).getScriptObject() instanceof FootstepDataListMessage)
          {
-            if (((FootstepDataListMessage) listToEdit.get(i).getScriptObject()).footstepDataList.size() == 0)
+            if (((FootstepDataListMessage) listToEdit.get(i).getScriptObject()).getFootstepDataList().size() == 0)
                listToEdit.remove(i);
          }
       }
@@ -116,7 +116,7 @@ public class ScriptTools
 
          if (scriptObject.getScriptObject() instanceof FootstepDataListMessage)
          {
-            if (((FootstepDataListMessage) scriptObject.getScriptObject()).footstepDataList.size() == 0)
+            if (((FootstepDataListMessage) scriptObject.getScriptObject()).getFootstepDataList().size() == 0)
                elementsToRemove.add(i);
          }
       }
