@@ -195,6 +195,7 @@ public class ConvexPolygonToolsTest
       ConvexPolygon2dTestHelpers.verifyPointsAreNotInside(polygon2, pointsThatShouldNotBeInOriginals, 0.0);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testCombineDisjointPolygons2() throws Exception
    {

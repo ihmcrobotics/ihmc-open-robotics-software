@@ -469,6 +469,7 @@ public class SpatialAccelerationCalculatorTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testWithDoVelocityTermsSetToFalse() throws Exception
    {

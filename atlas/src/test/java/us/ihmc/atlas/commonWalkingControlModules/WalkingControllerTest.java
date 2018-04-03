@@ -42,6 +42,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -153,6 +154,7 @@ public class WalkingControllerTest
 
    private static final double maxDriftRate = 0.2;
 
+   @ContinuousIntegrationTest(estimatedDuration = 10.0)
    @Test(timeout = 30000)
    public void testForGarbage()
    {

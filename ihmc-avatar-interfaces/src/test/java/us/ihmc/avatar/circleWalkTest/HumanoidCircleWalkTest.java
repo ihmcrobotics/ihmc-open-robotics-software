@@ -19,6 +19,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -100,6 +101,7 @@ public abstract class HumanoidCircleWalkTest implements MultiRobotTestInterface
       return null;
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
    public void testCircleWalk() throws SimulationExceededMaximumTimeException
    {

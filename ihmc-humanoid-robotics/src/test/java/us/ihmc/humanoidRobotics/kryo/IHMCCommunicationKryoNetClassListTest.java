@@ -12,8 +12,9 @@ import java.util.Set;
 import org.junit.Test;
 import org.reflections.Reflections;
 
-import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+
 import us.ihmc.idl.PreallocatedList;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.pubsub.TopicDataType;
@@ -24,11 +25,12 @@ public class IHMCCommunicationKryoNetClassListTest
    {
       Reflections ref = new Reflections();
       Set<Class<? extends TopicDataType>> subTypesOf = ref.getSubTypesOf(TopicDataType.class);
-      
+
       for (Class<? extends TopicDataType> subTypeOf : subTypesOf)
          System.out.println("                         registerPacketField(" + subTypeOf.getSimpleName() + ".class);");
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAllClassesRegisteredArePackets()
    {
@@ -41,6 +43,7 @@ public class IHMCCommunicationKryoNetClassListTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAllPacketFieldsAreRegistered()
          throws InstantiationException, IllegalAccessException, NoSuchFieldException, SecurityException, IllegalArgumentException

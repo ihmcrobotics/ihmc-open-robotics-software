@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public class ExpandingPolytopeAlgorithmTest
 {
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWithAPointInsideACube()
    {
@@ -68,6 +70,7 @@ public class ExpandingPolytopeAlgorithmTest
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.05), closestPointOnB, 1e-7);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testWithTwoCollidingCubes()
    {
@@ -105,6 +108,7 @@ public class ExpandingPolytopeAlgorithmTest
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.7, 2.75, 4.0), closestPointOnB, 1e-7);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testExtensivelyWithTwoCubes()
    {
@@ -167,6 +171,7 @@ public class ExpandingPolytopeAlgorithmTest
       assertTrue("numberOfCollisions = " + numberOfCollisions, numberOfCollisions > 500);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testExtensivelyWithPolytopes()
    {
@@ -264,6 +269,7 @@ public class ExpandingPolytopeAlgorithmTest
       assertTrue("numberOfCollisions = " + numberOfCollisions, numberOfCollisions > 500);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testExtensivelyWithCylinders()
    {
@@ -365,6 +371,7 @@ public class ExpandingPolytopeAlgorithmTest
       assertTrue("numberOfCollisions = " + numberOfCollisions, numberOfCollisions > 500);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testTroublesomeCubes()
    {
@@ -408,6 +415,7 @@ public class ExpandingPolytopeAlgorithmTest
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-0.6654362950758336, 0.0120271553579471, 0.005), closestPointOnB, 1e-7);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testTroublesomeCylinder()
    {

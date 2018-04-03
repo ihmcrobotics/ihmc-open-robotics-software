@@ -3,6 +3,7 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -32,12 +33,14 @@ public class VisibilityGraphOcclusionTest
    }
 
    @Test(timeout = timeout)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    public void testVisibilityGraphWithOcclusion()
    {
       runTest(occludedEnvironmentWithAGoalPlane);
    }
 
    @Test(timeout = timeout)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    public void testVisibilityGraphWithOcclusionAndNoGoalPlane()
    {
       runTest(occludedEnvironmentWithoutAGoalPlane);
