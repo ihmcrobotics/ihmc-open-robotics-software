@@ -2,10 +2,10 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Random;
 
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrientationTrajectoryCommand, PelvisOrientationTrajectoryMessage>,
@@ -41,14 +41,14 @@ public class PelvisOrientationTrajectoryCommand implements Command<PelvisOrienta
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisOrientationTrajectoryMessage message)
    {
       setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
-      so3Trajectory.set(resolver, message.so3Trajectory);
+      so3Trajectory.set(resolver, message.getSo3Trajectory());
    }
 
    @Override
    public void set(PelvisOrientationTrajectoryMessage message)
    {
       setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
-      so3Trajectory.set(message.so3Trajectory);
+      so3Trajectory.set(message.getSo3Trajectory());
    }
 
    /**

@@ -397,7 +397,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon))
          return false;
-      if (this.predicted_contact_points_2d_.size() == other.predicted_contact_points_2d_.size())
+      if (this.predicted_contact_points_2d_.size() != other.predicted_contact_points_2d_.size())
       {
          return false;
       }
@@ -416,7 +416,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.swing_height_, other.swing_height_, epsilon))
          return false;
 
-      if (this.custom_position_waypoints_.size() == other.custom_position_waypoints_.size())
+      if (this.custom_position_waypoints_.size() != other.custom_position_waypoints_.size())
       {
          return false;
       }
@@ -429,7 +429,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          }
       }
 
-      if (this.swing_trajectory_.size() == other.swing_trajectory_.size())
+      if (this.swing_trajectory_.size() != other.swing_trajectory_.size())
       {
          return false;
       }

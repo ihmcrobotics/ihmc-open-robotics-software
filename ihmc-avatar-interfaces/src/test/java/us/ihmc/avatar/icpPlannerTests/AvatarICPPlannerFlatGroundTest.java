@@ -9,6 +9,8 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -23,8 +25,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
@@ -403,22 +403,22 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
          FootstepDataMessage footstepMessage = new FootstepDataMessage();
          footstepMessage.setSwingDuration(swingDuration);
          footstepMessage.setTransferDuration(transferDuration);
-         footstepMessage.setLocation(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
-         footstepMessage.setOrientation(new Quaternion());
+         footstepMessage.getLocation().set(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
+         footstepMessage.getOrientation().set(new Quaternion());
          footstepMessage.setRobotSide(robotSide.toByte());
 
-         footstepListMessage.footstepDataList.add().set(footstepMessage);
+         footstepListMessage.getFootstepDataList().add().set(footstepMessage);
          robotSide = robotSide.getOppositeSide();
       }
 
       FootstepDataMessage footstepMessage = new FootstepDataMessage();
       footstepMessage.setSwingDuration(swingDuration);
       footstepMessage.setTransferDuration(transferDuration);
-      footstepMessage.setLocation(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
-      footstepMessage.setOrientation(new Quaternion());
+      footstepMessage.getLocation().set(new Point3D(xLocation, robotSide.negateIfRightSide(stanceWidth / 2.0), 0.0));
+      footstepMessage.getOrientation().set(new Quaternion());
       footstepMessage.setRobotSide(robotSide.toByte());
 
-      footstepListMessage.footstepDataList.add().set(footstepMessage);
+      footstepListMessage.getFootstepDataList().add().set(footstepMessage);
       footstepListMessage.setDefaultSwingDuration(swingDuration);
       footstepListMessage.setDefaultTransferDuration(transferDuration);
 
@@ -514,7 +514,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       FootstepDataMessage footstepData = createFootstepDataMessage(fullRobotModel, robotSide, predictedContactPointsInAnkleFrame, placeToStep, setPredictedContactPoints);
-      message.footstepDataList.add().set(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
 
       drcSimulationTestHelper.send(message);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.2);
@@ -535,8 +535,8 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       FramePoint3D placeToStepInWorld = new FramePoint3D(placeToStep);
       placeToStepInWorld.changeFrame(worldFrame);
 
-      footstepData.setLocation(placeToStepInWorld);
-      footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+      footstepData.getLocation().set(placeToStepInWorld);
+      footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide.toByte());
 
       if (setPredictedContactPoints && (contactPointsInAnkleFrame != null))

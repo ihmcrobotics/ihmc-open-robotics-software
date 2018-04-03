@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.communication;
 
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
+import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
 
 public interface CoactiveDataListenerInterface
 {

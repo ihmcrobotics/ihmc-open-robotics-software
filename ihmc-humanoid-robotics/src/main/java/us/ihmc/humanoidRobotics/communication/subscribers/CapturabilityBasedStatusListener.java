@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.subscribers;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 
 public interface CapturabilityBasedStatusListener
 {

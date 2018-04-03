@@ -7,6 +7,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.ros.message.Time;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotModelFactory;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -25,7 +26,6 @@ import us.ihmc.humanoidRobotics.kryo.PPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosJointStatePublisher;
@@ -168,7 +168,7 @@ public class MultisenseTestBenchWithZeroPoseModuleNetworkProcessor implements Pa
             long timeStamp = ppsTimestampOffsetProvider.adjustRobotTimeStampToRosClock(robotConfigurationData.getTimestamp());
             Time t = Time.fromNano(timeStamp);
 
-            if (robotConfigurationData.jointNameHash != jointNameHash)
+            if (robotConfigurationData.getJointNameHash() != jointNameHash)
             {
                throw new RuntimeException("Joint names do not match for RobotConfigurationData");
             }

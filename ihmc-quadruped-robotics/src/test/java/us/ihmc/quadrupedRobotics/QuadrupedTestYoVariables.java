@@ -22,10 +22,7 @@ public abstract class QuadrupedTestYoVariables
    private final YoDouble yoBodyAngularRateInputX;
    private final YoDouble yoBodyAngularRateInputY;
    private final YoDouble yoBodyAngularRateInputZ;
-   private final YoDouble yoPlanarVelocityInputX;
-   private final YoDouble yoPlanarVelocityInputY;
-   private final YoDouble yoPlanarVelocityInputZ;
-   
+
    private final YoDouble robotBodyX;
    private final YoDouble robotBodyY;
    private final YoDouble robotBodyZ;
@@ -55,10 +52,7 @@ public abstract class QuadrupedTestYoVariables
       yoBodyAngularRateInputX = (YoDouble) scs.getVariable("bodyAngularRateInputX");
       yoBodyAngularRateInputY = (YoDouble) scs.getVariable("bodyAngularRateInputY");
       yoBodyAngularRateInputZ = (YoDouble) scs.getVariable("bodyAngularRateInputZ");
-      yoPlanarVelocityInputX = (YoDouble) scs.getVariable("planarVelocityInputX");
-      yoPlanarVelocityInputY = (YoDouble) scs.getVariable("planarVelocityInputY");
-      yoPlanarVelocityInputZ = (YoDouble) scs.getVariable("planarVelocityInputZ");
-      
+
       robotBodyX = (YoDouble) scs.getVariable("q_x");
       robotBodyY = (YoDouble) scs.getVariable("q_y");
       robotBodyZ = (YoDouble) scs.getVariable("q_z");
@@ -134,21 +128,6 @@ public abstract class QuadrupedTestYoVariables
    public YoDouble getYoBodyAngularRateInputZ()
    {
       return yoBodyAngularRateInputZ;
-   }
-
-   public YoDouble getYoPlanarVelocityInputX()
-   {
-      return yoPlanarVelocityInputX;
-   }
-
-   public YoDouble getYoPlanarVelocityInputY()
-   {
-      return yoPlanarVelocityInputY;
-   }
-
-   public YoDouble getYoPlanarVelocityInputZ()
-   {
-      return yoPlanarVelocityInputZ;
    }
 
    public YoDouble getRobotBodyX()

@@ -5,11 +5,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SpatialVectorMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packets.SpatialVectorMessage;
-import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -17,7 +18,6 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 /**
@@ -172,9 +172,9 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       FullRobotModelCache fullRobotModelCache = getFullRobotModelCache(model);
 
       FloatingInverseDynamicsJoint rootJoint = model.getRootJoint();
-      if (robotConfigurationData.jointNameHash != fullRobotModelCache.jointNameHash)
+      if (robotConfigurationData.getJointNameHash() != fullRobotModelCache.jointNameHash)
       {
-         System.out.println(robotConfigurationData.jointNameHash);
+         System.out.println(robotConfigurationData.getJointNameHash());
          System.out.println(fullRobotModelCache.jointNameHash);
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
       }
@@ -188,15 +188,15 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          fullRobotModelCache.allJoints[i].setQd(newJointVelocities.get(i));
       }
 
-      Vector3D32 translation = robotConfigurationData.getRootTranslation();
+      Vector3D translation = robotConfigurationData.getRootTranslation();
       rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-      Quaternion32 orientation = robotConfigurationData.getRootOrientation();
+      Quaternion orientation = robotConfigurationData.getRootOrientation();
       rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
 
       Twist rootJointTwist = new Twist();
       rootJoint.getJointTwist(rootJointTwist);
-      Vector3D32 pelvisAngularVelocity = robotConfigurationData.getPelvisAngularVelocity();
-      Vector3D32 pelvisLinearVelocity = robotConfigurationData.getPelvisLinearVelocity();
+      Vector3D pelvisAngularVelocity = robotConfigurationData.getPelvisAngularVelocity();
+      Vector3D pelvisLinearVelocity = robotConfigurationData.getPelvisLinearVelocity();
       rootJointTwist.setAngularPart(pelvisAngularVelocity);
       rootJointTwist.setLinearPart(pelvisLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
@@ -207,9 +207,9 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       {
          for (int i = 0; i < forceSensorDataHolder.getForceSensorDefinitions().size(); i++)
          {
-            SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.momentAndForceDataAllForceSensors.get(i);
-            forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i)).setWrench(momentAndForceVectorForSensor.angularPart,
-                                                                                                          momentAndForceVectorForSensor.linearPart);
+            SpatialVectorMessage momentAndForceVectorForSensor = robotConfigurationData.getForceSensorData().get(i);
+            forceSensorDataHolder.get(forceSensorDataHolder.getForceSensorDefinitions().get(i)).setWrench(momentAndForceVectorForSensor.getAngularPart(),
+                                                                                                          momentAndForceVectorForSensor.getLinearPart());
          }
       }
    }

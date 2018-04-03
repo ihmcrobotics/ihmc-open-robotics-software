@@ -5,6 +5,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.RequestLidarScanMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
@@ -12,22 +15,21 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.LidarScanCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
 import us.ihmc.robotics.quadTree.Box;
@@ -37,9 +39,9 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class HeightQuadTreeToolboxController extends ToolboxController
 {
@@ -194,7 +196,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
       RobotConfigurationData robotConfigurationData = robotConfigurationDataToProcess.getAndSet(null);
       if (robotConfigurationData != null)
       {
-         if (expectedRobotConfigurationDataHash != robotConfigurationData.jointNameHash)
+         if (expectedRobotConfigurationDataHash != robotConfigurationData.getJointNameHash())
             throw new RuntimeException("Received a " + RobotConfigurationData.class.getSimpleName() + " that does not match the fullRobotModel.");
 
          TFloatArrayList newJointAngles = robotConfigurationData.getJointAngles();
@@ -203,9 +205,9 @@ public class HeightQuadTreeToolboxController extends ToolboxController
             oneDoFJoints[i].setQ(newJointAngles.get(i));
          }
 
-         Vector3D32 translation = robotConfigurationData.getRootTranslation();
+         Vector3D translation = robotConfigurationData.getRootTranslation();
          rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-         Quaternion32 orientation = robotConfigurationData.getRootOrientation();
+         Quaternion orientation = robotConfigurationData.getRootOrientation();
          rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.getPredecessor().updateFramesRecursively();
       }

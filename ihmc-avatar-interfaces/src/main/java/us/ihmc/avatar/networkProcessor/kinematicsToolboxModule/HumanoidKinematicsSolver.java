@@ -1,18 +1,18 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
-import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
-import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -65,10 +65,10 @@ public class HumanoidKinematicsSolver
    public void setInitialConfiguration(KinematicsToolboxOutputStatus kinematicsToolboxOutputStatus)
    {
       RobotConfigurationData configurationData = new RobotConfigurationData();
-      configurationData.jointNameHash = kinematicsToolboxOutputStatus.jointNameHash;
-      MessageTools.copyData(kinematicsToolboxOutputStatus.desiredJointAngles, configurationData.jointAngles);
-      configurationData.rootTranslation = new Vector3D32(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
-      configurationData.rootOrientation = new Quaternion32(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
+      configurationData.setJointNameHash(kinematicsToolboxOutputStatus.getJointNameHash());
+      MessageTools.copyData(kinematicsToolboxOutputStatus.getDesiredJointAngles(), configurationData.getJointAngles());
+      configurationData.getRootTranslation().set(new Vector3D32(kinematicsToolboxOutputStatus.getDesiredRootTranslation()));
+      configurationData.getRootOrientation().set(new Quaternion32(kinematicsToolboxOutputStatus.getDesiredRootOrientation()));
       setInitialConfiguration(configurationData);
    }
 

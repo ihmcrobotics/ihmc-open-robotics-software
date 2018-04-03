@@ -3,6 +3,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
+import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
+import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import controller_msgs.msg.dds.FrameInformation;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -11,9 +14,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
@@ -97,33 +97,33 @@ public final class EuclideanTrajectoryControllerCommand extends QueueableCommand
       clear(dataFrame);
       set(message);
 
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.selectionMatrix.getSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrame(linearSelectionFrame);
 
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.weightMatrix.getWeightFrameId());
+      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrame(linearWeightFrame);
    }
 
    @Override
    public void set(EuclideanTrajectoryMessage message)
    {
-      HumanoidMessageTools.checkIfDataFrameIdsMatch(message.frameInformation, trajectoryPointList.getReferenceFrame());
+      HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
       List<EuclideanTrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
          EuclideanTrajectoryPointMessage euclideanTrajectoryPointMessage = trajectoryPointMessages.get(i);
-         trajectoryPointList.addTrajectoryPoint(euclideanTrajectoryPointMessage.time, euclideanTrajectoryPointMessage.position,
-                                                euclideanTrajectoryPointMessage.linearVelocity);
+         trajectoryPointList.addTrajectoryPoint(euclideanTrajectoryPointMessage.getTime(), euclideanTrajectoryPointMessage.getPosition(),
+                                                euclideanTrajectoryPointMessage.getLinearVelocity());
       }
       setQueueableCommandVariables(message.getQueueingProperties());
       selectionMatrix.resetSelection();
-      selectionMatrix.setAxisSelection(message.selectionMatrix.xSelected, message.selectionMatrix.ySelected, message.selectionMatrix.zSelected);
+      selectionMatrix.setAxisSelection(message.getSelectionMatrix().getXSelected(), message.getSelectionMatrix().getYSelected(), message.getSelectionMatrix().getZSelected());
       weightMatrix.clear();
-      weightMatrix.setWeights(message.weightMatrix.xWeight, message.weightMatrix.yWeight, message.weightMatrix.zWeight);
+      weightMatrix.setWeights(message.getWeightMatrix().getXWeight(), message.getWeightMatrix().getYWeight(), message.getWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
-      message.controlFramePose.get(controlFramePoseInBodyFrame);
+      message.getControlFramePose().get(controlFramePoseInBodyFrame);
    }
 
    public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, EuclideanTrajectoryMessage message)

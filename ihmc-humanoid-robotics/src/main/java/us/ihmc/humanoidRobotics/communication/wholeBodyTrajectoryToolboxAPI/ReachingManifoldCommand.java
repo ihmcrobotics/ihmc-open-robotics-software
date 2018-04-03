@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import controller_msgs.msg.dds.ReachingManifoldMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -12,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ReachingManifoldMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -88,11 +88,11 @@ public class ReachingManifoldCommand
       this.manifoldOriginPosition.set(message.getManifoldOriginPosition());
       this.manifoldOriginOrientation.set(message.getManifoldOriginOrientation());
 
-      for (int i = 0; i < message.manifoldConfigurationSpaceNames.size(); i++)
+      for (int i = 0; i < message.getManifoldConfigurationSpaceNames().size(); i++)
       {
-         manifoldConfigurationSpaces.add(ConfigurationSpaceName.fromByte(message.manifoldConfigurationSpaceNames.get(i)));
-         manifoldLowerLimits.add(message.manifoldLowerLimits.get(i));
-         manifoldUpperLimits.add(message.manifoldUpperLimits.get(i));
+         manifoldConfigurationSpaces.add(ConfigurationSpaceName.fromByte(message.getManifoldConfigurationSpaceNames().get(i)));
+         manifoldLowerLimits.add(message.getManifoldLowerLimits().get(i));
+         manifoldUpperLimits.add(message.getManifoldUpperLimits().get(i));
       }
    }
 

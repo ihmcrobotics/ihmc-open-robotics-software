@@ -1,304 +1,402 @@
 <object-stream>
   <long>0</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
-    <uniqueId>-1</uniqueId>
+  <controller__msgs.msg.dds.FootstepDataListMessage>
+    <uniqueId>0</uniqueId>
     <destination>0</destination>
     <source>0</source>
-    <footstepDataList>
-      <clazz>us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage</clazz>
+    <sequence__id__>0</sequence__id__>
+    <footstep__data__list__>
+      <clazz>controller_msgs.msg.dds.FootstepDataMessage</clazz>
       <values>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+        <controller__msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
-          <robotSide>1</robotSide>
-          <location>
+          <sequence__id__>0</sequence__id__>
+          <robot__side__>1</robot__side__>
+          <location__>
             <x>0.5256588991888308</x>
             <y>-0.168015789765116</y>
             <z>0.0034022527812858916</z>
-          </location>
-          <orientation>
+          </location__>
+          <orientation__>
             <x>2.152526913793795E-4</x>
             <y>-0.0039267323895573955</y>
             <z>-0.0010246821224833887</z>
             <s>0.9999917421986881</s>
-          </orientation>
-          <predictedContactPoints>
-            <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values/>
-            <size>0</size>
-          </predictedContactPoints>
-          <trajectoryType>0</trajectoryType>
-          <swingHeight>0.0</swingHeight>
-          <customPositionWaypoints>
+          </orientation__>
+          <predicted__contact__points__2d__>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </customPositionWaypoints>
-          <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </predicted__contact__points__2d__>
+          <trajectory__type__>0</trajectory__type__>
+          <swing__height__>0.0</swing__height__>
+          <custom__position__waypoints__>
+            <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </swingTrajectory>
-          <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
-          <swingDuration>-1.0</swingDuration>
-          <transferDuration>-1.0</transferDuration>
-          <touchdownDuration>-1.0</touchdownDuration>
-          <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </custom__position__waypoints__>
+          <swing__trajectory__>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <values/>
+            <size>0</size>
+            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </swing__trajectory__>
+          <swing__trajectory__blend__duration__>0.0</swing__trajectory__blend__duration__>
+          <swing__duration__>-1.0</swing__duration__>
+          <transfer__duration__>-1.0</transfer__duration__>
+          <touchdown__duration__>-1.0</touchdown__duration__>
+          <execution__delay__time__>0.0</execution__delay__time__>
+        </controller__msgs.msg.dds.FootstepDataMessage>
+        <controller__msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
-          <robotSide>0</robotSide>
-          <location>
+          <sequence__id__>0</sequence__id__>
+          <robot__side__>0</robot__side__>
+          <location__>
             <x>1.0256588991888307</x>
             <y>0.081984210234884</y>
             <z>0.006109460888215734</z>
-          </location>
-          <orientation>
+          </location__>
+          <orientation__>
             <x>2.152526913793793E-4</x>
             <y>-0.003926732389557397</y>
             <z>-0.0010246821224833887</z>
             <s>0.9999917421986881</s>
-          </orientation>
-          <predictedContactPoints>
-            <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values/>
-            <size>0</size>
-          </predictedContactPoints>
-          <trajectoryType>0</trajectoryType>
-          <swingHeight>0.0</swingHeight>
-          <customPositionWaypoints>
+          </orientation__>
+          <predicted__contact__points__2d__>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </customPositionWaypoints>
-          <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </predicted__contact__points__2d__>
+          <trajectory__type__>0</trajectory__type__>
+          <swing__height__>0.0</swing__height__>
+          <custom__position__waypoints__>
+            <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </swingTrajectory>
-          <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
-          <swingDuration>-1.0</swingDuration>
-          <transferDuration>-1.0</transferDuration>
-          <touchdownDuration>-1.0</touchdownDuration>
-          <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </custom__position__waypoints__>
+          <swing__trajectory__>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <values/>
+            <size>0</size>
+            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </swing__trajectory__>
+          <swing__trajectory__blend__duration__>0.0</swing__trajectory__blend__duration__>
+          <swing__duration__>-1.0</swing__duration__>
+          <transfer__duration__>-1.0</transfer__duration__>
+          <touchdown__duration__>-1.0</touchdown__duration__>
+          <execution__delay__time__>0.0</execution__delay__time__>
+        </controller__msgs.msg.dds.FootstepDataMessage>
+        <controller__msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
-          <robotSide>1</robotSide>
-          <location>
+          <sequence__id__>0</sequence__id__>
+          <robot__side__>1</robot__side__>
+          <location__>
             <x>1.5256588991888307</x>
             <y>-0.168015789765116</y>
             <z>0.008597240204584244</z>
-          </location>
-          <orientation>
+          </location__>
+          <orientation__>
             <x>2.1525269137937961E-4</x>
             <y>-0.003926732389557397</y>
             <z>-0.0010246821224833887</z>
             <s>0.9999917421986881</s>
-          </orientation>
-          <predictedContactPoints>
-            <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values/>
-            <size>0</size>
-          </predictedContactPoints>
-          <trajectoryType>0</trajectoryType>
-          <swingHeight>0.0</swingHeight>
-          <customPositionWaypoints>
+          </orientation__>
+          <predicted__contact__points__2d__>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </customPositionWaypoints>
-          <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </predicted__contact__points__2d__>
+          <trajectory__type__>0</trajectory__type__>
+          <swing__height__>0.0</swing__height__>
+          <custom__position__waypoints__>
+            <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </swingTrajectory>
-          <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
-          <swingDuration>-1.0</swingDuration>
-          <transferDuration>-1.0</transferDuration>
-          <touchdownDuration>-1.0</touchdownDuration>
-          <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </custom__position__waypoints__>
+          <swing__trajectory__>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <values/>
+            <size>0</size>
+            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </swing__trajectory__>
+          <swing__trajectory__blend__duration__>0.0</swing__trajectory__blend__duration__>
+          <swing__duration__>-1.0</swing__duration__>
+          <transfer__duration__>-1.0</transfer__duration__>
+          <touchdown__duration__>-1.0</touchdown__duration__>
+          <execution__delay__time__>0.0</execution__delay__time__>
+        </controller__msgs.msg.dds.FootstepDataMessage>
+        <controller__msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
-          <robotSide>0</robotSide>
-          <location>
+          <sequence__id__>0</sequence__id__>
+          <robot__side__>0</robot__side__>
+          <location__>
             <x>2.025658899188831</x>
             <y>0.081984210234884</y>
             <z>0.011304294087297481</z>
-          </location>
-          <orientation>
+          </location__>
+          <orientation__>
             <x>2.1525269137938043E-4</x>
             <y>-0.003926732389557397</y>
             <z>-0.0010246821224833887</z>
             <s>0.9999917421986881</s>
-          </orientation>
-          <predictedContactPoints>
-            <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values/>
-            <size>0</size>
-          </predictedContactPoints>
-          <trajectoryType>0</trajectoryType>
-          <swingHeight>0.0</swingHeight>
-          <customPositionWaypoints>
+          </orientation__>
+          <predicted__contact__points__2d__>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </customPositionWaypoints>
-          <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </predicted__contact__points__2d__>
+          <trajectory__type__>0</trajectory__type__>
+          <swing__height__>0.0</swing__height__>
+          <custom__position__waypoints__>
+            <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </swingTrajectory>
-          <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
-          <swingDuration>-1.0</swingDuration>
-          <transferDuration>-1.0</transferDuration>
-          <touchdownDuration>-1.0</touchdownDuration>
-          <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </custom__position__waypoints__>
+          <swing__trajectory__>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <values/>
+            <size>0</size>
+            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </swing__trajectory__>
+          <swing__trajectory__blend__duration__>0.0</swing__trajectory__blend__duration__>
+          <swing__duration__>-1.0</swing__duration__>
+          <transfer__duration__>-1.0</transfer__duration__>
+          <touchdown__duration__>-1.0</touchdown__duration__>
+          <execution__delay__time__>0.0</execution__delay__time__>
+        </controller__msgs.msg.dds.FootstepDataMessage>
+        <controller__msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
-          <robotSide>1</robotSide>
-          <location>
+          <sequence__id__>0</sequence__id__>
+          <robot__side__>1</robot__side__>
+          <location__>
             <x>2.525658899188831</x>
             <y>-0.168015789765116</y>
             <z>0.013792073403665991</z>
-          </location>
-          <orientation>
+          </location__>
+          <orientation__>
             <x>2.1525269137937961E-4</x>
             <y>-0.003926732389557397</y>
             <z>-0.0010246821224833887</z>
             <s>0.9999917421986881</s>
-          </orientation>
-          <predictedContactPoints>
-            <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values/>
-            <size>0</size>
-          </predictedContactPoints>
-          <trajectoryType>0</trajectoryType>
-          <swingHeight>0.0</swingHeight>
-          <customPositionWaypoints>
+          </orientation__>
+          <predicted__contact__points__2d__>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </customPositionWaypoints>
-          <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </predicted__contact__points__2d__>
+          <trajectory__type__>0</trajectory__type__>
+          <swing__height__>0.0</swing__height__>
+          <custom__position__waypoints__>
+            <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </swingTrajectory>
-          <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
-          <swingDuration>-1.0</swingDuration>
-          <transferDuration>-1.0</transferDuration>
-          <touchdownDuration>-1.0</touchdownDuration>
-          <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </custom__position__waypoints__>
+          <swing__trajectory__>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <values/>
+            <size>0</size>
+            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </swing__trajectory__>
+          <swing__trajectory__blend__duration__>0.0</swing__trajectory__blend__duration__>
+          <swing__duration__>-1.0</swing__duration__>
+          <transfer__duration__>-1.0</transfer__duration__>
+          <touchdown__duration__>-1.0</touchdown__duration__>
+          <execution__delay__time__>0.0</execution__delay__time__>
+        </controller__msgs.msg.dds.FootstepDataMessage>
+        <controller__msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
-          <robotSide>0</robotSide>
-          <location>
+          <sequence__id__>0</sequence__id__>
+          <robot__side__>0</robot__side__>
+          <location__>
             <x>3.025658899188831</x>
             <y>0.081984210234884</y>
             <z>0.013901710686838348</z>
-          </location>
-          <orientation>
+          </location__>
+          <orientation__>
             <x>2.1525269137938037E-4</x>
             <y>-0.003926732389557397</y>
             <z>-0.0010246821224833887</z>
             <s>0.9999917421986881</s>
-          </orientation>
-          <predictedContactPoints>
-            <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values/>
-            <size>0</size>
-          </predictedContactPoints>
-          <trajectoryType>0</trajectoryType>
-          <swingHeight>0.0</swingHeight>
-          <customPositionWaypoints>
+          </orientation__>
+          <predicted__contact__points__2d__>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </customPositionWaypoints>
-          <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </predicted__contact__points__2d__>
+          <trajectory__type__>0</trajectory__type__>
+          <swing__height__>0.0</swing__height__>
+          <custom__position__waypoints__>
+            <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </swingTrajectory>
-          <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
-          <swingDuration>-1.0</swingDuration>
-          <transferDuration>-1.0</transferDuration>
-          <touchdownDuration>-1.0</touchdownDuration>
-          <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
-        <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </custom__position__waypoints__>
+          <swing__trajectory__>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <values/>
+            <size>0</size>
+            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </swing__trajectory__>
+          <swing__trajectory__blend__duration__>0.0</swing__trajectory__blend__duration__>
+          <swing__duration__>-1.0</swing__duration__>
+          <transfer__duration__>-1.0</transfer__duration__>
+          <touchdown__duration__>-1.0</touchdown__duration__>
+          <execution__delay__time__>0.0</execution__delay__time__>
+        </controller__msgs.msg.dds.FootstepDataMessage>
+        <controller__msgs.msg.dds.FootstepDataMessage>
           <uniqueId>0</uniqueId>
           <destination>0</destination>
           <source>0</source>
-          <robotSide>1</robotSide>
-          <location>
+          <sequence__id__>0</sequence__id__>
+          <robot__side__>1</robot__side__>
+          <location__>
             <x>3.025658899188831</x>
             <y>-0.168015789765116</y>
             <z>0.013901710686838348</z>
-          </location>
-          <orientation>
+          </location__>
+          <orientation__>
             <x>2.1525269137938037E-4</x>
             <y>-0.003926732389557397</y>
             <z>-0.0010246821224833887</z>
             <s>0.9999917421986881</s>
-          </orientation>
-          <predictedContactPoints>
-            <clazz>us.ihmc.euclid.tuple2D.Point2D</clazz>
-            <values/>
-            <size>0</size>
-          </predictedContactPoints>
-          <trajectoryType>0</trajectoryType>
-          <swingHeight>0.0</swingHeight>
-          <customPositionWaypoints>
+          </orientation__>
+          <predicted__contact__points__2d__>
             <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </customPositionWaypoints>
-          <swingTrajectory>
-            <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </predicted__contact__points__2d__>
+          <trajectory__type__>0</trajectory__type__>
+          <swing__height__>0.0</swing__height__>
+          <custom__position__waypoints__>
+            <clazz>us.ihmc.euclid.tuple3D.Point3D</clazz>
             <values/>
             <size>0</size>
-          </swingTrajectory>
-          <swingTrajectoryBlendDuration>0.0</swingTrajectoryBlendDuration>
-          <swingDuration>-1.0</swingDuration>
-          <transferDuration>-1.0</transferDuration>
-          <touchdownDuration>-1.0</touchdownDuration>
-          <executionDelayTime>0.0</executionDelayTime>
-        </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
+            <topicDataType class="geometry_msgs.msg.dds.PointPubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </custom__position__waypoints__>
+          <swing__trajectory__>
+            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <values/>
+            <size>0</size>
+            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+              <serializeCDR/>
+              <deserializeCDR/>
+            </topicDataType>
+          </swing__trajectory__>
+          <swing__trajectory__blend__duration__>0.0</swing__trajectory__blend__duration__>
+          <swing__duration__>-1.0</swing__duration__>
+          <transfer__duration__>-1.0</transfer__duration__>
+          <touchdown__duration__>-1.0</touchdown__duration__>
+          <execution__delay__time__>0.0</execution__delay__time__>
+        </controller__msgs.msg.dds.FootstepDataMessage>
       </values>
       <size>7</size>
-    </footstepDataList>
-    <executionTiming>0</executionTiming>
-    <defaultSwingDuration>0.75</defaultSwingDuration>
-    <defaultTransferDuration>0.15</defaultTransferDuration>
-    <finalTransferDuration>0.15</finalTransferDuration>
-    <trustHeightOfFootsteps>true</trustHeightOfFootsteps>
-    <areFootstepsAdjustable>false</areFootstepsAdjustable>
-    <offsetFootstepsWithExecutionError>false</offsetFootstepsWithExecutionError>
-    <queueingProperties>
+      <topicDataType class="controller_msgs.msg.dds.FootstepDataMessagePubSubType">
+        <serializeCDR/>
+        <deserializeCDR/>
+      </topicDataType>
+    </footstep__data__list__>
+    <execution__timing__>0</execution__timing__>
+    <default__swing__duration__>0.0</default__swing__duration__>
+    <default__transfer__duration__>0.0</default__transfer__duration__>
+    <final__transfer__duration__>0.0</final__transfer__duration__>
+    <trust__height__of__footsteps__>true</trust__height__of__footsteps__>
+    <are__footsteps__adjustable__>false</are__footsteps__adjustable__>
+    <offset__footsteps__with__execution__error__>false</offset__footsteps__with__execution__error__>
+    <queueing__properties__>
       <uniqueId>0</uniqueId>
       <destination>0</destination>
       <source>0</source>
-      <executionMode>0</executionMode>
-      <previousMessageId>0</previousMessageId>
-      <executionDelayTime>0.0</executionDelayTime>
-    </queueingProperties>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
+      <sequence__id__>0</sequence__id__>
+      <execution__mode__>0</execution__mode__>
+      <message__id__>1</message__id__>
+      <previous__message__id__>0</previous__message__id__>
+      <execution__delay__time__>0.0</execution__delay__time__>
+    </queueing__properties__>
+  </controller__msgs.msg.dds.FootstepDataListMessage>
   <long>0</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>

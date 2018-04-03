@@ -1,92 +1,75 @@
 <object-stream>
   <long>0</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage>
+  <controller__msgs.msg.dds.FootTrajectoryMessage>
     <uniqueId>0</uniqueId>
     <destination>0</destination>
     <source>0</source>
-    <robotSide>1</robotSide>
-    <se3Trajectory>
+    <sequence__id__>0</sequence__id__>
+    <robot__side__>1</robot__side__>
+    <se3__trajectory__>
       <uniqueId>0</uniqueId>
       <destination>0</destination>
       <source>0</source>
-      <taskspaceTrajectoryPoints>
-        <clazz>us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage</clazz>
-        <values>
-          <us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
-            <uniqueId>0</uniqueId>
-            <destination>0</destination>
-            <source>0</source>
-            <time>2.0</time>
-            <position>
-              <x>0.0</x>
-              <y>0.0</y>
-              <z>0.3</z>
-            </position>
-            <orientation>
-              <x>0.0</x>
-              <y>0.0</y>
-              <z>0.0</z>
-              <s>1.0</s>
-            </orientation>
-            <linearVelocity>
-              <x>0.0</x>
-              <y>0.0</y>
-              <z>0.0</z>
-            </linearVelocity>
-            <angularVelocity>
-              <x>0.0</x>
-              <y>0.0</y>
-              <z>0.0</z>
-            </angularVelocity>
-          </us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage>
-        </values>
-        <size>1</size>
-      </taskspaceTrajectoryPoints>
-      <angularSelectionMatrix>
+      <sequence__id__>0</sequence__id__>
+      <taskspace__trajectory__points__>
+        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <values/>
+        <size>0</size>
+        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+          <serializeCDR/>
+          <deserializeCDR/>
+        </topicDataType>
+      </taskspace__trajectory__points__>
+      <angular__selection__matrix__>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <source>0</source>
-        <selectionFrameId>0</selectionFrameId>
-        <xSelected>true</xSelected>
-        <ySelected>true</ySelected>
-        <zSelected>true</zSelected>
-      </angularSelectionMatrix>
-      <linearSelectionMatrix>
+        <sequence__id__>0</sequence__id__>
+        <selection__frame__id__>0</selection__frame__id__>
+        <x__selected__>true</x__selected__>
+        <y__selected__>true</y__selected__>
+        <z__selected__>true</z__selected__>
+      </angular__selection__matrix__>
+      <linear__selection__matrix__>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <source>0</source>
-        <selectionFrameId>0</selectionFrameId>
-        <xSelected>true</xSelected>
-        <ySelected>true</ySelected>
-        <zSelected>true</zSelected>
-      </linearSelectionMatrix>
-      <frameInformation>
+        <sequence__id__>0</sequence__id__>
+        <selection__frame__id__>0</selection__frame__id__>
+        <x__selected__>true</x__selected__>
+        <y__selected__>true</y__selected__>
+        <z__selected__>true</z__selected__>
+      </linear__selection__matrix__>
+      <frame__information__>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <source>0</source>
-        <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
-        <dataReferenceFrameId>1</dataReferenceFrameId>
-      </frameInformation>
-      <angularWeightMatrix>
+        <sequence__id__>0</sequence__id__>
+        <trajectory__reference__frame__id__>0</trajectory__reference__frame__id__>
+        <data__reference__frame__id__>0</data__reference__frame__id__>
+      </frame__information__>
+      <angular__weight__matrix__>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <source>0</source>
-        <weightFrameId>0</weightFrameId>
-        <xWeight>NaN</xWeight>
-        <yWeight>NaN</yWeight>
-        <zWeight>NaN</zWeight>
-      </angularWeightMatrix>
-      <linearWeightMatrix>
+        <sequence__id__>0</sequence__id__>
+        <weight__frame__id__>0</weight__frame__id__>
+        <x__weight__>-1.0</x__weight__>
+        <y__weight__>-1.0</y__weight__>
+        <z__weight__>-1.0</z__weight__>
+      </angular__weight__matrix__>
+      <linear__weight__matrix__>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <source>0</source>
-        <weightFrameId>0</weightFrameId>
-        <xWeight>NaN</xWeight>
-        <yWeight>NaN</yWeight>
-        <zWeight>NaN</zWeight>
-      </linearWeightMatrix>
-      <useCustomControlFrame>false</useCustomControlFrame>
-      <controlFramePose>
+        <sequence__id__>0</sequence__id__>
+        <weight__frame__id__>0</weight__frame__id__>
+        <x__weight__>-1.0</x__weight__>
+        <y__weight__>-1.0</y__weight__>
+        <z__weight__>-1.0</z__weight__>
+      </linear__weight__matrix__>
+      <use__custom__control__frame__>false</use__custom__control__frame__>
+      <control__frame__pose__>
         <position>
           <x>0.0</x>
           <y>0.0</y>
@@ -98,17 +81,19 @@
           <z>0.0</z>
           <s>1.0</s>
         </orientation>
-      </controlFramePose>
-      <queueingProperties>
+      </control__frame__pose__>
+      <queueing__properties__>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
         <source>0</source>
-        <executionMode>0</executionMode>
-        <previousMessageId>0</previousMessageId>
-        <executionDelayTime>0.0</executionDelayTime>
-      </queueingProperties>
-    </se3Trajectory>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage>
+        <sequence__id__>0</sequence__id__>
+        <execution__mode__>0</execution__mode__>
+        <message__id__>1</message__id__>
+        <previous__message__id__>0</previous__message__id__>
+        <execution__delay__time__>0.0</execution__delay__time__>
+      </queueing__properties__>
+    </se3__trajectory__>
+  </controller__msgs.msg.dds.FootTrajectoryMessage>
   <long>0</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>

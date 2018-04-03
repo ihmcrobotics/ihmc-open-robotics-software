@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class AbstractDesiredFootstepCalculator implements DesiredFootstepCalculator
 {
@@ -55,8 +55,8 @@ public abstract class AbstractDesiredFootstepCalculator implements DesiredFootst
 
       FootstepDataMessage footstep = new FootstepDataMessage();
       footstep.setRobotSide(swingLegSide.toByte());
-      footstep.setLocation(framePosition);
-      footstep.setOrientation(frameOrientation);
+      footstep.getLocation().set(framePosition);
+      footstep.getOrientation().set(frameOrientation);
 
       return footstep;
    }

@@ -117,36 +117,6 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       return groundPlanePointZ;
    }
 
-   public YoDouble getXGaitEndDoubleSupportDurationInput()
-   {
-      return xGaitEndDoubleSupportDurationInput;
-   }
-
-   public YoDouble getXGaitEndPhaseShiftInput()
-   {
-      return xGaitEndPhaseShiftInput;
-   }
-
-   public YoDouble getXGaitStanceWidthInput()
-   {
-      return xGaitStanceWidthInput;
-   }
-
-   public YoDouble getXGaitStanceLengthInput()
-   {
-      return xGaitStanceLengthInput;
-   }
-
-   public YoDouble getXGaitStepGroundClearanceInput()
-   {
-      return xGaitStepGroundClearanceInput;
-   }
-
-   public YoDouble getXGaitStepDurationInput()
-   {
-      return xGaitStepDurationInput;
-   }
-
    public YoDouble getComPositionEstimateX()
    {
       return comPositionEstimateX;

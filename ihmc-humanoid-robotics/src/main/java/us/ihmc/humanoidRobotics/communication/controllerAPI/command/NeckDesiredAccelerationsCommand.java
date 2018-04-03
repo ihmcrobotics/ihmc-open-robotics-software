@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
 
 public class NeckDesiredAccelerationsCommand implements Command<NeckDesiredAccelerationsCommand, NeckDesiredAccelerationsMessage>
 {
@@ -22,7 +22,7 @@ public class NeckDesiredAccelerationsCommand implements Command<NeckDesiredAccel
    @Override
    public void set(NeckDesiredAccelerationsMessage message)
    {
-      desiredAccelerations.set(message.desiredAccelerations);
+      desiredAccelerations.set(message.getDesiredAccelerations());
    }
 
    public DesiredAccelerationsCommand getDesiredAccelerations()

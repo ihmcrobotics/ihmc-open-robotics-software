@@ -12,9 +12,9 @@ import java.util.Random;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 
+import controller_msgs.msg.dds.FootLoadBearingMessage;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
 
 public class XStreamTest
 {

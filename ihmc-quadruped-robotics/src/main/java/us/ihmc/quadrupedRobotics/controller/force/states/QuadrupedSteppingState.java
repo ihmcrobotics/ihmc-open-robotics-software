@@ -25,6 +25,7 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPreplannedStepStream;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStreamMultiplexer;
@@ -47,14 +48,8 @@ public class QuadrupedSteppingState implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoQuadrupedXGaitSettings xGaitSettingsProvider;
-   private final QuadrupedPreplannedStepInputProvider preplannedStepProvider;
-   private final QuadrupedPlanarVelocityInputProvider planarVelocityProvider;
    private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
-
-   private final QuadrupedPreplannedStepStream preplannedStepStream;
-   private final QuadrupedXGaitStepStream xGaitStepStream;
-   private final QuadrupedStepStreamMultiplexer<QuadrupedSteppingStateEnum> stepStreamMultiplexer;
+   private final QuadrupedStepMessageHandler stepMessageHandler;
 
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedForceControllerToolbox controllerToolbox;
@@ -103,20 +98,8 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
 
       // Initialize input providers.
-      xGaitSettingsProvider = new YoQuadrupedXGaitSettings(runtimeEnvironment.getXGaitSettings(), runtimeEnvironment.getGlobalDataProducer(), registry);
-      preplannedStepProvider = new QuadrupedPreplannedStepInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
-      planarVelocityProvider = new QuadrupedPlanarVelocityInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), controllerToolbox.getReferenceFrames(), runtimeEnvironment.getGlobalDataProducer(), registry);
       soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
-
-      // Initialize input step streams.
-      xGaitStepStream = new QuadrupedXGaitStepStream(planarVelocityProvider, xGaitSettingsProvider, controllerToolbox.getReferenceFrames(),
-                                                     runtimeEnvironment.getControlDT(), runtimeEnvironment.getRobotTimestamp(), registry);
-      preplannedStepStream = new QuadrupedPreplannedStepStream(preplannedStepProvider, controllerToolbox.getReferenceFrames(),
-                                                               runtimeEnvironment.getRobotTimestamp(), registry);
-      stepStreamMultiplexer = new QuadrupedStepStreamMultiplexer<>(QuadrupedSteppingStateEnum.class, registry);
-      stepStreamMultiplexer.addStepStream(QuadrupedSteppingStateEnum.XGAIT, xGaitStepStream);
-      stepStreamMultiplexer.addStepStream(QuadrupedSteppingStateEnum.STEP, preplannedStepStream);
-      stepStreamMultiplexer.selectStepStream(QuadrupedSteppingStateEnum.XGAIT);
 
       GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
 
@@ -143,7 +126,7 @@ public class QuadrupedSteppingState implements QuadrupedController
    {
       // Initialize controllers.
       final QuadrupedController standController = new QuadrupedStandController(controllerToolbox, controlManagerFactory, registry);
-      final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, stepStreamMultiplexer, registry);
+      final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, stepMessageHandler, registry);
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(controllerToolbox, controlManagerFactory,
                                                                                                        soleWaypointInputProvider, registry);
 
@@ -153,12 +136,10 @@ public class QuadrupedSteppingState implements QuadrupedController
 
       factory.addState(QuadrupedSteppingStateEnum.STAND, standController);
       factory.addState(QuadrupedSteppingStateEnum.STEP, stepController);
-      factory.addState(QuadrupedSteppingStateEnum.XGAIT, stepController);
       factory.addState(QuadrupedSteppingStateEnum.SOLE_WAYPOINT, soleWaypointController);
 
       // Add automatic transitions that lead into the stand state.
       factory.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.STEP, QuadrupedSteppingStateEnum.STAND);
-      factory.addTransition(ControllerEvent.DONE, QuadrupedSteppingStateEnum.XGAIT, QuadrupedSteppingStateEnum.STAND);
 
       // Sole Waypoint events
       factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.SOLE_WAYPOINT);
@@ -167,17 +148,6 @@ public class QuadrupedSteppingState implements QuadrupedController
 
       // Manually triggered events to transition to main controllers.
       factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.STEP);
-      factory.addTransition(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT, QuadrupedSteppingStateEnum.STAND, QuadrupedSteppingStateEnum.XGAIT);
-
-      // Callbacks functions.
-      Runnable standToXGaitCallback = () -> stepStreamMultiplexer.selectStepStream(QuadrupedSteppingStateEnum.XGAIT);
-      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_XGAIT, QuadrupedSteppingStateEnum.STAND, standToXGaitCallback);
-
-      Runnable xGaitToStandCallback = () -> stepController.halt();
-      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.XGAIT, xGaitToStandCallback);
-
-      Runnable standToStepCallback = () -> stepStreamMultiplexer.selectStepStream(QuadrupedSteppingStateEnum.STEP);
-      factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STEP, QuadrupedSteppingStateEnum.STAND, standToStepCallback);
 
       Runnable stepToStandCallback = () -> stepController.halt();
       factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.STEP, stepToStandCallback);
@@ -208,7 +178,7 @@ public class QuadrupedSteppingState implements QuadrupedController
          trigger.fireEvent(reqEvent);
       }
 
-      if (preplannedStepProvider.isStepPlanAvailable())
+      if (stepMessageHandler.isStepPlanAvailable())
       {
          if (stateMachine.getCurrentStateKey() == QuadrupedSteppingStateEnum.STAND)
          {

@@ -8,6 +8,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 
 public class NetClassList
@@ -87,7 +88,14 @@ public class NetClassList
 
    public void registerWithKryo(Kryo kryo)
    {
+      kryo.addDefaultSerializer(IDLSequence.Object.class, IDLSequenceObjectSerializer.class);
       kryo.addDefaultSerializer(RecyclingArrayListPubSub.class, RecyclingArrayListPubSubSerializer.class);
+      kryo.addDefaultSerializer(IDLSequence.Boolean.class, IDLSequenceBooleanSerializer.class);
+      kryo.addDefaultSerializer(IDLSequence.Double.class, IDLSequenceDoubleSerializer.class);
+      kryo.addDefaultSerializer(IDLSequence.Float.class, IDLSequenceFloatSerializer.class);
+      kryo.addDefaultSerializer(IDLSequence.Integer.class, IDLSequenceIntegerSerializer.class);
+      kryo.addDefaultSerializer(IDLSequence.Byte.class, IDLSequenceByteSerializer.class);
+      kryo.addDefaultSerializer(IDLSequence.Long.class, IDLSequenceLongSerializer.class);
 
       for (Class<?> clazz : getPacketClassList())
       {

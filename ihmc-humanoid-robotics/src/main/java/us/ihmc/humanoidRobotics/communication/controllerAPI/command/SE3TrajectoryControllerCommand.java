@@ -3,6 +3,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 import java.util.List;
 import java.util.Random;
 
+import controller_msgs.msg.dds.FrameInformation;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,10 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.FrameInformation;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -99,37 +99,37 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       clear(dataFrame);
       set(message);
 
-      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.angularSelectionMatrix.getSelectionFrameId());
-      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.linearSelectionMatrix.getSelectionFrameId());
+      ReferenceFrame angularSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularSelectionMatrix().getSelectionFrameId());
+      ReferenceFrame linearSelectionFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearSelectionMatrix().getSelectionFrameId());
       selectionMatrix.setSelectionFrames(angularSelectionFrame, linearSelectionFrame);
 
-      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.angularWeightMatrix.getWeightFrameId());
-      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.linearWeightMatrix.getWeightFrameId());
+      ReferenceFrame angularWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getAngularWeightMatrix().getWeightFrameId());
+      ReferenceFrame linearWeightFrame = resolver.getReferenceFrameFromNameBaseHashCode(message.getLinearWeightMatrix().getWeightFrameId());
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
    }
 
    @Override
    public void set(SE3TrajectoryMessage message)
    {
-      HumanoidMessageTools.checkIfDataFrameIdsMatch(message.frameInformation, trajectoryPointList.getReferenceFrame());
+      HumanoidMessageTools.checkIfDataFrameIdsMatch(message.getFrameInformation(), trajectoryPointList.getReferenceFrame());
       List<SE3TrajectoryPointMessage> trajectoryPointMessages = message.getTaskspaceTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.size();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
          SE3TrajectoryPointMessage se3TrajectoryPointMessage = trajectoryPointMessages.get(i);
-         trajectoryPointList.addTrajectoryPoint(se3TrajectoryPointMessage.time, se3TrajectoryPointMessage.position, se3TrajectoryPointMessage.orientation,
-                                                se3TrajectoryPointMessage.linearVelocity, se3TrajectoryPointMessage.angularVelocity);
+         trajectoryPointList.addTrajectoryPoint(se3TrajectoryPointMessage.getTime(), se3TrajectoryPointMessage.getPosition(), se3TrajectoryPointMessage.getOrientation(),
+                                                se3TrajectoryPointMessage.getLinearVelocity(), se3TrajectoryPointMessage.getAngularVelocity());
       }
       setQueueableCommandVariables(message.getQueueingProperties());
       selectionMatrix.resetSelection();
-      selectionMatrix.setAngularAxisSelection(message.angularSelectionMatrix.xSelected, message.angularSelectionMatrix.ySelected, message.angularSelectionMatrix.zSelected);
-      selectionMatrix.setLinearAxisSelection(message.linearSelectionMatrix.xSelected, message.linearSelectionMatrix.ySelected, message.linearSelectionMatrix.zSelected);
+      selectionMatrix.setAngularAxisSelection(message.getAngularSelectionMatrix().getXSelected(), message.getAngularSelectionMatrix().getYSelected(), message.getAngularSelectionMatrix().getZSelected());
+      selectionMatrix.setLinearAxisSelection(message.getLinearSelectionMatrix().getXSelected(), message.getLinearSelectionMatrix().getYSelected(), message.getLinearSelectionMatrix().getZSelected());
       weightMatrix.clear();
-      weightMatrix.setAngularWeights(message.angularWeightMatrix.xWeight, message.angularWeightMatrix.yWeight, message.angularWeightMatrix.zWeight);
-      weightMatrix.setLinearWeights(message.linearWeightMatrix.xWeight, message.linearWeightMatrix.yWeight, message.linearWeightMatrix.zWeight);
+      weightMatrix.setAngularWeights(message.getAngularWeightMatrix().getXWeight(), message.getAngularWeightMatrix().getYWeight(), message.getAngularWeightMatrix().getZWeight());
+      weightMatrix.setLinearWeights(message.getLinearWeightMatrix().getXWeight(), message.getLinearWeightMatrix().getYWeight(), message.getLinearWeightMatrix().getZWeight());
       useCustomControlFrame = message.getUseCustomControlFrame();
-      message.controlFramePose.get(controlFramePoseInBodyFrame);
+      message.getControlFramePose().get(controlFramePoseInBodyFrame);
    }
 
    public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, SE3TrajectoryMessage message)
