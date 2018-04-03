@@ -228,6 +228,105 @@ public class InverseDynamicsJointsFromSCSRobotGenerator
          }
       }
    }
+
+   /**
+    * Updates an SCS Robot state with the state from the Inverse Dynamics Model
+    *
+    * @param updateRootJoints whether the root joints' state should also be updated.
+    * @param updatePositions whether the joint positions should be copied over to the SCS robot or not.
+    * @param updateVelocities whether the joint velocities should be copied over to the SCS robot or not.
+    * @param updateAccelerations whether the joint accelerations should be copied over to the SCS robot or not.
+    * @param useDesiredAcceleration whether to extract the desired or measured joint accelerations. Unused when {@code updateAccelerations == false}.
+    * @param updateTorques whether the joint forces/torques should be copied over to the SCS robot or not.
+    * @param useDesiredTorque whether to extract the desired or measured joint forces/torques. Unused when {@code updateTorques == false}.
+    */
+   public void updateRobotFromInverseDynamicsRobotModel(boolean updateRootJoints, boolean updatePositions, boolean updateVelocities, boolean updateAccelerations,
+                                                        boolean useDesiredAcceleration, boolean updateTorques, boolean useDesiredTorque)
+   {
+
+      Collection<OneDegreeOfFreedomJoint> pinJoints = scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints(); //pinToRevoluteJointMap.keySet();
+      for (OneDegreeOfFreedomJoint pinJoint : pinJoints)
+      {
+         if (updateRootJoints || (pinJoint.getParentJoint() != null))
+         {
+            OneDoFJoint revoluteJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(pinJoint); //pinToRevoluteJointMap.get(pinJoint);
+
+            double jointPosition;
+            double jointVelocity;
+            double jointAcceleration;
+            double jointTorque;
+
+            if (updatePositions)
+            {
+               jointPosition = revoluteJoint.getQ();
+               pinJoint.setQ(jointPosition);
+            }
+
+            if (updateAccelerations)
+            {
+               if (useDesiredAcceleration)
+                  jointAcceleration = revoluteJoint.getQddDesired();
+               else
+                  jointAcceleration = revoluteJoint.getQdd();
+               pinJoint.setQdd(jointAcceleration);
+            }
+
+            if (updateVelocities)
+            {
+               jointVelocity = revoluteJoint.getQd();
+               pinJoint.setQd(jointVelocity);
+            }
+
+            if (updateTorques)
+            {
+               if (useDesiredTorque)
+                  jointTorque = revoluteJoint.getTau();
+               else
+                  jointTorque = revoluteJoint.getTauMeasured();
+               pinJoint.setTau(jointTorque);
+            }
+
+         }
+      }
+
+      if (updateRootJoints)
+      {
+         Collection<? extends FloatingJoint> floatingJoints = scsToInverseDynamicsJointMap.getFloatingJoints(); //floatingToSixDofToJointMap.keySet();
+         for (FloatingJoint floatingJoint : floatingJoints)
+         {
+            FloatingInverseDynamicsJoint sixDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsSixDoFJoint(floatingJoint); //floatingToSixDofToJointMap.get(floatingJoint);
+            RigidBodyTransform rotationAndTranslation = new RigidBodyTransform();
+            if (updatePositions)
+            {
+               sixDoFJoint.getJointTransform3D(rotationAndTranslation);
+               floatingJoint.setRotationAndTranslation(rotationAndTranslation);
+            }
+
+            ReferenceFrame pelvisFrame = sixDoFJoint.getFrameAfterJoint();
+
+            if (updateVelocities)
+            {
+               linearVelocity.setIncludingFrame(pelvisFrame, sixDoFJoint.getLinearVelocityForReading());
+               linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
+               floatingJoint.setVelocity(linearVelocity);
+               floatingJoint.setAngularVelocityInBody(sixDoFJoint.getAngularVelocityForReading());
+            }
+
+            if (updateAccelerations)
+            {
+               if (useDesiredAcceleration)
+                  sixDoFJoint.getDesiredJointAcceleration(spatialAccelerationVector);
+               else
+                  sixDoFJoint.getJointAcceleration(spatialAccelerationVector);
+               spatialAccelerationVector.getLinearPart(originAcceleration);
+               originAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+               floatingJoint.setAcceleration(originAcceleration);
+               spatialAccelerationVector.getAngularPart(angularAcceleration);
+               floatingJoint.setAngularAccelerationInBody(angularAcceleration);
+            }
+         }
+      }
+   }
    
    public FullInverseDynamicsStructure getInverseDynamicsStructure()
    {

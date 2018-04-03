@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
@@ -15,17 +16,21 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 /**
- * CommandInputManager is used to generate a thread-safe input API for a controller.
- * {@link Packet} and {@link Command} can be submitted through the methods {@link #submitMessage(Packet)} and {@link #submitCommand(Command)}.
- * Only registered inputs (Packet or Command) will make it through to controller side.
- * Unregistered inputs are ignored and the user is averted by a message error with the information on the input class.
+ * CommandInputManager is used to generate a thread-safe input API for a controller. {@link Packet}
+ * and {@link Command} can be submitted through the methods {@link #submitMessage(Packet)} and
+ * {@link #submitCommand(Command)}. Only registered inputs (Packet or Command) will make it through
+ * to controller side. Unregistered inputs are ignored and the user is averted by a message error
+ * with the information on the input class.
  * 
- * Registering inputs is done in the constructor {@link #CommandInputManager(List)}, this is how one wants to define the API.
+ * Registering inputs is done in the constructor {@link #CommandInputManager(List)}, this is how one
+ * wants to define the API.
  * 
- * The list of supported inputs can be accessed using {@link #getListOfSupportedMessages()} and {@link #getListOfSupportedCommands()}.
+ * The list of supported inputs can be accessed using {@link #getListOfSupportedMessages()} and
+ * {@link #getListOfSupportedCommands()}.
  * 
- * CommandInputManager assumes that the different methods for submitting a inputs are called from another thread.
- * ABSOLUTELY NO Packet/Command should be directly passed to controller, any Packet/Command has to go through this API to ensure that multi-threading is done properly.
+ * CommandInputManager assumes that the different methods for submitting a inputs are called from
+ * another thread. ABSOLUTELY NO Packet/Command should be directly passed to controller, any
+ * Packet/Command has to go through this API to ensure that multi-threading is done properly.
  * 
  * @author Sylvain
  *
@@ -33,21 +38,22 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 public class CommandInputManager
 {
    private final String printStatementPrefix;
-   private final int buffersCapacity = 16;
+   private final int buffersCapacity;
 
    /**
-    * List of all the buffers that allows the user to easily flush all new commands using {@link #flushAllCommands()}.
-    * These buffers CANNOT be visible or accessed from outside this class.
+    * List of all the buffers that allows the user to easily flush all new commands using
+    * {@link #flushAllCommands()}. These buffers CANNOT be visible or accessed from outside this
+    * class.
     */
    private final List<ConcurrentRingBuffer<?>> allBuffers = new ArrayList<>();
    /**
-    * Map from the registered commands to their associated buffer.
-    * These buffers CANNOT be visible or accessed from outside this class.
+    * Map from the registered commands to their associated buffer. These buffers CANNOT be visible
+    * or accessed from outside this class.
     */
    private final Map<Class<? extends Command<?, ?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> commandClassToBufferMap = new HashMap<>();
    /**
-    * Map from the registered messages to their associated buffer.
-    * These buffers CANNOT be visible or accessed from outside this class.
+    * Map from the registered messages to their associated buffer. These buffers CANNOT be visible
+    * or accessed from outside this class.
     */
    private final Map<Class<? extends Packet<?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> messageClassToBufferMap = new HashMap<>();
 
@@ -61,9 +67,17 @@ public class CommandInputManager
 
    /** List of the listeners that should get notified when receiving a new valid command. */
    private final List<HasReceivedInputListener> hasReceivedInputListeners = new ArrayList<>();
-   
+
    /** Converters used to perform custom conversion to commands for specific messages. **/
-   private List<CommandConversionInterface> commandConverters = new ArrayList<>();
+   private final List<CommandConversionInterface> commandConverters = new ArrayList<>();
+
+   /**
+    * Protocols for unpacking certain types of messages. These messages do not have to be registered
+    * at construction time.
+    */
+   private final Map<Class<? extends Packet<?>>, MessageUnpacker<? extends Packet<?>>> messageUnpackers = new HashMap<>();
+   /** Buffer used to unpack messages without making garbage. */
+   private final List<Packet<?>> unpackedMessages = new ArrayList<>();
 
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
@@ -77,29 +91,57 @@ public class CommandInputManager
 
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
-    * 
-    * @param name name used when printing statements. It should preferably be unique to distinguish the 
-    * different modules using this class.
+    *
+    * @param name name used when printing statements. It should preferably be unique to distinguish
+    *           the different modules using this class.
     * @param commandsToRegister list of the commands that this API should support.
     */
    public CommandInputManager(String name, List<Class<? extends Command<?, ?>>> commandsToRegister)
    {
+      this(name, commandsToRegister, 16);
+   }
+
+   /**
+    * Only constructor to build a new API. No new constructors will be tolerated.
+    * 
+    * @param name name used when printing statements. It should preferably be unique to distinguish
+    *           the different modules using this class.
+    * @param commandsToRegister list of the commands that this API should support.
+    * @param buffersCapacity the capacity of the internal buffers, should be a power of 2.
+    */
+   public CommandInputManager(String name, List<Class<? extends Command<?, ?>>> commandsToRegister, int buffersCapacity)
+   {
       this.printStatementPrefix = name == null ? "" : name + ": ";
+      this.buffersCapacity = buffersCapacity;
       registerNewCommands(commandsToRegister);
    }
 
    /**
-    * Registers a converter that helps convert a packet to a command. Currently only supports one converter
+    * Registers a converter that helps convert a packet to a command. Currently only supports one
+    * converter
+    * 
     * @param commandConversionHelper
     */
    public void registerConversionHelper(CommandConversionInterface commandConversionHelper)
    {
       this.commandConverters.add(commandConversionHelper);
    }
-   
+
    /**
-    * This method has to remain private.
-    * It is used to register in the API a list of commands.
+    * Registers a protocol for unpacking a certain of message.
+    * 
+    * @param messageClass the type of messages that holds onto multiple messages which should be
+    *           unpacked at reception.
+    * @param messageUnpacker the protocol for unpacking the message.
+    */
+   public <T extends Packet<T>> void registerMessageUnpacker(Class<T> messageClass, MessageUnpacker<T> messageUnpacker)
+   {
+      messageUnpackers.put(messageClass, messageUnpacker);
+   }
+
+   /**
+    * This method has to remain private. It is used to register in the API a list of commands.
+    * 
     * @param commandClasses
     */
    @SuppressWarnings("unchecked")
@@ -110,8 +152,8 @@ public class CommandInputManager
    }
 
    /**
-    * This method has to remain private.
-    * It is used to register in the API a command.
+    * This method has to remain private. It is used to register in the API a command.
+    * 
     * @param commandClass
     */
    private <C extends Command<C, M>, M extends Packet<M>> void registerNewCommand(Class<C> commandClass)
@@ -135,15 +177,20 @@ public class CommandInputManager
    }
 
    /**
-    * Submit a new {@link Packet} to be processed by the controller.
-    * This method can be called from any thread.
-    * The message is first copied locally and only the copy will be visible for the controller.
-    * No reference of this message will be held after calling this method.
-    * The user is free to modify the message afterwards.
+    * Submit a new {@link Packet} to be processed by the controller. This method can be called from
+    * any thread. The message is first copied locally and only the copy will be visible for the
+    * controller. No reference of this message will be held after calling this method. The user is
+    * free to modify the message afterwards.
+    * 
     * @param message message to be submitted to the controller.
     */
-   @SuppressWarnings("unchecked")
    public <M extends Packet<M>> void submitMessage(M message)
+   {
+      submitMessageInternal(message);
+   }
+
+   @SuppressWarnings({"unchecked", "rawtypes"})
+   private void submitMessageInternal(Packet message)
    {
       if (message == null)
       {
@@ -151,13 +198,26 @@ public class CommandInputManager
          return;
       }
 
-      ConcurrentRingBuffer<? extends Command<?, ?>> buffer = messageClassToBufferMap.get(message.getClass());
+      MessageUnpacker messageUnpacker = messageUnpackers.get(message.getClass());
+
+      if (messageUnpacker != null)
+      {
+         messageUnpacker.unpackMessage(message, unpackedMessages);
+
+         while (!unpackedMessages.isEmpty())
+         {
+            submitMessageInternal(unpackedMessages.remove(unpackedMessages.size() - 1));
+         }
+         return;
+      }
+
+      ConcurrentRingBuffer buffer = messageClassToBufferMap.get(message.getClass());
       if (buffer == null)
       {
          PrintTools.error(this, printStatementPrefix + "The message type " + message.getClass().getSimpleName() + " is not supported.");
          return;
       }
-      Command<?, M> nextCommand = (Command<?, M>) buffer.next();
+      Command nextCommand = (Command) buffer.next();
       if (nextCommand == null)
       {
          PrintTools.warn(this, printStatementPrefix + "The buffer for the message: " + message.getClass().getSimpleName() + " is full. Message ignored.");
@@ -170,7 +230,7 @@ public class CommandInputManager
       {
          nextCommand.set(message);
       }
-         
+
       buffer.commit();
 
       for (int i = 0; i < hasReceivedInputListeners.size(); i++)
@@ -204,11 +264,11 @@ public class CommandInputManager
    }
 
    /**
-    * Submit a new list of {@link Packet} to be processed by the controller.
-    * This method can be called from any thread.
-    * The message is first copied locally and only the copy will be visible for the controller.
-    * No reference of this message will be held after calling this method.
-    * The user is free to modify the message afterwards.
+    * Submit a new list of {@link Packet} to be processed by the controller. This method can be
+    * called from any thread. The message is first copied locally and only the copy will be visible
+    * for the controller. No reference of this message will be held after calling this method. The
+    * user is free to modify the message afterwards.
+    * 
     * @param messages list of messages to be submitted to the controller.
     */
    @SuppressWarnings("unchecked")
@@ -219,11 +279,11 @@ public class CommandInputManager
    }
 
    /**
-    * Submit a new {@link Command} to be processed by the controller.
-    * This method can be called from any thread.
-    * The command is first copied locally and only the copy will be visible for the controller.
-    * No reference of this command will be held after calling this method.
-    * The user is free to modify the command afterwards.
+    * Submit a new {@link Command} to be processed by the controller. This method can be called from
+    * any thread. The command is first copied locally and only the copy will be visible for the
+    * controller. No reference of this command will be held after calling this method. The user is
+    * free to modify the command afterwards.
+    * 
     * @param command command to be submitted to the controller.
     */
    @SuppressWarnings("unchecked")
@@ -253,11 +313,11 @@ public class CommandInputManager
    }
 
    /**
-    * Submit a new list of {@link Command} to be processed by the controller.
-    * This method can be called from any thread.
-    * The command is first copied locally and only the copy will be visible for the controller.
-    * No reference of this command will be held after calling this method.
-    * The user is free to modify the command afterwards.
+    * Submit a new list of {@link Command} to be processed by the controller. This method can be
+    * called from any thread. The command is first copied locally and only the copy will be visible
+    * for the controller. No reference of this command will be held after calling this method. The
+    * user is free to modify the command afterwards.
+    * 
     * @param commands list of commands to be submitted to the controller.
     */
    @SuppressWarnings("unchecked")
@@ -279,6 +339,7 @@ public class CommandInputManager
 
    /**
     * Check if a new command to be processed is available.
+    * 
     * @param commandClassToCheck class of the command to check availability.
     * @return true if at least one new command is available.
     */
@@ -298,6 +359,7 @@ public class CommandInputManager
 
    /**
     * Throw away any new available commands of a certain type.
+    * 
     * @param commandClassToFlush Used to know what type of command is to be thrown away.
     */
    public <C extends Command<C, ?>> void flushCommands(Class<C> commandClassToFlush)
@@ -306,8 +368,9 @@ public class CommandInputManager
    }
 
    /**
-    * Poll the most recent available command.
-    * After calling this method, no new command will be available.
+    * Poll the most recent available command. After calling this method, no new command will be
+    * available.
+    * 
     * @param commandClassToPoll Used to know what type of command is to be polled.
     * @return the new command to be processed, returns null if there is no new available command.
     */
@@ -317,10 +380,12 @@ public class CommandInputManager
    }
 
    /**
-    * Poll all the new available commands.
-    * After calling this method, no new command will be available.
+    * Poll all the new available commands. After calling this method, no new command will be
+    * available.
+    * 
     * @param commandClassToPoll Used to know what type of command is to be polled.
-    * @return the new commands to be processed stored in a list, returns an empty list if there is no new available command.
+    * @return the new commands to be processed stored in a list, returns an empty list if there is
+    *         no new available command.
     */
    @SuppressWarnings("unchecked")
    public <C extends Command<C, ?>> List<C> pollNewCommands(Class<C> commandClassToPoll)
@@ -332,11 +397,12 @@ public class CommandInputManager
    }
 
    /**
-    * This method has to remain private.
-    * Reads all the new available commands from a buffer and copy them in a list.
+    * This method has to remain private. Reads all the new available commands from a buffer and copy
+    * them in a list.
     * 
     * @param buffer Buffer in which the new available commands are stored.
-    * @param commandsToPack Used to copy and store all the new available commands. This list will be empty is there is no new available command.
+    * @param commandsToPack Used to copy and store all the new available commands. This list will be
+    *           empty is there is no new available command.
     */
    private static <C extends Command<C, ?>> void pollNewCommands(ConcurrentRingBuffer<C> buffer, RecyclingArrayList<C> commandsToPack)
    {
@@ -355,8 +421,9 @@ public class CommandInputManager
    }
 
    /**
-    * Method to help creating a {@link ConcurrentRingBuffer} for a given class.
-    * The class has to have an empty constructor.
+    * Method to help creating a {@link ConcurrentRingBuffer} for a given class. The class has to
+    * have an empty constructor.
+    * 
     * @param clazz For which a new builder needs to be created.
     * @return The new builder.
     */
@@ -387,8 +454,8 @@ public class CommandInputManager
             catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
             {
                e.printStackTrace();
-               throw new RuntimeException(
-                     "Something went wrong the empty constructor implemented in the class: " + emptyConstructor.getDeclaringClass().getSimpleName());
+               throw new RuntimeException("Something went wrong the empty constructor implemented in the class: "
+                     + emptyConstructor.getDeclaringClass().getSimpleName());
             }
 
             return newInstance;
@@ -398,7 +465,7 @@ public class CommandInputManager
    }
 
    /**
-    * @return The list of all the commands supported by this API. 
+    * @return The list of all the commands supported by this API.
     */
    public List<Class<? extends Command<?, ?>>> getListOfSupportedCommands()
    {
@@ -406,7 +473,7 @@ public class CommandInputManager
    }
 
    /**
-    * @return The list of all the messages supported by this API. 
+    * @return The list of all the messages supported by this API.
     */
    public List<Class<? extends Packet<?>>> getListOfSupportedMessages()
    {
@@ -418,6 +485,6 @@ public class CommandInputManager
     */
    public static interface HasReceivedInputListener
    {
-      public void hasReceivedInput(Class<? extends Command<?,?>> commandClass);
+      public void hasReceivedInput(Class<? extends Command<?, ?>> commandClass);
    }
 }
