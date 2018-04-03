@@ -1,4 +1,4 @@
-package us.ihmc.parameterTuner.guiElements.tuners;
+package us.ihmc.parameterTuner.guiElements.tabs;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,23 +16,23 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 
-public class TuningBoxManager
+public class TuningBox extends VBox
 {
    private static final double buttonSize = 12.0;
    private final Image image;
-
-   private final VBox tuningBox;
 
    private final List<String> parametersBeingTuned = new ArrayList<>();
    private final Map<String, Button> removeButtons = new HashMap<>();
 
    private Map<String, Tuner> tunerMap;
 
-   public TuningBoxManager(VBox tuningBox)
+   public TuningBox()
    {
-      this.tuningBox = tuningBox;
-      image = new Image(TuningBoxManager.class.getResourceAsStream("/close.png"));
+      setFillWidth(true);
+      setSpacing(10.0);
+      image = new Image(TuningBox.class.getResourceAsStream("/close.png"));
    }
 
    public void handleNewParameter(String uniqueName)
@@ -74,14 +74,14 @@ public class TuningBoxManager
 
    public void updateView()
    {
-      tuningBox.getChildren().clear();
+      getChildren().clear();
       parametersBeingTuned.forEach(uniqueName ->
       {
          HBox box = new HBox(10.0);
          box.setAlignment(Pos.CENTER_LEFT);
          box.getChildren().add(removeButtons.get(uniqueName));
          box.getChildren().add(tunerMap.get(uniqueName));
-         tuningBox.getChildren().add(box);
+         getChildren().add(box);
       });
    }
 
