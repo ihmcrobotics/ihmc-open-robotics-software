@@ -181,7 +181,7 @@ public class YoFrameSE3TrajectoryPointTest
                                          testedYoFrameSE3TrajectoryPoint.getAngularVelocity(), testedYoFrameSE3TrajectoryPoint, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {

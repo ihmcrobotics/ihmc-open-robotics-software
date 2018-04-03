@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoCounterTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testCounter()
    {

@@ -22,7 +22,7 @@ public class PlanarRegionTerrainObjectTest
 {
    private static final double DEFAULT_ALLOWABLE_PENETRATION_THICKNESS = 1e5;
 
-   @ContinuousIntegrationTest(estimatedDuration = 5.2)
+   @ContinuousIntegrationTest(estimatedDuration = 4.0)
    @Test(timeout = 30000)
    public void testHeightAt() throws Exception
    {
@@ -54,7 +54,7 @@ public class PlanarRegionTerrainObjectTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.2)
+   @ContinuousIntegrationTest(estimatedDuration = 4.0)
    @Test(timeout = 30000)
    public void testHeightAndNormalAt() throws Exception
    {
@@ -94,7 +94,7 @@ public class PlanarRegionTerrainObjectTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.4)
+   @ContinuousIntegrationTest(estimatedDuration = 4.0)
    @Test(timeout = 30000)
    public void testGetBoundingBox() throws Exception
    {
@@ -137,7 +137,7 @@ public class PlanarRegionTerrainObjectTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.1)
+   @ContinuousIntegrationTest(estimatedDuration = 4.0)
    @Test(timeout = 30000)
    public void testIsClose() throws Exception
    {
@@ -167,7 +167,7 @@ public class PlanarRegionTerrainObjectTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 4.2)
+   @ContinuousIntegrationTest(estimatedDuration = 4.0)
    @Test(timeout = 30000)
    public void testCheckIfInside() throws Exception
    {

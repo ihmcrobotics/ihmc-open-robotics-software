@@ -42,8 +42,8 @@ public class IHMCROSTranslationRuntimeToolsTest
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(5, TimeUnit.MINUTES));
 
    @SuppressWarnings({"rawtypes", "unchecked"})
-   @ContinuousIntegrationTest(estimatedDuration = 81.4)
-   @Test(timeout = 410000)
+   @ContinuousIntegrationTest(estimatedDuration = 16.5)
+   @Test(timeout = Integer.MAX_VALUE)
    public void testBidirectionalConversionWithRandomConstructors()
    {
       Reflections reflections = new Reflections("us.ihmc");

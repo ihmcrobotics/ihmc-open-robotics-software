@@ -242,7 +242,7 @@ public class ICPControlPlaneTest
       expectedProjectedPoint.checkReferenceFrameMatch(projectedPoint);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRandomProjectOntoPlane()
    {
@@ -483,7 +483,7 @@ public class ICPControlPlaneTest
       EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testRandomProjectOntoSurface()
    {

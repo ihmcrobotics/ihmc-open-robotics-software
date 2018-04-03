@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoMinimumJerkTrajectoryTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
 	@Test(timeout = 30000)
    public void testRandomInitialFinalConditions()
    {
@@ -60,7 +60,7 @@ public class YoMinimumJerkTrajectoryTest
       return min + Math.random() * (max - min);
    }
    
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testTimeExtensionRuntime()
    {

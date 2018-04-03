@@ -79,8 +79,8 @@ public class SimulatedIMURawSensorReaderTest
       simulatedIMURawSensorReader.initialize();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.3)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @Test(timeout = 300000)
    public void testRead()
    {
       for (int i = 0; i < 10000; i++)

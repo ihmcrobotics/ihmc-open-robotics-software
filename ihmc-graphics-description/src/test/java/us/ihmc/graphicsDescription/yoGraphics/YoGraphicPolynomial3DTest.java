@@ -19,8 +19,8 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 
 public class YoGraphicPolynomial3DTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 6.7)
-   @Test(timeout = 34000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testRemoteYoGraphicVariableOrdering()
    {
       Random random = new Random(345345L);

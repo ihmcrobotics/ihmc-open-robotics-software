@@ -73,7 +73,7 @@ public class JointPhysicsConservedQuantitiesTest
       return randomFloatingChain;
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 11.3)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1000.0)
    @Test(timeout=3000000)
    public void testLinearAndAngularMomentumAreConverved()
    {

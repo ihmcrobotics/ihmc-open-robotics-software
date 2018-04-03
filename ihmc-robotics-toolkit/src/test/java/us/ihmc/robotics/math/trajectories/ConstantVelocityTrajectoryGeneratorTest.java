@@ -35,7 +35,7 @@ public class ConstantVelocityTrajectoryGeneratorTest
       assertTrue(simpleLinearTrajectory.getAcceleration() == 0.0);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testRandomTrajectories()
    {

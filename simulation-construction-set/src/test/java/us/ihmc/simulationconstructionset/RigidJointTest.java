@@ -114,7 +114,7 @@ public class RigidJointTest
       EuclidCoreTestTools.assertTuple3DEquals(expectedCenterOfMass, centerOfMass, 1e-10);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOneRigidJointWithRotationAndTranslation()
    {

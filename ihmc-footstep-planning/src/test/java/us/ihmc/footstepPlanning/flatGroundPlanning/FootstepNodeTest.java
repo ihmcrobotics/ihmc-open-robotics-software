@@ -20,8 +20,8 @@ import static org.junit.Assert.assertTrue;
 
 public class FootstepNodeTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testEqualsAndHashMethodsWithRandomTransforms()
    {
       Random random = new Random(3823L);
@@ -45,8 +45,8 @@ public class FootstepNodeTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testShiftInSoleFrame()
    {
       Vector3D soleTranslation = new Vector3D();

@@ -17,7 +17,7 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SL
 
 public class ContinuousSimpleReactionDynamicsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDynamics()
    {
@@ -68,7 +68,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(functionExpected, function, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDynamicsStateGradient()
    {
@@ -101,7 +101,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testStateGradientNumericalDifferentiationStance()
    {
@@ -138,7 +138,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testStateGradientNumericalDifferentiationFlight()
    {
@@ -175,7 +175,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testControlGradientNumericalDifferentiationStance()
    {
@@ -212,7 +212,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testControlGradientNumericalDifferentiationFlight()
    {
@@ -249,7 +249,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(expectedGradient, gradient, 1e-2);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDynamicsControlGradient()
    {
@@ -290,7 +290,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDynamicsStateGradientNumericalDifferentiationStance()
    {
@@ -368,7 +368,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDynamicsStateGradientNumericalDifferentiationFlight()
    {
@@ -446,7 +446,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDynamicsControlGradientNumericalDifferentiationStance()
    {
@@ -553,7 +553,7 @@ public class ContinuousSimpleReactionDynamicsTest
       JUnitTools.assertMatrixEquals(gradientExpected, gradient, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDynamicsControlGradientNumericalDifferentiationFlight()
    {

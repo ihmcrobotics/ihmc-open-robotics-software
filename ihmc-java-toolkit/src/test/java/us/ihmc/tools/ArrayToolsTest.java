@@ -78,7 +78,7 @@ public class ArrayToolsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromDataInputStream()
    {
@@ -208,7 +208,7 @@ public class ArrayToolsTest
 
 
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.7)
+	@ContinuousIntegrationTest(estimatedDuration = 1.4)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromString() throws IOException
    {
@@ -234,7 +234,7 @@ public class ArrayToolsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout = 30000)
    public void testParseDoubleArrayFromBufferedReader()
    {

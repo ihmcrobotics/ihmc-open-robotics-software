@@ -213,7 +213,7 @@ public class SimpleSO3TrajectoryPointTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {

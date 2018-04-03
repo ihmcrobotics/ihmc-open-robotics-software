@@ -12,8 +12,8 @@ public class DummyOneDegreeOfFreedomJointTest
 {
    private final static boolean keepSCSUp = false;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 300000)
    public void testDummyOneDegreeOfFreedomJoint()
    {
       Robot robot = new Robot("testDummyOneDegreeOfFreedomJoint");

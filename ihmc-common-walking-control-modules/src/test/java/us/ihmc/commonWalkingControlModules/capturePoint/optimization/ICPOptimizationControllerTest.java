@@ -46,8 +46,8 @@ public class ICPOptimizationControllerTest
    private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
    public void testStandingWithPerfectTracking() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -117,8 +117,8 @@ public class ICPOptimizationControllerTest
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
    public void testTransferWithPerfectTracking() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -188,8 +188,8 @@ public class ICPOptimizationControllerTest
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
    public void testStandingConstrained() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -269,8 +269,8 @@ public class ICPOptimizationControllerTest
       Assert.assertTrue(desiredCMP.epsilonEquals(desiredCMPExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
    public void testStandingConstrainedWithAngularMomentum() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");

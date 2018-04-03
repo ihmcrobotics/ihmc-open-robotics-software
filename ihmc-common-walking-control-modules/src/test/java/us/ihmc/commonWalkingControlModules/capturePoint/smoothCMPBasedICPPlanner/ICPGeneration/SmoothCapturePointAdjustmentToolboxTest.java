@@ -44,7 +44,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
          icpQuantityInitialConditionList.add(new FrameVector3D());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAdjustICPDuringInitialTransfer3DLinear()
    {
@@ -154,7 +154,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAdjustICPDuringRegularTransfer3DLinear()
    {
@@ -289,7 +289,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAdjustICPDuringRegularTransferRecomputed3DLinear()
    {
@@ -454,7 +454,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.9)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAdjustICPDuringInitialTransfer3DCubic()
    {
@@ -564,7 +564,7 @@ public class SmoothCapturePointAdjustmentToolboxTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.3)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAdjustICPDuringRegularTransfer3DCubic()
    {

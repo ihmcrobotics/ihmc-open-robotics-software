@@ -196,7 +196,7 @@ public abstract class AbstractSimpleActiveSetQPSolverWithInactiveVariablesTest e
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 300000000)
    public void testSimpleCasesWithBoundsConstraintsAndInactiveVariables()
    {
       testSimpleCasesWithBoundsConstraintsAndInactiveVariables(1, 2, 3, 2, false);

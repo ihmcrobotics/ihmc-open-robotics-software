@@ -10,8 +10,8 @@ import us.ihmc.continuousIntegration.IntegrationCategory;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPQPIndexHandlerTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
    public void testRegisterFootstep()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();
@@ -21,8 +21,8 @@ public class ICPQPIndexHandlerTest
       Assert.assertEquals(1, indexHandler.getNumberOfFootstepsToConsider());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 21000)
    public void testSizing()
    {
       ICPQPIndexHandler indexHandler = new ICPQPIndexHandler();

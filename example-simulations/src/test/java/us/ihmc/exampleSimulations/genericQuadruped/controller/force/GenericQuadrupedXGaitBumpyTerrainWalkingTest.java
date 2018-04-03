@@ -22,16 +22,16 @@ public class GenericQuadrupedXGaitBumpyTerrainWalkingTest extends QuadrupedXGait
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 84.7)
-   @Test(timeout = 420000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 250000)
    public void testWalkingOverShallowBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testWalkingOverShallowBumpyTerrain();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 113.0)
-   @Test(timeout = 570000)
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
+   @Test(timeout = 250000)
    public void testWalkingOverMediumBumpyTerrain() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
       super.testWalkingOverMediumBumpyTerrain();

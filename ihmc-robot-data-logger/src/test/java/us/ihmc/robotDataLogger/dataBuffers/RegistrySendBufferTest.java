@@ -30,8 +30,8 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class RegistrySendBufferTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 56.9)
-   @Test(timeout = 280000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 1200000)
    public void testYoVariables() throws IOException
    {
       Random random = new Random(23589735l);

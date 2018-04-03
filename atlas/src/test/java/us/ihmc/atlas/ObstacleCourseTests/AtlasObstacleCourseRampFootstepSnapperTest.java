@@ -31,8 +31,8 @@ public class AtlasObstacleCourseRampFootstepSnapperTest extends DRCObstacleCours
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 85.9)
-   @Test(timeout = 430000)
+   @ContinuousIntegrationTest(estimatedDuration = 50.0)
+   @Test(timeout = 120000)
    public void testWalkingUpRampUsingSnapFootsteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampUsingSnapFootsteps();

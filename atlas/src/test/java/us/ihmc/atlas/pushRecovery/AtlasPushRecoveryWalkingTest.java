@@ -44,7 +44,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 29.3)
+   @ContinuousIntegrationTest(estimatedDuration = 26.7)
    @Test(timeout = 150000)
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
@@ -53,39 +53,39 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
 
    // Moved one of the old push recovery tests to fast so it is checked from time to time.
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 78.4, categoriesOverride = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
-   @Test(timeout = 390000)
+   @ContinuousIntegrationTest(estimatedDuration = 45.0, categoriesOverride = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
+   @Test(timeout = 150000)
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushLeftInitialTransferState();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 48.6)
-   @Test(timeout = 240000)
+   @ContinuousIntegrationTest(estimatedDuration = 44.5)
+   @Test(timeout = 150000)
    public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightInitialTransferState();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 35.3)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 44.5)
+   @Test(timeout = 150000)
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightLateSwing();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 48.0)
-   @Test(timeout = 240000)
+   @ContinuousIntegrationTest(estimatedDuration = 44.5)
+   @Test(timeout = 150000)
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightThenLeftMidSwing(800.0);
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 33.7)
-   @Test(timeout = 170000)
+   @ContinuousIntegrationTest(estimatedDuration = 31.2)
+   @Test(timeout = 150000)
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
    {
       super.testPushRightTransferState();
@@ -100,7 +100,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 29.1)
+   @ContinuousIntegrationTest(estimatedDuration = 29.0)
    @Test(timeout = 150000)
    public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException
    {

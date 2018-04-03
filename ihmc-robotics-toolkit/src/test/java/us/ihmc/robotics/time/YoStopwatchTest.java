@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoStopwatchTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.8)
    @Test(timeout = 30000)
    public void testStopwatch()
    {

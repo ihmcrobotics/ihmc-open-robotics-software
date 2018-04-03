@@ -19,8 +19,8 @@ public class ValkyrieFlatGroundWalkingTest extends DRCFlatGroundWalkingTest
 {
    private DRCRobotModel robotModel;
 
-	@ContinuousIntegrationTest(estimatedDuration = 466.6)
-	@Test(timeout = 2300000)
+	@ContinuousIntegrationTest(estimatedDuration = 273.1)
+	@Test(timeout = 950000)
    public void testValkyrieFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);

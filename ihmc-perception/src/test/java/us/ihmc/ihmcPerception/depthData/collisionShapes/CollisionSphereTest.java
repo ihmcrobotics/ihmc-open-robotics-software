@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class CollisionSphereTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testInsideSpherePoints()
    {

@@ -56,7 +56,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
    private int numInY = (int) ((xMax - yMin) / incrementY);
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000000)
    public void testIdealFootstepAlwaysBetterThanOthers()
    {
       Random random = new Random(1776L);
@@ -119,8 +119,8 @@ public class BipedalStepAdjustmentCostCalculatorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.6)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testScoringFootsteps()
    {
       SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();

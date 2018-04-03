@@ -61,7 +61,7 @@ public abstract class ConvexOptimizationAdapterTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testASimpleRedundantEqualityCase()
    {
@@ -143,7 +143,7 @@ public abstract class ConvexOptimizationAdapterTest
       assertEquals(0, sol2[1], 1e-5);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testASimpleInequalityCase() throws Exception
    {

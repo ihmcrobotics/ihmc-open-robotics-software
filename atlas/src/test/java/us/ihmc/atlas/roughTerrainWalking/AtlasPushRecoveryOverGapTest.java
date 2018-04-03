@@ -20,16 +20,16 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
 {
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 31.8)
-   @Test(timeout = 160000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 70000)
    public void testNoPush() throws SimulationExceededMaximumTimeException
    {
       super.testNoPush();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 33.6)
-   @Test(timeout = 170000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 70000)
    public void testForwardPush() throws SimulationExceededMaximumTimeException
    {
       super.testForwardPush();

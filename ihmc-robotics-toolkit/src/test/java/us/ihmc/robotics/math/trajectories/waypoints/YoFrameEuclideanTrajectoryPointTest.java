@@ -162,7 +162,7 @@ public class YoFrameEuclideanTrajectoryPointTest
                                          testedYoFrameEuclideanTrajectoryPoint.getLinearVelocity(), testedYoFrameEuclideanTrajectoryPoint, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testChangeFrame() throws Exception
    {
@@ -336,7 +336,7 @@ public class YoFrameEuclideanTrajectoryPointTest
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSomeSetsAngGets()
    {

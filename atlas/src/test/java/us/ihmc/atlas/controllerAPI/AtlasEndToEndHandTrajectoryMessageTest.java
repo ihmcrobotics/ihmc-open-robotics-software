@@ -33,64 +33,64 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
    private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 35.3)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test(timeout = 60000)
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       super.testCustomControlFrame();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 16.5)
-   @Test(timeout = 82000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test(timeout = 60000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       super.testMessageWithTooManyTrajectoryPoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 27.5)
-   @Test(timeout = 140000)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test(timeout = 60000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       super.testMultipleTrajectoryPoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 49.2)
-   @Test(timeout = 250000)
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
+   @Test(timeout = 60000)
    public void testQueuedMessages() throws Exception
    {
       super.testQueuedMessages();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 23.2)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 60000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       super.testQueueStoppedWithOverrideMessage();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 18.5)
-   @Test(timeout = 93000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test(timeout = 60000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       super.testQueueWithWrongPreviousId();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 35.5)
-   @Test(timeout = 180000)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test(timeout = 60000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       super.testSingleTrajectoryPoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 33.5)
-   @Test(timeout = 170000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 60000)
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();
@@ -100,8 +100,8 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
     * Test revealing a bug that was preventing the trajectory from flipping the sign of the final orientation (necessary to prevent an extra rotation).
     * This bug was due to limiting the angle described by a Quaternion to be in [-Pi; Pi].
     */
-   @ContinuousIntegrationTest(estimatedDuration = 29.7)
-   @Test(timeout = 150000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 60000)
    public void testBugFromActualSimDataWithTwoTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

@@ -50,7 +50,7 @@ public class AStarPlanarRegionsPlannerTest
    private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testFootstepGraph()
    {
       FootstepNode startNode = new FootstepNode(0.0, 0.0);
@@ -105,7 +105,7 @@ public class AStarPlanarRegionsPlannerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000)
    public void testFootstepNode()
    {
       double gridX = FootstepNode.gridSizeXY;
@@ -134,7 +134,7 @@ public class AStarPlanarRegionsPlannerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 300000)
    public void testNodeExpansion()
    {
       if (!visualize)
@@ -174,7 +174,7 @@ public class AStarPlanarRegionsPlannerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 300000)
    public void testSimpleExpansion()
    {
       // make planar regions

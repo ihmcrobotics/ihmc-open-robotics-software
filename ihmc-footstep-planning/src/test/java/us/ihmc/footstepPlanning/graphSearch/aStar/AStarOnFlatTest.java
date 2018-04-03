@@ -28,32 +28,32 @@ public class AStarOnFlatTest extends FootstepPlannerOnFlatGroundTest
    private FootstepNodeVisualization visualization = null;
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testJustStraightLine()
    {
       super.testJustStraightLine(true);
    }
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testATightTurn()
    {
       super.testATightTurn(true);
    }
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.2)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testStraightLineWithInitialTurn()
    {
       super.testStraightLineWithInitialTurn(true);
    }
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 2.7)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 300000)
    public void testJustTurnInPlace()
    {
       super.testJustTurnInPlace(true);

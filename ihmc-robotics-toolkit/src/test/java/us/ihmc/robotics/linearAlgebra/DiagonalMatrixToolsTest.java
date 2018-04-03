@@ -17,8 +17,8 @@ public class DiagonalMatrixToolsTest
 {
    private final double epsilon = 1e-6;
 
-   @ContinuousIntegrationTest(estimatedDuration = 14.0)
-   @Test(timeout = 70000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test(timeout = 30000)
    public void testSquareInvert()
    {
       Random random = new Random();
@@ -55,8 +55,8 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 9.8)
-   @Test(timeout = 49000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test(timeout = 30000)
    public void testPreMult()
    {
       Random random = new Random();
@@ -94,8 +94,8 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 50000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test(timeout = 30000)
    public void testPostMult()
    {
       Random random = new Random();
@@ -133,8 +133,8 @@ public class DiagonalMatrixToolsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test(timeout = 3000000)
    public void testPostMultTransA()
    {
          DenseMatrix64F diagonal = new DenseMatrix64F(2, 4);
@@ -159,8 +159,8 @@ public class DiagonalMatrixToolsTest
          JUnitTools.assertMatrixEquals(solution, expectedSolution, epsilon);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 7.9)
-   @Test(timeout = 39000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test(timeout = 3000000)
    public void testRandomPostMultTransA()
    {
       Random random = new Random(124L);

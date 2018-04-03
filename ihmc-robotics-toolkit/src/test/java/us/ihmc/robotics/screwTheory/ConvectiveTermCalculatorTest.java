@@ -51,7 +51,7 @@ public class ConvectiveTermCalculatorTest
       SpatialMotionVectorTest.assertSpatialMotionVectorEquals(accelerationBack, acceleration, 1e-12);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.6)
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
    public void testWithJointAccelerations() throws Exception
    {

@@ -27,8 +27,8 @@ public class AtlasEndToEndFootLoadBearingTest extends EndToEndEndFootBearingMess
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 43.0)
-   @Test(timeout = 210000)
+   @ContinuousIntegrationTest(estimatedDuration = 41.3)
+   @Test(timeout = 160000)
    public void testSwitchFootToLoadBearing() throws Exception
    {
       super.testSwitchFootToLoadBearing();

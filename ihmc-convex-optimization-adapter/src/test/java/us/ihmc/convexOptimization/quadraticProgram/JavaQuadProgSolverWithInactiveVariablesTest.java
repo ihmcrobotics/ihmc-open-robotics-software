@@ -81,7 +81,7 @@ public class JavaQuadProgSolverWithInactiveVariablesTest extends AbstractSimpleA
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
+   @Test(timeout = 300000000)
    public void testSimpleCasesWithBoundsConstraintsAndInactiveVariables()
    {
       testSimpleCasesWithBoundsConstraintsAndInactiveVariables(0, 1, 2, 0, false);

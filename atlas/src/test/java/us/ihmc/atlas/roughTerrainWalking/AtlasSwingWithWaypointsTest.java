@@ -17,16 +17,16 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasSwingWithWaypointsTest extends AvatarSwingWithWaypointsTest
 {
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 113.2)
-   @Test(timeout = 570000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 500000)
    public void testRegularSwingWithWaypoints() throws SimulationExceededMaximumTimeException
    {
       super.testRegularSwingWithWaypoints();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 27.2)
-   @Test(timeout = 140000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 500000)
    public void testSwingWithWaypointsRotated() throws SimulationExceededMaximumTimeException
    {
       super.testSwingWithWaypointsRotated();

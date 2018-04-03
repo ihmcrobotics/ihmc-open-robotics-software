@@ -58,7 +58,7 @@ public class IcpCloud3DTest {
       assertTrue(found.getT().normSq()<=1e-8);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void perfect_translation() {
 

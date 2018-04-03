@@ -18,7 +18,7 @@ public class DataFileWriterTest
 {
    private static final String TEST_DIRECTORY = "us/ihmc/simulationconstructionset/dataFileWriterTest/";
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.9)
+	@ContinuousIntegrationTest(estimatedDuration = 0.7)
 	@Test(timeout=300000)
    public void testDataFileWriterAndReader() throws IOException, URISyntaxException
    {
@@ -311,7 +311,7 @@ public class DataFileWriterTest
       fileOne.delete();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout = 30000)
    public void testWritingAndReadingADataFileWithLotsOfVariables() throws IOException
    {

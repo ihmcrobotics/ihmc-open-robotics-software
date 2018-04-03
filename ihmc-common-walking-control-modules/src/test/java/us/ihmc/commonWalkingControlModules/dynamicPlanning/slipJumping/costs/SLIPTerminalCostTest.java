@@ -53,7 +53,7 @@ public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCost()
    {
@@ -103,7 +103,7 @@ public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCostStateGradientNumerically()
    {
@@ -111,7 +111,7 @@ public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCostControlGradientNumerically()
    {
@@ -119,7 +119,7 @@ public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCostStateHessianNumerically()
    {
@@ -127,7 +127,7 @@ public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCostControlHessianNumerically()
    {
@@ -135,7 +135,7 @@ public class SLIPTerminalCostTest extends TrackingCostFunctionTest<SLIPState>
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testCostStateControlHessianNumerically()
    {
