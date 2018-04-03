@@ -7,6 +7,8 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
@@ -14,6 +16,7 @@ import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalTools;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -30,7 +33,7 @@ public class QuadrupedStepMessageHandler
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final AtomicReference<QuadrupedTimedStepPacket> inputTimedStepPacket = new AtomicReference<>();
+//   private final AtomicReference<QuadrupedTimedStepPacket> inputTimedStepPacket = new AtomicReference<>();
    private final QuadrupedReferenceFrames referenceFrames;
    private final YoFrameOrientation bodyOrientation;
    private final ArrayList<YoQuadrupedTimedStep> activeSteps = new ArrayList<>();
@@ -52,17 +55,20 @@ public class QuadrupedStepMessageHandler
       this.referenceFrames = referenceFrames;
       this.bodyOrientation = new YoFrameOrientation("bodyOrientation", ReferenceFrame.getWorldFrame(), registry);
 
+      /*
       if(globalDataProducer != null)
       {
          globalDataProducer.attachListener(QuadrupedTimedStepPacket.class, inputTimedStepPacket::set);
       }
+      */
 
       parentRegistry.addChild(registry);
    }
 
    public boolean isStepPlanAvailable()
    {
-      return inputTimedStepPacket.get() != null;
+      return receivedStepSequence.size() > 0;
+//      return inputTimedStepPacket.get() != null;
    }
 
    public void getBodyOrientation(FrameQuaternion bodyOrientation)
@@ -80,10 +86,12 @@ public class QuadrupedStepMessageHandler
     */
    public void process(FrameVector3DReadOnly stepAdjustment)
    {
+      /*
       if(isStepPlanAvailable())
       {
          updateStepSequence();
       }
+      */
 
       TimeIntervalTools.removeEndTimesLessThan(robotTimestamp.getDoubleValue(), receivedStepSequence);
       if(haltFlag.getBooleanValue())
@@ -93,6 +101,7 @@ public class QuadrupedStepMessageHandler
       updateActiveSteps();
    }
 
+   /*
    private void updateStepSequence()
    {
       double currentTime = robotTimestamp.getDoubleValue();
@@ -111,6 +120,31 @@ public class QuadrupedStepMessageHandler
             receivedStepSequence.add();
             YoQuadrupedTimedStep step = receivedStepSequence.get(receivedStepSequence.size() - 1);
             step.set(steps.get(i));
+            step.getTimeInterval().shiftInterval(timeShift);
+         }
+      }
+
+      TimeIntervalTools.sortByEndTime(receivedStepSequence);
+      bodyOrientation.setFromReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
+   }
+   */
+
+   public void handleQuadrupedTimedStepListCommand(QuadrupedTimedStepListCommand command)
+   {
+      double currentTime = robotTimestamp.getDoubleValue();
+      boolean isExpressedInAbsoluteTime = command.isExpressedInAbsoluteTime();
+      RecyclingArrayList<QuadrupedTimedStepCommand> stepCommands = command.getStepCommands();
+
+      receivedStepSequence.clear();
+      for (int i = 0; i < Math.min(stepCommands.size(), STEP_QUEUE_SIZE); i++)
+      {
+         double timeShift = isExpressedInAbsoluteTime ? 0.0 : currentTime;
+         double touchdownTime = stepCommands.get(i).getTimeIntervalCommand().getEndTime();
+         if (touchdownTime + timeShift >= currentTime)
+         {
+            receivedStepSequence.add();
+            YoQuadrupedTimedStep step = receivedStepSequence.get(receivedStepSequence.size() - 1);
+            step.set(stepCommands.get(i));
             step.getTimeInterval().shiftInterval(timeShift);
          }
       }
@@ -194,7 +228,7 @@ public class QuadrupedStepMessageHandler
    public void reset()
    {
       haltFlag.set(false);
-      inputTimedStepPacket.set(null);
+      //inputTimedStepPacket.set(null);
       receivedStepSequence.clear();
       adjustedStepSequence.clear();
    }

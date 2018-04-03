@@ -68,42 +68,14 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 
 public abstract class ControllerAPIDefinition
 {
-   private static final List<Class<? extends Command<?, ?>>> supportedCommands;
-   private static final List<Class<? extends Packet<?>>> supportedStatusMessages;
+   private static final List<Class<? extends Command<?, ?>>> controllerSupportedCommands;
+   private static final List<Class<? extends Packet<?>>> controllerSupportedStatusMessages;
+
+   private static final List<Class<? extends Command<?, ?>>> quadrupedSupportedCommands;
 
    static
    {
@@ -140,7 +112,7 @@ public abstract class ControllerAPIDefinition
       commands.add(CenterOfMassTrajectoryCommand.class);
       commands.add(PlanarRegionsListCommand.class);
 
-      supportedCommands = Collections.unmodifiableList(commands);
+      controllerSupportedCommands = Collections.unmodifiableList(commands);
 
       List<Class<? extends Packet<?>>> statusMessages = new ArrayList<>();
       statusMessages.add(CapturabilityBasedStatus.class);
@@ -153,17 +125,28 @@ public abstract class ControllerAPIDefinition
       statusMessages.add(TextToSpeechPacket.class);
       statusMessages.add(RequestPlanarRegionsListMessage.class);
 
-      supportedStatusMessages = Collections.unmodifiableList(statusMessages);
+      controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
+
+      List<Class<? extends Command<?, ?>>> quadrupedCommands = new ArrayList<>();
+      quadrupedCommands.add(QuadrupedTimedStepListCommand.class);
+      quadrupedCommands.add(QuadrupedTimedStepCommand.class);
+
+      quadrupedSupportedCommands = Collections.unmodifiableList(quadrupedCommands);
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()
    {
-      return supportedCommands;
+      return controllerSupportedCommands;
+   }
+
+   public static List<Class<? extends Command<?, ?>>> getQuadrupedSupportedCommands()
+   {
+      return quadrupedSupportedCommands;
    }
 
    public static List<Class<? extends Packet<?>>> getControllerSupportedStatusMessages()
    {
-      return supportedStatusMessages;
+      return controllerSupportedStatusMessages;
    }
 
    public static MessageValidator createDefaultMessageValidation()
