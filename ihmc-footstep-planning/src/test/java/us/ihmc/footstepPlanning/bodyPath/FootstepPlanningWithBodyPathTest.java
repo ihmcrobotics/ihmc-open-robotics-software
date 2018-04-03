@@ -52,6 +52,7 @@ public class FootstepPlanningWithBodyPathTest
    @Rule
    public TestName name = new TestName();
 
+   @ContinuousIntegrationTest(estimatedDuration = 7.0)
    @Test(timeout = 30000)
    public void testWaypointPathOnFlat()
    {

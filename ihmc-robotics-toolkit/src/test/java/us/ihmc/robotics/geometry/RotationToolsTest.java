@@ -414,6 +414,7 @@ public class RotationToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testComputeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate() throws Exception
    {
@@ -451,6 +452,7 @@ public class RotationToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testComputeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate() throws Exception
    {
@@ -478,6 +480,7 @@ public class RotationToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void computeYawPitchRollAngleRatesFromAngularVelocityInBodyFrame() throws Exception
    {
@@ -503,6 +506,7 @@ public class RotationToolsTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void computeYawPitchRollAngleRatesFromAngularVelocityInWorldFrame() throws Exception
    {

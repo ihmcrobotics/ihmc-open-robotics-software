@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import controller_msgs.msg.dds.AdjustFootstepMessage;
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -30,6 +31,7 @@ public class MessageTransformerTest
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = Integer.MAX_VALUE)
    public void testHandTrajectoryMessage()
    {
@@ -56,6 +58,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = Integer.MAX_VALUE)
    public void testPelvisHeightTrajectoryMessage()
    {
@@ -80,6 +83,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = Integer.MAX_VALUE)
    public void testAdjustFootstepMessage()
    {
@@ -99,6 +103,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = Integer.MAX_VALUE)
    public void testFootstepDataMessage()
    {
@@ -124,6 +129,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = Integer.MAX_VALUE)
    public void testFootstepDataListMessage()
    {
@@ -150,6 +156,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = Integer.MAX_VALUE)
    public void testVehiclePosePacket()
    {
@@ -169,6 +176,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = Integer.MAX_VALUE)
    public void testVideoPacket()
    {

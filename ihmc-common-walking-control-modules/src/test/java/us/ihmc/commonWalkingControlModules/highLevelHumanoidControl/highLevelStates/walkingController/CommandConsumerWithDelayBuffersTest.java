@@ -1,31 +1,32 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CommandConsumerWithDelayBuffersTest
 {
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testConstructor()
    {
@@ -43,6 +44,7 @@ public class CommandConsumerWithDelayBuffersTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testIsNewCommandAvailableWithNoDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
@@ -93,6 +95,7 @@ public class CommandConsumerWithDelayBuffersTest
       
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testIsNewCommandAvailableWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
@@ -162,6 +165,7 @@ public class CommandConsumerWithDelayBuffersTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testSendMultipleCommandWithDelays() throws SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
@@ -236,7 +240,8 @@ public class CommandConsumerWithDelayBuffersTest
          }
       }
    }
-   
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testQueueingManually()
    {
@@ -291,7 +296,8 @@ public class CommandConsumerWithDelayBuffersTest
          
       }
    }
-   
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testClearAllQueues()
    {
@@ -337,6 +343,7 @@ public class CommandConsumerWithDelayBuffersTest
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testClearSingleQueue()
    {
@@ -400,6 +407,7 @@ public class CommandConsumerWithDelayBuffersTest
 
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testFlushCommands()
    {
@@ -439,7 +447,8 @@ public class CommandConsumerWithDelayBuffersTest
       assertFalse(commandConsumer.isNewCommandAvailable(TestCommand.class));
       assertEquals(0,commandConsumer.pollNewCommands(TestCommand.class).size());
    }
-   
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public <C extends Command<C, ?>, M extends Packet<M>> void testAddingTooManyCommands()
    {

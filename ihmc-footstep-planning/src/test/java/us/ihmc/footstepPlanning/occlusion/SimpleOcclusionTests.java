@@ -78,7 +78,7 @@ public class SimpleOcclusionTests
    public TestName name = new TestName();
 
    @Test(timeout = 300000)
-   @ContinuousIntegrationTest(estimatedDuration = 10.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 2.2, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    public void testSimpleOcclusions()
    {
       FramePose3D startPose = new FramePose3D();
@@ -87,6 +87,7 @@ public class SimpleOcclusionTests
       runTest(startPose, goalPose, regions, defaultMaxAllowedSolveTime);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    @Ignore // Resource file does not seem to exist.
    public void testOcclusionsFromData()
@@ -119,6 +120,7 @@ public class SimpleOcclusionTests
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 300000)
    @Ignore
    public void testMazeWithOcclusions()
