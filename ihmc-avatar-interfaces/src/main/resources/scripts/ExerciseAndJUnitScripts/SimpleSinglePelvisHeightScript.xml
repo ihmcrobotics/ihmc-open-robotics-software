@@ -1,68 +1,84 @@
 <object-stream>
-  <long>1492627391925</long>
-  <us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage>
-    <uniqueId>-1</uniqueId>
+  <long>0</long>
+  <controller__msgs.msg.dds.PelvisHeightTrajectoryMessage>
+    <uniqueId>0</uniqueId>
     <destination>0</destination>
     <source>0</source>
-    <euclideanTrajectory>
-      <taskspaceTrajectoryPoints>
-        <us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage>
-          <uniqueId>0</uniqueId>
-          <destination>0</destination>
-          <time>2.0</time>
-          <position>
-            <x>0.0</x>
-            <y>0.0</y>
-            <z>0.6</z>
-          </position>
-          <linearVelocity>
-            <x>0.0</x>
-            <y>0.0</y>
-            <z>0.0</z>
-          </linearVelocity>
-        </us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage>
-      </taskspaceTrajectoryPoints>
-      <linearSelectionMatrix>
+    <sequence__id__>0</sequence__id__>
+    <enable__user__pelvis__control__>false</enable__user__pelvis__control__>
+    <enable__user__pelvis__control__during__walking__>false</enable__user__pelvis__control__during__walking__>
+    <euclidean__trajectory__>
+      <uniqueId>0</uniqueId>
+      <destination>0</destination>
+      <source>0</source>
+      <sequence__id__>0</sequence__id__>
+      <taskspace__trajectory__points__>
+        <clazz>controller_msgs.msg.dds.EuclideanTrajectoryPointMessage</clazz>
+        <values/>
+        <size>0</size>
+        <topicDataType class="controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType">
+          <serializeCDR/>
+          <deserializeCDR/>
+        </topicDataType>
+      </taskspace__trajectory__points__>
+      <selection__matrix__>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <selectionFrameId>0</selectionFrameId>
-        <xSelected>false</xSelected>
-        <ySelected>false</ySelected>
-        <zSelected>true</zSelected>
-      </linearSelectionMatrix>
-      <frameInformation>
-      <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
-        <dataReferenceFrameId>83766130</dataReferenceFrameId>
-      </frameInformation>
-      <linearWeightMatrix>
+        <source>0</source>
+        <sequence__id__>0</sequence__id__>
+        <selection__frame__id__>0</selection__frame__id__>
+        <x__selected__>true</x__selected__>
+        <y__selected__>true</y__selected__>
+        <z__selected__>true</z__selected__>
+      </selection__matrix__>
+      <frame__information__>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <weightFrameId>0</weightFrameId>
-        <xWeight>NaN</xWeight>
-        <yWeight>NaN</yWeight>
-        <zWeight>NaN</zWeight>
-      </linearWeightMatrix>
-      <useCustomControlFrame>false</useCustomControlFrame>
-      <controlFramePose>
+        <source>0</source>
+        <sequence__id__>0</sequence__id__>
+        <trajectory__reference__frame__id__>0</trajectory__reference__frame__id__>
+        <data__reference__frame__id__>0</data__reference__frame__id__>
+      </frame__information__>
+      <weight__matrix__>
+        <uniqueId>0</uniqueId>
+        <destination>0</destination>
+        <source>0</source>
+        <sequence__id__>0</sequence__id__>
+        <weight__frame__id__>0</weight__frame__id__>
+        <x__weight__>-1.0</x__weight__>
+        <y__weight__>-1.0</y__weight__>
+        <z__weight__>-1.0</z__weight__>
+      </weight__matrix__>
+      <use__custom__control__frame__>false</use__custom__control__frame__>
+      <control__frame__pose__>
+        <position>
+          <x>0.0</x>
+          <y>0.0</y>
+          <z>0.0</z>
+        </position>
         <orientation>
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
           <s>1.0</s>
         </orientation>
-        <position>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-        </position>
-      </controlFramePose>
-    </euclideanTrajectory>
-    <enableUserPelvisControl>false</enableUserPelvisControl>
-    <enableUserPelvisControlDuringWalking>false</enableUserPelvisControlDuringWalking>
-  </us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage>
-  <long>1492627391926</long>
+      </control__frame__pose__>
+      <queueing__properties__>
+        <uniqueId>0</uniqueId>
+        <destination>0</destination>
+        <source>0</source>
+        <sequence__id__>0</sequence__id__>
+        <execution__mode__>0</execution__mode__>
+        <message__id__>1</message__id__>
+        <previous__message__id__>0</previous__message__id__>
+        <execution__delay__time__>0.0</execution__delay__time__>
+      </queueing__properties__>
+    </euclidean__trajectory__>
+  </controller__msgs.msg.dds.PelvisHeightTrajectoryMessage>
+  <long>0</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>
     <destination>0</destination>
+    <source>0</source>
   </us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
 </object-stream>

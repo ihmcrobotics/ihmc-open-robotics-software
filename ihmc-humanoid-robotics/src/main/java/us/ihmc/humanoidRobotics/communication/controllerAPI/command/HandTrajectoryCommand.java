@@ -2,11 +2,11 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Random;
 
+import controller_msgs.msg.dds.HandTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
@@ -67,14 +67,14 @@ public class HandTrajectoryCommand
    @Override
    public void set(HandTrajectoryMessage message)
    {
-      se3Trajectory.set(message.se3Trajectory);
+      se3Trajectory.set(message.getSe3Trajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HandTrajectoryMessage message)
    {
-      se3Trajectory.set(resolver, message.se3Trajectory);
+      se3Trajectory.set(resolver, message.getSe3Trajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
    }
 

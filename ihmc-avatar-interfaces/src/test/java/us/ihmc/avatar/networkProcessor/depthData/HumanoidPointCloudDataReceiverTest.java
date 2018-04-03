@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.PointCloudWorldPacket;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
@@ -24,7 +25,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -155,7 +156,7 @@ public abstract class HumanoidPointCloudDataReceiverTest implements MultiRobotTe
 
          try
          {
-            List<Point3D32> lidarWorldPoints = Arrays.asList(pointCloud.getDecayingWorldScan());
+            List<Point3D32> lidarWorldPoints = Arrays.asList(HumanoidMessageTools.getDecayingWorldScan(pointCloud));
             numberOfLidarPointsConsumed += lidarWorldPoints.size();
 
             for (Point3D32 lidarWorldPoint : lidarWorldPoints)

@@ -1,13 +1,14 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message commands the controller to start loading a foot that was unloaded to support the robot weight.
- * When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support.
+ * This message is part of the IHMC whole-body controller API. This message commands the controller
+ * to start loading a foot that was unloaded to support the robot weight. When the robot is
+ * performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the
+ * robot to switch back to double support.
  */
 public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       implements Settable<FootLoadBearingMessage>, EpsilonComparable<FootLoadBearingMessage>
@@ -16,6 +17,10 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    public static final byte LOAD_BEARING_REQUEST_LOAD = (byte) 0;
    public static final byte LOAD_BEARING_REQUEST_UNLOAD = (byte) 1;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    /**
     * Needed to identify a side dependent end-effector.
     */
@@ -31,29 +36,40 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
 
    public FootLoadBearingMessage()
    {
-
    }
 
    public FootLoadBearingMessage(FootLoadBearingMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(FootLoadBearingMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       load_bearing_request_ = other.load_bearing_request_;
 
       execution_delay_time_ = other.execution_delay_time_;
+
    }
 
    /**
-    * Needed to identify a side dependent end-effector.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public byte getRobotSide()
+   public void setSequenceId(long sequence_id)
    {
-      return robot_side_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -65,11 +81,11 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    }
 
    /**
-    * Whether the end-effector should be loaded or unloaded.
+    * Needed to identify a side dependent end-effector.
     */
-   public byte getLoadBearingRequest()
+   public byte getRobotSide()
    {
-      return load_bearing_request_;
+      return robot_side_;
    }
 
    /**
@@ -81,11 +97,11 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
    }
 
    /**
-    * The time to delay this command on the controller side before being executed.
+    * Whether the end-effector should be loaded or unloaded.
     */
-   public double getExecutionDelayTime()
+   public byte getLoadBearingRequest()
    {
-      return execution_delay_time_;
+      return load_bearing_request_;
    }
 
    /**
@@ -96,6 +112,14 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       execution_delay_time_ = execution_delay_time;
    }
 
+   /**
+    * The time to delay this command on the controller side before being executed.
+    */
+   public double getExecutionDelayTime()
+   {
+      return execution_delay_time_;
+   }
+
    @Override
    public boolean epsilonEquals(FootLoadBearingMessage other, double epsilon)
    {
@@ -103,6 +127,9 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
@@ -128,6 +155,9 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
 
       FootLoadBearingMessage otherMyClass = (FootLoadBearingMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -146,17 +176,17 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootLoadBearingMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("load_bearing_request=");
       builder.append(this.load_bearing_request_);
-
       builder.append(", ");
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);
-
       builder.append("}");
       return builder.toString();
    }

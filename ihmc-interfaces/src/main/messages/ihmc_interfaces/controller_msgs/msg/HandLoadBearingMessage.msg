@@ -4,6 +4,9 @@
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 # The robot side of the hand that will be load bearing.
 byte robot_side 255
 # Determines whether hybrid load bearing and jointspace control will be used.

@@ -10,6 +10,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -23,21 +28,17 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
@@ -125,11 +126,12 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
          Point3D position = new Point3D(handPosition.getPosition());
          Quaternion orientation = new Quaternion(handPosition.getOrientation());
 
-         HandTrajectoryMessage handHoldMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, 1);
-         handHoldMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrame(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
-         handHoldMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrame(worldFrame);
+         HandTrajectoryMessage handHoldMessage = new HandTrajectoryMessage();
+         handHoldMessage.setRobotSide(robotSide.toByte());
+         handHoldMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide())));
+         handHoldMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
          Vector3D zeroVelocity = new Vector3D();
-         handHoldMessage.getSe3Trajectory().setTrajectoryPoint(0, 11.0, position, orientation, zeroVelocity, zeroVelocity, worldFrame);
+         handHoldMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(11.0, position, orientation, zeroVelocity, zeroVelocity));
          drcSimulationTestHelper.send(handHoldMessage);
       }
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeToCompleteWalking);
@@ -161,12 +163,13 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
          for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
          {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
-            armTrajectoryMessage.setUniqueId(id);
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
+            armTrajectoryMessage.getJointspaceTrajectory().getQueueingProperties().setMessageId(id);
+
             if (messageIndex > 0)
             {
-               armTrajectoryMessage.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
-               armTrajectoryMessage.getQueueingProperties().setPreviousMessageId(id - 1);
+               armTrajectoryMessage.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
+               armTrajectoryMessage.getJointspaceTrajectory().getQueueingProperties().setPreviousMessageId(id - 1);
             }
             id++;
 
@@ -175,6 +178,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
             for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
             {
                OneDoFJoint joint = armJoints[jointIndex];
+               OneDoFJointTrajectoryMessage jointTrajectoryMessage = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add();
 
                trajectoryPoint1DCalculator.clear();
 
@@ -191,8 +195,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
                   SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
-                  armTrajectoryMessage.getJointspaceTrajectory().setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
-                        trajectoryPoint.getVelocity());
+                  jointTrajectoryMessage.getTrajectoryPoints().add().set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
+                                                                                                                        trajectoryPoint.getVelocity()));
                }
             }
             messageList.add(armTrajectoryMessage);
@@ -241,7 +245,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       footsteps.setDefaultSwingDuration(swingTime);
       footsteps.setDefaultTransferDuration(transferTime);
 
-      int numberOfSteps = footsteps.getDataList().size();
+      int numberOfSteps = footsteps.getFootstepDataList().size();
       drcSimulationTestHelper.send(footsteps);
 
       int timeWalking = numberOfSteps;
@@ -260,11 +264,10 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       for (int i = 0; i < 30; i++)
       {
          footStep = componentBasedDesiredFootstepCalculator.predictFootstepAfterDesiredFootstep(robotSide, previousFootStep, stepTime * i, stepTime);
-         footsteps.add(footStep);
+         footsteps.getFootstepDataList().add().set(footStep);
          robotSide = robotSide.getOppositeSide();
          previousFootStep = footStep;
       }
-      footsteps.setExecutionMode(ExecutionMode.OVERRIDE);
 
       return footsteps;
    }

@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.ClearDelayQueueMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueMessage;
 
 /**
  * This command is used to clear the delay buffers on the controller, If you sent a command with a

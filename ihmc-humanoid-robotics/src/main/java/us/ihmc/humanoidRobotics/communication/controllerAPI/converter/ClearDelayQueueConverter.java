@@ -2,12 +2,12 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.converter;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.ClearDelayQueueMessage;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.ClearDelayQueueMessage;
 
 public class ClearDelayQueueConverter implements CommandConversionInterface
 {
@@ -36,8 +36,8 @@ public class ClearDelayQueueConverter implements CommandConversionInterface
    {
       ClearDelayQueueCommand clearCommand = (ClearDelayQueueCommand) command;
       ClearDelayQueueMessage clearMessage = (ClearDelayQueueMessage) message;
-      clearCommand.setCommandClassToClear(hashCodeToCommandClasses.get(clearMessage.getClassToClearSimpleNameBasedHashCode()));
-      clearCommand.setMessageClassToClear(hashCodeToMessageClasses.get(clearMessage.getClassToClearSimpleNameBasedHashCode()));
+      clearCommand.setCommandClassToClear(hashCodeToCommandClasses.get(clearMessage.getClassSimpleNameBasedHashCode()));
+      clearCommand.setMessageClassToClear(hashCodeToMessageClasses.get(clearMessage.getClassSimpleNameBasedHashCode()));
       clearCommand.setClearAllDelayBuffers(clearMessage.getClearAllDelayBuffers());
    }
 }

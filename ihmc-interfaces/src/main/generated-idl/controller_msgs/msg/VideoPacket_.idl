@@ -35,6 +35,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::VideoPacket_")
       struct VideoPacket
       {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
         @defaultValue(value=255)
         octet video_source;
         long long timestamp;

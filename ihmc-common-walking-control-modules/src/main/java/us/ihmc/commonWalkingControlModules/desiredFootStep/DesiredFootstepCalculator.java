@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface DesiredFootstepCalculator

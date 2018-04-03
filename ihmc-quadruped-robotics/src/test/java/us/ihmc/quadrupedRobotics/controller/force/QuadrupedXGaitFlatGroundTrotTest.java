@@ -12,6 +12,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -21,6 +22,7 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
 {
    private GoalOrientedTestConductor conductor;
    private QuadrupedForceTestYoVariables variables;
+   private QuadrupedStepTeleopManager stepTeleopManager;
 
    @Before
    public void setup()
@@ -32,8 +34,10 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
          QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
          quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
          quadrupedTestFactory.setGroundContactModelType(QuadrupedGroundContactModelType.FLAT);
+         quadrupedTestFactory.setUseNetworking(true);
          conductor = quadrupedTestFactory.createTestConductor();
          variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+         stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       }
       catch (IOException e)
       {
@@ -63,12 +67,12 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
 
    private void trotFast(double directionX) throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
 
-      variables.getYoPlanarVelocityInputX().set(directionX * 0.6);
+      stepTeleopManager.setDesiredVelocity(directionX * 0.6, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
       if(Math.signum(directionX) < 0)
@@ -94,14 +98,12 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
    
    private void trotSlow(double directionX) throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
-      
-//      variables.getXGaitEndDoubleSupportDurationInput().set(0.3);
-      
-      variables.getYoPlanarVelocityInputX().set(directionX * 0.1);
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.setDesiredVelocity(directionX * 0.1, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 6.0);
       
@@ -139,17 +141,16 @@ public abstract class QuadrupedXGaitFlatGroundTrotTest implements QuadrupedMulti
 
    private void trotInACircle(double directionX, double directionZ) throws AssertionFailedError
    {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      variables.getXGaitEndPhaseShiftInput().set(180.0);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
+      stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(directionX * 0.5);//reduced for real robot gains
-      variables.getYoPlanarVelocityInputZ().set(directionZ * 0.25);//reduced for real robot gains
+
+      stepTeleopManager.setDesiredVelocity(directionX * 0.5, 0.0, directionZ * 0.25); //reduced for real robot gains
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 20.0);
       if(Math.signum(directionX) > 0)

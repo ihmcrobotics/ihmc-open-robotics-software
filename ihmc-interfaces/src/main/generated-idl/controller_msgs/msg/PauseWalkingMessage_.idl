@@ -17,6 +17,10 @@ module controller_msgs
       struct PauseWalkingMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * True to pause walking, false to unpause and resume an existing footstep plan.
          */
         boolean pause;

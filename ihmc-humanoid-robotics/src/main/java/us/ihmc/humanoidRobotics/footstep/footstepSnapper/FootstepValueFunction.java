@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 
 /**
  * Created by agrabertilton on 1/19/15.

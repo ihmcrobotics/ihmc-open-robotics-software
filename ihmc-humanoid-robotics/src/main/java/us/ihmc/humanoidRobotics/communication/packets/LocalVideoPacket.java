@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.awt.image.BufferedImage;
 
+import controller_msgs.msg.dds.IntrinsicParametersMessage;
 import us.ihmc.communication.packets.Packet;
 
 public class LocalVideoPacket extends Packet<LocalVideoPacket>
@@ -52,11 +53,4 @@ public class LocalVideoPacket extends Packet<LocalVideoPacket>
       ret &= intrinsicParameters.equals(other.intrinsicParameters);
       return ret;
    }
-
-   @Override
-   public boolean isClonable()
-   {
-      return false;
-   }
-
 }

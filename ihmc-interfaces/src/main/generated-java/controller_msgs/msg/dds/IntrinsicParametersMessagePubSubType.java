@@ -1,20 +1,38 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "IntrinsicParametersMessage" defined in "IntrinsicParametersMessage_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "IntrinsicParametersMessage" defined in
+ * "IntrinsicParametersMessage_.idl". Use this class to provide the TopicDataType to a Participant.
  *
- * This file was automatically generated from IntrinsicParametersMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit IntrinsicParametersMessage_.idl instead.
+ * This file was automatically generated from IntrinsicParametersMessage_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * IntrinsicParametersMessage_.idl instead.
+ *
  */
 public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.IntrinsicParametersMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::IntrinsicParametersMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public IntrinsicParametersMessagePubSubType()
+   @Override
+   public void serialize(controller_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
+         throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.IntrinsicParametersMessage data)
+         throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -25,6 +43,8 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    public static int getMaxCdrSerializedSize(int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -63,6 +83,8 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -85,6 +107,7 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
 
       cdr.write_type_2(data.getWidth());
 
@@ -108,10 +131,12 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_6(data.getT1());
 
       cdr.write_type_6(data.getT2());
+
    }
 
    public static void read(controller_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
 
       data.setWidth(cdr.read_type_2());
 
@@ -128,81 +153,47 @@ public class IntrinsicParametersMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setCy(cdr.read_type_6());
 
       cdr.read_type_e(data.getRadial());
-
       data.setT1(cdr.read_type_6());
 
       data.setT2(cdr.read_type_6());
-   }
 
-   public static void staticCopy(controller_msgs.msg.dds.IntrinsicParametersMessage src, controller_msgs.msg.dds.IntrinsicParametersMessage dest)
-   {
-      dest.set(src);
-   }
-
-   @Override
-   public void serialize(controller_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.IntrinsicParametersMessage data)
-         throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
    }
 
    @Override
    public final void serialize(controller_msgs.msg.dds.IntrinsicParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_2("width", data.getWidth());
-
       ser.write_type_2("height", data.getHeight());
-
       ser.write_type_6("fx", data.getFx());
-
       ser.write_type_6("fy", data.getFy());
-
       ser.write_type_6("skew", data.getSkew());
-
       ser.write_type_6("cx", data.getCx());
-
       ser.write_type_6("cy", data.getCy());
-
       ser.write_type_e("radial", data.getRadial());
-
       ser.write_type_6("t1", data.getT1());
-
       ser.write_type_6("t2", data.getT2());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.IntrinsicParametersMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setWidth(ser.read_type_2("width"));
-
       data.setHeight(ser.read_type_2("height"));
-
       data.setFx(ser.read_type_6("fx"));
-
       data.setFy(ser.read_type_6("fy"));
-
       data.setSkew(ser.read_type_6("skew"));
-
       data.setCx(ser.read_type_6("cx"));
-
       data.setCy(ser.read_type_6("cy"));
-
       ser.read_type_e("radial", data.getRadial());
-
       data.setT1(ser.read_type_6("t1"));
-
       data.setT2(ser.read_type_6("t2"));
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.IntrinsicParametersMessage src, controller_msgs.msg.dds.IntrinsicParametersMessage dest)
+   {
+      dest.set(src);
    }
 
    @Override

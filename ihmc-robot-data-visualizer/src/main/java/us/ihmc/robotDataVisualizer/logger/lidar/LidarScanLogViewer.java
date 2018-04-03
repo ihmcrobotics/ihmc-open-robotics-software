@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
 import javafx.animation.AnimationTimer;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
@@ -15,15 +16,16 @@ import javafx.scene.paint.Material;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Affine;
-import us.ihmc.communication.packets.LidarScanMessage;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
-import us.ihmc.commons.thread.ThreadTools;
 
 public class LidarScanLogViewer extends AnimationTimer
 {
@@ -101,12 +103,13 @@ public class LidarScanLogViewer extends AnimationTimer
 
       Point3D32 scanPoint = new Point3D32();
       scanMeshBuilder.clear();
-      for (int i = 0; i < message.getNumberOfScanPoints(); i++)
+      int numberOfScanPoints = message.getScan().size() / 3;
+      for (int i = 0; i < numberOfScanPoints; i++)
       {
-         double alpha = i / (double) message.getNumberOfScanPoints();
+         double alpha = i / (double) numberOfScanPoints;
          Color color = Color.hsb(alpha * 240.0, 1.0, 1.0);
 
-         message.getScanPoint(i, scanPoint);
+         MessageTools.unpackScanPoint(message, i, scanPoint);
 
          scanMeshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, color);
       }
@@ -124,8 +127,8 @@ public class LidarScanLogViewer extends AnimationTimer
 
       newMessageToRender.set(lidarScanMessage);
 
-      Quaternion32 orientation = lidarScanMessage.getLidarOrientation();
-      Point3D32 position = lidarScanMessage.getLidarPosition();
+      Quaternion orientation = lidarScanMessage.getLidarOrientation();
+      Point3D position = lidarScanMessage.getLidarPosition();
       lastAffine.set(JavaFXTools.createAffineFromQuaternionAndTuple(orientation, position));
       executor.execute(this::computeScanMesh);
    }

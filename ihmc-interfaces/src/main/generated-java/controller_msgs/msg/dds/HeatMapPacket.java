@@ -1,11 +1,15 @@
 package controller_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<HeatMapPacket>, EpsilonComparable<HeatMapPacket>
 {
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    public us.ihmc.idl.IDLSequence.Float data_;
    public int width_;
    public int height_;
@@ -20,11 +24,14 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
 
    public HeatMapPacket(HeatMapPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(HeatMapPacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       data_.set(other.data_);
       width_ = other.width_;
 
@@ -32,6 +39,23 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
 
       name_.setLength(0);
       name_.append(other.name_);
+
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.idl.IDLSequence.Float getData()
@@ -39,14 +63,19 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
       return data_;
    }
 
+   public void setWidth(int width)
+   {
+      width_ = width;
+   }
+
    public int getWidth()
    {
       return width_;
    }
 
-   public void setWidth(int width)
+   public void setHeight(int height)
    {
-      width_ = width;
+      height_ = height;
    }
 
    public int getHeight()
@@ -54,9 +83,10 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
       return height_;
    }
 
-   public void setHeight(int height)
+   public void setName(java.lang.String name)
    {
-      height_ = height;
+      name_.setLength(0);
+      name_.append(name);
    }
 
    public java.lang.String getNameAsString()
@@ -69,12 +99,6 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
       return name_;
    }
 
-   public void setName(java.lang.String name)
-   {
-      name_.setLength(0);
-      name_.append(name);
-   }
-
    @Override
    public boolean epsilonEquals(HeatMapPacket other, double epsilon)
    {
@@ -82,6 +106,9 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.data_, other.data_, epsilon))
          return false;
@@ -110,9 +137,11 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
 
       HeatMapPacket otherMyClass = (HeatMapPacket) other;
 
-      if (!this.data_.equals(otherMyClass.data_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
 
+      if (!this.data_.equals(otherMyClass.data_))
+         return false;
       if (this.width_ != otherMyClass.width_)
          return false;
 
@@ -131,21 +160,20 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
       StringBuilder builder = new StringBuilder();
 
       builder.append("HeatMapPacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("data=");
       builder.append(this.data_);
-
       builder.append(", ");
       builder.append("width=");
       builder.append(this.width_);
-
       builder.append(", ");
       builder.append("height=");
       builder.append(this.height_);
-
       builder.append(", ");
       builder.append("name=");
       builder.append(this.name_);
-
       builder.append("}");
       return builder.toString();
    }

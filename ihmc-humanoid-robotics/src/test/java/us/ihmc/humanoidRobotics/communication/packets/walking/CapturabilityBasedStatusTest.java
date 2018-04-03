@@ -14,6 +14,7 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;

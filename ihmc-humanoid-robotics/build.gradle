@@ -38,6 +38,7 @@ mainDependencies {
    compile group: "us.ihmc", name: "ihmc-sensor-processing", version: "source"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"
    compile group: "us.ihmc", name: "ihmc-footstep-planning", version: "source"
+   compile group: "us.ihmc", name: "ihmc-interfaces", version: "source"
 }
 
 testDependencies {
