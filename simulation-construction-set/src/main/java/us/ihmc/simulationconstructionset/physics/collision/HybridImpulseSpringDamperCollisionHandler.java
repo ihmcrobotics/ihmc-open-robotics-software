@@ -61,6 +61,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    private static final boolean slipTowardEachOtherIfSlipping = true;
 
    private static final boolean allowRecyclingOfPointsInUse = true;
+   
+   private static boolean useShuffleContactingPairs = false;
 
    private final Random random;
 
@@ -133,7 +135,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
    {
       int numberOfCollisions = shapesInContactList.size();
 
-      Collections.shuffle(shapesInContactList, random);
+      if(useShuffleContactingPairs)
+         Collections.shuffle(shapesInContactList, random);
 
       if (DEBUG)
          System.out.println("Resolving " + numberOfCollisions + " collisions....");
@@ -222,6 +225,11 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       {
          contactingExternalForcePointsVisualizer.update();
       }
+   }
+   
+   public void useShuffleContactingPairs(boolean value)
+   {
+      useShuffleContactingPairs = value;
    }
 
    private final Point3D positionOne = new Point3D();
