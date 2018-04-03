@@ -42,8 +42,8 @@ public class YoVariableHandShakeBuilderTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 1200000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
+   @Test(timeout = 30000)
    public void testHandshake()
    {
       Random random = new Random(12451528l);

@@ -78,7 +78,7 @@ public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
       assertTrue(latch.await(1, TimeUnit.SECONDS));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 2.7)
+   @ContinuousIntegrationTest(estimatedDuration = 2.8)
    @Test(timeout = 30000)
    public void highLevelRosServiceClientTest() throws InterruptedException
    {

@@ -154,8 +154,8 @@ public class WalkingControllerTest
 
    private static final double maxDriftRate = 0.2;
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 17.4)
+   @Test(timeout = 87000)
    public void testForGarbage()
    {
       walkingController.initialize();

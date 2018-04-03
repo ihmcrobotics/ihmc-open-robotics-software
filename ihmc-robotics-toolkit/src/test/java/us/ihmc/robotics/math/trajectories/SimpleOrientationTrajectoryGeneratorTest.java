@@ -78,7 +78,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testCompareWithSingleFrameTrajectoryGenerator()
    {
@@ -194,7 +194,7 @@ public class SimpleOrientationTrajectoryGeneratorTest
       assertTrue(angularAcceleration1.epsilonEquals(angularAcceleration2, EPSILON));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout = 30000)
    public void testMultipleFramesWithSingleFrameTrajectoryGenerators()
    {

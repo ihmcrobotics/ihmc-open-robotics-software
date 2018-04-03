@@ -65,7 +65,7 @@ public class JointWrenchSensorTest
       assertJointWrenchEquals(jointWrenchSensorTwo, expectedJointForce, expectedJointTorque);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
 	@Test(timeout=300000)
    public void testJointTorquesMatchWhenSensorAtJoint() throws UnreasonableAccelerationException
    {

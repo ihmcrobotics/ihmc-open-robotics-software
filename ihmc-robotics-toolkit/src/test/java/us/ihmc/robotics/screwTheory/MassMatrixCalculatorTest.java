@@ -81,7 +81,7 @@ public abstract class MassMatrixCalculatorTest
       return kineticEnergy.get(0, 0);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.2)
+	@ContinuousIntegrationTest(estimatedDuration = 1.7)
 	@Test(timeout = 30000)
    public void compareMassMatrixCalculators()
    {

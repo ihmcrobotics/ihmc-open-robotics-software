@@ -32,8 +32,8 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    }
 
    /** {@inheritDoc} */
-   @ContinuousIntegrationTest(estimatedDuration = 90.0)
-   @Test(timeout = 230000)
+   @ContinuousIntegrationTest(estimatedDuration = 74.2)
+   @Test(timeout = 370000)
    public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.08;
@@ -43,8 +43,8 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    }
 
    /** {@inheritDoc} */
-   @ContinuousIntegrationTest(estimatedDuration = 90.0)
-   @Test(timeout = 230000)
+   @ContinuousIntegrationTest(estimatedDuration = 70.4)
+   @Test(timeout = 350000)
    public void testUnknownStepDownOneFootOnEachStepLong() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.10;
@@ -54,8 +54,8 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    }
 
    /** {@inheritDoc} */
-   @ContinuousIntegrationTest(estimatedDuration = 90.0)
-   @Test(timeout = 230000)
+   @ContinuousIntegrationTest(estimatedDuration = 68.1)
+   @Test(timeout = 340000)
    public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.07;
@@ -75,8 +75,8 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    }
 
    /** {@inheritDoc} */
-   @ContinuousIntegrationTest(estimatedDuration = 90.0)
-   @Test(timeout = 230000)
+   @ContinuousIntegrationTest(estimatedDuration = 107.1)
+   @Test(timeout = 540000)
    public void testDropOffsWhileWalking() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.10;

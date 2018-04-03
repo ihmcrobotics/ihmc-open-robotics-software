@@ -33,24 +33,24 @@ public class AtlasHandDesiredConfigurationBehaviorTest extends HumanoidHandDesir
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 24.8)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 45.9)
+   @Test(timeout = 230000)
    public void testCloseHand() throws SimulationExceededMaximumTimeException
    {
       super.testCloseHand();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 30.1)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 51.9)
+   @Test(timeout = 260000)
    public void testPauseAndResumeCloseHand() throws SimulationExceededMaximumTimeException
    {
       super.testPauseAndResumeCloseHand();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 22.2)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 39.8)
+   @Test(timeout = 200000)
    public void testStopCloseHand() throws SimulationExceededMaximumTimeException
    {
       super.testStopCloseHand();

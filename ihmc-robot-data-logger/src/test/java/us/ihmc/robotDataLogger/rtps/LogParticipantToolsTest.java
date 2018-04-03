@@ -16,8 +16,8 @@ import us.ihmc.tools.compression.CompressionImplementationFactory;
 
 public class LogParticipantToolsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 1200000)
+   @ContinuousIntegrationTest(estimatedDuration = 8.2)
+   @Test(timeout = 41000)
    public void testSegmentation()
    {
       CompressionImplementation compressor = CompressionImplementationFactory.instance();

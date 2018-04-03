@@ -30,7 +30,7 @@ public class IHMCCommunicationKryoNetClassListTest
          System.out.println("                         registerPacketField(" + subTypeOf.getSimpleName() + ".class);");
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAllClassesRegisteredArePackets()
    {
@@ -43,7 +43,7 @@ public class IHMCCommunicationKryoNetClassListTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testAllPacketFieldsAreRegistered()
          throws InstantiationException, IllegalAccessException, NoSuchFieldException, SecurityException, IllegalArgumentException

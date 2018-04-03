@@ -26,7 +26,7 @@ import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 public class MovingWalkingReferenceFrameTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testAgainstFiniteDifference()
    {

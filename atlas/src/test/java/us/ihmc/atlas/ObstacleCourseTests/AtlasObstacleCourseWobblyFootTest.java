@@ -37,8 +37,8 @@ public class AtlasObstacleCourseWobblyFootTest extends DRCObstacleCourseWobblyFo
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 20.5)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 23.5)
+   @Test(timeout = 120000)
    public void testStandingForACoupleSecondsWithWobblyFeet() throws SimulationExceededMaximumTimeException
    {
       super.testStandingForACoupleSecondsWithWobblyFeet();

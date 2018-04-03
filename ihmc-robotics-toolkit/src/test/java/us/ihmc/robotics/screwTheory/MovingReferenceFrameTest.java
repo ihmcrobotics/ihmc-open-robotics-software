@@ -12,7 +12,7 @@ public class MovingReferenceFrameTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorWithPrismaticChainRobot() throws Exception
    {
@@ -46,7 +46,7 @@ public class MovingReferenceFrameTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorWithChainRobot() throws Exception
    {
@@ -80,7 +80,7 @@ public class MovingReferenceFrameTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorWithTreeRobot() throws Exception
    {

@@ -32,15 +32,15 @@ public class VisibilityGraphOcclusionTest
       occludedEnvironmentWithoutAGoalPlane = simpleOccludedEnvironment(false);
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    public void testVisibilityGraphWithOcclusion()
    {
       runTest(occludedEnvironmentWithAGoalPlane);
    }
 
-   @Test(timeout = timeout)
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    public void testVisibilityGraphWithOcclusionAndNoGoalPlane()
    {
       runTest(occludedEnvironmentWithoutAGoalPlane);

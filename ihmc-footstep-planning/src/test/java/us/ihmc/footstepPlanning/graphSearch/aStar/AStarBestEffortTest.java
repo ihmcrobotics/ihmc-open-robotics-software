@@ -45,7 +45,7 @@ public class AStarBestEffortTest
       planner.setTimeout(5.0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
    public void testBestEffort()
    {

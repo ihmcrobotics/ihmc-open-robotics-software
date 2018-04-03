@@ -26,32 +26,32 @@ public class AtlasSwingTrajectoryTest extends DRCSwingTrajectoryTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 76.4)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 130.4)
+   @Test(timeout = 650000)
    public void testMultipleHeightFootsteps() throws SimulationExceededMaximumTimeException
    {
       super.testMultipleHeightFootsteps();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 32.9)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 47.8)
+   @Test(timeout = 240000)
    public void testNegativeSwingHeight() throws SimulationExceededMaximumTimeException
    {
       super.testNegativeSwingHeight();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 36.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 55.8)
+   @Test(timeout = 280000)
    public void testReallyHighFootstep() throws SimulationExceededMaximumTimeException
    {
       super.testReallyHighFootstep();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 36.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 126.9)
+   @Test(timeout = 630000)
    public void testSelfCollisionAvoidance() throws SimulationExceededMaximumTimeException
    {
       super.testSelfCollisionAvoidance();

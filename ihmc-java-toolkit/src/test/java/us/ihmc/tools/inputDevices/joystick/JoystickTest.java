@@ -18,7 +18,7 @@ import us.ihmc.tools.inputDevices.joystick.virtualJoystick.VirtualJoystick;
 
 public class JoystickTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.8)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCreateJoystick()
    {
@@ -50,7 +50,7 @@ public class JoystickTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testCreateVirtualJoystick()
    {
