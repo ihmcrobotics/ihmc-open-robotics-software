@@ -23,6 +23,7 @@ testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
    bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
    disableBambooConfigurationCheck = false
+   maximumSuiteDuration = 15.0
 }
 
 mainDependencies {
