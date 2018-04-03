@@ -19,7 +19,7 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 
 public class YoGraphicPolynomial3DTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testRemoteYoGraphicVariableOrdering()
    {

@@ -93,32 +93,32 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
       return 5;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 76.4)
+   @Test(timeout = 380000)
    @Override
    public void testPauseWalking() throws SimulationExceededMaximumTimeException
    {
       super.testPauseWalking();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 77.3)
+   @Test(timeout = 390000)
    @Override
    public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
    {
       super.testPauseWalkingForward();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 78.9)
+   @Test(timeout = 390000)
    @Override
    public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
    {
       super.testPauseWalkingInitialTransfer();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 73.9)
+   @Test(timeout = 370000)
    @Override
    public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
    {

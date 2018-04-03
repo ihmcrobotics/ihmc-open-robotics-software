@@ -23,7 +23,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class ArmTrajectoryCommandTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = IndexOutOfBoundsException.class)
    public void testClear()
    {
@@ -40,7 +40,7 @@ public class ArmTrajectoryCommandTest
       armTrajectoryCommand.getJointspaceTrajectory().getJointTrajectoryPoint(0, 0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsCommandValid()
    {
@@ -50,14 +50,14 @@ public class ArmTrajectoryCommandTest
       assertFalse(armTrajectoryCommand.isCommandValid());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testArmTrajectoryCommand()
    {
       new ArmTrajectoryCommand();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClearRobotSide()
    {
@@ -75,7 +75,7 @@ public class ArmTrajectoryCommandTest
       assertEquals(0, armTrajectoryCommand.getJointspaceTrajectory().getTrajectoryPointLists().size());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetRobotSide()
    {
@@ -116,7 +116,7 @@ public class ArmTrajectoryCommandTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSetArmTrajectoryCommand()
    {
@@ -157,7 +157,7 @@ public class ArmTrajectoryCommandTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGetMessageClass()
    {

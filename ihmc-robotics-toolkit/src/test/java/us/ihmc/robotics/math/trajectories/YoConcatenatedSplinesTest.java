@@ -23,7 +23,7 @@ public class YoConcatenatedSplinesTest
    private final static double EPSILON = 1;
    private final static Random random = new Random(2468642L);
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.8)
+	@ContinuousIntegrationTest(estimatedDuration = 1.7)
 	@Test(timeout = 30000)
    public void testSimpleCubicQuinticCubic()
    {
@@ -95,7 +95,7 @@ public class YoConcatenatedSplinesTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 3.3)
+	@ContinuousIntegrationTest(estimatedDuration = 4.3)
 	@Test(timeout = 30000)
    public void testQuinticsFromCubicQuinticCubic()
    {
@@ -134,7 +134,7 @@ public class YoConcatenatedSplinesTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.4)
+	@ContinuousIntegrationTest(estimatedDuration = 1.7)
 	@Test(timeout = 30000)
    public void testTimeFromArcLength()
    {

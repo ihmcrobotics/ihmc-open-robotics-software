@@ -162,7 +162,7 @@ public class KinematicsToolboxControllerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testHoldBodyPose() throws Exception
    {
@@ -184,7 +184,7 @@ public class KinematicsToolboxControllerTest
                  toolboxController.getSolution().getSolutionQuality() < 1.0e-4);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testRandomHandPositions() throws Exception
    {
@@ -222,7 +222,7 @@ public class KinematicsToolboxControllerTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @ContinuousIntegrationTest(estimatedDuration = 1.3)
    @Test(timeout = 30000)
    public void testRandomHandPoses() throws Exception
    {

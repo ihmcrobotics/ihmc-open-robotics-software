@@ -14,8 +14,8 @@ public class ConnectionPoint3DTest
    private static final int ITERATIONS = 10000;
    private static final double EPSILON = 1.0e-12;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 1000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testRound() throws Exception
    {
       Random random = new Random(43566787);

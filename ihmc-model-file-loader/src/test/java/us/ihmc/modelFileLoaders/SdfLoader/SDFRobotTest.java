@@ -33,7 +33,7 @@ import us.ihmc.simulationconstructionset.RobotFromDescription;
 
 public class SDFRobotTest
 {
-	@ContinuousIntegrationTest(estimatedDuration = 0.6)
+	@ContinuousIntegrationTest(estimatedDuration = 5.8)
    @Test(timeout = 30000)
    public void testSDFRobotVersusRobotDescription() throws FileNotFoundException, JAXBException
    {

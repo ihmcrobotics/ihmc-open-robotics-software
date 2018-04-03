@@ -79,16 +79,16 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
    private final Vector3D forceDirection2 = new Vector3D(1.0, 0.0, 0.0);
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 45.0)
-   @Test(timeout = 520000)
+   @ContinuousIntegrationTest(estimatedDuration = 57.4)
+   @Test(timeout = 290000)
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalk();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 36.0)
-   @Test(timeout = 520000)
+   @ContinuousIntegrationTest(estimatedDuration = 59.7)
+   @Test(timeout = 300000)
    public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalkWithForceDisturbances();

@@ -21,8 +21,8 @@ public class RateLimitedYoFrameOrientationTest
 {
    private static final double EPSILON = 1.0e-11;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
-   @Test(timeout = 10000)
+   @ContinuousIntegrationTest(estimatedDuration = 3.1)
+   @Test(timeout = 30000)
    public void testConvergenceWithConstantInput() throws Exception
    {
       Random random = new Random(46363);

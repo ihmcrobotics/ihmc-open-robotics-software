@@ -42,40 +42,40 @@ public class ValkyrieObstacleCourseTrialsTerrainTest extends DRCObstacleCourseTr
    }
 
    @Override
-	@ContinuousIntegrationTest(estimatedDuration = 56.0)
-   @Test(timeout = 170000)
+	@ContinuousIntegrationTest(estimatedDuration = 81.4)
+   @Test(timeout = 410000)
    public void testTrialsTerrainZigzagHurdlesScript() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainZigzagHurdlesScript();
    }
 
    @Override
-	@ContinuousIntegrationTest(estimatedDuration = 90.4)
-   @Test(timeout = 230000)
+	@ContinuousIntegrationTest(estimatedDuration = 125.6)
+   @Test(timeout = 630000)
    public void testWalkingOntoAndOverSlopesSideways() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOntoAndOverSlopesSideways();
    }
 
    @Override
-	@ContinuousIntegrationTest(estimatedDuration = 120.0)
-   @Test(timeout = 350000)
+	@ContinuousIntegrationTest(estimatedDuration = 176.1)
+   @Test(timeout = 880000)
    public void testTrialsTerrainSlopeScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainSlopeScriptRandomFootSlip();
    }
 
    @Override
-	@ContinuousIntegrationTest(estimatedDuration = 111.0)
-   @Test(timeout = 280000)
+	@ContinuousIntegrationTest(estimatedDuration = 177.6)
+   @Test(timeout = 890000)
    public void testTrialsTerrainSlopeScript() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainSlopeScript();
    }
 
    @Override
-	@ContinuousIntegrationTest(estimatedDuration = 49.1)
-   @Test(timeout = 130000)
+	@ContinuousIntegrationTest(estimatedDuration = 56.0)
+   @Test(timeout = 280000)
    public void testTrialsTerrainZigzagHurdlesScriptRandomFootSlip() throws SimulationExceededMaximumTimeException
    {
       super.testTrialsTerrainZigzagHurdlesScriptRandomFootSlip();

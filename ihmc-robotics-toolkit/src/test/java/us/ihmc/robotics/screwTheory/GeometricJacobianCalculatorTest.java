@@ -150,7 +150,7 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.6)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorChainRobot() throws Exception
    {
@@ -225,7 +225,7 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.5)
+   @ContinuousIntegrationTest(estimatedDuration = 4.8)
    @Test(timeout = 30000)
    public void testConvectiveTerm() throws Exception
    {
@@ -315,7 +315,7 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
    public void testAgainstSpatialAccelerationCalculatorChainRobot() throws Exception
    {
@@ -373,7 +373,7 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.35)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorFloatingJointRobot() throws Exception
    {
@@ -417,7 +417,7 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
    public void testAgainstSpatialAccelerationCalculatorFloatingJointRobot() throws Exception
    {

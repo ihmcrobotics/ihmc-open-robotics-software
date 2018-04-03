@@ -22,7 +22,7 @@ public class SimulationRewindabilityVerifierTest
    private static final boolean VERBOSE = false;
    private final double DT = 0.01;
 
-	@ContinuousIntegrationTest(estimatedDuration = 4.2)
+	@ContinuousIntegrationTest(estimatedDuration = 4.0)
 	@Test(timeout=300000)
    public void testRewindableSimulation() throws UnreasonableAccelerationException
    {
@@ -43,7 +43,7 @@ public class SimulationRewindabilityVerifierTest
       scs2.closeAndDispose();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 4.2)
+	@ContinuousIntegrationTest(estimatedDuration = 4.0)
 	@Test(timeout=300000)
    public void testEasilyDetectableNonRewindableSimulation() throws UnreasonableAccelerationException
    {
@@ -70,7 +70,7 @@ public class SimulationRewindabilityVerifierTest
       scs2.closeAndDispose();
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 8.5)
+	@ContinuousIntegrationTest(estimatedDuration = 8.2)
 	@Test(timeout=300000)
    public void testDifficultToDetectNonRewindableSimulation() throws UnreasonableAccelerationException
    {
