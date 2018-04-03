@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.RootJointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedAccelerationCommand;
@@ -289,9 +288,6 @@ public class WholeBodyInverseDynamicsSolver
             break;
          case JOINT_ACCELERATION_INTEGRATION:
             jointAccelerationIntegrationCalculator.submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
-            break;
-         case ROOT_JOINT_ACCELERATION_COMMAND:
-            spatialAccelerationCalculator.setRootAcceleration(((RootJointAccelerationCommand) command).getRootJointSpatialAcceleration());
             break;
          case COMMAND_LIST:
             submitInverseDynamicsCommandList((InverseDynamicsCommandList) command);

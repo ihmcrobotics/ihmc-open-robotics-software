@@ -4,7 +4,6 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
-import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpMessageHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotionPlanner;
@@ -14,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -24,7 +22,6 @@ public class StandingState extends AbstractJumpState
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final CentroidalMomentumManager centroidalMomentumManager;
-   private final GravityCompensationManager gravityCompensationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers;
    private final FeetJumpManager feetManager;
    private final RigidBodyControlManager headManager;
@@ -36,13 +33,12 @@ public class StandingState extends AbstractJumpState
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
    public StandingState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-                        CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
-                        PelvisControlManager pelvisControlManager, SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager,
+                        CentroidalMomentumManager centroidalMomentumManager, PelvisControlManager pelvisControlManager,
+                        SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager,
                         Map<String, RigidBodyControlManager> bodyManagerMap, FullHumanoidRobotModel fullRobotModel)
    {
       super(stateEnum, motionPlanner, messageHandler, controllerToolbox);
       this.centroidalMomentumManager = centroidalMomentumManager;
-      this.gravityCompensationManager = gravityCompensationManager;
       this.pelvisControlManager = pelvisControlManager;
       this.feetManager = feetManager;
       this.handManagers = handManagers;
@@ -62,7 +58,6 @@ public class StandingState extends AbstractJumpState
    public void doAction()
    {
       centroidalMomentumManager.computeForZeroMomentumRateOfChange();
-      gravityCompensationManager.setRootJointAccelerationForStandardGravitationalForce();
       pelvisControlManager.maintainDesiredPositionAndOrientation();
       feetManager.compute();
       headManager.compute();

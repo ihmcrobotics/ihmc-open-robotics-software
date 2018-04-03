@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.centroidalMotionPlanner.CentroidalMot
 import us.ihmc.commonWalkingControlModules.configurations.JumpControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
-import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpControlManagerInterface;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpMessageHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
@@ -48,10 +47,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 
 public class JumpHighLevelHumanoidController
 {
@@ -74,7 +71,6 @@ public class JumpHighLevelHumanoidController
    private final WholeBodyMotionPlanner motionPlanner;
    private final JumpMessageHandler messageHandler;
    private final CentroidalMomentumManager centroidalMomentumManager;
-   private final GravityCompensationManager gravityCompensationManager;
    private final PelvisControlManager pelvisControlManager;
    private final FeetJumpManager feetManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
@@ -112,8 +108,6 @@ public class JumpHighLevelHumanoidController
       this.messageHandler = new JumpMessageHandler();
       this.centroidalMomentumManager = jumpControlManagerFactory.getOrCreateCentroidalMomentumManager();
       controlManagerList.add(centroidalMomentumManager);
-      this.gravityCompensationManager = jumpControlManagerFactory.getOrCreateGravityCompensationManager();
-      controlManagerList.add(gravityCompensationManager);
       this.feetManager = jumpControlManagerFactory.getOrCreateFeetManager();
       controlManagerList.add(feetManager);
       this.pelvisControlManager = jumpControlManagerFactory.getOrCreatePelvisControlManager();
@@ -191,26 +185,26 @@ public class JumpHighLevelHumanoidController
 
    private void setupStateMachine()
    {
-      StandingState standingState = new StandingState(motionPlanner, messageHandler, controllerToolbox, centroidalMomentumManager, gravityCompensationManager,
-                                                      pelvisControlManager, handManagers, feetManager, rigidBodyManagersByName, fullRobotModel);
+      StandingState standingState = new StandingState(motionPlanner, messageHandler, controllerToolbox, centroidalMomentumManager, pelvisControlManager,
+                                                      handManagers, feetManager, rigidBodyManagersByName, fullRobotModel);
       StandingToTakeOffCondition standingToTakeOffCondition = new StandingToTakeOffCondition(standingState);
       standingState.addStateTransition(JumpStateEnum.TAKE_OFF, standingToTakeOffCondition);
       stateMachine.addState(standingState);
 
-      TakeOffState takeOffState = new TakeOffState(motionPlanner, messageHandler, controllerToolbox, centroidalMomentumManager, gravityCompensationManager,
-                                                   pelvisControlManager, handManagers, feetManager, rigidBodyManagersByName, fullRobotModel);
+      TakeOffState takeOffState = new TakeOffState(motionPlanner, messageHandler, controllerToolbox, centroidalMomentumManager, pelvisControlManager,
+                                                   handManagers, feetManager, rigidBodyManagersByName, fullRobotModel);
       TakeOffToFlightCondition takeOffToFlightCondition = new TakeOffToFlightCondition(takeOffState, footSwitches);
       takeOffState.addStateTransition(JumpStateEnum.FLIGHT, takeOffToFlightCondition);
       stateMachine.addState(takeOffState);
 
       FlightState flightState = new FlightState(motionPlanner, messageHandler, controllerToolbox, controlCoreToolbox, centroidalMomentumManager,
-                                                gravityCompensationManager, pelvisControlManager, handManagers, feetManager, rigidBodyManagersByName, registry);
+                                                pelvisControlManager, handManagers, feetManager, rigidBodyManagersByName, registry);
       FlightToLandingCondition flightToLandingCondition = new FlightToLandingCondition(flightState, footSwitches);
       flightState.addStateTransition(JumpStateEnum.LANDING, flightToLandingCondition);
       stateMachine.addState(flightState);
 
-      LandingState landingState = new LandingState(motionPlanner, messageHandler, controllerToolbox, centroidalMomentumManager, gravityCompensationManager,
-                                                   handManagers, feetManager, pelvisControlManager, rigidBodyManagersByName, registry);
+      LandingState landingState = new LandingState(motionPlanner, messageHandler, controllerToolbox, centroidalMomentumManager, handManagers, feetManager,
+                                                   pelvisControlManager, rigidBodyManagersByName, registry);
       LandingToStandingCondition landingToStandingCondition = new LandingToStandingCondition(landingState);
       landingState.addStateTransition(JumpStateEnum.STANDING, landingToStandingCondition);
       stateMachine.addState(landingState);

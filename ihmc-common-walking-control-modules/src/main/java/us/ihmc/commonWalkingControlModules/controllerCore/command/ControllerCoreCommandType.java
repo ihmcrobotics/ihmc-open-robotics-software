@@ -152,13 +152,8 @@ public enum ControllerCoreCommandType
     * Represents the list of controlled bodies using the  {@link ControlledBodiesCommand} for the {@link WholeBodyVirtualModelControlSolver}.
     * // TODO remove this command.
     */
-   CONTROLLED_BODIES,
+   CONTROLLED_BODIES;
    
-   /**
-    * Sets the root joint acceleration
-    */
-   ROOT_JOINT_ACCELERATION_COMMAND;
-
    private static final ControllerCoreCommandType[] inverseKinematicsCommands = { TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION, PRIVILEGED_VELOCITY,
          LIMIT_REDUCTION, COMMAND_LIST };
 

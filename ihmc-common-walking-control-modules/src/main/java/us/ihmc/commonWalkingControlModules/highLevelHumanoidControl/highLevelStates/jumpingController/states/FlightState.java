@@ -4,7 +4,6 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
-import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpMessageHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotionPlanner;
@@ -21,7 +20,6 @@ public class FlightState extends AbstractJumpState
    private static final JumpStateEnum stateEnum = JumpStateEnum.FLIGHT;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final CentroidalMomentumManager wholeBodyMomentumManager;
-   private final GravityCompensationManager gravityCompensationManager;
    private final FeetJumpManager feetManager;
    private final PelvisControlManager pelvisManager;
    private final SideDependentList<RigidBodyControlManager> handManagers;
@@ -32,15 +30,13 @@ public class FlightState extends AbstractJumpState
    private final YoBoolean isDone;
 
    public FlightState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-                      WholeBodyControlCoreToolbox controlCoreToolbox, CentroidalMomentumManager centroidalMomentumManager,
-                      GravityCompensationManager gravityCompensationManager, PelvisControlManager pelvisManager,
+                      WholeBodyControlCoreToolbox controlCoreToolbox, CentroidalMomentumManager centroidalMomentumManager, PelvisControlManager pelvisManager,
                       SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager, Map<String, RigidBodyControlManager> bodyManagerMap,
                       YoVariableRegistry registry)
    {
       super(stateEnum, motionPlanner, messageHandler, controllerToolbox);
       this.controllerToolbox = controllerToolbox;
       this.wholeBodyMomentumManager = centroidalMomentumManager;
-      this.gravityCompensationManager = gravityCompensationManager;
       this.feetManager = feetManager;
       this.pelvisManager = pelvisManager;
       this.handManagers = handManagers;
@@ -60,7 +56,6 @@ public class FlightState extends AbstractJumpState
    public void doAction()
    {
       wholeBodyMomentumManager.computeMomentumRateOfChangeForFreeFall();
-      gravityCompensationManager.setRootJointAccelerationForFreeFall();
       pelvisManager.maintainDesiredOrientationOnly();
       feetManager.compute();
       for (RobotSide side : RobotSide.values)

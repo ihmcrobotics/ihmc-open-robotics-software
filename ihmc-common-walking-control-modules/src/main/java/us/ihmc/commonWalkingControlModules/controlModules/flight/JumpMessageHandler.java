@@ -61,7 +61,7 @@ public class JumpMessageHandler
          contactStateList.add(flightState);
       case LANDING:
          ContactState landingState = new ContactState(worldFrame);
-         landingState.setDuration(1.0);
+         landingState.setDuration(0.5);
          createRectangle(currentPosition.getReferenceFrame(), currentPosition.getX(), currentPosition.getY(), 0.01, 0.01, tempPolygon);
          landingState.setSupportPolygon(tempPolygon);
          landingState.setContactType(ContactType.DOUBLE_SUPPORT);

@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
-import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpControlManagerInterface;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -49,7 +48,6 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
 
    private FeetJumpManager feetManager;
    private CentroidalMomentumManager momentumManager;
-   private GravityCompensationManager gravityCompensationManager;
    private PelvisControlManager pelvisControlManager;
 
    private final List<JumpControlManagerInterface> controlManagers = new ArrayList<>();
@@ -151,20 +149,6 @@ public class JumpControlManagerFactory extends AbstractHighLevelControllerParame
       momentumManager = new CentroidalMomentumManager(controllerToolbox, jumpControllerParameters, registry);
       controlManagers.add(momentumManager);
       return momentumManager;
-   }
-
-   public GravityCompensationManager getOrCreateGravityCompensationManager()
-   {
-      if (gravityCompensationManager != null)
-         return gravityCompensationManager;
-      if (!hasHighLevelHumanoidControllerToolbox(GravityCompensationManager.class))
-         return null;
-      if (!hasJumpControllerParameters(GravityCompensationManager.class))
-         return null;
-
-      this.gravityCompensationManager = new GravityCompensationManager(controllerToolbox, jumpControllerParameters, registry);
-      controlManagers.add(gravityCompensationManager);
-      return gravityCompensationManager;
    }
 
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody baseBody, ReferenceFrame controlFrame,

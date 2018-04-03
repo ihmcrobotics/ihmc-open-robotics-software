@@ -4,7 +4,6 @@ import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controlModules.flight.CentroidalMomentumManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.FeetJumpManager;
-import us.ihmc.commonWalkingControlModules.controlModules.flight.GravityCompensationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.JumpMessageHandler;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.PelvisControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.flight.WholeBodyMotionPlanner;
@@ -25,7 +24,6 @@ public class LandingState extends AbstractJumpState
 
    private final WholeBodyMotionPlanner motionPlanner;
    private final CentroidalMomentumManager centroidalMomentumManager;
-   private final GravityCompensationManager gravityCompensationManager;
    private final FeetJumpManager feetManager;
    private final SideDependentList<RigidBodyControlManager> handManagers;
    private final RigidBodyControlManager headManager;
@@ -36,7 +34,7 @@ public class LandingState extends AbstractJumpState
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
    public LandingState(WholeBodyMotionPlanner motionPlanner, JumpMessageHandler messageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
-                       CentroidalMomentumManager centroidalMomentumManager, GravityCompensationManager gravityCompensationManager,
+                       CentroidalMomentumManager centroidalMomentumManager, 
                        SideDependentList<RigidBodyControlManager> handManagers, FeetJumpManager feetManager, PelvisControlManager pelvisControlManager,
                        Map<String, RigidBodyControlManager> bodyManagerMap, YoVariableRegistry registry)
 
@@ -44,7 +42,6 @@ public class LandingState extends AbstractJumpState
       super(stateEnum, motionPlanner, messageHandler, controllerToolbox);
       this.motionPlanner = motionPlanner;
       this.centroidalMomentumManager = centroidalMomentumManager;
-      this.gravityCompensationManager = gravityCompensationManager;
       this.feetManager = feetManager;
       this.handManagers = handManagers;
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -64,8 +61,7 @@ public class LandingState extends AbstractJumpState
    {
       double time = getTimeInCurrentState();
       centroidalMomentumManager.computeMomentumRateOfChangeFromForceProfile(time);
-      gravityCompensationManager.setRootJointAccelerationForStandardGravitationalForce();
-      pelvisControlManager.maintainDesiredOrientationOnly();
+      pelvisControlManager.maintainDesiredPositionAndOrientation();
       feetManager.compute();
       headManager.compute();
       chestManager.compute();
