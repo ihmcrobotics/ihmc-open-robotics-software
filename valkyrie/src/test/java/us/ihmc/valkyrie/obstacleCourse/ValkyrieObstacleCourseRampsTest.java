@@ -30,40 +30,40 @@ public class ValkyrieObstacleCourseRampsTest extends DRCObstacleCourseRampsTest
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 73.5)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 100.6)
+   @Test(timeout = 500000)
    public void testWalkingDownRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingDownRampWithMediumSteps();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 61.8)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 99.7)
+   @Test(timeout = 500000)
    public void testWalkingUpRampWithMediumSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampWithMediumSteps();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 57.9)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 500000)
    public void testWalkingUpRampWithShortSteps() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampWithShortSteps();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 76.9)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 104.2)
+   @Test(timeout = 520000)
    public void testWalkingUpRampWithShortStepsALittleTooHigh() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampWithShortStepsALittleTooHigh();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 68.7)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 100.9)
+   @Test(timeout = 500000)
    public void testWalkingUpRampWithShortStepsALittleTooLow() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingUpRampWithShortStepsALittleTooLow();

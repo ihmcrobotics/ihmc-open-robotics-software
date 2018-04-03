@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public class ExpandingPolytopeSilhouetteConstructorTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSilhouetteConstructorWithTetrahedron()
    {
@@ -66,7 +66,7 @@ public class ExpandingPolytopeSilhouetteConstructorTest
       assertEquals(0, edge.getEdgeIndex());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSilhouetteConstructorWithIcoSphere()
    {

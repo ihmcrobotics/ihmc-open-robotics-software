@@ -26,24 +26,24 @@ public class ValkyrieEndToEndPelvisHeightTrajectoryMessageTest extends EndToEndP
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 35.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 42.4)
+   @Test(timeout = 210000)
    public void testSingleWaypoint() throws Exception
    {
       super.testSingleWaypoint();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 100000)
+   @ContinuousIntegrationTest(estimatedDuration = 27.3)
+   @Test(timeout = 140000)
    public void testSingleWaypointInUserMode() throws Exception
    {
       super.testSingleWaypointInUserMode();
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 60.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 99.8)
+   @Test(timeout = 500000)
    public void testSingleWaypointThenManualChange() throws Exception
    {
       super.testSingleWaypointThenManualChange();

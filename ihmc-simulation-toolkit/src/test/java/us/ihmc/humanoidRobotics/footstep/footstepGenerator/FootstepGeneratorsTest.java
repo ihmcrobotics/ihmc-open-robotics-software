@@ -142,7 +142,7 @@ public class FootstepGeneratorsTest
       assertTrue("Do not allow visualizations for committing to bamboo", allowVisualization == Visualization.NO_VISUALIZATION);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.7)
+	@ContinuousIntegrationTest(estimatedDuration = 0.9)
 	@Test(timeout=300000)
    public void stepInPlaceTest()
    {
@@ -234,7 +234,7 @@ public class FootstepGeneratorsTest
       testTurnStraightTurnFootstepGenerator("Walk forwards, auto stance", startX, startY, startYaw, null, endX, endY, endYaw, vis);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void walkLeftwardTest()
    {
@@ -263,7 +263,7 @@ public class FootstepGeneratorsTest
             endYaw, vis);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void walkRightwardTest()
    {
@@ -292,7 +292,7 @@ public class FootstepGeneratorsTest
             endYaw, vis);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void walkBackwardTest()
    {
@@ -349,7 +349,7 @@ public class FootstepGeneratorsTest
       testTurnStraightTurnFootstepGenerator("Forwards not on zero, auto stance first", startX, startY, startYaw, null, endX, endY, endYaw, vis2);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void turningThenStraightFootstepGenerator_noTurnVaryingStartOrientationTest()
    {
@@ -406,7 +406,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void turningThenStraightFootstepGenerator_varyInitialTurnsThenNonForwardsToSameEndPointTest()
    {
@@ -434,7 +434,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout=300000)
    public void smallTurnWithSmallDisplacementTest()
    {
@@ -476,7 +476,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void negativePathS_LeftRightPathsWithSmallTurnAndLargerInitialStance()
    {
@@ -566,7 +566,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void TurnStraightTurn_nonForwardTestInitialTurnsNoFinalTurnsToSameEndPointTest()
    {
@@ -624,7 +624,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.9)
 	@Test(timeout=300000)
    public void TurnStraightTurn_varyFinalOrientationOnlyNonForwardTest()
    {
@@ -656,7 +656,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.6)
 	@Test(timeout=300000)
    public void TurnStraightTurn_varyFinalPositionWithSameOrientationsTest()
    {
@@ -728,7 +728,7 @@ public class FootstepGeneratorsTest
       testTurnStraightTurnFootstepGenerator("AutoStance, " + description, startX, startY, startYaw, null, endX, endY, endYaw, visl);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void TurnStraightTurn_180PathVaryingOrientationsCheckMiddleOrientationTest()
    {
@@ -780,7 +780,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 3.7)
+	@ContinuousIntegrationTest(estimatedDuration = 6.3)
 	@Test(timeout=300000)
    public void TwoSegment_RandomTransitionTest()
    {
@@ -868,7 +868,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.7)
 	@Test(timeout=300000)
    public void VaryingLengthTest()
    {
@@ -1075,7 +1075,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.5)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout=300000)
    public void turningNonStandardInitialConditionsAutoStanceSideSelectionTest()
    {
@@ -1127,7 +1127,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.4)
 	@Test(timeout=300000)
    public void leftRightNonStandardInitialConditionsAutoStanceSideSelectionTest()
    {
@@ -1172,7 +1172,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.6)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout=300000)
    public void leftRightWrongOutwardFirstStepTest()
    {
@@ -1350,7 +1350,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.5)
 	@Test(timeout=300000)
    public void TranslationPathYawTest()
    {
@@ -1472,7 +1472,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.4)
+	@ContinuousIntegrationTest(estimatedDuration = 0.3)
 	@Test(timeout=300000)
    public void TranslationPath_VaryforwardNonStandardInitialConditionsTest()
    {
@@ -1623,7 +1623,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.2)
+	@ContinuousIntegrationTest(estimatedDuration = 2.4)
 	@Test(timeout=300000)
    public void RotateTranslateRotate_RotateTranslateRotateTest()
    {
@@ -1659,7 +1659,7 @@ public class FootstepGeneratorsTest
       }
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.3)
+	@ContinuousIntegrationTest(estimatedDuration = 2.0)
 	@Test(timeout=300000)
    public void RotateTranslateRotate_RotateRotateTest()
    {
@@ -1815,7 +1815,7 @@ public class FootstepGeneratorsTest
       assertNoCourseRepeatedSquareUpSteps(testDescription, footsteps, startX, startY, startYaw, eps, 1);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.3)
+	@ContinuousIntegrationTest(estimatedDuration = 0.2)
 	@Test(timeout=300000)
    public void RotateTranslateRotate_CourseRestepAtEndTest()
    {

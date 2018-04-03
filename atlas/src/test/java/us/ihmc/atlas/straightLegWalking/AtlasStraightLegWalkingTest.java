@@ -36,7 +36,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 200000)
+   @Test(timeout = 300000)
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
    {
       super.testForwardWalking();
@@ -44,7 +44,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration =  20.0, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 200000)
+   @Test(timeout = 400000)
    public void testSlowerWalking() throws SimulationExceededMaximumTimeException
    {
       super.testSlowerWalking();
@@ -60,7 +60,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
    @Override
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 200000)
+   @Test(timeout = 520000)
    public void testWalkingOverStairs() throws Exception
    {
       super.testWalkingOverStairs();
@@ -75,7 +75,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration =  167.7, categoriesOverride = {IntegrationCategory.FAST})
-   @Test(timeout = 200000)
+   @Test(timeout = 680000)
    public void testSteppingDown() throws Exception
    {
       double stepDownHeight = 0.12;

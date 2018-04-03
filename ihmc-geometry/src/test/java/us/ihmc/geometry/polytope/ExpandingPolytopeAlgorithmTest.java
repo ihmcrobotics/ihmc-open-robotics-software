@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 public class ExpandingPolytopeAlgorithmTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithAPointInsideACube()
    {
@@ -70,7 +70,7 @@ public class ExpandingPolytopeAlgorithmTest
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.05), closestPointOnB, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testWithTwoCollidingCubes()
    {
@@ -171,7 +171,7 @@ public class ExpandingPolytopeAlgorithmTest
       assertTrue("numberOfCollisions = " + numberOfCollisions, numberOfCollisions > 500);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testExtensivelyWithPolytopes()
    {
@@ -269,7 +269,7 @@ public class ExpandingPolytopeAlgorithmTest
       assertTrue("numberOfCollisions = " + numberOfCollisions, numberOfCollisions > 500);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
    @Test(timeout = 30000)
    public void testExtensivelyWithCylinders()
    {
@@ -371,7 +371,7 @@ public class ExpandingPolytopeAlgorithmTest
       assertTrue("numberOfCollisions = " + numberOfCollisions, numberOfCollisions > 500);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublesomeCubes()
    {
@@ -415,7 +415,7 @@ public class ExpandingPolytopeAlgorithmTest
       EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-0.6654362950758336, 0.0120271553579471, 0.005), closestPointOnB, 1e-7);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTroublesomeCylinder()
    {

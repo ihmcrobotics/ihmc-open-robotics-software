@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 public class ConvexPolytopeFromExpandingPolytopeEntryGeneratorTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGeneratorUsingIcoSpheres()
    {

@@ -23,7 +23,7 @@ public class JGraphToolsTest
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
 
-   @Test(timeout = 10000)
+   @Test(timeout = 30000)
    @ContinuousIntegrationTest(estimatedDuration = 0.5)
    public void testRedundantPathBugTwoStages()
    {
@@ -74,8 +74,8 @@ public class JGraphToolsTest
       }
    }
 
-   @Test(timeout = 10000)
-   @ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 1.9)
    public void testRedundantPathBugRandomNumberOfStages()
    {
       Random random = new Random(34667);

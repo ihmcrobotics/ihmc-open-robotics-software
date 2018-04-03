@@ -14,7 +14,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootLoadBearingBehaviorTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSetInput()
    {

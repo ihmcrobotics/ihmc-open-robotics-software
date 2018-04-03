@@ -45,7 +45,7 @@ public class WaypointDefinedBodyPathPlanTest
    @Rule
    public TestName name = new TestName();
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleBodyPath()
    {
