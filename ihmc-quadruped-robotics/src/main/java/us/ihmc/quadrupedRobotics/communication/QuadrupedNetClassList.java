@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.pubsub.TopicDataType;
@@ -48,6 +49,10 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(RecyclingArrayListPubSub.class);
       registerPacketField(us.ihmc.idl.CDR.class);
       registerPacketField(ArrayList.class);
+
+
+      registerPacketField(QuadrupedTimedStepListMessagePubSubType.class);
+
 
 
       registerPacketClass(Packet.class);
@@ -143,6 +148,11 @@ public class QuadrupedNetClassList extends NetClassList
 
       registerPacketClass(QuadrupedSteppingEventPacket.class);
       registerPacketField(QuadrupedSteppingRequestedEvent.class);
+
+
+//      registerPacketClass(HighLevelStateMessage.class);
+//      registerPacketField(HighLevelControllerName.class);
+      registerPacketClass(QuadrupedSteppingStateChangeMessage.class);
 
       registerPacketField(String.class);
       registerPacketField(boolean.class);
