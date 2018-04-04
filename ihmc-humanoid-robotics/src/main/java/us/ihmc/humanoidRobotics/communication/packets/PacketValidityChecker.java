@@ -98,7 +98,8 @@ public abstract class PacketValidityChecker
 
          if (swingTrajectory.size() > Footstep.maxNumberOfSwingWaypoints)
          {
-            String errorMessage = messageClassName + " has " + swingTrajectory.size() + " waypoints. Up to " + Footstep.maxNumberOfSwingWaypoints + " are allowed.";
+            String errorMessage =
+                  messageClassName + " has " + swingTrajectory.size() + " waypoints. Up to " + Footstep.maxNumberOfSwingWaypoints + " are allowed.";
             return errorMessage;
          }
 
@@ -223,7 +224,6 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-
       //TODO Check if thats supposed to be checked
       packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getGroundClearance());
       if (packetFieldErrorType != null)
@@ -314,6 +314,48 @@ public abstract class PacketValidityChecker
                return errorMessage;
             }
          }
+      }
+
+      return null;
+   }
+
+   public static String validateSoleTrajectoryMessage(SoleTrajectoryMessage message)
+   {
+      String errorMessage = validatePacket(message);
+      if (errorMessage != null)
+         return message.getClass().getSimpleName() + " " + errorMessage;
+
+      EuclideanTrajectoryPointMessage previousTrajectoryPoint = null;
+
+      if (message.getPositionTrajectory().getTaskspaceTrajectoryPoints().isEmpty())
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         errorMessage = "Received " + messageClassName + " with no waypoint.";
+         return errorMessage;
+      }
+
+      for (int i = 0; i < message.getPositionTrajectory().getTaskspaceTrajectoryPoints().size(); i++)
+      {
+         EuclideanTrajectoryPointMessage waypoint = message.getPositionTrajectory().getTaskspaceTrajectoryPoints().get(i);
+         errorMessage = validateEuclideanTrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
+         if (errorMessage != null)
+         {
+            String messageClassName = message.getClass().getSimpleName();
+            errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
+            return errorMessage;
+         }
+         previousTrajectoryPoint = waypoint;
+      }
+
+
+      ObjectErrorType errorType;
+
+      errorType = ObjectValidityChecker.validateEnum(RobotQuadrant.fromByte(message.getRobotQuadrant()));
+      if (errorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         errorMessage = messageClassName + "'s robotQuadrant field " + errorType.getMessage();
+         return errorMessage;
       }
 
       return null;
@@ -519,7 +561,7 @@ public abstract class PacketValidityChecker
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = message.getJointTrajectoryMessages().get(jointIndex);
-         if(oneJointTrajectoryMessage != null)
+         if (oneJointTrajectoryMessage != null)
          {
             errorMessage = validateOneJointTrajectoryMessage(oneJointTrajectoryMessage, false);
          }
@@ -540,12 +582,12 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
-      if(message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
 
-      if(message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Trajectory Reference Frame Id Not Set";
       }
@@ -596,12 +638,12 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if(message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
 
-      if(message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Trajectory Reference Frame Id Not Set";
       }
@@ -897,7 +939,7 @@ public abstract class PacketValidityChecker
    }
 
    private static String validateEuclideanTrajectoryPointMessage(EuclideanTrajectoryPointMessage se3TrajectoryPoint,
-         EuclideanTrajectoryPointMessage previousTrajectoryPoint, boolean checkId)
+                                                                 EuclideanTrajectoryPointMessage previousTrajectoryPoint, boolean checkId)
    {
       String errorMessage = validatePacket(se3TrajectoryPoint);
       if (errorMessage != null)
@@ -923,6 +965,7 @@ public abstract class PacketValidityChecker
 
       return null;
    }
+
 
    private static String validateSO3TrajectoryPointMessage(SO3TrajectoryPointMessage so3TrajectoryPoint, SO3TrajectoryPointMessage previousSO3TrajectoryPoint,
                                                            boolean checkId)
@@ -1030,11 +1073,11 @@ public abstract class PacketValidityChecker
    {
       if (message == null)
          return "is null.";
-      if(message.getDesiredJointAccelerations() == null)
+      if (message.getDesiredJointAccelerations() == null)
       {
          return "desired acceleration buffer null";
       }
-      if(message.getDesiredJointAccelerations().size()  == 0)
+      if (message.getDesiredJointAccelerations().size() == 0)
       {
          return "desired acceleration buffer empty";
       }

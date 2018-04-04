@@ -13,6 +13,7 @@ import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppi
 import java.util.*;
 
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedTimedStepListMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateSoleTrajectoryMessage;
 
 public class QuadrupedControllerAPIDefinition
 {
@@ -52,7 +53,7 @@ public class QuadrupedControllerAPIDefinition
    public static ControllerNetworkSubscriber.MessageValidator createDefaultMessageValidation()
    {
       Map<Class<? extends Packet<?>>, ControllerNetworkSubscriber.MessageValidator> validators = new HashMap<>();
-      //      validators.put(FootTrajectoryMessage.class, message -> validateFootTrajectoryMessage((FootTrajectoryMessage) message)); // TODO
+      validators.put(SoleTrajectoryMessage.class, message -> validateSoleTrajectoryMessage((SoleTrajectoryMessage) message));
       //      validators.put(PelvisTrajectoryMessage.class, message -> validatePelvisTrajectoryMessage((PelvisTrajectoryMessage) message));
       //      validators
       //            .put(PelvisOrientationTrajectoryMessage.class, message -> validatePelvisOrientationTrajectoryMessage((PelvisOrientationTrajectoryMessage) message));
@@ -75,7 +76,7 @@ public class QuadrupedControllerAPIDefinition
    public static MessageCollector.MessageIDExtractor createDefaultMessageIDExtractor()
    {
       Map<Class<? extends Packet<?>>, MessageCollector.MessageIDExtractor> extractors = new HashMap<>();
-      //      extractors.put(FootTrajectoryMessage.class, m -> ((FootTrajectoryMessage) m).getSequenceId()); // TODO
+      extractors.put(SoleTrajectoryMessage.class, m -> ((SoleTrajectoryMessage) m).getSequenceId());
       //      extractors.put(PelvisTrajectoryMessage.class, m -> ((PelvisTrajectoryMessage) m).getSequenceId());
       //      extractors.put(PelvisOrientationTrajectoryMessage.class, m -> ((PelvisOrientationTrajectoryMessage) m).getSequenceId());
       //      extractors.put(PelvisHeightTrajectoryMessage.class, m -> ((PelvisHeightTrajectoryMessage) m).getSequenceId());
