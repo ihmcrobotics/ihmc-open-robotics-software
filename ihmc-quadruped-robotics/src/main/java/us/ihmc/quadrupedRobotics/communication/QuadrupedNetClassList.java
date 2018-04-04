@@ -93,8 +93,9 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(RobotQuadrant.class);
       registerPacketField(TimeInterval.class);
 
-      registerPacketClass(QuadrupedSoleWaypointPacket.class);
-      registerPacketField(QuadrupedSoleWaypointList.class);
+      registerPacketField(SoleTrajectoryMessage.class);
+      registerPacketClass(SoleTrajectoryMessage.class);
+
       registerPacketField(QuadrantDependentList.class);
       registerPacketField(RobotQuadrant[][].class);
       registerPacketField(RobotQuadrant[].class);
