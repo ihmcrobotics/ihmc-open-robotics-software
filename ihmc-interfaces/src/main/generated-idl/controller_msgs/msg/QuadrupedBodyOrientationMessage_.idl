@@ -24,6 +24,11 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
+         * If true, the times are expressed in absolute time relative to the robot start
+         */
+        @defaultValue(value=True)
+        boolean is_expressed_in_absolute_time;
+        /**
          * The orientation trajectory information.
          */
         controller_msgs::msg::dds::SO3TrajectoryMessage so3_trajectory;
