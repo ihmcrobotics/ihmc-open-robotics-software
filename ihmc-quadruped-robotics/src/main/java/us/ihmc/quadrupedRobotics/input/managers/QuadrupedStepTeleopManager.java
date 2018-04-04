@@ -52,9 +52,7 @@ public class QuadrupedStepTeleopManager
       this.packetCommunicator = packetCommunicator;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
       this.stepStream = new QuadrupedXGaitStepStream(velocityInput, xGaitSettings, referenceFrames, timestamp, registry);
-//      packetCommunicator.attachListener(QuadrupedForceControllerStatePacket.class, forceControlStatePacket::set);
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class, controllerStateChangeMessage::set);
-//      packetCommunicator.attachListener(QuadrupedSteppingStatePacket.class, steppingStatePacket::set);
       packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class, steppingStateChangeMessage::set);
       packetCommunicator.attachListener(RobotConfigurationData.class, packet -> timestampNanos.set(packet.timestamp_));
 

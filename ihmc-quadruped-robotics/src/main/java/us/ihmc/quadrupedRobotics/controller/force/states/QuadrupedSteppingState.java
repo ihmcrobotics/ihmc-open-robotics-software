@@ -14,9 +14,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingStatePacket;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -63,7 +61,6 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final StateMachine<QuadrupedSteppingStateEnum, QuadrupedController> stateMachine;
    private EventTrigger trigger;
 
-   private final QuadrupedSteppingStatePacket quadrupedSteppingStatePacket;
    private final AtomicReference<QuadrupedSteppingRequestedEvent> requestedEvent = new AtomicReference<>();
 
    private final QuadrupedFeetManager feetManager;
@@ -125,8 +122,6 @@ public class QuadrupedSteppingState implements QuadrupedController
             }
          });
       }
-
-      this.quadrupedSteppingStatePacket = new QuadrupedSteppingStatePacket();
 
       this.stateMachine = buildStateMachine();
 
@@ -218,14 +213,6 @@ public class QuadrupedSteppingState implements QuadrupedController
 
       // update controller state machine
       stateMachine.doActionAndTransition();
-
-      // Send state information
-      quadrupedSteppingStatePacket.set(stateMachine.getCurrentStateKey());
-
-      if (runtimeEnvironment.getGlobalDataProducer() != null)
-      {
-         runtimeEnvironment.getGlobalDataProducer().queueDataToSend(quadrupedSteppingStatePacket);
-      }
 
       submitControllerCoreCommands();
 

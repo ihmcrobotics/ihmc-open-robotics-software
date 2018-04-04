@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
 import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
-import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
@@ -11,9 +10,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerStatePacket;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -55,8 +52,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final YoEnum<QuadrupedForceControllerRequestedEvent> lastEvent = new YoEnum<>("lastEvent", registry, QuadrupedForceControllerRequestedEvent.class);
 
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
-
-   private final QuadrupedForceControllerStatePacket quadrupedForceControllerStatePacket;
 
    private final StateMachine<QuadrupedForceControllerEnum, QuadrupedController> stateMachine;
    private EventTrigger trigger;
@@ -124,7 +119,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             }
          });
       }
-      this.quadrupedForceControllerStatePacket = new QuadrupedForceControllerStatePacket();
 
       this.stateMachine = buildStateMachine(runtimeEnvironment, initialState);
    }
@@ -236,14 +230,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       // update output processor
       outputProcessor.update();
-
-      // Send state information
-      quadrupedForceControllerStatePacket.set(stateMachine.getCurrentStateKey());
-
-      if (runtimeEnvironment.getGlobalDataProducer() != null)
-      {
-         runtimeEnvironment.getGlobalDataProducer().queueDataToSend(quadrupedForceControllerStatePacket);
-      }
    }
 
    @Override

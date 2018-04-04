@@ -110,9 +110,6 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(Double.class);
       registerPacketField(Object[].class);
 
-      registerPacketClass(QuadrupedSteppingStatePacket.class);
-      registerPacketField(QuadrupedSteppingStateEnum.class);
-
 
       // Head Data
       registerPacketClass(DetectedFacesPacket.class);
@@ -137,21 +134,17 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(Vector3D.class);
 
       // Events and controller states
-      registerPacketClass(QuadrupedForceControllerEventPacket.class);
-      registerPacketField(QuadrupedForceControllerRequestedEvent.class);
+      registerPacketClass(QuadrupedForceControllerEventPacket.class); // fixme make a message
+      registerPacketField(QuadrupedForceControllerRequestedEvent.class); // fixme make a message
 
-      registerPacketClass(QuadrupedForceControllerStatePacket.class);
-      registerPacketField(QuadrupedForceControllerEnum.class);
+      registerPacketField(QuadrupedForceControllerEnum.class); // fixme make a message
 
-      registerPacketClass(QuadrupedXGaitSettingsPacket.class);
-      registerPacketField(QuadrupedXGaitSettingsReadOnly.class);
+      registerPacketClass(QuadrupedXGaitSettingsPacket.class); // fixme make a message
+      registerPacketField(QuadrupedXGaitSettingsReadOnly.class); // fixme make a message
 
-      registerPacketClass(QuadrupedSteppingEventPacket.class);
-      registerPacketField(QuadrupedSteppingRequestedEvent.class);
+      registerPacketClass(QuadrupedSteppingEventPacket.class); // fixme make a message
+      registerPacketField(QuadrupedSteppingRequestedEvent.class); // fixme make a message
 
-
-//      registerPacketClass(HighLevelStateMessage.class);
-//      registerPacketField(HighLevelControllerName.class);
       registerPacketClass(QuadrupedSteppingStateChangeMessage.class);
       registerPacketClass(QuadrupedControllerStateChangeMessage.class);
 
