@@ -153,6 +153,7 @@ public class QuadrupedNetClassList extends NetClassList
 //      registerPacketClass(HighLevelStateMessage.class);
 //      registerPacketField(HighLevelControllerName.class);
       registerPacketClass(QuadrupedSteppingStateChangeMessage.class);
+      registerPacketClass(QuadrupedControllerStateChangeMessage.class);
 
       registerPacketField(String.class);
       registerPacketField(boolean.class);

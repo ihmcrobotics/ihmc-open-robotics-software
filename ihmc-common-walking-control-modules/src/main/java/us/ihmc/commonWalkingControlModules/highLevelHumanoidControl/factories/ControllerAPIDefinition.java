@@ -96,6 +96,7 @@ public abstract class ControllerAPIDefinition
 
       List<Class<? extends Packet<?>>> quadrupedStatusMessages = new ArrayList<>();
       quadrupedStatusMessages.add(QuadrupedSteppingStateChangeMessage.class);
+      quadrupedStatusMessages.add(QuadrupedControllerStateChangeMessage.class);
 
       quadrupedSupportedStatusMessages = Collections.unmodifiableList(quadrupedStatusMessages);
    }

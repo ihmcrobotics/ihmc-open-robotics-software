@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
@@ -65,6 +67,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
+
+   private final QuadrupedControllerStateChangeMessage quadrupedControllerStateChangeMessage = new QuadrupedControllerStateChangeMessage();
 
    private final AtomicReference<QuadrupedForceControllerRequestedEvent> requestedEvent = new AtomicReference<>();
 
@@ -340,20 +344,18 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedForceControllerEnum.STEPPING,
                             QuadrupedForceControllerEnum.STAND_PREP);
 
-      /*
-      factory.addStateChangedListener(new StateChangedListener<HighLevelControllerName>()
+      factory.addStateChangedListener(new StateChangedListener<QuadrupedForceControllerEnum>()
       {
          @Override
-         public void stateChanged(HighLevelControllerName from, HighLevelControllerName to)
+         public void stateChanged(QuadrupedForceControllerEnum from, QuadrupedForceControllerEnum to)
          {
             byte fromByte = from == null ? -1 : from.toByte();
             byte toByte = to == null ? -1 : to.toByte();
-            highLevelStateChangeStatusMessage.setInitialHighLevelControllerName(fromByte);
-            highLevelStateChangeStatusMessage.setEndHighLevelControllerName(toByte);
-            statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
+            quadrupedControllerStateChangeMessage.setInitialControllerName(fromByte);
+            quadrupedControllerStateChangeMessage.setEndControllerName(toByte);
+            statusMessageOutputManager.reportStatusMessage(quadrupedControllerStateChangeMessage);
          }
       });
-      */
 
       return factory.build(initialState);
    }
