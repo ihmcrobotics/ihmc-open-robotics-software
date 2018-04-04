@@ -3,10 +3,15 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 import java.util.ArrayList;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.LidarScanMessagePubSubType;
 import controller_msgs.msg.dds.PlanarRegionMessage;
+import controller_msgs.msg.dds.PlanarRegionMessagePubSubType;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
 import controller_msgs.msg.dds.RequestLidarScanMessage;
+import controller_msgs.msg.dds.RequestLidarScanMessagePubSubType;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessagePubSubType;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
@@ -17,7 +22,10 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.idl.IDLSequence;
+import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
+import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotEnvironmentAwareness.communication.APIFactory.APIElementId;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoxMessage;
@@ -90,14 +98,34 @@ public class REACommunicationKryoNetClassLists
 
       publicNetClassList.registerPacketField(float[].class);
       publicNetClassList.registerPacketField(ArrayList.class);
+      publicNetClassList.registerPacketField(Point3D.class);
       publicNetClassList.registerPacketField(Point3D32.class);
       publicNetClassList.registerPacketField(Point2D32.class);
       publicNetClassList.registerPacketField(Vector3D32.class);
       publicNetClassList.registerPacketField(Quaternion32.class);
+      publicNetClassList.registerPacketField(Quaternion.class);
       publicNetClassList.registerPacketField(Point2D32[].class);
       publicNetClassList.registerPacketField(PlanarRegionsRequestType.class);
 
       publicNetClassList.registerPacketField(PlanarRegionMessage.class);
+
+      publicNetClassList.registerPacketField(RequestPlanarRegionsListMessagePubSubType.class);
+      publicNetClassList.registerPacketField(RequestLidarScanMessagePubSubType.class);
+      publicNetClassList.registerPacketField(PlanarRegionsListMessagePubSubType.class);
+      publicNetClassList.registerPacketField(LidarScanMessagePubSubType.class);
+      publicNetClassList.registerPacketField(PlanarRegionMessagePubSubType.class);
+
+      publicNetClassList.registerPacketField(IDLSequence.Object.class);
+      publicNetClassList.registerPacketField(IDLSequence.Float.class);
+      publicNetClassList.registerPacketField(IDLSequence.Boolean.class);
+      publicNetClassList.registerPacketField(IDLSequence.Double.class);
+      publicNetClassList.registerPacketField(IDLSequence.Integer.class);
+      publicNetClassList.registerPacketField(IDLSequence.Byte.class);
+      publicNetClassList.registerPacketField(IDLSequence.Long.class);
+      publicNetClassList.registerPacketField(IDLSequence.StringBuilderHolder.class);
+      publicNetClassList.registerPacketField(TopicDataType.class);
+      publicNetClassList.registerPacketField(RecyclingArrayListPubSub.class);
+      publicNetClassList.registerPacketField(us.ihmc.idl.CDR.class);
    }
 
    public static NetClassList getPublicNetClassList()
