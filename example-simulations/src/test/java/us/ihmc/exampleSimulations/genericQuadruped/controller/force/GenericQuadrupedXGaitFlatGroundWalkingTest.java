@@ -17,36 +17,32 @@ public class GenericQuadrupedXGaitFlatGroundWalkingTest extends QuadrupedXGaitFl
       return new GenericQuadrupedTestFactory();
    }
    
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 125.8)
    @Test(timeout = 630000)
    public void testWalkingForwardFast()
    {
-      super.testWalkingForwardFast();
+      super.testFlatGroundWalking(0.8);
    }
    
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 144.6)
    @Test(timeout = 720000)
    public void testWalkingForwardSlow()
    {
-      super.testWalkingForwardSlow();
+      super.testFlatGroundWalking(0.1);
    }
    
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 91.4)
    @Test(timeout = 460000)
    public void testWalkingBackwardsFast()
    {
-      super.testWalkingBackwardsFast();
+      super.testFlatGroundWalking(-0.8);
    }
    
-   @Override
    @ContinuousIntegrationTest(estimatedDuration = 133.1)
    @Test(timeout = 670000)
    public void testWalkingBackwardsSlow()
    {
-      super.testWalkingBackwardsSlow();
+      super.testFlatGroundWalking(-0.1);
    }
    
    @Override
