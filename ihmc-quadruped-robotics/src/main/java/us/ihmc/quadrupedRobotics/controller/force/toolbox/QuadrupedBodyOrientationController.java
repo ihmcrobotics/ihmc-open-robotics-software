@@ -15,36 +15,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedBodyOrientationController
 {
-   public static class Setpoints
-   {
-      private final FrameQuaternion bodyOrientation = new FrameQuaternion();
-      private final FrameVector3D bodyAngularVelocity = new FrameVector3D();
-      private final FrameVector3D comTorqueFeedforward = new FrameVector3D();
-
-      public void initialize(FrameQuaternionReadOnly bodyOrientation)
-      {
-         this.bodyOrientation.setIncludingFrame(bodyOrientation);
-         this.bodyOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-         bodyAngularVelocity.setToZero();
-         comTorqueFeedforward.setToZero();
-      }
-
-      public FrameQuaternion getBodyOrientation()
-      {
-         return bodyOrientation;
-      }
-
-      public FrameVector3D getBodyAngularVelocity()
-      {
-         return bodyAngularVelocity;
-      }
-
-      public FrameVector3D getComTorqueFeedforward()
-      {
-         return comTorqueFeedforward;
-      }
-   }
-
    private final ReferenceFrame bodyFrame;
    private final AxisAngleOrientationController bodyOrientationController;
    private final DefaultYoPID3DGains bodyOrientationControllerGains;

@@ -12,7 +12,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBod
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedBodyOrientationController;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
@@ -27,7 +26,6 @@ public class QuadrupedBodyOrientationManager
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final QuadrupedBodyOrientationController.Setpoints setpoints = new QuadrupedBodyOrientationController.Setpoints();
    private final QuadrupedBodyOrientationController controller;
    private final YoPID3DGains gains;
 
@@ -51,8 +49,7 @@ public class QuadrupedBodyOrientationManager
 
    private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
 
-   public QuadrupedBodyOrientationManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
-                                          YoVariableRegistry parentRegistry)
+   public QuadrupedBodyOrientationManager(QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
 
@@ -86,7 +83,10 @@ public class QuadrupedBodyOrientationManager
 
    public void initialize(FrameQuaternionReadOnly bodyOrientationEstimate)
    {
-      setpoints.initialize(bodyOrientationEstimate);
+      desiredBodyOrientation.setIncludingFrame(bodyOrientationEstimate);
+      desiredBodyAngularVelocity.setToZero();
+      desiredBodyAngularAcceleration.setToZero();
+      desiredBodyFeedForwardTorque.setToZero();
       controller.reset();
    }
 
