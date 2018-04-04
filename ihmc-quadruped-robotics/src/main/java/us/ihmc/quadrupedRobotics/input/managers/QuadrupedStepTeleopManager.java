@@ -70,9 +70,7 @@ public class QuadrupedStepTeleopManager
       }
       else if(standingRequested.getAndSet(false))
       {
-         QuadrupedRequestedSteppingStateMessage stopWalkingPacket = new QuadrupedRequestedSteppingStateMessage();
-         stopWalkingPacket.setQuadrupedSteppingState(QuadrupedSteppingRequestedEvent.REQUEST_STAND.toByte());
-         packetCommunicator.send(stopWalkingPacket);
+         requestStopWalking();
          walking.set(false);
       }
       else if (isInStepState() && walking.getBooleanValue())
@@ -94,6 +92,13 @@ public class QuadrupedStepTeleopManager
       QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
       controllerMessage.setQuadrupedControllerName(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING.toByte());
       packetCommunicator.send(controllerMessage);
+   }
+
+   public void requestStopWalking()
+   {
+      QuadrupedRequestedSteppingStateMessage steppingMessage = new QuadrupedRequestedSteppingStateMessage();
+      steppingMessage.setQuadrupedSteppingState(QuadrupedSteppingRequestedEvent.REQUEST_STAND.toByte());
+      packetCommunicator.send(steppingMessage);
    }
 
    public void requestXGait()
