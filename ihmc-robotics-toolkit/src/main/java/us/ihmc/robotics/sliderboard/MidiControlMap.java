@@ -9,24 +9,6 @@ package us.ihmc.robotics.sliderboard;
 public interface MidiControlMap
 {
    /**
-    * Gets the MIDI control channel (between 0 and 127) associated with the given knob index for a
-    * sliderboard.
-    *
-    * @param knobIndex the index of a knob on the sliderboard.
-    * @return the MIDI control channel associated with the knob index.
-    */
-   int getKnobChannel(int knobIndex);
-
-   /**
-    * Gets the knob index of the provided MIDI control channel. This is the inverse function of
-    * {@link #getKnobChannel(int)}.
-    *
-    * @param knobChannel the MIDI channel associated with a knob on the slider board.
-    * @return the index of the knob corresponding to the provided MIDI channel.
-    */
-   int getKnobIndex(int knobChannel);
-
-   /**
     * Gets the MIDI control channel (between 0 and 127) associated with the given slider index for a
     * sliderboard.
     *

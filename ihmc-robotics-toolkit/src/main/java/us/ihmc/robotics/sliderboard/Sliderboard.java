@@ -1,7 +1,5 @@
 package us.ihmc.robotics.sliderboard;
 
-import java.util.Random;
-
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiSystem;
@@ -11,7 +9,6 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Transmitter;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.robotics.sliderboard.boards.SliderboardType;
 
 /**
@@ -171,25 +168,4 @@ public class Sliderboard
       }
    }
 
-   public static void main(String[] args)
-   {
-      Sliderboard sliderboard = new Sliderboard();
-
-      for (int slider = 0; slider < 8; slider++)
-      {
-         int sliderIndex = slider;
-         sliderboard.addListener(value -> PrintTools.info("Slider " + sliderIndex + " moved to: " + value), slider);
-      }
-
-      Random random = new Random();
-      for (int i = 0; i < 10; i++)
-      {
-         sliderboard.setSliderValue(random.nextDouble(), random.nextInt(8));
-         ThreadTools.sleep(100);
-      }
-
-      ThreadTools.sleep(10000);
-
-      sliderboard.close();
-   }
 }
