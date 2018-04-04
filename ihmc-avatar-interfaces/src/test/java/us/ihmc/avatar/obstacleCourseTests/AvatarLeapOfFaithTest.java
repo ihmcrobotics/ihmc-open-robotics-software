@@ -283,7 +283,7 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
    }
 
 
-   public void testUnknownStepDownOneFootOnEachStepWithUncertainty(double stepDownHeight) throws SimulationExceededMaximumTimeException
+   public void testUnknownStepDownOneFootOnEachStepWithUncertainty(double stepDownHeight, double stepLength, double stairLength) throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
@@ -291,9 +291,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       double transferTime = 0.2;
 
       int numberOfStepsDown = 5;
-      double stepLength = 0.38;
 
-      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
+      SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stairLength, stepDownHeight);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setTestEnvironment(stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
