@@ -43,21 +43,21 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   public void testWalkingOverShallowRamps() throws IOException
+   public void testWalkingOverShallowRamps(double comHeightForRoughTerrain) throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.075, 0.75, 1.2);
       
-      walkOverRamps(groundProfile);
+      walkOverRamps(groundProfile, comHeightForRoughTerrain);
    }
 
-   public void testWalkingOverAggressiveRamps() throws IOException
+   public void testWalkingOverAggressiveRamps(double comHeightForRoughTerrain) throws IOException
    {
       RampsGroundProfile groundProfile = new RampsGroundProfile(0.15, 0.75, 1.2);
       
-      walkOverRamps(groundProfile);
+      walkOverRamps(groundProfile, comHeightForRoughTerrain);
    }
 
-   private void walkOverRamps(RampsGroundProfile groundProfile) throws IOException, AssertionFailedError
+   private void walkOverRamps(RampsGroundProfile groundProfile, double comHeightForRoughTerrain) throws IOException, AssertionFailedError
    {
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
@@ -73,7 +73,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.30);
       stepTeleopManager.getXGaitSettings().setStepDuration(0.35);
       stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.1);
-      poseTeleopManager.setDesiredCoMHeight(0.575);
+      poseTeleopManager.setDesiredCoMHeight(comHeightForRoughTerrain);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
