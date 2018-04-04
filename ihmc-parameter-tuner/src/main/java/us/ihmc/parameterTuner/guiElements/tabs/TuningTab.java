@@ -12,6 +12,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Pair;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
 import us.ihmc.robotics.sliderboard.Sliderboard;
 
@@ -107,14 +108,14 @@ public class TuningTab extends Tab
       tuningBox.setSliderboard(sliderboard);
    }
 
-   public void handleNewParameter(String uniqueName)
+   public void handleNewParameter(String uniqueName, int sliderIndex)
    {
-      tuningBox.handleNewParameter(uniqueName);
+      tuningBox.handleNewParameter(uniqueName, sliderIndex);
    }
 
-   public List<String> getParameterUniqueNames()
+   public List<Pair<String, Integer>> getParameterSavingInfo()
    {
-      return tuningBox.getParameterUniqueNames();
+      return tuningBox.getParameterSavingInfo();
    }
 
    private void hide()

@@ -17,13 +17,15 @@ public class SliderButton extends Button
    private boolean isActive = false;
 
    private ParameterChangeListener listener;
-   private int sliderIndex = -1;
+   private int sliderIndex;
 
    private Tuner tuner;
    private Sliderboard sliderboard;
 
-   public SliderButton()
+   public SliderButton(int initialSliderIndex)
    {
+      sliderIndex = initialSliderIndex;
+
       Image sliderImage = new Image(SliderButton.class.getResourceAsStream("/sliders.png"));
       sliderGraphic = new ImageView(sliderImage);
 
@@ -144,5 +146,10 @@ public class SliderButton extends Button
 
       this.tuner = null;
       this.sliderboard = null;
+   }
+
+   public int getIndex()
+   {
+      return sliderIndex;
    }
 }

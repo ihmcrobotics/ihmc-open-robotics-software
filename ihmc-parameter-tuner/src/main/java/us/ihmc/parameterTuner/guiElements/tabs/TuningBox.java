@@ -27,6 +27,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Pair;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
@@ -60,7 +61,7 @@ public class TuningBox extends VBox
       moveImage = new Image(TuningBox.class.getResourceAsStream("/move.png"));
    }
 
-   public void handleNewParameter(String uniqueName)
+   public void handleNewParameter(String uniqueName, int sliderIndex)
    {
       if (parametersBeingTuned.contains(uniqueName))
       {
@@ -89,7 +90,7 @@ public class TuningBox extends VBox
          updateView();
       });
 
-      sliderButtons.put(uniqueName, new SliderButton());
+      sliderButtons.put(uniqueName, new SliderButton(sliderIndex));
 
       Label drag = new Label();
       ImageView moveGraphic = new ImageView(moveImage);
@@ -218,8 +219,13 @@ public class TuningBox extends VBox
       });
    }
 
-   public List<String> getParameterUniqueNames()
+   public List<Pair<String, Integer>> getParameterSavingInfo()
    {
-      return Collections.unmodifiableList(parametersBeingTuned);
+      List<Pair<String, Integer>> info = new ArrayList<>();
+      parametersBeingTuned.forEach(uniqueName -> {
+         int sliderIndex = sliderButtons.get(uniqueName).getIndex();
+         info.add(new Pair<>(uniqueName, new Integer(sliderIndex)));
+      });
+      return Collections.unmodifiableList(info);
    }
 }
