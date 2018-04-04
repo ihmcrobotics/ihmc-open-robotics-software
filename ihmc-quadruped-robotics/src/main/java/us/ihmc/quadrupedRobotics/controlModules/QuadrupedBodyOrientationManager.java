@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedBodyOrientationController;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
@@ -17,8 +18,12 @@ import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.trajectories.SimpleOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class QuadrupedBodyOrientationManager
 {
@@ -31,23 +36,32 @@ public class QuadrupedBodyOrientationManager
 
    private final ParameterizedPID3DGains bodyOrientationGainsParameter;
 
-   private final QuadrupedPostureInputProviderInterface postureProvider;
+   private final MultipleWaypointsOrientationTrajectoryGenerator bodyOrientationTrajectory;
+
    private final GroundPlaneEstimator groundPlaneEstimator;
 
    private final FrameQuaternion bodyOrientationReference;
    private final OrientationFrame bodyOrientationReferenceFrame;
 
+   private final FrameQuaternion desiredBodyOrientation;
+   private final FrameVector3D desiredBodyAngularVelocity;
+   private final FrameVector3D desiredBodyAngularAcceleration;
+   private final FrameVector3D desiredBodyFeedForwardTorque;
+
+   private final YoDouble robotTimestamp;
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
    private final MomentumRateCommand angularMomentumCommand = new MomentumRateCommand();
    private final YoFrameVector bodyAngularWeight = new YoFrameVector("bodyAngularWeight", worldFrame, registry);
+
    private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
 
    public QuadrupedBodyOrientationManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
                                           YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
-      this.postureProvider = postureProvider;
+
+      robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
 
       DefaultPID3DGains bodyOrientationDefaultGains = new DefaultPID3DGains();
       bodyOrientationDefaultGains.setProportionalGains(1000.0, 1000.0, 1000.0);
@@ -62,6 +76,14 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationReference = new FrameQuaternion();
       bodyOrientationReferenceFrame = new OrientationFrame(bodyOrientationReference);
 
+      bodyOrientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("bodyTrajectory", bodyOrientationReferenceFrame, registry);
+
+      desiredBodyOrientation = new FrameQuaternion(bodyOrientationReferenceFrame);
+      desiredBodyAngularVelocity = new FrameVector3D(bodyOrientationReferenceFrame);
+      desiredBodyAngularAcceleration = new FrameVector3D(bodyOrientationReferenceFrame);
+
+      desiredBodyFeedForwardTorque = new FrameVector3D();
+
       bodyAngularWeight.set(2.5, 2.5, 1.0);
       angularMomentumCommand.setAngularWeights(bodyAngularWeight);
       angularMomentumCommand.setSelectionMatrixForAngularControl();
@@ -75,6 +97,11 @@ public class QuadrupedBodyOrientationManager
       controller.reset();
    }
 
+   public void handleBodyOrientationCommand(QuadrupedBodyOrientationCommand command)
+   {
+      bodyOrientationTrajectory.appendWaypoints(command.getSO3Trajectory().getTrajectoryPointList());
+   }
+
    public void compute(FrameQuaternionReadOnly bodyOrientationDesired)
    {
       gains.set(bodyOrientationGainsParameter);
@@ -83,18 +110,21 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationReference.changeFrame(bodyOrientationReferenceFrame.getParent());
       bodyOrientationReferenceFrame.setOrientationAndUpdate(bodyOrientationReference);
 
-      setpoints.getBodyOrientation().changeFrame(bodyOrientationReferenceFrame);
-      setpoints.getBodyOrientation().set(postureProvider.getBodyOrientationInput());
-      setpoints.getBodyOrientation().changeFrame(worldFrame);
-      double bodyOrientationYaw = setpoints.getBodyOrientation().getYaw();
-      double bodyOrientationPitch = setpoints.getBodyOrientation().getPitch() + groundPlaneEstimator.getPitch(bodyOrientationYaw);
-      double bodyOrientationRoll = setpoints.getBodyOrientation().getRoll();
-      setpoints.getBodyOrientation().setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
+      bodyOrientationTrajectory.compute(robotTimestamp.getDoubleValue());
 
-      setpoints.getBodyAngularVelocity().set(postureProvider.getBodyAngularRateInput());
-      setpoints.getComTorqueFeedforward().setToZero();
+      desiredBodyOrientation.changeFrame(bodyOrientationReferenceFrame);
+      bodyOrientationTrajectory.getAngularData(desiredBodyOrientation, desiredBodyAngularVelocity, desiredBodyAngularAcceleration);
+      desiredBodyOrientation.changeFrame(worldFrame);
 
-      controller.compute(desiredAngularMomentumRate, setpoints, controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity());
+      double bodyOrientationYaw = desiredBodyOrientation.getYaw();
+      double bodyOrientationPitch = desiredBodyOrientation.getPitch() + groundPlaneEstimator.getPitch(bodyOrientationYaw);
+      double bodyOrientationRoll = desiredBodyOrientation.getRoll();
+      desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
+
+      desiredBodyFeedForwardTorque.setToZero();
+
+      controller.compute(desiredAngularMomentumRate, desiredBodyOrientation, desiredBodyAngularVelocity, desiredBodyFeedForwardTorque,
+                         controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity());
 
       desiredAngularMomentumRate.changeFrame(worldFrame);
       angularMomentumCommand.setAngularMomentumRate(desiredAngularMomentumRate);
