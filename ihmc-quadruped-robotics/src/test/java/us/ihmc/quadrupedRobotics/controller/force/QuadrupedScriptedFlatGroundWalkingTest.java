@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
+import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import org.junit.After;
@@ -11,8 +13,6 @@ import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerStatePacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingStatePacket;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -60,12 +60,15 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
-      PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new QuadrupedNetClassList());
+      PacketCommunicator packetCommunicator = PacketCommunicator
+            .createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, new QuadrupedNetClassList());
       AtomicReference<QuadrupedForceControllerEnum> controllerState = new AtomicReference<>();
       AtomicReference<QuadrupedSteppingStateEnum> steppingState = new AtomicReference<>();
-      packetCommunicator.attachListener(QuadrupedForceControllerStatePacket.class, packet -> controllerState.set(packet.get()));
+      packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class,
+                                        packet -> controllerState.set(QuadrupedForceControllerEnum.fromByte(packet.getEndControllerName())));
 
-      packetCommunicator.attachListener(QuadrupedSteppingStatePacket.class, packet -> steppingState.set(packet.get()));
+      packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class,
+                                        packet -> steppingState.set(QuadrupedSteppingStateEnum.fromByte(packet.getEndSteppingControllerName())));
       packetCommunicator.connect();
 
       QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING);
@@ -78,7 +81,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       packetCommunicator.send(message);
 
       boolean isStanding = true;
-      while(isStanding)
+      while (isStanding)
       {
          conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
          conductor.simulate();
@@ -86,7 +89,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       }
 
       boolean isStepping = true;
-      while(isStepping)
+      while (isStepping)
       {
          conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
          conductor.simulate();
