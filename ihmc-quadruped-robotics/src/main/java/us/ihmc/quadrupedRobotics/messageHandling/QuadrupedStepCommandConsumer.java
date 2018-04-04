@@ -2,8 +2,10 @@ package us.ihmc.quadrupedRobotics.messageHandling;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.CommandConsumerWithDelayBuffers;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
+import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 
@@ -13,12 +15,16 @@ public class QuadrupedStepCommandConsumer
 
    private final CommandConsumerWithDelayBuffers commandConsumerWithDelayBuffers;
 
+   private final QuadrupedBodyOrientationManager bodyOrientationManager;
+
    public QuadrupedStepCommandConsumer(CommandInputManager commandInputManager, QuadrupedStepMessageHandler stepMessageHandler,
                                        QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory managerFactory)
    {
       this.stepMessageHandler = stepMessageHandler;
       this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager,
                                                                                  controllerToolbox.getRuntimeEnvironment().getRobotTimestamp());
+
+      bodyOrientationManager = managerFactory.getOrCreateBodyOrientationManager();
    }
 
    public void update()
@@ -35,6 +41,14 @@ public class QuadrupedStepCommandConsumer
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SoleTrajectoryCommand.class))
       {
          stepMessageHandler.handleSoleTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewCommands(SoleTrajectoryCommand.class));
+      }
+   }
+
+   public void consumeBodyCommands()
+   {
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(QuadrupedBodyOrientationCommand.class))
+      {
+         bodyOrientationManager.handleBodyOrientationCommand(commandConsumerWithDelayBuffers.pollNewestCommand(QuadrupedBodyOrientationCommand.class));
       }
    }
 }
