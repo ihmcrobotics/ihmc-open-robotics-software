@@ -2,7 +2,6 @@ package us.ihmc.quadrupedRobotics.controller.position;
 
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -12,27 +11,22 @@ import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlController;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionDoNothingController;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionJointInitializationController;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionStandPrepController;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionStandReadyController;
+import us.ihmc.quadrupedRobotics.controller.position.states.*;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
-import us.ihmc.tools.thread.CloseableAndDisposable;
-import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.util.PeriodicThreadScheduler;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
+import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal finite state
@@ -57,7 +51,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
       commandInputManager = new CommandInputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands());
       try
       {
-         commandInputManager.registerConversionHelper(new ClearDelayQueueConverter(ControllerAPIDefinition.getControllerSupportedCommands()));
+         commandInputManager.registerConversionHelper(new ClearDelayQueueConverter(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands()));
       }
       catch (InstantiationException | IllegalAccessException e)
       {

@@ -177,9 +177,6 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
 
-      commandConsumer.update();
-      commandConsumer.consumeFootCommands();
-
       if (commandInputManager.isNewCommandAvailable(QuadrupedRequestedSteppingStateCommand.class))
       {
          requestedEvent.set(commandInputManager.pollNewestCommand(QuadrupedRequestedSteppingStateCommand.class).getRequestedSteppingState());
@@ -191,6 +188,9 @@ public class QuadrupedSteppingState implements QuadrupedController
          lastEvent.set(reqEvent);
          trigger.fireEvent(reqEvent);
       }
+
+      commandConsumer.update();
+      commandConsumer.consumeFootCommands();
 
       if (stepMessageHandler.isStepPlanAvailable())
       {
