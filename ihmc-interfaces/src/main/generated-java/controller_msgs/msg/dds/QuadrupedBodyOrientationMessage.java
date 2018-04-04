@@ -19,6 +19,10 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
     */
    public long sequence_id_;
    /**
+    * If true, the times are expressed in absolute time relative to the robot start
+    */
+   public boolean is_expressed_in_absolute_time_ = true;
+   /**
     * The orientation trajectory information.
     */
    public controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
@@ -37,6 +41,8 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
    public void set(QuadrupedBodyOrientationMessage other)
    {
       sequence_id_ = other.sequence_id_;
+
+      is_expressed_in_absolute_time_ = other.is_expressed_in_absolute_time_;
 
       controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
    }
@@ -58,6 +64,22 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
    }
 
    /**
+    * If true, the times are expressed in absolute time relative to the robot start
+    */
+   public void setIsExpressedInAbsoluteTime(boolean is_expressed_in_absolute_time)
+   {
+      is_expressed_in_absolute_time_ = is_expressed_in_absolute_time;
+   }
+
+   /**
+    * If true, the times are expressed in absolute time relative to the robot start
+    */
+   public boolean getIsExpressedInAbsoluteTime()
+   {
+      return is_expressed_in_absolute_time_;
+   }
+
+   /**
     * The orientation trajectory information.
     */
    public controller_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
@@ -74,6 +96,9 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
          return true;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_expressed_in_absolute_time_, other.is_expressed_in_absolute_time_, epsilon))
          return false;
 
       if (!this.so3_trajectory_.epsilonEquals(other.so3_trajectory_, epsilon))
@@ -97,6 +122,9 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
       if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
 
+      if (this.is_expressed_in_absolute_time_ != otherMyClass.is_expressed_in_absolute_time_)
+         return false;
+
       if (!this.so3_trajectory_.equals(otherMyClass.so3_trajectory_))
          return false;
 
@@ -111,6 +139,9 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
       builder.append("QuadrupedBodyOrientationMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);
+      builder.append(", ");
+      builder.append("is_expressed_in_absolute_time=");
+      builder.append(this.is_expressed_in_absolute_time_);
       builder.append(", ");
       builder.append("so3_trajectory=");
       builder.append(this.so3_trajectory_);

@@ -11,6 +11,7 @@ import java.util.Random;
 public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOrientationCommand, QuadrupedBodyOrientationMessage>,
       FrameBasedCommand<QuadrupedBodyOrientationMessage>, EpsilonComparable<QuadrupedBodyOrientationCommand>
 {
+   private boolean isExpressedInAbsoluteTime;
    private final SO3TrajectoryControllerCommand so3Trajectory;
 
    public QuadrupedBodyOrientationCommand()
@@ -26,24 +27,28 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    @Override
    public void clear()
    {
+      isExpressedInAbsoluteTime = true;
       so3Trajectory.clear();
    }
 
    @Override
    public void set(QuadrupedBodyOrientationCommand other)
    {
+      isExpressedInAbsoluteTime = other.isExpressedInAbsoluteTime;
       so3Trajectory.set(other.so3Trajectory);
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyOrientationMessage message)
    {
+      isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
       so3Trajectory.set(resolver, message.getSo3Trajectory());
    }
 
    @Override
    public void set(QuadrupedBodyOrientationMessage message)
    {
+      isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
       so3Trajectory.set(message.getSo3Trajectory());
    }
 
@@ -51,7 +56,12 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    @Override
    public boolean epsilonEquals(QuadrupedBodyOrientationCommand other, double epsilon)
    {
-      return so3Trajectory.epsilonEquals(other.so3Trajectory, epsilon);
+      return isExpressedInAbsoluteTime == other.isExpressedInAbsoluteTime && so3Trajectory.epsilonEquals(other.so3Trajectory, epsilon);
+   }
+
+   public boolean isExpressedInAbsoluteTime()
+   {
+      return isExpressedInAbsoluteTime;
    }
 
    public SO3TrajectoryControllerCommand getSO3Trajectory()
