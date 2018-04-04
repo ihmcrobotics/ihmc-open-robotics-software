@@ -54,58 +54,30 @@ public abstract class QuadrupedXGaitFlatGroundWalkingTest implements QuadrupedMu
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
-   public void testWalkingForwardFast()
+   public void testFlatGroundWalking(double walkingSpeed)
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
+      double walkTime = 5.0;
       stepTeleopManager.requestXGait();
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(90.0);
-      stepTeleopManager.setDesiredVelocity(1.0, 0.0, 0.0);
+      stepTeleopManager.setDesiredVelocity(walkingSpeed, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 8.0));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.0));
-      conductor.simulate();
-   }
-   
-   public void testWalkingForwardSlow()
-   {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+      conductor.addTerminalGoal(YoVariableTestGoal.timeInFuture(variables.getYoTime(), walkTime));
 
-      stepTeleopManager.requestXGait();
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(90.0);
-      stepTeleopManager.setDesiredVelocity(0.1, 0.0, 0.0);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 0.3));
-      conductor.simulate();
-   }
-   
-   public void testWalkingBackwardsFast()
-   {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+      double finalPositionX = walkTime * walkingSpeed * 0.7;
+      if(walkingSpeed > 0.0)
+      {
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), finalPositionX));
+      }
+      else
+      {
+         conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), finalPositionX));
+      }
 
-      stepTeleopManager.requestXGait();
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(90.0);
-      stepTeleopManager.setDesiredVelocity(-1.0, 0.0, 0.0);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 10.0));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -2.0));
       conductor.simulate();
    }
-   
-   public void testWalkingBackwardsSlow()
-   {
-      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
 
-      stepTeleopManager.requestXGait();
-      stepTeleopManager.getXGaitSettings().setEndPhaseShift(90.0);
-      stepTeleopManager.setDesiredVelocity(-0.1, 0.0, 0.0);
-      conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(YoVariableTestGoal.doubleLessThan(variables.getYoTime(), 14.0));
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), -0.4));
-      conductor.simulate();
-   }
-   
    public void testWalkingInAForwardLeftCircle()
    {
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
