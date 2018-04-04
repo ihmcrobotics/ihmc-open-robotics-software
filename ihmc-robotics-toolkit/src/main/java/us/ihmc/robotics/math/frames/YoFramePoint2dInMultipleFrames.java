@@ -116,7 +116,7 @@ public class YoFramePoint2dInMultipleFrames extends YoFramePoint2d implements Yo
             public void notifyOfVariableChange(YoVariable<?> v)
             {
                localFramePoint.setIncludingFrame(YoFramePoint2dInMultipleFrames.this);
-               point.setAndMatchFrame(localFramePoint);
+               point.setMatchingFrame(localFramePoint);
             }
          });
       }

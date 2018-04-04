@@ -247,6 +247,6 @@ public class FootStepPlanner
 
       }
       polygon.update();
-      yoFramePolygon.setConvexPolygon2d(polygon);
+      yoFramePolygon.set(polygon);
    }
 }

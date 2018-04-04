@@ -237,7 +237,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       desiredContactPosition.checkReferenceFrameMatch(desiredContactFrame.getParent());
       desiredContactOrientation.checkReferenceFrameMatch(desiredContactFrame.getParent());
       desiredContactFrame.setPoseAndUpdate(desiredContactPosition, desiredContactOrientation);
-      contactPointInWorld.setAndMatchFrame(contactPoint);
+      contactPointInWorld.setMatchingFrame(contactPoint);
 
       // assemble the selection matrices for the controller core commands
       accelerationSelectionMatrix.resetSelection();

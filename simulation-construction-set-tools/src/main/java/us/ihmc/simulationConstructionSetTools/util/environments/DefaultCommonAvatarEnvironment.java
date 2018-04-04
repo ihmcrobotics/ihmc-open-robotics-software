@@ -8,6 +8,7 @@ import java.util.Random;
 import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -1457,7 +1458,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
          vertexPoints.add(point2d);
       }
 
-      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertexPoints);
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(vertexPoints));
       RotatableConvexPolygonTerrainObject rock = new RotatableConvexPolygonTerrainObject(normal, convexPolygon, centroidHeight, rockAppearance);
       combinedTerrainObject.addTerrainObject(rock);
    }

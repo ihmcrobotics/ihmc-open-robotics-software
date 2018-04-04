@@ -176,8 +176,8 @@ public class QuadrupedDcmBasedMpcOptimizationWithLaneChange implements Quadruped
       stepAdjustmentVector.setElement(1, u.get(rowOffset++, 0));
 
       // Update logging variables
-      yoCmpPositionSetpoint.setAndMatchFrame(cmpPositionSetpoint);
-      yoStepAdjustmentVector.setAndMatchFrame(stepAdjustmentVector);
+      yoCmpPositionSetpoint.setMatchingFrame(cmpPositionSetpoint);
+      yoStepAdjustmentVector.setMatchingFrame(stepAdjustmentVector);
    }
 
    private void initializeCostTerms(QuadrantDependentList<ContactState> currentContactState, QuadrupedMpcOptimizationWithLaneChangeSettings settings)

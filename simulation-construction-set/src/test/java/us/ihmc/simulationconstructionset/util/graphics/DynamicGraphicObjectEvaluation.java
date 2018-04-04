@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.util.graphics;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -14,7 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -23,6 +23,7 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class DynamicGraphicObjectEvaluation
 {
@@ -53,7 +54,7 @@ public class DynamicGraphicObjectEvaluation
          {0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}, {0.5, 1.2}, {0.5, -0.2}
       };
 
-      ConvexPolygon2D polygon = new ConvexPolygon2D(pointList);
+      ConvexPolygon2D polygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointList));
 
       AppearanceDefinition appearance = YoAppearance.Red();
       appearance.setTransparency(0.8);
@@ -61,7 +62,7 @@ public class DynamicGraphicObjectEvaluation
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       int maxNumberOfVertices = polygon.getNumberOfVertices();
       final YoFrameConvexPolygon2d yoPolygon = new YoFrameConvexPolygon2d("PolyPoints", "", worldFrame, maxNumberOfVertices, registry);
-      yoPolygon.setConvexPolygon2d(polygon);
+      yoPolygon.set(polygon);
       YoFramePose yoPolyOrigin = new YoFramePose("PolyOrigin", worldFrame, registry);
       YoGraphicPolygon yoGraphicPolygon = new YoGraphicPolygon("Polygon", yoPolygon, yoPolyOrigin, 3.0, appearance);
       yoPolyOrigin.setXYZ(0.1, 0.2, 1.0);
@@ -141,11 +142,11 @@ public class DynamicGraphicObjectEvaluation
             {
                quickPause();
 
-               ConvexPolygon2D newPolygon = new ConvexPolygon2D(secondPointList);
-               yoPolygon.setConvexPolygon2d(newPolygon);
+               ConvexPolygon2D newPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(secondPointList));
+               yoPolygon.set(newPolygon);
 
-               ConvexPolygon2D newYoPolygon = new ConvexPolygon2D(pointList);
-               yoFramePolygon.setConvexPolygon2d(newYoPolygon);
+               ConvexPolygon2D newYoPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointList));
+               yoFramePolygon.set(newYoPolygon);
                yoGraphicYoFramePolygon.update();
 
                Vector3D eulerAngles = new Vector3D();
@@ -159,12 +160,12 @@ public class DynamicGraphicObjectEvaluation
                scs.tickAndUpdate();
 
                quickPause();
-               newPolygon = new ConvexPolygon2D(pointList);
-               yoPolygon.setConvexPolygon2d(newPolygon);
+               newPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointList));
+               yoPolygon.set(newPolygon);
                yoGraphicYoFramePolygon.update();
 
-               newYoPolygon = new ConvexPolygon2D(secondPointList);
-               yoFramePolygon.setConvexPolygon2d(newYoPolygon);
+               newYoPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(secondPointList));
+               yoFramePolygon.set(newYoPolygon);
 
                yoGraphicText.setText("GoodBye");
                yoGraphicText.update();

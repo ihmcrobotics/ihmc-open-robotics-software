@@ -37,7 +37,7 @@ public class YoSE3ConfigurationProvider implements SE3ConfigurationProvider
 
    public void setPose(FramePose3D pose)
    {
-      this.position.setAndMatchFrame(pose.getPosition());
-      this.orientation.setAndMatchFrame(pose.getOrientation());
+      this.position.setMatchingFrame(pose.getPosition());
+      this.orientation.setMatchingFrame(pose.getOrientation());
    }
 }

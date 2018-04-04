@@ -19,6 +19,7 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -620,13 +621,13 @@ public class FootstepSnapperSimulationTest
             robot.getRobotsYoVariableRegistry().addChild(registry);
             YoGraphicsListRegistry yoGraphicsListRegistry = footstepVisualizer.getGraphicsListRegistry();
 
-            ConvexPolygon2D polygon2d = new ConvexPolygon2D(new double[][]
+            ConvexPolygon2D polygon2d = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new double[][]
             {
                {0.1, 0.1}, {0.1, -0.1}, {-0.1, -0.1}, {-0.1, 0.1}
-            });
+            }));
 
             YoFrameConvexPolygon2d yoFrameConvexPolygon2d = new YoFrameConvexPolygon2d("plane", "", worldFrame, 4, registry);
-            yoFrameConvexPolygon2d.setConvexPolygon2d(polygon2d);
+            yoFrameConvexPolygon2d.set(polygon2d);
 
 //          YoGraphicPolygon polygonViz = new YoGraphicPolygon("plane", yoFrameConvexPolygon2d, planePose, 1.0, YoAppearance.Gold());
 //          yoGraphicsListRegistry.registerYoGraphic("Plane", polygonViz);

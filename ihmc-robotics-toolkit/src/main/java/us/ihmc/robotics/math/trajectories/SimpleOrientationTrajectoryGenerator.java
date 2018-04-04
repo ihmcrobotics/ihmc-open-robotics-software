@@ -79,12 +79,12 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
 
    public void setInitialOrientation(FrameQuaternionReadOnly initialOrientation)
    {
-      this.initialOrientation.setAndMatchFrame(initialOrientation);
+      this.initialOrientation.setMatchingFrame(initialOrientation);
    }
 
    public void setFinalOrientation(FrameQuaternionReadOnly finalOrientation)
    {
-      this.finalOrientation.setAndMatchFrame(finalOrientation);
+      this.finalOrientation.setMatchingFrame(finalOrientation);
    }
 
    public void setTrajectoryTime(double newTrajectoryTime)

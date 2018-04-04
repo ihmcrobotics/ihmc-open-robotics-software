@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.Color;
 
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class CaptureRegionVisualizer
 {
@@ -19,7 +19,7 @@ public class CaptureRegionVisualizer
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private final YoFrameConvexPolygon2d yoCaptureRegionPolygon;
-   private final FrameConvexPolygon2d captureRegionPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D captureRegionPolygon = new FrameConvexPolygon2D();
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
 
    public CaptureRegionVisualizer(OneStepCaptureRegionCalculator captureRegionCalculator, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -43,19 +43,19 @@ public class CaptureRegionVisualizer
 
    public void hide()
    {
-      yoCaptureRegionPolygon.hide();
+      yoCaptureRegionPolygon.clear();
    }
 
    public void update()
    {
-      captureRegionPolygon.setIncludingFrameAndUpdate(captureRegionCalculator.getCaptureRegion());
+      captureRegionPolygon.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
       captureRegionPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
       if (yoCaptureRegionPolygon != null)
       {
          try
          {
-            yoCaptureRegionPolygon.setFrameConvexPolygon2d(captureRegionPolygon);
+            yoCaptureRegionPolygon.set(captureRegionPolygon);
          }
          catch (Exception e)
          {

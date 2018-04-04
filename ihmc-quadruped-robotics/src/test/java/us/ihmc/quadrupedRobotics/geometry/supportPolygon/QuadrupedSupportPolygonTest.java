@@ -1,6 +1,10 @@
 package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -11,10 +15,12 @@ import com.google.caliper.api.VmOptions;
 import com.google.caliper.runner.CaliperMain;
 
 import us.ihmc.commons.Assertions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -25,8 +31,6 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -1197,7 +1201,7 @@ public class QuadrupedSupportPolygonTest
       for (int i = 0; i < 4; i++)
       {
          FramePoint3D polyPoint = poly.getFootstep(RobotQuadrant.getQuadrantNameFromOrdinal(i));
-         FramePoint2DReadOnly convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
+         FramePoint2DReadOnly convexPoint = yoFrameConvexPolygon2d.getVertex(i);
          polyPoint.checkReferenceFrameMatch(convexPoint);
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, MathTools.epsilonEquals(polyPoint.getX(), convexPoint.getX(), 1e-7));
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, MathTools.epsilonEquals(polyPoint.getY(), convexPoint.getY(), 1e-7));
@@ -1207,7 +1211,7 @@ public class QuadrupedSupportPolygonTest
       poly.packYoFrameConvexPolygon2d(yoFrameConvexPolygon2d);
       
       RobotQuadrant quadrant = poly.getFirstSupportingQuadrant();
-      FrameConvexPolygon2d expected = new FrameConvexPolygon2d(poly.getReferenceFrame());
+      FrameConvexPolygon2D expected = new FrameConvexPolygon2D(poly.getReferenceFrame());
 
       for (int i = 0; i < 3; i++)
       {
@@ -1220,9 +1224,8 @@ public class QuadrupedSupportPolygonTest
 
       for (int i = 0; i < 3; i++)
       {
-         FramePoint2DReadOnly convexPoint = yoFrameConvexPolygon2d.getFrameVertex(i);
-         FramePoint2D polyPoint = new FramePoint2D();
-         expected.getFrameVertex(i, polyPoint);
+         FramePoint2DReadOnly convexPoint = yoFrameConvexPolygon2d.getVertex(i);
+         FramePoint2D polyPoint = new FramePoint2D(expected.getVertex(i));
          assertTrue("not equal expected: " + polyPoint + " actual: " + convexPoint, polyPoint.epsilonEquals(convexPoint, 1e-7));
       }
    }

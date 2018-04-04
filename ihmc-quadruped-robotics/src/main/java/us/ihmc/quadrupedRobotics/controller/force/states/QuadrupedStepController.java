@@ -78,7 +78,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
    public void onLiftOff(RobotQuadrant thisStepQuadrant)
    {
       // update ground plane estimate
-      groundPlanePositions.get(thisStepQuadrant).setAndMatchFrame(controllerToolbox.getTaskSpaceEstimates().getSolePosition(thisStepQuadrant));
+      groundPlanePositions.get(thisStepQuadrant).setMatchingFrame(controllerToolbox.getTaskSpaceEstimates().getSolePosition(thisStepQuadrant));
       onLiftOffTriggered.set(true);
    }
 
@@ -119,7 +119,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       groundPlaneEstimator.clearContactPoints();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         groundPlanePositions.get(robotQuadrant).setAndMatchFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
+         groundPlanePositions.get(robotQuadrant).setMatchingFrame(taskSpaceEstimates.getSolePosition(robotQuadrant));
          groundPlaneEstimator.addContactPoint(groundPlanePositions.get(robotQuadrant));
       }
       groundPlaneEstimator.compute();

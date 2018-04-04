@@ -5,7 +5,9 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -14,9 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -75,7 +75,7 @@ public class PelvisICPBasedTranslationManager
    private final SideDependentList<MovingReferenceFrame> ankleZUpFrames;
 
    private final BipedSupportPolygons bipedSupportPolygons;
-   private FrameConvexPolygon2d supportPolygon;
+   private FrameConvexPolygon2D supportPolygon;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
@@ -384,7 +384,7 @@ public class PelvisICPBasedTranslationManager
    }
 
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
-   private final FrameConvexPolygon2d safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D safeSupportPolygonToConstrainICPOffset = new FrameConvexPolygon2D();
 
    private final FramePoint2D originalICPToModify = new FramePoint2D();
 
@@ -420,7 +420,7 @@ public class PelvisICPBasedTranslationManager
 
       if (isFrozen.getBooleanValue())
       {
-         desiredICPOffset.setAndMatchFrame(icpOffsetForFreezing);
+         desiredICPOffset.setMatchingFrame(icpOffsetForFreezing);
          desiredICPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
          desiredCoPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
          desiredICPToModify.add(icpOffsetForFreezing);

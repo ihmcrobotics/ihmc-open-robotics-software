@@ -5,15 +5,16 @@ import java.awt.Color;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoArtifactLineSegment2d extends YoArtifact
 {
@@ -23,7 +24,7 @@ public class YoArtifactLineSegment2d extends YoArtifact
    
    private final Point2D tempFirstEndpoint = new Point2D();
    private final LineSegment2D tempLineSegment = new LineSegment2D();
-   private final ConvexPolygon2D tempArrowPolygon = new ConvexPolygon2D(new double[][] {{0.0, 0.1}, {0.1, 0.0}, {0.1, 0.1}});
+   private final ConvexPolygon2D tempArrowPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new double[][] {{0.0, 0.1}, {0.1, 0.0}, {0.1, 0.1}}));
    
    private final boolean drawArrow;
 

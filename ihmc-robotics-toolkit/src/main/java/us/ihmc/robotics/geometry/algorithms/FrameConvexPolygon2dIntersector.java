@@ -5,6 +5,7 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment3D;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
 
 /**
@@ -54,12 +54,12 @@ public class FrameConvexPolygon2dIntersector
       noIntersection = false;
    }
 
-   public void intersect3d(FrameConvexPolygon2d polygonOne, FrameConvexPolygon2d polygonTwo, FrameLineSegment3D intersectionToPack)
+   public void intersect3d(FrameConvexPolygon2D polygonOne, FrameConvexPolygon2D polygonTwo, FrameLineSegment3D intersectionToPack)
    {
       noIntersection = false;
 
-      polygonOne.getPlane3d(planeOne);
-      polygonTwo.getPlane3d(planeTwo);
+      planeOne.setIncludingFrame(polygonOne.getReferenceFrame(), 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+      planeTwo.setIncludingFrame(polygonTwo.getReferenceFrame(), 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
       planeTwo.changeFrame(planeOne.getReferenceFrame());
 
       // if planes are parallel, a 2d result
@@ -207,11 +207,11 @@ public class FrameConvexPolygon2dIntersector
       return !point.containsNaN();
    }
 
-   private void intersectASinglePolygon(FrameConvexPolygon2d polygon, Pair<FramePoint3D, FramePoint3D> intersectionWithPolygon)
+   private void intersectASinglePolygon(FrameConvexPolygon2D polygon, Pair<FramePoint3D, FramePoint3D> intersectionWithPolygon)
    {
       intersectionOfPlanes.changeFrame(polygon.getReferenceFrame());
       intersectionOfPlanes.set(planeIntersectionOnPolygonPlane);
-      polygon.intersectionWith(planeIntersectionOnPolygonPlane, lineIntersectionOnPolygonPlane);
+      polygon.intersectionWith(planeIntersectionOnPolygonPlane, lineIntersectionOnPolygonPlane.getFirst(), lineIntersectionOnPolygonPlane.getSecond());
 
       if (lineIntersectionOnPolygonPlane.getFirst().containsNaN() && lineIntersectionOnPolygonPlane.getSecond().containsNaN())
       {

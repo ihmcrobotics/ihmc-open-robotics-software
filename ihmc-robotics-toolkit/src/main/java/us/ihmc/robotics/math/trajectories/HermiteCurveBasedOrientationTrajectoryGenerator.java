@@ -170,27 +170,27 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
    public void setInitialOrientation(FrameQuaternionReadOnly initialOrientation)
    {
-      this.initialOrientation.setAndMatchFrame(initialOrientation);
+      this.initialOrientation.setMatchingFrame(initialOrientation);
    }
 
    public void setFinalOrientation(FrameQuaternionReadOnly finalOrientation)
    {
-      this.finalOrientation.setAndMatchFrame(finalOrientation);
+      this.finalOrientation.setMatchingFrame(finalOrientation);
    }
 
    public void setFinalOrientation(FramePose3D finalPose)
    {
-      finalOrientation.setAndMatchFrame(finalPose.getOrientation());
+      finalOrientation.setMatchingFrame(finalPose.getOrientation());
    }
 
    public void setInitialAngularVelocity(FrameVector3DReadOnly initialAngularVelocity)
    {
-      this.initialAngularVelocity.setAndMatchFrame(initialAngularVelocity);
+      this.initialAngularVelocity.setMatchingFrame(initialAngularVelocity);
    }
 
    public void setFinalAngularVelocity(FrameVector3DReadOnly finalAngularVelocity)
    {
-      this.finalAngularVelocity.setAndMatchFrame(finalAngularVelocity);
+      this.finalAngularVelocity.setMatchingFrame(finalAngularVelocity);
    }
 
    public void setInitialVelocityToZero()
@@ -508,13 +508,13 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    private QuaternionReadOnly exp(double alpha, Vector3DReadOnly rotation)
    {
       tempLogExpVector3D.setAndScale(alpha, rotation);
-      tempLogExpQuaternion.set(tempLogExpVector3D);
+      tempLogExpQuaternion.setRotationVector(tempLogExpVector3D);
       return tempLogExpQuaternion;
    }
 
    private Vector3DReadOnly log(QuaternionReadOnly q)
    {
-      q.get(tempLogExpVector3D);
+      q.getRotationVector(tempLogExpVector3D);
       return tempLogExpVector3D;
    }
 

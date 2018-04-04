@@ -1,37 +1,33 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLineSegment2DReadOnly;
 
 public class FrameConvexPolygon2dAndConnectingEdges
 {
-   private final FrameConvexPolygon2d originalPolygon1, originalPolygon2;
-   private final FrameConvexPolygon2d combinedPolygon;
-   private final FrameLineSegment2D connectingEdge1, connectingEdge2;
+   private final FrameConvexPolygon2D originalPolygon1 = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D originalPolygon2 = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D combinedPolygon = new FrameConvexPolygon2D();
+   private final FrameLineSegment2D connectingEdge1 = new FrameLineSegment2D();
+   private final FrameLineSegment2D connectingEdge2 = new FrameLineSegment2D();
 
    public FrameConvexPolygon2dAndConnectingEdges()
    {
-      this.originalPolygon1 = new FrameConvexPolygon2d();
-      this.originalPolygon2 = new FrameConvexPolygon2d();
-
-      this.combinedPolygon = new FrameConvexPolygon2d();
-      this.connectingEdge1 = new FrameLineSegment2D();
-      this.connectingEdge2 = new FrameLineSegment2D();
    }
 
-   public FrameConvexPolygon2dAndConnectingEdges(FrameConvexPolygon2d originalPolygon1, FrameConvexPolygon2d originalPolygon2, FrameConvexPolygon2d polygon, FrameLineSegment2D connectingEdge1, FrameLineSegment2D connectingEdge2)
+   public FrameConvexPolygon2dAndConnectingEdges(FrameConvexPolygon2DReadOnly originalPolygon1, FrameConvexPolygon2DReadOnly originalPolygon2,
+                                                 FrameConvexPolygon2DReadOnly polygon, FrameLineSegment2DReadOnly connectingEdge1,
+                                                 FrameLineSegment2DReadOnly connectingEdge2)
    {
-      this.originalPolygon1 = originalPolygon1;
-      this.originalPolygon2 = originalPolygon2;
-      
-      this.combinedPolygon = polygon;
-      this.connectingEdge1 = connectingEdge1;
-      this.connectingEdge2 = connectingEdge2;
+      setIncludingFrame(originalPolygon1, originalPolygon2, polygon, connectingEdge1, connectingEdge2);
    }
 
-   public FrameConvexPolygon2d getFrameConvexPolygon2d()
+   public FrameConvexPolygon2D getFrameConvexPolygon2d()
    {
       return combinedPolygon;
    }
@@ -46,32 +42,33 @@ public class FrameConvexPolygon2dAndConnectingEdges
       return connectingEdge2;
    }
 
-   public FrameConvexPolygon2d getOriginalPolygon1()
+   public FrameConvexPolygon2D getOriginalPolygon1()
    {
       return originalPolygon1;
    }
 
-   public FrameConvexPolygon2d getOriginalPolygon2()
+   public FrameConvexPolygon2D getOriginalPolygon2()
    {
       return originalPolygon2;
    }
 
-   public void setIncludingFrameAndUpdate(FrameConvexPolygon2d originalPolygon1, FrameConvexPolygon2d originalPolygon2, FrameConvexPolygon2d combinedPolygon, FrameLineSegment2D connectingEdge1,
-         FrameLineSegment2D connectingEdge2)
+   public void setIncludingFrame(FrameConvexPolygon2DReadOnly originalPolygon1, FrameConvexPolygon2DReadOnly originalPolygon2,
+                                 FrameConvexPolygon2DReadOnly combinedPolygon, FrameLineSegment2DReadOnly connectingEdge1,
+                                 FrameLineSegment2DReadOnly connectingEdge2)
    {
-      this.originalPolygon1.setIncludingFrameAndUpdate(originalPolygon1);
-      this.originalPolygon2.setIncludingFrameAndUpdate(originalPolygon2);
-      this.combinedPolygon.setIncludingFrameAndUpdate(combinedPolygon);
+      this.originalPolygon1.setIncludingFrame(originalPolygon1);
+      this.originalPolygon2.setIncludingFrame(originalPolygon2);
+      this.combinedPolygon.setIncludingFrame(combinedPolygon);
       this.connectingEdge1.setIncludingFrame(connectingEdge1);
       this.connectingEdge2.setIncludingFrame(connectingEdge2);
    }
 
-   public void setIncludingFrameAndUpdate(ReferenceFrame referenceFrame, FrameConvexPolygon2d originalPolygon1, FrameConvexPolygon2d originalPolygon2,
-         ConvexPolygon2D combinedPolygon, LineSegment2D connectingEdge1, LineSegment2D connectingEdge2)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, FrameConvexPolygon2DReadOnly originalPolygon1, FrameConvexPolygon2DReadOnly originalPolygon2,
+                                 ConvexPolygon2DReadOnly combinedPolygon, LineSegment2DReadOnly connectingEdge1, LineSegment2DReadOnly connectingEdge2)
    {
-      this.originalPolygon1.setIncludingFrameAndUpdate(originalPolygon1);
-      this.originalPolygon2.setIncludingFrameAndUpdate(originalPolygon2);
-      this.combinedPolygon.setIncludingFrameAndUpdate(referenceFrame, combinedPolygon);
+      this.originalPolygon1.setIncludingFrame(originalPolygon1);
+      this.originalPolygon2.setIncludingFrame(originalPolygon2);
+      this.combinedPolygon.setIncludingFrame(referenceFrame, combinedPolygon);
       this.connectingEdge1.setIncludingFrame(referenceFrame, connectingEdge1);
       this.connectingEdge2.setIncludingFrame(referenceFrame, connectingEdge2);
    }

@@ -177,7 +177,7 @@ public class FixedBaseRobotArmController implements RobotController
       FrameQuaternion initialOrientation = new FrameQuaternion(robotArm.getHandControlFrame());
       initialOrientation.changeFrame(worldFrame);
 
-      handTargetPosition.setAndMatchFrame(initialPosition);
+      handTargetPosition.setMatchingFrame(initialPosition);
       handTargetOrientation.setAndMatchFrame(initialOrientation);
 
       trajectoryDuration.set(0.5);

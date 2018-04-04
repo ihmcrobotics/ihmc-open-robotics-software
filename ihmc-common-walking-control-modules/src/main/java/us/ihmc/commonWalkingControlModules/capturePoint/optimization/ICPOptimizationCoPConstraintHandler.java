@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -34,7 +34,7 @@ public class ICPOptimizationCoPConstraintHandler
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            FrameConvexPolygon2d supportPolygon;
+            FrameConvexPolygon2D supportPolygon;
             if (useICPControlPolygons.getBooleanValue() && icpControlPolygons != null)
                supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(robotSide);
             else
@@ -50,7 +50,7 @@ public class ICPOptimizationCoPConstraintHandler
 
       if (keepCoPInsideSupportPolygon.getBooleanValue())
       {
-         FrameConvexPolygon2d supportPolygon;
+         FrameConvexPolygon2D supportPolygon;
          if (useICPControlPolygons.getBooleanValue() && icpControlPolygons != null)
             supportPolygon = icpControlPolygons.getFootControlPolygonInWorldFrame(supportSide);
          else

@@ -4,8 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -45,8 +43,6 @@ public abstract class YoFrameTuple2d implements FixedFrameTuple2DBasics
       this.referenceFrame = referenceFrame;
    }
 
-   public abstract void setAndMatchFrame(FrameTuple2DReadOnly frameTuple2DReadOnly);
-
    @Override
    public void setX(double x)
    {
@@ -85,11 +81,6 @@ public abstract class YoFrameTuple2d implements FixedFrameTuple2DBasics
    public final YoDouble getYoY()
    {
       return y;
-   }
-
-   public void setByProjectionOntoXYPlane(FrameTuple3DReadOnly frameTuple3DReadOnly)
-   {
-      set(frameTuple3DReadOnly);
    }
 
    public void notifyVariableChangedListeners()

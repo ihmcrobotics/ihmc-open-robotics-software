@@ -116,12 +116,12 @@ public class PiecewiseReverseDcmTrajectory
       for (int i = 0; i < numberOfSteps; i++)
       {
          this.timesAtStartOfSteps[i] = timesAtStartOfSteps.get(i).doubleValue();
-         vrpCornerPoints.get(i).setAndMatchFrame(cmpPositionAtStartOfSteps.get(i));
+         vrpCornerPoints.get(i).setMatchingFrame(cmpPositionAtStartOfSteps.get(i));
          vrpCornerPoints.get(i).addZ(comHeight);
       }
       this.timesAtStartOfSteps[numberOfSteps] = finalTime;
 
-      dcmCornerPoints.get(numberOfSteps).setAndMatchFrame(finalDcmPosition);
+      dcmCornerPoints.get(numberOfSteps).setMatchingFrame(finalDcmPosition);
 
       for (int i = numberOfSteps - 1; i >= 0; i--)
       {

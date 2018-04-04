@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -145,8 +146,8 @@ public class PushAndWalkBehavior extends AbstractBehavior
             takeSteps(direction);
          }
 
-         yoDesiredCapturePoint.setAndMatchFrame(desiredCapturePoint);
-         yoCapturePoint.setAndMatchFrame(capturePoint);
+         yoDesiredCapturePoint.setMatchingFrame(desiredCapturePoint);
+         yoCapturePoint.setMatchingFrame(capturePoint);
          if (desiredCapturePointViz != null)
          {
             desiredCapturePointViz.update();
@@ -274,7 +275,7 @@ public class PushAndWalkBehavior extends AbstractBehavior
       //System.out.println(localDirection.getX() + " " + localDirection.getY());
       //System.out.println(reachableRegion.toString());
       Line2D ray = new Line2D(swingLocation.getX(), swingLocation.getY(), localDirection.getX(), localDirection.getY());
-      Point2D[] location2d = reachableRegion.intersectionWithRay(ray);
+      Point2DBasics[] location2d = reachableRegion.intersectionWithRay(ray);
       
       int index = 0;
       if(location2d == null)

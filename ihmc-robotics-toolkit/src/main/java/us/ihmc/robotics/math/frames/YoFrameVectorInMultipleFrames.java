@@ -115,7 +115,7 @@ public class YoFrameVectorInMultipleFrames extends YoFrameVector implements YoMu
             public void notifyOfVariableChange(YoVariable<?> v)
             {
                localFrameVector.setIncludingFrame(YoFrameVectorInMultipleFrames.this);
-               vector.setAndMatchFrame(localFrameVector);
+               vector.setMatchingFrame(localFrameVector);
             }
          });
       }

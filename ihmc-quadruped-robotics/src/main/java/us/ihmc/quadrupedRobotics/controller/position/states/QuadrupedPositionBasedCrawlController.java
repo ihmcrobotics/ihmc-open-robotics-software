@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex3DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -1190,7 +1191,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       desiredFootPositionInBody.setIncludingFrame(feedForwardCenterOfMassFrame, desiredFootPosition);
       desiredFootPositionInBody.changeFrame(feedForwardReferenceFrames.getLegAttachmentFrame(robotQuadrant));
 
-      desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).setAndMatchFrame(desiredFootPositionInBody);
+      desiredFeetPositionsInLegAttachmentFrame.get(robotQuadrant).setMatchingFrame(desiredFootPositionInBody);
    }
 
 
@@ -1237,7 +1238,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          tempSupportPolygonFramePointHolder.add(quadrant).setIncludingFrame(supportPolygon.getFootstep(quadrant));
       }
 
-      yoFramePolygon.setConvexPolygon2d(tempSupportPolygonFramePointHolder.values());
+      yoFramePolygon.set(FrameVertex3DSupplier.asFrameVertex3DSupplier(tempSupportPolygonFramePointHolder.values()));
    }
 
    /**
@@ -1791,7 +1792,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          for(RobotQuadrant robotQuadrant :  RobotQuadrant.values)
          {
-            tripleSupportPolygons.get(robotQuadrant).hide();
+            tripleSupportPolygons.get(robotQuadrant).clear();
          }
 
          // 5.1/7.2 MS 71% START
@@ -1828,7 +1829,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          tempCommonShrunkenPolygon.getAndSwapSameSideFootsteps(estimatedCommonTriangle.get(firstSwingLeg.getSameSideQuadrant()), firstSwingLeg.getSide());
          drawSupportPolygon(tempCommonShrunkenPolygon, commonTriplePolygons.get(firstSwingLeg.getSide()));
          YoFrameConvexPolygon2d firstTripleSupportPolygonGraphic = tripleSupportPolygons.get(firstSwingLeg);
-         firstTripleSupportPolygonGraphic.hide();
+         firstTripleSupportPolygonGraphic.clear();
          drawSupportPolygon(firstTripleSupportPolygon, firstTripleSupportPolygonGraphic);
          drawSupportPolygon(secondTripleSupportPolygon, tripleSupportPolygons.get(secondSwingLeg));
       }
@@ -2002,7 +2003,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          currentDesiredInTrajectory.changeFrame(ReferenceFrame.getWorldFrame());
          currentSwingTarget.set(currentDesiredInTrajectory);
 
-         desiredFeetLocations.get(swingQuadrant).setAndMatchFrame(currentDesiredInTrajectory);
+         desiredFeetLocations.get(swingQuadrant).setMatchingFrame(currentDesiredInTrajectory);
 
          computeCurrentSupportPolygonAndDistanceInside(swingQuadrant);
 

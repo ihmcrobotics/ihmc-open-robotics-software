@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -45,8 +44,6 @@ public abstract class YoFrameTuple implements FixedFrameTuple3DBasics
       z = new YoDouble(YoFrameVariableNameTools.createZName(namePrefix, nameSuffix), registry);
       this.referenceFrame = referenceFrame;
    }
-
-   public abstract void setAndMatchFrame(FrameTuple3DReadOnly frameTuple3DReadOnly);
 
    @Override
    public void setX(double x)

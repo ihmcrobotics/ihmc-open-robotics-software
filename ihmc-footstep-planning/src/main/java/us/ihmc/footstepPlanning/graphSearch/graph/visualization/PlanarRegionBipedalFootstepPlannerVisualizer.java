@@ -98,16 +98,16 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       leftRejectedFootstep = new YoFrameConvexPolygon2d("leftRejectedFootstep", worldFrame, maxNumberOfVertices, registry);
       rightRejectedFootstep = new YoFrameConvexPolygon2d("rightRejectedFootstep", worldFrame, maxNumberOfVertices, registry);
 
-      leftFootstepStart.setConvexPolygon2d(leftFootInSoleFrame);
-      rightFootstepStart.setConvexPolygon2d(leftFootInSoleFrame);
-      leftFootstepGoal.setConvexPolygon2d(leftFootInSoleFrame);
-      rightFootstepGoal.setConvexPolygon2d(rightFootInSoleFrame);
-      leftFootstepUnderConsideration.setConvexPolygon2d(leftFootInSoleFrame);
-      rightFootstepUnderConsideration.setConvexPolygon2d(rightFootInSoleFrame);
-      leftAcceptedFootstep.setConvexPolygon2d(leftFootInSoleFrame);
-      rightAcceptedFootstep.setConvexPolygon2d(rightFootInSoleFrame);
-      leftRejectedFootstep.setConvexPolygon2d(leftFootInSoleFrame);
-      rightRejectedFootstep.setConvexPolygon2d(rightFootInSoleFrame);
+      leftFootstepStart.set(leftFootInSoleFrame);
+      rightFootstepStart.set(leftFootInSoleFrame);
+      leftFootstepGoal.set(leftFootInSoleFrame);
+      rightFootstepGoal.set(rightFootInSoleFrame);
+      leftFootstepUnderConsideration.set(leftFootInSoleFrame);
+      rightFootstepUnderConsideration.set(rightFootInSoleFrame);
+      leftAcceptedFootstep.set(leftFootInSoleFrame);
+      rightAcceptedFootstep.set(rightFootInSoleFrame);
+      leftRejectedFootstep.set(leftFootInSoleFrame);
+      rightRejectedFootstep.set(rightFootInSoleFrame);
 
       leftFootstepStartViz = new YoGraphicPolygon("leftFootstepStartViz", leftFootstepStart, "leftFootstepStartPose", "", registry, 1.0, YoAppearance.Gold());
       rightFootstepStartViz = new YoGraphicPolygon("rightFootstepStartViz", rightFootstepStart, "rightFootstepStartPose", "", registry, 1.0, YoAppearance.Gold());
@@ -165,13 +165,13 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       for (int i=0; i<numberOfSolutionPolygons; i++)
       {
          YoFrameConvexPolygon2d leftFootstepSolvedPlan = new YoFrameConvexPolygon2d("leftFootstepSolvedPlan" + i, worldFrame, maxNumberOfVertices, registry);
-         leftFootstepSolvedPlan.setConvexPolygon2d(leftFootInSoleFrame);
+         leftFootstepSolvedPlan.set(leftFootInSoleFrame);
 
          YoGraphicPolygon leftFootstepSolvedPlanViz = new YoGraphicPolygon("leftFootstepSolvedPlanViz" + i, leftFootstepSolvedPlan, "leftFootstepSolvedPlan" + i, "", registry, 1.0, YoAppearance.Purple());
          graphicsListRegistry.registerYoGraphic("FootstepPlanner", leftFootstepSolvedPlanViz);
          
          YoFrameConvexPolygon2d rightFootstepSolvedPlan = new YoFrameConvexPolygon2d("rightFootstepSolvedPlan" + i, worldFrame, maxNumberOfVertices, registry);
-         rightFootstepSolvedPlan.setConvexPolygon2d(rightFootInSoleFrame);
+         rightFootstepSolvedPlan.set(rightFootInSoleFrame);
 
          YoGraphicPolygon rightFootstepSolvedPlanViz = new YoGraphicPolygon("rightFootstepSolvedPlanViz" + i, rightFootstepSolvedPlan, "rightFootstepSolvedPlan" + i, "", registry, 1.0, YoAppearance.Purple());
          graphicsListRegistry.registerYoGraphic("FootstepPlanner", rightFootstepSolvedPlanViz);

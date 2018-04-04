@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -34,7 +33,6 @@ public class QuadrupedFeetManager
    private final QuadrupedForceControllerToolbox toolbox;
 
    // support polygon
-   private final List<FramePoint3D> contactPoints = new ArrayList<>();
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("supportPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoArtifactPolygon supportPolygonVisualizer = new YoArtifactPolygon("supportPolygonVisualizer", supportPolygon, Color.black, false, 1);
 
@@ -52,19 +50,20 @@ public class QuadrupedFeetManager
 
    public void updateSupportPolygon()
    {
-      contactPoints.clear();
+      supportPolygon.clear();
+
       for(RobotQuadrant quadrant : RobotQuadrant.values)
       {
          if(footControlModules.get(quadrant).getContactState() == ContactState.IN_CONTACT)
-            contactPoints.add(toolbox.getTaskSpaceEstimates().getSolePosition(quadrant));
+            supportPolygon.addVertexMatchingFrame(toolbox.getTaskSpaceEstimates().getSolePosition(quadrant));
       }
 
-      supportPolygon.setConvexPolygon2d(contactPoints);
+      supportPolygon.update();
    }
 
    public void hideSupportPolygon()
    {
-      supportPolygon.hide();
+      supportPolygon.clear();
    }
 
    public YoFrameConvexPolygon2d getSupportPolygon()

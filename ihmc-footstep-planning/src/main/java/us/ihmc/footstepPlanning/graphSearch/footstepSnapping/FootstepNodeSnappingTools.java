@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -14,7 +13,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootstepNodeSnappingTools
 {
@@ -90,7 +88,7 @@ public class FootstepNodeSnappingTools
       regionToSole.setAndInvert(soleTransform);
       regionToSole.multiply(regionToWorld);
 
-      footPolygonInRegionFrame.applyTransformAndProjectToXYPlane(regionToSole);
+      footPolygonInRegionFrame.applyTransform(regionToSole, false);
    }
 
    /**

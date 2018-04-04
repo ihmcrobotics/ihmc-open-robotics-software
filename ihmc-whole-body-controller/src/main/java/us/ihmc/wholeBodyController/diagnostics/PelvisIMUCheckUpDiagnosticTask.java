@@ -297,7 +297,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
       FrameVector3D tempAngularVelocity = new FrameVector3D(imuSensor.getMeasurementFrame());
       imuSensor.getAngularVelocityMeasurement(tempAngularVelocity);
-      imuAngularVelocityInPelvis.setAndMatchFrame(tempAngularVelocity);
+      imuAngularVelocityInPelvis.setMatchingFrame(tempAngularVelocity);
 
       // Really hackish, but it should work.
       // The idea is to compare the joint velocities against the IMU velocity to look for delay.

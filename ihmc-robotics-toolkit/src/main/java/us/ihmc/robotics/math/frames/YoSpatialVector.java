@@ -146,12 +146,12 @@ public class YoSpatialVector
 
    public void setAndMatchFrameLinearPart(FrameTuple3DReadOnly frameVector)
    {
-      linearPart.setAndMatchFrame(frameVector);
+      linearPart.setMatchingFrame(frameVector);
    }
 
    public void setAndMatchFrameAngularPart(FrameTuple3DReadOnly frameVector)
    {
-      angularPart.setAndMatchFrame(frameVector);
+      angularPart.setMatchingFrame(frameVector);
    }
 
    public void setAndMatchFrame(FrameTuple3DReadOnly linearPart, FrameTuple3DReadOnly angularPart)

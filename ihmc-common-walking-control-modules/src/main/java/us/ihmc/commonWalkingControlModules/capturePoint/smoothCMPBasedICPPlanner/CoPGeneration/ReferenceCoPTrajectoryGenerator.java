@@ -15,6 +15,11 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools.Bound;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -34,7 +39,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -90,8 +94,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
    // State variables 
    private final SideDependentList<ReferenceFrame> soleZUpFrames;
-   private final SideDependentList<FrameConvexPolygon2d> supportFootPolygonsInSoleZUpFrames = new SideDependentList<>();
-   private final SideDependentList<ConvexPolygon2D> defaultFootPolygons = new SideDependentList<>();
+   private final SideDependentList<FrameConvexPolygon2D> supportFootPolygonsInSoleZUpFrames = new SideDependentList<>();
+   private final SideDependentList<ConvexPolygon2DReadOnly> defaultFootPolygons = new SideDependentList<>();
 
    // Planner parameters
    private final YoInteger numberOfPointsPerFoot;
@@ -129,13 +133,13 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private CoPTrajectory activeTrajectory;
    private double initialTime;
    private FramePoint3D tempDoubleSupportPolygonCentroid = new FramePoint3D();
-   private FrameConvexPolygon2d supportFootPolygon = new FrameConvexPolygon2d();
-   private FrameConvexPolygon2d swingFootInitialPolygon = new FrameConvexPolygon2d();
-   private FrameConvexPolygon2d swingFootPredictedFinalPolygon = new FrameConvexPolygon2d();
+   private FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D();
+   private FrameConvexPolygon2D swingFootInitialPolygon = new FrameConvexPolygon2D();
+   private FrameConvexPolygon2D swingFootPredictedFinalPolygon = new FrameConvexPolygon2D();
 
    // Temp variables for computation only
    private final ConvexPolygon2D polygonReference = new ConvexPolygon2D();
-   private final FrameConvexPolygon2d tempPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
    private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
    private final FramePoint3D tempFramePoint1 = new FramePoint3D();
    private final FramePoint3D tempFramePoint2 = new FramePoint3D();
@@ -229,8 +233,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FrameConvexPolygon2d defaultFootPolygon = new FrameConvexPolygon2d(contactableFeet.get(robotSide).getContactPoints2d());
-         defaultFootPolygons.put(robotSide, defaultFootPolygon.getConvexPolygon2d());
+         ConvexPolygon2D defaultFootPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactableFeet.get(robotSide).getContactPoints2d()));
+         defaultFootPolygons.put(robotSide, defaultFootPolygon);
 
          supportFootPolygonsInSoleZUpFrames.put(robotSide, bipedSupportPolygons.getFootPolygonInSoleZUpFrame(robotSide));
       }
@@ -699,8 +703,8 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     * @param framePointToPack
     * @param transferToSide
     */
-   private void computeMidFeetPointWithChickenSupport(FramePoint3D framePointToPack, FrameConvexPolygon2d supportFootPolygon,
-                                                      FrameConvexPolygon2d swingFootPolygon)
+   private void computeMidFeetPointWithChickenSupport(FramePoint3D framePointToPack, FrameConvexPolygon2D supportFootPolygon,
+                                                      FrameConvexPolygon2D swingFootPolygon)
    {
       computeMidFeetPointByPositionFraction(framePointToPack, supportFootPolygon, swingFootPolygon, percentageChickenSupport.getDoubleValue(),
                                             supportFootPolygon.getReferenceFrame());
@@ -710,7 +714,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    private final FramePoint3D fractionTempMidPoint = new FramePoint3D();
    private final FramePoint3D fractionTempPoint1 = new FramePoint3D();
    private final FramePoint3D fractionTempPoint2 = new FramePoint3D();
-   private void computeMidFeetPointByPositionFraction(FramePoint3D framePointToPack, FrameConvexPolygon2d footPolygonA, FrameConvexPolygon2d footPolygonB,
+   private void computeMidFeetPointByPositionFraction(FramePoint3D framePointToPack, FrameConvexPolygon2D footPolygonA, FrameConvexPolygon2D footPolygonB,
                                                       double fraction, ReferenceFrame referenceFrameToConvertTo)
    {
       getDoubleSupportPolygonCentroid(fractionTempMidPoint, footPolygonA, footPolygonB, referenceFrameToConvertTo);
@@ -762,7 +766,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       case INITIAL_SWING_POLYGON:
          throw new RuntimeException("Unable to constrain given the " + stepLengthOffsetPolygon);
       case FINAL_SWING_POLYGON:
-         supportFootPolygon.getFrameVertex(supportFootPolygon.getMaxXMaxYIndex(), tempFramePoint2d);
+         tempFramePoint2d.setIncludingFrame(supportFootPolygon.getVertex(EuclidGeometryPolygonTools.findVertexIndex(supportFootPolygon, true, Bound.MAX, Bound.MAX)));
          convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, swingFootInitialPolygon.getReferenceFrame());
          return getStepLengthBasedOffset(swingFootInitialPolygon, tempFramePoint1, stepLengthToCoPOffsetFactor);
       case FINAL_DOUBLE_SUPPORT_POLYGON:
@@ -1057,7 +1061,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       return setExitCoPUnderSpecialCases(framePointToPack, supportFootPolygon, swingFootPredictedFinalPolygon, supportSide);
    }
 
-   private boolean setExitCoPUnderSpecialCases(FramePoint3D framePointToPack, FrameConvexPolygon2d supportFootPolygon, FrameConvexPolygon2d swingFootPolygon,
+   private boolean setExitCoPUnderSpecialCases(FramePoint3D framePointToPack, FrameConvexPolygon2D supportFootPolygon, FrameConvexPolygon2D swingFootPolygon,
                                                RobotSide supportSide)
    {
       convertToFramePointRetainingZ(tempFramePoint1, swingFootPolygon.getCentroid(), supportFootPolygon.getReferenceFrame());
@@ -1102,11 +1106,11 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       {
       //TODO should all the calculations be done with respect to the support polygon
       case INITIAL_SWING_POLYGON:
-         swingFootInitialPolygon.getFrameVertex(swingFootInitialPolygon.getMaxXMaxYIndex(), tempFramePoint2d);
+         tempFramePoint2d.setIncludingFrame(swingFootInitialPolygon.getVertex(EuclidGeometryPolygonTools.findVertexIndex(swingFootInitialPolygon, true, Bound.MAX, Bound.MAX)));
          convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, supportFootPolygon.getReferenceFrame());
          return getStepLengthBasedOffset(supportFootPolygon, tempFramePoint1, stepLengthToCoPOffsetFactor);
       case FINAL_SWING_POLYGON:
-         swingFootPredictedFinalPolygon.getFrameVertex(swingFootPredictedFinalPolygon.getMaxXMaxYIndex(), tempFramePoint2d);
+         tempFramePoint2d.setIncludingFrame(swingFootPredictedFinalPolygon.getVertex(EuclidGeometryPolygonTools.findVertexIndex(swingFootPredictedFinalPolygon, true, Bound.MAX, Bound.MAX)));
          convertToFramePointRetainingZ(tempFramePoint1, tempFramePoint2d, supportFootPolygon.getReferenceFrame());
          return getStepLengthBasedOffset(supportFootPolygon, tempFramePoint1, stepLengthToCoPOffsetFactor);
       case INITIAL_DOUBLE_SUPPORT_POLYGON:
@@ -1155,7 +1159,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
-   private static double getStepLengthBasedOffset(FrameConvexPolygon2d supportPolygon, FramePoint3D referencePoint, double stepLengthToCoPOffsetFactor)
+   private static double getStepLengthBasedOffset(FrameConvexPolygon2D supportPolygon, FramePoint3D referencePoint, double stepLengthToCoPOffsetFactor)
    {
       return stepLengthToCoPOffsetFactor * (referencePoint.getX() - supportPolygon.getMaxX());
    }
@@ -1168,7 +1172,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     * @param supportFoot
     * @param safeDistanceFromSupportPolygonEdges
     */
-   private void constrainToPolygon(FramePoint3D copPointToConstrain, FrameConvexPolygon2d constraintPolygon, double safeDistanceFromSupportPolygonEdges)
+   private void constrainToPolygon(FramePoint3D copPointToConstrain, FrameConvexPolygon2D constraintPolygon, double safeDistanceFromSupportPolygonEdges)
    {
       polygonScaler.scaleConvexPolygon(constraintPolygon, safeDistanceFromSupportPolygonEdges, tempPolygon);
       copPointToConstrain.changeFrame(constraintPolygon.getReferenceFrame());
@@ -1214,7 +1218,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
     * Updates the variable {@code currentDoubleSupportPolygon} from the specified swing and support
     * polygons
     */
-   private void getDoubleSupportPolygonCentroid(FramePoint3D framePointToPack, FrameConvexPolygon2d supportFootPolygon, FrameConvexPolygon2d swingFootPolygon,
+   private void getDoubleSupportPolygonCentroid(FramePoint3D framePointToPack, FrameConvexPolygon2D supportFootPolygon, FrameConvexPolygon2D swingFootPolygon,
                                                 ReferenceFrame referenceFrameToStoreResultIn)
    {
       doubleSupportCentroidTempPoint1.setIncludingFrame(swingFootPolygon.getCentroid(), 0.0);
@@ -1298,7 +1302,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
    }
 
-   private void setFootPolygonFromFootstep(FrameConvexPolygon2d framePolygonToPack, int footstepIndex)
+   private void setFootPolygonFromFootstep(FrameConvexPolygon2D framePolygonToPack, int footstepIndex)
    {
       FootstepData upcomingFootstepData = upcomingFootstepsData.get(footstepIndex);
       Footstep upcomingFootstep = upcomingFootstepData.getFootstep();
@@ -1309,7 +1313,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
             && upcomingFootstep.getPredictedContactPoints().size() > 0)
       {
          polygonReference.clear();
-         polygonReference.addVertices(upcomingFootstep.getPredictedContactPoints(), upcomingFootstep.getPredictedContactPoints().size());
+         polygonReference.addVertices(Vertex2DSupplier.asVertex2DSupplier(upcomingFootstep.getPredictedContactPoints()));
          polygonReference.update();
          framePolygonToPack.addVertices(polygonReference);
       }
@@ -1318,7 +1322,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       framePolygonToPack.update();
    }
 
-   private void setFootPolygonFromCurrentState(FrameConvexPolygon2d framePolygonToPack, RobotSide robotSide)
+   private void setFootPolygonFromCurrentState(FrameConvexPolygon2D framePolygonToPack, RobotSide robotSide)
    {
       if (!supportFootPolygonsInSoleZUpFrames.get(robotSide).isEmpty() && !(supportFootPolygonsInSoleZUpFrames.get(robotSide).getNumberOfVertices() < 3))
          framePolygonToPack.setIncludingFrame(supportFootPolygonsInSoleZUpFrames.get(robotSide));

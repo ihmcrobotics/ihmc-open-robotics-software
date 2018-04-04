@@ -2,12 +2,14 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerParameters;
@@ -113,14 +115,14 @@ public class PlanarRegionBaseOfCliffAvoider implements FootstepNodeChecker
            planarRegionsList.findPlanarRegionsIntersectingLineSegment(lineSegmentInWorldFrame, intersectingRegionsToPack);
            for (PlanarRegion intersectingRegion : intersectingRegionsToPack)
            {
-              ArrayList<Point2D[]> intersectionsInPlaneFrameToPack = new ArrayList<>();
+              List<Point2DBasics[]> intersectionsInPlaneFrameToPack = new ArrayList<>();
               intersectingRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegmentInWorldFrame, intersectionsInPlaneFrameToPack);
               for (int i = 0; i < intersectionsInPlaneFrameToPack.size(); i++)
               {
-                 Point2D[] points = intersectionsInPlaneFrameToPack.get(i);
+                 Point2DBasics[] points = intersectionsInPlaneFrameToPack.get(i);
                  for (int j = 0; j < points.length; j++)
                  {
-                    Point2D point = points[j];
+                    Point2DBasics point = points[j];
                     RigidBodyTransform regionTransformToWorld = new RigidBodyTransform();
                     intersectingRegion.getTransformToWorld(regionTransformToWorld);
                     Point3D pointInOriginalSoleFrame = new Point3D(point.getX(), point.getY(), 0.0);

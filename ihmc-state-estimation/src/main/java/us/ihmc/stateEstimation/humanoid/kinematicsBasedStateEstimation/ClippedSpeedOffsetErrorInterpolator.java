@@ -522,12 +522,12 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalOffsetFramePoint_Translation.changeFrame(worldFrame);
       goalOffsetFramePoint_Translation.set(updatedGoalOffset_Translation);
       goalOffsetFramePoint_Translation.changeFrame(startOffsetErrorReferenceFrame_Translation);
-      yoGoalOffsetFramePoint_Translation.setAndMatchFrame(goalOffsetFramePoint_Translation);
+      yoGoalOffsetFramePoint_Translation.setMatchingFrame(goalOffsetFramePoint_Translation);
 
       interpolatedOffsetFramePoint_Translation.changeFrame(worldFrame);
       interpolatedOffsetFramePoint_Translation.set(interpolatedTranslation);
       interpolatedOffsetFramePoint_Translation.changeFrame(startOffsetErrorReferenceFrame_Translation);
-      yoInterpolatedOffsetFramePoint_Translation.setAndMatchFrame(interpolatedOffsetFramePoint_Translation);
+      yoInterpolatedOffsetFramePoint_Translation.setMatchingFrame(interpolatedOffsetFramePoint_Translation);
 
       goalOffsetFrameOrientation_Rotation.changeFrame(worldFrame);
       goalOffsetFrameOrientation_Rotation.set(updatedGoalOffset_Rotation);

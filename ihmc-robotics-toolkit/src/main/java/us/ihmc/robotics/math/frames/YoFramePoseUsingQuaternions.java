@@ -44,14 +44,14 @@ public class YoFramePoseUsingQuaternions implements FixedFramePose3DBasics
 
    public void setAndMatchFrame(FramePose3D framePose)
    {
-      position.setAndMatchFrame(framePose.getPosition());
-      orientation.setAndMatchFrame(framePose.getOrientation());
+      position.setMatchingFrame(framePose.getPosition());
+      orientation.setMatchingFrame(framePose.getOrientation());
    }
 
    public void setAndMatchFrame(FramePoint3DReadOnly framePoint, FrameQuaternionReadOnly frameOrientation)
    {
-      position.setAndMatchFrame(framePoint);
-      orientation.setAndMatchFrame(frameOrientation);
+      position.setMatchingFrame(framePoint);
+      orientation.setMatchingFrame(frameOrientation);
    }
 
    @Override

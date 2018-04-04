@@ -106,8 +106,8 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public void setInitialConditions(FramePoint3D initialPosition, FrameVector3D initialVelocity)
    {
-      this.initialPosition.setAndMatchFrame(initialPosition);
-      this.initialVelocity.setAndMatchFrame(initialVelocity);
+      this.initialPosition.setMatchingFrame(initialPosition);
+      this.initialVelocity.setMatchingFrame(initialVelocity);
    }
 
    public void setInitialConditions(YoFramePoint initialPosition, YoFrameVector initialVelocity)
@@ -119,13 +119,13 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    public void setInitialConditions(YoFramePoint initialPosition, FrameVector3D initialVelocity)
    {
       this.initialPosition.set(initialPosition);
-      this.initialVelocity.setAndMatchFrame(initialVelocity);
+      this.initialVelocity.setMatchingFrame(initialVelocity);
    }
 
    public void setFinalConditions(FramePoint3D finalPosition, FrameVector3D finalVelocity)
    {
-      this.finalPosition.setAndMatchFrame(finalPosition);
-      this.finalVelocity.setAndMatchFrame(finalVelocity);
+      this.finalPosition.setMatchingFrame(finalPosition);
+      this.finalVelocity.setMatchingFrame(finalVelocity);
    }
 
    public void setFinalConditions(YoFramePoint finalPosition, YoFrameVector finalVelocity)
@@ -137,7 +137,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    public void setFinalConditions(YoFramePoint finalPosition, FrameVector3D finalVelocity)
    {
       this.finalPosition.set(finalPosition);
-      this.finalVelocity.setAndMatchFrame(finalVelocity);
+      this.finalVelocity.setMatchingFrame(finalVelocity);
    }
 
    public void setTrajectoryParameters(double duration, FramePoint3D initialPosition, FrameVector3D initialVelocity, FramePoint3D finalPosition, FrameVector3D finalVelocity)
