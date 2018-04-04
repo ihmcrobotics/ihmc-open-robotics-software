@@ -692,6 +692,18 @@ public abstract class PacketValidityChecker
       return null;
    }
 
+   public static String validateQuadrupedBodyOrientationMessage(QuadrupedBodyOrientationMessage message)
+   {
+      String errorMessage = validatePacket(message);
+
+      if (errorMessage == null)
+         errorMessage = validateSO3TrajectoryMessage(message.getSo3Trajectory());
+      if (errorMessage != null)
+         return QuadrupedBodyOrientationMessage.class.getSimpleName() + " " + errorMessage;
+
+      return null;
+   }
+
    public static String validateFootTrajectoryMessage(FootTrajectoryMessage message)
    {
       String errorMessage = validatePacket(message);
