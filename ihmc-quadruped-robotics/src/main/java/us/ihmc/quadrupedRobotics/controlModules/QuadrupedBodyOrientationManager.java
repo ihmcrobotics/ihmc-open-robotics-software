@@ -99,6 +99,10 @@ public class QuadrupedBodyOrientationManager
 
    public void handleBodyOrientationCommand(QuadrupedBodyOrientationCommand command)
    {
+      double currentTime = robotTimestamp.getDoubleValue();
+      double timeShift = command.isExpressedInAbsoluteTime() ? 0.0 : currentTime;
+      command.getSO3Trajectory().getTrajectoryPointList().addTimeOffset(timeShift);
+
       bodyOrientationTrajectory.appendWaypoints(command.getSO3Trajectory().getTrajectoryPointList());
    }
 
@@ -129,11 +133,6 @@ public class QuadrupedBodyOrientationManager
       desiredAngularMomentumRate.changeFrame(worldFrame);
       angularMomentumCommand.setAngularMomentumRate(desiredAngularMomentumRate);
       angularMomentumCommand.setAngularWeights(bodyAngularWeight);
-   }
-
-   public void getDesiredAngularMomentumRate(FrameVector3D angularMomentumRateToPack)
-   {
-      angularMomentumRateToPack.setIncludingFrame(desiredAngularMomentumRate);
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
