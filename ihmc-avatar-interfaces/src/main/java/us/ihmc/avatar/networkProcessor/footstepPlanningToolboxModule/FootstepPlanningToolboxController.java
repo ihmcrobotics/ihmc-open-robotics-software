@@ -73,7 +73,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private final YoDouble toolboxTime = new YoDouble("ToolboxTime", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
 
-   private final RobotContactPointParameters contactPointParameters;
+   private final RobotContactPointParameters<RobotSide> contactPointParameters;
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
    private final PacketCommunicator packetCommunicator;
