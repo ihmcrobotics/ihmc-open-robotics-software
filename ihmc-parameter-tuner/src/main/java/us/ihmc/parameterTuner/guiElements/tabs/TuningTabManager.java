@@ -102,7 +102,7 @@ public class TuningTabManager
       }
 
       TuningTab activeTab = (TuningTab) tabPane.getSelectionModel().getSelectedItem();
-      activeTab.handleNewParameter(uniqueName);
+      activeTab.handleNewParameter(uniqueName, -1);
    }
 
    public void close()
