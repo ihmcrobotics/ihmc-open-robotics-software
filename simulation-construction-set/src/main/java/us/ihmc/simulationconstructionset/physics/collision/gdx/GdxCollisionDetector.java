@@ -23,11 +23,14 @@ import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Box3D;
 import us.ihmc.euclid.geometry.Cylinder3D;
+import us.ihmc.euclid.geometry.Ramp3D;
 import us.ihmc.euclid.geometry.Shape3D;
 import us.ihmc.euclid.geometry.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.geometry.polytope.ConvexPolytope;
+import us.ihmc.geometry.polytope.ConvexPolytopeConstructor;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
@@ -37,6 +40,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeWithLink;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.collision.simple.Capsule3D;
+import us.ihmc.simulationconstructionset.physics.collision.simple.PolytopeShapeDescription;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleContactWrapper;
 
 public class GdxCollisionDetector implements ScsCollisionDetector
@@ -168,8 +172,11 @@ public class GdxCollisionDetector implements ScsCollisionDetector
             return createCylinder(shape3D);
          if (!(shape3D instanceof Capsule3D))
             return createCapsule(shape3D);
+         if (!(shape3D instanceof Ramp3D))
+            return createRamp(shape3D);
 
-         throw new IllegalArgumentException("The type of "+ shape3D.getClass() + " is not matched among the simple shape Box3D, Sphere3D, Cylinder3D, Capsule3D");
+         throw new IllegalArgumentException("The type of " + shape3D.getClass()
+               + " is not matched among the simple shape Box3D, Sphere3D, Cylinder3D, Capsule3D");
       }
 
       private CollisionShapeDescription<?> createBox(Shape3D<?> shape3D)
@@ -202,6 +209,15 @@ public class GdxCollisionDetector implements ScsCollisionDetector
             throw new IllegalArgumentException("Check Shape3D is Capsule3D");
          Capsule3D capsule3D = (Capsule3D) shape3D;
          return createCapsule(capsule3D.getRadius(), capsule3D.getLineSegment().length());
+      }
+
+      private CollisionShapeDescription<?> createRamp(Shape3D<?> shape3D)
+      {
+         if (!(shape3D instanceof Ramp3D))
+            throw new IllegalArgumentException("Check Shape3D is Ramp3D");
+         Ramp3D ramp3D = (Ramp3D) shape3D;
+         ConvexPolytope polytope = ConvexPolytopeConstructor.constructRamp(ramp3D.getLength(), ramp3D.getWidth(), ramp3D.getHeight());
+         return new PolytopeShapeDescription<>(polytope);
       }
 
       @Override
@@ -247,8 +263,8 @@ public class GdxCollisionDetector implements ScsCollisionDetector
          Link link = null;
          boolean isGround = false;
 
-         BulletCollisionShapeWithLink shape = new BulletCollisionShapeWithLink("shape" + allShapes.size(), (BulletShapeDescription<?>) description, link, isGround,
-                                                                               shapeToLink);
+         BulletCollisionShapeWithLink shape = new BulletCollisionShapeWithLink("shape" + allShapes.size(), (BulletShapeDescription<?>) description, link,
+                                                                               isGround, shapeToLink);
          collisionWorld.addCollisionObject(shape, (short) 0xFFFF, (short) 0xFFFF);
 
          allShapes.add(shape);
@@ -265,8 +281,8 @@ public class GdxCollisionDetector implements ScsCollisionDetector
             shapeToLink = new RigidBodyTransform();
          }
 
-         BulletCollisionShapeWithLink shape = new BulletCollisionShapeWithLink("shape" + allShapes.size(), (BulletShapeDescription<?>) description, link, isGround,
-                                                                               shapeToLink);
+         BulletCollisionShapeWithLink shape = new BulletCollisionShapeWithLink("shape" + allShapes.size(), (BulletShapeDescription<?>) description, link,
+                                                                               isGround, shapeToLink);
          collisionWorld.addCollisionObject(shape, (short) collisionGroup, (short) collisionMask);
 
          allShapes.add(shape);
