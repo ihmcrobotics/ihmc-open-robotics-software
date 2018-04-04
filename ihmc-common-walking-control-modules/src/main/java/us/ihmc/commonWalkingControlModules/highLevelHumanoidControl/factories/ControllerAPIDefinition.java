@@ -76,6 +76,7 @@ public abstract class ControllerAPIDefinition
    private static final List<Class<? extends Packet<?>>> controllerSupportedStatusMessages;
 
    private static final List<Class<? extends Command<?, ?>>> quadrupedSupportedCommands;
+   private static final List<Class<? extends Packet<?>>> quadrupedSupportedStatusMessages;
 
    static
    {
@@ -129,9 +130,12 @@ public abstract class ControllerAPIDefinition
 
       List<Class<? extends Command<?, ?>>> quadrupedCommands = new ArrayList<>();
       quadrupedCommands.add(QuadrupedTimedStepListCommand.class);
-      quadrupedCommands.add(QuadrupedTimedStepCommand.class);
 
       quadrupedSupportedCommands = Collections.unmodifiableList(quadrupedCommands);
+
+      List<Class<? extends Packet<?>>> quadrupedStatusMessages = new ArrayList<>();
+
+      quadrupedSupportedStatusMessages = Collections.unmodifiableList(quadrupedStatusMessages);
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()
@@ -147,6 +151,11 @@ public abstract class ControllerAPIDefinition
    public static List<Class<? extends Packet<?>>> getControllerSupportedStatusMessages()
    {
       return controllerSupportedStatusMessages;
+   }
+
+   public static List<Class<? extends Packet<?>>> getQuadrupedSupportedStatusMessages()
+   {
+      return quadrupedSupportedStatusMessages;
    }
 
    public static MessageValidator createDefaultMessageValidation()

@@ -11,10 +11,6 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbo
 
 public class QuadrupedStepCommandConsumer
 {
-   private final QuadrupedBalanceManager balanceManager;
-   private final QuadrupedFeetManager feetManager;
-   private final QuadrupedBodyOrientationManager bodyOrientationManager;
-
    private final QuadrupedStepMessageHandler stepMessageHandler;
 
    private final CommandConsumerWithDelayBuffers commandConsumerWithDelayBuffers;
@@ -25,10 +21,6 @@ public class QuadrupedStepCommandConsumer
       this.stepMessageHandler = stepMessageHandler;
       this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager,
                                                                                  controllerToolbox.getRuntimeEnvironment().getRobotTimestamp());
-
-      balanceManager = managerFactory.getOrCreateBalanceManager();
-      feetManager = managerFactory.getOrCreateFeetManager();
-      bodyOrientationManager = managerFactory.getOrCreateBodyOrientationManager();
    }
 
    public void update()

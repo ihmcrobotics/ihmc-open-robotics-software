@@ -1,16 +1,13 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
-import com.jme3.scene.shape.Quad;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedScriptedFlatGroundWalkingTest;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;

@@ -1,12 +1,12 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
-
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
@@ -15,19 +15,12 @@ import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedDoNothingController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFallController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedJointInitializationController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedSteppingState;
+import us.ihmc.quadrupedRobotics.controller.force.states.*;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
 import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -35,17 +28,25 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventTrigger;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal finite state machine.
  * <p/>
  * Users can manually fire events on the {@code userTrigger} YoVariable.
  */
-public class QuadrupedForceControllerManager implements QuadrupedControllerManager
+public class QuadrupedForceControllerManager implements QuadrupedControllerManager, CloseableAndDisposable
 {
+   private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoEnum<QuadrupedForceControllerRequestedEvent> lastEvent = new YoEnum<>("lastEvent", registry, QuadrupedForceControllerRequestedEvent.class);
 
@@ -61,6 +62,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final OutputProcessor outputProcessor;
 
    private final CommandInputManager commandInputManager;
+   private final StatusMessageOutputManager statusMessageOutputManager;
 
    private final AtomicReference<QuadrupedForceControllerRequestedEvent> requestedEvent = new AtomicReference<>();
 
@@ -89,6 +91,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       {
          e.printStackTrace();
       }
+      statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getQuadrupedSupportedStatusMessages());
+
 
       controlManagerFactory.getOrCreateFeetManager();
       controlManagerFactory.getOrCreateBodyOrientationManager();
@@ -336,5 +340,21 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
                             QuadrupedForceControllerEnum.STAND_PREP);
 
       return factory.build(initialState);
+   }
+
+   public void createControllerNetworkSubscriber(PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
+   {
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, scheduler,
+                                                                                                packetCommunicator);
+//      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
+      controllerNetworkSubscriber.addMessageCollector(ControllerAPIDefinition.createDefaultMessageIDExtractor());
+      controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
+      closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      closeableAndDisposableRegistry.closeAndDispose();
    }
 }
