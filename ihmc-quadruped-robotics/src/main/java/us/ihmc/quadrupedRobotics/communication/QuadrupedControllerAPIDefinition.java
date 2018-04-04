@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
@@ -29,6 +30,7 @@ public class QuadrupedControllerAPIDefinition
       quadrupedCommands.add(SoleTrajectoryCommand.class);
       quadrupedCommands.add(QuadrupedRequestedSteppingStateCommand.class);
       quadrupedCommands.add(QuadrupedRequestedControllerStateCommand.class);
+      quadrupedCommands.add(QuadrupedBodyOrientationCommand.class);
 
       quadrupedSupportedCommands = Collections.unmodifiableList(quadrupedCommands);
 
