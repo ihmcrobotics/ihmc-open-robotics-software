@@ -173,7 +173,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDoubleSupportFootstepPlanFromRest()
    {
@@ -263,7 +263,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       assertTrue("Planned footsteps not removed", testCoPGenerator.getNumberOfFootstepsRegistered() == 0);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testDoubleSupportFootstepPlanMoving()
    {
@@ -349,7 +349,7 @@ public class ReferenceCoPTrajectoryGeneratorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testSingleSupportFootstepPlan()
    {

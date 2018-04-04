@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class RigidBodyTransformGeneratorTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSimpleTransformGeneration()
    {
@@ -72,7 +72,7 @@ public class RigidBodyTransformGeneratorTest
 
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testTranslateThenRotateTransformGeneration()
    {
@@ -87,7 +87,7 @@ public class RigidBodyTransformGeneratorTest
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testMultiStepTransformGeneration()
    {

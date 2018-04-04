@@ -14,7 +14,7 @@ import us.ihmc.tools.MemoryTools;
 public class ReferenceFrameMemoryTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.6)
    @Test(timeout = 30000)
    public void testGarbageCollectionInBroadTrees()
    {

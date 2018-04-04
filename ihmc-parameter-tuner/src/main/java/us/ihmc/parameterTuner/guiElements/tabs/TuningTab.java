@@ -12,9 +12,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
-import us.ihmc.parameterTuner.guiElements.tuners.TuningBoxManager;
 
 public class TuningTab extends Tab
 {
@@ -23,7 +21,7 @@ public class TuningTab extends Tab
    private final TextField textField = new TextField();
    private final TabPane parent;
 
-   private final TuningBoxManager tuningBoxManager;
+   private final TuningBox tuningBox = new TuningBox();
 
    public TuningTab(String name, TabPane parent)
    {
@@ -50,11 +48,6 @@ public class TuningTab extends Tab
          }
       });
 
-      VBox tuningBox = new VBox();
-      tuningBox.setFillWidth(true);
-      tuningBox.setSpacing(10.0);
-      tuningBoxManager = new TuningBoxManager(tuningBox);
-
       ScrollPane scrollPane = new ScrollPane();
       AnchorPane.setLeftAnchor(scrollPane, 0.0);
       AnchorPane.setRightAnchor(scrollPane, 0.0);
@@ -73,7 +66,7 @@ public class TuningTab extends Tab
       parent.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
          if (this == newValue)
          {
-            tuningBoxManager.updateView();
+            tuningBox.updateView();
          }
       });
 
@@ -104,16 +97,16 @@ public class TuningTab extends Tab
 
    public void setTunerMap(Map<String, Tuner> tunerMap)
    {
-      tuningBoxManager.setTunerMap(tunerMap);
+      tuningBox.setTunerMap(tunerMap);
    }
 
    public void handleNewParameter(String uniqueName)
    {
-      tuningBoxManager.handleNewParameter(uniqueName);
+      tuningBox.handleNewParameter(uniqueName);
    }
 
    public List<String> getParameterUniqueNames()
    {
-      return tuningBoxManager.getParameterUniqueNames();
+      return tuningBox.getParameterUniqueNames();
    }
 }

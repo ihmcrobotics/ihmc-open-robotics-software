@@ -327,8 +327,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 600000)
+   @ContinuousIntegrationTest(estimatedDuration = 283.1)
+   @Test(timeout = 1400000)
    public void testDispatchKarateKidDiagnosticBehavior() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

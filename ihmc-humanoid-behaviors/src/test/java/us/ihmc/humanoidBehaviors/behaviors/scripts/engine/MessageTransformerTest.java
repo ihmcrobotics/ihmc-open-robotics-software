@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.rules.DisableOnDebug;
 import org.junit.rules.Timeout;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import controller_msgs.msg.dds.AdjustFootstepMessage;
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -30,7 +31,8 @@ public class MessageTransformerTest
    @Rule
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
 
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testHandTrajectoryMessage()
    {
       Random random = new Random(6543);
@@ -56,7 +58,8 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testPelvisHeightTrajectoryMessage()
    {
       Random random = new Random(6543);
@@ -80,7 +83,8 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testAdjustFootstepMessage()
    {
       Random random = new Random(6543);
@@ -99,7 +103,8 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testFootstepDataMessage()
    {
       Random random = new Random(6543);
@@ -124,7 +129,8 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testFootstepDataListMessage()
    {
       Random random = new Random(6543);
@@ -150,7 +156,8 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testVehiclePosePacket()
    {
       Random random = new Random(6543);
@@ -169,7 +176,8 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testVideoPacket()
    {
       Random random = new Random(6543);
