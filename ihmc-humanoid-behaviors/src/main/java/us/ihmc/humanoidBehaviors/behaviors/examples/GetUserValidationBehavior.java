@@ -1,11 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
+import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 
 public class GetUserValidationBehavior extends AbstractBehavior implements CoactiveDataListenerInterface
 {
@@ -67,9 +67,9 @@ public class GetUserValidationBehavior extends AbstractBehavior implements Coact
    @Override
    public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)
    {
-      if (data.key.equalsIgnoreCase("validate"))
+      if (data.getKeyAsString().equalsIgnoreCase("validate"))
       {
-         if (data.value == 1)
+         if (data.getValue() == 1)
          {
             validated = true;
          }

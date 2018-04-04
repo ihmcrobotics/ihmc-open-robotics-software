@@ -25,7 +25,10 @@ import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class RosTools
 {
@@ -165,41 +168,34 @@ public class RosTools
    }
 
    
-   public static void packRosQuaternionToQuat4d(Quaternion rosQuat, us.ihmc.euclid.tuple4D.Quaternion quat)
+   public static void packRosQuaternionToEuclidQuaternion(Quaternion rosQuat, QuaternionBasics quat)
    {
       quat.set(rosQuat.getX(), rosQuat.getY(), rosQuat.getZ(), rosQuat.getW());
       
    }
 
-   public static void packRosVector3ToVector3d(Vector3 rosVector, Vector3D vectorToPack)
+   public static void packRosVector3ToEuclidTuple3D(Vector3 rosVector, Tuple3DBasics vectorToPack)
    {
       vectorToPack.setX(rosVector.getX());
       vectorToPack.setY(rosVector.getY());
       vectorToPack.setZ(rosVector.getZ());
    }
    
-   public static void packVector3dToGeometry_msgsVector3(Vector3D vector, Vector3 rosVectorToPack)
+   public static void packEuclidTuple3DToGeometry_msgsVector3(Tuple3DReadOnly vector, Vector3 rosVectorToPack)
    {
       rosVectorToPack.setX(vector.getX());
       rosVectorToPack.setY(vector.getY());
       rosVectorToPack.setZ(vector.getZ());
    }
    
-   public static void packVector3fToGeometry_msgsVector3(Vector3D32 vector, Vector3 rosVectorToPack)
-   {
-      rosVectorToPack.setX(vector.getX());
-      rosVectorToPack.setY(vector.getY());
-      rosVectorToPack.setZ(vector.getZ());
-   }
-   
-   public static void packVector3dToGeometry_MsgPoint(Vector3D position, Point point)
+   public static void packEuclidTuple3DToGeometry_MsgPoint(Tuple3DReadOnly position, Point point)
    {
       point.setX(position.getX());
       point.setY(position.getY());
       point.setZ(position.getZ());
    }
 
-   public static void packRigidBodyTransformToGeometry_msgsPose(RigidBodyTransform pelvisTransform, Pose pose)
+   public static void packEuclidRigidBodyTransformToGeometry_msgsPose(RigidBodyTransform pelvisTransform, Pose pose)
    {
       Vector3D point = new Vector3D();
       pelvisTransform.getTranslation(point);
@@ -207,16 +203,16 @@ public class RosTools
       us.ihmc.euclid.tuple4D.Quaternion rotation = new us.ihmc.euclid.tuple4D.Quaternion();
       pelvisTransform.getRotation(rotation);
       
-      packVector3dAndQuat4dToGeometry_msgsPose(point, rotation, pose);
+      packEuclidTuple3DAndQuaternionToGeometry_msgsPose(point, rotation, pose);
    }
    
-   public static void packVector3dAndQuat4dToGeometry_msgsPose(Vector3D point, us.ihmc.euclid.tuple4D.Quaternion rotation, Pose pose)
+   public static void packEuclidTuple3DAndQuaternionToGeometry_msgsPose(Tuple3DReadOnly point, QuaternionReadOnly rotation, Pose pose)
    {
-      RosTools.packVector3dToGeometry_MsgPoint(point, pose.getPosition());
+      RosTools.packEuclidTuple3DToGeometry_MsgPoint(point, pose.getPosition());
       RosTools.packQuat4dToGeometry_msgsQuaternion(rotation, pose.getOrientation());
    }
 
-   private static void packQuat4dToGeometry_msgsQuaternion(us.ihmc.euclid.tuple4D.Quaternion quat, Quaternion orientation)
+   private static void packQuat4dToGeometry_msgsQuaternion(QuaternionReadOnly quat, Quaternion orientation)
    {
       orientation.setW(quat.getS());
       orientation.setX(quat.getX());

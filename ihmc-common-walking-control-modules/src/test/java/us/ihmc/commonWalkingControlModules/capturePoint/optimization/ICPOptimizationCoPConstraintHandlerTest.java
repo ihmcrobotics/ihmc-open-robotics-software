@@ -46,7 +46,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testDoubleSupportWithBipedSupportPolygonsAndAngularMomentum()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -109,7 +109,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSingleSupportWithBipedSupportPolygonsAndAngularMomentum()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -215,7 +215,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testDoubleSupportWithBipedSupportPolygonsNoAngularMomentum()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -272,7 +272,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 21000)
+   @Test(timeout = 30000)
    public void testSingleSupportWithBipedSupportPolygonsNoAngularMomentum()
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");

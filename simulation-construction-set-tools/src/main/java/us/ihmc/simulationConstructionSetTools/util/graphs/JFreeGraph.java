@@ -310,12 +310,17 @@ public class JFreeGraph extends JPanel
 
    public static JFreeGraph createDataVsTimeGraph(DataBufferEntry timeEntry, DataBufferEntry dataEntry, Color plotColor)
    {
+      return createDataVsTimeGraph(timeEntry, dataEntry, dataEntry.getVariableName(), "time", dataEntry.getVariableName(), plotColor);
+   }
+
+   public static JFreeGraph createDataVsTimeGraph(DataBufferEntry timeEntry, DataBufferEntry dataEntry, String title, String xLabel, String yLabel, Color plotColor)
+   {
       String variableName = dataEntry.getVariable().getName();
       JFreePlot plot = new JFreePlot("time vs " + variableName, timeEntry, dataEntry);
       plot.setIsScatterPlot(false);
       plot.setColor(plotColor);
-      
-      JFreeGraph graph = new JFreeGraph(variableName, "time", variableName);
+
+      JFreeGraph graph = new JFreeGraph(title, xLabel, yLabel);
       graph.addPlot(plot);
 
       return graph;
@@ -330,14 +335,17 @@ public class JFreeGraph extends JPanel
    {
       String dataOneVariableName = dataOneEntry.getVariable().getName();
       String dataTwoVariableName = dataTwoEntry.getVariable().getName();
-      JFreePlot plot = new JFreePlot((dataOneVariableName + "_Vs_" + dataTwoVariableName), dataOneEntry, dataTwoEntry, false, true);
+      String title = dataOneVariableName + "_Vs_" + dataTwoVariableName;
+      return createDataOneVsDataTwoGraph(dataOneEntry, dataTwoEntry, title, dataOneEntry.getVariableName(), dataTwoEntry.getVariableName(), plotColor);
+   }
+
+   public static JFreeGraph createDataOneVsDataTwoGraph(DataBufferEntry dataOneEntry, DataBufferEntry dataTwoEntry, String title, String xLabel, String yLabel, Color plotColor)
+   {
+      JFreePlot plot = new JFreePlot(title, dataOneEntry, dataTwoEntry, false, true);
       plot.setIsScatterPlot(true);
       plot.setColor(plotColor);
 
-      JFreeGraph graph = new JFreeGraph((dataOneVariableName + "_Vs_" + dataTwoVariableName), dataOneVariableName, dataTwoVariableName);
-      graph.addPlot(plot);
-
-      return graph;
+      return new JFreeGraph(title, xLabel, yLabel, plot);
    }
 
    void saveToSVG(File svgFileName) throws IOException

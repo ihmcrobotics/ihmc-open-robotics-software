@@ -1,82 +1,22 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "PelvisHeightTrajectoryMessage" defined in "PelvisHeightTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "PelvisHeightTrajectoryMessage" defined in
+ * "PelvisHeightTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a
+ * Participant.
  *
- * This file was automatically generated from PelvisHeightTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit PelvisHeightTrajectoryMessage_.idl instead.
+ * This file was automatically generated from PelvisHeightTrajectoryMessage_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * PelvisHeightTrajectoryMessage_.idl instead.
+ *
  */
 public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PelvisHeightTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PelvisHeightTrajectoryMessage_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
-
-   public PelvisHeightTrajectoryMessagePubSubType()
-   {
-
-   }
-
-   public static int getMaxCdrSerializedSize()
-   {
-      return getMaxCdrSerializedSize(0);
-   }
-
-   public static int getMaxCdrSerializedSize(int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data)
-   {
-      return getCdrSerializedSize(data, 0);
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public static void write(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, us.ihmc.idl.CDR cdr)
-   {
-
-      cdr.write_type_7(data.getEnableUserPelvisControl());
-
-      cdr.write_type_7(data.getEnableUserPelvisHeightControlDuringWalking());
-
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
-   }
-
-   public static void read(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, us.ihmc.idl.CDR cdr)
-   {
-
-      data.setEnableUserPelvisControl(cdr.read_type_7());
-
-      data.setEnableUserPelvisHeightControlDuringWalking(cdr.read_type_7());
-
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);
-   }
-
-   public static void staticCopy(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage src, controller_msgs.msg.dds.PelvisHeightTrajectoryMessage dest)
-   {
-      dest.set(src);
-   }
 
    @Override
    public void serialize(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
@@ -96,24 +36,92 @@ public class PelvisHeightTrajectoryMessagePubSubType implements us.ihmc.pubsub.T
       deserializeCDR.finishDeserialize();
    }
 
+   public static int getMaxCdrSerializedSize()
+   {
+      return getMaxCdrSerializedSize(0);
+   }
+
+   public static int getMaxCdrSerializedSize(int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data)
+   {
+      return getCdrSerializedSize(data, 0);
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public static void write(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, us.ihmc.idl.CDR cdr)
+   {
+      cdr.write_type_4(data.getSequenceId());
+
+      cdr.write_type_7(data.getEnableUserPelvisControl());
+
+      cdr.write_type_7(data.getEnableUserPelvisControlDuringWalking());
+
+      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
+   }
+
+   public static void read(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, us.ihmc.idl.CDR cdr)
+   {
+      data.setSequenceId(cdr.read_type_4());
+
+      data.setEnableUserPelvisControl(cdr.read_type_7());
+
+      data.setEnableUserPelvisControlDuringWalking(cdr.read_type_7());
+
+      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);
+
+   }
+
    @Override
    public final void serialize(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("enable_user_pelvis_control", data.getEnableUserPelvisControl());
-
-      ser.write_type_7("enable_user_pelvis_height_control_during_walking", data.getEnableUserPelvisHeightControlDuringWalking());
-
+      ser.write_type_7("enable_user_pelvis_control_during_walking", data.getEnableUserPelvisControlDuringWalking());
       ser.write_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PelvisHeightTrajectoryMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setEnableUserPelvisControl(ser.read_type_7("enable_user_pelvis_control"));
-
-      data.setEnableUserPelvisHeightControlDuringWalking(ser.read_type_7("enable_user_pelvis_height_control_during_walking"));
-
+      data.setEnableUserPelvisControlDuringWalking(ser.read_type_7("enable_user_pelvis_control_during_walking"));
       ser.read_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.PelvisHeightTrajectoryMessage src, controller_msgs.msg.dds.PelvisHeightTrajectoryMessage dest)
+   {
+      dest.set(src);
    }
 
    @Override

@@ -1,9 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
-import us.ihmc.communication.packets.ExecutionMode;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -14,12 +17,8 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -159,7 +158,7 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    private void sendTextToSpeechPacket(String message)
    {
       TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket(message);
-      textToSpeechPacket.setbeep(false);
+      textToSpeechPacket.setBeep(false);
       sendPacketToUI(textToSpeechPacket);
    }
 
@@ -180,9 +179,9 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
          FootstepStatusMessage status = latestFootstepStatus.get(side);
          if (status != null)
          {
-            latestFootstepStatusEnum.get(side).set(status.getStatus());
+            latestFootstepStatusEnum.get(side).set(status.getFootstepStatus());
 
-            if (status.getStatus() == FootstepStatus.STARTED.toByte())
+            if (status.getFootstepStatus() == FootstepStatus.STARTED.toByte())
             {
                currentlySwingingFoot.set(side);
             }
@@ -236,10 +235,9 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
          FootstepDataMessage firstFootstepMessage = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), new Point3D(tempFootstepPosePosition), new Quaternion(tempFirstFootstepPoseOrientation));
 
-         footstepDataListMessage.add(firstFootstepMessage);
+         footstepDataListMessage.getFootstepDataList().add().set(firstFootstepMessage);
       }
 
-      footstepDataListMessage.setExecutionMode(ExecutionMode.OVERRIDE);
       return footstepDataListMessage;
    }
 

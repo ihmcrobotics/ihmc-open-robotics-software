@@ -1,48 +1,67 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * This message is part of the IHMC height quad tree module
  */
-public class HeightQuadTreeMessage implements Settable<HeightQuadTreeMessage>, EpsilonComparable<HeightQuadTreeMessage>
+public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> implements Settable<HeightQuadTreeMessage>, EpsilonComparable<HeightQuadTreeMessage>
 {
-   private float default_height_;
-   private float resolution_;
-   private float x_size_;
-   private float y_size_;
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.HeightQuadTreeLeafMessage> leaves_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public float default_height_;
+   public float resolution_;
+   public float size_x_;
+   public float size_y_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.HeightQuadTreeLeafMessage> leaves_;
 
    public HeightQuadTreeMessage()
    {
-
       leaves_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.HeightQuadTreeLeafMessage>(5000,
                                                                                                       controller_msgs.msg.dds.HeightQuadTreeLeafMessage.class,
                                                                                                       new controller_msgs.msg.dds.HeightQuadTreeLeafMessagePubSubType());
+
    }
 
    public HeightQuadTreeMessage(HeightQuadTreeMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(HeightQuadTreeMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       default_height_ = other.default_height_;
 
       resolution_ = other.resolution_;
 
-      x_size_ = other.x_size_;
+      size_x_ = other.size_x_;
 
-      y_size_ = other.y_size_;
+      size_y_ = other.size_y_;
 
       leaves_.set(other.leaves_);
    }
 
-   public float getDefaultHeight()
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
    {
-      return default_height_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setDefaultHeight(float default_height)
@@ -50,9 +69,9 @@ public class HeightQuadTreeMessage implements Settable<HeightQuadTreeMessage>, E
       default_height_ = default_height;
    }
 
-   public float getResolution()
+   public float getDefaultHeight()
    {
-      return resolution_;
+      return default_height_;
    }
 
    public void setResolution(float resolution)
@@ -60,24 +79,29 @@ public class HeightQuadTreeMessage implements Settable<HeightQuadTreeMessage>, E
       resolution_ = resolution;
    }
 
-   public float getXSize()
+   public float getResolution()
    {
-      return x_size_;
+      return resolution_;
    }
 
-   public void setXSize(float x_size)
+   public void setSizeX(float size_x)
    {
-      x_size_ = x_size;
+      size_x_ = size_x;
    }
 
-   public float getYSize()
+   public float getSizeX()
    {
-      return y_size_;
+      return size_x_;
    }
 
-   public void setYSize(float y_size)
+   public void setSizeY(float size_y)
    {
-      y_size_ = y_size;
+      size_y_ = size_y;
+   }
+
+   public float getSizeY()
+   {
+      return size_y_;
    }
 
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.HeightQuadTreeLeafMessage> getLeaves()
@@ -93,16 +117,19 @@ public class HeightQuadTreeMessage implements Settable<HeightQuadTreeMessage>, E
       if (other == this)
          return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_height_, other.default_height_, epsilon))
          return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.resolution_, other.resolution_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_size_, other.x_size_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.size_x_, other.size_x_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_size_, other.y_size_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.size_y_, other.size_y_, epsilon))
          return false;
 
       if (this.leaves_.size() == other.leaves_.size())
@@ -133,16 +160,19 @@ public class HeightQuadTreeMessage implements Settable<HeightQuadTreeMessage>, E
 
       HeightQuadTreeMessage otherMyClass = (HeightQuadTreeMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.default_height_ != otherMyClass.default_height_)
          return false;
 
       if (this.resolution_ != otherMyClass.resolution_)
          return false;
 
-      if (this.x_size_ != otherMyClass.x_size_)
+      if (this.size_x_ != otherMyClass.size_x_)
          return false;
 
-      if (this.y_size_ != otherMyClass.y_size_)
+      if (this.size_y_ != otherMyClass.size_y_)
          return false;
 
       if (!this.leaves_.equals(otherMyClass.leaves_))
@@ -157,25 +187,23 @@ public class HeightQuadTreeMessage implements Settable<HeightQuadTreeMessage>, E
       StringBuilder builder = new StringBuilder();
 
       builder.append("HeightQuadTreeMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("default_height=");
       builder.append(this.default_height_);
-
       builder.append(", ");
       builder.append("resolution=");
       builder.append(this.resolution_);
-
       builder.append(", ");
-      builder.append("x_size=");
-      builder.append(this.x_size_);
-
+      builder.append("size_x=");
+      builder.append(this.size_x_);
       builder.append(", ");
-      builder.append("y_size=");
-      builder.append(this.y_size_);
-
+      builder.append("size_y=");
+      builder.append(this.size_y_);
       builder.append(", ");
       builder.append("leaves=");
       builder.append(this.leaves_);
-
       builder.append("}");
       return builder.toString();
    }

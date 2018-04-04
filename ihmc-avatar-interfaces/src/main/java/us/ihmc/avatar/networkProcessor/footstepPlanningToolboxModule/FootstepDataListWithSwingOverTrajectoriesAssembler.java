@@ -3,9 +3,13 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryExpansionStatus;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -14,17 +18,14 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.Footstep.FootstepType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FootstepDataListWithSwingOverTrajectoriesAssembler
 {
@@ -84,7 +85,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
-         footstepDataMessage.setCustomPositionWaypoints(waypoints);
+         MessageTools.copyData(waypoints, footstepDataMessage.getCustomPositionWaypoints());
 
          if (simpleFootstep.hasFoothold())
          {
@@ -101,23 +102,25 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                fourPartialFootholdCorners.add(new Point2D(partialFootholdPolygon.getVertex(j)));
             }
 
-            footstepDataMessage.setPredictedContactPoints(fourPartialFootholdCorners);
+            HumanoidMessageTools.packPredictedContactPoints(fourPartialFootholdCorners, footstepDataMessage);
          }
 
          double maxSpeed = maxSpeedDimensionless / swingTime;
          if (maxSpeed > maxSwingSpeed)
          {
             double adjustedSwingTime = maxSpeedDimensionless / maxSwingSpeed;
-            footstepDataMessage.setTimings(adjustedSwingTime, transferTime);
+            footstepDataMessage.setSwingDuration(adjustedSwingTime);
+            footstepDataMessage.setTransferDuration(transferTime);
          }
 
-         footstepDataListMessage.add(footstepDataMessage);
+         footstepDataListMessage.getFootstepDataList().add().set(footstepDataMessage);
 
          swingStartPose.setIncludingFrame(stanceFootPose);
          stanceFootPose.setIncludingFrame(swingEndPose);
       }
 
-      footstepDataListMessage.setExecutionMode(executionMode);
+      footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
+      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
       return footstepDataListMessage;
    }
 
@@ -146,7 +149,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          waypoints[0].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
-         footstepDataMessage.setCustomPositionWaypoints(waypoints);
+         MessageTools.copyData(waypoints, footstepDataMessage.getCustomPositionWaypoints());
 
          if (footstep.getFootstepType() == FootstepType.PARTIAL_FOOTSTEP)
          {
@@ -165,16 +168,18 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
                fourPartialFootholdCorners.add(new Point2D(partialFootholdPolygon.getVertex(j)));
             }
 
-            footstepDataMessage.setPredictedContactPoints(fourPartialFootholdCorners);
+            
+            HumanoidMessageTools.packPredictedContactPoints(fourPartialFootholdCorners, footstepDataMessage);
          }
 
-         footstepDataListMessage.add(footstepDataMessage);
+         footstepDataListMessage.getFootstepDataList().add().set(footstepDataMessage);
 
          swingStartPose.setIncludingFrame(stanceFootPose);
          stanceFootPose.setIncludingFrame(swingEndPose);
       }
 
-      footstepDataListMessage.setExecutionMode(executionMode);
+      footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
+      footstepDataListMessage.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
       return footstepDataListMessage;
    }
 

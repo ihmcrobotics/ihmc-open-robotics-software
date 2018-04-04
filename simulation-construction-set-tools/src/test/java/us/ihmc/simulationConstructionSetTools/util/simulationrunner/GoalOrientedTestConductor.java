@@ -34,8 +34,10 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
    private final AtomicBoolean createAssertionFailedException = new AtomicBoolean();
    private final AtomicBoolean printSuccessMessage = new AtomicBoolean();
+   private final AtomicBoolean createSCSCrashedException = new AtomicBoolean();
 
    private String assertionFailedMessage = null;
+   private String scsCrashedException = null;
    
    public GoalOrientedTestConductor(SimulationConstructionSet scs, SimulationTestingParameters simulationTestingParameters)
    {
@@ -184,7 +186,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       printSuccessMessage.set(false);
       
       printSimulatingMessage();
-      
+
       scs.simulate();
 
       while (!createAssertionFailedException.get() && !printSuccessMessage.get())
@@ -201,6 +203,11 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       {
          printSuccessMessage();
          stop();
+      }
+      else if(createSCSCrashedException.get())
+      {
+         stop();
+         PrintTools.error(scsCrashedException);
       }
       
       //wait to see if scs threw any exceptions
@@ -289,7 +296,6 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
    @Override
    public void simulationDone()
    {
-      
    }
 
    @Override
@@ -299,6 +305,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
       {
          PrintTools.error(throwable.getMessage());
       }
-      assertionFailedMessage = throwable.getMessage();
+      scsCrashedException = throwable.getMessage();
+      createSCSCrashedException.set(true);
    }
 }

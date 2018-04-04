@@ -35,7 +35,8 @@ public class MockAtlasController
          RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
          // Pack message with data
-         robotConfigurationData.getHeader().getStamp().setNanosec(i);
+//         robotConfigurationData.getHeader().getStamp().setNanosec(i);
+         robotConfigurationData.getTimestamp();
 
          // Publish message, thread safe, copies data into another preallocated holder for sending
          publisher.publish(robotConfigurationData);

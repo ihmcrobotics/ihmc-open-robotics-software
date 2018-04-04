@@ -1,10 +1,19 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
+import java.io.IOException;
+
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.net.NetClassList;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.*;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedControllerCoreOptimizationSettings;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDefaultInitialPosition;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
@@ -14,6 +23,8 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
@@ -31,9 +42,8 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-
-import javax.swing.text.html.Option;
-import java.io.IOException;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 {
@@ -44,7 +54,6 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private static final boolean USE_STATE_ESTIMATOR = false;
    private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = true;
-   private static final boolean USE_NETWORKING = false;
 
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
 
@@ -53,6 +62,10 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<QuadrupedSimulationInitialPositionParameters> initialPosition = new OptionalFactoryField<>("initialPosition");
+   private final OptionalFactoryField<Boolean> useNetworking = new OptionalFactoryField<>("useNetworking");
+
+   private QuadrupedStepTeleopManager stepTeleopManager;
+   private QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager;
 
    @Override
    public GoalOrientedTestConductor createTestConductor() throws IOException
@@ -60,6 +73,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       useStateEstimator.setDefaultValue(USE_STATE_ESTIMATOR);
       initialPosition.setDefaultValue(new GenericQuadrupedDefaultInitialPosition());
       usePushRobotController.setDefaultValue(false);
+      useNetworking.setDefaultValue(false);
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
@@ -75,6 +89,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
+      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(
+            fullRobotModel.getTotalMass());
 
       SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
 
@@ -96,8 +112,9 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setUseTrackAndDolly(USE_TRACK_AND_DOLLY);
       simulationFactory.setInitialPositionParameters(initialPositionParameters);
       simulationFactory.setFullRobotModel(fullRobotModel);
+      simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
-      simulationFactory.setUseNetworking(USE_NETWORKING);
+      simulationFactory.setUseNetworking(useNetworking.get());
       simulationFactory.setTimestampHolder(timestampProvider);
       simulationFactory.setUseStateEstimator(useStateEstimator.get());
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
@@ -108,6 +125,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setControlMode(controlMode.get());
       simulationFactory.setXGaitSettings(xGaitSettings);
       simulationFactory.setInitialForceControlState(QuadrupedForceControllerEnum.FREEZE);
+      simulationFactory.setUseLocalCommunicator(useNetworking.get());
 
       if (groundContactModelType.hasValue())
       {
@@ -117,9 +135,36 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       {
          simulationFactory.setGroundProfile3D(providedGroundProfile3D.get());
       }
+
+      if(useNetworking.get())
+      {
+         YoVariableRegistry teleopRegistry = new YoVariableRegistry("TeleopRegistry");
+         sdfRobot.getRobotsYoVariableRegistry().addChild(teleopRegistry);
+
+         PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
+         packetCommunicator.connect();
+         stepTeleopManager = new QuadrupedStepTeleopManager(packetCommunicator, xGaitSettings, referenceFrames, teleopRegistry);
+         bodyPoseTeleopManager = new QuadrupedBodyPoseTeleopManager(physicalProperties.getNominalCoMHeight(), packetCommunicator);
+
+         new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
+      }
+      else
+      {
+         stepTeleopManager = null;
+      }
+
       simulationFactory.setPositionBasedCrawlControllerParameters(positionBasedCrawlControllerParameters);
       simulationFactory.setUsePushRobotController(usePushRobotController.get());
       GoalOrientedTestConductor goalOrientedTestConductor = new GoalOrientedTestConductor(simulationFactory.createSimulation(), simulationTestingParameters);
+
+      if(useNetworking.get())
+      {
+         goalOrientedTestConductor.getScs().addScript(t ->
+                                                      {
+                                                         stepTeleopManager.update();
+                                                         bodyPoseTeleopManager.update();
+                                                      });
+      }
 
       FactoryTools.disposeFactory(this);
 
@@ -160,5 +205,23 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public void setInitialPosition(QuadrupedSimulationInitialPositionParameters initialPosition)
    {
       this.initialPosition.set(initialPosition);
+   }
+
+   @Override
+   public void setUseNetworking(boolean useNetworking)
+   {
+      this.useNetworking.set(useNetworking);
+   }
+
+   @Override
+   public QuadrupedStepTeleopManager getStepTeleopManager()
+   {
+      return stepTeleopManager;
+   }
+
+   @Override
+   public QuadrupedBodyPoseTeleopManager getBodyPoseTeleopManager()
+   {
+      return bodyPoseTeleopManager;
    }
 }

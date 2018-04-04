@@ -1,50 +1,56 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.
+ * This message is part of the IHMC whole-body controller API. Send whole body trajectories to the
+ * robot. A best effort is made to execute the trajectory while balance is kept.
  */
-public class WholeBodyTrajectoryMessage implements Settable<WholeBodyTrajectoryMessage>, EpsilonComparable<WholeBodyTrajectoryMessage>
+public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage>
+      implements Settable<WholeBodyTrajectoryMessage>, EpsilonComparable<WholeBodyTrajectoryMessage>
 {
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
    /**
     * Trajectory for the left hand
     */
-   private controller_msgs.msg.dds.HandTrajectoryMessage left_hand_trajectory_message_;
+   public controller_msgs.msg.dds.HandTrajectoryMessage left_hand_trajectory_message_;
    /**
     * Trajectory for the right hand
     */
-   private controller_msgs.msg.dds.HandTrajectoryMessage right_hand_trajectory_message_;
+   public controller_msgs.msg.dds.HandTrajectoryMessage right_hand_trajectory_message_;
    /**
     * Trajectory for the left arm joints
     */
-   private controller_msgs.msg.dds.ArmTrajectoryMessage left_arm_trajectory_message_;
+   public controller_msgs.msg.dds.ArmTrajectoryMessage left_arm_trajectory_message_;
    /**
     * Trajectory for the right arm joints
     */
-   private controller_msgs.msg.dds.ArmTrajectoryMessage right_arm_trajectory_message_;
+   public controller_msgs.msg.dds.ArmTrajectoryMessage right_arm_trajectory_message_;
    /**
     * Trajectory for the chest
     */
-   private controller_msgs.msg.dds.ChestTrajectoryMessage chest_trajectory_message_;
+   public controller_msgs.msg.dds.ChestTrajectoryMessage chest_trajectory_message_;
    /**
     * Trajectory for the pelvis
     */
-   private controller_msgs.msg.dds.PelvisTrajectoryMessage pelvis_trajectory_message_;
+   public controller_msgs.msg.dds.PelvisTrajectoryMessage pelvis_trajectory_message_;
    /**
     * Trajectory for the left foot
     */
-   private controller_msgs.msg.dds.FootTrajectoryMessage left_foot_trajectory_message_;
+   public controller_msgs.msg.dds.FootTrajectoryMessage left_foot_trajectory_message_;
    /**
     * Trajectory for the right foot
     */
-   private controller_msgs.msg.dds.FootTrajectoryMessage right_foot_trajectory_message_;
+   public controller_msgs.msg.dds.FootTrajectoryMessage right_foot_trajectory_message_;
    /**
     * Trajectory for the head
     */
-   private controller_msgs.msg.dds.HeadTrajectoryMessage head_trajectory_message_;
+   public controller_msgs.msg.dds.HeadTrajectoryMessage head_trajectory_message_;
 
    public WholeBodyTrajectoryMessage()
    {
@@ -61,11 +67,14 @@ public class WholeBodyTrajectoryMessage implements Settable<WholeBodyTrajectoryM
 
    public WholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(WholeBodyTrajectoryMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.staticCopy(other.left_hand_trajectory_message_, left_hand_trajectory_message_);
       controller_msgs.msg.dds.HandTrajectoryMessagePubSubType.staticCopy(other.right_hand_trajectory_message_, right_hand_trajectory_message_);
       controller_msgs.msg.dds.ArmTrajectoryMessagePubSubType.staticCopy(other.left_arm_trajectory_message_, left_arm_trajectory_message_);
@@ -75,6 +84,22 @@ public class WholeBodyTrajectoryMessage implements Settable<WholeBodyTrajectoryM
       controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.staticCopy(other.left_foot_trajectory_message_, left_foot_trajectory_message_);
       controller_msgs.msg.dds.FootTrajectoryMessagePubSubType.staticCopy(other.right_foot_trajectory_message_, right_foot_trajectory_message_);
       controller_msgs.msg.dds.HeadTrajectoryMessagePubSubType.staticCopy(other.head_trajectory_message_, head_trajectory_message_);
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -157,30 +182,25 @@ public class WholeBodyTrajectoryMessage implements Settable<WholeBodyTrajectoryM
       if (other == this)
          return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
+
       if (!this.left_hand_trajectory_message_.epsilonEquals(other.left_hand_trajectory_message_, epsilon))
          return false;
-
       if (!this.right_hand_trajectory_message_.epsilonEquals(other.right_hand_trajectory_message_, epsilon))
          return false;
-
       if (!this.left_arm_trajectory_message_.epsilonEquals(other.left_arm_trajectory_message_, epsilon))
          return false;
-
       if (!this.right_arm_trajectory_message_.epsilonEquals(other.right_arm_trajectory_message_, epsilon))
          return false;
-
       if (!this.chest_trajectory_message_.epsilonEquals(other.chest_trajectory_message_, epsilon))
          return false;
-
       if (!this.pelvis_trajectory_message_.epsilonEquals(other.pelvis_trajectory_message_, epsilon))
          return false;
-
       if (!this.left_foot_trajectory_message_.epsilonEquals(other.left_foot_trajectory_message_, epsilon))
          return false;
-
       if (!this.right_foot_trajectory_message_.epsilonEquals(other.right_foot_trajectory_message_, epsilon))
          return false;
-
       if (!this.head_trajectory_message_.epsilonEquals(other.head_trajectory_message_, epsilon))
          return false;
 
@@ -199,30 +219,25 @@ public class WholeBodyTrajectoryMessage implements Settable<WholeBodyTrajectoryM
 
       WholeBodyTrajectoryMessage otherMyClass = (WholeBodyTrajectoryMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (!this.left_hand_trajectory_message_.equals(otherMyClass.left_hand_trajectory_message_))
          return false;
-
       if (!this.right_hand_trajectory_message_.equals(otherMyClass.right_hand_trajectory_message_))
          return false;
-
       if (!this.left_arm_trajectory_message_.equals(otherMyClass.left_arm_trajectory_message_))
          return false;
-
       if (!this.right_arm_trajectory_message_.equals(otherMyClass.right_arm_trajectory_message_))
          return false;
-
       if (!this.chest_trajectory_message_.equals(otherMyClass.chest_trajectory_message_))
          return false;
-
       if (!this.pelvis_trajectory_message_.equals(otherMyClass.pelvis_trajectory_message_))
          return false;
-
       if (!this.left_foot_trajectory_message_.equals(otherMyClass.left_foot_trajectory_message_))
          return false;
-
       if (!this.right_foot_trajectory_message_.equals(otherMyClass.right_foot_trajectory_message_))
          return false;
-
       if (!this.head_trajectory_message_.equals(otherMyClass.head_trajectory_message_))
          return false;
 
@@ -235,41 +250,35 @@ public class WholeBodyTrajectoryMessage implements Settable<WholeBodyTrajectoryM
       StringBuilder builder = new StringBuilder();
 
       builder.append("WholeBodyTrajectoryMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("left_hand_trajectory_message=");
       builder.append(this.left_hand_trajectory_message_);
-
       builder.append(", ");
       builder.append("right_hand_trajectory_message=");
       builder.append(this.right_hand_trajectory_message_);
-
       builder.append(", ");
       builder.append("left_arm_trajectory_message=");
       builder.append(this.left_arm_trajectory_message_);
-
       builder.append(", ");
       builder.append("right_arm_trajectory_message=");
       builder.append(this.right_arm_trajectory_message_);
-
       builder.append(", ");
       builder.append("chest_trajectory_message=");
       builder.append(this.chest_trajectory_message_);
-
       builder.append(", ");
       builder.append("pelvis_trajectory_message=");
       builder.append(this.pelvis_trajectory_message_);
-
       builder.append(", ");
       builder.append("left_foot_trajectory_message=");
       builder.append(this.left_foot_trajectory_message_);
-
       builder.append(", ");
       builder.append("right_foot_trajectory_message=");
       builder.append(this.right_foot_trajectory_message_);
-
       builder.append(", ");
       builder.append("head_trajectory_message=");
       builder.append(this.head_trajectory_message_);
-
       builder.append("}");
       return builder.toString();
    }

@@ -1,56 +1,70 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * This message is part of the IHMC whole-body inverse kinematics module.
  */
-public class HumanoidKinematicsToolboxConfigurationMessage
+public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<HumanoidKinematicsToolboxConfigurationMessage>
       implements Settable<HumanoidKinematicsToolboxConfigurationMessage>, EpsilonComparable<HumanoidKinematicsToolboxConfigurationMessage>
 {
    /**
-    * When set to true, the solver will hold the current x and y coordinates of the center
-    * of mass. By 'current', it means that the solver will use the robot configuration data
-    * broadcasted by the controller to obtain the center of mass position.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   private boolean hold_current_center_of_mass_xy_position_ = true;
+   public long sequence_id_;
+   /**
+    * When set to true, the solver will hold the current x and y coordinates of the center of mass.
+    * By 'current', it means that the solver will use the robot configuration data broadcasted by
+    * the controller to obtain the center of mass position.
+    */
+   public boolean hold_current_center_of_mass_xy_position_ = true;
    /**
     * When set to true, the solver will hold the pose of the active support foot/feet.
     */
-   private boolean hold_support_foot_positions_ = true;
+   public boolean hold_support_foot_positions_ = true;
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {
-
    }
 
    public HumanoidKinematicsToolboxConfigurationMessage(HumanoidKinematicsToolboxConfigurationMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(HumanoidKinematicsToolboxConfigurationMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       hold_current_center_of_mass_xy_position_ = other.hold_current_center_of_mass_xy_position_;
 
       hold_support_foot_positions_ = other.hold_support_foot_positions_;
+
    }
 
    /**
-    * When set to true, the solver will hold the current x and y coordinates of the center
-    * of mass. By 'current', it means that the solver will use the robot configuration data
-    * broadcasted by the controller to obtain the center of mass position.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public boolean getHoldCurrentCenterOfMassXyPosition()
+   public void setSequenceId(long sequence_id)
    {
-      return hold_current_center_of_mass_xy_position_;
+      sequence_id_ = sequence_id;
    }
 
    /**
-    * When set to true, the solver will hold the current x and y coordinates of the center
-    * of mass. By 'current', it means that the solver will use the robot configuration data
-    * broadcasted by the controller to obtain the center of mass position.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
+   }
+
+   /**
+    * When set to true, the solver will hold the current x and y coordinates of the center of mass.
+    * By 'current', it means that the solver will use the robot configuration data broadcasted by
+    * the controller to obtain the center of mass position.
     */
    public void setHoldCurrentCenterOfMassXyPosition(boolean hold_current_center_of_mass_xy_position)
    {
@@ -58,11 +72,13 @@ public class HumanoidKinematicsToolboxConfigurationMessage
    }
 
    /**
-    * When set to true, the solver will hold the pose of the active support foot/feet.
+    * When set to true, the solver will hold the current x and y coordinates of the center of mass.
+    * By 'current', it means that the solver will use the robot configuration data broadcasted by
+    * the controller to obtain the center of mass position.
     */
-   public boolean getHoldSupportFootPositions()
+   public boolean getHoldCurrentCenterOfMassXyPosition()
    {
-      return hold_support_foot_positions_;
+      return hold_current_center_of_mass_xy_position_;
    }
 
    /**
@@ -73,6 +89,14 @@ public class HumanoidKinematicsToolboxConfigurationMessage
       hold_support_foot_positions_ = hold_support_foot_positions;
    }
 
+   /**
+    * When set to true, the solver will hold the pose of the active support foot/feet.
+    */
+   public boolean getHoldSupportFootPositions()
+   {
+      return hold_support_foot_positions_;
+   }
+
    @Override
    public boolean epsilonEquals(HumanoidKinematicsToolboxConfigurationMessage other, double epsilon)
    {
@@ -80,6 +104,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_current_center_of_mass_xy_position_, other.hold_current_center_of_mass_xy_position_, epsilon))
          return false;
@@ -102,6 +129,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage
 
       HumanoidKinematicsToolboxConfigurationMessage otherMyClass = (HumanoidKinematicsToolboxConfigurationMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.hold_current_center_of_mass_xy_position_ != otherMyClass.hold_current_center_of_mass_xy_position_)
          return false;
 
@@ -117,13 +147,14 @@ public class HumanoidKinematicsToolboxConfigurationMessage
       StringBuilder builder = new StringBuilder();
 
       builder.append("HumanoidKinematicsToolboxConfigurationMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("hold_current_center_of_mass_xy_position=");
       builder.append(this.hold_current_center_of_mass_xy_position_);
-
       builder.append(", ");
       builder.append("hold_support_foot_positions=");
       builder.append(this.hold_support_foot_positions_);
-
       builder.append("}");
       return builder.toString();
    }

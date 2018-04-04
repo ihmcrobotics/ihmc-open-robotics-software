@@ -2,10 +2,14 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningToolboxModule;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.PrintTools;
@@ -15,8 +19,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -43,10 +45,7 @@ import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPlanarRegionsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRequestPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -178,12 +177,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
       if (request == null)
          return false;
 
-      planId.set(request.planId);
-      FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.requestedFootstepPlannerType);
+      planId.set(request.getPlannerRequestId());
+      FootstepPlannerType requestedPlannerType = FootstepPlannerType.fromByte(request.getRequestedFootstepPlannerType());
 
       if (debug)
       {
-         PrintTools.info("Starting to plan. Plan id: " + request.planId + ". Timeout: " + request.timeout);
+         PrintTools.info("Starting to plan. Plan id: " + request.getPlannerRequestId() + ". Timeout: " + request.getTimeout());
       }
 
       if (requestedPlannerType != null)
@@ -191,7 +190,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
          activePlanner.set(requestedPlannerType);
       }
 
-      PlanarRegionsListMessage planarRegionsListMessage = request.planarRegionsListMessage;
+      PlanarRegionsListMessage planarRegionsListMessage = request.getPlanarRegionsListMessage();
       if (planarRegionsListMessage == null)
       {
          this.planarRegionsList = Optional.empty();
@@ -203,15 +202,15 @@ public class FootstepPlanningToolboxController extends ToolboxController
       }
 
       FramePose3D initialStancePose = new FramePose3D(ReferenceFrame.getWorldFrame());
-      initialStancePose.setPosition(new Point3D(request.stanceFootPositionInWorld));
-      initialStancePose.setOrientation(new Quaternion(request.stanceFootOrientationInWorld));
+      initialStancePose.setPosition(new Point3D(request.getStanceFootPositionInWorld()));
+      initialStancePose.setOrientation(new Quaternion(request.getStanceFootOrientationInWorld()));
 
       FramePose3D goalPose = new FramePose3D(ReferenceFrame.getWorldFrame());
-      goalPose.setPosition(new Point3D(request.goalPositionInWorld));
-      goalPose.setOrientation(new Quaternion(request.goalOrientationInWorld));
+      goalPose.setPosition(new Point3D(request.getGoalPositionInWorld()));
+      goalPose.setOrientation(new Quaternion(request.getGoalOrientationInWorld()));
 
       FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
-      planner.setInitialStanceFoot(initialStancePose, RobotSide.fromByte(request.initialStanceRobotSide));
+      planner.setInitialStanceFoot(initialStancePose, RobotSide.fromByte(request.getInitialStanceRobotSide()));
 
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
@@ -259,16 +258,16 @@ public class FootstepPlanningToolboxController extends ToolboxController
       FootstepPlanningToolboxOutputStatus result = new FootstepPlanningToolboxOutputStatus();
       if (footstepPlan == null)
       {
-         result.footstepDataList = new FootstepDataListMessage();
+         result.getFootstepDataList().set(new FootstepDataListMessage());
       }
       else
       {
-         result.footstepDataList = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE);
+         result.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.0, 0.0, ExecutionMode.OVERRIDE));
       }
 
-      planarRegionsList.ifPresent(result::setPlanarRegionsList);
+      planarRegionsList.ifPresent(regions -> result.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regions)));
       result.setPlanId(planId.getIntegerValue());
-      result.footstepPlanningResult = status.toByte();
+      result.setFootstepPlanningResult(status.toByte());
       return result;
    }
 

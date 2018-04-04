@@ -123,6 +123,7 @@ public class VisibilityGraphsOcclusionTest
    }
 
    @Test(timeout = TIMEOUT)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Ignore
    public void testMazeWithOcclusions()
    {

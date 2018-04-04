@@ -48,7 +48,7 @@ public class QuadrupedForceBasedJointInitializationController implements Quadrup
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
    {
       OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
@@ -63,6 +63,11 @@ public class QuadrupedForceBasedJointInitializationController implements Quadrup
          }
       }
 
+   }
+
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
+   {
       return allJointsInitialized() ? ControllerEvent.DONE : null;
    }
 

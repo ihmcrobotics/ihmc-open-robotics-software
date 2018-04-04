@@ -20,30 +20,30 @@ public class GenericQuadrupedXGaitWalkingOverRampsTest extends QuadrupedXGaitWal
       return new GenericQuadrupedTestFactory();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 600000)
+   @ContinuousIntegrationTest(estimatedDuration = 238.9)
+   @Test(timeout = 1200000)
    public void testWalkingDownSlope() throws IOException
    {
       super.testWalkingDownSlope(new GenericQuadrupedDefaultInitialPosition());
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 140.0)
-   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 431.3)
+   @Test(timeout = 2200000)
    public void testWalkingOverShallowRamps() throws IOException
    {
       super.testWalkingOverShallowRamps();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 195.3)
+   @Test(timeout = 980000)
    public void testWalkingUpSlope() throws IOException
    {
       super.testWalkingUpSlope(new GenericQuadrupedDefaultInitialPosition());
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 100.0)
-   @Test(timeout = 600000)
+   @ContinuousIntegrationTest(estimatedDuration = 405.9)
+   @Test(timeout = 2000000)
    public void testWalkingOverAggressiveRamps() throws IOException
    {
       super.testWalkingOverAggressiveRamps();

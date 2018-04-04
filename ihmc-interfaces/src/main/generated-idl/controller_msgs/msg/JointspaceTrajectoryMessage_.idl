@@ -21,6 +21,10 @@ module controller_msgs
       struct JointspaceTrajectoryMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Trajectory for each.
          */
         sequence<controller_msgs::msg::dds::OneDoFJointTrajectoryMessage> joint_trajectory_messages;

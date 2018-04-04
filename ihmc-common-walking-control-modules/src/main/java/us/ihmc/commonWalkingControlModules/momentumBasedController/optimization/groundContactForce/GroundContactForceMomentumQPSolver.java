@@ -123,7 +123,7 @@ public class GroundContactForceMomentumQPSolver
       regularizationMatrix = new DenseMatrix64F(problemSize, problemSize);
 
       momentumRateRegularization.set(0.00001);
-      momentumAccelerationRegularization.set(0.0001);
+      momentumAccelerationRegularization.set(0.000001);
       double defaultRhoRegularization = 0.00001;
       for (int i = 0; i < momentumSize; i++)
          regularizationMatrix.set(i, i, momentumRateRegularization.getDoubleValue());
@@ -156,7 +156,7 @@ public class GroundContactForceMomentumQPSolver
 
    public void setRhoRegularizationWeight(DenseMatrix64F weight)
    {
-      CommonOps.insert(weight, regularizationMatrix, 0, 0);
+      CommonOps.insert(weight, regularizationMatrix, momentumSize, momentumSize);
    }
 
    public void setUseWarmStart(boolean useWarmStart)
@@ -476,7 +476,7 @@ public class GroundContactForceMomentumQPSolver
          MatrixTools.setMatrixBlock(tempWrenchConstraint_J, 0, 0, momentumJacobian, 0, 0, Wrench.SIZE, momentumSize, -1.0);
          CommonOps.insert(rhoJacobian, tempWrenchConstraint_J, 0, momentumSize);
 
-         double weight = 150.0;
+         double weight = 1500.0;
          tempWrenchConstraint_H.reshape(problemSize, problemSize);
          CommonOps.multInner(tempWrenchConstraint_J, tempWrenchConstraint_H);
          CommonOps.scale(weight, tempWrenchConstraint_H);

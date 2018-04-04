@@ -1,37 +1,46 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * (Obsolete) This message is part of the old IHMC footstep planning module.
  */
-public class FootstepPlanRequestPacket implements Settable<FootstepPlanRequestPacket>, EpsilonComparable<FootstepPlanRequestPacket>
+public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
+      implements Settable<FootstepPlanRequestPacket>, EpsilonComparable<FootstepPlanRequestPacket>
 {
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_START_SEARCH = (byte) 0;
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_STOP_SEARCH = (byte) 1;
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_UPDATE_START = (byte) 2;
-   private controller_msgs.msg.dds.FootstepDataMessage start_footstep_;
-   private double theta_start_;
-   private double max_sub_optimality_ = 1.0;
-   private us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> goals_;
-   private byte footstep_plan_request_type_ = (byte) 255;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public controller_msgs.msg.dds.FootstepDataMessage start_footstep_;
+   public double theta_start_;
+   public double max_sub_optimality_ = 1.0;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> goals_;
+   public byte footstep_plan_request_type_ = (byte) 255;
 
    public FootstepPlanRequestPacket()
    {
       start_footstep_ = new controller_msgs.msg.dds.FootstepDataMessage();
-
       goals_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage>(100, controller_msgs.msg.dds.FootstepDataMessage.class,
                                                                                                new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
+
    }
 
    public FootstepPlanRequestPacket(FootstepPlanRequestPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(FootstepPlanRequestPacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.FootstepDataMessagePubSubType.staticCopy(other.start_footstep_, start_footstep_);
       theta_start_ = other.theta_start_;
 
@@ -39,6 +48,23 @@ public class FootstepPlanRequestPacket implements Settable<FootstepPlanRequestPa
 
       goals_.set(other.goals_);
       footstep_plan_request_type_ = other.footstep_plan_request_type_;
+
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public controller_msgs.msg.dds.FootstepDataMessage getStartFootstep()
@@ -46,19 +72,14 @@ public class FootstepPlanRequestPacket implements Settable<FootstepPlanRequestPa
       return start_footstep_;
    }
 
-   public double getThetaStart()
-   {
-      return theta_start_;
-   }
-
    public void setThetaStart(double theta_start)
    {
       theta_start_ = theta_start;
    }
 
-   public double getMaxSubOptimality()
+   public double getThetaStart()
    {
-      return max_sub_optimality_;
+      return theta_start_;
    }
 
    public void setMaxSubOptimality(double max_sub_optimality)
@@ -66,19 +87,24 @@ public class FootstepPlanRequestPacket implements Settable<FootstepPlanRequestPa
       max_sub_optimality_ = max_sub_optimality;
    }
 
+   public double getMaxSubOptimality()
+   {
+      return max_sub_optimality_;
+   }
+
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> getGoals()
    {
       return goals_;
    }
 
-   public byte getFootstepPlanRequestType()
-   {
-      return footstep_plan_request_type_;
-   }
-
    public void setFootstepPlanRequestType(byte footstep_plan_request_type)
    {
       footstep_plan_request_type_ = footstep_plan_request_type;
+   }
+
+   public byte getFootstepPlanRequestType()
+   {
+      return footstep_plan_request_type_;
    }
 
    @Override
@@ -89,9 +115,11 @@ public class FootstepPlanRequestPacket implements Settable<FootstepPlanRequestPa
       if (other == this)
          return true;
 
-      if (!this.start_footstep_.epsilonEquals(other.start_footstep_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
 
+      if (!this.start_footstep_.epsilonEquals(other.start_footstep_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.theta_start_, other.theta_start_, epsilon))
          return false;
 
@@ -129,9 +157,11 @@ public class FootstepPlanRequestPacket implements Settable<FootstepPlanRequestPa
 
       FootstepPlanRequestPacket otherMyClass = (FootstepPlanRequestPacket) other;
 
-      if (!this.start_footstep_.equals(otherMyClass.start_footstep_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
 
+      if (!this.start_footstep_.equals(otherMyClass.start_footstep_))
+         return false;
       if (this.theta_start_ != otherMyClass.theta_start_)
          return false;
 
@@ -140,7 +170,6 @@ public class FootstepPlanRequestPacket implements Settable<FootstepPlanRequestPa
 
       if (!this.goals_.equals(otherMyClass.goals_))
          return false;
-
       if (this.footstep_plan_request_type_ != otherMyClass.footstep_plan_request_type_)
          return false;
 
@@ -153,25 +182,23 @@ public class FootstepPlanRequestPacket implements Settable<FootstepPlanRequestPa
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlanRequestPacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("start_footstep=");
       builder.append(this.start_footstep_);
-
       builder.append(", ");
       builder.append("theta_start=");
       builder.append(this.theta_start_);
-
       builder.append(", ");
       builder.append("max_sub_optimality=");
       builder.append(this.max_sub_optimality_);
-
       builder.append(", ");
       builder.append("goals=");
       builder.append(this.goals_);
-
       builder.append(", ");
       builder.append("footstep_plan_request_type=");
       builder.append(this.footstep_plan_request_type_);
-
       builder.append("}");
       return builder.toString();
    }

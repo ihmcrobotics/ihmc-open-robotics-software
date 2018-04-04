@@ -1,99 +1,22 @@
 package controller_msgs.msg.dds;
 
 /**
- * Topic data type of the struct "KinematicsToolboxOutputStatus" defined in "KinematicsToolboxOutputStatus_.idl". Use this class to provide the TopicDataType to a Participant.
+ * 
+ * Topic data type of the struct "KinematicsToolboxOutputStatus" defined in
+ * "KinematicsToolboxOutputStatus_.idl". Use this class to provide the TopicDataType to a
+ * Participant.
  *
- * This file was automatically generated from KinematicsToolboxOutputStatus_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit KinematicsToolboxOutputStatus_.idl instead.
+ * This file was automatically generated from KinematicsToolboxOutputStatus_.idl by
+ * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
+ * KinematicsToolboxOutputStatus_.idl instead.
+ *
  */
 public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::KinematicsToolboxOutputStatus_";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
-
-   public KinematicsToolboxOutputStatusPubSubType()
-   {
-
-   }
-
-   public static int getMaxCdrSerializedSize()
-   {
-      return getMaxCdrSerializedSize(0);
-   }
-
-   public static int getMaxCdrSerializedSize(int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.KinematicsToolboxOutputStatus data)
-   {
-      return getCdrSerializedSize(data, 0);
-   }
-
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.KinematicsToolboxOutputStatus data, int current_alignment)
-   {
-      int initial_alignment = current_alignment;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getDesiredJointAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootTranslation(), current_alignment);
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredRootOrientation(), current_alignment);
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      return current_alignment - initial_alignment;
-   }
-
-   public static void write(controller_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
-   {
-
-      cdr.write_type_2(data.getJointNameHash());
-
-      if (data.getDesiredJointAngles().size() <= 100)
-         cdr.write_type_e(data.getDesiredJointAngles());
-      else
-         throw new RuntimeException("desired_joint_angles field exceeds the maximum length");
-
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootTranslation(), cdr);
-
-      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredRootOrientation(), cdr);
-
-      cdr.write_type_6(data.getSolutionQuality());
-   }
-
-   public static void read(controller_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
-   {
-
-      data.setJointNameHash(cdr.read_type_2());
-
-      cdr.read_type_e(data.getDesiredJointAngles());
-
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootTranslation(), cdr);
-
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredRootOrientation(), cdr);
-
-      data.setSolutionQuality(cdr.read_type_6());
-   }
-
-   public static void staticCopy(controller_msgs.msg.dds.KinematicsToolboxOutputStatus src, controller_msgs.msg.dds.KinematicsToolboxOutputStatus dest)
-   {
-      dest.set(src);
-   }
 
    @Override
    public void serialize(controller_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
@@ -113,13 +36,92 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       deserializeCDR.finishDeserialize();
    }
 
+   public static int getMaxCdrSerializedSize()
+   {
+      return getMaxCdrSerializedSize(0);
+   }
+
+   public static int getMaxCdrSerializedSize(int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.KinematicsToolboxOutputStatus data)
+   {
+      return getCdrSerializedSize(data, 0);
+   }
+
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.KinematicsToolboxOutputStatus data, int current_alignment)
+   {
+      int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getDesiredJointAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootTranslation(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredRootOrientation(), current_alignment);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      return current_alignment - initial_alignment;
+   }
+
+   public static void write(controller_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
+   {
+      cdr.write_type_4(data.getSequenceId());
+
+      cdr.write_type_2(data.getJointNameHash());
+
+      if (data.getDesiredJointAngles().size() <= 100)
+         cdr.write_type_e(data.getDesiredJointAngles());
+      else
+         throw new RuntimeException("desired_joint_angles field exceeds the maximum length");
+
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootTranslation(), cdr);
+      geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredRootOrientation(), cdr);
+      cdr.write_type_6(data.getSolutionQuality());
+
+   }
+
+   public static void read(controller_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
+   {
+      data.setSequenceId(cdr.read_type_4());
+
+      data.setJointNameHash(cdr.read_type_2());
+
+      cdr.read_type_e(data.getDesiredJointAngles());
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootTranslation(), cdr);
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredRootOrientation(), cdr);
+      data.setSolutionQuality(cdr.read_type_6());
+
+   }
+
    @Override
    public final void serialize(controller_msgs.msg.dds.KinematicsToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_2("joint_name_hash", data.getJointNameHash());
-
       ser.write_type_e("desired_joint_angles", data.getDesiredJointAngles());
-
       ser.write_type_a("desired_root_translation", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootTranslation());
 
       ser.write_type_a("desired_root_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredRootOrientation());
@@ -130,15 +132,19 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsToolboxOutputStatus data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setJointNameHash(ser.read_type_2("joint_name_hash"));
-
       ser.read_type_e("desired_joint_angles", data.getDesiredJointAngles());
-
       ser.read_type_a("desired_root_translation", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootTranslation());
 
       ser.read_type_a("desired_root_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredRootOrientation());
 
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
+   }
+
+   public static void staticCopy(controller_msgs.msg.dds.KinematicsToolboxOutputStatus src, controller_msgs.msg.dds.KinematicsToolboxOutputStatus dest)
+   {
+      dest.set(src);
    }
 
    @Override

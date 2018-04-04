@@ -1,56 +1,51 @@
-// generated from rosidl_generator_dds_idl/resource/msg.idl.em
-
 #ifndef __controller_msgs__msg__RobotConfigurationData__idl__
 #define __controller_msgs__msg__RobotConfigurationData__idl__
 
+#include "controller_msgs/msg/./IMUPacket_.idl"
+#include "controller_msgs/msg/./SpatialVectorMessage_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
-#include "geometry_msgs/msg/./Wrench_.idl"
-#include "sensor_msgs/msg/./Imu_.idl"
-#include "std_msgs/msg/./Header_.idl"
 module controller_msgs
 {
   module msg
   {
     module dds
     {
-      const long RobotConfigurationData__STANDING =
-      3;
+      const octet ROBOT_MOTION_STATUS_STANDING =
+      0;
 
-      const long RobotConfigurationData__IN_MOTION =
-      4;
+      const octet ROBOT_MOTION_STATUS_IN_MOTION =
+      1;
 
 
       @TypeCode(type="controller_msgs::msg::dds_::RobotConfigurationData_")
       struct RobotConfigurationData
       {
-        std_msgs::msg::dds::Header header;
         /**
-         * debug
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
-        long long dropped_messages;
+        unsigned long sequence_id;
+        long long timestamp;
         long long sensor_head_pps_timestamp;
         long joint_name_hash;
         sequence<float, 50> joint_angles;
         sequence<float, 50> joint_velocities;
         sequence<float, 50> joint_torques;
-        sequence<geometry_msgs::msg::dds::Wrench, 50> force_sensor_data;
-        sequence<sensor_msgs::msg::dds::Imu, 5> imu_sensor_data;
         geometry_msgs::msg::dds::Vector3 root_translation;
         geometry_msgs::msg::dds::Quaternion root_orientation;
         geometry_msgs::msg::dds::Vector3 pelvis_linear_velocity;
         geometry_msgs::msg::dds::Vector3 pelvis_angular_velocity;
         geometry_msgs::msg::dds::Vector3 pelvis_linear_acceleration;
-        long robot_motion_status;
-        /**
-         * For verifying the robot is receiving your commands
-         */
+        sequence<controller_msgs::msg::dds::SpatialVectorMessage, 50> force_sensor_data;
+        sequence<controller_msgs::msg::dds::IMUPacket, 10> imu_sensor_data;
+        @defaultValue(value=255)
+        octet robot_motion_status;
         long last_received_packet_type_id;
         long long last_received_packet_unique_id;
         long long last_received_packet_robot_timestamp;
-      };  // struct RobotConfigurationData
-    };  // module dds_
-  };  // module msg
-};  // module controller_msgs
+      };
+    };
+  };
+};
 
-#endif  // __controller_msgs__msg__RobotConfigurationData__idl__
+#endif

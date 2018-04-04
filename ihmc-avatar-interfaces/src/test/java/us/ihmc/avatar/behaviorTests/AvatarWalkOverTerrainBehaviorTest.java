@@ -79,7 +79,7 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
 
       behaviorCommunicator.send(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockField));
       behaviorCommunicator.send(HumanoidMessageTools.createWalkOverTerrainGoalPacket(goalPosition, new Quaternion()));
-      behaviorCommunicator.send(HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WAlK_OVER_TERRAIN));
+      behaviorCommunicator.send(HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_OVER_TERRAIN));
 
       FloatingJoint pelvisJoint = simulationTestHelper.getRobot().getRootJoint();
       Point3D pelvisPosition = new Point3D();

@@ -13,12 +13,14 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.robotics.lists.PriorityQueue;
 
 public class GarbageFreePriorityQueueTest
 {
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testQueueableCommandPriorityQueue()
    {
@@ -37,6 +39,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSameDelay()
    {
@@ -59,6 +62,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(10, index);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAddingInOrder()
    {
@@ -80,6 +84,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(10, index);
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPop()
    {
@@ -101,6 +106,7 @@ public class GarbageFreePriorityQueueTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPopExtended()
    {
@@ -145,7 +151,8 @@ public class GarbageFreePriorityQueueTest
          index++;
       }
    }
-   
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPeek()
    { 
@@ -156,7 +163,8 @@ public class GarbageFreePriorityQueueTest
       assertEquals(chestTrajectoryCommand, commandPriorityQueue.peek());
       assertEquals(1, commandPriorityQueue.getSize());
    }
-   
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPopWhenEmpty()
    { 
@@ -165,6 +173,7 @@ public class GarbageFreePriorityQueueTest
       assertEquals(0, commandPriorityQueue.getSize());
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testClear()
    { 

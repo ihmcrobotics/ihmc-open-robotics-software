@@ -4,8 +4,8 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosBoolPublisher;
 import us.ihmc.utilities.ros.publisher.RosDoublePublisher;
@@ -133,36 +133,36 @@ public class RosAtlasAuxiliaryRobotDataPublisher implements Runnable
       for (AtlasElectricMotorPacketEnum value : AtlasElectricMotorPacketEnum.values)
       {
          RosBoolPublisher rosBoolPublisher = electricForearmEnabledPublishers.get(value);
-         rosBoolPublisher.publish(auxiliaryRobotData.electricJointEnabledArray[value.getId()]);
+         rosBoolPublisher.publish(auxiliaryRobotData.getElectricJointEnabledArray().get(value.getId()) == 1);
 
          RosDoublePublisher temperaturePublisher = electricForearmTemperaturePublishers.get(value);
-         temperaturePublisher.publish(auxiliaryRobotData.electricJointTemperatures[value.getId()]);
+         temperaturePublisher.publish(auxiliaryRobotData.getElectricJointTemperatures().get(value.getId()));
 
          RosDoublePublisher currentPublisher = electricForearmCurrentPublishers.get(value);
-         currentPublisher.publish(auxiliaryRobotData.electricJointCurrents[value.getId()]);
+         currentPublisher.publish(auxiliaryRobotData.getElectricJointCurrents().get(value.getId()));
       }
    }
 
    private void publishPumpData(AtlasAuxiliaryRobotData auxiliaryRobotData)
    {
-      pumpInletPressurePublisher.publish(auxiliaryRobotData.pumpInletPressure);
-      pumpSupplyPressurePublisher.publish(auxiliaryRobotData.pumpSupplyPressure);
-      airSumpPressurePublisher.publish(auxiliaryRobotData.airSumpPressure);
-      pumpSupplyTemperaturePublisher.publish(auxiliaryRobotData.pumpSupplyTemperature);
-      pumpRPMPublisher.publish(auxiliaryRobotData.pumpRPM);
-      motorTemperaturePublisher.publish(auxiliaryRobotData.motorTemperature);
-      motorDriverTemperaturePublisher.publish(auxiliaryRobotData.motorDriverTemperature);
+      pumpInletPressurePublisher.publish(auxiliaryRobotData.getPumpInletPressure());
+      pumpSupplyPressurePublisher.publish(auxiliaryRobotData.getPumpSupplyPressure());
+      airSumpPressurePublisher.publish(auxiliaryRobotData.getAirSumpPressure());
+      pumpSupplyTemperaturePublisher.publish(auxiliaryRobotData.getPumpSupplyTemperature());
+      pumpRPMPublisher.publish(auxiliaryRobotData.getPumpRpm());
+      motorTemperaturePublisher.publish(auxiliaryRobotData.getMotorTemperature());
+      motorDriverTemperaturePublisher.publish(auxiliaryRobotData.getMotorDriverTemperature());
    }
 
    private void publishBatteryData(AtlasAuxiliaryRobotData auxiliaryRobotData)
    {
-      batteryChargingPublisher.publish(auxiliaryRobotData.batteryCharging);
-      batteryVoltagePublisher.publish(auxiliaryRobotData.batteryVoltage);
-      batteryCurrentPublisher.publish(auxiliaryRobotData.batteryCurrent);
-      remainingBatteryTimePublisher.publish(auxiliaryRobotData.remainingBatteryTime);
-      remainingAmpHoursPublisher.publish(auxiliaryRobotData.remainingAmpHours);
-      remainingChargePercentagePublisher.publish(auxiliaryRobotData.remainingChargePercentage);
-      cycleCountPublisher.publish(auxiliaryRobotData.batteryCycleCount);
+      batteryChargingPublisher.publish(auxiliaryRobotData.getBatteryCharging());
+      batteryVoltagePublisher.publish(auxiliaryRobotData.getBatteryVoltage());
+      batteryCurrentPublisher.publish(auxiliaryRobotData.getBatteryCurrent());
+      remainingBatteryTimePublisher.publish(auxiliaryRobotData.getRemainingBatteryTime());
+      remainingAmpHoursPublisher.publish(auxiliaryRobotData.getRemainingAmpHours());
+      remainingChargePercentagePublisher.publish(auxiliaryRobotData.getRemainingChargePercentage());
+      cycleCountPublisher.publish(auxiliaryRobotData.getBatteryCycleCount());
    }
 
    public void receivedPacket(AtlasAuxiliaryRobotData auxiliaryRobotData)

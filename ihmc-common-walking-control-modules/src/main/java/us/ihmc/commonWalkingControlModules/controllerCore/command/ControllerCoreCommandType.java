@@ -75,16 +75,11 @@ public enum ControllerCoreCommandType
    PRIVILEGED_CONFIGURATION,
 
    /**
-    * Represents a command for the {@link WholeBodyInverseDynamicsSolver} to specify a desired privileged acceleration of a joint or joints. This acceleration
-    * is then used in the task null-space to help the solution avoid singularities.
+    * Represents a command for the {@link WholeBodyInverseDynamicsSolver} to specify a desired privileged joint space of a joint or joints. This is an
+    * acceleration in the {@link WholeBodyInverseDynamicsSolver}, a velocity in the {@link WholeBodyInverseKinematicsSolver}, and will be a torque in the
+    * {@link WholeBodyVirtualModelControlSolver}. This is then used in the task null-space to help the solution avoid singularities.
     */
-   PRIVILEGED_ACCELERATION,
-
-   /**
-    * Represents a command for the {@link WholeBodyInverseKinematicsSolver} to specify a desired privileged velocity of a joint or joints. This velocity
-    * is then used in the task null-space to help the solution avoid singularities.
-    */
-   PRIVILEGED_VELOCITY,
+   PRIVILEGED_JOINTSPACE_COMMAND,
 
    /**
     * Represents a command for the {@link WholeBodyControllerCore} to specify a desired joint limit reduction using the {@link JointLimitReductionCommand}
@@ -155,16 +150,17 @@ public enum ControllerCoreCommandType
     */
    CONTROLLED_BODIES;
 
-   private static final ControllerCoreCommandType[] inverseKinematicsCommands = { TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION, PRIVILEGED_VELOCITY,
-         LIMIT_REDUCTION, COMMAND_LIST };
+   private static final ControllerCoreCommandType[] inverseKinematicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION,
+         PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, COMMAND_LIST};
 
-   private static final ControllerCoreCommandType[] inverseDynamicsCommands = { TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION, PRIVILEGED_ACCELERATION,
-         LIMIT_REDUCTION, JOINT_LIMIT_ENFORCEMENT, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, CENTER_OF_PRESSURE, JOINT_ACCELERATION_INTEGRATION, COMMAND_LIST };
+   private static final ControllerCoreCommandType[] inverseDynamicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, PRIVILEGED_CONFIGURATION,
+         PRIVILEGED_JOINTSPACE_COMMAND, LIMIT_REDUCTION, JOINT_LIMIT_ENFORCEMENT, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, CENTER_OF_PRESSURE,
+         JOINT_ACCELERATION_INTEGRATION, COMMAND_LIST};
 
-   private static final ControllerCoreCommandType[] virtualModelControlCommands = { MOMENTUM, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, VIRTUAL_WRENCH, VIRTUAL_FORCE,
-         VIRTUAL_TORQUE, JOINTSPACE, CONTROLLED_BODIES, COMMAND_LIST };
+   private static final ControllerCoreCommandType[] virtualModelControlCommands = {MOMENTUM, EXTERNAL_WRENCH, PLANE_CONTACT_STATE, VIRTUAL_WRENCH,
+         VIRTUAL_FORCE, VIRTUAL_TORQUE, JOINTSPACE, CONTROLLED_BODIES, JOINT_LIMIT_ENFORCEMENT, COMMAND_LIST};
 
-   private static final ControllerCoreCommandType[] feedbackControlCommands = { TASKSPACE, POINT, ORIENTATION, JOINTSPACE, MOMENTUM, COMMAND_LIST };
+   private static final ControllerCoreCommandType[] feedbackControlCommands = {TASKSPACE, POINT, ORIENTATION, JOINTSPACE, MOMENTUM, COMMAND_LIST};
 
    /**
     * Gets the list of available commands for the {@link WholeBodyInverseKinematicsSolver}.

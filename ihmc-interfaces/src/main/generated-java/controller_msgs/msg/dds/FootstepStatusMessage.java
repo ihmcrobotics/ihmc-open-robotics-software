@@ -1,50 +1,58 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This message gives the status of the current footstep from the controller as well as the position and orientation of the footstep in world coordinates.
+ * This message is part of the IHMC whole-body controller API. This message gives the status of the
+ * current footstep from the controller as well as the position and orientation of the footstep in
+ * world coordinates.
  */
-public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, EpsilonComparable<FootstepStatusMessage>
+public class FootstepStatusMessage extends Packet<FootstepStatusMessage> implements Settable<FootstepStatusMessage>, EpsilonComparable<FootstepStatusMessage>
 {
    public static final byte FOOTSTEP_STATUS_STARTED = (byte) 0;
    public static final byte FOOTSTEP_STATUS_COMPLETED = (byte) 1;
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   /**
     * The current footstep status enum value.
     */
-   private byte footstep_status_ = (byte) 255;
+   public byte footstep_status_ = (byte) 255;
    /**
-    * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+    * footstep_index starts at 0 and monotonically increases with each completed footstep in a given
+    * FootstepDataListMessage.
     */
-   private int footstep_index_;
+   public int footstep_index_;
    /**
     * The robot side (left or right) that this footstep status correlates to.
     */
-   private byte robot_side_ = (byte) 255;
+   public byte robot_side_ = (byte) 255;
    /**
-    * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
+    * Specifies the desired position of the foot sent to the controller as opposed to where the foot
+    * actually landed.
     */
-   private us.ihmc.euclid.tuple3D.Point3D desired_foot_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D desired_foot_position_in_world_;
    /**
-    * Specifies the desired orientation of the foot sent to the controller as opposed to where the foot actually landed.
+    * Specifies the desired orientation of the foot sent to the controller as opposed to where the
+    * foot actually landed.
     */
-   private us.ihmc.euclid.tuple4D.Quaternion desired_foot_orientation_in_world_;
+   public us.ihmc.euclid.tuple4D.Quaternion desired_foot_orientation_in_world_;
    /**
     * Specifies the position of where the foot actually landed.
     */
-   private us.ihmc.euclid.tuple3D.Point3D actual_foot_position_in_world_;
+   public us.ihmc.euclid.tuple3D.Point3D actual_foot_position_in_world_;
    /**
     * Specifies the orientation of where the foot actually landed.
     */
-   private us.ihmc.euclid.tuple4D.Quaternion actual_foot_orientation_in_world_;
+   public us.ihmc.euclid.tuple4D.Quaternion actual_foot_orientation_in_world_;
 
    public FootstepStatusMessage()
    {
-
       desired_foot_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_foot_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
       actual_foot_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
@@ -53,11 +61,14 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
 
    public FootstepStatusMessage(FootstepStatusMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(FootstepStatusMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       footstep_status_ = other.footstep_status_;
 
       footstep_index_ = other.footstep_index_;
@@ -71,11 +82,19 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
    }
 
    /**
-    * The current footstep status enum value.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public byte getFootstepStatus()
+   public void setSequenceId(long sequence_id)
    {
-      return footstep_status_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -87,15 +106,16 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
    }
 
    /**
-    * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+    * The current footstep status enum value.
     */
-   public int getFootstepIndex()
+   public byte getFootstepStatus()
    {
-      return footstep_index_;
+      return footstep_status_;
    }
 
    /**
-    * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+    * footstep_index starts at 0 and monotonically increases with each completed footstep in a given
+    * FootstepDataListMessage.
     */
    public void setFootstepIndex(int footstep_index)
    {
@@ -103,11 +123,12 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
    }
 
    /**
-    * The robot side (left or right) that this footstep status correlates to.
+    * footstep_index starts at 0 and monotonically increases with each completed footstep in a given
+    * FootstepDataListMessage.
     */
-   public byte getRobotSide()
+   public int getFootstepIndex()
    {
-      return robot_side_;
+      return footstep_index_;
    }
 
    /**
@@ -119,7 +140,16 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
    }
 
    /**
-    * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
+    * The robot side (left or right) that this footstep status correlates to.
+    */
+   public byte getRobotSide()
+   {
+      return robot_side_;
+   }
+
+   /**
+    * Specifies the desired position of the foot sent to the controller as opposed to where the foot
+    * actually landed.
     */
    public us.ihmc.euclid.tuple3D.Point3D getDesiredFootPositionInWorld()
    {
@@ -127,7 +157,8 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
    }
 
    /**
-    * Specifies the desired orientation of the foot sent to the controller as opposed to where the foot actually landed.
+    * Specifies the desired orientation of the foot sent to the controller as opposed to where the
+    * foot actually landed.
     */
    public us.ihmc.euclid.tuple4D.Quaternion getDesiredFootOrientationInWorld()
    {
@@ -158,6 +189,9 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
       if (other == this)
          return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_status_, other.footstep_status_, epsilon))
          return false;
 
@@ -169,13 +203,10 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
 
       if (!this.desired_foot_position_in_world_.epsilonEquals(other.desired_foot_position_in_world_, epsilon))
          return false;
-
       if (!this.desired_foot_orientation_in_world_.epsilonEquals(other.desired_foot_orientation_in_world_, epsilon))
          return false;
-
       if (!this.actual_foot_position_in_world_.epsilonEquals(other.actual_foot_position_in_world_, epsilon))
          return false;
-
       if (!this.actual_foot_orientation_in_world_.epsilonEquals(other.actual_foot_orientation_in_world_, epsilon))
          return false;
 
@@ -194,6 +225,9 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
 
       FootstepStatusMessage otherMyClass = (FootstepStatusMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.footstep_status_ != otherMyClass.footstep_status_)
          return false;
 
@@ -205,13 +239,10 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
 
       if (!this.desired_foot_position_in_world_.equals(otherMyClass.desired_foot_position_in_world_))
          return false;
-
       if (!this.desired_foot_orientation_in_world_.equals(otherMyClass.desired_foot_orientation_in_world_))
          return false;
-
       if (!this.actual_foot_position_in_world_.equals(otherMyClass.actual_foot_position_in_world_))
          return false;
-
       if (!this.actual_foot_orientation_in_world_.equals(otherMyClass.actual_foot_orientation_in_world_))
          return false;
 
@@ -224,33 +255,29 @@ public class FootstepStatusMessage implements Settable<FootstepStatusMessage>, E
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepStatusMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("footstep_status=");
       builder.append(this.footstep_status_);
-
       builder.append(", ");
       builder.append("footstep_index=");
       builder.append(this.footstep_index_);
-
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("desired_foot_position_in_world=");
       builder.append(this.desired_foot_position_in_world_);
-
       builder.append(", ");
       builder.append("desired_foot_orientation_in_world=");
       builder.append(this.desired_foot_orientation_in_world_);
-
       builder.append(", ");
       builder.append("actual_foot_position_in_world=");
       builder.append(this.actual_foot_position_in_world_);
-
       builder.append(", ");
       builder.append("actual_foot_orientation_in_world=");
       builder.append(this.actual_foot_orientation_in_world_);
-
       builder.append("}");
       return builder.toString();
    }

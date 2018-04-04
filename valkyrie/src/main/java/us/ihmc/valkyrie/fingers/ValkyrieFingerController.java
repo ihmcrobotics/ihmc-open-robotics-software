@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.robotController.RobotController;
@@ -93,7 +93,7 @@ public class ValkyrieFingerController implements RobotController
       {
          if (subscribers.get(robotSide).isNewDesiredConfigurationAvailable())
          {
-            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(subscribers.get(robotSide).pollMessage().getHandDesiredConfiguration());
+            HandConfiguration handDesiredConfiguration = HandConfiguration.fromByte(subscribers.get(robotSide).pollMessage().getDesiredHandConfiguration());
 
             switch (handDesiredConfiguration)
             {

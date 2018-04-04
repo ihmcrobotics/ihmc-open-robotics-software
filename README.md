@@ -72,7 +72,7 @@ An example workflow for developing against a local clone of the software:
 **To publish jars to your local Maven repository:**  
 ```bash
 $ cd /path/to/ihmc-open-robotics-software
-$ ./gradlew compositeTask -PtaskName=publishToMavenLocal -PdepthFromWorkspaceDirectory=0 -PpublishMode=LOCAL
+$ ./gradlew compositeTask -PtaskName=publishToMavenLocal -PcompositeSearchHeight=0 -PpublishMode=LOCAL
 ```
 
 **To depend on the jars in your local Maven repository:**

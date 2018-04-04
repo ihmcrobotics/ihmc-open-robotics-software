@@ -185,7 +185,6 @@ public class JointSpaceHandControlState extends HandControlState
          }
 
          localCommand.set(jointTrajectoryCommand);
-         localCommand.setCommandId(jointspaceTrajectory.getCommandId());
       }
 
       lastCommandId.set(jointspaceTrajectory.getCommandId());
@@ -277,7 +276,6 @@ public class JointSpaceHandControlState extends HandControlState
       OneDoFJointTrajectoryCommand commandForExcedent = commandQueues.get(joint).addFirst();
       numberOfQueuedCommands.get(joint).increment();
       commandForExcedent.clear();
-      commandForExcedent.setCommandId(command.getCommandId());
 
       for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
       {

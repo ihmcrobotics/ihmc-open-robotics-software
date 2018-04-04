@@ -18,6 +18,10 @@ module controller_msgs
       struct KinematicsToolboxConfigurationMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
          */
         geometry_msgs::msg::dds::Point privileged_root_joint_position;
@@ -33,7 +37,7 @@ module controller_msgs
         /**
          * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
          */
-        float privileged_joint_angles;
+        sequence<float> privileged_joint_angles;
       };
     };
   };

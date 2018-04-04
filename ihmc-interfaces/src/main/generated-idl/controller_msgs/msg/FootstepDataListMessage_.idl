@@ -25,6 +25,10 @@ module controller_msgs
       struct FootstepDataListMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Defines the list of footstep to perform.
          */
         sequence<controller_msgs::msg::dds::FootstepDataMessage> footstep_data_list;
@@ -69,7 +73,6 @@ module controller_msgs
         /**
          * Contains information on whether the robot can automatically adjust its footsteps to retain balance.
          */
-        @defaultValue(value=True)
         boolean are_footsteps_adjustable;
         /**
          * If true the controller will adjust upcoming footsteps with the location error of previous steps.

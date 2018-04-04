@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineStateChangedListener;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
@@ -15,6 +14,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 
 public class StateChangeSmootherComponent implements OutputProcessorComponent
 {
@@ -103,18 +103,9 @@ public class StateChangeSmootherComponent implements OutputProcessorComponent
       }
    }
 
-   public FiniteStateMachineStateChangedListener createFiniteStateMachineStateChangedListener()
+   public <K extends Enum<K>> StateChangedListener<K> createFiniteStateMachineStateChangedListener()
    {
-      FiniteStateMachineStateChangedListener finiteStateMachineStateChangedListener = new FiniteStateMachineStateChangedListener()
-      {
-         @Override
-         public void stateHasChanged(Enum<?> oldState, Enum<?> newState)
-         {
-            hasHighLevelControllerStateChanged.set(true);
-         }
-      };
-
-      return finiteStateMachineStateChangedListener;
+      return (from, to) -> hasHighLevelControllerStateChanged.set(true);
    }
 
    public ControllerStateChangedListener createControllerStateChangedListener()

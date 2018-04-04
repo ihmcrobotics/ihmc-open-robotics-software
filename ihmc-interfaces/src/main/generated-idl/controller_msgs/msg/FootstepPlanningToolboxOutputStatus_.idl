@@ -39,6 +39,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::FootstepPlanningToolboxOutputStatus_")
       struct FootstepPlanningToolboxOutputStatus
       {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
         controller_msgs::msg::dds::FootstepDataListMessage footstep_data_list;
         @defaultValue(value=255)
         octet footstep_planning_result;

@@ -15,7 +15,7 @@ import us.ihmc.utilities.parameterOptimization.SimpleRandomGradientDecentParamet
 public class SimpleSimulationTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 1.4)
+	@ContinuousIntegrationTest(estimatedDuration = 1.6)
 	@Test(timeout=300000)
    public void testSimpleSimulation()
    {

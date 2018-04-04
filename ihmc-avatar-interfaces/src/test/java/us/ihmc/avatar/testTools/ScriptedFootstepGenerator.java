@@ -1,5 +1,7 @@
 package us.ihmc.avatar.testTools;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -9,8 +11,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -57,7 +57,7 @@ public class ScriptedFootstepGenerator
          double[][] footstepLocationAndOrientation = footstepLocationsAndOrientations[i];
          Footstep footstep = generateFootstepFromLocationAndOrientation(robotSide, footstepLocationAndOrientation);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, footstep.getFootstepPose().getPosition(), footstep.getFootstepPose().getOrientation());
-         footstepDataList.add(footstepData);
+         footstepDataList.getFootstepDataList().add().set(footstepData);
       }
 
       return footstepDataList;

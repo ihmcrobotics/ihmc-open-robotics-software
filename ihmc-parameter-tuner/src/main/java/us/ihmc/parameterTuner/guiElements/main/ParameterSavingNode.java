@@ -66,11 +66,6 @@ public class ParameterSavingNode extends HBox
       }
    }
 
-   public File getActiveFile()
-   {
-      return activeFile;
-   }
-
    public void setRegistries(List<GuiRegistry> registries)
    {
       this.registries = registries;
@@ -123,16 +118,8 @@ public class ParameterSavingNode extends HBox
 
    private void handleSave(ActionEvent event) throws IOException
    {
-      // if overwriting a file pop up summary dialog
-      boolean isModified = modified.isSelected();
-      boolean isMerge = merge.isSelected();
-      if (activeFile.exists() && !ParameterSavingTools.confirmSave(isModified, isMerge, activeFile.getName()))
-      {
-         return;
-      }
-
       List<GuiRegistry> registriesAfterModified;
-      if (isModified)
+      if (modified.isSelected())
       {
          registriesAfterModified = ParameterSavingTools.filterModified(registries);
       }
@@ -142,7 +129,7 @@ public class ParameterSavingNode extends HBox
       }
 
       List<GuiRegistry> registriesAfterMerge;
-      if (isMerge && activeFile.exists())
+      if (merge.isSelected() && activeFile.exists())
       {
          List<Registry> xmlRegistries = ParameterTuningTools.getParameters(activeFile);
          List<GuiRegistry> existingRegistry = ParameterTuningTools.buildGuiRegistryFromXML(xmlRegistries);
@@ -183,7 +170,7 @@ public class ParameterSavingNode extends HBox
     *
     * @return the most-recently-used file.
     */
-   private File getDefaultFilePath()
+   public File getDefaultFilePath()
    {
       Preferences prefs = Preferences.userNodeForPackage(ParameterSavingNode.class);
       String filePath = prefs.get("filePath", null);

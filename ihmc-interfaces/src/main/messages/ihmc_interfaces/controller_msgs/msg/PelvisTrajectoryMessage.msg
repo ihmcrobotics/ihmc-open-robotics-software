@@ -4,6 +4,9 @@
 # To excute a single straight line trajectory to reach a desired pelvis pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
 # Note that the pelvis position is limited keep the robot's balance (center of mass has to remain inside the support polygon).
 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 # Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
 bool enable_user_pelvis_control false
 # If enable_user_pelvis_control is true then enable_user_pelvis_control_during_walking

@@ -1,13 +1,13 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedSolePositionController;
-import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedControlManagerFactory
@@ -21,11 +21,13 @@ public class QuadrupedControlManagerFactory
    private QuadrupedFeetManager feetManager;
    private QuadrupedBodyOrientationManager bodyOrientationManager;
    private QuadrupedBalanceManager balanceManager;
+   private QuadrupedJointSpaceManager jointSpaceManager;
 
-   public QuadrupedControlManagerFactory(QuadrupedForceControllerToolbox toolbox, QuadrupedPostureInputProviderInterface postureProvider, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public QuadrupedControlManagerFactory(QuadrupedForceControllerToolbox toolbox, QuadrupedPhysicalProperties physicalProperties, GlobalDataProducer globalDataProducer,
+                                         YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.toolbox = toolbox;
-      this.postureProvider = postureProvider;
+      this.postureProvider = new QuadrupedPostureInputProvider(physicalProperties, globalDataProducer, registry);
       this.graphicsListRegistry = graphicsListRegistry;
 
       parentRegistry.addChild(registry);
@@ -58,8 +60,26 @@ public class QuadrupedControlManagerFactory
       return balanceManager;
    }
 
-   public QuadrupedSolePositionController getOrCreateSolePositionController(RobotQuadrant robotQuadrant)
+   public QuadrupedJointSpaceManager getOrCreateJointSpaceManager()
    {
-      return getOrCreateFeetManager().getSolePositionController(robotQuadrant);
+      if (jointSpaceManager != null)
+         return jointSpaceManager;
+
+      jointSpaceManager = new QuadrupedJointSpaceManager(toolbox, registry);
+      return jointSpaceManager;
+   }
+
+   public FeedbackControlCommandList createFeedbackControlTemplate()
+   {
+      FeedbackControlCommandList ret = new FeedbackControlCommandList();
+
+      if (feetManager != null)
+         ret.addCommandList(feetManager.createFeedbackControlTemplate());
+      if (bodyOrientationManager != null)
+         ret.addCommand(bodyOrientationManager.createFeedbackControlTemplate());
+      if (jointSpaceManager != null)
+         ret.addCommand(jointSpaceManager.createFeedbackControlTemplate());
+
+      return ret;
    }
 }

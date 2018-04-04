@@ -54,8 +54,8 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
       
       userTrigger = (YoEnum<QuadrupedForceControllerRequestedEvent>) scs.getVariable("userTrigger");
       stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.getVariable("stepTrigger");
-      forceControllerState = (YoEnum<QuadrupedForceControllerEnum>) scs.getVariable("forceControllerState");
-      steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingState");
+      forceControllerState = (YoEnum<QuadrupedForceControllerEnum>) scs.getVariable("forceControllerCurrentState");
+      steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingCurrentState");
 
       stanceHeight = (YoDouble) scs.getVariable("stanceHeight");
       groundPlanePointZ = (YoDouble) scs.getVariable("groundPlanePointZ");
@@ -115,36 +115,6 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    public YoDouble getGroundPlanePointZ()
    {
       return groundPlanePointZ;
-   }
-
-   public YoDouble getXGaitEndDoubleSupportDurationInput()
-   {
-      return xGaitEndDoubleSupportDurationInput;
-   }
-
-   public YoDouble getXGaitEndPhaseShiftInput()
-   {
-      return xGaitEndPhaseShiftInput;
-   }
-
-   public YoDouble getXGaitStanceWidthInput()
-   {
-      return xGaitStanceWidthInput;
-   }
-
-   public YoDouble getXGaitStanceLengthInput()
-   {
-      return xGaitStanceLengthInput;
-   }
-
-   public YoDouble getXGaitStepGroundClearanceInput()
-   {
-      return xGaitStepGroundClearanceInput;
-   }
-
-   public YoDouble getXGaitStepDurationInput()
-   {
-      return xGaitStepDurationInput;
    }
 
    public YoDouble getComPositionEstimateX()

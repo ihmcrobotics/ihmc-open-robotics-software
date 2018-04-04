@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.8"
+      classpath "us.ihmc:ihmc-build:0.12.11"
       classpath "org.hidetake:gradle-ssh-plugin:2.9.0"
    }
 }
@@ -27,11 +27,12 @@ ihmc {
 testSuites {
    def prefix = "LIBS-IHMCOPENROBOTICSSOFTWARE"
    bambooPlanKeys = [prefix + "FAST", prefix + "INDEVELOPMENT", prefix + "UI", prefix + "VIDEO"]
+   maximumSuiteDuration = 15.0
 }
 
 mainDependencies {
    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.13'
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.9'
    compile group: 'org.georegression', name: 'georegression', version: '0.11'
    compile group: 'org.ddogleg', name: 'ddogleg', version: '0.7'
    compile group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.7'

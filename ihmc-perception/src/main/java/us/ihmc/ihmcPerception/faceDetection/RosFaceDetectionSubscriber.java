@@ -1,9 +1,9 @@
 package us.ihmc.ihmcPerception.faceDetection;
 
+import controller_msgs.msg.dds.DetectedFacesPacket;
 import people_msgs.PositionMeasurement;
 import people_msgs.PositionMeasurementArray;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.DetectedFacesPacket;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;

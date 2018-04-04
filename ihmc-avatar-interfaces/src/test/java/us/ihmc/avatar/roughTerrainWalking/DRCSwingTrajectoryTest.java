@@ -9,6 +9,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -26,8 +28,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -261,7 +261,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.4, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
 
       return desiredFootsteps;
    }
@@ -272,17 +272,17 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       FootstepDataMessage footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(0.6, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
 
       footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, new Point3D(1.2, 0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
 
       footstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT, new Point3D(1.2, -0.125, 0.0), new Quaternion(0, 0, 0, 1));
       footstep.setTrajectoryType(TrajectoryType.OBSTACLE_CLEARANCE.toByte());
       footstep.setSwingHeight(swingHeight);
-      desiredFootsteps.footstepDataList.add(footstep);
+      desiredFootsteps.getFootstepDataList().add().set(footstep);
       return desiredFootsteps;
    }
 
@@ -351,7 +351,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
          lastPosition.set(stepLocation);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(swingSide, stepLocation, stepOrientation);
          footstepData.setSwingDuration(swingTime);
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
          swingSide = swingSide.getOppositeSide();
       }
 

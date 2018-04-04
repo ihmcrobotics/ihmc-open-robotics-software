@@ -1,44 +1,64 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * Message used to report the current joint angles for the fingers of a hand.
  */
-public class HandJointAnglePacket implements Settable<HandJointAnglePacket>, EpsilonComparable<HandJointAnglePacket>
+public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implements Settable<HandJointAnglePacket>, EpsilonComparable<HandJointAnglePacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
-   private byte robot_side_ = (byte) 255;
-   private us.ihmc.idl.IDLSequence.Double joint_angles_;
-   private boolean connected_;
-   private boolean calibrated_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public byte robot_side_ = (byte) 255;
+   public us.ihmc.idl.IDLSequence.Double joint_angles_;
+   public boolean connected_;
+   public boolean calibrated_;
 
    public HandJointAnglePacket()
    {
-
       joint_angles_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
+
    }
 
    public HandJointAnglePacket(HandJointAnglePacket other)
    {
+      this();
       set(other);
    }
 
    public void set(HandJointAnglePacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       joint_angles_.set(other.joint_angles_);
       connected_ = other.connected_;
 
       calibrated_ = other.calibrated_;
+
    }
 
-   public byte getRobotSide()
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
    {
-      return robot_side_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRobotSide(byte robot_side)
@@ -46,14 +66,14 @@ public class HandJointAnglePacket implements Settable<HandJointAnglePacket>, Eps
       robot_side_ = robot_side;
    }
 
+   public byte getRobotSide()
+   {
+      return robot_side_;
+   }
+
    public us.ihmc.idl.IDLSequence.Double getJointAngles()
    {
       return joint_angles_;
-   }
-
-   public boolean getConnected()
-   {
-      return connected_;
    }
 
    public void setConnected(boolean connected)
@@ -61,14 +81,19 @@ public class HandJointAnglePacket implements Settable<HandJointAnglePacket>, Eps
       connected_ = connected;
    }
 
-   public boolean getCalibrated()
+   public boolean getConnected()
    {
-      return calibrated_;
+      return connected_;
    }
 
    public void setCalibrated(boolean calibrated)
    {
       calibrated_ = calibrated;
+   }
+
+   public boolean getCalibrated()
+   {
+      return calibrated_;
    }
 
    @Override
@@ -78,6 +103,9 @@ public class HandJointAnglePacket implements Settable<HandJointAnglePacket>, Eps
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
@@ -106,12 +134,14 @@ public class HandJointAnglePacket implements Settable<HandJointAnglePacket>, Eps
 
       HandJointAnglePacket otherMyClass = (HandJointAnglePacket) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
       if (!this.joint_angles_.equals(otherMyClass.joint_angles_))
          return false;
-
       if (this.connected_ != otherMyClass.connected_)
          return false;
 
@@ -127,21 +157,20 @@ public class HandJointAnglePacket implements Settable<HandJointAnglePacket>, Eps
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandJointAnglePacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("joint_angles=");
       builder.append(this.joint_angles_);
-
       builder.append(", ");
       builder.append("connected=");
       builder.append(this.connected_);
-
       builder.append(", ");
       builder.append("calibrated=");
       builder.append(this.calibrated_);
-
       builder.append("}");
       return builder.toString();
    }

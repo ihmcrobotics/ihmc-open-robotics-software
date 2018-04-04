@@ -2,8 +2,8 @@ package us.ihmc.avatar.networkProcessor.time;
 
 import org.ros.message.Time;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosClockPublisher;
 

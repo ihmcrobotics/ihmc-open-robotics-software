@@ -1,31 +1,57 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * General purpose message that contains vertices to represent a 2D polygon (z ignored).
  */
-public class Polygon2DMessage implements Settable<Polygon2DMessage>, EpsilonComparable<Polygon2DMessage>
+public class Polygon2DMessage extends Packet<Polygon2DMessage> implements Settable<Polygon2DMessage>, EpsilonComparable<Polygon2DMessage>
 {
-   private us.ihmc.euclid.tuple3D.Point3D vertices_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> vertices_;
 
    public Polygon2DMessage()
    {
-      vertices_ = new us.ihmc.euclid.tuple3D.Point3D();
+      vertices_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>(100, us.ihmc.euclid.tuple3D.Point3D.class,
+                                                                                     new geometry_msgs.msg.dds.PointPubSubType());
+
    }
 
    public Polygon2DMessage(Polygon2DMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(Polygon2DMessage other)
    {
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.vertices_, vertices_);
+      sequence_id_ = other.sequence_id_;
+
+      vertices_.set(other.vertices_);
    }
 
-   public us.ihmc.euclid.tuple3D.Point3D getVertices()
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
+   }
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> getVertices()
    {
       return vertices_;
    }
@@ -38,8 +64,21 @@ public class Polygon2DMessage implements Settable<Polygon2DMessage>, EpsilonComp
       if (other == this)
          return true;
 
-      if (!this.vertices_.epsilonEquals(other.vertices_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
+
+      if (this.vertices_.size() == other.vertices_.size())
+      {
+         return false;
+      }
+      else
+      {
+         for (int i = 0; i < this.vertices_.size(); i++)
+         {
+            if (!this.vertices_.get(i).epsilonEquals(other.vertices_.get(i), epsilon))
+               return false;
+         }
+      }
 
       return true;
    }
@@ -56,6 +95,9 @@ public class Polygon2DMessage implements Settable<Polygon2DMessage>, EpsilonComp
 
       Polygon2DMessage otherMyClass = (Polygon2DMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (!this.vertices_.equals(otherMyClass.vertices_))
          return false;
 
@@ -68,9 +110,11 @@ public class Polygon2DMessage implements Settable<Polygon2DMessage>, EpsilonComp
       StringBuilder builder = new StringBuilder();
 
       builder.append("Polygon2DMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("vertices=");
       builder.append(this.vertices_);
-
       builder.append("}");
       return builder.toString();
    }

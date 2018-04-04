@@ -22,6 +22,10 @@ module controller_msgs
       struct QueueableMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * When EXECUTION_MODE_OVERRIDE is chosen:
          * - For trajectory messages: the time of the first trajectory point can be zero, in which case the controller will start directly at the first trajectory point.
          * Otherwise the controller will prepend a first trajectory point at the current desired position.
@@ -37,7 +41,7 @@ module controller_msgs
         /**
          * Defines a unique ID for this message. Only needed when you want to queue another message to this message.
          */
-        @defaultValue(value=1)
+        @defaultValue(value=-1)
         long long message_id;
         /**
          * Only needed when using EXECUTION_MODE_QUEUE mode, it refers to the message_id to which this message should be queued to.

@@ -7,13 +7,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.AdjustFootstepMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
-import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -21,11 +25,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -33,13 +33,12 @@ import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -87,7 +86,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          @Override
          public void doScript(double t)
          {
-            if (singleSupportStartConditions.get(swingSideForAdjusting).checkCondition())
+            if (singleSupportStartConditions.get(swingSideForAdjusting).testCondition(Double.NaN))
             {
                if (Double.isNaN(swingInitialTime))
                   swingInitialTime = t;
@@ -137,10 +136,10 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
          final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
-               footPrefix + "State");
+               footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
          final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
-               "walkingState");
+               "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -164,7 +163,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          framePosition.add(stepLength, side.negateIfRightSide(stepWidth), 0.0);
          Point3D position = new Point3D(framePosition);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-         footstepDataListMessage.add(HumanoidMessageTools.createFootstepDataMessage(side, position, orientation));
+         footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, position, orientation));
          side = side.getOppositeSide();
       }
 
@@ -216,7 +215,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
@@ -235,7 +234,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          if (side == RobotSide.LEFT)
          {

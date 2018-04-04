@@ -4,7 +4,7 @@ buildscript {
       mavenLocal()
    }
    dependencies {
-      classpath "us.ihmc:ihmc-build:0.12.8"
+      classpath "us.ihmc:ihmc-build:0.12.11"
    }
 }
 apply plugin: "us.ihmc.ihmc-build"
@@ -26,7 +26,7 @@ mainDependencies {
    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
    compile group: 'com.google.guava', name: 'guava', version: '18.0'
    compile group: "us.ihmc", name: "ihmc-commons", version: "0.18.0"
-   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.8'
+   compile group: 'us.ihmc', name: 'ihmc-yovariables', version: '0.2.9'
    compile group: "us.ihmc", name: "ihmc-robotics-toolkit", version: "source"
    compile group: "us.ihmc", name: "ihmc-robot-description", version: "source"
    compile group: "us.ihmc", name: "ihmc-graphics-description", version: "source"

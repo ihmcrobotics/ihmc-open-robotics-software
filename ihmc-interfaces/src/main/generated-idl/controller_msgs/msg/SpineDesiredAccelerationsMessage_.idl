@@ -18,6 +18,10 @@ module controller_msgs
       struct SpineDesiredAccelerationsMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * The desired joint acceleration information.
          */
         controller_msgs::msg::dds::DesiredAccelerationsMessage desired_accelerations;

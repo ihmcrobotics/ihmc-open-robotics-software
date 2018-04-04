@@ -1,14 +1,14 @@
 package us.ihmc.quadrupedRobotics.controller.position.states;
 
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 /**
  * This controller sets desired joint angles to their actual values when the joint comes online.
@@ -54,7 +54,7 @@ public class QuadrupedPositionJointInitializationController implements Quadruped
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
    {
       OneDoFJoint[] joints = fullRobotModel.getOneDoFJoints();
       for (int i = 0; i < joints.length; i++)
@@ -74,6 +74,11 @@ public class QuadrupedPositionJointInitializationController implements Quadruped
          }
       }
 
+   }
+
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
+   {
       return allJointsInitialized() ? ControllerEvent.DONE : null;
    }
 

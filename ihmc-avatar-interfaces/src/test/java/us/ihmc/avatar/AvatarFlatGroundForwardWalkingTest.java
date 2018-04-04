@@ -9,28 +9,30 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTestInterface
@@ -129,6 +131,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       return new FootstepDataListMessage();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
@@ -161,7 +164,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       double intitialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
-      int steps = footMessage.footstepDataList.size();
+      int steps = footMessage.getFootstepDataList().size();
 
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -172,6 +175,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       controllerSpy.assertCheckpointsReached();
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
    @Test(timeout = 30000)
    public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
    {
@@ -204,7 +208,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       controllerSpy.setFootStepCheckPoints(rootLocations, getStepLength(), getStepWidth());
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       drcSimulationTestHelper.send(footMessage);
-      double simulationTime = 1 * footMessage.footstepDataList.size() + 1.0;
+      double simulationTime = 1 * footMessage.getFootstepDataList().size() + 1.0;
 
       boolean success;
       // Push:
@@ -233,10 +237,10 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
    private void addFootstep(Point3D stepLocation, Quaternion orient, RobotSide robotSide, FootstepDataListMessage message)
    {
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.setLocation(stepLocation);
-      footstepData.setOrientation(orient);
+      footstepData.getLocation().set(stepLocation);
+      footstepData.getOrientation().set(orient);
       footstepData.setRobotSide(robotSide.toByte());
-      message.add(footstepData);
+      message.getFootstepDataList().add().set(footstepData);
    }
 
    private void setupCameraBackView()
@@ -316,13 +320,11 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
          final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
-               footPrefix + "State");
+                                                                                                    sidePrefix + "FootCurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
-               "walkingState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable(WalkingHighLevelHumanoidController.class.getSimpleName(), "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -345,7 +347,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
@@ -364,7 +366,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          if (side == RobotSide.LEFT)
          {

@@ -134,8 +134,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 13.9)
+   @Test(timeout = 70000)
    public void testExtensivelyPointToPolytope()
    {
       Random random = new Random(1776L);
@@ -305,7 +305,7 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       //      System.out.println("numberOutside = " + numberOutside);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
+   @ContinuousIntegrationTest(estimatedDuration = 3.9)
    @Test(timeout = 30000)
    public void testExtensivelyPolytopeToPolytope()
    {
@@ -409,8 +409,8 @@ public class GilbertJohnsonKeerthiCollisionDetectorTest
       assertTrue("numberNotColliding = " + numberNotColliding, numberNotColliding > 1000);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 10.0)
-   @Test (timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 6.8)
+   @Test (timeout = 34000)
    public void testExtensivelyCylinderToPolytope()
    {
       Random random = new Random(1776L);

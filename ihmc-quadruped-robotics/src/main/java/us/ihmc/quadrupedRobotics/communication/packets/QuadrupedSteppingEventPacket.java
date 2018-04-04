@@ -6,7 +6,7 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEven
 
 public class QuadrupedSteppingEventPacket extends Packet<QuadrupedSteppingEventPacket>
 {
-   private QuadrupedSteppingRequestedEvent event;
+   public QuadrupedSteppingRequestedEvent event;
 
    public QuadrupedSteppingEventPacket()
    {

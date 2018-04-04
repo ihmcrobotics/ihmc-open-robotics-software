@@ -13,8 +13,8 @@ import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataVisualizer.logger.converters.LogFormatUpdater;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class LogCrawler implements Runnable
 {
@@ -23,6 +23,7 @@ public class LogCrawler implements Runnable
    private LogCrawlerListenerInterface playbackListener;
    private double dt;
    private File logFile;
+   private RobotDescription robotDescription;
 
    public LogCrawler(File logFile, LogCrawlerListenerInterface playbackListener) throws IOException
    {
@@ -50,8 +51,7 @@ public class LogCrawler implements Runnable
 
       YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType());
       parser.parseFrom(handshakeData);
-      YoVariable<?>[] yoVariablesToUpdate = playbackListener.getYovariablesToUpdate(parser.getRootRegistry());
-
+      
       GeneralizedSDFRobotModel generalizedSDFRobotModel;
       if (!logProperties.getModel().getLoaderAsString().isEmpty())
       {
@@ -78,12 +78,14 @@ public class LogCrawler implements Runnable
       {
          throw new RuntimeException("No model available for log");
       }
+      
 
       boolean useCollisionMeshes = false;
-
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, null, useCollisionMeshes);
+      robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, null, useCollisionMeshes);
 
+      YoVariable<?>[] yoVariablesToUpdate = playbackListener.getYovariablesToUpdate(parser.getRootRegistry(), robotDescription);
+      
       robot = new SpecificLogVariableUpdater(selectedFile, robotDescription, parser.getJointStates(), parser.getYoVariablesList(), logProperties,
             yoVariablesToUpdate);
       dt = parser.getDt();
@@ -97,10 +99,10 @@ public class LogCrawler implements Runnable
       try
       {
          readLogFile(logFile);
-
+         playbackListener.onStart(this, robot);
          while (!robot.readAndProcessALogLineReturnTrueIfDone(dt))
          {
-            playbackListener.update(this, robot.getTime());
+            playbackListener.update(robot.getTime());
          }
       }
       catch (IOException e)
@@ -114,6 +116,11 @@ public class LogCrawler implements Runnable
          System.out.println("Finished searching " + logFileName + ", took " + Conversions.millisecondsToMinutes(endTime - startTime) + " minutes");
          playbackListener.onFinish();
       }
+   }
+   
+   public double getDT()
+   {
+      return dt;
    }
 
    public String getLogFileName()

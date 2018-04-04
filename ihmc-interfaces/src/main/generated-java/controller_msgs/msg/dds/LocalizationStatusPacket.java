@@ -1,33 +1,63 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * Message part of the localization module
  */
-public class LocalizationStatusPacket implements Settable<LocalizationStatusPacket>, EpsilonComparable<LocalizationStatusPacket>
+public class LocalizationStatusPacket extends Packet<LocalizationStatusPacket>
+      implements Settable<LocalizationStatusPacket>, EpsilonComparable<LocalizationStatusPacket>
 {
-   private double overlap_;
-   private java.lang.StringBuilder status_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public double overlap_;
+   public java.lang.StringBuilder status_;
 
    public LocalizationStatusPacket()
    {
-
       status_ = new java.lang.StringBuilder(255);
    }
 
    public LocalizationStatusPacket(LocalizationStatusPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(LocalizationStatusPacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       overlap_ = other.overlap_;
 
       status_.setLength(0);
       status_.append(other.status_);
+
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
+   }
+
+   public void setOverlap(double overlap)
+   {
+      overlap_ = overlap;
    }
 
    public double getOverlap()
@@ -35,9 +65,10 @@ public class LocalizationStatusPacket implements Settable<LocalizationStatusPack
       return overlap_;
    }
 
-   public void setOverlap(double overlap)
+   public void setStatus(java.lang.String status)
    {
-      overlap_ = overlap;
+      status_.setLength(0);
+      status_.append(status);
    }
 
    public java.lang.String getStatusAsString()
@@ -50,12 +81,6 @@ public class LocalizationStatusPacket implements Settable<LocalizationStatusPack
       return status_;
    }
 
-   public void setStatus(String status)
-   {
-      status_.setLength(0);
-      status_.append(status);
-   }
-
    @Override
    public boolean epsilonEquals(LocalizationStatusPacket other, double epsilon)
    {
@@ -63,6 +88,9 @@ public class LocalizationStatusPacket implements Settable<LocalizationStatusPack
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.overlap_, other.overlap_, epsilon))
          return false;
@@ -85,6 +113,9 @@ public class LocalizationStatusPacket implements Settable<LocalizationStatusPack
 
       LocalizationStatusPacket otherMyClass = (LocalizationStatusPacket) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.overlap_ != otherMyClass.overlap_)
          return false;
 
@@ -100,13 +131,14 @@ public class LocalizationStatusPacket implements Settable<LocalizationStatusPack
       StringBuilder builder = new StringBuilder();
 
       builder.append("LocalizationStatusPacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("overlap=");
       builder.append(this.overlap_);
-
       builder.append(", ");
       builder.append("status=");
       builder.append(this.status_);
-
       builder.append("}");
       return builder.toString();
    }

@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.leapOfFaith.FootLeapOfFaithModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -185,7 +184,7 @@ public class SwingState extends AbstractFootControlState
    public SwingState(FootControlHelper footControlHelper, FrameVector3DReadOnly touchdownVelocity, FrameVector3DReadOnly touchdownAcceleration, PIDSE3GainsReadOnly gains,
                      YoVariableRegistry registry)
    {
-      super(ConstraintType.SWING, footControlHelper);
+      super(footControlHelper);
       this.gains = gains;
 
       this.legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
@@ -368,9 +367,10 @@ public class SwingState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      super.doTransitionIntoAction();
+      super.onEntry();
+      currentTime.set(0.0);
       swingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
       replanTrajectory.set(false);
@@ -389,10 +389,10 @@ public class SwingState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      super.doTransitionOutOfAction();
-
+      super.onExit();
+      currentTime.set(0.0);
       swingTimeSpeedUpFactor.set(Double.NaN);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
 
@@ -409,9 +409,9 @@ public class SwingState extends AbstractFootControlState
    }
 
    @Override
-   public void doSpecificAction()
+   public void doSpecificAction(double timeInState)
    {
-      computeAndPackTrajectory();
+      computeAndPackTrajectory(timeInState);
 
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
       {
@@ -444,8 +444,9 @@ public class SwingState extends AbstractFootControlState
 
       computeCurrentWeights(nominalAngularWeight, nominalLinearWeight, currentAngularWeight, currentLinearWeight);
 
-      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      spatialFeedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(currentAngularWeight, currentLinearWeight);
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
       spatialFeedbackControlCommand.setGains(gains);
@@ -454,9 +455,9 @@ public class SwingState extends AbstractFootControlState
       yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
    }
 
-   private void computeAndPackTrajectory()
+   private void computeAndPackTrajectory(double timeInState)
    {
-      currentTime.set(getTimeInCurrentState());
+      currentTime.set(timeInState);
 
       if (footstepWasAdjusted.getBooleanValue())
       {
@@ -569,7 +570,7 @@ public class SwingState extends AbstractFootControlState
             currentTimeWithSwingSpeedUp.set(currentTime.getDoubleValue());
       }
 
-      return computeSwingTimeRemaining();
+      return computeSwingTimeRemaining(currentTime.getDoubleValue());
    }
 
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
@@ -827,7 +828,7 @@ public class SwingState extends AbstractFootControlState
       return zDifference > minHeightDifferenceForObstacleClearance.getValue();
    }
 
-   private double computeSwingTimeRemaining()
+   private double computeSwingTimeRemaining(double timeInState)
    {
       double swingDuration = this.swingDuration.getDoubleValue();
       if (!currentTimeWithSwingSpeedUp.isNaN())
@@ -837,7 +838,7 @@ public class SwingState extends AbstractFootControlState
       }
       else
       {
-         return swingDuration - getTimeInCurrentState();
+         return swingDuration - timeInState;
       }
    }
 

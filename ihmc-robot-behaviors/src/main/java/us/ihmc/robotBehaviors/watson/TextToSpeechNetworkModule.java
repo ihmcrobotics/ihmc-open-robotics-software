@@ -2,10 +2,10 @@ package us.ihmc.robotBehaviors.watson;
 
 import java.io.IOException;
 
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 
@@ -33,8 +33,8 @@ public class TextToSpeechNetworkModule implements PacketConsumer<TextToSpeechPac
    @Override
    public void receivedPacket(TextToSpeechPacket packet)
    {
-      PrintTools.debug(this, "Received TextToSpeechPacket: " + packet.getTextToSpeak());
-      String textToSpeak = packet.getTextToSpeak();
+      PrintTools.debug(this, "Received TextToSpeechPacket: " + packet.getTextToSpeakAsString());
+      String textToSpeak = packet.getTextToSpeakAsString();
       textToSpeak = "<prosody pitch=\"60Hz\" rate=\"-10%\" volume=\"x-loud\">" + textToSpeak + "</prosody>";
       ttsClient.playText(textToSpeak);
    }

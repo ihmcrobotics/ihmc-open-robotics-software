@@ -1,15 +1,20 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * This message is part of the IHMC humanoid behavior module.
  */
-public class ValveLocationPacket implements Settable<ValveLocationPacket>, EpsilonComparable<ValveLocationPacket>
+public class ValveLocationPacket extends Packet<ValveLocationPacket> implements Settable<ValveLocationPacket>, EpsilonComparable<ValveLocationPacket>
 {
-   private us.ihmc.euclid.geometry.Pose3D valve_pose_in_world_;
-   private double valve_radius_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public us.ihmc.euclid.geometry.Pose3D valve_pose_in_world_;
+   public double valve_radius_;
 
    public ValveLocationPacket()
    {
@@ -18,13 +23,33 @@ public class ValveLocationPacket implements Settable<ValveLocationPacket>, Epsil
 
    public ValveLocationPacket(ValveLocationPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(ValveLocationPacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.valve_pose_in_world_, valve_pose_in_world_);
       valve_radius_ = other.valve_radius_;
+
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.euclid.geometry.Pose3D getValvePoseInWorld()
@@ -32,14 +57,14 @@ public class ValveLocationPacket implements Settable<ValveLocationPacket>, Epsil
       return valve_pose_in_world_;
    }
 
-   public double getValveRadius()
-   {
-      return valve_radius_;
-   }
-
    public void setValveRadius(double valve_radius)
    {
       valve_radius_ = valve_radius;
+   }
+
+   public double getValveRadius()
+   {
+      return valve_radius_;
    }
 
    @Override
@@ -50,9 +75,11 @@ public class ValveLocationPacket implements Settable<ValveLocationPacket>, Epsil
       if (other == this)
          return true;
 
-      if (!this.valve_pose_in_world_.epsilonEquals(other.valve_pose_in_world_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
 
+      if (!this.valve_pose_in_world_.epsilonEquals(other.valve_pose_in_world_, epsilon))
+         return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.valve_radius_, other.valve_radius_, epsilon))
          return false;
 
@@ -71,9 +98,11 @@ public class ValveLocationPacket implements Settable<ValveLocationPacket>, Epsil
 
       ValveLocationPacket otherMyClass = (ValveLocationPacket) other;
 
-      if (!this.valve_pose_in_world_.equals(otherMyClass.valve_pose_in_world_))
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
 
+      if (!this.valve_pose_in_world_.equals(otherMyClass.valve_pose_in_world_))
+         return false;
       if (this.valve_radius_ != otherMyClass.valve_radius_)
          return false;
 
@@ -86,13 +115,14 @@ public class ValveLocationPacket implements Settable<ValveLocationPacket>, Epsil
       StringBuilder builder = new StringBuilder();
 
       builder.append("ValveLocationPacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("valve_pose_in_world=");
       builder.append(this.valve_pose_in_world_);
-
       builder.append(", ");
       builder.append("valve_radius=");
       builder.append(this.valve_radius_);
-
       builder.append("}");
       return builder.toString();
    }

@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.controller;
 
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineState;
+import us.ihmc.robotics.stateMachine.extra.EventState;
 
-public interface QuadrupedController extends FiniteStateMachineState<ControllerEvent>
+public interface QuadrupedController extends EventState
 {
 }

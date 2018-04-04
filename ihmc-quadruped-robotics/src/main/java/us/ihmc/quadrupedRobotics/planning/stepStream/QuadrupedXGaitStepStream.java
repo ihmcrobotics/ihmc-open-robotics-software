@@ -1,6 +1,10 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
@@ -9,17 +13,14 @@ import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.util.PreallocatedList;
 import us.ihmc.quadrupedRobotics.util.YoPreallocatedList;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+
 import java.util.ArrayList;
 
 public class QuadrupedXGaitStepStream implements QuadrupedStepStream
@@ -36,7 +37,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    private final ReferenceFrame bodyZUpFrame;
    private final ReferenceFrame worldFrame;
    private final double controlDT;
-   private final YoDouble timestamp;
+   private final YoDouble timestamp, previousTimestamp;
 
    private final YoDouble bodyYaw;
    private final YoFrameOrientation bodyOrientation;
@@ -44,6 +45,12 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    private final EndDependentList<YoQuadrupedTimedStep> xGaitCurrentSteps;
    private final ArrayList<YoQuadrupedTimedStep> xGaitPreviewSteps;
    private final YoPreallocatedList<YoQuadrupedTimedStep> stepSequence;
+
+   public QuadrupedXGaitStepStream(QuadrupedPlanarVelocityInputProvider planarVelocityProvider, YoQuadrupedXGaitSettings xGaitSettings,
+                                   QuadrupedReferenceFrames referenceFrames, YoDouble timestamp, YoVariableRegistry parentRegistry)
+   {
+      this(planarVelocityProvider, xGaitSettings, referenceFrames, Double.NaN, timestamp, parentRegistry);
+   }
 
    public QuadrupedXGaitStepStream(QuadrupedPlanarVelocityInputProvider planarVelocityProvider, YoQuadrupedXGaitSettings xGaitSettings,
          QuadrupedReferenceFrames referenceFrames, double controlDT, YoDouble timestamp, YoVariableRegistry parentRegistry)
@@ -56,6 +63,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       this.worldFrame = ReferenceFrame.getWorldFrame();
       this.controlDT = controlDT;
       this.timestamp = timestamp;
+      this.previousTimestamp = new YoDouble("previousTimestamp", registry);
 
       this.bodyYaw = new YoDouble("bodyYaw", registry);
       this.bodyOrientation = new YoFrameOrientation("bodyOrientation", worldFrame, registry);
@@ -70,15 +78,8 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       {
          xGaitPreviewSteps.add(new YoQuadrupedTimedStep("previewStep" + i, registry));
       }
-      this.stepSequence = new YoPreallocatedList<>("stepSequence", registry, NUMBER_OF_PREVIEW_STEPS + 2,
-            new YoPreallocatedList.DefaultElementFactory<YoQuadrupedTimedStep>()
-            {
-               @Override
-               public YoQuadrupedTimedStep createDefaultElement(String prefix, YoVariableRegistry registry)
-               {
-                  return new YoQuadrupedTimedStep(prefix, registry);
-               }
-            });
+
+      this.stepSequence = new YoPreallocatedList<>("stepSequence", registry, NUMBER_OF_PREVIEW_STEPS + 2, YoQuadrupedTimedStep::new);
 
       if (parentRegistry != null)
       {
@@ -104,6 +105,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       // initialize body orientation
       bodyOrientation.setFromReferenceFrame(bodyZUpFrame);
       bodyYaw.set(bodyOrientation.getYaw().getDoubleValue());
+      previousTimestamp.set(timestamp.getDoubleValue());
 
       // initialize step queue
       updateXGaitSettings();
@@ -127,8 +129,16 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       double currentTime = timestamp.getDoubleValue();
 
       // update body orientation
-      bodyYaw.add(planarVelocityProvider.get().getZ() * controlDT);
-      bodyOrientation.setYawPitchRoll(bodyYaw.getDoubleValue(), 0.0, 0.0);
+      if(Double.isNaN(controlDT))
+      {
+         double effectiveDT = timestamp.getDoubleValue() - previousTimestamp.getDoubleValue();
+         previousTimestamp.set(timestamp.getDoubleValue());
+         updateBodyOrientation(effectiveDT);
+      }
+      else
+      {
+         updateBodyOrientation(controlDT);
+      }
 
       // update xgait current steps
       for (int i = 0; i < xGaitPreviewSteps.size(); i++)
@@ -164,6 +174,12 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
             stepSequence.get(stepSequence.size() - 1).set(xGaitPreviewSteps.get(i));
          }
       }
+   }
+
+   private void updateBodyOrientation(double dt)
+   {
+      bodyYaw.add(planarVelocityProvider.get().getZ() * dt);
+      bodyOrientation.setYawPitchRoll(bodyYaw.getDoubleValue(), 0.0, 0.0);
    }
 
    @Override

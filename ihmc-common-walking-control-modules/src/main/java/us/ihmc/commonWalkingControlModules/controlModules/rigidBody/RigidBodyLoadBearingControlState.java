@@ -170,7 +170,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
       updateInternal();
 
@@ -191,8 +191,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       bodyFixedControlledPose.setToZero(contactFrame);
       bodyFixedControlledPose.changeFrame(bodyFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-      spatialFeedbackControlCommand.set(desiredContactPosition, zeroInWorld, zeroInWorld);
-      spatialFeedbackControlCommand.set(desiredContactOrientation, zeroInWorld, zeroInWorld);
+      spatialFeedbackControlCommand.set(desiredContactPosition, zeroInWorld);
+      spatialFeedbackControlCommand.set(desiredContactOrientation, zeroInWorld);
+      spatialFeedbackControlCommand.setFeedForwardAction(zeroInWorld, zeroInWorld);
       spatialFeedbackControlCommand.setSelectionMatrix(feedbackSelectionMatrix);
 
       spatialFeedbackControlCommand.setOrientationGains(taskspaceOrientationGains);
@@ -282,7 +283,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
       desiredContactPosition.setToZero(contactFrame);
       desiredContactOrientation.setToZero(contactFrame);
@@ -305,7 +306,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
       hideGraphics();
       hybridModeActive.set(false);

@@ -9,6 +9,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -23,8 +25,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.allocations.AllocationTest;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -46,8 +46,8 @@ public class AtlasAllocationTest implements AllocationTest
 
    private DRCSimulationTestHelper testHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 53.3, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 270000)
    public void testForAllocationsStanding() throws SimulationExceededMaximumTimeException
    {
       testInternal(() -> {
@@ -62,8 +62,8 @@ public class AtlasAllocationTest implements AllocationTest
       });
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 20.0, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 500000)
+   @ContinuousIntegrationTest(estimatedDuration = 82.3, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 410000)
    public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
    {
       double defaultSwingDuration = 0.5;
@@ -99,11 +99,10 @@ public class AtlasAllocationTest implements AllocationTest
       for (int i = 0; i < steps; i++)
       {
          xLocation += stepLength;
-         FootstepDataMessage footstepMessage = new FootstepDataMessage();
-         footstepMessage.setLocation(new Point3D(xLocation, robotSide.negateIfRightSide(0.15), 0.0));
-         footstepMessage.setOrientation(new Quaternion());
+         FootstepDataMessage footstepMessage = footstepListMessage.getFootstepDataList().add();
+         footstepMessage.getLocation().set(new Point3D(xLocation, robotSide.negateIfRightSide(0.15), 0.0));
+         footstepMessage.getOrientation().set(new Quaternion());
          footstepMessage.setRobotSide(robotSide.toByte());
-         footstepListMessage.add(footstepMessage);
          robotSide = robotSide.getOppositeSide();
       }
       return footstepListMessage;

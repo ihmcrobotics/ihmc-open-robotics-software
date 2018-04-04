@@ -1,8 +1,8 @@
 package us.ihmc.communication.controllerAPI.command;
 
-import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.QueueableMessage;
+import controller_msgs.msg.dds.QueueableMessage;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.Packet;
 
 /**
  * A QueueableCommand is a {@link Command} that can be queued for execution inside the controller. It implements command
@@ -53,11 +53,11 @@ public abstract class QueueableCommand<C extends QueueableCommand<C, M>, M exten
    /**
     * Copies the variables associated with command queuing from the given {@link QueueableMessage} into this one.
     */
-   public void setQueueableCommandVariables(long messageId, QueueableMessage messageQueueingProperties)
+   public void setQueueableCommandVariables(QueueableMessage messageQueueingProperties)
    {
-      commandId = messageId;
       if (messageQueueingProperties == null)
          return;
+      commandId = messageQueueingProperties.getMessageId();
       setExecutionDelayTime(messageQueueingProperties.getExecutionDelayTime());
       executionMode = ExecutionMode.fromByte(messageQueueingProperties.getExecutionMode());
       previousCommandId = messageQueueingProperties.getPreviousMessageId();
