@@ -490,7 +490,7 @@ public abstract class PacketValidityChecker
    {
       String errorMessage = validatePacket(message);
       if (errorMessage != null)
-         return message.getClass().getSimpleName() + " " + errorMessage;
+         return SO3TrajectoryMessage.class + " " + errorMessage;
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
