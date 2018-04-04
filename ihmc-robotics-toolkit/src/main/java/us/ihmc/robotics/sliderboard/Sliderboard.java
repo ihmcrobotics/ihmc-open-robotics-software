@@ -123,14 +123,14 @@ public class Sliderboard
     * @param sliderListener the listener to ass to the slider
     * @param sliderIndex the index of the slider
     */
-   public void addListener(SliderboardListener sliderListener, int sliderIndex)
+   public boolean addListener(SliderboardListener sliderListener, int sliderIndex)
    {
       if (!isConnected())
       {
-         return;
+         return false;
       }
 
-      sliderboardDataReciever.addListener(sliderListener, sliderIndex);
+      return sliderboardDataReciever.addListener(sliderListener, sliderIndex);
    }
 
    /**
@@ -166,6 +166,16 @@ public class Sliderboard
       {
          PrintTools.info("Was unable to create slider board message.");
       }
+   }
+
+   public void clearListeners()
+   {
+      sliderboardDataReciever.clearListeners();
+   }
+
+   public void clearListeners(int sliderIndex)
+   {
+      sliderboardDataReciever.clearListeners(sliderIndex);
    }
 
 }

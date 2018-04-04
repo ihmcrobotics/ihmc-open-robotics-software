@@ -11,6 +11,7 @@ import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 import us.ihmc.commons.PrintTools;
 
 public class SliderboardDataReciever implements Receiver
@@ -60,17 +61,44 @@ public class SliderboardDataReciever implements Receiver
       values.put(sliderIndex, value);
    }
 
-   public void addListener(SliderboardListener sliderListener, int sliderIndex)
+   public boolean addListener(SliderboardListener sliderListener, int sliderIndex)
    {
+      if (channelMapper.getSliderChannel(sliderIndex) == -1)
+      {
+         return false;
+      }
+
       if (!listeners.containsKey(sliderIndex))
       {
          listeners.put(sliderIndex, new ArrayList<>());
       }
       listeners.get(sliderIndex).add(sliderListener);
+      return true;
    }
 
    @Override
    public void close()
    {
+   }
+
+   public void clearListeners()
+   {
+      listeners.forEachValue(new TObjectProcedure<List<SliderboardListener>>()
+      {
+         @Override
+         public boolean execute(List<SliderboardListener> listenerList)
+         {
+            listenerList.clear();
+            return true;
+         }
+      });
+   }
+
+   public void clearListeners(int sliderIndex)
+   {
+      if (listeners.containsKey(sliderIndex))
+      {
+         listeners.get(sliderIndex).clear();
+      }
    }
 }
