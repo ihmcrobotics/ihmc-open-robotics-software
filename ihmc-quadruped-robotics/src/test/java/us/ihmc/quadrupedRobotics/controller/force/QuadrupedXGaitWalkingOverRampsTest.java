@@ -133,7 +133,7 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
 
       stepTeleopManager.setDesiredVelocity(0.75, 0.0, 0.0);
       conductor.addTimeLimit(variables.getYoTime(), 6.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 3.0));
+      conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 2.0));
       conductor.simulate();
 
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
