@@ -8,15 +8,10 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
@@ -133,10 +128,7 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketClass(PlanarVelocityPacket.class);
       registerPacketField(Vector3D.class);
 
-      // Events and controller states
-      registerPacketField(QuadrupedForceControllerEnum.class); // fixme make a message
-
-      registerPacketClass(QuadrupedXGaitSettingsPacket.class); // fixme make a message
+      // Events and controller statesregisterPacketClass(QuadrupedXGaitSettingsPacket.class); // fixme make a message
       registerPacketField(QuadrupedXGaitSettingsReadOnly.class); // fixme make a message
 
       registerPacketClass(QuadrupedRequestedControllerStateMessage.class);

@@ -8,6 +8,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
@@ -81,7 +82,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, physicalProperties, runtimeEnvironment.getGlobalDataProducer(),
                                                                       runtimeEnvironment.getGraphicsListRegistry(), registry);
 
-      commandInputManager = new CommandInputManager(ControllerAPIDefinition.getQuadrupedSupportedCommands());
+      commandInputManager = new CommandInputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands());
       try
       {
          commandInputManager.registerConversionHelper(new ClearDelayQueueConverter(ControllerAPIDefinition.getControllerSupportedCommands()));
@@ -90,7 +91,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       {
          e.printStackTrace();
       }
-      statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getQuadrupedSupportedStatusMessages());
+      statusMessageOutputManager = new StatusMessageOutputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedStatusMessages());
 
       controlManagerFactory.getOrCreateFeetManager();
       controlManagerFactory.getOrCreateBodyOrientationManager();
@@ -329,8 +330,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, scheduler,
                                                                                                 packetCommunicator);
       //      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
-      controllerNetworkSubscriber.addMessageCollector(ControllerAPIDefinition.createDefaultMessageIDExtractor());
-      controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
+      controllerNetworkSubscriber.addMessageCollector(QuadrupedControllerAPIDefinition.createDefaultMessageIDExtractor());
+      controllerNetworkSubscriber.addMessageValidator(QuadrupedControllerAPIDefinition.createDefaultMessageValidation());
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);
    }
 
