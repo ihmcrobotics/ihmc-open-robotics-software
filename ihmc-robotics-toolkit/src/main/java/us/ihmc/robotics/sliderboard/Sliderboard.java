@@ -12,6 +12,7 @@ import javax.sound.midi.Transmitter;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.robotics.sliderboard.boards.SliderboardType;
 
 /**
  * A lightweight sliderboard.
@@ -30,7 +31,10 @@ import us.ihmc.commons.thread.ThreadTools;
  */
 public class Sliderboard
 {
-   private final SliderboardDataReciever sliderboardDataReciever = new SliderboardDataReciever();
+   private static final SliderboardType sliderboardType = SliderboardType.findConnectedSliderBoard();
+
+   private final MidiControlMap channelMapper;
+   private final SliderboardDataReciever sliderboardDataReciever;
 
    // Keep these around so they can be closed properly.
    private MidiDevice outDevice;
@@ -40,10 +44,20 @@ public class Sliderboard
 
    public Sliderboard()
    {
+      if (sliderboardType == null)
+      {
+         channelMapper = null;
+         sliderboardDataReciever = null;
+         return;
+      }
+
+      channelMapper = sliderboardType.getChannelMapper();
+      sliderboardDataReciever = new SliderboardDataReciever(channelMapper);
+
       // Go through all system MIDI devices and find the ones for receiving from and sending to the sliderboard.
       for (MidiDevice.Info info : MidiSystem.getMidiDeviceInfo())
       {
-         if (SliderboardTools.infoMatchesSliderboard(info))
+         if (SliderboardTools.infoMatchesSliderboard(info, sliderboardType.getStringIdentifier()))
          {
             try
             {
@@ -110,43 +124,43 @@ public class Sliderboard
     * Attaches a listener to the specified slider that will get called whenever a slider is moved.
     *
     * @param sliderListener the listener to ass to the slider
-    * @param slider the index of the slider
+    * @param sliderIndex the index of the slider
     */
-   public void addListener(SliderboardListener sliderListener, int slider)
+   public void addListener(SliderboardListener sliderListener, int sliderIndex)
    {
       if (!isConnected())
       {
          return;
       }
 
-      sliderboardDataReciever.addListener(sliderListener, slider);
+      sliderboardDataReciever.addListener(sliderListener, sliderIndex);
    }
 
    /**
     * Sets the value of a slider.
     *
     * @param sliderPercent the new value for the slider between 0.0 and 1.0
-    * @param slider the index of the slider
+    * @param sliderIndex the index of the slider
     */
-   public void setSliderValue(double sliderPercent, int slider)
+   public void setSliderValue(double sliderPercent, int sliderIndex)
    {
       if (!isConnected())
       {
          return;
       }
 
-      if (!SliderboardConfiguration.SLIDER_CONTROLLER_MAP.containsKey(slider))
+      int channel = channelMapper.getSliderChannel(sliderIndex);
+      if (channel == -1)
       {
-         PrintTools.info("Unknown slider index: " + slider);
+         PrintTools.info("Unknown slider index: " + sliderIndex);
          return;
       }
 
       try
       {
          ShortMessage message = new ShortMessage();
-         byte data1 = SliderboardConfiguration.SLIDER_CONTROLLER_MAP.get(slider);
-         byte data2 = SliderboardTools.toDataByte(sliderPercent);
-         message.setMessage(SliderboardTools.STATUS, data1, data2);
+         int data = SliderboardTools.toDataByte(sliderPercent);
+         message.setMessage(SliderboardTools.STATUS, channel, data);
 
          // Should this be done on a thread?
          receiver.send(message, -1);
@@ -161,16 +175,16 @@ public class Sliderboard
    {
       Sliderboard sliderboard = new Sliderboard();
 
-      int[] sliders = SliderboardConfiguration.SLIDER_CONTROLLER_MAP.keys();
-      for (int slider : sliders)
+      for (int slider = 0; slider < 8; slider++)
       {
-         sliderboard.addListener(value -> PrintTools.info("Slider " + slider +" moved to: " + value), slider);
+         int sliderIndex = slider;
+         sliderboard.addListener(value -> PrintTools.info("Slider " + sliderIndex + " moved to: " + value), slider);
       }
 
       Random random = new Random();
       for (int i = 0; i < 10; i++)
       {
-         sliderboard.setSliderValue(random.nextDouble(), sliders[random.nextInt(sliders.length)]);
+         sliderboard.setSliderValue(random.nextDouble(), random.nextInt(8));
          ThreadTools.sleep(100);
       }
 

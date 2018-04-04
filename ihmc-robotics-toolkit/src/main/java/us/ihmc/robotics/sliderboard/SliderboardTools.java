@@ -29,25 +29,18 @@ public class SliderboardTools
     */
    public static final int MAX_VALUE = 0b01111111;
 
-   public static double toSliderPercent(byte dataByte)
+   public static double toSliderPercent(int dataByte)
    {
       return MathTools.clamp(((double) dataByte) / MAX_VALUE, 0.0, 1.0);
    }
 
-   public static byte toDataByte(double sliderPercent)
+   public static int toDataByte(double sliderPercent)
    {
-      return (byte) (MAX_VALUE * MathTools.clamp(sliderPercent, 0.0, 1.0));
+      return (int) (MAX_VALUE * MathTools.clamp(sliderPercent, 0.0, 1.0));
    }
 
-   public static boolean infoMatchesSliderboard(MidiDevice.Info info)
+   public static boolean infoMatchesSliderboard(MidiDevice.Info info, String sliderBoardName)
    {
-      String sliderBoardName = SliderboardConfiguration.SLIDER_BOARD_NAME;
-      if (sliderBoardName == null)
-      {
-         // No supported slider board is plugged in.
-         return false;
-      }
-
       String name = info.getName();
       String description = info.getDescription();
       return name.contains(sliderBoardName) || description.contains(sliderBoardName);

@@ -15,9 +15,16 @@ import us.ihmc.commons.PrintTools;
 
 public class SliderboardDataReciever implements Receiver
 {
+   private final MidiControlMap channelMapper;
+
    private final TIntObjectMap<List<SliderboardListener>> listeners = new TIntObjectHashMap<>();
 
    private final TIntDoubleMap values = new TIntDoubleHashMap();
+
+   public SliderboardDataReciever(MidiControlMap channelMapper)
+   {
+      this.channelMapper = channelMapper;
+   }
 
    @Override
    public void send(MidiMessage message, long timeStamp)
@@ -33,36 +40,33 @@ public class SliderboardDataReciever implements Receiver
          return;
       }
 
-      if (!SliderboardConfiguration.CONTROLLER_SLIDER_MAP.containsKey((byte) shortMessage.getData1()))
+      int sliderChannel = shortMessage.getData1();
+      int sliderIndex = channelMapper.getSliderIndex(sliderChannel);
+
+      if (sliderIndex == -1)
       {
-         PrintTools.info("Unknown controller: " + shortMessage.getData1());
+         PrintTools.info("Unknown controller: " + sliderChannel);
          return;
       }
 
-      int slider = SliderboardConfiguration.CONTROLLER_SLIDER_MAP.get((byte) shortMessage.getData1());
-      double value = SliderboardTools.toSliderPercent((byte) shortMessage.getData2());
+      double value = SliderboardTools.toSliderPercent(shortMessage.getData2());
 
-      List<SliderboardListener> sliderListeners = listeners.get(slider);
-      double previousValue = values.containsKey(slider) ? values.get(slider) : -1.0;
+      List<SliderboardListener> sliderListeners = listeners.get(sliderIndex);
+      double previousValue = values.containsKey(sliderIndex) ? values.get(sliderIndex) : -1.0;
       if (sliderListeners != null && previousValue != value)
       {
          sliderListeners.forEach(listener -> listener.sliderMoved(value));
       }
-      values.put(slider, value);
+      values.put(sliderIndex, value);
    }
 
-   public void addListener(SliderboardListener sliderListener, int slider)
+   public void addListener(SliderboardListener sliderListener, int sliderIndex)
    {
-      if (!SliderboardConfiguration.SLIDER_CONTROLLER_MAP.containsKey(slider))
+      if (!listeners.containsKey(sliderIndex))
       {
-         PrintTools.info("Unknown slider index: " + slider);
-         return;
+         listeners.put(sliderIndex, new ArrayList<>());
       }
-      if (!listeners.containsKey(slider))
-      {
-         listeners.put(slider, new ArrayList<>());
-      }
-      listeners.get(slider).add(sliderListener);
+      listeners.get(sliderIndex).add(sliderListener);
    }
 
    @Override
