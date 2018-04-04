@@ -6,5 +6,19 @@ public enum QuadrupedForceControllerRequestedEvent
    REQUEST_STAND_PREP,
    REQUEST_FREEZE,
    REQUEST_STEPPING,
-   REQUEST_FALL
+   REQUEST_FALL;
+
+   public static QuadrupedForceControllerRequestedEvent[] values = values();
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static QuadrupedForceControllerRequestedEvent fromByte(byte enumAsByte)
+   {
+      if (enumAsByte == -1)
+         return null;
+      return values[enumAsByte];
+   }
 }
