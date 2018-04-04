@@ -161,6 +161,9 @@ public class Sliderboard
 
          // Should this be done on a thread?
          receiver.send(message, -1);
+
+         // Also send the message to the receiver "faking" an update from the slider board.
+         sliderboardDataReciever.send(message, -1);
       }
       catch (InvalidMidiDataException e)
       {
