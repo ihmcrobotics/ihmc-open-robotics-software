@@ -30,23 +30,25 @@ import javafx.scene.shape.Rectangle;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiElement;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
+import us.ihmc.robotics.sliderboard.Sliderboard;
 
 public class TuningBox extends VBox
 {
-   private static final double imageSize = 20.0;
-   private static final double buttonPadding = 5.0;
+   public static final double imageSize = 20.0;
+   public static final double buttonPadding = 5.0;
 
    private final Image closeImage;
    private final Image moveImage;
-   private final Image sliderImage;
 
    private final List<String> parametersBeingTuned = new ArrayList<>();
    private final Map<String, Button> removeButtons = new HashMap<>();
-   private final Map<String, Button> sliderButtons = new HashMap<>();
+   private final Map<String, SliderButton> sliderButtons = new HashMap<>();
    private final Map<String, Node> dragNodes = new HashMap<>();
    private final Map<String, EventHandler<DragEvent>> dragOverEvents = new HashMap<>();
 
    private Map<String, Tuner> tunerMap;
+
+   private Sliderboard sliderboard;
 
    private final Rectangle placeholder = new Rectangle(100, 3);
 
@@ -56,7 +58,6 @@ public class TuningBox extends VBox
       setSpacing(10.0);
       closeImage = new Image(TuningBox.class.getResourceAsStream("/close.png"));
       moveImage = new Image(TuningBox.class.getResourceAsStream("/move.png"));
-      sliderImage = new Image(TuningBox.class.getResourceAsStream("/sliders.png"));
    }
 
    public void handleNewParameter(String uniqueName)
@@ -88,16 +89,7 @@ public class TuningBox extends VBox
          updateView();
       });
 
-      Button slider = new Button(null);
-      slider.setPadding(new Insets(buttonPadding));
-      ImageView sliderGraphic = new ImageView(sliderImage);
-      sliderGraphic.setFitWidth(imageSize);
-      sliderGraphic.setFitHeight(imageSize);
-      slider.setGraphic(sliderGraphic);
-      sliderButtons.put(uniqueName, slider);
-      slider.setOnAction(event -> {
-         // TODO: add some code to make this work.
-      });
+      sliderButtons.put(uniqueName, new SliderButton());
 
       Label drag = new Label();
       ImageView moveGraphic = new ImageView(moveImage);
@@ -191,20 +183,38 @@ public class TuningBox extends VBox
       updateView();
    }
 
+   public void setSliderboard(Sliderboard sliderboard)
+   {
+      this.sliderboard = sliderboard;
+      updateView();
+   }
+
    public void updateView()
    {
       getChildren().clear();
       parametersBeingTuned.forEach(uniqueName -> {
+         Tuner tuner = tunerMap.get(uniqueName);
          HBox box = new HBox(10.0);
          box.setAlignment(Pos.CENTER_LEFT);
          box.getChildren().add(dragNodes.get(uniqueName));
-         box.getChildren().add(sliderButtons.get(uniqueName));
+         if (sliderboard != null && sliderboard.isConnected())
+         {
+            SliderButton sliderButton = sliderButtons.get(uniqueName);
+            sliderButton.link(tuner, sliderboard);
+            box.getChildren().add(sliderButton);
+         }
          box.getChildren().add(removeButtons.get(uniqueName));
-         box.getChildren().add(tunerMap.get(uniqueName));
-
+         box.getChildren().add(tuner);
          box.setOnDragOver(dragOverEvents.get(uniqueName));
 
          getChildren().add(box);
+      });
+   }
+
+   public void hide()
+   {
+      parametersBeingTuned.forEach(uniqueName -> {
+         sliderButtons.get(uniqueName).unlink();
       });
    }
 

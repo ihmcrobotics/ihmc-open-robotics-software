@@ -119,4 +119,15 @@ public class EnumTuner extends HBox implements InputNode
    {
       return this;
    }
+
+   @Override
+   public void setValueFromPercent(double percent)
+   {
+   }
+
+   @Override
+   public double getValuePercent()
+   {
+      return 0.0;
+   }
 }

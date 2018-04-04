@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.text.Text;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
 public abstract class NumericTuner<T extends Number> extends HBox implements InputNode
@@ -93,5 +94,36 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    public Node getFullInputNode()
    {
       return this;
+   }
+
+   @Override
+   public void setValueFromPercent(double percent)
+   {
+      if (slider.isDisabled())
+      {
+         PrintTools.warn("Slider bounds not valid.");
+         return;
+      }
+
+      double min = slider.doDouble(this.min.getValue());
+      double max = slider.doDouble(this.max.getValue());
+      double newValue = min + percent * (max - min);
+
+      value.setValue(slider.toNumber(slider.roundToPrecision(newValue)));
+   }
+
+   @Override
+   public double getValuePercent()
+   {
+      if (slider.isDisabled())
+      {
+         PrintTools.warn("Slider bounds not valid.");
+         return 0.0;
+      }
+
+      double min = slider.doDouble(this.min.getValue());
+      double max = slider.doDouble(this.max.getValue());
+      double value = slider.doDouble(this.value.getValue());
+      return (value - min) / (max - min);
    }
 }

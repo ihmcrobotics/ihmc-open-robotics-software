@@ -207,4 +207,9 @@ public class GuiController
       });
       changeCollector.startRecording();
    }
+
+   public void close()
+   {
+      tuningTabManager.close();
+   }
 }

@@ -149,6 +149,11 @@ public class GuiParameter extends GuiElement
       return status;
    }
 
+   public void removeChangeListener(ParameterChangeListener listener)
+   {
+      listeners.remove(listener);
+   }
+
    public void addChangedListener(ParameterChangeListener listener)
    {
       listeners.add(listener);

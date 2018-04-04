@@ -62,6 +62,7 @@ public abstract class ParameterTuningApplication extends Application
       primaryStage.setOnCloseRequest(event -> {
          animationTimer.stop();
          guiInterface.shutdown();
+         controller.close();
       });
 
       primaryStage.setTitle(getClass().getSimpleName());

@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
+import us.ihmc.robotics.sliderboard.Sliderboard;
 
 public class TuningTab extends Tab
 {
@@ -64,9 +65,10 @@ public class TuningTab extends Tab
       scrollPane.setContent(tuningBox);
 
       parent.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-         if (this == newValue)
+         if (this == newValue && oldValue != null)
          {
-            tuningBox.updateView();
+            ((TuningTab) oldValue).hide();
+            ((TuningTab) newValue).updateView();
          }
       });
 
@@ -100,6 +102,11 @@ public class TuningTab extends Tab
       tuningBox.setTunerMap(tunerMap);
    }
 
+   public void setSliderboard(Sliderboard sliderboard)
+   {
+      tuningBox.setSliderboard(sliderboard);
+   }
+
    public void handleNewParameter(String uniqueName)
    {
       tuningBox.handleNewParameter(uniqueName);
@@ -108,5 +115,15 @@ public class TuningTab extends Tab
    public List<String> getParameterUniqueNames()
    {
       return tuningBox.getParameterUniqueNames();
+   }
+
+   private void hide()
+   {
+      tuningBox.hide();
+   }
+
+   private void updateView()
+   {
+      tuningBox.updateView();
    }
 }

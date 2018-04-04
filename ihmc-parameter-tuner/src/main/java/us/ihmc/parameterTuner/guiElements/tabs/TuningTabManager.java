@@ -6,6 +6,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TabPane;
 import us.ihmc.parameterTuner.guiElements.tuners.Tuner;
+import us.ihmc.robotics.sliderboard.Sliderboard;
 
 public class TuningTabManager
 {
@@ -18,6 +19,8 @@ public class TuningTabManager
    private final MenuItem loadTab = new MenuItem("Load Tab");
 
    private final TabSaver tabSaver;
+
+   private final Sliderboard sliderboard = new Sliderboard();
 
    public TuningTabManager(TabPane tabPane)
    {
@@ -38,7 +41,8 @@ public class TuningTabManager
          tabSaver.saveTab(selectedTab);
       });
       loadTab.setOnAction(event -> {
-         tabSaver.loadTab(tabPane, tunerMap);
+         TuningTab newTab = tabSaver.loadTab(tabPane, tunerMap);
+         newTab.setSliderboard(sliderboard);
          updateMenuItems();
       });
 
@@ -55,6 +59,7 @@ public class TuningTabManager
       String name = createUniqueName(tabPane, "NewTab");
       TuningTab newTab = new TuningTab(name, tabPane);
       newTab.setTunerMap(tunerMap);
+      newTab.setSliderboard(sliderboard);
       updateMenuItems();
    }
 
@@ -85,7 +90,7 @@ public class TuningTabManager
       this.tunerMap = tunerMap;
       tabPane.getTabs().clear();
       tabSaver.loadDefaultTabs(tabPane, tunerMap);
-      tabPane.getTabs().forEach(tab -> ((TuningTab) tab).setTunerMap(tunerMap));
+      tabPane.getTabs().forEach(tab -> ((TuningTab) tab).setSliderboard(sliderboard));
       updateMenuItems();
    }
 
@@ -100,4 +105,8 @@ public class TuningTabManager
       activeTab.handleNewParameter(uniqueName);
    }
 
+   public void close()
+   {
+      sliderboard.close();
+   }
 }

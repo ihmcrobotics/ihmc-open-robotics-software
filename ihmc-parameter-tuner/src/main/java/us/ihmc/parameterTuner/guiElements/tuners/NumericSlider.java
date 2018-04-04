@@ -89,7 +89,7 @@ public abstract class NumericSlider<T extends Number> extends Slider
       return Math.pow(10.0, -getPrecision());
    }
 
-   private double roundToPrecision(double value)
+   public double roundToPrecision(double value)
    {
       return Precision.round(value, getPrecision());
    }
