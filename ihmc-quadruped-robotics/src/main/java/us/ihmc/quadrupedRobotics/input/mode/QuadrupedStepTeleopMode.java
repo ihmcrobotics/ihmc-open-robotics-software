@@ -36,6 +36,8 @@ public class QuadrupedStepTeleopMode
    private final DoubleParameter[] xGaitEndDoubleSupportDuration = new DoubleParameter[2];
    private final DoubleParameter[] xGaitEndPhaseShift = new DoubleParameter[2];
 
+   private final DoubleParameter xGaitBodyOrientationShiftTime = new DoubleParameter("xGaitBodyOrientationShiftTime", registry, 0.1);;
+
    private final QuadrupedStepTeleopManager stepTeleopManager;
    private final QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager;
    private InputValueIntegrator comZ;
@@ -62,7 +64,7 @@ public class QuadrupedStepTeleopMode
       double bodyRoll = 0.0;
       double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * pitchScaleParameter.getValue();
       double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawScaleParameter.getValue();
-      bodyPoseTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll);
+      bodyPoseTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll, xGaitBodyOrientationShiftTime.getValue());
 
       double comZdot = 0.0;
       if (channels.get(XBoxOneMapping.DPAD) == 0.25)
