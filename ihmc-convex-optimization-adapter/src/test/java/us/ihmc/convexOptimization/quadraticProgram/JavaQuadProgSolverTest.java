@@ -30,7 +30,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       return solver;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testTimingAgainstStandardQuadProg() throws NoConvergenceException
    {
@@ -157,7 +157,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       PrintTools.info("Simple solve time : " + simpleTimer.getAverageTime());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAgainstStandardQuadProg() throws NoConvergenceException
    {
@@ -229,7 +229,7 @@ public class JavaQuadProgSolverTest extends AbstractSimpleActiveSetQPSolverTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testSolveProblemWithParallelConstraints() throws NoConvergenceException
    {

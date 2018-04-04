@@ -36,72 +36,72 @@ public class AtlasWalkToLocationBehaviorTest extends DRCWalkToLocationBehaviorTe
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 63.6)
-   @Test(timeout = 320000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 150000)
    public void testTurn361DegreesInPlace() throws SimulationExceededMaximumTimeException
    {
       super.testTurn361DegreesInPlace();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 29.7)
-   @Test(timeout = 150000)
+   @ContinuousIntegrationTest(estimatedDuration = 57.2)
+   @Test(timeout = 290000)
    public void testWalkAndStopBehavior() throws SimulationExceededMaximumTimeException
    {
       super.testWalkAndStopBehavior();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 48.8)
-   @Test(timeout = 240000)
+   @ContinuousIntegrationTest(estimatedDuration = 60.3)
+   @Test(timeout = 300000)
    public void testWalkAtAngleAndFinishAlignedWithInitialOrientation() throws SimulationExceededMaximumTimeException
    {
       super.testWalkAtAngleAndFinishAlignedWithInitialOrientation();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 59.3)
-   @Test(timeout = 300000)
+   @ContinuousIntegrationTest(estimatedDuration = 63.3)
+   @Test(timeout = 320000)
    public void testWalkAtAngleAndFinishAlignedWithWalkingPath() throws SimulationExceededMaximumTimeException
    {
       super.testWalkAtAngleAndFinishAlignedWithWalkingPath();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 55.7)
-   @Test(timeout = 280000)
+   @ContinuousIntegrationTest(estimatedDuration = 71.6)
+   @Test(timeout = 360000)
    public void testWalkAtAngleUsingStartOrientation() throws SimulationExceededMaximumTimeException
    {
       super.testWalkAtAngleUsingStartOrientation();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 47.7)
-   @Test(timeout = 150000)
+   @ContinuousIntegrationTest(estimatedDuration = 84.3)
+   @Test(timeout = 420000)
    public void testWalkAtAngleUsingStartTargetMeanOrientation() throws SimulationExceededMaximumTimeException
    {
       super.testWalkAtAngleUsingStartTargetMeanOrientation();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 58.7)
-   @Test(timeout = 290000)
+   @ContinuousIntegrationTest(estimatedDuration = 108.6)
+   @Test(timeout = 540000)
    public void testWalkAtAngleUsingTargetOrientation() throws SimulationExceededMaximumTimeException
    {
       super.testWalkAtAngleUsingTargetOrientation();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 28.5)
-   @Test(timeout = 140000)
+   @ContinuousIntegrationTest(estimatedDuration = 44.0)
+   @Test(timeout = 220000)
    public void testWalkBackwardsASmallAmountWithoutTurningInPlace() throws SimulationExceededMaximumTimeException
    {
       super.testWalkBackwardsASmallAmountWithoutTurningInPlace();
    }
    
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 39.5)
-   @Test(timeout = 200000)
+   @ContinuousIntegrationTest(estimatedDuration = 59.4)
+   @Test(timeout = 300000)
    public void testWalkForwardsX() throws SimulationExceededMaximumTimeException
    {
       super.testWalkForwardsX();

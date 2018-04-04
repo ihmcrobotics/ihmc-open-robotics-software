@@ -22,8 +22,8 @@ public class ICPOptimizationQPSolverTest
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double epsilon = 1e-3;
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testStandingWithPerfectTrackingAndAngularMomentum() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -49,8 +49,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testStandingUnconstrainedWithAndAngularMomentum() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -79,8 +79,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The CMP Feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testStandingUnconstrained() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -108,8 +108,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testStandingConstrained() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -150,8 +150,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testStandingConstrainedWithAngularMomentum() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -199,8 +199,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSteppingUnconstrainedFeedbackPreferred() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -245,8 +245,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSteppingUnconstrainedFootstepAdjustmentPreferred() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -290,8 +290,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSteppingUnconstrainedFootstepAdjustmentPreferredWithAngularMomentum() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -336,8 +336,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSteppingUnconstrainedWithAdjustment() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -406,8 +406,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSteppingUnconstrainedWithAdjustmentAndAngularMomentum() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -477,8 +477,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSteppingCoPConstrainedWithAdjustment() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -531,8 +531,8 @@ public class ICPOptimizationQPSolverTest
       Assert.assertTrue("The footstep location solution is wrong.", footstepLocation.epsilonEquals(footstepLocationExpected, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testCoPAndFootstepConstrainedWithAdjustment() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -627,8 +627,8 @@ public class ICPOptimizationQPSolverTest
       return supportPolygon;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testNoExceptions() throws Exception
    {
          ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
@@ -693,8 +693,8 @@ public class ICPOptimizationQPSolverTest
          Assert.assertTrue("There should not have been an exception.", exception == null);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.0)
-   @Test(timeout = 21000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSimpleNoExceptions() throws Exception
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);

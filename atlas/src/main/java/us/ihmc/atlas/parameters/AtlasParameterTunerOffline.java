@@ -10,7 +10,7 @@ import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
 import us.ihmc.parameterTuner.offline.FileInputManager;
 
-public class AtlasParameterFileTuner extends ParameterTuningApplication
+public class AtlasParameterTunerOffline extends ParameterTuningApplication
 {
    @Override
    protected ParameterGuiInterface createInputManager()

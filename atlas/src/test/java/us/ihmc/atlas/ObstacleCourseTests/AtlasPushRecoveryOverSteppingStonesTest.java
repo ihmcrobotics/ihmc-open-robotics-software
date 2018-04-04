@@ -77,8 +77,8 @@ public class AtlasPushRecoveryOverSteppingStonesTest extends AvatarPushRecoveryO
    }
 
    @Override
-   @ContinuousIntegrationTest(estimatedDuration = 48.9)
-   @Test(timeout = 950000)
+   @ContinuousIntegrationTest(estimatedDuration = 70.9)
+   @Test(timeout = 350000)
    public void testWalkingOverSteppingStonesForwardPush() throws SimulationExceededMaximumTimeException
    {
       super.testWalkingOverSteppingStonesForwardPush();

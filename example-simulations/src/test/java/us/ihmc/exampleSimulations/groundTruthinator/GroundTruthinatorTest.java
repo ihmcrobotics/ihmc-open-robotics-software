@@ -19,7 +19,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 public class GroundTruthinatorTest
 {
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.2)
    @Test(timeout = 30000)
    public void testSimpleTranslationGroundTruthinator()
    {

@@ -70,8 +70,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
 
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.FAST, estimatedDuration = 31.3)
-   @Test(timeout = 190000)
+   @ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.FAST, estimatedDuration = 157.4)
+   @Test(timeout = 790000)
    public void testWalkingWithRandomArmTrajectoryMovements() throws Exception
    {
       Random random = new Random(564654L);
@@ -95,8 +95,8 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
       assertTrue(success);
    }
 
-   @ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.FAST, estimatedDuration = 31.3)
-   @Test(timeout = 190000)
+   @ContinuousIntegrationTest(categoriesOverride = IntegrationCategory.FAST, estimatedDuration = 168.3)
+   @Test(timeout = 840000)
    public void testWalkingWithArmsHoldingInFeetFrame() throws Exception
    {
       Random random = new Random(564654L);

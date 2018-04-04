@@ -15,7 +15,7 @@ import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 
 public class DelayEstimatorBetweenTwoSignalsTest
 {
-   @ContinuousIntegrationTest(estimatedDuration = 0.8)
+   @ContinuousIntegrationTest(estimatedDuration = 1.7)
    @Test(timeout = 30000)
    public void testPerfectSignal() throws Exception
    {
@@ -57,7 +57,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testWithShiftedSignal() throws Exception
    {
@@ -101,7 +101,7 @@ public class DelayEstimatorBetweenTwoSignalsTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testNoisySignal() throws Exception
    {

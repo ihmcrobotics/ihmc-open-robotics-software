@@ -25,7 +25,7 @@ import us.ihmc.robotics.testing.JUnitTools;
 public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 2.2)
+	@ContinuousIntegrationTest(estimatedDuration = 2.6)
 	@Test(timeout = 30000)
    public void testChangeFrameUsingNumericalDifferentiationVersusAnalytical()
    {
@@ -99,6 +99,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
 	/**
 	 * This test is used to prove that the reference frame in which the linear acceleration of a body fixed point in computed in does not matter.
 	 */
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testGetAccelerationOfPointFixedInBodyFrameComputedInDifferentFrames() throws Exception
    {

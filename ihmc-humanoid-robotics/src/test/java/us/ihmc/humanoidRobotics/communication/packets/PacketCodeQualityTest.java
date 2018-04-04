@@ -67,7 +67,7 @@ public class PacketCodeQualityTest
    public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @Test(timeout = 30000)
    public void testFrameInformationDefaultValues()
    {
       FrameInformation frameInformation = new FrameInformation();
@@ -77,8 +77,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testNoFieldsAreNullAfterPacketCreation()
    { // This test won't fail on Arrays or Lists
       boolean verbose = true;
@@ -145,8 +145,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testPacketsHaveNoConvenienceMethod()
    { // This test won't fail for setUniqueId(long) or validateMessage()
       boolean verbose = true;
@@ -260,8 +260,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testPacketsUseIDLSequenceObjectOnly()
    { // This test won't fail on Arrays or Lists
       boolean verbose = true;
@@ -317,8 +317,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testPacketOnlyExtendPacketClass()
    {
       boolean verbose = true;
@@ -363,8 +363,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testPacketDoNotDeclareTypes()
    {
       boolean verbose = true;
@@ -405,8 +405,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testPacketsHaveUniqueSimpleNameBasedHashCode()
    { // This test won't fail on Arrays or Lists
       boolean verbose = true;
@@ -434,8 +434,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testPacketsDeclarePrimitiveOrMessageTypeFields()
    { // This test won't fail on Arrays or Lists
       boolean verbose = true;
@@ -514,8 +514,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testPacketStaticFieldsAreFinal()
    {
       boolean verbose = true;
@@ -558,8 +558,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testPacketHaveNoEnum()
    {
       boolean verbose = true;
@@ -606,8 +606,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.4, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testPacketByteFieldNameRefersToEnumType() throws NoSuchFieldException, SecurityException
    {
       boolean verbose = true;
@@ -679,8 +679,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testPacketWithByteFieldDeclareEnumValuesAsStaticByteFields() throws NoSuchFieldException, SecurityException
    {
       boolean verbose = true;
@@ -818,8 +818,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 4.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testOnlyEmptyAndCopyConstructor()
    {
       boolean verbose = false;
@@ -876,8 +876,8 @@ public class PacketCodeQualityTest
    }
 
    @SuppressWarnings("rawtypes")
-   @ContinuousIntegrationTest(estimatedDuration = 1.0, categoriesOverride = IntegrationCategory.FAST)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0, categoriesOverride = IntegrationCategory.FAST)
+   @Test(timeout = 30000)
    public void testNoRandomConstructor()
    {
       boolean printPacketTypesWithRandomConstructor = false;

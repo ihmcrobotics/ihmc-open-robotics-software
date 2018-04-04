@@ -234,7 +234,7 @@ public class FootstepAngularMomentumPredictorTest
       clear();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
    @Test(timeout = 30000)
    public void testAngularMomentumInitialTransfer()
    {
@@ -319,7 +319,7 @@ public class FootstepAngularMomentumPredictorTest
       return comListCounter + 1;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
    @Test(timeout = 30000)
    public void testAngularMomentumNormalTransfer()
    {
@@ -471,7 +471,7 @@ public class FootstepAngularMomentumPredictorTest
       return comListCounter;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.7)
+   @ContinuousIntegrationTest(estimatedDuration = 1.2)
    @Test(timeout = 30000)
    public void testAngularMomentumSwing()
    {

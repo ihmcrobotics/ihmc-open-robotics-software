@@ -1,14 +1,14 @@
-package us.ihmc.parameterTuner.remote;
+package us.ihmc.parameterTuner.offline;
 
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
 
-public class ParameterRemoteTuner extends ParameterTuningApplication
+public class ParameterTunerOffline extends ParameterTuningApplication
 {
    @Override
    protected ParameterGuiInterface createInputManager()
    {
-      return new RemoteInputManager();
+      return new FileInputManager();
    }
 
    public static void main(String[] args)

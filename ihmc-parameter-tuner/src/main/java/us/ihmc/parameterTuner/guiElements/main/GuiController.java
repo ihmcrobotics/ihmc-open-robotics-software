@@ -115,7 +115,10 @@ public class GuiController
          @Override
          public void handle(DragEvent event)
          {
-            addSelectedParametersToTuner();
+            if (event.getGestureSource() == tree)
+            {
+               addSelectedParametersToTuner();
+            }
          }
       });
 
