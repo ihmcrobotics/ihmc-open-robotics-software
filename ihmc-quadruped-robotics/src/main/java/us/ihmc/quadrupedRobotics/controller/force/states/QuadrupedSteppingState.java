@@ -191,6 +191,7 @@ public class QuadrupedSteppingState implements QuadrupedController
 
       commandConsumer.update();
       commandConsumer.consumeFootCommands();
+      commandConsumer.consumeBodyCommands();
 
       if (stepMessageHandler.isStepPlanAvailable())
       {
