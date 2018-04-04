@@ -9,7 +9,6 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceCont
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
