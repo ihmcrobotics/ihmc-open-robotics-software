@@ -41,7 +41,6 @@ public class QuadrupedStepMessageHandler
 
    private final QuadrantDependentList<RecyclingArrayDeque<SoleTrajectoryCommand>> upcomingFootTrajectoryCommandList = new QuadrantDependentList<>();
 
-
    private final QuadrupedReferenceFrames referenceFrames;
    private final YoFrameOrientation bodyOrientation;
    private final ArrayList<YoQuadrupedTimedStep> activeSteps = new ArrayList<>();
@@ -90,7 +89,7 @@ public class QuadrupedStepMessageHandler
    public void process(FrameVector3DReadOnly stepAdjustment)
    {
       TimeIntervalTools.removeEndTimesLessThan(robotTimestamp.getDoubleValue(), receivedStepSequence);
-      if(haltFlag.getBooleanValue())
+      if (haltFlag.getBooleanValue())
          pruneHaltedSteps();
 
       updateAdjustedStepQueue(stepAdjustment);
@@ -121,6 +120,13 @@ public class QuadrupedStepMessageHandler
       bodyOrientation.setFromReferenceFrame(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
    }
 
+   public void clearSteps()
+   {
+      receivedStepSequence.clear();
+      adjustedStepSequence.clear();
+      activeSteps.clear();
+   }
+
    public void handleSoleTrajectoryCommand(List<SoleTrajectoryCommand> commands)
    {
       for (int i = 0; i < commands.size(); i++)
@@ -130,7 +136,7 @@ public class QuadrupedStepMessageHandler
       }
    }
 
-   public SoleTrajectoryCommand pollFootTrajectoryForSolePositionControl(RobotSide swingQuadrant)
+   public SoleTrajectoryCommand pollFootTrajectoryForSolePositionControl(RobotQuadrant swingQuadrant)
    {
       return upcomingFootTrajectoryCommandList.get(swingQuadrant).poll();
    }
@@ -138,6 +144,17 @@ public class QuadrupedStepMessageHandler
    public boolean hasFootTrajectoryForSolePositionControl(RobotQuadrant swingQuadrant)
    {
       return !upcomingFootTrajectoryCommandList.get(swingQuadrant).isEmpty();
+   }
+
+   public boolean hasFootTrajectoryForSolePositionControl()
+   {
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (hasFootTrajectoryForSolePositionControl(robotQuadrant))
+            return true;
+      }
+
+      return false;
    }
 
    public void clearFootTrajectory(RobotQuadrant robotQuadrant)
@@ -151,12 +168,11 @@ public class QuadrupedStepMessageHandler
          clearFootTrajectory(robotQuadrant);
    }
 
-
    private void pruneHaltedSteps()
    {
-      for (int i = receivedStepSequence.size() - 1; i >=0; i--)
+      for (int i = receivedStepSequence.size() - 1; i >= 0; i--)
       {
-         if(receivedStepSequence.get(i).getTimeInterval().getStartTime() > haltTime.getDoubleValue())
+         if (receivedStepSequence.get(i).getTimeInterval().getStartTime() > haltTime.getDoubleValue())
             receivedStepSequence.remove(i);
       }
    }
@@ -185,7 +201,8 @@ public class QuadrupedStepMessageHandler
 
    public boolean isDoneWithStepSequence()
    {
-      return receivedStepSequence.size() == 0 || receivedStepSequence.get(receivedStepSequence.size() - 1).getTimeInterval().getEndTime() < robotTimestamp.getDoubleValue();
+      return receivedStepSequence.size() == 0 || receivedStepSequence.get(receivedStepSequence.size() - 1).getTimeInterval().getEndTime() < robotTimestamp
+            .getDoubleValue();
    }
 
    public void halt()

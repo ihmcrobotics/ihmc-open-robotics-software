@@ -45,7 +45,6 @@ public class QuadrupedSteppingState implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
    private final QuadrupedStepMessageHandler stepMessageHandler;
 
    private final QuadrupedStepCommandConsumer commandConsumer;
@@ -103,13 +102,8 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, feedbackTemplate, runtimeEnvironment.getJointDesiredOutputList(), registry);
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
 
-      GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
-
       // Initialize input providers.
       stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), controllerToolbox.getReferenceFrames(), registry);
-      // TODO push this into step command consumer
-      soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(globalDataProducer, registry);
-
       commandConsumer = new QuadrupedStepCommandConsumer(commandInputManager, stepMessageHandler, controllerToolbox, controlManagerFactory);
 
       this.stateMachine = buildStateMachine();
@@ -123,7 +117,7 @@ public class QuadrupedSteppingState implements QuadrupedController
       final QuadrupedController standController = new QuadrupedStandController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, stepMessageHandler, registry);
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(controllerToolbox, controlManagerFactory,
-                                                                                                       soleWaypointInputProvider, registry);
+                                                                                                       stepMessageHandler, registry);
 
       EventBasedStateMachineFactory<QuadrupedSteppingStateEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(
             QuadrupedSteppingStateEnum.class);
@@ -169,7 +163,12 @@ public class QuadrupedSteppingState implements QuadrupedController
    @Override
    public void onEntry()
    {
+      commandInputManager.flushAllCommands();
 
+      stepMessageHandler.clearFootTrajectory();
+      stepMessageHandler.clearSteps();
+
+      stateMachine.resetToInitialState();
    }
 
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
@@ -199,9 +198,18 @@ public class QuadrupedSteppingState implements QuadrupedController
       {
          if (stateMachine.getCurrentStateKey() == QuadrupedSteppingStateEnum.STAND)
          {
-            // trigger step event if preplanned steps are available in stand state
+            // trigger step event steps are available in stand state
             lastEvent.set(QuadrupedSteppingRequestedEvent.REQUEST_STEP);
             trigger.fireEvent(QuadrupedSteppingRequestedEvent.REQUEST_STEP);
+         }
+      }
+      if (stepMessageHandler.hasFootTrajectoryForSolePositionControl())
+      {
+         if (stateMachine.getCurrentStateKey() == QuadrupedSteppingStateEnum.STAND)
+         {
+            // trigger step event if sole waypoints are available in stand state
+            lastEvent.set(QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT);
+            trigger.fireEvent(QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT);
          }
       }
 

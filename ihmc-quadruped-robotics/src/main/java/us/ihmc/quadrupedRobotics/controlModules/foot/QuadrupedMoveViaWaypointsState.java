@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import afu.org.checkerframework.checker.oigj.qual.O;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
@@ -9,7 +10,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
-import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.geometry.shapes.FrameRamp3d;
+import us.ihmc.robotics.math.trajectories.waypoints.*;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -29,6 +31,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame soleFrame;
    private final QuadrupedSoleWaypointList quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
+   private final FrameEuclideanTrajectoryPointList trajectoryPointList = new FrameEuclideanTrajectoryPointList();
 
    private final QuadrupedFootControlModuleParameters parameters;
 
@@ -68,9 +71,9 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       feedbackControlCommand.setBodyFixedPointToControl(currentPosition);
    }
 
-   public void handleWaypointList(QuadrupedSoleWaypointList quadrupedSoleWaypointList)
+   public void handleWaypointList(FrameEuclideanTrajectoryPointList trajectoryPointList)
    {
-      this.quadrupedSoleWaypointList.set(quadrupedSoleWaypointList);
+      this.trajectoryPointList.set(trajectoryPointList);
    }
 
    public void initialize(boolean useInitialSoleForceAsFeedforwardTerm)
@@ -101,7 +104,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    {
       double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
 
-      if (currentTrajectoryTime > quadrupedSoleWaypointList.getFinalTime())
+      if (currentTrajectoryTime > trajectoryPointList.getTrajectoryTime())
       {
          soleForceCommand.setToZero();
 
@@ -133,7 +136,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    public QuadrupedFootControlModule.FootEvent fireEvent(double timeInState)
    {
       double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
-      return currentTrajectoryTime > quadrupedSoleWaypointList.getFinalTime() ? QuadrupedFootControlModule.FootEvent.TIMEOUT : null;
+      return currentTrajectoryTime > trajectoryPointList.getTrajectoryTime() ? QuadrupedFootControlModule.FootEvent.TIMEOUT : null;
    }
 
    @Override
@@ -142,16 +145,15 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
       soleForceCommand.setToZero();
    }
 
+
    private void createSoleWaypointTrajectory()
    {
       quadrupedWaypointsPositionTrajectoryGenerator.clear();
-      for (int i = 0; i < quadrupedSoleWaypointList.size(); ++i)
+      for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); ++i)
       {
-         quadrupedWaypointsPositionTrajectoryGenerator
-               .appendWaypoint(quadrupedSoleWaypointList.get(i).getTime(), quadrupedSoleWaypointList.get(i).getPosition(),
-                               quadrupedSoleWaypointList.get(i).getVelocity());
+         quadrupedWaypointsPositionTrajectoryGenerator.appendWaypoint(trajectoryPointList.getTrajectoryPoint(i));
       }
-      if (quadrupedSoleWaypointList.size() > 0)
+      if (trajectoryPointList.getNumberOfTrajectoryPoints() > 0)
       {
          quadrupedWaypointsPositionTrajectoryGenerator.initialize();
       }
@@ -162,7 +164,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    {
       double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
 
-      if (currentTrajectoryTime > quadrupedSoleWaypointList.getFinalTime())
+      if (currentTrajectoryTime > trajectoryPointList.getTrajectoryTime())
          return virtualForceCommand;
       else
          return null;
@@ -173,9 +175,15 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    {
       double currentTrajectoryTime = robotTime.getDoubleValue() - taskStartTime;
 
-      if (currentTrajectoryTime > quadrupedSoleWaypointList.getFinalTime())
+      if (currentTrajectoryTime > trajectoryPointList.getTrajectoryTime())
          return null;
       else
          return feedbackControlCommand;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return feedbackControlCommand;
    }
 }

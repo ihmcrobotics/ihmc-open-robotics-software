@@ -17,6 +17,7 @@ public abstract class QuadrupedFootState implements EventState
 
    public abstract VirtualModelControlCommand<?> getVirtualModelControlCommand();
    public abstract FeedbackControlCommand<?> getFeedbackControlCommand();
+   public abstract FeedbackControlCommand<?> createFeedbackControlTemplate();
 
    public FrameVector3DReadOnly getSoleForceCommand()
    {
