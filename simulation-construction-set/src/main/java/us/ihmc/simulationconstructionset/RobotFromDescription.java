@@ -138,11 +138,13 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       addExternalForcePoints(jointDescription, joint);
       addKinematicPoints(jointDescription, joint);
 
+      addExternalForcePointsFromCollisionMesh(jointDescription, joint);
+      
       addLidarMounts(jointDescription, joint);
       addCameraMounts(jointDescription, joint);
       addIMUMounts(jointDescription, joint);
       addJointWrenchSensors(jointDescription, joint);
-
+      
       addForceSensors(jointDescription, joint);
 
       // Iterate over the children
@@ -162,6 +164,25 @@ public class RobotFromDescription extends Robot implements OneDegreeOfFreedomJoi
       }
 
       return joint;
+   }
+   
+   private void addExternalForcePointsFromCollisionMesh(JointDescription jointDescription, Joint joint)
+   {
+      Link link = joint.getLink();
+      ArrayList<CollisionMeshDescription> collisionMeshDescriptions = link.getCollisionMeshDescriptions();
+      
+      if (collisionMeshDescriptions != null)
+      {
+         int estimatedNumberOfContactPoints = 0;
+
+         for (int i = 0; i < collisionMeshDescriptions.size(); i++)
+         {
+            CollisionMeshDescription collisionMesh = collisionMeshDescriptions.get(i);
+            estimatedNumberOfContactPoints += collisionMesh.getEstimatedNumberOfContactPoints();
+         }
+
+         link.enableContactingExternalForcePoints(estimatedNumberOfContactPoints, yoVariableRegistry);
+      }
    }
 
    private void addLidarMounts(JointDescription jointDescription, Joint joint)

@@ -1,37 +1,46 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * This message is used to provides additional properties for cameras.
  */
-public class IntrinsicParametersMessage implements Settable<IntrinsicParametersMessage>, EpsilonComparable<IntrinsicParametersMessage>
+public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessage>
+      implements Settable<IntrinsicParametersMessage>, EpsilonComparable<IntrinsicParametersMessage>
 {
-   private int width_;
-   private int height_;
-   private double fx_;
-   private double fy_;
-   private double skew_;
-   private double cx_;
-   private double cy_;
-   private us.ihmc.idl.IDLSequence.Double radial_;
-   private double t1_;
-   private double t2_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public int width_;
+   public int height_;
+   public double fx_;
+   public double fy_;
+   public double skew_;
+   public double cx_;
+   public double cy_;
+   public us.ihmc.idl.IDLSequence.Double radial_;
+   public double t1_;
+   public double t2_;
 
    public IntrinsicParametersMessage()
    {
-
       radial_ = new us.ihmc.idl.IDLSequence.Double(100, "type_6");
+
    }
 
    public IntrinsicParametersMessage(IntrinsicParametersMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(IntrinsicParametersMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       width_ = other.width_;
 
       height_ = other.height_;
@@ -50,11 +59,23 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       t1_ = other.t1_;
 
       t2_ = other.t2_;
+
    }
 
-   public int getWidth()
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
    {
-      return width_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setWidth(int width)
@@ -62,9 +83,9 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       width_ = width;
    }
 
-   public int getHeight()
+   public int getWidth()
    {
-      return height_;
+      return width_;
    }
 
    public void setHeight(int height)
@@ -72,9 +93,9 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       height_ = height;
    }
 
-   public double getFx()
+   public int getHeight()
    {
-      return fx_;
+      return height_;
    }
 
    public void setFx(double fx)
@@ -82,9 +103,9 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       fx_ = fx;
    }
 
-   public double getFy()
+   public double getFx()
    {
-      return fy_;
+      return fx_;
    }
 
    public void setFy(double fy)
@@ -92,9 +113,9 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       fy_ = fy;
    }
 
-   public double getSkew()
+   public double getFy()
    {
-      return skew_;
+      return fy_;
    }
 
    public void setSkew(double skew)
@@ -102,9 +123,9 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       skew_ = skew;
    }
 
-   public double getCx()
+   public double getSkew()
    {
-      return cx_;
+      return skew_;
    }
 
    public void setCx(double cx)
@@ -112,9 +133,9 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       cx_ = cx;
    }
 
-   public double getCy()
+   public double getCx()
    {
-      return cy_;
+      return cx_;
    }
 
    public void setCy(double cy)
@@ -122,14 +143,14 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       cy_ = cy;
    }
 
+   public double getCy()
+   {
+      return cy_;
+   }
+
    public us.ihmc.idl.IDLSequence.Double getRadial()
    {
       return radial_;
-   }
-
-   public double getT1()
-   {
-      return t1_;
    }
 
    public void setT1(double t1)
@@ -137,14 +158,19 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       t1_ = t1;
    }
 
-   public double getT2()
+   public double getT1()
    {
-      return t2_;
+      return t1_;
    }
 
    public void setT2(double t2)
    {
       t2_ = t2;
+   }
+
+   public double getT2()
+   {
+      return t2_;
    }
 
    @Override
@@ -154,6 +180,9 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.width_, other.width_, epsilon))
          return false;
@@ -176,8 +205,16 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cy_, other.cy_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.radial_, other.radial_, epsilon))
+      if (radial_.size() != other.radial_.size())
          return false;
+      else
+         for (int i = 0; i < radial_.size(); i++)
+         {
+            if (!us.ihmc.idl.IDLTools.epsilonEquals(radial_.get(i), other.radial_.get(i), epsilon))
+            {
+               return false;
+            }
+         }
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.t1_, other.t1_, epsilon))
          return false;
@@ -199,6 +236,9 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
          return false;
 
       IntrinsicParametersMessage otherMyClass = (IntrinsicParametersMessage) other;
+
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
 
       if (this.width_ != otherMyClass.width_)
          return false;
@@ -223,7 +263,6 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
 
       if (!this.radial_.equals(otherMyClass.radial_))
          return false;
-
       if (this.t1_ != otherMyClass.t1_)
          return false;
 
@@ -239,45 +278,38 @@ public class IntrinsicParametersMessage implements Settable<IntrinsicParametersM
       StringBuilder builder = new StringBuilder();
 
       builder.append("IntrinsicParametersMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("width=");
       builder.append(this.width_);
-
       builder.append(", ");
       builder.append("height=");
       builder.append(this.height_);
-
       builder.append(", ");
       builder.append("fx=");
       builder.append(this.fx_);
-
       builder.append(", ");
       builder.append("fy=");
       builder.append(this.fy_);
-
       builder.append(", ");
       builder.append("skew=");
       builder.append(this.skew_);
-
       builder.append(", ");
       builder.append("cx=");
       builder.append(this.cx_);
-
       builder.append(", ");
       builder.append("cy=");
       builder.append(this.cy_);
-
       builder.append(", ");
       builder.append("radial=");
       builder.append(this.radial_);
-
       builder.append(", ");
       builder.append("t1=");
       builder.append(this.t1_);
-
       builder.append(", ");
       builder.append("t2=");
       builder.append(this.t2_);
-
       builder.append("}");
       return builder.toString();
    }

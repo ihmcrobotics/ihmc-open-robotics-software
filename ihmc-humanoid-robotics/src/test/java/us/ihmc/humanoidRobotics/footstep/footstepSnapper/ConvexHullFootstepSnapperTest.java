@@ -12,7 +12,6 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
 
 
@@ -35,7 +34,7 @@ public class ConvexHullFootstepSnapperTest
       pointsToCrop.add(new Point2D(1,-1));
       pointsToCrop.add(new Point2D(1.1,0));
 
-      List<Point2DReadOnly> finalPoints = footstepSnapper.reduceListOfPointsByArea(pointsToCrop, 4);
+      List<Point2D> finalPoints = footstepSnapper.reduceListOfPointsByArea(pointsToCrop, 4);
       assertTrue(finalPoints.size() == 4.0);
       ConvexPolygon2D endPolygon = new ConvexPolygon2D(finalPoints);
       assertEquals(4.0, endPolygon.getArea(), 1e-15);

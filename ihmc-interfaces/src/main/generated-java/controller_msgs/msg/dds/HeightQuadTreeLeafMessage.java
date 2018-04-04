@@ -1,64 +1,89 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * This message is part of the IHMC height quad tree module
  */
-public class HeightQuadTreeLeafMessage implements Settable<HeightQuadTreeLeafMessage>, EpsilonComparable<HeightQuadTreeLeafMessage>
+public class HeightQuadTreeLeafMessage extends Packet<HeightQuadTreeLeafMessage>
+      implements Settable<HeightQuadTreeLeafMessage>, EpsilonComparable<HeightQuadTreeLeafMessage>
 {
-   private float x_center_;
-   private float y_center_;
-   private float height_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public float center_x_;
+   public float center_y_;
+   public float height_;
 
    public HeightQuadTreeLeafMessage()
    {
-
    }
 
    public HeightQuadTreeLeafMessage(HeightQuadTreeLeafMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(HeightQuadTreeLeafMessage other)
    {
-      x_center_ = other.x_center_;
+      sequence_id_ = other.sequence_id_;
 
-      y_center_ = other.y_center_;
+      center_x_ = other.center_x_;
+
+      center_y_ = other.center_y_;
 
       height_ = other.height_;
+
    }
 
-   public float getXCenter()
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
    {
-      return x_center_;
+      sequence_id_ = sequence_id;
    }
 
-   public void setXCenter(float x_center)
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
    {
-      x_center_ = x_center;
+      return sequence_id_;
    }
 
-   public float getYCenter()
+   public void setCenterX(float center_x)
    {
-      return y_center_;
+      center_x_ = center_x;
    }
 
-   public void setYCenter(float y_center)
+   public float getCenterX()
    {
-      y_center_ = y_center;
+      return center_x_;
    }
 
-   public float getHeight()
+   public void setCenterY(float center_y)
    {
-      return height_;
+      center_y_ = center_y;
+   }
+
+   public float getCenterY()
+   {
+      return center_y_;
    }
 
    public void setHeight(float height)
    {
       height_ = height;
+   }
+
+   public float getHeight()
+   {
+      return height_;
    }
 
    @Override
@@ -69,10 +94,13 @@ public class HeightQuadTreeLeafMessage implements Settable<HeightQuadTreeLeafMes
       if (other == this)
          return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_center_, other.x_center_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_center_, other.y_center_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.center_x_, other.center_x_, epsilon))
+         return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.center_y_, other.center_y_, epsilon))
          return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_, other.height_, epsilon))
@@ -93,10 +121,13 @@ public class HeightQuadTreeLeafMessage implements Settable<HeightQuadTreeLeafMes
 
       HeightQuadTreeLeafMessage otherMyClass = (HeightQuadTreeLeafMessage) other;
 
-      if (this.x_center_ != otherMyClass.x_center_)
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
          return false;
 
-      if (this.y_center_ != otherMyClass.y_center_)
+      if (this.center_x_ != otherMyClass.center_x_)
+         return false;
+
+      if (this.center_y_ != otherMyClass.center_y_)
          return false;
 
       if (this.height_ != otherMyClass.height_)
@@ -111,17 +142,17 @@ public class HeightQuadTreeLeafMessage implements Settable<HeightQuadTreeLeafMes
       StringBuilder builder = new StringBuilder();
 
       builder.append("HeightQuadTreeLeafMessage {");
-      builder.append("x_center=");
-      builder.append(this.x_center_);
-
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
       builder.append(", ");
-      builder.append("y_center=");
-      builder.append(this.y_center_);
-
+      builder.append("center_x=");
+      builder.append(this.center_x_);
+      builder.append(", ");
+      builder.append("center_y=");
+      builder.append(this.center_y_);
       builder.append(", ");
       builder.append("height=");
       builder.append(this.height_);
-
       builder.append("}");
       return builder.toString();
    }

@@ -8,9 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.RequestWristForceSensorCalibrationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.humanoidRobotics.communication.subscribers.RequestWristForceSensorCalibrationSubscriber;
@@ -55,6 +53,9 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
+import controller_msgs.msg.dds.StateEstimatorModePacket;
 
 public class DRCEstimatorThread implements MultiThreadedRobotControlElement
 {

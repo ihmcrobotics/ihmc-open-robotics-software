@@ -155,11 +155,18 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
    {
       controllerToolbox.update();
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
+      feetManager.updateSupportPolygon();
+      feetManager.compute();
+      feetManager.getDesiredSoleForceCommand(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
+   }
+
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
+   {
       return isDoneMoving.getBooleanValue() ? ControllerEvent.DONE : null;
    }
 

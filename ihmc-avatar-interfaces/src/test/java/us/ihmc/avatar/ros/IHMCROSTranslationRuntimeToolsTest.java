@@ -39,11 +39,11 @@ import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
 public class IHMCROSTranslationRuntimeToolsTest
 {
    @Rule
-   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(1, TimeUnit.MINUTES));
+   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(5, TimeUnit.MINUTES));
 
    @SuppressWarnings({"rawtypes", "unchecked"})
-   @ContinuousIntegrationTest(estimatedDuration = 16.5)
-   @Test(timeout = Integer.MAX_VALUE)
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
+   @Test(timeout = 30000)
    public void testBidirectionalConversionWithRandomConstructors()
    {
       Reflections reflections = new Reflections("us.ihmc");
@@ -63,7 +63,7 @@ public class IHMCROSTranslationRuntimeToolsTest
       Packet<?> ihmcMessage = null;
       Random random = new Random(1976L);
 
-      for (int i = 0; i < 5000; i++)
+      for (int i = 0; i < 1000; i++)
       {
          int packetsFailed = 0;
          for (Class<?> concreteType : concreteTypes)

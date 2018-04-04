@@ -1,57 +1,62 @@
 package us.ihmc.humanoidBehaviors.stateMachine;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBehavior
 {
+   private final BehaviorStateMachine<E> stateMachine;
 
-   protected BehaviorStateMachine<E> statemachine;
-
-   public StateMachineBehavior(String stateMachineName, Class<E> enumType, YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge)
+   public StateMachineBehavior(String stateMachineName, Class<E> keyType, DoubleProvider timeProvider, CommunicationBridge outgoingCommunicationBridge)
    {
-      this(null, stateMachineName, enumType, yoTime, outgoingCommunicationBridge);
+      this(null, stateMachineName, keyType, timeProvider, outgoingCommunicationBridge);
    }
 
-   public StateMachineBehavior(String namePrefix, String stateMachineName, Class<E> enumType, YoDouble yoTime, CommunicationBridge outgoingCommunicationBridge)
+   public StateMachineBehavior(String namePrefix, String stateMachineName, Class<E> keyType, DoubleProvider timeProvider,
+                               CommunicationBridge outgoingCommunicationBridge)
    {
       super(namePrefix, outgoingCommunicationBridge);
-      statemachine = new BehaviorStateMachine<E>(stateMachineName, stateMachineName + "SwitchTime", enumType, yoTime, registry);
+      StateMachineFactory<E, BehaviorAction> stateMachineFactory = new StateMachineFactory<>(keyType);
+      E initialBehaviorKey = configureStateMachineAndReturnInitialKey(stateMachineFactory);
+      stateMachine = new BehaviorStateMachine<>(stateMachineFactory.build(initialBehaviorKey));
    }
+
+   protected abstract E configureStateMachineAndReturnInitialKey(StateMachineFactory<E, BehaviorAction> factory);
 
    public BehaviorStateMachine<E> getStateMachine()
    {
-      return statemachine;
+      return stateMachine;
    }
 
    @Override
    public void onBehaviorEntered()
    {
-      statemachine.initialize();
+      stateMachine.initialize();
    }
 
    @Override
    public void onBehaviorPaused()
    {
-      statemachine.pause();
+      stateMachine.pause();
    }
 
    public void onBehaviorResumed()
    {
-      statemachine.resume();
+      stateMachine.resume();
    }
 
    public void onBehaviorAborted()
    {
-      statemachine.stop();
+      stateMachine.stop();
    }
 
    @Override
    public void doControl()
    {
-      statemachine.doAction();
-      statemachine.checkTransitionConditions();
+      stateMachine.doControlAndTransitions();
    }
 
    @Override
@@ -59,7 +64,7 @@ public abstract class StateMachineBehavior<E extends Enum<E>> extends AbstractBe
    {
       //if your current state has finished and there is no transition out of that state... the entire state machine is finished
 
-      if (statemachine.getCurrentState().isDone() && statemachine.getCurrentState().getStateTransitions().size() == 0)
+      if (stateMachine.getCurrentBehavior().isDone() && stateMachine.isCurrentBehaviorTerminal())
       {
          return true;
       }

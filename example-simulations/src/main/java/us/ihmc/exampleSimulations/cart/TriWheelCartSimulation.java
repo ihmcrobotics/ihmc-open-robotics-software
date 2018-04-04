@@ -12,7 +12,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
-import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
+import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 
 public class TriWheelCartSimulation
 {
@@ -67,11 +67,11 @@ public class TriWheelCartSimulation
       scs.setGroundVisible(false);
 
       // simulate.
-      DefaultCollisionVisualizer collisionVisualizer = new DefaultCollisionVisualizer(100.0, 100.0, 0.01, scs, 1000);
       double coefficientOfRestitution = 0.2;
       double coefficientOfFriction = 0.7;
       CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
-      scs.initializeCollisionDetectionAndHandling(collisionVisualizer, collisionHandler);
+      CollisionManager collisionManager = new CollisionManager(null, collisionHandler);
+      scs.initializeShapeCollision(collisionManager);
 
       scs.setDT(dt, 1);
       scs.setFastSimulate(true);

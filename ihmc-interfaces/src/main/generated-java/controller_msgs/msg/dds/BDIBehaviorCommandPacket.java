@@ -1,12 +1,14 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * Atlas specific message.
  */
-public class BDIBehaviorCommandPacket implements Settable<BDIBehaviorCommandPacket>, EpsilonComparable<BDIBehaviorCommandPacket>
+public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket>
+      implements Settable<BDIBehaviorCommandPacket>, EpsilonComparable<BDIBehaviorCommandPacket>
 {
    public static final byte NONE = (byte) 0;
    public static final byte FREEZE = (byte) 1;
@@ -18,29 +20,47 @@ public class BDIBehaviorCommandPacket implements Settable<BDIBehaviorCommandPack
    public static final byte USER = (byte) 7;
    public static final byte CALIBRATE = (byte) 8;
    public static final byte SOFT_STOP = (byte) 9;
-   private byte atlas_bdi_robot_behavior_ = (byte) 255;
-   private boolean stop_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public byte atlas_bdi_robot_behavior_ = (byte) 255;
+   public boolean stop_;
 
    public BDIBehaviorCommandPacket()
    {
-
    }
 
    public BDIBehaviorCommandPacket(BDIBehaviorCommandPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(BDIBehaviorCommandPacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       atlas_bdi_robot_behavior_ = other.atlas_bdi_robot_behavior_;
 
       stop_ = other.stop_;
+
    }
 
-   public byte getAtlasBdiRobotBehavior()
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
    {
-      return atlas_bdi_robot_behavior_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setAtlasBdiRobotBehavior(byte atlas_bdi_robot_behavior)
@@ -48,14 +68,19 @@ public class BDIBehaviorCommandPacket implements Settable<BDIBehaviorCommandPack
       atlas_bdi_robot_behavior_ = atlas_bdi_robot_behavior;
    }
 
-   public boolean getStop()
+   public byte getAtlasBdiRobotBehavior()
    {
-      return stop_;
+      return atlas_bdi_robot_behavior_;
    }
 
    public void setStop(boolean stop)
    {
       stop_ = stop;
+   }
+
+   public boolean getStop()
+   {
+      return stop_;
    }
 
    @Override
@@ -65,6 +90,9 @@ public class BDIBehaviorCommandPacket implements Settable<BDIBehaviorCommandPack
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.atlas_bdi_robot_behavior_, other.atlas_bdi_robot_behavior_, epsilon))
          return false;
@@ -87,6 +115,9 @@ public class BDIBehaviorCommandPacket implements Settable<BDIBehaviorCommandPack
 
       BDIBehaviorCommandPacket otherMyClass = (BDIBehaviorCommandPacket) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.atlas_bdi_robot_behavior_ != otherMyClass.atlas_bdi_robot_behavior_)
          return false;
 
@@ -102,13 +133,14 @@ public class BDIBehaviorCommandPacket implements Settable<BDIBehaviorCommandPack
       StringBuilder builder = new StringBuilder();
 
       builder.append("BDIBehaviorCommandPacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("atlas_bdi_robot_behavior=");
       builder.append(this.atlas_bdi_robot_behavior_);
-
       builder.append(", ");
       builder.append("stop=");
       builder.append(this.stop_);
-
       builder.append("}");
       return builder.toString();
    }

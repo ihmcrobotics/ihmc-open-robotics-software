@@ -25,6 +25,10 @@ module controller_msgs
       struct HandTrajectoryMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Specifies which hand will execute the trajectory.
          */
         @defaultValue(value=255)

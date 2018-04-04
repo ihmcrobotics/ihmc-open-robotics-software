@@ -16,11 +16,10 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachine;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineBuilder;
-import us.ihmc.robotics.stateMachines.eventBasedStateMachine.FiniteStateMachineYoVariableTrigger;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 
 /**
@@ -34,47 +33,49 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
 
-   private final FiniteStateMachine<QuadrupedPositionControllerState, ControllerEvent, QuadrupedController> stateMachine;
-   private final FiniteStateMachineYoVariableTrigger<QuadrupedPositionControllerRequestedEvent> userEventTrigger;
+   private final StateMachine<QuadrupedPositionControllerState, QuadrupedController> stateMachine;
 
    public QuadrupedPositionControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedSimulationInitialPositionParameters initialPositionParameters, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedLegInverseKinematicsCalculator legIKCalculator)
    {
       // Initialize input providers.
-      QuadrupedPostureInputProvider postureProvider = new QuadrupedPostureInputProvider(physicalProperties, runtimeEnvironment.getGlobalDataProducer(), registry);
-      QuadrupedPlanarVelocityInputProvider planarVelocityProvider = new QuadrupedPlanarVelocityInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
+      QuadrupedPostureInputProvider postureProvider = new QuadrupedPostureInputProvider(physicalProperties, runtimeEnvironment.getGlobalDataProducer(),
+                                                                                        registry);
+      QuadrupedPlanarVelocityInputProvider planarVelocityProvider = new QuadrupedPlanarVelocityInputProvider(runtimeEnvironment.getGlobalDataProducer(),
+                                                                                                             registry);
 
-      QuadrupedController jointInitializationController = new QuadrupedPositionJointInitializationController(
-            runtimeEnvironment);
+      QuadrupedController jointInitializationController = new QuadrupedPositionJointInitializationController(runtimeEnvironment);
       QuadrupedController doNothingController = new QuadrupedPositionDoNothingController(runtimeEnvironment);
       QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, initialPositionParameters, registry);
       QuadrupedController standReadyController = new QuadrupedPositionStandReadyController(runtimeEnvironment);
-      QuadrupedController crawlController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters, postureProvider, planarVelocityProvider, legIKCalculator);
+      QuadrupedController crawlController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties,
+                                                                                      crawlControllerParameters, postureProvider, planarVelocityProvider,
+                                                                                      legIKCalculator);
 
-      FiniteStateMachineBuilder<QuadrupedPositionControllerState, ControllerEvent, QuadrupedController> builder = new FiniteStateMachineBuilder<>(
-            QuadrupedPositionControllerState.class, ControllerEvent.class, "positionControllerState", registry);
+      EventBasedStateMachineFactory<QuadrupedPositionControllerState, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedPositionControllerState.class);
+      factory.setNamePrefix("positionControllerState").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
+      factory.buildYoEventTrigger("userTrigger", QuadrupedPositionControllerRequestedEvent.class);
 
-      builder.addState(QuadrupedPositionControllerState.JOINT_INITIALIZATION, jointInitializationController);
-      builder.addState(QuadrupedPositionControllerState.DO_NOTHING, doNothingController);
-      builder.addState(QuadrupedPositionControllerState.STAND_PREP, standPrepController);
-      builder.addState(QuadrupedPositionControllerState.STAND_READY, standReadyController);
-      builder.addState(QuadrupedPositionControllerState.CRAWL, crawlController);
+      factory.addState(QuadrupedPositionControllerState.JOINT_INITIALIZATION, jointInitializationController);
+      factory.addState(QuadrupedPositionControllerState.DO_NOTHING, doNothingController);
+      factory.addState(QuadrupedPositionControllerState.STAND_PREP, standPrepController);
+      factory.addState(QuadrupedPositionControllerState.STAND_READY, standReadyController);
+      factory.addState(QuadrupedPositionControllerState.CRAWL, crawlController);
 
       // TODO: Define more state transitions.
-      builder.addTransition(ControllerEvent.DONE, QuadrupedPositionControllerState.JOINT_INITIALIZATION, QuadrupedPositionControllerState.DO_NOTHING);
-      builder.addTransition(ControllerEvent.DONE, QuadrupedPositionControllerState.STAND_PREP, QuadrupedPositionControllerState.STAND_READY);
+      factory.addTransition(ControllerEvent.DONE, QuadrupedPositionControllerState.JOINT_INITIALIZATION, QuadrupedPositionControllerState.DO_NOTHING);
+      factory.addTransition(ControllerEvent.DONE, QuadrupedPositionControllerState.STAND_PREP, QuadrupedPositionControllerState.STAND_READY);
 
       // Manually triggered events to transition to main controllers.
-      builder.addTransition(QuadrupedPositionControllerRequestedEvent.class, QuadrupedPositionControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.DO_NOTHING,
-            QuadrupedPositionControllerState.STAND_PREP);
-      builder.addTransition(QuadrupedPositionControllerRequestedEvent.class, QuadrupedPositionControllerRequestedEvent.REQUEST_CRAWL, QuadrupedPositionControllerState.STAND_READY,
-            QuadrupedPositionControllerState.CRAWL);
+      factory.addTransition(QuadrupedPositionControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.DO_NOTHING,
+                            QuadrupedPositionControllerState.STAND_PREP);
+      factory.addTransition(QuadrupedPositionControllerRequestedEvent.REQUEST_CRAWL, QuadrupedPositionControllerState.STAND_READY,
+                            QuadrupedPositionControllerState.CRAWL);
 
       // Transitions from controllers back to stand prep.
-      builder.addTransition(QuadrupedPositionControllerRequestedEvent.class, QuadrupedPositionControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.CRAWL,
-            QuadrupedPositionControllerState.STAND_PREP);
+      factory.addTransition(QuadrupedPositionControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedPositionControllerState.CRAWL,
+                            QuadrupedPositionControllerState.STAND_PREP);
 
-      this.stateMachine = builder.build(QuadrupedPositionControllerState.JOINT_INITIALIZATION);
-      this.userEventTrigger = new FiniteStateMachineYoVariableTrigger<>(stateMachine, "userTrigger", registry, QuadrupedPositionControllerRequestedEvent.class);
+      this.stateMachine = factory.build(QuadrupedPositionControllerState.JOINT_INITIALIZATION);
    }
 
    @Override
@@ -86,7 +87,7 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
    @Override
    public void doControl()
    {
-      stateMachine.process();
+      stateMachine.doActionAndTransition();
    }
 
    @Override

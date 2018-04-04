@@ -2,26 +2,36 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.DisableOnDebug;
+import org.junit.rules.Timeout;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import controller_msgs.msg.dds.AdjustFootstepMessage;
+import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.msg.dds.VehiclePosePacket;
+import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.RandomHumanoidMessages;
-import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
-import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 
 public class MessageTransformerTest
 {
+   @Rule
+   public DisableOnDebug disableOnDebug = new DisableOnDebug(new Timeout(30, TimeUnit.SECONDS));
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testHandTrajectoryMessage()
    {
@@ -32,12 +42,13 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       HandTrajectoryMessage expected = new HandTrajectoryMessage(original);
-      for (SE3TrajectoryPointMessage trajectoryPoint : expected.se3Trajectory.taskspaceTrajectoryPoints)
+      for (int i = 0; i < expected.getSe3Trajectory().getTaskspaceTrajectoryPoints().size(); i++)
       {
-         trajectoryPoint.position.applyTransform(transform);
-         trajectoryPoint.orientation.applyTransform(transform);
-         trajectoryPoint.linearVelocity.applyTransform(transform);
-         trajectoryPoint.angularVelocity.applyTransform(transform);
+         SE3TrajectoryPointMessage trajectoryPoint = expected.getSe3Trajectory().getTaskspaceTrajectoryPoints().get(i);
+         trajectoryPoint.getPosition().applyTransform(transform);
+         trajectoryPoint.getOrientation().applyTransform(transform);
+         trajectoryPoint.getLinearVelocity().applyTransform(transform);
+         trajectoryPoint.getAngularVelocity().applyTransform(transform);
       }
 
       HandTrajectoryMessage actual = new HandTrajectoryMessage(original);
@@ -47,6 +58,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPelvisHeightTrajectoryMessage()
    {
@@ -57,10 +69,11 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       PelvisHeightTrajectoryMessage expected = new PelvisHeightTrajectoryMessage(original);
-      for (EuclideanTrajectoryPointMessage trajectoryPoint : expected.euclideanTrajectory.taskspaceTrajectoryPoints)
+      for (int i = 0; i < expected.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().size(); i++)
       {
-         trajectoryPoint.position.applyTransform(transform);
-         trajectoryPoint.linearVelocity.applyTransform(transform);
+         EuclideanTrajectoryPointMessage trajectoryPoint = expected.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().get(i);
+         trajectoryPoint.getPosition().applyTransform(transform);
+         trajectoryPoint.getLinearVelocity().applyTransform(transform);
       }
 
       PelvisHeightTrajectoryMessage actual = new PelvisHeightTrajectoryMessage(original);
@@ -70,6 +83,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testAdjustFootstepMessage()
    {
@@ -80,8 +94,8 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       AdjustFootstepMessage expected = new AdjustFootstepMessage(original);
-      expected.location.applyTransform(transform);
-      expected.orientation.applyTransform(transform);
+      expected.getLocation().applyTransform(transform);
+      expected.getOrientation().applyTransform(transform);
 
       AdjustFootstepMessage actual = new AdjustFootstepMessage(original);
       MessageTransformer.transform(actual, transform);
@@ -89,6 +103,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFootstepDataMessage()
    {
@@ -99,10 +114,14 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       FootstepDataMessage expected = new FootstepDataMessage(original);
-      expected.location.applyTransform(transform);
-      expected.orientation.applyTransform(transform);
-      for (Point3D waypoint : expected.positionWaypoints)
+      expected.getLocation().applyTransform(transform);
+      expected.getOrientation().applyTransform(transform);
+      List<Point3D> positionWaypoints = expected.getCustomPositionWaypoints();
+      for (int i = 0; i < positionWaypoints.size(); i++)
+      {
+         Point3D waypoint = positionWaypoints.get(i);
          waypoint.applyTransform(transform);
+      }
 
       FootstepDataMessage actual = new FootstepDataMessage(original);
       MessageTransformer.transform(actual, transform);
@@ -110,6 +129,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testFootstepDataListMessage()
    {
@@ -120,11 +140,13 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       FootstepDataListMessage expected = new FootstepDataListMessage(original);
-      for (FootstepDataMessage footstepDataMessage : expected.footstepDataList)
+      List<FootstepDataMessage> footstepDataList = expected.getFootstepDataList();
+      for (int i = 0; i < footstepDataList.size(); i++)
       {
-         footstepDataMessage.location.applyTransform(transform);
-         footstepDataMessage.orientation.applyTransform(transform);
-         for (Point3D waypoint : footstepDataMessage.positionWaypoints)
+         FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
+         footstepDataMessage.getLocation().applyTransform(transform);
+         footstepDataMessage.getOrientation().applyTransform(transform);
+         for (Point3D waypoint : footstepDataMessage.getCustomPositionWaypoints())
             waypoint.applyTransform(transform);
       }
 
@@ -134,6 +156,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testVehiclePosePacket()
    {
@@ -144,8 +167,8 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       VehiclePosePacket expected = new VehiclePosePacket(original);
-      expected.position.applyTransform(transform);
-      expected.orientation.applyTransform(transform);
+      expected.getPosition().applyTransform(transform);
+      expected.getOrientation().applyTransform(transform);
 
       VehiclePosePacket actual = new VehiclePosePacket(original);
       MessageTransformer.transform(actual, transform);
@@ -153,6 +176,7 @@ public class MessageTransformerTest
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testVideoPacket()
    {
@@ -163,8 +187,8 @@ public class MessageTransformerTest
       RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
 
       VideoPacket expected = new VideoPacket(original);
-      expected.position.applyTransform(transform);
-      expected.orientation.applyTransform(transform);
+      expected.getPosition().applyTransform(transform);
+      expected.getOrientation().applyTransform(transform);
 
       VideoPacket actual = new VideoPacket(original);
       MessageTransformer.transform(actual, transform);

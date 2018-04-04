@@ -16,6 +16,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::LidarScanMessage_")
       struct LidarScanMessage
       {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
         long long robot_timestamp;
         geometry_msgs::msg::dds::Point lidar_position;
         geometry_msgs::msg::dds::Quaternion lidar_orientation;

@@ -9,6 +9,9 @@ byte TRAJECTORY_TYPE_OBSTACLE_CLEARANCE = 1
 byte TRAJECTORY_TYPE_CUSTOM = 2
 byte TRAJECTORY_TYPE_WAYPOINTS = 3
 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 # Specifies which foot will swing to reach the footstep.
 byte robot_side 255
 # Specifies the position of the footstep (sole frame) in world frame.

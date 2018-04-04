@@ -1,7 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
@@ -11,17 +14,15 @@ import us.ihmc.humanoidBehaviors.communication.CoactiveDataListenerInterface;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpBallBehaviorState> implements CoactiveDataListenerInterface
 {
@@ -39,16 +40,16 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
    private CommunicationBridge communicationBridge;
 
    public PickUpBallBehaviorStateMachine(CommunicationBridge communicationBridge, YoDouble yoTime, YoBoolean yoDoubleSupport,
-         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
-         AtlasPrimitiveActions atlasPrimitiveActions)
+                                         FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
+                                         WholeBodyControllerParameters wholeBodyControllerParameters, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("pickUpBallStateMachine", PickUpBallBehaviorState.class, yoTime, communicationBridge);
-      
-      System.out.println("PickUpBallBehaviorStateMachine queue size "+communicationBridge.getListeningNetworkQueues().size());
-      
+
+      System.out.println("PickUpBallBehaviorStateMachine queue size " + communicationBridge.getListeningNetworkQueues().size());
+
       this.communicationBridge = communicationBridge;
       communicationBridge.addListeners(this);
-//      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
+      //      communicationBridge.registerYovaribleForAutoSendToUI(statemachine.getStateYoVariable());
 
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
@@ -63,12 +64,11 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       searchFarForSphereBehavior = new SearchFarForSphereBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, false, atlasPrimitiveActions);
       searchNearForSphereBehavior = new SearchNearForSphereBehavior(yoTime, coactiveElement, referenceFrames, fullRobotModel, communicationBridge, false,
-            atlasPrimitiveActions);
+                                                                    atlasPrimitiveActions);
       walkToPickUpLocationBehavior = new WalkToPickObjectOffGroundLocationBehavior(yoTime, referenceFrames, communicationBridge, wholeBodyControllerParameters,
-            fullRobotModel, atlasPrimitiveActions);
+                                                                                   fullRobotModel, atlasPrimitiveActions);
       pickObjectOffGroundBehavior = new PickObjectOffGroundBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, atlasPrimitiveActions);
       putBallInBucketBehavior = new PutBallInBucketBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, atlasPrimitiveActions);
-      setupStateMachine();
    }
 
    @Override
@@ -83,18 +83,16 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
       return coactiveElement;
    }
 
-   private void setupStateMachine()
+   @Override
+   protected PickUpBallBehaviorState configureStateMachineAndReturnInitialKey(StateMachineFactory<PickUpBallBehaviorState, BehaviorAction> factory)
    {
-
       //TODO setup search for ball behavior
 
-      BehaviorAction<PickUpBallBehaviorState> searchForBallFar = new BehaviorAction<PickUpBallBehaviorState>(PickUpBallBehaviorState.SEARCHING_FOR_BALL_FAR,
-            searchFarForSphereBehavior);
+      BehaviorAction searchForBallFar = new BehaviorAction(searchFarForSphereBehavior); // PickUpBallBehaviorState.SEARCHING_FOR_BALL_FAR
 
       // WALK TO THE BALL *******************************************
 
-      BehaviorAction<PickUpBallBehaviorState> walkToBallTask = new BehaviorAction<PickUpBallBehaviorState>(PickUpBallBehaviorState.WALKING_TO_BALL,
-            walkToPickUpLocationBehavior)
+      BehaviorAction walkToBallTask = new BehaviorAction(walkToPickUpLocationBehavior) // PickUpBallBehaviorState.WALKING_TO_BALL
       {
 
          @Override
@@ -112,8 +110,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
 
       //LOOK DOWN AND FIND BALL AGAIN
 
-      BehaviorAction<PickUpBallBehaviorState> searchForBallNear = new BehaviorAction<PickUpBallBehaviorState>(PickUpBallBehaviorState.SEARCHING_FOR_BALL_NEAR,
-            searchNearForSphereBehavior)
+      BehaviorAction searchForBallNear = new BehaviorAction(searchNearForSphereBehavior) // PickUpBallBehaviorState.SEARCHING_FOR_BALL_NEAR
       {
 
          @Override
@@ -130,8 +127,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
 
       //PICK UP THE BALL
 
-      BehaviorAction<PickUpBallBehaviorState> pickUpBall = new BehaviorAction<PickUpBallBehaviorState>(PickUpBallBehaviorState.PICKING_UP_BALL,
-            pickObjectOffGroundBehavior)
+      BehaviorAction pickUpBall = new BehaviorAction(pickObjectOffGroundBehavior) // PickUpBallBehaviorState.PICKING_UP_BALL
       {
          @Override
          protected void setBehaviorInput()
@@ -146,13 +142,11 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          }
       };
 
-      BehaviorAction<PickUpBallBehaviorState> putBallInBucket = new BehaviorAction<PickUpBallBehaviorState>(PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET,
-            putBallInBucketBehavior);
+      BehaviorAction putBallInBucket = new BehaviorAction(putBallInBucketBehavior); // PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET
 
-      BehaviorAction<PickUpBallBehaviorState> resetRobot = new BehaviorAction<PickUpBallBehaviorState>(PickUpBallBehaviorState.RESET_ROBOT, resetRobotBehavior);
+      BehaviorAction resetRobot = new BehaviorAction(resetRobotBehavior); // PickUpBallBehaviorState.RESET_ROBOT
 
-      BehaviorAction<PickUpBallBehaviorState> setup = new BehaviorAction<PickUpBallBehaviorState>(PickUpBallBehaviorState.SETUP_ROBOT,
-            atlasPrimitiveActions.rightArmGoHomeBehavior, atlasPrimitiveActions.leftHandDesiredConfigurationBehavior)
+      BehaviorAction setup = new BehaviorAction(atlasPrimitiveActions.rightArmGoHomeBehavior, atlasPrimitiveActions.leftHandDesiredConfigurationBehavior) // PickUpBallBehaviorState.SETUP_ROBOT
       {
          @Override
          protected void setBehaviorInput()
@@ -165,15 +159,15 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
          }
       };
 
-      statemachine.addStateWithDoneTransition(setup, PickUpBallBehaviorState.SEARCHING_FOR_BALL_FAR);
-
-      statemachine.addStateWithDoneTransition(searchForBallFar, PickUpBallBehaviorState.WALKING_TO_BALL);
-      statemachine.addStateWithDoneTransition(walkToBallTask, PickUpBallBehaviorState.SEARCHING_FOR_BALL_NEAR);
-      statemachine.addStateWithDoneTransition(searchForBallNear, PickUpBallBehaviorState.PICKING_UP_BALL);
-      statemachine.addStateWithDoneTransition(pickUpBall, PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
-      statemachine.addStateWithDoneTransition(putBallInBucket, PickUpBallBehaviorState.RESET_ROBOT);
-      statemachine.addState(resetRobot);
-      statemachine.setStartState(PickUpBallBehaviorState.SETUP_ROBOT);
+      factory.addStateAndDoneTransition(PickUpBallBehaviorState.SETUP_ROBOT, setup, PickUpBallBehaviorState.SEARCHING_FOR_BALL_FAR);
+      factory.addStateAndDoneTransition(PickUpBallBehaviorState.SEARCHING_FOR_BALL_FAR, searchForBallFar, PickUpBallBehaviorState.WALKING_TO_BALL);
+      factory.addStateAndDoneTransition(PickUpBallBehaviorState.WALKING_TO_BALL, walkToBallTask, PickUpBallBehaviorState.SEARCHING_FOR_BALL_NEAR);
+      factory.addStateAndDoneTransition(PickUpBallBehaviorState.SEARCHING_FOR_BALL_NEAR, searchForBallNear, PickUpBallBehaviorState.PICKING_UP_BALL);
+      factory.addStateAndDoneTransition(PickUpBallBehaviorState.PICKING_UP_BALL, pickUpBall, PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET);
+      factory.addStateAndDoneTransition(PickUpBallBehaviorState.PUTTING_BALL_IN_BASKET, putBallInBucket, PickUpBallBehaviorState.RESET_ROBOT);
+      factory.addState(PickUpBallBehaviorState.RESET_ROBOT, resetRobot);
+      
+      return PickUpBallBehaviorState.SETUP_ROBOT;
    }
 
    @Override
@@ -200,11 +194,10 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
 
    }
 
-
    @Override
    public void coactiveDataRecieved(SimpleCoactiveBehaviorDataPacket data)
    {
-      System.out.println("BEHAVIOR RECIEVED " + data.key + " " + data.value);
+      System.out.println("BEHAVIOR RECIEVED " + data.getKeyAsString() + " " + data.getValue());
    }
 
 }

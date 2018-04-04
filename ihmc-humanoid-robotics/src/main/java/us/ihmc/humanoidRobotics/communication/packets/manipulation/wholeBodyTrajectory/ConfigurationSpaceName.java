@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory;
 
+import gnu.trove.list.TByteList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public enum ConfigurationSpaceName
@@ -84,6 +85,16 @@ public enum ConfigurationSpaceName
       for (int i = 0; i < enumArray.length; i++)
          byteArray[i] = enumArray[i].toByte();
       return byteArray;
+   }
+   
+   public static ConfigurationSpaceName[] fromBytes(TByteList enumListAsBytes)
+   {
+      if (enumListAsBytes == null)
+         return null;
+      ConfigurationSpaceName[] enumArray = new ConfigurationSpaceName[enumListAsBytes.size()];
+      for (int i = 0; i < enumListAsBytes.size(); i++)
+         enumArray[i] = fromByte(enumListAsBytes.get(i));
+      return enumArray;
    }
    
    public static ConfigurationSpaceName[] fromBytes(byte[] enumArrayAsBytes)

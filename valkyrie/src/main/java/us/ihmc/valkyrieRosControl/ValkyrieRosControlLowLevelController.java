@@ -7,13 +7,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -133,9 +133,9 @@ public class ValkyrieRosControlLowLevelController
          {
             if (statusMessage != null)
             {
-               currentHighLevelControllerState.set(HighLevelControllerName.fromByte(statusMessage.endHighLevelControllerName));
+               currentHighLevelControllerState.set(HighLevelControllerName.fromByte(statusMessage.getEndHighLevelControllerName()));
 
-               if (statusMessage.initialHighLevelControllerName == HighLevelControllerName.CALIBRATION.toByte())
+               if (statusMessage.getInitialHighLevelControllerName() == HighLevelControllerName.CALIBRATION.toByte())
                   writeTorqueOffsets();
             }
          }

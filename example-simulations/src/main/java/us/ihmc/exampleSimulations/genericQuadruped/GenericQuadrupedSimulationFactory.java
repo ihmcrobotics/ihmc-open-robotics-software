@@ -1,13 +1,11 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDefaultInitialPosition;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.*;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationFactory;
@@ -41,7 +39,7 @@ public class GenericQuadrupedSimulationFactory
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
    private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = false;
-   private static final boolean USE_NETWORKING = false;
+   private static final boolean USE_NETWORKING = true;
 
    private QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
 
@@ -60,6 +58,8 @@ public class GenericQuadrupedSimulationFactory
 
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
+      ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(
+            fullRobotModel.getTotalMass());
 
       SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
 
@@ -81,6 +81,7 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setUseTrackAndDolly(USE_TRACK_AND_DOLLY);
       simulationFactory.setInitialPositionParameters(initialPositionParameters);
       simulationFactory.setFullRobotModel(fullRobotModel);
+      simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
       simulationFactory.setControlMode(CONTROL_MODE);
       simulationFactory.setUseNetworking(USE_NETWORKING);

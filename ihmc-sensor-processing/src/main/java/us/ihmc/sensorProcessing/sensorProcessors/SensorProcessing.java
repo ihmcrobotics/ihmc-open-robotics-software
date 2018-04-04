@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
 
+import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -43,7 +44,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticUpdatable;
 import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;

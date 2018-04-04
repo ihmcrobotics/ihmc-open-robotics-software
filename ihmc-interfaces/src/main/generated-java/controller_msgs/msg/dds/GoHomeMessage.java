@@ -1,14 +1,15 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * The message commands the controller to bring the given part of the body back to a default configuration called 'home'.
- * It is useful to get back to a safe configuration before walking.
+ * This message is part of the IHMC whole-body controller API. The message commands the controller
+ * to bring the given part of the body back to a default configuration called 'home'. It is useful
+ * to get back to a safe configuration before walking.
  */
-public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable<GoHomeMessage>
+public class GoHomeMessage extends Packet<GoHomeMessage> implements Settable<GoHomeMessage>, EpsilonComparable<GoHomeMessage>
 {
    public static final byte HUMANOID_BODY_PART_ARM = (byte) 0;
    public static final byte HUMANOID_BODY_PART_CHEST = (byte) 1;
@@ -16,34 +17,40 @@ public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   /**
     * Specifies the part of the body the use wants to move back to its home configuration.
     */
-   private byte humanoid_body_part_ = (byte) 255;
+   public byte humanoid_body_part_ = (byte) 255;
    /**
     * Needed to identify a side dependent end-effector.
     */
-   private byte robot_side_ = (byte) 255;
+   public byte robot_side_ = (byte) 255;
    /**
     * How long the trajectory will spline from the current desired to the home configuration.
     */
-   private double trajectory_time_;
+   public double trajectory_time_;
    /**
     * The time to delay this command on the controller side before being executed.
     */
-   private double execution_delay_time_;
+   public double execution_delay_time_;
 
    public GoHomeMessage()
    {
-
    }
 
    public GoHomeMessage(GoHomeMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(GoHomeMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       humanoid_body_part_ = other.humanoid_body_part_;
 
       robot_side_ = other.robot_side_;
@@ -51,14 +58,23 @@ public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable
       trajectory_time_ = other.trajectory_time_;
 
       execution_delay_time_ = other.execution_delay_time_;
+
    }
 
    /**
-    * Specifies the part of the body the use wants to move back to its home configuration.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public byte getHumanoidBodyPart()
+   public void setSequenceId(long sequence_id)
    {
-      return humanoid_body_part_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    /**
@@ -70,11 +86,11 @@ public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable
    }
 
    /**
-    * Needed to identify a side dependent end-effector.
+    * Specifies the part of the body the use wants to move back to its home configuration.
     */
-   public byte getRobotSide()
+   public byte getHumanoidBodyPart()
    {
-      return robot_side_;
+      return humanoid_body_part_;
    }
 
    /**
@@ -86,11 +102,11 @@ public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable
    }
 
    /**
-    * How long the trajectory will spline from the current desired to the home configuration.
+    * Needed to identify a side dependent end-effector.
     */
-   public double getTrajectoryTime()
+   public byte getRobotSide()
    {
-      return trajectory_time_;
+      return robot_side_;
    }
 
    /**
@@ -102,11 +118,11 @@ public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable
    }
 
    /**
-    * The time to delay this command on the controller side before being executed.
+    * How long the trajectory will spline from the current desired to the home configuration.
     */
-   public double getExecutionDelayTime()
+   public double getTrajectoryTime()
    {
-      return execution_delay_time_;
+      return trajectory_time_;
    }
 
    /**
@@ -117,6 +133,14 @@ public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable
       execution_delay_time_ = execution_delay_time;
    }
 
+   /**
+    * The time to delay this command on the controller side before being executed.
+    */
+   public double getExecutionDelayTime()
+   {
+      return execution_delay_time_;
+   }
+
    @Override
    public boolean epsilonEquals(GoHomeMessage other, double epsilon)
    {
@@ -124,6 +148,9 @@ public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.humanoid_body_part_, other.humanoid_body_part_, epsilon))
          return false;
@@ -152,6 +179,9 @@ public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable
 
       GoHomeMessage otherMyClass = (GoHomeMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.humanoid_body_part_ != otherMyClass.humanoid_body_part_)
          return false;
 
@@ -173,21 +203,20 @@ public class GoHomeMessage implements Settable<GoHomeMessage>, EpsilonComparable
       StringBuilder builder = new StringBuilder();
 
       builder.append("GoHomeMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("humanoid_body_part=");
       builder.append(this.humanoid_body_part_);
-
       builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("trajectory_time=");
       builder.append(this.trajectory_time_);
-
       builder.append(", ");
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);
-
       builder.append("}");
       return builder.toString();
    }

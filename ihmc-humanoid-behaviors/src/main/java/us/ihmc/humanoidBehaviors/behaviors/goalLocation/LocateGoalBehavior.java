@@ -3,8 +3,8 @@ package us.ihmc.humanoidBehaviors.behaviors.goalLocation;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -55,7 +55,7 @@ public class LocateGoalBehavior extends AbstractBehavior
    private void sendTextToSpeechPacket(String message)
    {
       TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket(message);
-      textToSpeechPacket.setbeep(false);
+      textToSpeechPacket.setBeep(false);
       sendPacketToUI(textToSpeechPacket);
    }
 

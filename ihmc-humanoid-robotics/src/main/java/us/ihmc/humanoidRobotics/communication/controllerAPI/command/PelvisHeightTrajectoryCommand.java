@@ -1,12 +1,12 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
@@ -82,9 +82,9 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
    @Override
    public void set(PelvisHeightTrajectoryMessage message)
    {
-      euclideanTrajectory.set(message.euclideanTrajectory);
-      enableUserPelvisControl = message.isEnableUserPelvisControl();
-      enableUserPelvisControlDuringWalking = message.isEnableUserPelvisControlDuringWalking();
+      euclideanTrajectory.set(message.getEuclideanTrajectory());
+      enableUserPelvisControl = message.getEnableUserPelvisControl();
+      enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
    }
 
    /**
@@ -98,16 +98,16 @@ public class PelvisHeightTrajectoryCommand implements Command<PelvisHeightTrajec
    {
       clear(dataFrame);
       set(message);
-      enableUserPelvisControl = message.isEnableUserPelvisControl();
-      enableUserPelvisControlDuringWalking = message.isEnableUserPelvisControlDuringWalking();
+      enableUserPelvisControl = message.getEnableUserPelvisControl();
+      enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisHeightTrajectoryMessage message)
    {
-      euclideanTrajectory.set(resolver, message.euclideanTrajectory);
-      enableUserPelvisControl = message.isEnableUserPelvisControl();
-      enableUserPelvisControlDuringWalking = message.isEnableUserPelvisControlDuringWalking();
+      euclideanTrajectory.set(resolver, message.getEuclideanTrajectory());
+      enableUserPelvisControl = message.getEnableUserPelvisControl();
+      enableUserPelvisControlDuringWalking = message.getEnableUserPelvisControlDuringWalking();
    }
 
    /**

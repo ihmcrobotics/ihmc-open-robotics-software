@@ -13,12 +13,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.RequestLidarScanMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.LidarScanMessage;
-import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
@@ -211,26 +211,23 @@ public class LidarScanLogReader
       try
       {
          LidarScanMessage lidarScanMessage = new LidarScanMessage();
-         lidarScanMessage.robotTimestamp = logDataInputStream.readLong();
+         lidarScanMessage.setRobotTimestamp(logDataInputStream.readLong());
 
-         lidarScanMessage.lidarPosition = new Point3D32();
-         lidarScanMessage.lidarPosition.setX(logDataInputStream.readFloat());
-         lidarScanMessage.lidarPosition.setY(logDataInputStream.readFloat());
-         lidarScanMessage.lidarPosition.setZ(logDataInputStream.readFloat());
+         lidarScanMessage.getLidarPosition().setX(logDataInputStream.readFloat());
+         lidarScanMessage.getLidarPosition().setY(logDataInputStream.readFloat());
+         lidarScanMessage.getLidarPosition().setZ(logDataInputStream.readFloat());
 
-         lidarScanMessage.lidarOrientation = new Quaternion32();
          double x = logDataInputStream.readFloat();
          double y = logDataInputStream.readFloat();
          double z = logDataInputStream.readFloat();
          double w = logDataInputStream.readFloat();
-         lidarScanMessage.lidarOrientation.set(x, y, z, w);
+         lidarScanMessage.getLidarOrientation().set(x, y, z, w);
 
          int scanLength = logDataInputStream.readInt();
-         lidarScanMessage.scan = new float[scanLength];
 
          for (int i = 0; i < scanLength; i++)
          {
-            lidarScanMessage.scan[i] = logDataInputStream.readFloat();
+            lidarScanMessage.getScan().add(logDataInputStream.readFloat());
          }
          return lidarScanMessage;
       }

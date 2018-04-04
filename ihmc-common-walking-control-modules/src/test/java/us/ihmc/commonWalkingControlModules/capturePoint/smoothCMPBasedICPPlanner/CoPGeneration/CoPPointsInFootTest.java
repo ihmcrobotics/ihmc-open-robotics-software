@@ -66,7 +66,7 @@ public class CoPPointsInFootTest
       registry.clear();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAddCoPPointToList()
    {
@@ -80,7 +80,7 @@ public class CoPPointsInFootTest
       assertTrue(copPointsInFoot.getCoPPointList().isEmpty());
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAddandSetIncludingFrameWithFramePoint()
    {
@@ -93,7 +93,7 @@ public class CoPPointsInFootTest
       assertTrue(MathTools.epsilonEquals(copPointsInFoot.get(0).getTime(), 0.2, epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testAddAndSetIncludingFrameWithYoFramePoint()
    {
@@ -134,7 +134,7 @@ public class CoPPointsInFootTest
       assertTrue(tempFramePointForTesting.epsilonEquals(testLocation2.getPosition(), epsilon));
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSetFeetLocations()
    {
@@ -177,7 +177,7 @@ public class CoPPointsInFootTest
       assertTrue(tempFramePoint.getZ() == 0.11 + zToAnkle);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testRegisterFrame()
    {
@@ -214,7 +214,7 @@ public class CoPPointsInFootTest
       assertTrue(tempFramePoint.getZ() == 0.11 + newFrameOriginZ);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testVisualization()
    {

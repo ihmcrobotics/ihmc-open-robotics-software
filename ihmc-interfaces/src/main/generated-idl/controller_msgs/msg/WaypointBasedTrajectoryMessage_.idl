@@ -19,6 +19,10 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::WaypointBasedTrajectoryMessage_")
       struct WaypointBasedTrajectoryMessage
       {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
         long long end_effector_name_based_hash_code;
         sequence<double> waypoint_times;
         sequence<geometry_msgs::msg::dds::Pose> waypoints;
@@ -26,6 +30,7 @@ module controller_msgs
         controller_msgs::msg::dds::SelectionMatrix3DMessage linear_selection_matrix;
         geometry_msgs::msg::dds::Point control_frame_position_in_end_effector;
         geometry_msgs::msg::dds::Quaternion control_frame_orientation_in_end_effector;
+        @defaultValue(value=-1.0)
         double weight;
       };
     };

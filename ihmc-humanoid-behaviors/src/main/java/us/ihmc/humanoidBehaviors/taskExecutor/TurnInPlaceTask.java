@@ -4,7 +4,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.TurnInPlaceBehavior;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class TurnInPlaceTask<E extends Enum<E>> extends BehaviorAction<E>
+public class TurnInPlaceTask extends BehaviorAction
 {
    private double desiredYaw;
    private TurnInPlaceBehavior turnInPlaceBehavior;
@@ -14,22 +14,12 @@ public class TurnInPlaceTask<E extends Enum<E>> extends BehaviorAction<E>
 
    public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, YoDouble yoTime)
    {
-      this(null,desiredYaw, turnInPlaceBehavior,yoTime);
+      this(desiredYaw, turnInPlaceBehavior, Double.NaN, Double.NaN);
    }
 
    public TurnInPlaceTask(double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, double transferTime, double swingTime)
-   {  
-      this(null, desiredYaw,  turnInPlaceBehavior,  transferTime,  swingTime);
-   }
-
-   public TurnInPlaceTask(E stateEnum, double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, YoDouble yoTime)
    {
-      this(stateEnum, desiredYaw, turnInPlaceBehavior, Double.NaN, Double.NaN);
-   }
-
-   public TurnInPlaceTask(E stateEnum, double desiredYaw, TurnInPlaceBehavior turnInPlaceBehavior, double transferTime, double swingTime)
-   {
-      super(stateEnum, turnInPlaceBehavior);
+      super(turnInPlaceBehavior);
       this.desiredYaw = desiredYaw;
       this.turnInPlaceBehavior = turnInPlaceBehavior;
       this.transferTime = transferTime;

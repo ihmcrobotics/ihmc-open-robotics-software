@@ -26,7 +26,7 @@ public class SelectionMatrix6DTest
 
    private static final int ITERATIONS = 500;
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testGettersSetters()
    {
@@ -152,7 +152,7 @@ public class SelectionMatrix6DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.9)
+   @ContinuousIntegrationTest(estimatedDuration = 1.6)
    @Test(timeout = 30000)
    public void testGetFullSelectionMatrixInFrame() throws Exception
    {
@@ -248,7 +248,7 @@ public class SelectionMatrix6DTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.8)
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testGetEfficientSelectionMatrixInFrame() throws Exception
    {

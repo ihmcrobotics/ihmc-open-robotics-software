@@ -1,31 +1,39 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
-public class MultisenseParameterPacket implements Settable<MultisenseParameterPacket>, EpsilonComparable<MultisenseParameterPacket>
+public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
+      implements Settable<MultisenseParameterPacket>, EpsilonComparable<MultisenseParameterPacket>
 {
-   private boolean initialize_;
-   private double gain_;
-   private double motor_speed_;
-   private boolean led_enable_;
-   private boolean flash_enable_;
-   private double duty_cycle_;
-   private boolean auto_exposure_;
-   private boolean auto_white_balance_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public boolean initialize_;
+   public double gain_;
+   public double motor_speed_;
+   public boolean led_enable_;
+   public boolean flash_enable_;
+   public double duty_cycle_;
+   public boolean auto_exposure_;
+   public boolean auto_white_balance_;
 
    public MultisenseParameterPacket()
    {
-
    }
 
    public MultisenseParameterPacket(MultisenseParameterPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(MultisenseParameterPacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       initialize_ = other.initialize_;
 
       gain_ = other.gain_;
@@ -41,11 +49,23 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
       auto_exposure_ = other.auto_exposure_;
 
       auto_white_balance_ = other.auto_white_balance_;
+
    }
 
-   public boolean getInitialize()
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
    {
-      return initialize_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setInitialize(boolean initialize)
@@ -53,9 +73,9 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
       initialize_ = initialize;
    }
 
-   public double getGain()
+   public boolean getInitialize()
    {
-      return gain_;
+      return initialize_;
    }
 
    public void setGain(double gain)
@@ -63,9 +83,9 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
       gain_ = gain;
    }
 
-   public double getMotorSpeed()
+   public double getGain()
    {
-      return motor_speed_;
+      return gain_;
    }
 
    public void setMotorSpeed(double motor_speed)
@@ -73,9 +93,9 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
       motor_speed_ = motor_speed;
    }
 
-   public boolean getLedEnable()
+   public double getMotorSpeed()
    {
-      return led_enable_;
+      return motor_speed_;
    }
 
    public void setLedEnable(boolean led_enable)
@@ -83,9 +103,9 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
       led_enable_ = led_enable;
    }
 
-   public boolean getFlashEnable()
+   public boolean getLedEnable()
    {
-      return flash_enable_;
+      return led_enable_;
    }
 
    public void setFlashEnable(boolean flash_enable)
@@ -93,9 +113,9 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
       flash_enable_ = flash_enable;
    }
 
-   public double getDutyCycle()
+   public boolean getFlashEnable()
    {
-      return duty_cycle_;
+      return flash_enable_;
    }
 
    public void setDutyCycle(double duty_cycle)
@@ -103,9 +123,9 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
       duty_cycle_ = duty_cycle;
    }
 
-   public boolean getAutoExposure()
+   public double getDutyCycle()
    {
-      return auto_exposure_;
+      return duty_cycle_;
    }
 
    public void setAutoExposure(boolean auto_exposure)
@@ -113,14 +133,19 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
       auto_exposure_ = auto_exposure;
    }
 
-   public boolean getAutoWhiteBalance()
+   public boolean getAutoExposure()
    {
-      return auto_white_balance_;
+      return auto_exposure_;
    }
 
    public void setAutoWhiteBalance(boolean auto_white_balance)
    {
       auto_white_balance_ = auto_white_balance;
+   }
+
+   public boolean getAutoWhiteBalance()
+   {
+      return auto_white_balance_;
    }
 
    @Override
@@ -130,6 +155,9 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.initialize_, other.initialize_, epsilon))
          return false;
@@ -170,6 +198,9 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
 
       MultisenseParameterPacket otherMyClass = (MultisenseParameterPacket) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.initialize_ != otherMyClass.initialize_)
          return false;
 
@@ -203,37 +234,32 @@ public class MultisenseParameterPacket implements Settable<MultisenseParameterPa
       StringBuilder builder = new StringBuilder();
 
       builder.append("MultisenseParameterPacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("initialize=");
       builder.append(this.initialize_);
-
       builder.append(", ");
       builder.append("gain=");
       builder.append(this.gain_);
-
       builder.append(", ");
       builder.append("motor_speed=");
       builder.append(this.motor_speed_);
-
       builder.append(", ");
       builder.append("led_enable=");
       builder.append(this.led_enable_);
-
       builder.append(", ");
       builder.append("flash_enable=");
       builder.append(this.flash_enable_);
-
       builder.append(", ");
       builder.append("duty_cycle=");
       builder.append(this.duty_cycle_);
-
       builder.append(", ");
       builder.append("auto_exposure=");
       builder.append(this.auto_exposure_);
-
       builder.append(", ");
       builder.append("auto_white_balance=");
       builder.append(this.auto_white_balance_);
-
       builder.append("}");
       return builder.toString();
    }

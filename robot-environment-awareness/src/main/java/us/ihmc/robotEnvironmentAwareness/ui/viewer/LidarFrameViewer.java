@@ -2,14 +2,14 @@ package us.ihmc.robotEnvironmentAwareness.ui.viewer;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.LidarScanMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.transform.Affine;
 import us.ihmc.communication.net.ConnectionStateListener;
-import us.ihmc.communication.packets.LidarScanMessage;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -63,8 +63,8 @@ public class LidarFrameViewer extends AnimationTimer
    {
       if (lidarScanMessage == null)
          return;
-      Quaternion32 orientation = lidarScanMessage.getLidarOrientation();
-      Point3D32 position = lidarScanMessage.getLidarPosition();
+      Quaternion orientation = lidarScanMessage.getLidarOrientation();
+      Point3D position = lidarScanMessage.getLidarPosition();
       lastAffine.set(JavaFXTools.createAffineFromQuaternionAndTuple(orientation, position));
    }
 

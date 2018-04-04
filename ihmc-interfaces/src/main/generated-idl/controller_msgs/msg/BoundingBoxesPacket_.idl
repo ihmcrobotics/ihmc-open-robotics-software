@@ -11,10 +11,14 @@ module controller_msgs
       @TypeCode(type="controller_msgs::msg::dds_::BoundingBoxesPacket_")
       struct BoundingBoxesPacket
       {
-        sequence<double> bounding_boxes_x_coordinates;
-        sequence<double> bounding_boxes_y_coordinates;
-        sequence<double> bounding_boxes_widths;
-        sequence<double> bounding_boxes_heights;
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        sequence<long> bounding_boxes_x_coordinates;
+        sequence<long> bounding_boxes_y_coordinates;
+        sequence<long> bounding_boxes_widths;
+        sequence<long> bounding_boxes_heights;
         sequence<string> labels;
       };
     };

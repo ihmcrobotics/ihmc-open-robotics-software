@@ -25,11 +25,11 @@ import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateMachine;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.extra.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -43,15 +43,13 @@ public class SkippyController implements RobotController
 
    /**
     *
-    * Outline of SkippyToDo: JUMP_FORWARD: If Skippy model is selected, robot
-    * JUMP_SIDEWAYS: If Skippy model is selected, robot will jump/balance in x
-    * direction (torso's rotation axis) BALANCE: If Skippy/Tippy model is
-    * selected, robot will balance POSITION: If Tippy model is selected, robot
+    * Outline of SkippyToDo: JUMP_FORWARD: If Skippy model is selected, robot JUMP_SIDEWAYS: If Skippy
+    * model is selected, robot will jump/balance in x direction (torso's rotation axis) BALANCE: If
+    * Skippy/Tippy model is selected, robot will balance POSITION: If Tippy model is selected, robot
     * will balance with the help of LEG joint (not tested)
     *
-    * Note: First three SkippyStatuses will allow model to balance according
-    * to: q_d_hip: desired angle of TORSO q_d_shoulder: desired angle of
-    * SHOULDER
+    * Note: First three SkippyStatuses will allow model to balance according to: q_d_hip: desired angle
+    * of TORSO q_d_shoulder: desired angle of SHOULDER
     *
     */
 
@@ -73,15 +71,14 @@ public class SkippyController implements RobotController
       BALANCE, POSITION
    }
 
-   private StateMachine<States> stateMachine;
+   private StateMachine<States, State> stateMachine;
 
    private final YoVariableRegistry registry = new YoVariableRegistry("SkippyController");
 
    // tau_* is torque, q_* is position, qd_* is velocity for joint *
    // private YoDouble q_foot_X, q_hip, qHipIncludingOffset, qd_foot_X,
    // qd_hip, qd_shoulder;
-   private final YoDouble k1, k2, k3, k4, k5, k6, k7, k8, angleToCoMInYZPlane, angleToCoMInXZPlane, angularVelocityToCoMYZPlane,
-         angularVelocityToCoMXZPlane; // controller
+   private final YoDouble k1, k2, k3, k4, k5, k6, k7, k8, angleToCoMInYZPlane, angleToCoMInXZPlane, angularVelocityToCoMYZPlane, angularVelocityToCoMXZPlane; // controller
    // gain
    // parameters
    private final YoDouble planarDistanceYZPlane, planarDistanceXZPlane;
@@ -152,10 +149,9 @@ public class SkippyController implements RobotController
 
    private final YoEnum<SkippyToDo> skippyToDo = new YoEnum<SkippyToDo>("SkippyToDo", registry, SkippyToDo.class);
    private final YoEnum<SkippyPlaneControlMode> hipPlaneControlMode = new YoEnum<SkippyPlaneControlMode>("hipPlaneControlMode", registry,
-                                                                                                                         SkippyPlaneControlMode.class);
-   private final YoEnum<SkippyPlaneControlMode> shoulderPlaneControlMode = new YoEnum<SkippyPlaneControlMode>("shoulderPlaneControlMode",
-                                                                                                                              registry,
-                                                                                                                              SkippyPlaneControlMode.class);
+                                                                                                         SkippyPlaneControlMode.class);
+   private final YoEnum<SkippyPlaneControlMode> shoulderPlaneControlMode = new YoEnum<SkippyPlaneControlMode>("shoulderPlaneControlMode", registry,
+                                                                                                              SkippyPlaneControlMode.class);
    private String name;
    private SkippyRobot robot;
    private RobotType robotType;
@@ -237,8 +233,7 @@ public class SkippyController implements RobotController
 
       if (skippyToDo.getEnumValue() != SkippyToDo.BALANCE && skippyToDo.getEnumValue() != SkippyToDo.POSITION || true)
       {
-         stateMachine = new StateMachine<States>("stateMachine", "stateMachineTime", States.class, robot.t, registry);
-         setUpStateMachines();
+         stateMachine = setUpStateMachines();
          createStateMachineWindow();
       }
       /*
@@ -565,6 +560,7 @@ public class SkippyController implements RobotController
 
    /**
     * CMP to CoM position vector
+    * 
     * @param cmpFrom TODO
     */
    public void positionVectorFomCmpToCom(YoFramePoint cmpFrom)
@@ -708,8 +704,7 @@ public class SkippyController implements RobotController
     */
    private void jumpControl()
    {
-      stateMachine.doAction();
-      stateMachine.checkTransitionConditions();
+      stateMachine.doActionAndTransition();
       balanceControl();
    }
 
@@ -944,8 +939,7 @@ public class SkippyController implements RobotController
    }
 
    /**
-    * positionControl: positions Tippy model in whatever position desired
-    * (specified within method)
+    * positionControl: positions Tippy model in whatever position desired (specified within method)
     */
    private void positionControl()
    {
@@ -1009,15 +1003,18 @@ public class SkippyController implements RobotController
     * STATE MACHINES
     */
 
-   private void setUpStateMachines()
+   private StateMachine<States, State> setUpStateMachines()
    {
+      StateMachineFactory<States, State> factory = new StateMachineFactory<>(States.class);
+      factory.setNamePrefix("stateMachine").setRegistry(registry).buildYoClock(robot.t);
+
       // states
-      State<States> balanceState = new BalanceState(skippyToDo.getEnumValue());
-      State<States> prepareState = new PrepareState(skippyToDo.getEnumValue());
-      State<States> leanState = new LeanState(skippyToDo.getEnumValue());
-      State<States> liftoffState = new LiftoffState(skippyToDo.getEnumValue());
-      State<States> repositionState = new RepositionState(skippyToDo.getEnumValue());
-      State<States> recoverState = new RecoverState(skippyToDo.getEnumValue());
+      factory.addState(States.BALANCE, new BalanceState(skippyToDo.getEnumValue()));
+      factory.addState(States.PREPARE, new PrepareState(skippyToDo.getEnumValue()));
+      factory.addState(States.LEAN, new LeanState(skippyToDo.getEnumValue()));
+      factory.addState(States.LIFTOFF, new LiftoffState(skippyToDo.getEnumValue()));
+      factory.addState(States.REPOSITION, new RepositionState(skippyToDo.getEnumValue()));
+      factory.addState(States.RECOVER, new RecoverState(skippyToDo.getEnumValue()));
 
       // transitions
       StateTransitionCondition balanceToPrepareTransitionCondition = new BalanceToPrepareTransitionCondition(skippyToDo.getEnumValue());
@@ -1027,32 +1024,14 @@ public class SkippyController implements RobotController
       StateTransitionCondition repositionToRecoverTransitionCondition = new RepositionToRecoverTransitionCondition(skippyToDo.getEnumValue());
       StateTransitionCondition recoverToBalanceTransitionCondition = new RecoverToBalanceTransitionCondition(skippyToDo.getEnumValue());
 
-      StateTransition<States> balanceToPrepare = new StateTransition<States>(States.PREPARE, balanceToPrepareTransitionCondition);
-      balanceState.addStateTransition(balanceToPrepare);
+      factory.addTransition(States.BALANCE, States.PREPARE, balanceToPrepareTransitionCondition);
+      factory.addTransition(States.PREPARE, States.LEAN, prepareToLeanTransitionCondition);
+      factory.addTransition(States.LEAN, States.LIFTOFF, leanToLiftoffTransitionCondition);
+      factory.addTransition(States.LIFTOFF, States.REPOSITION, liftoffToRepositionTransitionCondition);
+      factory.addTransition(States.REPOSITION, States.RECOVER, repositionToRecoverTransitionCondition);
+      factory.addTransition(States.RECOVER, States.BALANCE, recoverToBalanceTransitionCondition);
 
-      StateTransition<States> prepareToLean = new StateTransition<States>(States.LEAN, prepareToLeanTransitionCondition);
-      prepareState.addStateTransition(prepareToLean);
-
-      StateTransition<States> leanToLiftoff = new StateTransition<States>(States.LIFTOFF, leanToLiftoffTransitionCondition);
-      leanState.addStateTransition(leanToLiftoff);
-
-      StateTransition<States> liftoffToReposition = new StateTransition<States>(States.REPOSITION, liftoffToRepositionTransitionCondition);
-      liftoffState.addStateTransition(liftoffToReposition);
-
-      StateTransition<States> repositionToRecover = new StateTransition<States>(States.RECOVER, repositionToRecoverTransitionCondition);
-      repositionState.addStateTransition(repositionToRecover);
-
-      StateTransition<States> recoverToBalance = new StateTransition<States>(States.BALANCE, recoverToBalanceTransitionCondition);
-      recoverState.addStateTransition(recoverToBalance);
-
-      stateMachine.addState(balanceState);
-      stateMachine.addState(prepareState);
-      stateMachine.addState(leanState);
-      stateMachine.addState(liftoffState);
-      stateMachine.addState(repositionState);
-      stateMachine.addState(recoverState);
-
-      stateMachine.setCurrentState(States.BALANCE);
+      return factory.build(States.BALANCE);
    }
 
    public void createStateMachineWindow()
@@ -1081,7 +1060,7 @@ public class SkippyController implements RobotController
       frame.setAlwaysOnTop(false);
       frame.setVisible(true);
 
-      stateMachine.attachStateChangedListener(stateMachinePanel);
+      stateMachine.addStateChangedListener(stateMachinePanel);
    }
 
    private void setHipPlaneParametersForPositionControl()
@@ -1125,12 +1104,11 @@ public class SkippyController implements RobotController
          this.direction = direction;
       }
 
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          if (direction == SkippyToDo.JUMP_FORWARD)
          {
-            double time = stateMachine.timeInCurrentState();
-            return time < 4.01 && time > 3.99;
+            return timeInState < 4.01 && timeInState > 3.99;
          }
          else
             return false;
@@ -1147,12 +1125,11 @@ public class SkippyController implements RobotController
          this.direction = direction;
       }
 
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          if (direction == SkippyToDo.JUMP_FORWARD)
          {
-            double time = stateMachine.timeInCurrentState();
-            return time < 7.01 && time > 6.99;
+            return timeInState < 7.01 && timeInState > 6.99;
          }
          else
             return false;
@@ -1169,14 +1146,13 @@ public class SkippyController implements RobotController
          this.direction = direction;
       }
 
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          if (direction == SkippyToDo.JUMP_FORWARD)
          {
-            double time = stateMachine.timeInCurrentState();
-//            return time > 0.0 && time < 0.09;
-//            return true;
-            return time > 0.2;
+            //            return timeInState > 0.0 && timeInState < 0.09;
+            //            return true;
+            return timeInState > 0.2;
          }
          else
             return false;
@@ -1193,12 +1169,11 @@ public class SkippyController implements RobotController
          this.direction = direction;
       }
 
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          if (direction == SkippyToDo.JUMP_FORWARD)
          {
-            double time = stateMachine.timeInCurrentState();
-            return time < 0.36 && time > 0.35;//
+            return timeInState < 0.36 && timeInState > 0.35;//
          }
          else
             return false;
@@ -1215,10 +1190,9 @@ public class SkippyController implements RobotController
          this.direction = direction;
       }
 
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
-         double time = stateMachine.timeInCurrentState();
-         return time < 0.60 && time > 0.59;
+         return timeInState < 0.60 && timeInState > 0.59;
       }
    }
 
@@ -1232,61 +1206,58 @@ public class SkippyController implements RobotController
          this.direction = direction;
       }
 
-      public boolean checkCondition()
+      public boolean testCondition(double timeInState)
       {
          if (direction == SkippyToDo.JUMP_FORWARD)
          {
-            double time = stateMachine.timeInCurrentState();
-            return time < 4.01 && time > 3.99;
+            return timeInState < 4.01 && timeInState > 3.99;
          }
          return false;
       }
    }
 
-   private class BalanceState extends State<States>
+   private class BalanceState implements State
    {
 
       private final SkippyToDo direction;
 
       public BalanceState(SkippyToDo direction)
       {
-         super(States.BALANCE);
          this.direction = direction;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
          qd_hip.set(0.6);
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          qd_hip.set(0.6);
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 
       }
    }
 
-   private class PrepareState extends State<States>
+   private class PrepareState implements State
    {
 
       private final SkippyToDo direction;
 
       public PrepareState(SkippyToDo direction)
       {
-         super(States.PREPARE);
          this.direction = direction;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
- 
+
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          if (direction == SkippyToDo.JUMP_FORWARD)
          {
@@ -1294,27 +1265,26 @@ public class SkippyController implements RobotController
          }
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 
       }
    }
 
-   private class LeanState extends State<States>
+   private class LeanState implements State
    {
       private final SkippyToDo direction;
 
       public LeanState(SkippyToDo direction)
       {
-         super(States.LEAN);
          this.direction = direction;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          System.out.println("LeanState");
          if (direction == SkippyToDo.JUMP_FORWARD)
@@ -1326,81 +1296,78 @@ public class SkippyController implements RobotController
          }
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 
       }
    }
 
-   private class LiftoffState extends State<States>
+   private class LiftoffState implements State
    {
 
       private final SkippyToDo direction;
 
       public LiftoffState(SkippyToDo direction)
       {
-         super(States.LIFTOFF);
          this.direction = direction;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
 
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          q_d_hip.set(0.45);
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
       }
    }
 
-   private class RepositionState extends State<States>
+   private class RepositionState implements State
    {
 
       private final SkippyToDo direction;
 
       public RepositionState(SkippyToDo direction)
       {
-         super(States.REPOSITION);
          this.direction = direction;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          qd_hip.set(-1.3);
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 
       }
    }
 
-   private class RecoverState extends State<States>
+   private class RecoverState implements State
    {
 
       private final SkippyToDo direction;
 
       public RecoverState(SkippyToDo direction)
       {
-         super(States.RECOVER);
          this.direction = direction;
       }
 
-      public void doAction()
+      public void doAction(double timeInState)
       {
 
       }
 
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          hipPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
          shoulderPlaneControlMode.set(SkippyPlaneControlMode.BALANCE);
@@ -1410,7 +1377,7 @@ public class SkippyController implements RobotController
          //robot.glueDownToGroundPoint.setForce(0.0, 0.0, -1450.0);
       }
 
-      public void doTransitionOutOfAction()
+      public void onExit()
       {
 
       }

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions;
 
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.FlamingoStanceState;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 
 public class StopFlamingoCondition implements StateTransitionCondition
 {
@@ -16,9 +16,9 @@ public class StopFlamingoCondition implements StateTransitionCondition
    }
 
    @Override
-   public boolean checkCondition()
+   public boolean testCondition(double timeInState)
    {
-      if (!singleSupportState.isDone())
+      if (!singleSupportState.isDone(timeInState))
          return false;
 
       return !walkingMessageHandler.hasFootTrajectoryForFlamingoStance(singleSupportState.getSwingSide());

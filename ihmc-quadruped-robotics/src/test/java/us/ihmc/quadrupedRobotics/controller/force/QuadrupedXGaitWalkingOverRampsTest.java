@@ -11,6 +11,8 @@ import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
 import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.util.InclinedGroundProfile;
@@ -22,6 +24,8 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
 {
    protected GoalOrientedTestConductor conductor;
    protected QuadrupedForceTestYoVariables variables;
+   private QuadrupedStepTeleopManager stepTeleopManager;
+   private QuadrupedBodyPoseTeleopManager poseTeleopManager;
 
    @Before
    public void setup()
@@ -58,33 +62,36 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       QuadrupedTestFactory quadrupedTestFactory = createQuadrupedTestFactory();
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
+      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+      poseTeleopManager = quadrupedTestFactory.getBodyPoseTeleopManager();
 
-      variables.getXGaitEndDoubleSupportDurationInput().set(0.05);
-      variables.getXGaitStanceLengthInput().set(1.00);
-      variables.getXGaitStanceWidthInput().set(0.30);
-      variables.getXGaitStepDurationInput().set(0.35);
-      variables.getXGaitStepGroundClearanceInput().set(0.1);
-      variables.getYoComPositionInputZ().set(0.575);
+      stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.05);
+      stepTeleopManager.getXGaitSettings().setStanceLength(1.00);
+      stepTeleopManager.getXGaitSettings().setStanceWidth(0.30);
+      stepTeleopManager.getXGaitSettings().setStepDuration(0.35);
+      stepTeleopManager.getXGaitSettings().setStepGroundClearance(0.1);
+      poseTeleopManager.setDesiredCoMHeight(0.575);
 
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
-      
-      variables.getYoPlanarVelocityInputX().set(0.0);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(0.5);
+
+      stepTeleopManager.setDesiredVelocity(0.5, 0.0, 0.0);
       conductor.addTimeLimit(variables.getYoTime(), 20.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 5.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(0.0);
+
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(-0.5);
+
+      stepTeleopManager.setDesiredVelocity(-0.5, 0.0, 0.0);
       conductor.addTimeLimit(variables.getYoTime(), 20.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), 0.0));
       conductor.simulate();
@@ -111,28 +118,30 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       quadrupedTestFactory.setGroundProfile3D(groundProfile);
       quadrupedTestFactory.setControlMode(QuadrupedControlMode.FORCE);
       quadrupedTestFactory.setUseStateEstimator(false);
+      quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
+      stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
-      QuadrupedTestBehaviors.readyXGait(conductor, variables);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables);
-      
-      variables.getYoPlanarVelocityInputX().set(0.0);
+      QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
+      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
+
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(0.75);
+
+      stepTeleopManager.setDesiredVelocity(0.75, 0.0, 0.0);
       conductor.addTimeLimit(variables.getYoTime(), 6.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getRobotBodyX(), 3.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(0.0);
+
+      stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTimeLimit(variables.getYoTime(), 5.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
       conductor.simulate();
-      
-      variables.getYoPlanarVelocityInputX().set(-0.75);
+
+      stepTeleopManager.setDesiredVelocity(-0.75, 0.0, 0.0);
       conductor.addTimeLimit(variables.getYoTime(), 8.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleLessThan(variables.getRobotBodyX(), 0.0));
       conductor.simulate();

@@ -19,7 +19,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class UserPelvisOrientationManager extends PelvisOrientationControlState
+public class UserPelvisOrientationManager implements PelvisOrientationControlState
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -36,8 +36,6 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
 
    public UserPelvisOrientationManager(PID3DGainsReadOnly gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
-      super(PelvisOrientationControlMode.USER);
-
       RigidBody pelvis = controllerToolbox.getFullRobotModel().getPelvis();
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
@@ -63,9 +61,9 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
    }
 
    @Override
-   public void doAction()
+   public void doAction(double timeInState)
    {
-      taskspaceControlState.doAction();
+      taskspaceControlState.doAction(timeInState);
    }
 
    public boolean handlePelvisOrientationTrajectoryCommands(PelvisOrientationTrajectoryCommand command, FrameQuaternion initialOrientation)
@@ -99,8 +97,10 @@ public class UserPelvisOrientationManager extends PelvisOrientationControlState
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = taskspaceControlState.getSpatialFeedbackControlCommand();
       orientationFeedbackControlCommand.setGains(spatialFeedbackControlCommand.getGains().getOrientationGains());
       orientationFeedbackControlCommand.getSpatialAccelerationCommand().set(spatialFeedbackControlCommand.getSpatialAccelerationCommand());
-      spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
-      orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      spatialFeedbackControlCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackControlCommand.getFeedForwardAngularActionIncludingFrame(feedForwardAngularAcceleration);
+      orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
+      orientationFeedbackControlCommand.setFeedForwardAction(feedForwardAngularAcceleration);
       return orientationFeedbackControlCommand;
    }
 }

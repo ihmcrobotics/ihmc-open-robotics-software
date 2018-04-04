@@ -2,10 +2,10 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Random;
 
+import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand, PelvisTrajectoryMessage>, FrameBasedCommand<PelvisTrajectoryMessage>, EpsilonComparable<PelvisTrajectoryCommand>
@@ -41,17 +41,17 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisTrajectoryMessage message)
    {
-      setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
-      setEnableUserPelvisControl(message.isEnableUserPelvisControl());
-      se3Trajectory.set(resolver, message.se3Trajectory);
+      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
+      setEnableUserPelvisControl(message.getEnableUserPelvisControl());
+      se3Trajectory.set(resolver, message.getSe3Trajectory());
    }
 
    @Override
    public void set(PelvisTrajectoryMessage message)
    {
-      setEnableUserPelvisControlDuringWalking(message.isEnableUserPelvisControlDuringWalking());
-      setEnableUserPelvisControl(message.isEnableUserPelvisControl());
-      se3Trajectory.set(message.se3Trajectory);
+      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
+      setEnableUserPelvisControl(message.getEnableUserPelvisControl());
+      se3Trajectory.set(message.getSe3Trajectory());
    }
 
    public boolean isEnableUserPelvisControlDuringWalking()

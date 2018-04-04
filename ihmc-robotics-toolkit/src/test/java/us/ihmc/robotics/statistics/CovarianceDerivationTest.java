@@ -12,7 +12,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 public class CovarianceDerivationTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.2)
+	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testLawOfLargeNumbers()
    {
@@ -31,8 +31,8 @@ public class CovarianceDerivationTest
       assertEquals(variance, statistics.getVariance(), epsilon);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 8.4)
-	@Test(timeout = 42000)
+	@ContinuousIntegrationTest(estimatedDuration = 7.6)
+	@Test(timeout = 38000)
    public void testRandomWalkDiscretization()
    {
       Random random = new Random(1252L);

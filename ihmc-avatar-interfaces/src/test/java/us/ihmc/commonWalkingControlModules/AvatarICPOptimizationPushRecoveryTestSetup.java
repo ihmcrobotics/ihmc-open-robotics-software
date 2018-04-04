@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules;
 
 import org.junit.After;
 import org.junit.Before;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -14,12 +17,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
@@ -28,8 +29,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import static org.junit.Assert.assertTrue;
 
 public abstract class AvatarICPOptimizationPushRecoveryTestSetup
 {
@@ -157,12 +156,12 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
-      message.add(message1);
-      message.add(message2);
-      message.add(message3);
-      message.add(message4);
-      message.add(message5);
-      message.add(message6);
+      message.getFootstepDataList().add().set(message1);
+      message.getFootstepDataList().add().set(message2);
+      message.getFootstepDataList().add().set(message3);
+      message.getFootstepDataList().add().set(message4);
+      message.getFootstepDataList().add().set(message5);
+      message.getFootstepDataList().add().set(message6);
 
       return message;
    }
@@ -195,12 +194,12 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       swingTime = 1.2;
       transferTime = 0.8;
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
-      message.add(message1);
-      message.add(message2);
-      message.add(message3);
-      message.add(message4);
-      message.add(message5);
-      message.add(message6);
+      message.getFootstepDataList().add().set(message1);
+      message.getFootstepDataList().add().set(message2);
+      message.getFootstepDataList().add().set(message3);
+      message.getFootstepDataList().add().set(message4);
+      message.getFootstepDataList().add().set(message5);
+      message.getFootstepDataList().add().set(message6);
 
       return message;
    }
@@ -240,12 +239,12 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
-      message.add(message1);
-      message.add(message2);
-      message.add(message3);
-      message.add(message4);
-      message.add(message5);
-      message.add(message6);
+      message.getFootstepDataList().add().set(message1);
+      message.getFootstepDataList().add().set(message2);
+      message.getFootstepDataList().add().set(message3);
+      message.getFootstepDataList().add().set(message4);
+      message.getFootstepDataList().add().set(message5);
+      message.getFootstepDataList().add().set(message6);
 
       return message;
    }
@@ -263,8 +262,8 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       placeToStepInWorld.changeFrame(worldFrame);
       orientation.changeFrame(worldFrame);
 
-      footstepData.setLocation(placeToStepInWorld);
-      footstepData.setOrientation(orientation);
+      footstepData.getLocation().set(placeToStepInWorld);
+      footstepData.getOrientation().set(orientation);
       footstepData.setRobotSide(robotSide.toByte());
 
       return footstepData;
@@ -280,7 +279,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          return footConstraintType.getEnumValue() == ConstraintType.SWING;
       }
@@ -299,7 +298,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       }
 
       @Override
-      public boolean checkCondition()
+      public boolean testCondition(double time)
       {
          if (side == RobotSide.LEFT)
          {

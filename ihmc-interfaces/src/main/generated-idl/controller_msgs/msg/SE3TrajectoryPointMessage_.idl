@@ -21,6 +21,10 @@ module controller_msgs
       struct SE3TrajectoryPointMessage
       {
         /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
          * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
          */
         double time;

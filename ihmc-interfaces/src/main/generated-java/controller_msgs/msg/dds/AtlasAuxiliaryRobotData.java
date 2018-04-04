@@ -1,34 +1,40 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * Message specific to Atlas, it is reported by the IHMC state estimator.
  */
-public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData>, EpsilonComparable<AtlasAuxiliaryRobotData>
+public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData>
+      implements Settable<AtlasAuxiliaryRobotData>, EpsilonComparable<AtlasAuxiliaryRobotData>
 {
-   private us.ihmc.idl.IDLSequence.Float electric_joint_temperatures_;
-   private us.ihmc.idl.IDLSequence.Float electric_joint_currents_;
-   private us.ihmc.idl.IDLSequence.Float electric_joint_enabled_array_;
-   private float[] raw_imu_timestamps_;
-   private float[] raw_imu_packet_counts_;
-   private us.ihmc.euclid.tuple3D.Vector3D[] raw_imu_rates_;
-   private us.ihmc.euclid.tuple3D.Vector3D[] raw_imu_deltas_;
-   private boolean battery_charging_;
-   private float battery_voltage_;
-   private float battery_current_;
-   private float remaining_battery_time_;
-   private float remaining_amp_hours_;
-   private float remaining_charge_percentage_;
-   private long battery_cycle_count_;
-   private float pump_inlet_pressure_;
-   private float pump_supply_pressure_;
-   private float air_sump_pressure_;
-   private float pump_supply_temperature_;
-   private float pump_rpm_;
-   private float motor_temperature_;
-   private float motor_driver_temperature_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public us.ihmc.idl.IDLSequence.Float electric_joint_temperatures_;
+   public us.ihmc.idl.IDLSequence.Float electric_joint_currents_;
+   public us.ihmc.idl.IDLSequence.Boolean electric_joint_enabled_array_;
+   public float[] raw_imu_timestamps_;
+   public float[] raw_imu_packet_counts_;
+   public us.ihmc.euclid.tuple3D.Vector3D[] raw_imu_rates_;
+   public us.ihmc.euclid.tuple3D.Vector3D[] raw_imu_deltas_;
+   public boolean battery_charging_;
+   public float battery_voltage_;
+   public float battery_current_;
+   public float remaining_battery_time_;
+   public float remaining_amp_hours_;
+   public float remaining_charge_percentage_;
+   public long battery_cycle_count_;
+   public float pump_inlet_pressure_;
+   public float pump_supply_pressure_;
+   public float air_sump_pressure_;
+   public float pump_supply_temperature_;
+   public float pump_rpm_;
+   public float motor_temperature_;
+   public float motor_driver_temperature_;
 
    public AtlasAuxiliaryRobotData()
    {
@@ -36,19 +42,20 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
 
       electric_joint_currents_ = new us.ihmc.idl.IDLSequence.Float(6, "type_5");
 
-      electric_joint_enabled_array_ = new us.ihmc.idl.IDLSequence.Float(6, "type_5");
+      electric_joint_enabled_array_ = new us.ihmc.idl.IDLSequence.Boolean(6, "type_7");
 
       raw_imu_timestamps_ = new float[15];
 
       raw_imu_packet_counts_ = new float[15];
 
       raw_imu_rates_ = new us.ihmc.euclid.tuple3D.Vector3D[15];
+
       for (int i1 = 0; i1 < raw_imu_rates_.length; ++i1)
       {
          raw_imu_rates_[i1] = new us.ihmc.euclid.tuple3D.Vector3D();
       }
-
       raw_imu_deltas_ = new us.ihmc.euclid.tuple3D.Vector3D[15];
+
       for (int i3 = 0; i3 < raw_imu_deltas_.length; ++i3)
       {
          raw_imu_deltas_[i3] = new us.ihmc.euclid.tuple3D.Vector3D();
@@ -57,22 +64,27 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
 
    public AtlasAuxiliaryRobotData(AtlasAuxiliaryRobotData other)
    {
+      this();
       set(other);
    }
 
    public void set(AtlasAuxiliaryRobotData other)
    {
+      sequence_id_ = other.sequence_id_;
+
       electric_joint_temperatures_.set(other.electric_joint_temperatures_);
       electric_joint_currents_.set(other.electric_joint_currents_);
       electric_joint_enabled_array_.set(other.electric_joint_enabled_array_);
       for (int i5 = 0; i5 < raw_imu_timestamps_.length; ++i5)
       {
          raw_imu_timestamps_[i5] = other.raw_imu_timestamps_[i5];
+
       }
 
       for (int i7 = 0; i7 < raw_imu_packet_counts_.length; ++i7)
       {
          raw_imu_packet_counts_[i7] = other.raw_imu_packet_counts_[i7];
+
       }
 
       for (int i9 = 0; i9 < raw_imu_rates_.length; ++i9)
@@ -112,6 +124,23 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       motor_temperature_ = other.motor_temperature_;
 
       motor_driver_temperature_ = other.motor_driver_temperature_;
+
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public us.ihmc.idl.IDLSequence.Float getElectricJointTemperatures()
@@ -124,7 +153,7 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       return electric_joint_currents_;
    }
 
-   public us.ihmc.idl.IDLSequence.Float getElectricJointEnabledArray()
+   public us.ihmc.idl.IDLSequence.Boolean getElectricJointEnabledArray()
    {
       return electric_joint_enabled_array_;
    }
@@ -149,19 +178,14 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       return raw_imu_deltas_;
    }
 
-   public boolean getBatteryCharging()
-   {
-      return battery_charging_;
-   }
-
    public void setBatteryCharging(boolean battery_charging)
    {
       battery_charging_ = battery_charging;
    }
 
-   public float getBatteryVoltage()
+   public boolean getBatteryCharging()
    {
-      return battery_voltage_;
+      return battery_charging_;
    }
 
    public void setBatteryVoltage(float battery_voltage)
@@ -169,9 +193,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       battery_voltage_ = battery_voltage;
    }
 
-   public float getBatteryCurrent()
+   public float getBatteryVoltage()
    {
-      return battery_current_;
+      return battery_voltage_;
    }
 
    public void setBatteryCurrent(float battery_current)
@@ -179,9 +203,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       battery_current_ = battery_current;
    }
 
-   public float getRemainingBatteryTime()
+   public float getBatteryCurrent()
    {
-      return remaining_battery_time_;
+      return battery_current_;
    }
 
    public void setRemainingBatteryTime(float remaining_battery_time)
@@ -189,9 +213,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       remaining_battery_time_ = remaining_battery_time;
    }
 
-   public float getRemainingAmpHours()
+   public float getRemainingBatteryTime()
    {
-      return remaining_amp_hours_;
+      return remaining_battery_time_;
    }
 
    public void setRemainingAmpHours(float remaining_amp_hours)
@@ -199,9 +223,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       remaining_amp_hours_ = remaining_amp_hours;
    }
 
-   public float getRemainingChargePercentage()
+   public float getRemainingAmpHours()
    {
-      return remaining_charge_percentage_;
+      return remaining_amp_hours_;
    }
 
    public void setRemainingChargePercentage(float remaining_charge_percentage)
@@ -209,9 +233,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       remaining_charge_percentage_ = remaining_charge_percentage;
    }
 
-   public long getBatteryCycleCount()
+   public float getRemainingChargePercentage()
    {
-      return battery_cycle_count_;
+      return remaining_charge_percentage_;
    }
 
    public void setBatteryCycleCount(long battery_cycle_count)
@@ -219,9 +243,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       battery_cycle_count_ = battery_cycle_count;
    }
 
-   public float getPumpInletPressure()
+   public long getBatteryCycleCount()
    {
-      return pump_inlet_pressure_;
+      return battery_cycle_count_;
    }
 
    public void setPumpInletPressure(float pump_inlet_pressure)
@@ -229,9 +253,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       pump_inlet_pressure_ = pump_inlet_pressure;
    }
 
-   public float getPumpSupplyPressure()
+   public float getPumpInletPressure()
    {
-      return pump_supply_pressure_;
+      return pump_inlet_pressure_;
    }
 
    public void setPumpSupplyPressure(float pump_supply_pressure)
@@ -239,9 +263,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       pump_supply_pressure_ = pump_supply_pressure;
    }
 
-   public float getAirSumpPressure()
+   public float getPumpSupplyPressure()
    {
-      return air_sump_pressure_;
+      return pump_supply_pressure_;
    }
 
    public void setAirSumpPressure(float air_sump_pressure)
@@ -249,9 +273,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       air_sump_pressure_ = air_sump_pressure;
    }
 
-   public float getPumpSupplyTemperature()
+   public float getAirSumpPressure()
    {
-      return pump_supply_temperature_;
+      return air_sump_pressure_;
    }
 
    public void setPumpSupplyTemperature(float pump_supply_temperature)
@@ -259,9 +283,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       pump_supply_temperature_ = pump_supply_temperature;
    }
 
-   public float getPumpRpm()
+   public float getPumpSupplyTemperature()
    {
-      return pump_rpm_;
+      return pump_supply_temperature_;
    }
 
    public void setPumpRpm(float pump_rpm)
@@ -269,9 +293,9 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       pump_rpm_ = pump_rpm;
    }
 
-   public float getMotorTemperature()
+   public float getPumpRpm()
    {
-      return motor_temperature_;
+      return pump_rpm_;
    }
 
    public void setMotorTemperature(float motor_temperature)
@@ -279,14 +303,19 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       motor_temperature_ = motor_temperature;
    }
 
-   public float getMotorDriverTemperature()
+   public float getMotorTemperature()
    {
-      return motor_driver_temperature_;
+      return motor_temperature_;
    }
 
    public void setMotorDriverTemperature(float motor_driver_temperature)
    {
       motor_driver_temperature_ = motor_driver_temperature;
+   }
+
+   public float getMotorDriverTemperature()
+   {
+      return motor_driver_temperature_;
    }
 
    @Override
@@ -297,13 +326,16 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       if (other == this)
          return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.electric_joint_temperatures_, other.electric_joint_temperatures_, epsilon))
          return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.electric_joint_currents_, other.electric_joint_currents_, epsilon))
          return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.electric_joint_enabled_array_, other.electric_joint_enabled_array_, epsilon))
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBooleanSequence(this.electric_joint_enabled_array_, other.electric_joint_enabled_array_, epsilon))
          return false;
 
       for (int i13 = 0; i13 < raw_imu_timestamps_.length; ++i13)
@@ -387,24 +419,26 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
 
       AtlasAuxiliaryRobotData otherMyClass = (AtlasAuxiliaryRobotData) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (!this.electric_joint_temperatures_.equals(otherMyClass.electric_joint_temperatures_))
          return false;
-
       if (!this.electric_joint_currents_.equals(otherMyClass.electric_joint_currents_))
          return false;
-
       if (!this.electric_joint_enabled_array_.equals(otherMyClass.electric_joint_enabled_array_))
          return false;
-
       for (int i21 = 0; i21 < raw_imu_timestamps_.length; ++i21)
       {
          if (this.raw_imu_timestamps_[i21] != otherMyClass.raw_imu_timestamps_[i21])
             return false;
+
       }
       for (int i23 = 0; i23 < raw_imu_packet_counts_.length; ++i23)
       {
          if (this.raw_imu_packet_counts_[i23] != otherMyClass.raw_imu_packet_counts_[i23])
             return false;
+
       }
       for (int i25 = 0; i25 < raw_imu_rates_.length; ++i25)
       {
@@ -467,89 +501,71 @@ public class AtlasAuxiliaryRobotData implements Settable<AtlasAuxiliaryRobotData
       StringBuilder builder = new StringBuilder();
 
       builder.append("AtlasAuxiliaryRobotData {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("electric_joint_temperatures=");
       builder.append(this.electric_joint_temperatures_);
-
       builder.append(", ");
       builder.append("electric_joint_currents=");
       builder.append(this.electric_joint_currents_);
-
       builder.append(", ");
       builder.append("electric_joint_enabled_array=");
       builder.append(this.electric_joint_enabled_array_);
-
       builder.append(", ");
       builder.append("raw_imu_timestamps=");
       builder.append(java.util.Arrays.toString(this.raw_imu_timestamps_));
-
       builder.append(", ");
       builder.append("raw_imu_packet_counts=");
       builder.append(java.util.Arrays.toString(this.raw_imu_packet_counts_));
-
       builder.append(", ");
       builder.append("raw_imu_rates=");
       builder.append(java.util.Arrays.toString(this.raw_imu_rates_));
-
       builder.append(", ");
       builder.append("raw_imu_deltas=");
       builder.append(java.util.Arrays.toString(this.raw_imu_deltas_));
-
       builder.append(", ");
       builder.append("battery_charging=");
       builder.append(this.battery_charging_);
-
       builder.append(", ");
       builder.append("battery_voltage=");
       builder.append(this.battery_voltage_);
-
       builder.append(", ");
       builder.append("battery_current=");
       builder.append(this.battery_current_);
-
       builder.append(", ");
       builder.append("remaining_battery_time=");
       builder.append(this.remaining_battery_time_);
-
       builder.append(", ");
       builder.append("remaining_amp_hours=");
       builder.append(this.remaining_amp_hours_);
-
       builder.append(", ");
       builder.append("remaining_charge_percentage=");
       builder.append(this.remaining_charge_percentage_);
-
       builder.append(", ");
       builder.append("battery_cycle_count=");
       builder.append(this.battery_cycle_count_);
-
       builder.append(", ");
       builder.append("pump_inlet_pressure=");
       builder.append(this.pump_inlet_pressure_);
-
       builder.append(", ");
       builder.append("pump_supply_pressure=");
       builder.append(this.pump_supply_pressure_);
-
       builder.append(", ");
       builder.append("air_sump_pressure=");
       builder.append(this.air_sump_pressure_);
-
       builder.append(", ");
       builder.append("pump_supply_temperature=");
       builder.append(this.pump_supply_temperature_);
-
       builder.append(", ");
       builder.append("pump_rpm=");
       builder.append(this.pump_rpm_);
-
       builder.append(", ");
       builder.append("motor_temperature=");
       builder.append(this.motor_temperature_);
-
       builder.append(", ");
       builder.append("motor_driver_temperature=");
       builder.append(this.motor_driver_temperature_);
-
       builder.append("}");
       return builder.toString();
    }

@@ -5,7 +5,8 @@ import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.*;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
+import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -104,11 +105,18 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    }
 
    @Override
-   public ControllerEvent process()
+   public void doAction(double timeInState)
    {
       controllerToolbox.update();
-      feetManager.compute(taskSpaceControllerCommands.getSoleForce());
+      feetManager.updateSupportPolygon();
+      feetManager.compute();
+      feetManager.getDesiredSoleForceCommand(taskSpaceControllerCommands.getSoleForce());
       taskSpaceController.compute(taskSpaceControllerSettings, taskSpaceControllerCommands);
+   }
+
+   @Override
+   public ControllerEvent fireEvent(double timeInState)
+   {
       return isDoneMoving.getBooleanValue() ? ControllerEvent.DONE : null;
    }
 

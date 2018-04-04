@@ -5,6 +5,9 @@
 byte EXECUTION_TIMING_CONTROL_DURATIONS = 0
 byte EXECUTION_TIMING_CONTROL_ABSOLUTE_TIMINGS = 1
 
+# Unique ID used to identify this message, should preferably be consecutively increasing.
+uint32 sequence_id
+
 # Defines the list of footstep to perform.
 FootstepDataMessage[] footstep_data_list
 # When CONTROL_DURATIONS is chosen:
@@ -32,7 +35,7 @@ float64 final_transfer_duration -1.0
 # If false the controller adjust each footstep height to be at the support sole height.
 bool trust_height_of_footsteps true
 # Contains information on whether the robot can automatically adjust its footsteps to retain balance.
-bool are_footsteps_adjustable true
+bool are_footsteps_adjustable false
 # If true the controller will adjust upcoming footsteps with the location error of previous steps.
 bool offset_footsteps_with_execution_error false
 # Properties for queueing footstep lists.

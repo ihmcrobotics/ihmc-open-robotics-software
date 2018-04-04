@@ -3,11 +3,11 @@ package us.ihmc.avatar.networkProcessor.rrtToolboxModule;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -69,7 +69,7 @@ public class ConstrainedRigidBodyTrajectory
          controlFramePose.changeFrame(trajectoryCommand.getEndEffector().getBodyFixedFrame());
          this.controlFramePose.set(controlFramePose);
          this.hasTrajectoryCommand = true;
-         if (Double.isNaN(trajectoryCommand.getWeight()))
+         if (Double.isNaN(trajectoryCommand.getWeight()) || trajectoryCommand.getWeight() < 0.0)
             weight = DEFAULT_WEIGHT;
          else
             weight = trajectoryCommand.getWeight();
@@ -190,10 +190,14 @@ public class ConstrainedRigidBodyTrajectory
       Pose3D desiredEndEffectorPose = appendPoseToTrajectory(timeInTrajectory, poseToAppend);
 
       KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody);
-      message.setDesiredPose(desiredEndEffectorPose);
-      message.setControlFramePose(controlFramePose);
-      message.setSelectionMatrix(getSelectionMatrix());
-      message.setWeight(weight); // Sylvain's value :: 0.5
+      message.getDesiredPositionInWorld().set(desiredEndEffectorPose.getPosition());
+      message.getDesiredOrientationInWorld().set(desiredEndEffectorPose.getOrientation());
+      message.getControlFramePositionInEndEffector().set(controlFramePose.getPosition());
+      message.getControlFrameOrientationInEndEffector().set(controlFramePose.getOrientation());
+      message.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(getSelectionMatrix().getAngularPart()));
+      message.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(getSelectionMatrix().getLinearPart()));
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(weight));
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(weight)); // Sylvain's value :: 0.5
 
       return message;
    }

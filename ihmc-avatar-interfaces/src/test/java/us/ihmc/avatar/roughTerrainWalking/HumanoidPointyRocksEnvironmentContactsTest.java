@@ -7,6 +7,11 @@ import java.util.ArrayList;
 import org.junit.After;
 import org.junit.Before;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -15,11 +20,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -97,10 +97,10 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
          Point3D position = new Point3D(stepLocations.get(i));
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
-         footstepData.setLocation(position);
-         footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+         footstepData.getLocation().set(position);
+         footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide.toByte());
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
 
          drcSimulationTestHelper.send(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(6.0);
@@ -157,10 +157,10 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
 
          Point3D position = new Point3D(stepLocations.get(i));
          RobotSide robotSide = position.getY() > 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
-         footstepData.setLocation(position);
-         footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
+         footstepData.getLocation().set(position);
+         footstepData.getOrientation().set(new Quaternion(0.0, 0.0, 0.0, 1.0));
          footstepData.setRobotSide(robotSide.toByte());
-         message.add(footstepData);
+         message.getFootstepDataList().add().set(footstepData);
 
          drcSimulationTestHelper.send(message);
          boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -265,17 +265,16 @@ public abstract class HumanoidPointyRocksEnvironmentContactsTest implements Mult
       for (RobotSide robotSide : RobotSide.values)
       {
          ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-         armTrajectoryMessage.robotSide = robotSide.toByte();
+         armTrajectoryMessage.setRobotSide(robotSide.toByte());
          double[] armConfig = straightArmConfigs.get(robotSide);
-         armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[armConfig.length];
          for (int i = 0; i < armConfig.length; i++)
          {
             TrajectoryPoint1DMessage trajectoryPoint = new TrajectoryPoint1DMessage();
-            trajectoryPoint.position = armConfig[i];
-            trajectoryPoint.time = 0.5;
+            trajectoryPoint.setPosition(armConfig[i]);
+            trajectoryPoint.setTime(0.5);
             OneDoFJointTrajectoryMessage jointTrajectory = new OneDoFJointTrajectoryMessage();
-            jointTrajectory.trajectoryPoints = new TrajectoryPoint1DMessage[] {trajectoryPoint};
-            armTrajectoryMessage.jointspaceTrajectory.jointTrajectoryMessages[i] = jointTrajectory;
+            jointTrajectory.getTrajectoryPoints().add().set(trajectoryPoint);
+            armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add().set(jointTrajectory);
          }
          drcSimulationTestHelper.send(armTrajectoryMessage);
       }

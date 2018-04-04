@@ -1,36 +1,44 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
  * Atlas specific message
  */
-public class ManualHandControlPacket implements Settable<ManualHandControlPacket>, EpsilonComparable<ManualHandControlPacket>
+public class ManualHandControlPacket extends Packet<ManualHandControlPacket>
+      implements Settable<ManualHandControlPacket>, EpsilonComparable<ManualHandControlPacket>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    public static final int VELOCITY = 0;
    public static final int POSITION = 1;
-   private byte robot_side_ = (byte) 255;
-   private double index_;
-   private double middle_;
-   private double thumb_;
-   private double spread_;
-   private int control_type_;
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long sequence_id_;
+   public byte robot_side_ = (byte) 255;
+   public double index_;
+   public double middle_;
+   public double thumb_;
+   public double spread_;
+   public int control_type_;
 
    public ManualHandControlPacket()
    {
-
    }
 
    public ManualHandControlPacket(ManualHandControlPacket other)
    {
+      this();
       set(other);
    }
 
    public void set(ManualHandControlPacket other)
    {
+      sequence_id_ = other.sequence_id_;
+
       robot_side_ = other.robot_side_;
 
       index_ = other.index_;
@@ -42,11 +50,23 @@ public class ManualHandControlPacket implements Settable<ManualHandControlPacket
       spread_ = other.spread_;
 
       control_type_ = other.control_type_;
+
    }
 
-   public byte getRobotSide()
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public void setSequenceId(long sequence_id)
    {
-      return robot_side_;
+      sequence_id_ = sequence_id;
+   }
+
+   /**
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
    public void setRobotSide(byte robot_side)
@@ -54,9 +74,9 @@ public class ManualHandControlPacket implements Settable<ManualHandControlPacket
       robot_side_ = robot_side;
    }
 
-   public double getIndex()
+   public byte getRobotSide()
    {
-      return index_;
+      return robot_side_;
    }
 
    public void setIndex(double index)
@@ -64,9 +84,9 @@ public class ManualHandControlPacket implements Settable<ManualHandControlPacket
       index_ = index;
    }
 
-   public double getMiddle()
+   public double getIndex()
    {
-      return middle_;
+      return index_;
    }
 
    public void setMiddle(double middle)
@@ -74,9 +94,9 @@ public class ManualHandControlPacket implements Settable<ManualHandControlPacket
       middle_ = middle;
    }
 
-   public double getThumb()
+   public double getMiddle()
    {
-      return thumb_;
+      return middle_;
    }
 
    public void setThumb(double thumb)
@@ -84,9 +104,9 @@ public class ManualHandControlPacket implements Settable<ManualHandControlPacket
       thumb_ = thumb;
    }
 
-   public double getSpread()
+   public double getThumb()
    {
-      return spread_;
+      return thumb_;
    }
 
    public void setSpread(double spread)
@@ -94,14 +114,19 @@ public class ManualHandControlPacket implements Settable<ManualHandControlPacket
       spread_ = spread;
    }
 
-   public int getControlType()
+   public double getSpread()
    {
-      return control_type_;
+      return spread_;
    }
 
    public void setControlType(int control_type)
    {
       control_type_ = control_type;
+   }
+
+   public int getControlType()
+   {
+      return control_type_;
    }
 
    @Override
@@ -111,6 +136,9 @@ public class ManualHandControlPacket implements Settable<ManualHandControlPacket
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon))
          return false;
@@ -145,6 +173,9 @@ public class ManualHandControlPacket implements Settable<ManualHandControlPacket
 
       ManualHandControlPacket otherMyClass = (ManualHandControlPacket) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.robot_side_ != otherMyClass.robot_side_)
          return false;
 
@@ -172,29 +203,26 @@ public class ManualHandControlPacket implements Settable<ManualHandControlPacket
       StringBuilder builder = new StringBuilder();
 
       builder.append("ManualHandControlPacket {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);
-
       builder.append(", ");
       builder.append("index=");
       builder.append(this.index_);
-
       builder.append(", ");
       builder.append("middle=");
       builder.append(this.middle_);
-
       builder.append(", ");
       builder.append("thumb=");
       builder.append(this.thumb_);
-
       builder.append(", ");
       builder.append("spread=");
       builder.append(this.spread_);
-
       builder.append(", ");
       builder.append("control_type=");
       builder.append(this.control_type_);
-
       builder.append("}");
       return builder.toString();
    }

@@ -47,12 +47,7 @@ public class QuadrupedPlanarVelocityInputProvider
             public void receivedPacket(PlanarVelocityPacket packet)
             {
                packet.get(planarVelocityInput);
-               yoPlanarVelocityInputX.set(MathTools
-                     .clamp(planarVelocityInput.getX(), planarVelocityLowerLimitsParameter.getX(), planarVelocityUpperLimitsParameter.getX()));
-               yoPlanarVelocityInputY.set(MathTools
-                     .clamp(planarVelocityInput.getY(), planarVelocityLowerLimitsParameter.getY(), planarVelocityUpperLimitsParameter.getY()));
-               yoPlanarVelocityInputZ.set(MathTools
-                     .clamp(planarVelocityInput.getZ(), planarVelocityLowerLimitsParameter.getZ(), planarVelocityUpperLimitsParameter.getZ()));
+               updateVelocity();
             }
          });
       }
@@ -60,9 +55,25 @@ public class QuadrupedPlanarVelocityInputProvider
       parentRegistry.addChild(registry);
    }
 
+   private void updateVelocity()
+   {
+      yoPlanarVelocityInputX.set(MathTools
+            .clamp(planarVelocityInput.getX(), planarVelocityLowerLimitsParameter.getX(), planarVelocityUpperLimitsParameter.getX()));
+      yoPlanarVelocityInputY.set(MathTools
+            .clamp(planarVelocityInput.getY(), planarVelocityLowerLimitsParameter.getY(), planarVelocityUpperLimitsParameter.getY()));
+      yoPlanarVelocityInputZ.set(MathTools
+            .clamp(planarVelocityInput.getZ(), planarVelocityLowerLimitsParameter.getZ(), planarVelocityUpperLimitsParameter.getZ()));
+   }
+
    public Vector3D get()
    {
       planarVelocityInput.set(yoPlanarVelocityInputX.getDoubleValue(), yoPlanarVelocityInputY.getDoubleValue(), yoPlanarVelocityInputZ.getDoubleValue());
       return planarVelocityInput;
+   }
+
+   public void set(double velocityX, double velocityY, double velocityZ)
+   {
+      planarVelocityInput.set(velocityX, velocityY, velocityZ);
+      updateVelocity();
    }
 }

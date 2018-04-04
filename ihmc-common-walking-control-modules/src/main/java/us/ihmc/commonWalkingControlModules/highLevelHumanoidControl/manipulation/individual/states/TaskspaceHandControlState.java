@@ -236,8 +236,9 @@ public class TaskspaceHandControlState extends HandControlState
       desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
       yoDesiredPose.setAndMatchFrame(desiredPose);
 
-      spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
-      spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+      spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity);
+      spatialFeedbackControlCommand.changeFrameAndSet(desiredOrientation, desiredAngularVelocity);
+      spatialFeedbackControlCommand.changeFrameAndSetFeedForward(feedForwardAngularAcceleration, feedForwardLinearAcceleration);
       spatialFeedbackControlCommand.setGains(gains);
       angularWeight.set(yoAngularWeight);
       linearWeight.set(yoLinearWeight);

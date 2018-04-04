@@ -5,7 +5,6 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -64,7 +63,7 @@ public class OnToesState extends AbstractFootControlState
 
    public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, PIDSE3GainsReadOnly gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.TOES, footControlHelper);
+      super(footControlHelper);
 
       this.toeOffCalculator = toeOffCalculator;
       this.gains = gains;
@@ -127,7 +126,7 @@ public class OnToesState extends AbstractFootControlState
    }
 
    @Override
-   public void doSpecificAction()
+   public void doSpecificAction(double timeInState)
    {
       updateCurrentYoVariables();
       updateToeSlippingDetector();
@@ -143,8 +142,9 @@ public class OnToesState extends AbstractFootControlState
       desiredLinearVelocity.setToZero(worldFrame);
       desiredLinearAcceleration.setToZero(worldFrame);
 
-      feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      feedbackControlCommand.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity);
+      feedbackControlCommand.set(desiredPosition, desiredLinearVelocity);
+      feedbackControlCommand.setFeedForwardAction(desiredAngularAcceleration, desiredLinearAcceleration);
       zeroAccelerationCommand.setSpatialAccelerationToZero(toeOffFrame);
 
       feedbackControlCommand.setGains(gains);
@@ -249,9 +249,9 @@ public class OnToesState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionIntoAction()
+   public void onEntry()
    {
-      super.doTransitionIntoAction();
+      super.onEntry();
 
       if (usePointContact.getBooleanValue())
          setControlPointPositionFromContactPoint();
@@ -270,9 +270,9 @@ public class OnToesState extends AbstractFootControlState
    }
 
    @Override
-   public void doTransitionOutOfAction()
+   public void onExit()
    {
-      super.doTransitionOutOfAction();
+      super.onExit();
 
       toeOffDesiredPitchAngle.set(Double.NaN);
       toeOffDesiredPitchVelocity.set(Double.NaN);

@@ -6,6 +6,9 @@ import java.util.Collection;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.NormOps;
 
+import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
+import controller_msgs.msg.dds.SelectionMatrix3DMessage;
+import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -15,8 +18,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.RigidBodyExplorationConfigurationMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WaypointBasedTrajectoryMessage;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -116,7 +117,7 @@ public class WholeBodyTrajectoryToolboxHelper
 
       if (explorationMessage != null)
       {
-         ConfigurationSpaceName[] degreesOfFreedomToExplore = ConfigurationSpaceName.fromBytes(explorationMessage.configurationSpaceNamesToExplore);
+         ConfigurationSpaceName[] degreesOfFreedomToExplore = ConfigurationSpaceName.fromBytes(explorationMessage.getConfigurationSpaceNamesToExplore());
          for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
          {
             if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y
@@ -129,7 +130,11 @@ public class WholeBodyTrajectoryToolboxHelper
       }
 
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-      trajectory.getSelectionMatrix(selectionMatrix);
+      selectionMatrix.resetSelection();
+      SelectionMatrix3DMessage angularSelection = trajectory.getAngularSelectionMatrix();
+      SelectionMatrix3DMessage linearSelection = trajectory.getLinearSelectionMatrix();
+      selectionMatrix.setAngularAxisSelection(angularSelection.getXSelected(), angularSelection.getYSelected(), angularSelection.getZSelected());
+      selectionMatrix.setLinearAxisSelection(linearSelection.getXSelected(), linearSelection.getYSelected(), linearSelection.getZSelected());
       if (!selectionMatrix.isLinearXSelected() || !selectionMatrix.isLinearYSelected() || !selectionMatrix.isLinearZSelected())
          positionErrorQ.zero();
       if (!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())
@@ -158,7 +163,7 @@ public class WholeBodyTrajectoryToolboxHelper
 
       if (explorationMessage != null)
       {
-         ConfigurationSpaceName[] degreesOfFreedomToExplore = ConfigurationSpaceName.fromBytes(explorationMessage.configurationSpaceNamesToExplore);
+         ConfigurationSpaceName[] degreesOfFreedomToExplore = ConfigurationSpaceName.fromBytes(explorationMessage.getConfigurationSpaceNamesToExplore());
          for (int i = 0; i < degreesOfFreedomToExplore.length; i++)
          {
             if (degreesOfFreedomToExplore[i] == ConfigurationSpaceName.X || degreesOfFreedomToExplore[i] == ConfigurationSpaceName.Y
@@ -171,7 +176,11 @@ public class WholeBodyTrajectoryToolboxHelper
       }
 
       SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
-      trajectory.getSelectionMatrix(selectionMatrix);
+      selectionMatrix.resetSelection();
+      SelectionMatrix3DMessage angularSelection = trajectory.getAngularSelectionMatrix();
+      SelectionMatrix3DMessage linearSelection = trajectory.getLinearSelectionMatrix();
+      selectionMatrix.setAngularAxisSelection(angularSelection.getXSelected(), angularSelection.getYSelected(), angularSelection.getZSelected());
+      selectionMatrix.setLinearAxisSelection(linearSelection.getXSelected(), linearSelection.getYSelected(), linearSelection.getZSelected());
       if (!selectionMatrix.isLinearXSelected() || !selectionMatrix.isLinearYSelected() || !selectionMatrix.isLinearZSelected())
          positionErrorQ.zero();
       if (!selectionMatrix.isAngularXSelected() || !selectionMatrix.isAngularYSelected() || !selectionMatrix.isAngularZSelected())

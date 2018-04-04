@@ -1,60 +1,77 @@
 package controller_msgs.msg.dds;
 
-import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API.
- * This class is used to build 1D trajectory messages including jointspace trajectory messages.
- * For 3D trajectory points look at:
- * - EuclideanTrajectoryMessage (translational),
- * - SO3TrajectoryPointMessage (rotational),
- * - SE3TrajectoryPointMessage (translational AND rotational).
+ * This message is part of the IHMC whole-body controller API. This class is used to build 1D
+ * trajectory messages including jointspace trajectory messages. For 3D trajectory points look at: -
+ * EuclideanTrajectoryMessage (translational), - SO3TrajectoryPointMessage (rotational), -
+ * SE3TrajectoryPointMessage (translational AND rotational).
  */
-public class TrajectoryPoint1DMessage implements Settable<TrajectoryPoint1DMessage>, EpsilonComparable<TrajectoryPoint1DMessage>
+public class TrajectoryPoint1DMessage extends Packet<TrajectoryPoint1DMessage>
+      implements Settable<TrajectoryPoint1DMessage>, EpsilonComparable<TrajectoryPoint1DMessage>
 {
    /**
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   private double time_;
+   public long sequence_id_;
+   /**
+    * Time at which the trajectory point has to be reached. The time is relative to when the
+    * trajectory starts.
+    */
+   public double time_;
    /**
     * Define the desired 1D position to be reached at this trajectory point.
     */
-   private double position_;
+   public double position_;
    /**
     * Define the desired 1D velocity to be reached at this trajectory point.
     */
-   private double velocity_;
+   public double velocity_;
 
    public TrajectoryPoint1DMessage()
    {
-
    }
 
    public TrajectoryPoint1DMessage(TrajectoryPoint1DMessage other)
    {
+      this();
       set(other);
    }
 
    public void set(TrajectoryPoint1DMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       time_ = other.time_;
 
       position_ = other.position_;
 
       velocity_ = other.velocity_;
+
    }
 
    /**
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
     */
-   public double getTime()
+   public void setSequenceId(long sequence_id)
    {
-      return time_;
+      sequence_id_ = sequence_id;
    }
 
    /**
-    * Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+    */
+   public long getSequenceId()
+   {
+      return sequence_id_;
+   }
+
+   /**
+    * Time at which the trajectory point has to be reached. The time is relative to when the
+    * trajectory starts.
     */
    public void setTime(double time)
    {
@@ -62,11 +79,12 @@ public class TrajectoryPoint1DMessage implements Settable<TrajectoryPoint1DMessa
    }
 
    /**
-    * Define the desired 1D position to be reached at this trajectory point.
+    * Time at which the trajectory point has to be reached. The time is relative to when the
+    * trajectory starts.
     */
-   public double getPosition()
+   public double getTime()
    {
-      return position_;
+      return time_;
    }
 
    /**
@@ -78,11 +96,11 @@ public class TrajectoryPoint1DMessage implements Settable<TrajectoryPoint1DMessa
    }
 
    /**
-    * Define the desired 1D velocity to be reached at this trajectory point.
+    * Define the desired 1D position to be reached at this trajectory point.
     */
-   public double getVelocity()
+   public double getPosition()
    {
-      return velocity_;
+      return position_;
    }
 
    /**
@@ -93,6 +111,14 @@ public class TrajectoryPoint1DMessage implements Settable<TrajectoryPoint1DMessa
       velocity_ = velocity;
    }
 
+   /**
+    * Define the desired 1D velocity to be reached at this trajectory point.
+    */
+   public double getVelocity()
+   {
+      return velocity_;
+   }
+
    @Override
    public boolean epsilonEquals(TrajectoryPoint1DMessage other, double epsilon)
    {
@@ -100,6 +126,9 @@ public class TrajectoryPoint1DMessage implements Settable<TrajectoryPoint1DMessa
          return false;
       if (other == this)
          return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.time_, other.time_, epsilon))
          return false;
@@ -125,6 +154,9 @@ public class TrajectoryPoint1DMessage implements Settable<TrajectoryPoint1DMessa
 
       TrajectoryPoint1DMessage otherMyClass = (TrajectoryPoint1DMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
+
       if (this.time_ != otherMyClass.time_)
          return false;
 
@@ -143,17 +175,17 @@ public class TrajectoryPoint1DMessage implements Settable<TrajectoryPoint1DMessa
       StringBuilder builder = new StringBuilder();
 
       builder.append("TrajectoryPoint1DMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
       builder.append("time=");
       builder.append(this.time_);
-
       builder.append(", ");
       builder.append("position=");
       builder.append(this.position_);
-
       builder.append(", ");
       builder.append("velocity=");
       builder.append(this.velocity_);
-
       builder.append("}");
       return builder.toString();
    }

@@ -1,14 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.EnumMap;
+
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
-import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
-
-import java.util.EnumMap;
 
 public class RequestedControllerStateTransitionFactory<E extends Enum<E>> implements ControllerStateTransitionFactory<E>
 {
@@ -19,7 +17,8 @@ public class RequestedControllerStateTransitionFactory<E extends Enum<E>> implem
    private StateTransition<E> stateTransition;
 
    /**
-    * This transition will transition the robot from its current state into a requested state if the yo enum matches the next state enum.
+    * This transition will transition the robot from its current state into a requested state if the yo
+    * enum matches the next state enum.
     *
     * @param requestedControlState yo variable used to request a state change.
     * @param stateToAttachEnum state to check if the next state has been requested.
@@ -34,13 +33,25 @@ public class RequestedControllerStateTransitionFactory<E extends Enum<E>> implem
 
    /** {@inheritDoc} */
    @Override
-   public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends FinishableState<E>> stateMap, HighLevelControllerFactoryHelper controllerFactoryHelper,
-                                                        YoVariableRegistry parentRegistry)
+   public StateTransition<E> getOrCreateStateTransition(EnumMap<E, ? extends State> stateMap,
+                                                        HighLevelControllerFactoryHelper controllerFactoryHelper, YoVariableRegistry parentRegistry)
    {
       if (stateTransition == null)
-         stateTransition = StateMachineTools.buildRequestableStateTransition(requestedControlState, nextStateEnum);
+      {
+         stateTransition = new StateTransition<>(nextStateEnum, this::isNextStateRequested);
+      }
 
       return stateTransition;
+   }
+
+   private boolean isNextStateRequested(double timeInCurrentState)
+   {
+      if (requestedControlState.getEnumValue() == nextStateEnum)
+      {
+         requestedControlState.set(null);
+         return true;
+      }
+      return false;
    }
 
    /** {@inheritDoc} */

@@ -3,6 +3,8 @@ package us.ihmc.robotics.sensors;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -20,6 +22,12 @@ public class ForceSensorData implements ForceSensorDataReadOnly
       measurementLink = forceSensorDefinition.getRigidBody();
    }
 
+   public void setWrench(Vector3DReadOnly moment, Vector3DReadOnly force)
+   {
+      moment.get(0, wrench);
+      force.get(3, wrench);
+   }
+
    public void setWrench(DenseMatrix64F newWrench)
    {
       wrench.set(newWrench);
@@ -27,7 +35,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly
 
    public void setWrench(float[] newWrench)
    {
-      for(int i = 0; i < Wrench.SIZE; i++)
+      for (int i = 0; i < Wrench.SIZE; i++)
       {
          wrench.set(i, 0, newWrench[i]);
       }
@@ -65,9 +73,17 @@ public class ForceSensorData implements ForceSensorDataReadOnly
       wrenchToPack.set(measurementFrame, wrench);
    }
 
-   @Override public void getWrench(float[] wrenchToPack)
+   @Override
+   public void getWrench(Vector3DBasics momentToPack, Vector3DBasics forceToPack)
    {
-      for(int i = 0; i < Wrench.SIZE; i++)
+      momentToPack.set(0, wrench);
+      forceToPack.set(3, wrench);
+   }
+
+   @Override
+   public void getWrench(float[] wrenchToPack)
+   {
+      for (int i = 0; i < Wrench.SIZE; i++)
       {
          wrenchToPack[i] = (float) wrench.get(i, 0);
       }

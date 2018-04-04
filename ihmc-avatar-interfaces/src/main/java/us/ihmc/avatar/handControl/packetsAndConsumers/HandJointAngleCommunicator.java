@@ -5,10 +5,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -105,7 +105,11 @@ public class HandJointAngleCommunicator implements CloseableAndDisposable
       {
          return;
       }
-      packet.setAll(side.toByte(), connected.get(), calibrated.get(), fingers);
+      packet.setRobotSide(side.toByte());
+      packet.setConnected(connected.get());
+      packet.setCalibrated(calibrated.get());
+      packet.getJointAngles().reset();
+      packet.getJointAngles().add(fingers);
       packetCopier.commit();
    }
 
