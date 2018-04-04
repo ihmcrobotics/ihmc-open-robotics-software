@@ -3,6 +3,7 @@ package us.ihmc.robotics.robotSide;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.Random;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -36,6 +37,24 @@ public enum RobotQuadrant implements RobotSegment<RobotQuadrant>
    {
       this.end = end;
       this.side = side;
+   }
+
+public static RobotQuadrant generateRandomRobotQuadrant(Random random)
+   {
+      if (random.nextBoolean())
+      {
+         if (random.nextBoolean())
+            return FRONT_LEFT;
+         else
+            return FRONT_RIGHT;
+      }
+      else
+      {
+         if (random.nextBoolean())
+            return HIND_LEFT;
+         else
+            return HIND_RIGHT;
+      }
    }
 
    public RobotEnd getEnd()
