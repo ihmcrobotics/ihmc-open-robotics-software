@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import afu.org.checkerframework.checker.oigj.qual.O;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
@@ -9,9 +8,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
-import us.ihmc.robotics.geometry.shapes.FrameRamp3d;
-import us.ihmc.robotics.math.trajectories.waypoints.*;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
+import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -30,7 +28,6 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    // Feedback controller
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame soleFrame;
-   private final QuadrupedSoleWaypointList quadrupedSoleWaypointList = new QuadrupedSoleWaypointList();
    private final FrameEuclideanTrajectoryPointList trajectoryPointList = new FrameEuclideanTrajectoryPointList();
 
    private final QuadrupedFootControlModuleParameters parameters;

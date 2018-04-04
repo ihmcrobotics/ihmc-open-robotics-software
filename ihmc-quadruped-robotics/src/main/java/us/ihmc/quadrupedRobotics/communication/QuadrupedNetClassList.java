@@ -12,9 +12,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
-import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
@@ -100,7 +98,6 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(RobotQuadrant[][].class);
       registerPacketField(RobotQuadrant[].class);
       registerPacketField(ArrayList.class);
-      registerPacketField(SoleWaypoint.class);
       registerPacketField(Point3D.class);
       registerPacketField(Vector3D.class);
       registerPacketField(Double.class);
