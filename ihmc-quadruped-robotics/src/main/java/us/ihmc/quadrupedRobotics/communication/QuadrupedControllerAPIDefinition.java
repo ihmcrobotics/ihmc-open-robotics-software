@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 
@@ -24,6 +25,7 @@ public class QuadrupedControllerAPIDefinition
 
       List<Class<? extends Command<?, ?>>> quadrupedCommands = new ArrayList<>();
       quadrupedCommands.add(QuadrupedTimedStepListCommand.class);
+      quadrupedCommands.add(SoleTrajectoryCommand.class);
       quadrupedCommands.add(QuadrupedRequestedSteppingStateCommand.class);
       quadrupedCommands.add(QuadrupedRequestedControllerStateCommand.class);
 
@@ -50,7 +52,7 @@ public class QuadrupedControllerAPIDefinition
    public static ControllerNetworkSubscriber.MessageValidator createDefaultMessageValidation()
    {
       Map<Class<? extends Packet<?>>, ControllerNetworkSubscriber.MessageValidator> validators = new HashMap<>();
-//      validators.put(FootTrajectoryMessage.class, message -> validateFootTrajectoryMessage((FootTrajectoryMessage) message));
+//      validators.put(FootTrajectoryMessage.class, message -> validateFootTrajectoryMessage((FootTrajectoryMessage) message)); // TODO
 //      validators.put(PelvisTrajectoryMessage.class, message -> validatePelvisTrajectoryMessage((PelvisTrajectoryMessage) message));
 //      validators
 //            .put(PelvisOrientationTrajectoryMessage.class, message -> validatePelvisOrientationTrajectoryMessage((PelvisOrientationTrajectoryMessage) message));

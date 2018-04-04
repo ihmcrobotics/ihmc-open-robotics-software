@@ -1,14 +1,15 @@
 package controller_msgs.msg.dds;
 
 /**
-* 
-* Topic data type of the struct "QuadrupedRequestedSteppingStateMessage" defined in "QuadrupedRequestedSteppingStateMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
-*
-* This file was automatically generated from QuadrupedRequestedSteppingStateMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit QuadrupedRequestedSteppingStateMessage_.idl instead.
-*
-*/
-public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage>
+ *
+ * Topic data type of the struct "QuadrupedRequestedSteppingStateMessage" defined in "QuadrupedRequestedSteppingStateMessage_.idl". Use this class to provide the TopicDataType to a Participant.
+ *
+ * This file was automatically generated from QuadrupedRequestedSteppingStateMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
+ * Do not update this file directly, edit QuadrupedRequestedSteppingStateMessage_.idl instead.
+ *
+ */
+public class QuadrupedRequestedSteppingStateMessagePubSubType
+      implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::QuadrupedRequestedSteppingStateMessage_";
 
@@ -16,7 +17,8 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
+         throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +26,8 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data)
+         throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -44,7 +47,6 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
       return current_alignment - initial_alignment;
    }
 
@@ -59,10 +61,7 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -78,9 +77,8 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    public static void read(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-      	
+
       data.setQuadrupedSteppingState(cdr.read_type_9());
-      	
 
    }
 
@@ -98,7 +96,8 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
       data.setQuadrupedSteppingState(ser.read_type_9("quadruped_stepping_state"));
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage src, controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage src,
+                                 controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage dest)
    {
       dest.set(src);
    }
@@ -108,6 +107,7 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    {
       return new controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage();
    }
+
    @Override
    public int getTypeSize()
    {
@@ -119,7 +119,7 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    {
       return name;
    }
-   
+
    public void serialize(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -129,7 +129,7 @@ public class QuadrupedRequestedSteppingStateMessagePubSubType implements us.ihmc
    {
       read(data, cdr);
    }
-   
+
    public void copy(controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage src, controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage dest)
    {
       staticCopy(src, dest);
