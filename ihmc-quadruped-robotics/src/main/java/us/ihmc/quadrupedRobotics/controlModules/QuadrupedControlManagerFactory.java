@@ -47,7 +47,7 @@ public class QuadrupedControlManagerFactory
       if (bodyOrientationManager != null)
          return bodyOrientationManager;
 
-      bodyOrientationManager = new QuadrupedBodyOrientationManager(toolbox, postureProvider, registry);
+      bodyOrientationManager = new QuadrupedBodyOrientationManager(toolbox, registry);
       return bodyOrientationManager;
    }
 
