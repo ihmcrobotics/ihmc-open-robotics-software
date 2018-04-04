@@ -6,11 +6,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
@@ -106,20 +104,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       outputProcessorBuilder.addComponent(stateChangeSmootherComponent);
       outputProcessor = outputProcessorBuilder.build();
 
-      GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
-
-      if (globalDataProducer != null)
-      {
-         globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
-         {
-            @Override
-            public void receivedPacket(QuadrupedForceControllerEventPacket packet)
-            {
-               requestedEvent.set(packet.get());
-            }
-         });
-      }
-
       this.stateMachine = buildStateMachine(runtimeEnvironment, initialState);
    }
 
@@ -166,6 +150,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void doControl()
    {
+      if (commandInputManager.isNewCommandAvailable(QuadrupedRequestedControllerStateCommand.class))
+      {
+         requestedEvent.set(commandInputManager.pollNewestCommand(QuadrupedRequestedControllerStateCommand.class).getRequestedControllerState());
+      }
+
       // update fall detector
       if (controllerToolbox.getFallDetector().detect())
       {
@@ -179,17 +168,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          lastEvent.set(reqEvent);
          trigger.fireEvent(reqEvent);
       }
-      /*
-      if (preplannedStepProvider.isStepPlanAvailable())
-      {
-         if (stateMachine.getCurrentStateEnum() == QuadrupedForceControllerEnum.STAND)
-         {
-            // trigger step event if preplanned steps are available in stand state
-            lastEvent.set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
-            stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
-         }
-      }
-      */
 
       // update controller state machine
       stateMachine.doActionAndTransition();

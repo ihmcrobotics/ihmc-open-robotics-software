@@ -5,8 +5,6 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
@@ -72,7 +70,8 @@ public class QuadrupedStepTeleopManager
       }
       else if(standingRequested.getAndSet(false))
       {
-         QuadrupedSteppingEventPacket stopWalkingPacket = new QuadrupedSteppingEventPacket(QuadrupedSteppingRequestedEvent.REQUEST_STAND);
+         QuadrupedRequestedSteppingStateMessage stopWalkingPacket = new QuadrupedRequestedSteppingStateMessage();
+         stopWalkingPacket.setQuadrupedSteppingState(QuadrupedSteppingRequestedEvent.REQUEST_STAND.toByte());
          packetCommunicator.send(stopWalkingPacket);
          walking.set(false);
       }
@@ -92,8 +91,9 @@ public class QuadrupedStepTeleopManager
 
    public void requestSteppingState()
    {
-      QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING);
-      packetCommunicator.send(eventPacket);
+      QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
+      controllerMessage.setQuadrupedControllerName(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING.toByte());
+      packetCommunicator.send(controllerMessage);
    }
 
    public void requestXGait()
