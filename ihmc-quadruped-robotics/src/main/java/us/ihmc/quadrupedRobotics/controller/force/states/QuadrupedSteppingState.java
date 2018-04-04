@@ -11,10 +11,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
+import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -51,6 +50,7 @@ public class QuadrupedSteppingState implements QuadrupedController
 
    private final QuadrupedStepCommandConsumer commandConsumer;
 
+   private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
 
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
@@ -82,6 +82,7 @@ public class QuadrupedSteppingState implements QuadrupedController
    {
       this.runtimeEnvironment = runtimeEnvironment;
       this.controllerToolbox = controllerToolbox;
+      this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
       this.controlManagerFactory = controlManagerFactory;
 
@@ -110,18 +111,6 @@ public class QuadrupedSteppingState implements QuadrupedController
       soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(globalDataProducer, registry);
 
       commandConsumer = new QuadrupedStepCommandConsumer(commandInputManager, stepMessageHandler, controllerToolbox, controlManagerFactory);
-
-      if (globalDataProducer != null)
-      {
-         globalDataProducer.attachListener(QuadrupedSteppingEventPacket.class, new PacketConsumer<QuadrupedSteppingEventPacket>()
-         {
-            @Override
-            public void receivedPacket(QuadrupedSteppingEventPacket packet)
-            {
-               requestedEvent.set(packet.get());
-            }
-         });
-      }
 
       this.stateMachine = buildStateMachine();
 
@@ -193,6 +182,11 @@ public class QuadrupedSteppingState implements QuadrupedController
 
       commandConsumer.update();
       commandConsumer.consumeFootCommands();
+
+      if (commandInputManager.isNewCommandAvailable(QuadrupedRequestedSteppingStateCommand.class))
+      {
+         requestedEvent.set(commandInputManager.pollNewestCommand(QuadrupedRequestedSteppingStateCommand.class).getRequestedSteppingState());
+      }
 
       QuadrupedSteppingRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)

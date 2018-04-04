@@ -1,18 +1,17 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
-import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import controller_msgs.msg.dds.*;
 import org.junit.After;
 import org.junit.Before;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.quadrupedRobotics.*;
+import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
+import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
+import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -71,8 +70,9 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
                                         packet -> steppingState.set(QuadrupedSteppingStateEnum.fromByte(packet.getEndSteppingControllerName())));
       packetCommunicator.connect();
 
-      QuadrupedForceControllerEventPacket eventPacket = new QuadrupedForceControllerEventPacket(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING);
-      packetCommunicator.send(eventPacket);
+      QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
+      controllerMessage.setQuadrupedControllerName(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING.toByte());
+      packetCommunicator.send(controllerMessage);
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
