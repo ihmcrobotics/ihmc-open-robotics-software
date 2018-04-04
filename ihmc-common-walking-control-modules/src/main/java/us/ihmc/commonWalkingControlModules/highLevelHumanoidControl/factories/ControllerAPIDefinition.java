@@ -36,9 +36,6 @@ public abstract class ControllerAPIDefinition
    private static final List<Class<? extends Command<?, ?>>> controllerSupportedCommands;
    private static final List<Class<? extends Packet<?>>> controllerSupportedStatusMessages;
 
-   private static final List<Class<? extends Command<?, ?>>> quadrupedSupportedCommands;
-   private static final List<Class<? extends Packet<?>>> quadrupedSupportedStatusMessages;
-
    static
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
@@ -89,16 +86,6 @@ public abstract class ControllerAPIDefinition
 
       controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
 
-      List<Class<? extends Command<?, ?>>> quadrupedCommands = new ArrayList<>();
-      quadrupedCommands.add(QuadrupedTimedStepListCommand.class);
-
-      quadrupedSupportedCommands = Collections.unmodifiableList(quadrupedCommands);
-
-      List<Class<? extends Packet<?>>> quadrupedStatusMessages = new ArrayList<>();
-      quadrupedStatusMessages.add(QuadrupedSteppingStateChangeMessage.class);
-      quadrupedStatusMessages.add(QuadrupedControllerStateChangeMessage.class);
-
-      quadrupedSupportedStatusMessages = Collections.unmodifiableList(quadrupedStatusMessages);
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()
@@ -106,19 +93,9 @@ public abstract class ControllerAPIDefinition
       return controllerSupportedCommands;
    }
 
-   public static List<Class<? extends Command<?, ?>>> getQuadrupedSupportedCommands()
-   {
-      return quadrupedSupportedCommands;
-   }
-
    public static List<Class<? extends Packet<?>>> getControllerSupportedStatusMessages()
    {
       return controllerSupportedStatusMessages;
-   }
-
-   public static List<Class<? extends Packet<?>>> getQuadrupedSupportedStatusMessages()
-   {
-      return quadrupedSupportedStatusMessages;
    }
 
    public static MessageValidator createDefaultMessageValidation()
@@ -133,8 +110,8 @@ public abstract class ControllerAPIDefinition
       validators.put(ChestTrajectoryMessage.class, message -> validateChestTrajectoryMessage((ChestTrajectoryMessage) message));
       validators.put(SpineTrajectoryMessage.class, message -> validateSpineTrajectoryMessage((SpineTrajectoryMessage) message));
       validators.put(PelvisTrajectoryMessage.class, message -> validatePelvisTrajectoryMessage((PelvisTrajectoryMessage) message));
-      validators.put(PelvisOrientationTrajectoryMessage.class,
-                     message -> validatePelvisOrientationTrajectoryMessage((PelvisOrientationTrajectoryMessage) message));
+      validators
+            .put(PelvisOrientationTrajectoryMessage.class, message -> validatePelvisOrientationTrajectoryMessage((PelvisOrientationTrajectoryMessage) message));
       validators.put(PelvisHeightTrajectoryMessage.class, message -> validatePelvisHeightTrajectoryMessage((PelvisHeightTrajectoryMessage) message));
       validators.put(FootstepDataListMessage.class, message -> validateFootstepDataListMessage((FootstepDataListMessage) message));
       validators.put(AdjustFootstepMessage.class, message -> validateAdjustFootstepMessage((AdjustFootstepMessage) message));

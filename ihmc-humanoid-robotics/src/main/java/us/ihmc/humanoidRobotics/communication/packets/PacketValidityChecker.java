@@ -2,35 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.List;
 
-import controller_msgs.msg.dds.AdjustFootstepMessage;
-import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.DesiredAccelerationsMessage;
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import controller_msgs.msg.dds.FootLoadBearingMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.NeckDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.NeckTrajectoryMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SpineDesiredAccelerationsMessage;
-import controller_msgs.msg.dds.SpineTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
@@ -40,6 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -211,6 +184,128 @@ public abstract class PacketValidityChecker
          {
             FootstepDataMessage footstepData = message.getFootstepDataList().get(arrayListIndex);
             String footstepDataListErrorMessage = validateFootstepDataMessage(footstepData);
+
+            if (footstepDataListErrorMessage != null)
+            {
+               String messageClassName = message.getClass().getSimpleName();
+               String errorMessage = messageClassName + " field contains a FootstepData in which " + footstepDataListErrorMessage;
+               return errorMessage;
+            }
+         }
+      }
+
+      return null;
+   }
+
+   /**
+    * Checks the validity of a {@link QuadrupedStepMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateQuadrupedStepMessage(QuadrupedStepMessage message)
+   {
+      ObjectErrorType packetFieldErrorType;
+
+      packetFieldErrorType = ObjectValidityChecker.validateEnum(RobotQuadrant.fromByte(message.getRobotQuadrant()));
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s robotQuadrant field" + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      packetFieldErrorType = ObjectValidityChecker.validateTuple3d(message.getGoalPosition());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s goalPosition field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+
+      //TODO Check if thats supposed to be checked
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getGroundClearance());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s groundClearance field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      return null;
+   }
+
+   /**
+    * Checks the validity of a {@link QuadrupedStepMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateTimeIntervalMessage(TimeIntervalMessage message)
+   {
+      ObjectErrorType packetFieldErrorType;
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getStartTime());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s startTime field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(message.getEndTime());
+      if (packetFieldErrorType != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + "'s endTime field " + packetFieldErrorType.getMessage();
+         return errorMessage;
+      }
+
+      return null;
+   }
+
+   /**
+    * Checks the validity of a {@link QuadrupedTimedStepMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateQuadrupedTimedStepMessage(QuadrupedTimedStepMessage message)
+   {
+      String stepErrorMessage = validateQuadrupedStepMessage(message.getQuadrupedStepMessage());
+      if (stepErrorMessage != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + " step field which " + stepErrorMessage;
+         return errorMessage;
+      }
+
+      String timeErrorMessage = validateTimeIntervalMessage(message.getTimeInterval());
+      if (timeErrorMessage != null)
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         String errorMessage = messageClassName + " time interval field which " + timeErrorMessage;
+         return errorMessage;
+      }
+
+      return null;
+   }
+
+   /**
+    * Checks the validity of a {@link FootstepDataListMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validateQuadrupedTimedStepListMessage(QuadrupedTimedStepListMessage message)
+   {
+      if (message.getQuadrupedStepList() != null)
+      {
+         for (int arrayListIndex = 0; arrayListIndex < message.getQuadrupedStepList().size(); arrayListIndex++)
+         {
+            QuadrupedTimedStepMessage stepMessage = message.getQuadrupedStepList().get(arrayListIndex);
+            String footstepDataListErrorMessage = validateQuadrupedTimedStepMessage(stepMessage);
 
             if (footstepDataListErrorMessage != null)
             {
