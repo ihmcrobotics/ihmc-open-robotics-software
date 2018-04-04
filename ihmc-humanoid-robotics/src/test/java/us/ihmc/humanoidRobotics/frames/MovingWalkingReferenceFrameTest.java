@@ -20,8 +20,8 @@ import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.screwTheory.NumericalMovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculatorTest;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class MovingWalkingReferenceFrameTest
 {

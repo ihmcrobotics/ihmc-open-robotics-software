@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public class ConstantAccelerationTrajectoryGenerator implements DoubleTrajectoryGenerator
 {
