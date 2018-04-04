@@ -9,6 +9,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerStatePacket;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -24,6 +25,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventTrigger;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
@@ -92,7 +94,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          e.printStackTrace();
       }
       statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getQuadrupedSupportedStatusMessages());
-
 
       controlManagerFactory.getOrCreateFeetManager();
       controlManagerFactory.getOrCreateBodyOrientationManager();
@@ -275,7 +276,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       final QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedController freezeController = new QuadrupedForceBasedFreezeController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedSteppingState steppingController = new QuadrupedSteppingState(runtimeEnvironment, controllerToolbox, commandInputManager,
-                                                                                   controlManagerFactory, registry);
+                                                                                   statusMessageOutputManager, controlManagerFactory, registry);
       final QuadrupedController fallController = new QuadrupedForceBasedFallController(controllerToolbox, controlManagerFactory, registry);
 
       EventBasedStateMachineFactory<QuadrupedForceControllerEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(
@@ -339,6 +340,21 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedForceControllerEnum.STEPPING,
                             QuadrupedForceControllerEnum.STAND_PREP);
 
+      /*
+      factory.addStateChangedListener(new StateChangedListener<HighLevelControllerName>()
+      {
+         @Override
+         public void stateChanged(HighLevelControllerName from, HighLevelControllerName to)
+         {
+            byte fromByte = from == null ? -1 : from.toByte();
+            byte toByte = to == null ? -1 : to.toByte();
+            highLevelStateChangeStatusMessage.setInitialHighLevelControllerName(fromByte);
+            highLevelStateChangeStatusMessage.setEndHighLevelControllerName(toByte);
+            statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
+         }
+      });
+      */
+
       return factory.build(initialState);
    }
 
@@ -346,7 +362,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    {
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, scheduler,
                                                                                                 packetCommunicator);
-//      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
+      //      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.addMessageCollector(ControllerAPIDefinition.createDefaultMessageIDExtractor());
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);
