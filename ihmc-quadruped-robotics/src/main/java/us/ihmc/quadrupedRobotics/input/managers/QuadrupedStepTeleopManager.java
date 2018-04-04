@@ -1,13 +1,12 @@
 package us.ihmc.quadrupedRobotics.input.managers;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
-import us.ihmc.quadrupedRobotics.communication.packets.*;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
@@ -40,8 +39,8 @@ public class QuadrupedStepTeleopManager
 
    private final AtomicBoolean xGaitRequested = new AtomicBoolean();
    private final AtomicBoolean standingRequested = new AtomicBoolean();
-   private final AtomicReference<QuadrupedForceControllerStatePacket> forceControlStatePacket = new AtomicReference<>();
-   private final AtomicReference<QuadrupedSteppingStatePacket> steppingStatePacket = new AtomicReference<>();
+   private final AtomicReference<QuadrupedControllerStateChangeMessage> controllerStateChangeMessage = new AtomicReference<>();
+   private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
    private final AtomicDouble desiredVelocityX = new AtomicDouble();
    private final AtomicDouble desiredVelocityY = new AtomicDouble();
    private final AtomicDouble desiredVelocityZ = new AtomicDouble();
@@ -53,8 +52,10 @@ public class QuadrupedStepTeleopManager
       this.packetCommunicator = packetCommunicator;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
       this.stepStream = new QuadrupedXGaitStepStream(velocityInput, xGaitSettings, referenceFrames, timestamp, registry);
-      packetCommunicator.attachListener(QuadrupedForceControllerStatePacket.class, forceControlStatePacket::set);
-      packetCommunicator.attachListener(QuadrupedSteppingStatePacket.class, steppingStatePacket::set);
+//      packetCommunicator.attachListener(QuadrupedForceControllerStatePacket.class, forceControlStatePacket::set);
+      packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class, controllerStateChangeMessage::set);
+//      packetCommunicator.attachListener(QuadrupedSteppingStatePacket.class, steppingStatePacket::set);
+      packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class, steppingStateChangeMessage::set);
       packetCommunicator.attachListener(RobotConfigurationData.class, packet -> timestampNanos.set(packet.timestamp_));
 
       parentRegistry.addChild(registry);
@@ -104,10 +105,11 @@ public class QuadrupedStepTeleopManager
 
    private boolean isInStepState()
    {
-      QuadrupedForceControllerStatePacket forceControllerStatePacket = this.forceControlStatePacket.get();
-      QuadrupedSteppingStatePacket steppingStatePacket = this.steppingStatePacket.get();
-      return (forceControllerStatePacket != null && forceControllerStatePacket.get() == QuadrupedForceControllerEnum.STEPPING) && (steppingStatePacket != null
-            && steppingStatePacket.get() == QuadrupedSteppingStateEnum.STEP);
+      QuadrupedControllerStateChangeMessage controllerStateChangeMessage = this.controllerStateChangeMessage.get();
+      QuadrupedSteppingStateChangeMessage steppingStateChangeMessage = this.steppingStateChangeMessage.get();
+
+      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndControllerName() == QuadrupedForceControllerEnum.STEPPING.toByte()) &&
+            (steppingStateChangeMessage != null && steppingStateChangeMessage.getEndSteppingControllerName() == QuadrupedSteppingStateEnum.STEP.toByte());
    }
 
    public boolean isWalking()
