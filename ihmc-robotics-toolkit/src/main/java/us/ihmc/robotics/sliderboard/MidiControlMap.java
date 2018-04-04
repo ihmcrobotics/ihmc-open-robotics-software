@@ -28,6 +28,6 @@ public interface MidiControlMap
 
    static boolean isInRange(int index, int min, int max)
    {
-      return index >= 0 && index < max;
+      return index >= min && index <= max;
    }
 }
