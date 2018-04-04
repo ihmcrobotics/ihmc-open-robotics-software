@@ -1,16 +1,25 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import static org.fest.assertions.Fail.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -18,7 +27,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,13 +34,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.fest.assertions.Fail.fail;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPOptimizationCoPConstraintHandlerTest
@@ -75,8 +76,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
          fail();
       }
 
-      FrameConvexPolygon2d copConstraint = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d cmpConstraint = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -96,8 +97,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
-      PolygonWiggler.convertToInequalityConstraints(cmpConstraint.getConvexPolygon2d(), cmpAin, cmpBin, -0.05);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(cmpConstraint, cmpAin, cmpBin, -0.05);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
       CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
@@ -139,8 +140,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
          fail();
       }
 
-      FrameConvexPolygon2d copConstraint = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d cmpConstraint = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
 
       copConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT));
       cmpConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT));
@@ -157,8 +158,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
-      PolygonWiggler.convertToInequalityConstraints(cmpConstraint.getConvexPolygon2d(), cmpAin, cmpBin, -0.05);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(cmpConstraint, cmpAin, cmpBin, -0.05);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
       CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
@@ -184,8 +185,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
          fail();
       }
 
-      copConstraint = new FrameConvexPolygon2d();
-      cmpConstraint = new FrameConvexPolygon2d();
+      copConstraint = new FrameConvexPolygon2D();
+      cmpConstraint = new FrameConvexPolygon2D();
 
       copConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT));
       cmpConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT));
@@ -202,8 +203,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
-      PolygonWiggler.convertToInequalityConstraints(cmpConstraint.getConvexPolygon2d(), cmpAin, cmpBin, -0.05);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(cmpConstraint, cmpAin, cmpBin, -0.05);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
       CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
@@ -243,8 +244,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
          fail();
       }
 
-      FrameConvexPolygon2d copConstraint = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d cmpConstraint = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -261,7 +262,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
       assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
@@ -301,8 +302,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
          fail();
       }
 
-      FrameConvexPolygon2d copConstraint = new FrameConvexPolygon2d();
-      FrameConvexPolygon2d cmpConstraint = new FrameConvexPolygon2d();
+      FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
+      FrameConvexPolygon2D cmpConstraint = new FrameConvexPolygon2D();
 
       copConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT));
       cmpConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT));
@@ -316,7 +317,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       DenseMatrix64F perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
       assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
@@ -340,8 +341,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
          fail();
       }
 
-      copConstraint = new FrameConvexPolygon2d();
-      cmpConstraint = new FrameConvexPolygon2d();
+      copConstraint = new FrameConvexPolygon2D();
+      cmpConstraint = new FrameConvexPolygon2D();
 
       copConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT));
       cmpConstraint.addVertices(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT));
@@ -355,7 +356,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       perfectCMPMatrix = new DenseMatrix64F(2, 1);
       perfectCMP.get(perfectCMPMatrix);
 
-      PolygonWiggler.convertToInequalityConstraints(copConstraint.getConvexPolygon2d(), copAin, copBin, 0.01);
+      PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
       assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));

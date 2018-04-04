@@ -19,6 +19,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -31,7 +33,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -305,7 +306,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
       for (RobotSide robotSide : RobotSide.values)
       {
-         ConvexPolygon2D footPolygon = new ConvexPolygon2D(footContactPoints.get(robotSide));
+         ConvexPolygon2D footPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footContactPoints.get(robotSide)));
          ConvexPolygon2D shrunkFootPolygon = new ConvexPolygon2D();
          scaler.scaleConvexPolygon(footPolygon, 0.025, shrunkFootPolygon);
          footPolygons.put(robotSide, shrunkFootPolygon);
@@ -369,7 +370,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
       private final HumanoidReferenceFrames referenceFrames;
       private final SideDependentList<ConvexPolygon2D> footPolygonsInSole;
       private final SideDependentList<ConvexPolygon2D> footPolygonsInWorld;
-      private final FrameConvexPolygon2d framePolygon = new FrameConvexPolygon2d();
+      private final FrameConvexPolygon2D framePolygon = new FrameConvexPolygon2D();
 
       private boolean collision = false;
 
@@ -389,7 +390,7 @@ public abstract class DRCSwingTrajectoryTest implements MultiRobotTestInterface
             MovingReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
             framePolygon.setIncludingFrame(soleFrame, footPolygonsInSole.get(robotSide));
             framePolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
-            footPolygonsInWorld.get(robotSide).setAndUpdate(framePolygon.getConvexPolygon2d());
+            footPolygonsInWorld.get(robotSide).set(framePolygon);
          }
 
          ConvexPolygon2D leftPolygon = footPolygonsInWorld.get(RobotSide.LEFT);

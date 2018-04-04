@@ -123,7 +123,7 @@ public class YoFramePointInMultipleFrames extends YoFramePoint implements YoMult
             public void notifyOfVariableChange(YoVariable<?> v)
             {
                localFramePoint.setIncludingFrame(YoFramePointInMultipleFrames.this);
-               point.setAndMatchFrame(localFramePoint);
+               point.setMatchingFrame(localFramePoint);
             }
          });
       }

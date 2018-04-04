@@ -64,7 +64,7 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
    
    public void setInitialConditions(FramePoint3DReadOnly initialPosition)
    {
-      this.initialPosition.setAndMatchFrame(initialPosition);
+      this.initialPosition.setMatchingFrame(initialPosition);
    }
 
    public void setIntermediateConditions(double intermediateZPosition)
@@ -79,8 +79,8 @@ public class ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator im
    
    public void setFinalConditions(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity)
    {
-      this.finalPosition.setAndMatchFrame(finalPosition);
-      this.finalVelocity.setAndMatchFrame(finalVelocity);
+      this.finalPosition.setMatchingFrame(finalPosition);
+      this.finalVelocity.setMatchingFrame(finalVelocity);
    }
 
    public void setTrajectoryParameters(double duration, FramePoint3DReadOnly initialPosition, double intermediateZPosition, FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity)

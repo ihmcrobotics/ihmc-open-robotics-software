@@ -211,7 +211,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 //      desiredRandomChestOrientation.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
 
       Vector3D rotationVector = new Vector3D();
-      desiredChestOrientation.get(rotationVector);
+      desiredChestOrientation.getRotationVector(rotationVector);
       DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
       rotationVector.get(rotationVectorMatrix);
 
@@ -221,7 +221,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       DenseMatrix64F result = new DenseMatrix64F(3, 1);
       CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
       rotationVector.set(result);
-      desiredChestOrientation.set(rotationVector);
+      desiredChestOrientation.setRotationVector(rotationVector);
 
       System.out.println(desiredChestOrientation);
 
@@ -398,7 +398,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 //      desiredRandomChestOrientation.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
 
       Vector3D rotationVector = new Vector3D();
-      desiredChestOrientation.get(rotationVector);
+      desiredChestOrientation.getRotationVector(rotationVector);
       DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
       rotationVector.get(rotationVectorMatrix);
 
@@ -408,7 +408,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       DenseMatrix64F result = new DenseMatrix64F(3, 1);
       CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
       rotationVector.set(result);
-      desiredChestOrientation.set(rotationVector);
+      desiredChestOrientation.setRotationVector(rotationVector);
 
       System.out.println(desiredChestOrientation);
 

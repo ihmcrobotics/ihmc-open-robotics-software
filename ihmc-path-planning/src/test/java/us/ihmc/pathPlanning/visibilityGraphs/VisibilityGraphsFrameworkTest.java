@@ -28,6 +28,7 @@ import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -553,7 +554,7 @@ public class VisibilityGraphsFrameworkTest extends Application
          for (int i = 0; i < planarRegion.getNumberOfConvexPolygons(); i++)
          {
             ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(i);
-            Point2D closestPoint2D = convexPolygon.orthogonalProjectionCopy(walkerPosition2D);
+            Point2DBasics closestPoint2D = convexPolygon.orthogonalProjectionCopy(walkerPosition2D);
             if (closestPoint2D == null)
             {
                if (convexPolygon.isPointInside(walkerPosition2D))
@@ -570,7 +571,7 @@ public class VisibilityGraphsFrameworkTest extends Application
 
             if (walkerShapeLocal.isInsideOrOnSurface(closestPoint))
             {
-               Point2D intersectionLocal = closestPoint2D;
+               Point2DBasics intersectionLocal = closestPoint2D;
                Point3D intersectionWorld = new Point3D(intersectionLocal);
                planarRegion.transformFromLocalToWorld(intersectionWorld);
                errorMessages += fail(datasetName, "Body path is going through a region at: " + intersectionWorld);

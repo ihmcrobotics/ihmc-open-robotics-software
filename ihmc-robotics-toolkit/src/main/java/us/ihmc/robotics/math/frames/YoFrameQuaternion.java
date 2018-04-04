@@ -7,10 +7,8 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -25,8 +23,6 @@ public class YoFrameQuaternion implements FixedFrameQuaternionBasics
 
    private final YoDouble qx, qy, qz, qs;
    private final ReferenceFrame referenceFrame;
-   /** Only for some garbage-free operations and reducing number of operations on the YoDoubles. */
-   private final FrameQuaternion frameOrientation = new FrameQuaternion();
 
    public YoFrameQuaternion(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry registry)
    {
@@ -66,26 +62,6 @@ public class YoFrameQuaternion implements FixedFrameQuaternionBasics
       this.qy.set(qy);
       this.qz.set(qz);
       this.qs.set(qs);
-   }
-
-   public void setAndMatchFrame(FrameQuaternionReadOnly frameOrientation)
-   {
-      this.frameOrientation.setIncludingFrame(frameOrientation);
-      this.frameOrientation.changeFrame(getReferenceFrame());
-      set(this.frameOrientation);
-   }
-
-   /**
-    * Sets the orientation of this to the origin of the passed in ReferenceFrame.
-    *
-    * @param referenceFrame
-    */
-   @Override
-   public void setFromReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      frameOrientation.setToZero(referenceFrame);
-      frameOrientation.changeFrame(getReferenceFrame());
-      set(frameOrientation);
    }
 
    public YoDouble getYoQx()

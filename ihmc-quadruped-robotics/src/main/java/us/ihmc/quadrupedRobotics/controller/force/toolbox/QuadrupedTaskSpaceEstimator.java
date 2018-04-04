@@ -133,17 +133,17 @@ public class QuadrupedTaskSpaceEstimator
 
       // update yovariables
       yoBodyOrientationEstimate.setAndMatchFrame(estimates.getBodyOrientation());
-      yoBodyPositionEstimate.setAndMatchFrame(estimates.getBodyPosition());
-      yoBodyAngularVelocityEstimate.setAndMatchFrame(estimates.getBodyAngularVelocity());
-      yoBodyLinearVelocityEstimate.setAndMatchFrame(estimates.getBodyLinearVelocity());
-      yoComPositionEstimate.setAndMatchFrame(estimates.getComPosition());
-      yoComVelocityEstimate.setAndMatchFrame(estimates.getComVelocity());
+      yoBodyPositionEstimate.setMatchingFrame(estimates.getBodyPosition());
+      yoBodyAngularVelocityEstimate.setMatchingFrame(estimates.getBodyAngularVelocity());
+      yoBodyLinearVelocityEstimate.setMatchingFrame(estimates.getBodyLinearVelocity());
+      yoComPositionEstimate.setMatchingFrame(estimates.getComPosition());
+      yoComVelocityEstimate.setMatchingFrame(estimates.getComVelocity());
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          yoSoleOrientationEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleOrientation().get(robotQuadrant));
-         yoSolePositionEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSolePosition(robotQuadrant));
-         yoSoleAngularVelocityEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleAngularVelocity().get(robotQuadrant));
-         yoSoleLinearVelocityEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleLinearVelocity().get(robotQuadrant));
+         yoSolePositionEstimate.get(robotQuadrant).setMatchingFrame(estimates.getSolePosition(robotQuadrant));
+         yoSoleAngularVelocityEstimate.get(robotQuadrant).setMatchingFrame(estimates.getSoleAngularVelocity().get(robotQuadrant));
+         yoSoleLinearVelocityEstimate.get(robotQuadrant).setMatchingFrame(estimates.getSoleLinearVelocity().get(robotQuadrant));
       }
    }
 }

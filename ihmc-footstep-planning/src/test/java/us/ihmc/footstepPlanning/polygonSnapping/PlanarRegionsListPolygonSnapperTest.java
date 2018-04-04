@@ -196,7 +196,7 @@ public class PlanarRegionsListPolygonSnapperTest
          nonSnappedTransform = new RigidBodyTransform();
          nonSnappedTransform.setRotationEulerAndZeroTranslation(0.0, 0.0, xyYaw[2]);
          nonSnappedTransform.setTranslation(xyYaw[0], xyYaw[1], 0.0);
-         polygonToSnap.applyTransformAndProjectToXYPlane(nonSnappedTransform);
+         polygonToSnap.applyTransform(nonSnappedTransform, false);
 
          PlanarRegion planarRegionIntersection = new PlanarRegion();
          RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegionIntersection);

@@ -245,10 +245,10 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    public void updateSteeringWheel(FramePoint3D center, FrameVector3D rotationAxis, FrameVector3D zeroAxis)
    {
-      steeringWheelCenter.setAndMatchFrame(center);
-      steeringWheelRotationAxis.setAndMatchFrame(rotationAxis);
+      steeringWheelCenter.setMatchingFrame(center);
+      steeringWheelRotationAxis.setMatchingFrame(rotationAxis);
       steeringWheelRotationAxis.normalize();
-      steeringWheelZeroAxis.setAndMatchFrame(zeroAxis);
+      steeringWheelZeroAxis.setMatchingFrame(zeroAxis);
       steeringWheelZeroAxis.normalize();
       steeringWheelFrame.update();
 
@@ -327,7 +327,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double yFinal = steeringWheelRadius.getDoubleValue() * Math.sin(finalSteeringAngle.getDoubleValue());
       double zFinal = initialZ.getDoubleValue();
       finalPosition.setIncludingFrame(steeringWheelFrame, xFinal, yFinal, zFinal);
-      yoFinalPosition.setAndMatchFrame(finalPosition);
+      yoFinalPosition.setMatchingFrame(finalPosition);
 
       currentAngleTrackingError.set(0.0);
       currentControlledFrameRelativeAngle.set(initialSteeringAngle.getDoubleValue());
@@ -362,7 +362,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double z = initialZ.getDoubleValue();
 
       currentPosition.setIncludingFrame(steeringWheelFrame, x, y, z);
-      yoCurrentPositionWorld.setAndMatchFrame(currentPosition);
+      yoCurrentPositionWorld.setMatchingFrame(currentPosition);
 
       currentRelativeSteeringAngle.set(computeAngleDifferenceMinusPiToPi(angle, initialSteeringAngle.getDoubleValue()));
       if (adjustAngle)
@@ -401,15 +401,15 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       currentAngularVelocity.setIncludingFrame(steeringWheelFrame, 0.0, 0.0, 0.0);
       currentAngularAcceleration.setIncludingFrame(steeringWheelFrame, 0.0, 0.0, 0.0);
 
-      yoCurrentPosition.setAndMatchFrame(currentPosition);
-      yoCurrentAdjustedPositionWorld.setAndMatchFrame(currentPosition);
-      yoCurrentVelocity.setAndMatchFrame(currentVelocity);
-      yoCurrentAcceleration.setAndMatchFrame(currentAcceleration);
+      yoCurrentPosition.setMatchingFrame(currentPosition);
+      yoCurrentAdjustedPositionWorld.setMatchingFrame(currentPosition);
+      yoCurrentVelocity.setMatchingFrame(currentVelocity);
+      yoCurrentAcceleration.setMatchingFrame(currentAcceleration);
 
       currentOrientation.changeFrame(trajectoryFrame);
       yoCurrentOrientation.set(currentOrientation);
-      yoCurrentAngularVelocity.setAndMatchFrame(currentAngularVelocity);
-      yoCurrentAngularAcceleration.setAndMatchFrame(currentAngularAcceleration);
+      yoCurrentAngularVelocity.setMatchingFrame(currentAngularVelocity);
+      yoCurrentAngularAcceleration.setMatchingFrame(currentAngularAcceleration);
 
       updateTangentialCircleFrame();
    }
@@ -477,9 +477,9 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private void visualizeTrajectory()
    {
       initialPosition.setIncludingFrame(yoInitialPosition);
-      yoInitialPositionWorld.setAndMatchFrame(initialPosition);
+      yoInitialPositionWorld.setMatchingFrame(initialPosition);
       finalPosition.setIncludingFrame(yoFinalPosition);
-      yoFinalPositionWorld.setAndMatchFrame(finalPosition);
+      yoFinalPositionWorld.setMatchingFrame(finalPosition);
 
       for (int i = 0; i < numberOfBalls; i++)
       {

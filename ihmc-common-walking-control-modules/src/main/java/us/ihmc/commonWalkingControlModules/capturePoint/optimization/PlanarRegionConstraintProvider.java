@@ -1,12 +1,16 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import java.awt.Color;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -20,19 +24,16 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.ConvexPolygonToolbox;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.List;
-
-import java.awt.*;
 
 public class PlanarRegionConstraintProvider
 {
@@ -62,7 +63,7 @@ public class PlanarRegionConstraintProvider
 
    private PlanarRegion activePlanarRegion = null;
 
-   private final FrameConvexPolygon2d activePlanarRegionConvexHull = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D activePlanarRegionConvexHull = new FrameConvexPolygon2D();
 
    private final ConvexPolygon2D activePlanarRegionConvexHullInControlFrame = new ConvexPolygon2D();
    private final ConvexPolygon2D projectedAndShrunkConvexHull = new ConvexPolygon2D();
@@ -134,9 +135,9 @@ public class PlanarRegionConstraintProvider
       }
       else
       {
-         yoActivePlanarRegion.clearAndHide();
-         yoShrunkActivePlanarRegion.clearAndHide();
-         yoActivePlanarRegionInControlPlane.clearAndHide();
+         yoActivePlanarRegion.clear();
+         yoShrunkActivePlanarRegion.clear();
+         yoActivePlanarRegionInControlPlane.clear();
       }
    }
 
@@ -192,9 +193,9 @@ public class PlanarRegionConstraintProvider
       captureRegionCalculator.hideCaptureRegion();
       solver.resetPlanarRegionConstraint();
 
-      yoActivePlanarRegion.clearAndHide();
-      yoActivePlanarRegionInControlPlane.clearAndHide();
-      yoShrunkActivePlanarRegion.clearAndHide();
+      yoActivePlanarRegion.clear();
+      yoActivePlanarRegionInControlPlane.clear();
+      yoShrunkActivePlanarRegion.clear();
    }
 
 
@@ -256,7 +257,7 @@ public class PlanarRegionConstraintProvider
          footstepPolygon.update();
       }
       icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, footstepPolygon, projectedAndShrunkConvexHull, distanceFromEdgeForStepping);
-      yoShrunkActivePlanarRegion.setConvexPolygon2d(projectedAndShrunkConvexHull);
+      yoShrunkActivePlanarRegion.set(projectedAndShrunkConvexHull);
 
       return projectedAndShrunkConvexHull;
    }
@@ -281,7 +282,7 @@ public class PlanarRegionConstraintProvider
             activePlanarRegion = planarRegion;
 
             icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon);
-            activePlanarRegionConvexHullInControlFrame.setAndUpdate(tempProjectedPolygon);
+            activePlanarRegionConvexHullInControlFrame.set(tempProjectedPolygon);
             break;
          }
 
@@ -293,22 +294,22 @@ public class PlanarRegionConstraintProvider
     */
    private boolean checkCurrentPlanarRegion()
    {
-      FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
       icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
 
-      double intersectionArea = convexPolygonToolbox.computeIntersectionAreaOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon);
+      double intersectionArea = convexPolygonToolbox.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 
       if (intersectionArea > minimumAreaForSearch)
       {
          activePlanarRegionConvexHull.setIncludingFrame(planeReferenceFrame, activePlanarRegion.getConvexHull());
          activePlanarRegionConvexHull.changeFrameAndProjectToXYPlane(worldFrame);
 
-         yoActivePlanarRegion.setConvexPolygon2d(activePlanarRegionConvexHull.getConvexPolygon2d());
+         yoActivePlanarRegion.set(activePlanarRegionConvexHull);
 
          icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, activePlanarRegionConvexHullInControlFrame);
-         yoActivePlanarRegionInControlPlane.setConvexPolygon2d(activePlanarRegionConvexHullInControlFrame);
+         yoActivePlanarRegionInControlPlane.set(activePlanarRegionConvexHullInControlFrame);
          return false;
       }
 
@@ -320,7 +321,7 @@ public class PlanarRegionConstraintProvider
     */
    private PlanarRegion findPlanarRegionWithLargestIntersectionArea()
    {
-      FrameConvexPolygon2d captureRegion = captureRegionCalculator.getCaptureRegion();
+      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
       double maxArea = 0.0;
@@ -333,7 +334,7 @@ public class PlanarRegionConstraintProvider
 
          icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
 
-         double intersectionArea = convexPolygonToolbox.computeIntersectionAreaOfPolygons(captureRegion.getConvexPolygon2d(), tempProjectedPolygon);
+         double intersectionArea = convexPolygonToolbox.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 
          if (intersectionArea > maxArea)
          {
@@ -341,7 +342,7 @@ public class PlanarRegionConstraintProvider
             activePlanarRegion = planarRegion;
 
             icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, tempProjectedPolygon);
-            activePlanarRegionConvexHullInControlFrame.setAndUpdate(tempProjectedPolygon);
+            activePlanarRegionConvexHullInControlFrame.set(tempProjectedPolygon);
          }
       }
 
@@ -355,14 +356,14 @@ public class PlanarRegionConstraintProvider
          activePlanarRegionConvexHull.setIncludingFrame(planeReferenceFrame, activePlanarRegion.getConvexHull());
          activePlanarRegionConvexHull.changeFrameAndProjectToXYPlane(worldFrame);
 
-         yoActivePlanarRegion.setConvexPolygon2d(activePlanarRegionConvexHull.getConvexPolygon2d());
-         yoActivePlanarRegionInControlPlane.setConvexPolygon2d(activePlanarRegionConvexHullInControlFrame);
+         yoActivePlanarRegion.set(activePlanarRegionConvexHull);
+         yoActivePlanarRegionInControlPlane.set(activePlanarRegionConvexHullInControlFrame);
       }
       else
       {
-         yoActivePlanarRegion.clearAndHide();
-         yoShrunkActivePlanarRegion.clearAndHide();
-         yoActivePlanarRegionInControlPlane.clearAndHide();
+         yoActivePlanarRegion.clear();
+         yoShrunkActivePlanarRegion.clear();
+         yoActivePlanarRegionInControlPlane.clear();
       }
 
       return activePlanarRegion;
@@ -378,9 +379,9 @@ public class PlanarRegionConstraintProvider
       activePlanarRegion = null;
       activePlanarRegionConvexHullInControlFrame.clear();
 
-      yoActivePlanarRegion.clearAndHide();
-      yoShrunkActivePlanarRegion.clearAndHide();
-      yoActivePlanarRegionInControlPlane.clearAndHide();
+      yoActivePlanarRegion.clear();
+      yoShrunkActivePlanarRegion.clear();
+      yoActivePlanarRegionInControlPlane.clear();
    }
 
    private final FramePose3D footstepPose = new FramePose3D();

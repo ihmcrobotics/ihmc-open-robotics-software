@@ -52,7 +52,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
       {
          nextSwingLeg = lastStepQuadrant.getNextReversedRegularGaitSwingQuadrant();
       }
-      lastVelocity.setAndMatchFrame(desiredVelocity);
+      lastVelocity.setMatchingFrame(desiredVelocity);
       
       return nextSwingLeg;
    }
@@ -118,7 +118,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
 //            nextSwingLeg = lastStepQuadrant.getNextReversedRegularGaitSwingQuadrant();
 //         }
 //      }
-      lastVelocity.setAndMatchFrame(desiredVelocity);
+      lastVelocity.setMatchingFrame(desiredVelocity);
       
       return nextSwingLeg;
    }

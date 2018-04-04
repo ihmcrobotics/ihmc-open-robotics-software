@@ -21,7 +21,7 @@ public class SimpleFootstep
    {
       this.robotSide = other.robotSide;
       this.soleFramePose.setIncludingFrame(other.soleFramePose);
-      this.foothold.setAndUpdate(other.foothold);
+      this.foothold.set(other.foothold);
    }
 
    public RobotSide getRobotSide()
@@ -46,7 +46,7 @@ public class SimpleFootstep
 
    public void setFoothold(ConvexPolygon2D foothold)
    {
-      this.foothold.setAndUpdate(foothold);
+      this.foothold.set(foothold);
    }
 
    public boolean hasFoothold()
@@ -61,7 +61,7 @@ public class SimpleFootstep
       if (!hasFoothold())
          footholdToPack.setToNaN();
       else
-         footholdToPack.setAndUpdate(foothold);
+         footholdToPack.set(foothold);
    }
 
    public boolean epsilonEquals(SimpleFootstep otherFootstep, double epsilon)

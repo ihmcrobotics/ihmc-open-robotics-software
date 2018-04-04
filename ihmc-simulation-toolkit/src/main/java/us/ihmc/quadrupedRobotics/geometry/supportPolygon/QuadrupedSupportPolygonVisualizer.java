@@ -256,7 +256,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
          polygon.addVertex(footstep.getX(), footstep.getY());
       }
       polygon.update();
-      yoFramePolygon.setConvexPolygon2d(polygon);
+      yoFramePolygon.set(polygon);
    }
 
    

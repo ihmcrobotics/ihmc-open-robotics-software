@@ -297,7 +297,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
       }
 
       QuadrupedCenterOfPressureTools.computeCenterOfPressure(copPositionAtCurrentTime, solePositionAtCurrentTime, contactPressureAtCurrentTime);
-      yoCopPositionAtCurrentTime.setAndMatchFrame(copPositionAtCurrentTime);
+      yoCopPositionAtCurrentTime.setMatchingFrame(copPositionAtCurrentTime);
    }
 
    public void getPosition(FramePoint3D copPositionAtCurrentTime)

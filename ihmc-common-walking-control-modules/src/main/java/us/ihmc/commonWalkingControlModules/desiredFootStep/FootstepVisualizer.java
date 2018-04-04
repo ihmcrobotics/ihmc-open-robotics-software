@@ -14,10 +14,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FootstepVisualizer
 {
@@ -68,9 +68,12 @@ public class FootstepVisualizer
       else
          contactPointsToVisualize = predictedContactPoints;
 
-      foothold.setAndUpdate(contactPointsToVisualize, contactPointsToVisualize.size());
+      foothold.clear();
+      for (int i = 0; i < contactPointsToVisualize.size(); i++)
+         foothold.addVertex(contactPointsToVisualize.get(i));
+      foothold.update();
 
-      yoFoothold.setConvexPolygon2d(foothold);
+      yoFoothold.set(foothold);
 
       poseViz.update();
       footholdViz.update();

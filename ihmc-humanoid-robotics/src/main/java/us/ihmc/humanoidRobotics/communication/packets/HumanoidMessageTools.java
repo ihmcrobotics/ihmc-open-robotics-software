@@ -106,7 +106,10 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -147,7 +150,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
@@ -2004,7 +2006,7 @@ public class HumanoidMessageTools
       return handJointAnglePacket.getJointAngles().get(index);
    }
 
-   public static void packFootSupportPolygon(RobotSide robotSide, FrameConvexPolygon2d footPolygon, CapturabilityBasedStatus capturabilityBasedStatus)
+   public static void packFootSupportPolygon(RobotSide robotSide, ConvexPolygon2DReadOnly footPolygon, CapturabilityBasedStatus capturabilityBasedStatus)
    {
       int numberOfVertices = footPolygon.getNumberOfVertices();
 
@@ -2035,19 +2037,14 @@ public class HumanoidMessageTools
       }
    }
 
-   public static FrameConvexPolygon2d unpackFootSupportPolygon(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotSide)
+   public static FrameConvexPolygon2D unpackFootSupportPolygon(CapturabilityBasedStatus capturabilityBasedStatus, RobotSide robotSide)
    {
       if (robotSide == RobotSide.LEFT && capturabilityBasedStatus.getLeftFootSupportPolygon2d().size() > 0)
-         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), toPoint2Ds(capturabilityBasedStatus.getLeftFootSupportPolygon2d()));
+         return new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(), Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getLeftFootSupportPolygon2d()));
       else if (capturabilityBasedStatus.getRightFootSupportPolygon2d() != null)
-         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame(), toPoint2Ds(capturabilityBasedStatus.getRightFootSupportPolygon2d()));
+         return new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame(), Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getRightFootSupportPolygon2d()));
       else
-         return new FrameConvexPolygon2d(ReferenceFrame.getWorldFrame());
-   }
-
-   private static Point2D[] toPoint2Ds(List<Point3D> point3Ds)
-   {
-      return point3Ds.stream().map(Point2D::new).toArray(Point2D[]::new);
+         return new FrameConvexPolygon2D(ReferenceFrame.getWorldFrame());
    }
 
    public static boolean unpackIsInDoubleSupport(CapturabilityBasedStatus capturabilityBasedStatus)

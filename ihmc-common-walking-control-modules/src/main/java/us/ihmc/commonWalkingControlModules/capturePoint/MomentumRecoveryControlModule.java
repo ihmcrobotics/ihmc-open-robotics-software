@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import java.awt.Color;
 import java.util.List;
 
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,7 +15,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -75,16 +75,16 @@ public class MomentumRecoveryControlModule
    private Footstep nextFootstep;
 
    private final ConvexPolygonScaler polygonShrinker = new ConvexPolygonScaler();
-   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d extendedSupportPolygon = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d safeCMPArea = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D extendedSupportPolygon = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D safeCMPArea = new FrameConvexPolygon2D();
 
-   private final SideDependentList<FrameConvexPolygon2d> defaultFootPolygons;
+   private final SideDependentList<FrameConvexPolygon2D> defaultFootPolygons;
    private final FramePoint2D capturePoint2d = new FramePoint2D();
-   private final FrameConvexPolygon2d safeArea = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D safeArea = new FrameConvexPolygon2D();
 
-   private final FrameConvexPolygon2d tempPolygon1 = new FrameConvexPolygon2d();
-   private final FrameConvexPolygon2d tempPolygon2 = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D tempPolygon1 = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D tempPolygon2 = new FrameConvexPolygon2D();
 
    private final YoFrameConvexPolygon2d yoSafeArea;
    private final YoFrameConvexPolygon2d yoSafeCMPArea;
@@ -92,7 +92,7 @@ public class MomentumRecoveryControlModule
    private final YoFramePoint2d yoCapturePoint;
 
 
-   public MomentumRecoveryControlModule(SideDependentList<FrameConvexPolygon2d> defaultFootPolygons, double maxAllowedDistanceCMPSupport,
+   public MomentumRecoveryControlModule(SideDependentList<FrameConvexPolygon2D> defaultFootPolygons, double maxAllowedDistanceCMPSupport,
                                         boolean alwaysAllowMomentum, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.defaultFootPolygons = defaultFootPolygons;
@@ -190,7 +190,7 @@ public class MomentumRecoveryControlModule
       }
 
       if (yoSafeArea != null)
-         yoSafeArea.setFrameConvexPolygon2d(safeArea);
+         yoSafeArea.set(safeArea);
       if (yoCapturePoint != null)
          yoCapturePoint.set(capturePoint2d);
    }
@@ -205,30 +205,37 @@ public class MomentumRecoveryControlModule
       {
          List<Point2D> predictedContactPoints = nextFootstep.getPredictedContactPoints();
          if (predictedContactPoints != null && !predictedContactPoints.isEmpty())
-            tempPolygon1.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), predictedContactPoints);
+         {
+            tempPolygon1.clear(nextFootstep.getSoleReferenceFrame());
+            for (int i = 0; i < predictedContactPoints.size(); i++)
+               tempPolygon1.addVertex(predictedContactPoints.get(i));
+            tempPolygon1.update();
+         }
          else
-            tempPolygon1.setIncludingFrameAndUpdate(defaultFootPolygons.get(nextFootstep.getRobotSide()));
+         {
+            tempPolygon1.setIncludingFrame(defaultFootPolygons.get(nextFootstep.getRobotSide()));
+         }
 
-         tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
+         tempPolygon2.setIncludingFrame(nextFootstep.getSoleReferenceFrame(), tempPolygon1);
          tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
          polygonShrinker.scaleConvexPolygon(tempPolygon2, -distanceToExtendUpcomingFoothold.getDoubleValue(), tempPolygon1);
          safeArea.addVertices(tempPolygon1);
          safeArea.update();
       }
 
-      safeCMPArea.setIncludingFrameAndUpdate(safeArea);
+      safeCMPArea.setIncludingFrame(safeArea);
 
       // hysteresis:
       // shrink the safe area if we are already using upper body momentum
       if (usingUpperBodyMomentum.getBooleanValue())
       {
          polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaIfRecoveringSS.getDoubleValue(), tempPolygon1);
-         safeArea.setIncludingFrameAndUpdate(tempPolygon1);
+         safeArea.setIncludingFrame(tempPolygon1);
       }
       else
       {
          polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaSS.getDoubleValue(), tempPolygon1);
-         safeArea.setIncludingFrameAndUpdate(tempPolygon1);
+         safeArea.setIncludingFrame(tempPolygon1);
       }
 
       safeArea.changeFrameAndProjectToXYPlane(worldFrame);
@@ -249,20 +256,20 @@ public class MomentumRecoveryControlModule
 
    private void checkIfUseUpperBodyMomentumDoubleSupport()
    {
-      safeArea.setIncludingFrameAndUpdate(supportPolygon);
-      safeCMPArea.setIncludingFrameAndUpdate(safeArea);
+      safeArea.setIncludingFrame(supportPolygon);
+      safeCMPArea.setIncludingFrame(safeArea);
 
       // hysteresis:
       // shrink the safe area if we are already using upper body momentum
       if (usingUpperBodyMomentum.getBooleanValue())
       {
          polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaIfRecoveringDS.getDoubleValue(), tempPolygon1);
-         safeArea.setIncludingFrameAndUpdate(tempPolygon1);
+         safeArea.setIncludingFrame(tempPolygon1);
       }
       else
       {
          polygonShrinker.scaleConvexPolygon(safeArea, distanceToShrinkSafeAreaDS.getDoubleValue(), tempPolygon1);
-         safeArea.setIncludingFrameAndUpdate(tempPolygon1);
+         safeArea.setIncludingFrame(tempPolygon1);
       }
 
       capturePoint2d.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
@@ -315,9 +322,9 @@ public class MomentumRecoveryControlModule
       robotSideUpToDate = true;
    }
 
-   public void setSupportPolygon(FrameConvexPolygon2d supportPolygon)
+   public void setSupportPolygon(FrameConvexPolygon2D supportPolygon)
    {
-      this.supportPolygon.setIncludingFrameAndUpdate(supportPolygon);
+      this.supportPolygon.setIncludingFrame(supportPolygon);
       this.supportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
       supportUpToDate = true;
    }
@@ -327,25 +334,25 @@ public class MomentumRecoveryControlModule
       this.nextFootstep = nextFootstep;
    }
 
-   public void getCMPProjectionArea(FrameConvexPolygon2d areaToProjectInto, FrameConvexPolygon2d safeArea)
+   public void getCMPProjectionArea(FrameConvexPolygon2D areaToProjectInto, FrameConvexPolygon2D safeArea)
    {
       if (alwaysAllowMomentum.getBooleanValue() || usingUpperBodyMomentum.getBooleanValue())
       {
          polygonShrinker.scaleConvexPolygon(supportPolygon, -maxDistanceCMPSupport.getDoubleValue(), extendedSupportPolygon);
-         areaToProjectInto.setIncludingFrameAndUpdate(extendedSupportPolygon);
+         areaToProjectInto.setIncludingFrame(extendedSupportPolygon);
          safeCMPArea.changeFrameAndProjectToXYPlane(worldFrame);
-         safeArea.setIncludingFrameAndUpdate(safeCMPArea);
+         safeArea.setIncludingFrame(safeCMPArea);
       }
       else
       {
-         areaToProjectInto.setIncludingFrameAndUpdate(supportPolygon);
+         areaToProjectInto.setIncludingFrame(supportPolygon);
          safeArea.clearAndUpdate(worldFrame);
       }
 
       if (yoSafeCMPArea != null)
-         yoSafeCMPArea.setFrameConvexPolygon2d(safeArea);
+         yoSafeCMPArea.set(safeArea);
       if (yoProjectionArea != null)
-         yoProjectionArea.setFrameConvexPolygon2d(areaToProjectInto);
+         yoProjectionArea.set(areaToProjectInto);
    }
 
    public boolean getUseHighMomentumWeight()

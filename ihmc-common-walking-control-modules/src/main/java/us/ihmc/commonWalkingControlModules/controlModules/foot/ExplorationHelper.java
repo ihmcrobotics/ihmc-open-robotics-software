@@ -4,6 +4,8 @@ import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -11,8 +13,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -41,7 +41,7 @@ public class ExplorationHelper
    private int currentCornerIdx = 0;
    private int lastCornerCropped = 0;
    private double lastShrunkTime = 0.0;
-   private final FrameConvexPolygon2d supportPolygon = new FrameConvexPolygon2d();
+   private final FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
    private final FramePoint2D currentCorner = new FramePoint2D();
    private final YoInteger yoCurrentCorner;
 
@@ -113,6 +113,8 @@ public class ExplorationHelper
       lastShrunkTime = 0.0;
    }
 
+   private final FramePoint2D centroid = new FramePoint2D();
+
    private void computeDesiredCenterOfPressure(double time, boolean footholdWasUpdated)
    {
       if (footholdWasUpdated)
@@ -133,8 +135,8 @@ public class ExplorationHelper
       int corner = currentCornerIdx % corners;
       yoCurrentCorner.set(corner);
 
-      supportPolygon.getFrameVertex(corner, currentCorner);
-      FramePoint2D centroid = supportPolygon.getCentroid();
+      currentCorner.setIncludingFrame(supportPolygon.getVertex(corner));
+      centroid.setIncludingFrame(supportPolygon.getCentroid());
 
       currentCorner.changeFrame(soleFrame);
       centroid.changeFrame(soleFrame);

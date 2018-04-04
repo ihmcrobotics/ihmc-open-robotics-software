@@ -124,13 +124,13 @@ public class RateLimitedYoFrameQuaternion extends YoFrameQuaternion
          difference.preMultiplyConjugateOther(this);
       }
 
-      difference.get(limitedRotationVector);
+      difference.getRotationVector(limitedRotationVector);
       boolean clipped = limitedRotationVector.clipToMaxLength(dt * maxRateVariable.getValue());
       limited.set(clipped);
 
       if (clipped)
       {
-         difference.set(limitedRotationVector);
+         difference.setRotationVector(limitedRotationVector);
          multiply(difference);
       }
       else

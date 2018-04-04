@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.Polygon2DMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -78,7 +79,7 @@ public class PlanarRegionMessageConverter
       for (int polygonIndex = 0; polygonIndex < convexPolygonsMessage.size(); polygonIndex++)
       {
          List<? extends Point2DReadOnly> vertices2D = convexPolygonsMessage.get(polygonIndex).getVertices().stream().map(Point2D::new).collect(Collectors.toList());
-         ConvexPolygon2D convexPolygon = new ConvexPolygon2D(vertices2D);
+         ConvexPolygon2D convexPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(vertices2D));
          convexPolygons.add(convexPolygon);
       }
 

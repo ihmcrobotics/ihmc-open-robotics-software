@@ -442,7 +442,7 @@ public class RotationToolsTest
          Vector3D expectedAngularVelocity = new Vector3D();
          Quaternion difference = new Quaternion();
          difference.difference(previousRotation, rotation);
-         difference.get(expectedAngularVelocity);
+         difference.getRotationVector(expectedAngularVelocity);
          expectedAngularVelocity.scale(1.0 / dt);
 
          Vector3D actualAngularVelocity = new Vector3D();

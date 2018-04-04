@@ -92,7 +92,7 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
    @Override
    public void setGoalPosition(FramePoint3D goalPosition)
    {
-      this.goalPosition.setAndMatchFrame(goalPosition);
+      this.goalPosition.setMatchingFrame(goalPosition);
    }
 
    @Override

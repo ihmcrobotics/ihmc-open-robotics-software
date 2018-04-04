@@ -173,7 +173,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       RigidBodyTransform nodeTransform = new RigidBodyTransform();
       FootstepNodeTools.getNodeTransform(nodeToSnap, nodeTransform);
       ConvexPolygon2D footholdPolygon = new ConvexPolygon2D(unitSquare);
-      footholdPolygon.applyTransformAndProjectToXYPlane(nodeTransform);
+      footholdPolygon.applyTransform(nodeTransform, false);
 
       PlanarRegion planarRegion = createPlanarRegion(regionToWorldFrameTransform, footholdPolygon);
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegion);

@@ -169,8 +169,8 @@ public class WholeBodyVirtualModelControlSolver
          rootJoint.getWrench(residualRootJointWrench);
          residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
          residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
-         yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
-         yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+         yoResidualRootJointForce.setMatchingFrame(residualRootJointForce);
+         yoResidualRootJointTorque.setMatchingFrame(residualRootJointTorque);
       }
 
       planeContactWrenchProcessor.compute(externalWrenchSolution);

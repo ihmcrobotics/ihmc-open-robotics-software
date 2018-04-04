@@ -67,7 +67,7 @@ public class LongestFeasibleStepChooser implements NextSwingLegChooser
          
          workspaceCenterPoint.changeFrame(commonQuadrupedReferenceFrames.getHipPitchFrame(robotQuadrant));
          workspaceCenterPoint.set(0.0, 0.0, hipHeight);
-         footstepWorkspaceCenterFramePoints.get(robotQuadrant).setAndMatchFrame(workspaceCenterPoint);
+         footstepWorkspaceCenterFramePoints.get(robotQuadrant).setMatchingFrame(workspaceCenterPoint);
          
          // Update YoGraphicEllipsoids to footstep workspace
          Vector3D radiiToPack = new Vector3D();

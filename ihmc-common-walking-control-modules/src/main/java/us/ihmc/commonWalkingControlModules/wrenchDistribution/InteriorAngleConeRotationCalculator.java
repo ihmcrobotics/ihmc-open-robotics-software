@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
@@ -19,7 +19,7 @@ public class InteriorAngleConeRotationCalculator implements FrictionConeRotation
    public double computeConeRotation(YoPlaneContactState yoPlaneContactState, int contactPointIndex)
    {
       yoPlaneContactState.getContactPoints().get(contactPointIndex).getPosition2d(point2d);
-      ConvexPolygon2D supportPolygon = yoPlaneContactState.getSupportPolygonInPlaneFrame();
+      ConvexPolygon2DReadOnly supportPolygon = yoPlaneContactState.getSupportPolygonInPlaneFrame();
       int vertexIndex = supportPolygon.getClosestVertexIndex(point2d);
 
       double angleOfEdge = getAngleOfEdgeAfterPoint(supportPolygon, vertexIndex);
@@ -34,7 +34,7 @@ public class InteriorAngleConeRotationCalculator implements FrictionConeRotation
    private final Vector2D edgeDirection1 = new Vector2D();
    private final Vector2D edgeDirection2 = new Vector2D();
 
-   public double getInteriorAngle(ConvexPolygon2D supportPolygon, int vertexIndex)
+   public double getInteriorAngle(ConvexPolygon2DReadOnly supportPolygon, int vertexIndex)
    {
       supportPolygon.getEdge(supportPolygon.getPreviousVertexIndex(vertexIndex), edge1);
       supportPolygon.getEdge(vertexIndex, edge2);
@@ -53,7 +53,7 @@ public class InteriorAngleConeRotationCalculator implements FrictionConeRotation
    private final Vector2D edgeDirection = new Vector2D();
    private final Vector2D xAxis = new Vector2D();
 
-   public double getAngleOfEdgeAfterPoint(ConvexPolygon2D supportPolygon, int vertexIndex)
+   public double getAngleOfEdgeAfterPoint(ConvexPolygon2DReadOnly supportPolygon, int vertexIndex)
    {
       supportPolygon.getEdge(vertexIndex, edge);
       edgeDirection.sub(edge.getSecondEndpoint(), edge.getFirstEndpoint());
