@@ -22,7 +22,7 @@ testSuites {
 }
 
 mainDependencies {
-   compile group: 'us.ihmc', name: 'euclid', version: '0.8.1'
+   compile group: 'us.ihmc', name: 'euclid', version: '0.8.2'
    compile group: 'org.ejml', name: 'denseC64', version: '0.30'
    compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
    compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
