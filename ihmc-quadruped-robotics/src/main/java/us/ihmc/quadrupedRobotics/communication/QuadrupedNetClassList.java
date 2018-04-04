@@ -1,27 +1,22 @@
 package us.ihmc.quadrupedRobotics.communication;
 
-import java.util.ArrayList;
-
 import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.*;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.quadrupedRobotics.communication.packets.*;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
@@ -29,6 +24,8 @@ import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+
+import java.util.ArrayList;
 
 public class QuadrupedNetClassList extends NetClassList
 {
@@ -91,8 +88,6 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(QuadrupedTimedStepListMessage.class);
       registerPacketClass(QuadrupedTimedStepListMessage.class);
 
-      registerPacketField(QuadrupedTimedStep.class);
-      registerPacketClass(QuadrupedTimedStepPacket.class);
       registerPacketField(ArrayList.class);
       registerPacketField(Point3D.class);
       registerPacketField(RobotQuadrant.class);
