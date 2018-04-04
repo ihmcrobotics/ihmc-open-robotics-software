@@ -5,8 +5,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 public class VectorMean extends Vector3D
 {
-   private static final long serialVersionUID = 2936790417418842327L;
-
    private int sampleSize = 0;
 
    public VectorMean()
