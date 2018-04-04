@@ -736,7 +736,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         newContactPoints = generateContactPointsForFrontOfFoot(getRobotModel().getWalkingControllerParameters(), 0.51);
+         newContactPoints = generateContactPointsForFrontOfFoot(getRobotModel().getWalkingControllerParameters(), 0.52);
          FramePoint3D stepLocation = new FramePoint3D(fullRobotModel.getSoleFrame(robotSide.getOppositeSide()), stepLength,
                                                       robotSide.negateIfRightSide(stepWidth), 0.0);
 

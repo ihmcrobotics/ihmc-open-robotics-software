@@ -59,7 +59,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    public void testUnknownStepDownOneFootOnEachStepWithUncertainty() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.07;
-      super.testUnknownStepDownOneFootOnEachStepWithUncertainty(stepDownHeight, 0.35, 0.38);
+      super.testUnknownStepDownOneFootOnEachStepWithUncertainty(stepDownHeight, 0.345, 0.38);
    }
 
    /** {@inheritDoc} */
