@@ -1,7 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -29,13 +27,7 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepCommandConsumer;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPreplannedStepStream;
-import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStreamMultiplexer;
-import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
-import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -45,6 +37,8 @@ import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedSteppingState implements QuadrupedController
 {
@@ -178,6 +172,7 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
 
+      commandConsumer.update();
       commandConsumer.consumeFootCommands();
 
       QuadrupedSteppingRequestedEvent reqEvent = requestedEvent.getAndSet(null);
