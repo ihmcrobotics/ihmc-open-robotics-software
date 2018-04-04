@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import junit.framework.AssertionFailedError;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
@@ -34,7 +33,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
    private final AtomicBoolean createAssertionFailedException = new AtomicBoolean();
    private final AtomicBoolean printSuccessMessage = new AtomicBoolean();
-   private final AtomicBoolean createSCSCrashedException = new AtomicBoolean();
+   private final AtomicBoolean scsHasCrashed = new AtomicBoolean();
 
    private String assertionFailedMessage = null;
    private String scsCrashedException = null;
@@ -184,12 +183,13 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
 
       createAssertionFailedException.set(false);
       printSuccessMessage.set(false);
+      scsHasCrashed.set(false);
       
       printSimulatingMessage();
 
       scs.simulate();
 
-      while (!createAssertionFailedException.get() && !printSuccessMessage.get())
+      while (!createAssertionFailedException.get() && !printSuccessMessage.get() && !scsHasCrashed.get())
       {
          Thread.yield();
       }
@@ -204,7 +204,7 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
          printSuccessMessage();
          stop();
       }
-      else if(createSCSCrashedException.get())
+      else if(scsHasCrashed.get())
       {
          stop();
          PrintTools.error(scsCrashedException);
@@ -306,6 +306,6 @@ public class GoalOrientedTestConductor implements SimulationDoneListener
          PrintTools.error(throwable.getMessage());
       }
       scsCrashedException = throwable.getMessage();
-      createSCSCrashedException.set(true);
+      scsHasCrashed.set(true);
    }
 }
