@@ -1,9 +1,7 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.YoTimeInterval;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -47,52 +45,9 @@ public class YoQuadrupedTimedStep extends QuadrupedTimedStep
    }
 
    @Override
-   public void getTimeInterval(TimeInterval timeInterval)
+   protected Point3DBasics getGoalPosition()
    {
-      this.timeInterval.get(timeInterval);
-   }
-
-   @Override
-   public void setTimeInterval(TimeInterval timeInterval)
-   {
-      this.timeInterval.set(timeInterval);
-   }
-
-   private final Point3D tempGoalPosition = new Point3D();
-   /**
-    * Unsafe for external use.
-    */
-   @Override
-   protected Point3D getGoalPosition()
-   {
-      tempGoalPosition.set(goalPosition);
-      return tempGoalPosition;
-   }
-
-   @Override
-   public void getGoalPosition(Point3D goalPosition)
-   {
-      goalPosition.set(this.goalPosition);
-   }
-
-   @Override
-   public void getGoalPosition(FramePoint3D goalPosition)
-   {
-      ReferenceFrame originalFrame = goalPosition.getReferenceFrame();
-      goalPosition.setIncludingFrame(this.goalPosition);
-      goalPosition.changeFrame(originalFrame);
-   }
-
-   @Override
-   public void setGoalPosition(Point3DReadOnly goalPosition)
-   {
-      this.goalPosition.set(goalPosition);
-   }
-
-   @Override
-   public void setGoalPosition(FramePoint3D goalPosition)
-   {
-      this.goalPosition.setMatchingFrame(goalPosition);
+      return goalPosition;
    }
 
    @Override

@@ -1,14 +1,11 @@
 package us.ihmc.quadrupedRobotics.planning;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
 import us.ihmc.quadrupedRobotics.util.TimeIntervalProvider;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalProvider
@@ -25,7 +22,7 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
       setTimeInterval(timeInterval);
    }
 
-   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3D goalPosition, double groundClearance, TimeInterval timeInterval)
+   public QuadrupedTimedStep(RobotQuadrant robotQuadrant, Point3DBasics goalPosition, double groundClearance, TimeInterval timeInterval)
    {
       this();
       setRobotQuadrant(robotQuadrant);
@@ -39,24 +36,20 @@ public class QuadrupedTimedStep extends QuadrupedStep implements TimeIntervalPro
       this(other.getRobotQuadrant(), other.getGoalPosition(), other.getGroundClearance(), other.getTimeInterval());
    }
 
+   @Override
    public TimeInterval getTimeInterval()
    {
       return timeInterval;
    }
 
-   public void getTimeInterval(TimeInterval timeInterval)
-   {
-      this.timeInterval.get(timeInterval);
-   }
-
    public void setTimeInterval(TimeInterval timeInterval)
    {
-      this.timeInterval.set(timeInterval);
+      getTimeInterval().set(timeInterval);
    }
 
    public void setTimeInterval(TimeIntervalCommand command)
    {
-      this.timeInterval.set(command);
+      getTimeInterval().set(command);
    }
 
    public void set(QuadrupedTimedStep other)
