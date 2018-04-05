@@ -14,6 +14,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
@@ -51,6 +52,8 @@ public class QuadrupedBalanceManager
    private final YoDouble robotTimestamp;
 
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
+
+   private final QuadrupedCenterOfMassHeightManager centerOfMassHeightManager;
    private final QuadrupedMomentumRateOfChangeModule momentumRateOfChangeModule;
 
    private final DCMPlanner dcmPlanner;
@@ -122,6 +125,8 @@ public class QuadrupedBalanceManager
                                   yoGraphicsListRegistry);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
+
+      centerOfMassHeightManager = new QuadrupedCenterOfMassHeightManager(controllerToolbox, physicalProperties, parentRegistry);
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, postureProvider, registry, yoGraphicsListRegistry);
 
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), registry);
@@ -215,6 +220,11 @@ public class QuadrupedBalanceManager
       }
    }
 
+   public void handleBodyHeightCommand(QuadrupedBodyHeightCommand command)
+   {
+      centerOfMassHeightManager.handleBodyHeightCommand(command);
+   }
+
    public void clearStepSequence()
    {
       dcmPlanner.clearStepSequence();
@@ -267,15 +277,17 @@ public class QuadrupedBalanceManager
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
       dcmPlanner.setCoMHeight(linearInvertedPendulumModel.getComHeight());
 
-      // update desired horizontal com forces
       dcmPlanner.computeDcmSetpoints(contactStates, yoDesiredDCMPosition, yoDesiredDCMVelocity);
       dcmPlanner.getFinalDesiredDCM(yoFinalDesiredDCM);
 
+      double desiredCenterOfMassHeightAcceleration = centerOfMassHeightManager.computeDesiredCenterOfMassHeightAcceleration();
+
+      momentumRateOfChangeModule.setDesiredCenterOfMassHeightAcceleration(desiredCenterOfMassHeightAcceleration);
       momentumRateOfChangeModule
             .compute(momentumRateForCommand, yoVrpPositionSetpoint, yoDesiredCMP, dcmPositionEstimate, yoDesiredDCMPosition, yoDesiredDCMVelocity);
 
-      momentumRateForCommand.changeFrame(worldFrame);
-      momentumRateForCommand.subZ(controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getRuntimeEnvironment().getGravity());
+      //      momentumRateForCommand.changeFrame(worldFrame);
+      //      momentumRateForCommand.subZ(controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getRuntimeEnvironment().getGravity());
 
       momentumRateCommand.setLinearMomentumRate(momentumRateForCommand);
       momentumRateCommand.setLinearWeights(linearMomentumRateWeight);

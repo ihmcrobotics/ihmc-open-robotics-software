@@ -1,10 +1,8 @@
 package us.ihmc.quadrupedRobotics.controlModules;
 
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
@@ -26,21 +24,23 @@ public class QuadrupedMomentumRateOfChangeModule
    private final QuadrupedPostureInputProviderInterface postureProvider;
 
    private final DivergentComponentOfMotionController dcmPositionController;
-   private final QuadrupedComPositionController comPositionController;
-   private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
+//   private final QuadrupedComPositionController comPositionController;
+//   private final QuadrupedComPositionController.Setpoints comPositionControllerSetpoints;
 
    private final QuadrupedForceControllerToolbox controllerToolbox;
    private final LinearInvertedPendulumModel linearInvertedPendulumModel;
    private final double gravity;
    private final double mass;
 
-   private final ParameterizedPID3DGains comPositionGainsParameter;
-   private final DoubleParameter comPositionGravityCompensationParameter = new DoubleParameter("comPositionGravityCompensation", registry, 1);
+//   private final ParameterizedPID3DGains comPositionGainsParameter;
+//   private final DoubleParameter comPositionGravityCompensationParameter = new DoubleParameter("comPositionGravityCompensation", registry, 1);
 
    private final ReferenceFrame supportFrame;
    private final FramePoint3D cmpPositionSetpoint = new FramePoint3D();
 
    private final ReferenceFrame centerOfMassFrame;
+
+   private double desiredCoMHeightAcceleration;
 
    public QuadrupedMomentumRateOfChangeModule(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
                                               YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -60,13 +60,13 @@ public class QuadrupedMomentumRateOfChangeModule
       LinearInvertedPendulumModel linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       dcmPositionController = new DivergentComponentOfMotionController(comFrame, runtimeEnvironment.getControlDT(), linearInvertedPendulumModel, registry);
-      comPositionController = new QuadrupedComPositionController(comZUpFrame, runtimeEnvironment.getControlDT(), registry);
-      comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
+//      comPositionController = new QuadrupedComPositionController(comZUpFrame, runtimeEnvironment.getControlDT(), registry);
+//      comPositionControllerSetpoints = new QuadrupedComPositionController.Setpoints();
 
-      DefaultPID3DGains defaultComPositionGains = new DefaultPID3DGains();
-      defaultComPositionGains.setProportionalGains(0.0, 0.0, 5000.0);
-      defaultComPositionGains.setDerivativeGains(0.0, 0.0, 750.0);
-      comPositionGainsParameter = new ParameterizedPID3DGains("_comPosition", GainCoupling.NONE, true, defaultComPositionGains, registry);
+//      DefaultPID3DGains defaultComPositionGains = new DefaultPID3DGains();
+//      defaultComPositionGains.setProportionalGains(0.0, 0.0, 5000.0);
+//      defaultComPositionGains.setDerivativeGains(0.0, 0.0, 750.0);
+//      comPositionGainsParameter = new ParameterizedPID3DGains("_comPosition", GainCoupling.NONE, true, defaultComPositionGains, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -74,28 +74,42 @@ public class QuadrupedMomentumRateOfChangeModule
    public void initialize()
    {
       dcmPositionController.reset();
-      comPositionControllerSetpoints.initialize(controllerToolbox.getTaskSpaceEstimates().getComPosition());
-      comPositionController.reset();
+//      comPositionControllerSetpoints.initialize(controllerToolbox.getTaskSpaceEstimates().getComPosition());
+//      comPositionController.reset();
+   }
+   
+   public void setDesiredCenterOfMassHeightAcceleration(double desiredCoMHeightAcceleration)
+   {
+      this.desiredCoMHeightAcceleration = desiredCoMHeightAcceleration;
    }
 
    public void compute(FrameVector3D linearMomentumRateOfChangeToPack, FixedFramePoint3DBasics vrpPositionSetpointToPack, FixedFramePoint3DBasics cmpPositionSetpointToPack,
                        FramePoint3DReadOnly dcmPositionEstimate, FramePoint3DReadOnly dcmPositionSetpoint,
                        FrameVector3DReadOnly dcmVelocitySetpoint)
    {
-      comPositionController.getGains().set(comPositionGainsParameter);
+//      comPositionController.getGains().set(comPositionGainsParameter);
 
       dcmPositionController.compute(vrpPositionSetpointToPack, dcmPositionEstimate, dcmPositionSetpoint, dcmVelocitySetpoint);
 
+      double vrpHeightOffsetFromHeightManagement = desiredCoMHeightAcceleration * gravity / linearInvertedPendulumModel.getComHeight();
+      vrpPositionSetpointToPack.subZ(vrpHeightOffsetFromHeightManagement);
       cmpPositionSetpoint.set(vrpPositionSetpointToPack);
       cmpPositionSetpoint.subZ(linearInvertedPendulumModel.getComHeight());
+
+
       linearInvertedPendulumModel.computeComForce(linearMomentumRateOfChangeToPack, cmpPositionSetpoint);
+
 
       cmpPositionSetpoint.changeFrame(cmpPositionSetpointToPack.getReferenceFrame());
       cmpPositionSetpointToPack.set(cmpPositionSetpoint);
 
-      linearMomentumRateOfChangeToPack.changeFrame(supportFrame);
+
+      linearMomentumRateOfChangeToPack.changeFrame(worldFrame);
+      linearMomentumRateOfChangeToPack.subZ(mass * gravity);
+
 
       // update desired com position, velocity, and vertical force
+      /*
       comPositionControllerSetpoints.getComPosition().changeFrame(supportFrame);
       comPositionControllerSetpoints.getComPosition().set(postureProvider.getComPositionInput());
       comPositionControllerSetpoints.getComVelocity().changeFrame(supportFrame);
@@ -104,8 +118,9 @@ public class QuadrupedMomentumRateOfChangeModule
       comPositionControllerSetpoints.getComForceFeedforward().set(linearMomentumRateOfChangeToPack);
       comPositionControllerSetpoints.getComForceFeedforward().setZ(comPositionGravityCompensationParameter.getValue() * mass * gravity);
 
-      comPositionController.compute(linearMomentumRateOfChangeToPack, comPositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates());
+      comPositionController.compute(linearMomentumRateOfChangeToPack, comPositionControllerSetpoints, controllerToolbox.getTaskSpaceEstimates());*/
    }
+
 
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
    private final FrameVector2D achievedCoMAcceleration2d = new FrameVector2D();
