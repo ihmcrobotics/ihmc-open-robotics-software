@@ -128,6 +128,9 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(QuadrupedBodyOrientationMessage.class);
       registerPacketClass(QuadrupedBodyOrientationMessage.class);
 
+      registerPacketField(QuadrupedBodyHeightMessage.class);
+      registerPacketClass(QuadrupedBodyHeightMessage.class);
+
       registerPacketClass(ComPositionPacket.class);
       registerPacketField(Point3D.class);
 
