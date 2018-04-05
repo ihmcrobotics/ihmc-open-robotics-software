@@ -23,7 +23,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 import javafx.scene.layout.StackPane;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.ParameterTuningTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 import us.ihmc.parameterTuner.guiElements.GuiParameterStatus;
@@ -191,18 +190,16 @@ public class GuiController
 
       changeCollector.stopRecording();
       externallyChangesParameters.stream().forEach(externalParameter -> {
-         GuiParameter localParameter = parameterMap.get(externalParameter.getUniqueName());
-         if (localParameter == null)
+         String uniqueName = externalParameter.getUniqueName();
+         GuiParameter localParameter = parameterMap.get(uniqueName);
+         if (changeCollector.isPending(uniqueName))
          {
-            PrintTools.warn("Did not find " + externalParameter.getName() + " skipping...");
+            changeCollector.parameterWasUpdated(uniqueName, externalParameter.getCurrentValue());
          }
-         else
+         else if (!localParameter.getCurrentValue().equals(externalParameter.getCurrentValue()))
          {
-            if (!localParameter.getCurrentValue().equals(externalParameter.getCurrentValue()))
-            {
-               localParameter.setValueAndStatus(externalParameter);
-               localParameter.saveStateForReset();
-            }
+            localParameter.setValueAndStatus(externalParameter);
+            localParameter.saveStateForReset();
          }
       });
       changeCollector.startRecording();
