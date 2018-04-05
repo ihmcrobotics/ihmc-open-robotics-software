@@ -55,7 +55,8 @@ public class QuadrupedCenterOfMassHeightManager
 
    private final double controlDT;
 
-   public QuadrupedCenterOfMassHeightManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties, YoVariableRegistry parentRegistry)
+   public QuadrupedCenterOfMassHeightManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
+                                             YoVariableRegistry parentRegistry)
    {
       this.robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
@@ -68,8 +69,8 @@ public class QuadrupedCenterOfMassHeightManager
       centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
 
       PIDGains defaultComPositionGains = new PIDGains();
-      defaultComPositionGains.setKp(5000.0);
-      defaultComPositionGains.setKd(750.0);
+      defaultComPositionGains.setKp(50.0);
+      defaultComPositionGains.setKd(5.0);
       comPositionGainsParameter = new ParameterizedPIDGains("_comHeight", defaultComPositionGains, registry);
 
       linearMomentumZPDController = new PIDController("linearMomentumZPDController", registry);
@@ -125,14 +126,25 @@ public class QuadrupedCenterOfMassHeightManager
       centerOfMassHeightTrajectory.initialize();
    }
 
-   public double computeDesiredCenterOfMassHeightAcceleration()
+   public void update()
    {
       centerOfMassHeightTrajectory.compute(robotTimestamp.getDoubleValue());
       centerOfMassHeightTrajectory.getLinearData(desiredPosition, desiredVelocity, desiredAcceleration);
 
       desiredPosition.changeFrame(worldFrame);
       desiredVelocity.changeFrame(worldFrame);
+      desiredHeightInWorld.set(desiredPosition.getZ());
+      desiredVelocityInWorld.set(desiredVelocity.getZ());
+   }
 
+   public double getDesiredHeight(ReferenceFrame referenceFrame)
+   {
+      desiredPosition.changeFrame(referenceFrame);
+      return desiredPosition.getZ();
+   }
+
+   public double computeDesiredCenterOfMassHeightAcceleration()
+   {
       if (controlBodyHeight.getBooleanValue())
       {
          currentPosition.setToZero(bodyFrame);
@@ -149,8 +161,6 @@ public class QuadrupedCenterOfMassHeightManager
 
       currentHeightInWorld.set(currentPosition.getZ());
       currentVelocityInWorld.set(currentVelocity.getZ());
-      desiredHeightInWorld.set(desiredPosition.getZ());
-      desiredVelocityInWorld.set(desiredVelocity.getZ());
 
       linearMomentumZPDController.setGains(comPositionGainsParameter);
       return linearMomentumZPDController.compute(currentPosition.getZ(), desiredPosition.getZ(), currentVelocity.getZ(), desiredVelocity.getZ(), controlDT);

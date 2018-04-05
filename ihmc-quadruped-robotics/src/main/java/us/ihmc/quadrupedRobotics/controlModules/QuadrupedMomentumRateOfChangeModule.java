@@ -33,7 +33,7 @@ public class QuadrupedMomentumRateOfChangeModule
    private final double mass;
 
 //   private final ParameterizedPID3DGains comPositionGainsParameter;
-//   private final DoubleParameter comPositionGravityCompensationParameter = new DoubleParameter("comPositionGravityCompensation", registry, 1);
+   private final DoubleParameter comPositionGravityCompensationParameter = new DoubleParameter("comPositionGravityCompensation", registry, 1);
 
    private final ReferenceFrame supportFrame;
    private final FramePoint3D cmpPositionSetpoint = new FramePoint3D();
@@ -91,7 +91,7 @@ public class QuadrupedMomentumRateOfChangeModule
 
       dcmPositionController.compute(vrpPositionSetpointToPack, dcmPositionEstimate, dcmPositionSetpoint, dcmVelocitySetpoint);
 
-      double vrpHeightOffsetFromHeightManagement = desiredCoMHeightAcceleration * gravity / linearInvertedPendulumModel.getComHeight();
+      double vrpHeightOffsetFromHeightManagement = comPositionGravityCompensationParameter.getValue() * desiredCoMHeightAcceleration * linearInvertedPendulumModel.getComHeight() / gravity;
       vrpPositionSetpointToPack.subZ(vrpHeightOffsetFromHeightManagement);
       cmpPositionSetpoint.set(vrpPositionSetpointToPack);
       cmpPositionSetpoint.subZ(linearInvertedPendulumModel.getComHeight());
