@@ -298,16 +298,6 @@ public class KinematicsToolboxHelper
 
       controlFrame.setPoseAndUpdate(endEffector.getBodyFixedFrame().getTransformToRoot());
 
-      FramePoint3D currentPosition = new FramePoint3D();
-      feedbackControllerDataHolder.getPositionData(endEffector, currentPosition, Type.CURRENT);
-      currentPosition.changeFrame(worldFrame);
-      controlFrame.setPositionAndUpdate(currentPosition);
-
-      FrameQuaternion currentOrientation = new FrameQuaternion();
-      feedbackControllerDataHolder.getOrientationData(endEffector, currentOrientation, Type.CURRENT);
-      currentOrientation.changeFrame(worldFrame);
-      controlFrame.setOrientationAndUpdate(currentOrientation);
-
       FrameVector3D rotationError = new FrameVector3D();
       feedbackControllerDataHolder.getVectorData(endEffector, rotationError, Type.ERROR, Space.ROTATION_VECTOR);
       rotationError.changeFrame(controlFrame);
