@@ -181,4 +181,9 @@ public class Sliderboard
       sliderboardDataReciever.clearListeners(sliderIndex);
    }
 
+   public void removeListener(SliderboardListener sliderListener, int sliderIndex)
+   {
+      sliderboardDataReciever.removeListener(sliderListener, sliderIndex);
+   }
+
 }
