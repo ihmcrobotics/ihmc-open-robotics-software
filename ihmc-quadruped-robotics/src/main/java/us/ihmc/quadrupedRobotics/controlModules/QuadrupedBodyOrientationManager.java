@@ -129,7 +129,7 @@ public class QuadrupedBodyOrientationManager
          bodyOrientationTrajectory.clear();
       }
 
-      bodyOrientationTrajectory.appendWaypoints(command.getSO3Trajectory().getTrajectoryPointList());
+      bodyOrientationTrajectory.appendWaypoints(so3Trajectory.getTrajectoryPointList());
       bodyOrientationTrajectory.initialize();
    }
 
