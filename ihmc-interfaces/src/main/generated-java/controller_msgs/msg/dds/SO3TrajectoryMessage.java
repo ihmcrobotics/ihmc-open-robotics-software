@@ -49,7 +49,7 @@ public class SO3TrajectoryMessage extends Packet<SO3TrajectoryMessage> implement
 
    public SO3TrajectoryMessage()
    {
-      taskspace_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SO3TrajectoryPointMessage>(2000,
+      taskspace_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SO3TrajectoryPointMessage>(1,
                                                                                                                            controller_msgs.msg.dds.SO3TrajectoryPointMessage.class,
                                                                                                                            new controller_msgs.msg.dds.SO3TrajectoryPointMessagePubSubType());
       selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
