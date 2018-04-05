@@ -1,54 +1,55 @@
 package us.ihmc.quadrupedRobotics.controller.force;
 
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
-
+import controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerEventPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedForceControllerStatePacket;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
+import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedDoNothingController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFallController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedFreezeController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedJointInitializationController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedForceBasedStandPrepController;
-import us.ihmc.quadrupedRobotics.controller.force.states.QuadrupedSteppingState;
+import us.ihmc.quadrupedRobotics.controller.force.states.*;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
 import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventTrigger;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
+import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal finite state machine.
  * <p/>
  * Users can manually fire events on the {@code userTrigger} YoVariable.
  */
-public class QuadrupedForceControllerManager implements QuadrupedControllerManager
+public class QuadrupedForceControllerManager implements QuadrupedControllerManager, CloseableAndDisposable
 {
+   private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoEnum<QuadrupedForceControllerRequestedEvent> lastEvent = new YoEnum<>("lastEvent", registry, QuadrupedForceControllerRequestedEvent.class);
 
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
-
-   private final QuadrupedForceControllerStatePacket quadrupedForceControllerStatePacket;
 
    private final StateMachine<QuadrupedForceControllerEnum, QuadrupedController> stateMachine;
    private EventTrigger trigger;
@@ -57,6 +58,10 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final QuadrupedControlManagerFactory controlManagerFactory;
    private final OutputProcessor outputProcessor;
 
+   private final CommandInputManager commandInputManager;
+   private final StatusMessageOutputManager statusMessageOutputManager;
+
+   private final QuadrupedControllerStateChangeMessage quadrupedControllerStateChangeMessage = new QuadrupedControllerStateChangeMessage();
 
    private final AtomicReference<QuadrupedForceControllerRequestedEvent> requestedEvent = new AtomicReference<>();
 
@@ -65,14 +70,27 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       this(runtimeEnvironment, physicalProperties, QuadrupedForceControllerEnum.JOINT_INITIALIZATION);
    }
 
-   public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties, QuadrupedForceControllerEnum initialState) throws IOException
+   public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
+                                          QuadrupedForceControllerEnum initialState) throws IOException
    {
-      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry, runtimeEnvironment.getGraphicsListRegistry());
+      this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry,
+                                                                   runtimeEnvironment.getGraphicsListRegistry());
       this.runtimeEnvironment = runtimeEnvironment;
 
       // Initialize control modules
       this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, physicalProperties, runtimeEnvironment.getGlobalDataProducer(),
                                                                       runtimeEnvironment.getGraphicsListRegistry(), registry);
+
+      commandInputManager = new CommandInputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands());
+      try
+      {
+         commandInputManager.registerConversionHelper(new ClearDelayQueueConverter(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands()));
+      }
+      catch (InstantiationException | IllegalAccessException e)
+      {
+         e.printStackTrace();
+      }
+      statusMessageOutputManager = new StatusMessageOutputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedStatusMessages());
 
       controlManagerFactory.getOrCreateFeetManager();
       controlManagerFactory.getOrCreateBodyOrientationManager();
@@ -85,21 +103,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       OutputProcessorBuilder outputProcessorBuilder = new OutputProcessorBuilder(runtimeEnvironment.getFullRobotModel());
       outputProcessorBuilder.addComponent(stateChangeSmootherComponent);
       outputProcessor = outputProcessorBuilder.build();
-
-      GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
-
-      if (globalDataProducer != null)
-      {
-         globalDataProducer.attachListener(QuadrupedForceControllerEventPacket.class, new PacketConsumer<QuadrupedForceControllerEventPacket>()
-         {
-            @Override
-            public void receivedPacket(QuadrupedForceControllerEventPacket packet)
-            {
-               requestedEvent.set(packet.get());
-            }
-         });
-      }
-      this.quadrupedForceControllerStatePacket = new QuadrupedForceControllerStatePacket();
 
       this.stateMachine = buildStateMachine(runtimeEnvironment, initialState);
    }
@@ -122,7 +125,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             stateImpl.doAction(Double.NaN);
          }
          stateImpl.onExit();
-         
+
          for (int i = 0; i < iterations; i++)
          {
             robotTimestamp.add(Conversions.millisecondsToSeconds(1));
@@ -137,7 +140,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    {
       return stateMachine.getState(state);
    }
-   
+
    @Override
    public void initialize()
    {
@@ -147,6 +150,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    @Override
    public void doControl()
    {
+      if (commandInputManager.isNewCommandAvailable(QuadrupedRequestedControllerStateCommand.class))
+      {
+         requestedEvent.set(commandInputManager.pollNewestCommand(QuadrupedRequestedControllerStateCommand.class).getRequestedControllerState());
+      }
+
       // update fall detector
       if (controllerToolbox.getFallDetector().detect())
       {
@@ -160,17 +168,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          lastEvent.set(reqEvent);
          trigger.fireEvent(reqEvent);
       }
-      /*
-      if (preplannedStepProvider.isStepPlanAvailable())
-      {
-         if (stateMachine.getCurrentStateEnum() == QuadrupedForceControllerEnum.STAND)
-         {
-            // trigger step event if preplanned steps are available in stand state
-            lastEvent.set(QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
-            stateMachine.trigger(QuadrupedForceControllerRequestedEvent.class, QuadrupedForceControllerRequestedEvent.REQUEST_STEP);
-         }
-      }
-      */
 
       // update controller state machine
       stateMachine.doActionAndTransition();
@@ -211,14 +208,6 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       // update output processor
       outputProcessor.update();
-
-      // Send state information
-      quadrupedForceControllerStatePacket.set(stateMachine.getCurrentStateKey());
-      
-      if (runtimeEnvironment.getGlobalDataProducer() != null)
-      {
-         runtimeEnvironment.getGlobalDataProducer().queueDataToSend(quadrupedForceControllerStatePacket);
-      }
    }
 
    @Override
@@ -246,17 +235,20 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    }
 
    private StateMachine<QuadrupedForceControllerEnum, QuadrupedController> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
-                                                                                                                    QuadrupedForceControllerEnum initialState)
+                                                                                             QuadrupedForceControllerEnum initialState)
    {
       // Initialize controllers.
       final QuadrupedController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
-      final QuadrupedController doNothingController = new QuadrupedForceBasedDoNothingController(controlManagerFactory.getOrCreateFeetManager(), runtimeEnvironment, registry);
+      final QuadrupedController doNothingController = new QuadrupedForceBasedDoNothingController(controlManagerFactory.getOrCreateFeetManager(),
+                                                                                                 runtimeEnvironment, registry);
       final QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedController freezeController = new QuadrupedForceBasedFreezeController(controllerToolbox, controlManagerFactory, registry);
-      final QuadrupedSteppingState steppingController = new QuadrupedSteppingState(runtimeEnvironment, controllerToolbox, controlManagerFactory, registry);
+      final QuadrupedSteppingState steppingController = new QuadrupedSteppingState(runtimeEnvironment, controllerToolbox, commandInputManager,
+                                                                                   statusMessageOutputManager, controlManagerFactory, registry);
       final QuadrupedController fallController = new QuadrupedForceBasedFallController(controllerToolbox, controlManagerFactory, registry);
 
-      EventBasedStateMachineFactory<QuadrupedForceControllerEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedForceControllerEnum.class);
+      EventBasedStateMachineFactory<QuadrupedForceControllerEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(
+            QuadrupedForceControllerEnum.class);
       factory.setNamePrefix("forceController").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
       factory.buildYoEventTrigger("userTrigger", QuadrupedForceControllerRequestedEvent.class);
       trigger = factory.buildEventTrigger();
@@ -279,17 +271,17 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
                             QuadrupedForceControllerEnum.STEPPING);
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING, QuadrupedForceControllerEnum.DO_NOTHING,
                             QuadrupedForceControllerEnum.STEPPING);
-      factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING, QuadrupedForceControllerEnum.FREEZE,
-                            QuadrupedForceControllerEnum.STEPPING);
+      factory
+            .addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING, QuadrupedForceControllerEnum.FREEZE, QuadrupedForceControllerEnum.STEPPING);
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedForceControllerEnum.STAND_READY,
                             QuadrupedForceControllerEnum.STAND_PREP);
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedForceControllerEnum.FREEZE,
                             QuadrupedForceControllerEnum.STAND_PREP);
-      factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE, QuadrupedForceControllerEnum.DO_NOTHING,
-                            QuadrupedForceControllerEnum.FREEZE);
+      factory
+            .addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE, QuadrupedForceControllerEnum.DO_NOTHING, QuadrupedForceControllerEnum.FREEZE);
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE, QuadrupedForceControllerEnum.STEPPING, QuadrupedForceControllerEnum.FREEZE);
-      factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE, QuadrupedForceControllerEnum.STAND_PREP,
-                            QuadrupedForceControllerEnum.FREEZE);
+      factory
+            .addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE, QuadrupedForceControllerEnum.STAND_PREP, QuadrupedForceControllerEnum.FREEZE);
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE, QuadrupedForceControllerEnum.STAND_READY,
                             QuadrupedForceControllerEnum.FREEZE);
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_DO_NOTHING, QuadrupedForceControllerEnum.STEPPING,
@@ -316,6 +308,35 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP, QuadrupedForceControllerEnum.STEPPING,
                             QuadrupedForceControllerEnum.STAND_PREP);
 
+      factory.addStateChangedListener(new StateChangedListener<QuadrupedForceControllerEnum>()
+      {
+         @Override
+         public void stateChanged(QuadrupedForceControllerEnum from, QuadrupedForceControllerEnum to)
+         {
+            byte fromByte = from == null ? -1 : from.toByte();
+            byte toByte = to == null ? -1 : to.toByte();
+            quadrupedControllerStateChangeMessage.setInitialControllerName(fromByte);
+            quadrupedControllerStateChangeMessage.setEndControllerName(toByte);
+            statusMessageOutputManager.reportStatusMessage(quadrupedControllerStateChangeMessage);
+         }
+      });
+
       return factory.build(initialState);
+   }
+
+   public void createControllerNetworkSubscriber(PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
+   {
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, scheduler,
+                                                                                                packetCommunicator);
+      //      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
+      controllerNetworkSubscriber.addMessageCollector(QuadrupedControllerAPIDefinition.createDefaultMessageIDExtractor());
+      controllerNetworkSubscriber.addMessageValidator(QuadrupedControllerAPIDefinition.createDefaultMessageValidation());
+      closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      closeableAndDisposableRegistry.closeAndDispose();
    }
 }

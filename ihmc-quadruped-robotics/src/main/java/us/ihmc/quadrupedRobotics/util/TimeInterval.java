@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.util;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TimeIntervalCommand;
 
 public class TimeInterval
 {
@@ -72,6 +73,12 @@ public class TimeInterval
    {
       setStartTime(timeInterval.getStartTime());
       setEndTime(timeInterval.getEndTime());
+   }
+
+   public void set(TimeIntervalCommand command)
+   {
+      setStartTime(command.getStartTime());
+      setEndTime(command.getEndTime());
    }
 
    public boolean epsilonEquals(TimeInterval other, double epsilon)
