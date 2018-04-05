@@ -20,6 +20,7 @@ import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3TrajectoryPointInterface;
 
 public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3TrajectoryPoint, SimpleSE3TrajectoryPoint>
       implements SE3TrajectoryPointInterface<FrameSE3TrajectoryPoint>
@@ -149,6 +150,13 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    public void set(SE3TrajectoryPointInterface<?> se3TrajectoryPoint)
    {
       geometryObject.set(se3TrajectoryPoint);
+   }
+
+   public void setToRotation(SO3TrajectoryPointInterface<?> so3TrajectoryPoint)
+   {
+      geometryObject.setTime(so3TrajectoryPoint.getTime());
+      geometryObject.waypointData.getEuclideanWaypoint().setToZero();
+      geometryObject.waypointData.getSO3Waypoint().set(so3TrajectoryPoint);
    }
 
    public void setIncludingFrame(ReferenceFrame referenceFrame, SE3TrajectoryPointInterface<?> se3TrajectoryPoint)
