@@ -17,6 +17,8 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
+import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.planning.*;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlanner;
@@ -98,28 +100,31 @@ public class QuadrupedBalanceManager
                                                                                                                          YoAppearance.RGBColor(1, 0.5, 0.0),
                                                                                                                          YoAppearance.RGBColor(0.0, 0.5, 1.0));
 
-   public QuadrupedBalanceManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPostureInputProviderInterface postureProvider,
-                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public QuadrupedBalanceManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
+                                  QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry,
+                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.postureProvider = postureProvider;
 
       numberOfStepsToConsider.set(NUMBER_OF_STEPS_TO_CONSIDER);
 
+      QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       QuadrupedRuntimeEnvironment runtimeEnvironment = controllerToolbox.getRuntimeEnvironment();
       robotTimestamp = runtimeEnvironment.getRobotTimestamp();
 
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
+      double nominalHeight = physicalProperties.getNominalCoMHeight();
       currentSolePositions = controllerToolbox.getTaskSpaceEstimates().getSolePositions();
-      ReferenceFrame supportFrame = controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
-      dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), postureProvider.getComPositionInput().getZ(), robotTimestamp, supportFrame,
-                                  controllerToolbox.getReferenceFrames().getSoleFrames(), registry, yoGraphicsListRegistry);
+      ReferenceFrame supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
+      dcmPlanner = new DCMPlanner(runtimeEnvironment.getGravity(), nominalHeight, robotTimestamp, supportFrame, referenceFrames.getSoleFrames(), registry,
+                                  yoGraphicsListRegistry);
 
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, postureProvider, registry, yoGraphicsListRegistry);
 
-      crossoverProjection = new QuadrupedStepCrossoverProjection(controllerToolbox.getReferenceFrames().getBodyZUpFrame(), registry);
+      crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), registry);
 
       linearMomentumRateWeight.set(5.0, 5.0, 2.5);
       momentumRateCommand.setLinearWeights(linearMomentumRateWeight);

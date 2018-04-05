@@ -97,6 +97,11 @@ public class QuadrupedTaskSpaceEstimator
       parentRegistry.addChild(registry);
    }
 
+   public CenterOfMassJacobian getComJacobian()
+   {
+      return comJacobian;
+   }
+
    public void compute(QuadrupedTaskSpaceEstimates estimates)
    {
       // update solvers
