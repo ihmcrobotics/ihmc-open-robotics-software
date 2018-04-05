@@ -133,12 +133,6 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketClass(ComVelocityPacket.class);
       registerPacketField(Vector3D.class);
 
-      registerPacketClass(BodyOrientationPacket.class);
-      registerPacketField(Quaternion.class);
-
-      registerPacketClass(BodyAngularRatePacket.class);
-      registerPacketField(Vector3D.class);
-
       registerPacketClass(PlanarVelocityPacket.class);
       registerPacketField(Vector3D.class);
 
