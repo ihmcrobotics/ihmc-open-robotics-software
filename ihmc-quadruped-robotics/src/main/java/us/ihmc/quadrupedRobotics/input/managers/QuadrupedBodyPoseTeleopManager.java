@@ -4,12 +4,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class QuadrupedBodyPoseTeleopManager
 {
