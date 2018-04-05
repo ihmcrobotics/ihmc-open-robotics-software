@@ -81,6 +81,7 @@ public class QuadrupedBalanceManager
 
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final GroundPlaneEstimator groundPlaneEstimator;
+   private final ReferenceFrame supportFrame;
 
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
@@ -114,6 +115,7 @@ public class QuadrupedBalanceManager
 
       QuadrupedReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       QuadrupedRuntimeEnvironment runtimeEnvironment = controllerToolbox.getRuntimeEnvironment();
+      supportFrame = referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds();
       robotTimestamp = runtimeEnvironment.getRobotTimestamp();
 
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
@@ -241,7 +243,8 @@ public class QuadrupedBalanceManager
    private void initialize()
    {
       // update model
-      linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
+      centerOfMassHeightManager.update();
+      linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
       // update dcm estimate
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
@@ -270,8 +273,8 @@ public class QuadrupedBalanceManager
 
    public void compute(QuadrantDependentList<ContactState> contactStates)
    {
-      // update model
-      linearInvertedPendulumModel.setComHeight(postureProvider.getComPositionInput().getZ());
+      centerOfMassHeightManager.update();
+      linearInvertedPendulumModel.setComHeight(centerOfMassHeightManager.getDesiredHeight(supportFrame));
 
       // update dcm estimate
       controllerToolbox.getDCMPositionEstimate(dcmPositionEstimate);
