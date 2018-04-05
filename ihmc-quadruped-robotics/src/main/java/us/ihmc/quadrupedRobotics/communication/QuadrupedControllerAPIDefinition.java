@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
@@ -13,9 +14,7 @@ import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppi
 
 import java.util.*;
 
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedBodyOrientationMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateQuadrupedTimedStepListMessage;
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateSoleTrajectoryMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.*;
 
 public class QuadrupedControllerAPIDefinition
 {
@@ -32,6 +31,7 @@ public class QuadrupedControllerAPIDefinition
       quadrupedCommands.add(QuadrupedRequestedSteppingStateCommand.class);
       quadrupedCommands.add(QuadrupedRequestedControllerStateCommand.class);
       quadrupedCommands.add(QuadrupedBodyOrientationCommand.class);
+      quadrupedCommands.add(QuadrupedBodyHeightCommand.class);
 
       quadrupedSupportedCommands = Collections.unmodifiableList(quadrupedCommands);
 
@@ -59,7 +59,7 @@ public class QuadrupedControllerAPIDefinition
       validators.put(SoleTrajectoryMessage.class, message -> validateSoleTrajectoryMessage((SoleTrajectoryMessage) message));
       //      validators.put(PelvisTrajectoryMessage.class, message -> validatePelvisTrajectoryMessage((PelvisTrajectoryMessage) message));
       validators.put(QuadrupedBodyOrientationMessage.class, message -> validateQuadrupedBodyOrientationMessage((QuadrupedBodyOrientationMessage) message));
-      //      validators.put(PelvisHeightTrajectoryMessage.class, message -> validatePelvisHeightTrajectoryMessage((PelvisHeightTrajectoryMessage) message));
+      validators.put(QuadrupedBodyHeightMessage.class, message -> validateQuadrupedBodyHeightMessage((QuadrupedBodyHeightMessage) message));
       validators.put(QuadrupedTimedStepListMessage.class, message -> validateQuadrupedTimedStepListMessage((QuadrupedTimedStepListMessage) message));
       //      validators.put(GoHomeMessage.class, message -> validateGoHomeMessage((GoHomeMessage) message));
       //      validators.put(FootLoadBearingMessage.class, message -> validateFootLoadBearingMessage((FootLoadBearingMessage) message));
@@ -81,7 +81,7 @@ public class QuadrupedControllerAPIDefinition
       extractors.put(SoleTrajectoryMessage.class, m -> ((SoleTrajectoryMessage) m).getSequenceId());
       //      extractors.put(PelvisTrajectoryMessage.class, m -> ((PelvisTrajectoryMessage) m).getSequenceId());
       extractors.put(QuadrupedBodyOrientationMessage.class, m -> ((QuadrupedBodyOrientationMessage) m).getSequenceId());
-      //      extractors.put(PelvisHeightTrajectoryMessage.class, m -> ((PelvisHeightTrajectoryMessage) m).getSequenceId());
+      extractors.put(QuadrupedBodyHeightMessage.class, m -> ((QuadrupedBodyHeightMessage) m).getSequenceId());
       //      extractors.put(StopAllTrajectoryMessage.class, m -> ((StopAllTrajectoryMessage) m).getSequenceId());
       extractors.put(QuadrupedTimedStepListMessage.class, m -> ((QuadrupedTimedStepListMessage) m).getSequenceId());
       //      extractors.put(GoHomeMessage.class, m -> ((GoHomeMessage) m).getSequenceId());
