@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.TObjectIntMap;
@@ -34,8 +34,8 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    private final Map<String, GuiParameter> guiParametersByYoName = new HashMap<>();
    private final Map<String, YoVariable<?>> yoVariablesByGuiName = new HashMap<>();
 
-   private final ConcurrentHashMap<String, GuiParameter> serverChangedParameters = new ConcurrentHashMap<>();
-   private final ConcurrentHashMap<String, GuiParameter> userChangedParameters = new ConcurrentHashMap<>();
+   private final ConcurrentLinkedQueue<GuiParameter> serverChangedParameters = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<GuiParameter> userChangedParameters = new ConcurrentLinkedQueue<>();
 
    @Override
    public void receivedTimestampOnly(long timestamp)
@@ -87,7 +87,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
                String yoName = getUniqueName(changedParameter);
                GuiParameter newGuiParameter = new GuiParameter(guiParametersByYoName.get(yoName));
                newGuiParameter.setValue(changedParameter.getValueAsString());
-               serverChangedParameters.put(newGuiParameter.getUniqueName(), newGuiParameter);
+               serverChangedParameters.add(newGuiParameter);
             }
          });
       });
@@ -119,10 +119,16 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    @Override
    public void receivedTimestampAndData(long timestamp)
    {
-      List<GuiParameter> parametersToUpdate = new ArrayList<>(userChangedParameters.values());
-      userChangedParameters.clear();
-      parametersToUpdate.stream().forEach(guiParameter -> {
-         YoVariable<?> yoVariable = yoVariablesByGuiName.get(guiParameter.getUniqueName());
+      GuiParameter userChangedParameter;
+      Map<String, GuiParameter> parametersToUpdate = new HashMap<>();
+      while ((userChangedParameter = userChangedParameters.poll()) != null)
+      {
+         parametersToUpdate.put(userChangedParameter.getUniqueName(), userChangedParameter);
+      }
+
+      parametersToUpdate.values().forEach(guiParameter -> {
+         String uniqueName = guiParameter.getUniqueName();
+         YoVariable<?> yoVariable = yoVariablesByGuiName.get(uniqueName);
          setYoVariableFromGuiParameter(yoVariable, guiParameter);
       });
    }
@@ -170,15 +176,19 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
 
    public List<GuiParameter> getChangedParametersAndClear()
    {
-      List<GuiParameter> list = new ArrayList<>(serverChangedParameters.values());
-      serverChangedParameters.clear();
-      return list;
+      GuiParameter serverChangedParameter;
+      Map<String, GuiParameter> parametersToUpdate = new HashMap<>();
+      while ((serverChangedParameter = serverChangedParameters.poll()) != null)
+      {
+         parametersToUpdate.put(serverChangedParameter.getUniqueName(), serverChangedParameter);
+      }
+      return new ArrayList<>(parametersToUpdate.values());
    }
 
    public void changeVariables(List<GuiParameter> changedParameters)
    {
       changedParameters.stream().forEach(guiParameter -> {
-         userChangedParameters.put(guiParameter.getUniqueName(), guiParameter);
+         userChangedParameters.add(guiParameter);
       });
    }
 
