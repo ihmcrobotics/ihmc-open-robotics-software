@@ -2,6 +2,7 @@ package us.ihmc.parameterTuner.guiElements.main;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
@@ -9,7 +10,9 @@ import us.ihmc.parameterTuner.guiElements.ParameterChangeListener;
 
 public class ChangeCollector implements ParameterChangeListener
 {
-   private final ConcurrentHashMap<String, GuiParameter> changedParameters = new ConcurrentHashMap<>();
+   private final Map<String, GuiParameter> changedParameters = new ConcurrentHashMap<>();
+   private final Map<String, String> pendingChanges = new ConcurrentHashMap<>();
+
    private boolean recordingChange = true;
 
    @Override
@@ -25,9 +28,18 @@ public class ChangeCollector implements ParameterChangeListener
    public List<GuiParameter> getChangedParametersAndClear()
    {
       // this is called by the animation timer
-      List<GuiParameter> list = new ArrayList<>(changedParameters.values());
-      changedParameters.clear();
-      return list;
+      List<GuiParameter> outgoingChanges = new ArrayList<>();
+      for (GuiParameter changedParameter : changedParameters.values())
+      {
+         String uniqueName = changedParameter.getUniqueName();
+         if (!isPending(uniqueName))
+         {
+            outgoingChanges.add(changedParameter);
+            pendingChanges.put(uniqueName, changedParameter.getCurrentValue());
+            changedParameters.remove(uniqueName);
+         }
+      }
+      return outgoingChanges;
    }
 
    public void stopRecording()
@@ -38,5 +50,19 @@ public class ChangeCollector implements ParameterChangeListener
    public void startRecording()
    {
       recordingChange = true;
+   }
+
+   public boolean isPending(String uniqueName)
+   {
+      return pendingChanges.containsKey(uniqueName);
+   }
+
+   public void parameterWasUpdated(String uniqueName, String newValue)
+   {
+      String expectedValue = pendingChanges.get(uniqueName);
+      if (newValue.equals(expectedValue))
+      {
+         pendingChanges.remove(uniqueName);
+      }
    }
 }
