@@ -24,7 +24,7 @@ public class QuadrupedStepCommand implements Command<QuadrupedStepCommand, Quadr
    {
       robotQuadrant = null;
       groundClearance = 0.0;
-      goalPosition.set(0.0, 0.0, 0.0);
+      goalPosition.setToNaN();
    }
 
    @Override
