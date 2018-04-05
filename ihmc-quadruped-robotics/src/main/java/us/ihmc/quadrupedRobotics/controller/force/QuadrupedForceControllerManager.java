@@ -78,7 +78,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       this.runtimeEnvironment = runtimeEnvironment;
 
       // Initialize control modules
-      this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, physicalProperties, runtimeEnvironment.getGlobalDataProducer(),
+      this.controlManagerFactory = new QuadrupedControlManagerFactory(controllerToolbox, physicalProperties,
                                                                       runtimeEnvironment.getGraphicsListRegistry(), registry);
 
       commandInputManager = new CommandInputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands());
