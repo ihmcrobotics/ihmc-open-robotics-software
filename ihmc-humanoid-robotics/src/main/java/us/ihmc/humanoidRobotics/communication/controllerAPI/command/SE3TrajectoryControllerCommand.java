@@ -87,6 +87,22 @@ public final class SE3TrajectoryControllerCommand extends QueueableCommand<SE3Tr
       other.getControlFramePose(controlFramePoseInBodyFrame);
    }
 
+   public void setToOrientationTrajectory(SO3TrajectoryControllerCommand orientationTrajectory)
+   {
+      trajectoryPointList.setToOrientationTrajectoryIncludingFrame(orientationTrajectory.getTrajectoryPointList());
+
+      setQueueableCommandVariables(orientationTrajectory);
+
+      selectionMatrix.setAngularPart(orientationTrajectory.getSelectionMatrix());
+      selectionMatrix.clearLinearSelection();
+      weightMatrix.setAngularPart(orientationTrajectory.getWeightMatrix());
+      weightMatrix.clearLinearWeights();
+
+      trajectoryFrame = orientationTrajectory.getTrajectoryFrame();
+      useCustomControlFrame = orientationTrajectory.useCustomControlFrame();
+      orientationTrajectory.getControlFramePose(controlFramePoseInBodyFrame);
+   }
+
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, SE3TrajectoryMessage message)
    {

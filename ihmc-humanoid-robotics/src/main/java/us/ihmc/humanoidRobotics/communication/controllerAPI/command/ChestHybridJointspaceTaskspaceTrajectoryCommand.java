@@ -12,7 +12,8 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
       FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
-   private final SO3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SO3TrajectoryControllerCommand();
+   private final SO3TrajectoryControllerCommand so3Command = new SO3TrajectoryControllerCommand();
+   private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
 
    public ChestHybridJointspaceTaskspaceTrajectoryCommand()
    {
@@ -23,7 +24,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    {
       super();
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
-      this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
+      this.taskspaceTrajectoryCommand.setToOrientationTrajectory(taskspaceTrajectoryCommand);
    }
 
    public ChestHybridJointspaceTaskspaceTrajectoryCommand(Random random)
@@ -42,14 +43,16 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    public void set(ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(message.getTaskspaceTrajectoryMessage());
+      so3Command.set(message.getTaskspaceTrajectoryMessage());
+      taskspaceTrajectoryCommand.setToOrientationTrajectory(so3Command);
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
+      so3Command.set(resolver, message.getTaskspaceTrajectoryMessage());
+      taskspaceTrajectoryCommand.setToOrientationTrajectory(so3Command);
    }
 
    @Override
@@ -70,7 +73,7 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
       return jointspaceTrajectoryCommand;
    }
 
-   public SO3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
+   public SE3TrajectoryControllerCommand getTaskspaceTrajectoryCommand()
    {
       return taskspaceTrajectoryCommand;
    }

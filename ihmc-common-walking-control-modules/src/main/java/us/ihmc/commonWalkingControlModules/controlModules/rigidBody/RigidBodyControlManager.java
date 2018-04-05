@@ -286,33 +286,6 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand taskspaceCommand, JointspaceTrajectoryCommand jointspaceCommand)
-   {
-      throw new RuntimeException("Should not send these messages anymore. Switch to SE3 message with selection matrix.");
-//      if (taskspaceCommand.useCustomControlFrame())
-//      {
-//         taskspaceCommand.getControlFramePose(controlFrameTransform);
-//         taskspaceControlState.setControlFramePose(controlFrameTransform);
-//      }
-//      else
-//      {
-//         taskspaceControlState.setDefaultControlFrame();
-//      }
-//
-//      computeDesiredJointPositions(initialJointPositions);
-//      computeDesiredPose(initialPose);
-//
-//      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointspaceCommand, initialJointPositions, initialPose))
-//      {
-//         requestState(hybridControlState.getStateEnum());
-//      }
-//      else
-//      {
-//         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SO3 trajectory command.");
-//         hold();
-//      }
-   }
-
    public void handleDesiredAccelerationsCommand(DesiredAccelerationsCommand command)
    {
       if (userControlState.handleDesiredAccelerationsCommand(command))
