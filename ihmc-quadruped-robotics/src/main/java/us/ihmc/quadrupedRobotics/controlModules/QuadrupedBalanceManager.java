@@ -75,8 +75,6 @@ public class QuadrupedBalanceManager
 
    private final YoInteger numberOfStepsToConsider = new YoInteger("numberOfStepsToConsider", registry);
 
-   private final YoFrameVector linearMomentumRateWeight = new YoFrameVector("linearMomentumRateWeight", worldFrame, registry);
-
    private final QuadrupedStepCrossoverProjection crossoverProjection;
    private final GroundPlaneEstimator groundPlaneEstimator;
    private final ReferenceFrame supportFrame;
@@ -87,9 +85,6 @@ public class QuadrupedBalanceManager
 
    private final QuadrantDependentList<FramePoint3D> currentSolePositions;
    private final FramePoint3D tempPoint = new FramePoint3D();
-
-   private final FrameVector3D momentumRateForCommand = new FrameVector3D();
-   private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
 
    // footstep graphics
    private static final int maxNumberOfFootstepGraphicsPerQuadrant = 4;
@@ -128,10 +123,6 @@ public class QuadrupedBalanceManager
       momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
 
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), registry);
-
-      linearMomentumRateWeight.set(5.0, 5.0, 2.5);
-      momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
-      momentumRateCommand.setSelectionMatrixForLinearControl();
 
       adjustedActiveSteps = new RecyclingArrayList<>(10, new GenericTypeBuilder<QuadrupedStep>()
       {
@@ -281,15 +272,10 @@ public class QuadrupedBalanceManager
 
       double desiredCenterOfMassHeightAcceleration = centerOfMassHeightManager.computeDesiredCenterOfMassHeightAcceleration();
 
+      momentumRateOfChangeModule.setDCMEstimate(dcmPositionEstimate);
+      momentumRateOfChangeModule.setDCMSetpoints(yoDesiredDCMPosition, yoDesiredDCMVelocity);
       momentumRateOfChangeModule.setDesiredCenterOfMassHeightAcceleration(desiredCenterOfMassHeightAcceleration);
-      momentumRateOfChangeModule
-            .compute(momentumRateForCommand, yoVrpPositionSetpoint, yoDesiredCMP, dcmPositionEstimate, yoDesiredDCMPosition, yoDesiredDCMVelocity);
-
-      //      momentumRateForCommand.changeFrame(worldFrame);
-      //      momentumRateForCommand.subZ(controllerToolbox.getFullRobotModel().getTotalMass() * controllerToolbox.getRuntimeEnvironment().getGravity());
-
-      momentumRateCommand.setLinearMomentumRate(momentumRateForCommand);
-      momentumRateCommand.setLinearWeights(linearMomentumRateWeight);
+      momentumRateOfChangeModule.compute(yoVrpPositionSetpoint, yoDesiredCMP);
    }
 
    public void completedStep()
@@ -345,6 +331,6 @@ public class QuadrupedBalanceManager
 
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
-      return momentumRateCommand;
+      return momentumRateOfChangeModule.getMomentumRateCommand();
    }
 }
