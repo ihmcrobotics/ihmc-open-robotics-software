@@ -140,7 +140,8 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketClass(PlanarVelocityPacket.class);
       registerPacketField(Vector3D.class);
 
-      // Events and controller statesregisterPacketClass(QuadrupedXGaitSettingsPacket.class); // fixme make a message
+      // Events and controller states
+      registerPacketClass(QuadrupedXGaitSettingsPacket.class); // fixme make a message
       registerPacketField(QuadrupedXGaitSettingsReadOnly.class); // fixme make a message
 
       registerPacketClass(QuadrupedRequestedControllerStateMessage.class);
