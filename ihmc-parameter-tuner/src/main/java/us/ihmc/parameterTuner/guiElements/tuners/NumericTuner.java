@@ -17,9 +17,13 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    private final NumericSpinner<T> max = createSpinner();
    private final NumericSlider<T> slider = createSlider();
 
+   private final String parameterName;
+   private boolean haveSliderBoundsBeenInvalid = false;
+
    public NumericTuner(GuiParameter parameter)
    {
       setupNode();
+      parameterName = parameter.getName();
 
       value.addListener((observable, oldValue, newValue) -> {
          Platform.runLater(() -> parameter.setValue(value.getValueAsText()));
@@ -102,9 +106,14 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    {
       if (slider.isDisabled())
       {
-         PrintTools.warn("Slider bounds not valid.");
+         if (!haveSliderBoundsBeenInvalid)
+         {
+            PrintTools.warn("Slider bounds not valid for " + parameterName + ".");
+         }
+         haveSliderBoundsBeenInvalid = true;
          return;
       }
+      haveSliderBoundsBeenInvalid = false;
 
       double min = slider.toDouble(this.min.getValue());
       double max = slider.toDouble(this.max.getValue());
@@ -118,15 +127,9 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
    @Override
    public double getValuePercent()
    {
-      if (slider.isDisabled())
-      {
-         PrintTools.warn("Slider bounds not valid.");
-         return 0.0;
-      }
-
       double min = slider.toDouble(this.min.getValue());
       double max = slider.toDouble(this.max.getValue());
       double value = slider.toDouble(this.value.getValue());
-      return (value - min) / (max - min);
+      return MathTools.clamp((value - min) / (max - min), 0.0, 1.0);
    }
 }
