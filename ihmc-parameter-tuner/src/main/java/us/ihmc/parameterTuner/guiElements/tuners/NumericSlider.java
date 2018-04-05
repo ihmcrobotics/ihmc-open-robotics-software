@@ -37,9 +37,9 @@ public abstract class NumericSlider<T extends Number> extends Slider
 
    public void updateSlider(T value, T min, T max)
    {
-      double doubleValue = doDouble(value);
-      double doubleMin = doDouble(min);
-      double doubleMax = doDouble(max);
+      double doubleValue = toDouble(value);
+      double doubleMin = toDouble(min);
+      double doubleMax = toDouble(max);
 
       boolean boundsValid = doubleValue < doubleMin || doubleValue > doubleMax || doubleMin >= doubleMax;
       boolean boundsInfinite = Double.isInfinite(doubleMin) || Double.isInfinite(doubleMax);
@@ -78,7 +78,7 @@ public abstract class NumericSlider<T extends Number> extends Slider
       return toNumber(roundToPrecision(getValue()));
    }
 
-   public abstract double doDouble(T number);
+   public abstract double toDouble(T number);
 
    public abstract T toNumber(double doubleValue);
 
