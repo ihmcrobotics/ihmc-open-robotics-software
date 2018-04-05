@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.text.Text;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.parameterTuner.guiElements.GuiParameter;
 
@@ -105,11 +106,13 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
          return;
       }
 
-      double min = slider.doDouble(this.min.getValue());
-      double max = slider.doDouble(this.max.getValue());
+      double min = slider.toDouble(this.min.getValue());
+      double max = slider.toDouble(this.max.getValue());
       double newValue = min + percent * (max - min);
 
-      value.setValue(slider.toNumber(slider.roundToPrecision(newValue)));
+      double rounded = slider.roundToPrecision(newValue);
+      rounded = MathTools.clamp(rounded, min, max);
+      value.setValue(slider.toNumber(rounded));
    }
 
    @Override
@@ -121,9 +124,9 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
          return 0.0;
       }
 
-      double min = slider.doDouble(this.min.getValue());
-      double max = slider.doDouble(this.max.getValue());
-      double value = slider.doDouble(this.value.getValue());
+      double min = slider.toDouble(this.min.getValue());
+      double max = slider.toDouble(this.max.getValue());
+      double value = slider.toDouble(this.value.getValue());
       return (value - min) / (max - min);
    }
 }
