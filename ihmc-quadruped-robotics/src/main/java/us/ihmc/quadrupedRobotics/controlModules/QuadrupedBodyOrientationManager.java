@@ -45,6 +45,8 @@ public class QuadrupedBodyOrientationManager
    private final FrameVector3D desiredBodyAngularAcceleration;
    private final FrameVector3D desiredBodyFeedForwardTorque;
 
+   private ReferenceFrame desiredFrameToHold;
+
    private final YoDouble robotTimestamp;
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
@@ -68,9 +70,9 @@ public class QuadrupedBodyOrientationManager
 
       bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
       bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controllerToolbox.getRuntimeEnvironment().getControlDT(), registry);
-      yoBodyOrientationSetpoint = new YoFrameOrientation("bodyOrientationSetpoint", ReferenceFrame.getWorldFrame(), registry);
-      yoBodyAngularVelocitySetpoint = new YoFrameVector("bodyAngularVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
-      yoComTorqueFeedforwardSetpoint = new YoFrameVector("comTorqueFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry);
+      yoBodyOrientationSetpoint = new YoFrameOrientation("bodyOrientationSetpoint", worldFrame, registry);
+      yoBodyAngularVelocitySetpoint = new YoFrameVector("bodyAngularVelocitySetpoint", worldFrame, registry);
+      yoComTorqueFeedforwardSetpoint = new YoFrameVector("comTorqueFeedforwardSetpoint", worldFrame, registry);
 
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
@@ -131,11 +133,32 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationTrajectory.initialize();
    }
 
-   public void compute(FrameQuaternionReadOnly bodyOrientationDesired)
+   public void setDesiredFrameToHoldPosition(ReferenceFrame desiredFrameToHold)
+   {
+      this.desiredFrameToHold = desiredFrameToHold;
+   }
+
+   public void compute()
+   {
+      computeSetpoints();
+
+      doControl();
+
+      // update log variables
+      yoBodyOrientationSetpoint.setAndMatchFrame(desiredBodyOrientation);
+      yoBodyAngularVelocitySetpoint.setMatchingFrame(desiredBodyAngularVelocity);
+      yoComTorqueFeedforwardSetpoint.setMatchingFrame(desiredBodyFeedForwardTorque);
+
+      desiredAngularMomentumRate.changeFrame(worldFrame);
+      angularMomentumCommand.setAngularMomentumRate(desiredAngularMomentumRate);
+      angularMomentumCommand.setAngularWeights(bodyAngularWeight);
+   }
+
+   private void computeSetpoints()
    {
       bodyOrientationTrajectory.compute(robotTimestamp.getDoubleValue());
 
-      desiredBodyOrientation.setIncludingFrame(bodyOrientationDesired);
+      desiredBodyOrientation.setToZero(desiredFrameToHold);
       desiredBodyOrientation.changeFrame(worldFrame);
 
       bodyOrientationTrajectory.getAngularData(desiredBodyOrientationOffset, desiredBodyAngularVelocity, desiredBodyAngularAcceleration);
@@ -145,14 +168,7 @@ public class QuadrupedBodyOrientationManager
       double bodyOrientationPitch = desiredBodyOrientation.getPitch() + groundPlaneEstimator.getPitch(bodyOrientationYaw);
       double bodyOrientationRoll = desiredBodyOrientation.getRoll();
       desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
-
       desiredBodyFeedForwardTorque.setToZero();
-
-      doControl();
-
-      desiredAngularMomentumRate.changeFrame(worldFrame);
-      angularMomentumCommand.setAngularMomentumRate(desiredAngularMomentumRate);
-      angularMomentumCommand.setAngularWeights(bodyAngularWeight);
    }
 
    private void doControl()
@@ -169,10 +185,6 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationController
             .compute(desiredAngularMomentumRate, desiredBodyOrientation, desiredBodyAngularVelocity, estimatedVelocity, desiredBodyFeedForwardTorque);
 
-      // update log variables
-      yoBodyOrientationSetpoint.setAndMatchFrame(desiredBodyOrientation);
-      yoBodyAngularVelocitySetpoint.setMatchingFrame(desiredBodyAngularVelocity);
-      yoComTorqueFeedforwardSetpoint.setMatchingFrame(desiredBodyFeedForwardTorque);
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
