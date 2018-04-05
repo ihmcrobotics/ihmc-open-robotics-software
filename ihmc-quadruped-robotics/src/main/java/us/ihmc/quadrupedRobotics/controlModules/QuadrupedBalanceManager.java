@@ -58,8 +58,6 @@ public class QuadrupedBalanceManager
 
    private final DCMPlanner dcmPlanner;
 
-   private final QuadrupedPostureInputProviderInterface postureProvider;
-
    private final DoubleParameter dcmPositionStepAdjustmentGainParameter = new DoubleParameter("dcmPositionStepAdjustmentGain", registry, 1.5);
 
    private final YoFrameVector instantaneousStepAdjustment = new YoFrameVector("instantaneousStepAdjustment", worldFrame, registry);
@@ -105,11 +103,9 @@ public class QuadrupedBalanceManager
                                                                                                                          YoAppearance.RGBColor(0.0, 0.5, 1.0));
 
    public QuadrupedBalanceManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
-                                  QuadrupedPostureInputProviderInterface postureProvider, YoVariableRegistry parentRegistry,
-                                  YoGraphicsListRegistry yoGraphicsListRegistry)
+                                  YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controllerToolbox = controllerToolbox;
-      this.postureProvider = postureProvider;
 
       numberOfStepsToConsider.set(NUMBER_OF_STEPS_TO_CONSIDER);
 
@@ -129,7 +125,7 @@ public class QuadrupedBalanceManager
       linearInvertedPendulumModel = controllerToolbox.getLinearInvertedPendulumModel();
 
       centerOfMassHeightManager = new QuadrupedCenterOfMassHeightManager(controllerToolbox, physicalProperties, parentRegistry);
-      momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, postureProvider, registry, yoGraphicsListRegistry);
+      momentumRateOfChangeModule = new QuadrupedMomentumRateOfChangeModule(controllerToolbox, registry);
 
       crossoverProjection = new QuadrupedStepCrossoverProjection(referenceFrames.getBodyZUpFrame(), registry);
 
