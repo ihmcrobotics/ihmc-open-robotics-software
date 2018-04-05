@@ -5,10 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedControllerStateCommand;
 import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 
@@ -32,6 +29,15 @@ public class QuadrupedControllerAPIDefinition
       quadrupedCommands.add(QuadrupedRequestedControllerStateCommand.class);
       quadrupedCommands.add(QuadrupedBodyOrientationCommand.class);
       quadrupedCommands.add(QuadrupedBodyHeightCommand.class);
+//      quadrupedCommands.add(StopAllTrajectoryCommand.class); // TODO
+//      quadrupedCommands.add(FootLoadBearingCommand.class); // TODO
+//      quadrupedCommands.add(GoHomeCommand.class); // todo
+//      quadrupedCommands.add(QuadrupedBodyTranslationCommand.class); // todo
+//      quadrupedCommands.add(QuadrupedBodyPositionCommand.class); // todo
+//      quadrupedCommands.add(QuadrupedBodyTrajectoryCommand.class); // todo
+      quadrupedCommands.add(CenterOfMassTrajectoryCommand.class); // todo
+//      quadrupedCommands.add(AbortWalkingCommand.class);// todo
+//      quadrupedCommands.add(PauseWalkingCommand.class); // todo
 
       quadrupedSupportedCommands = Collections.unmodifiableList(quadrupedCommands);
 
