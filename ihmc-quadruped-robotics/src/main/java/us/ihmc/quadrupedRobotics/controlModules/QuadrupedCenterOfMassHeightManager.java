@@ -3,15 +3,14 @@ package us.ihmc.quadrupedRobotics.controlModules;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
@@ -86,9 +85,40 @@ public class QuadrupedCenterOfMassHeightManager
       parentRegistry.addChild(registry);
    }
 
-   public void handleCenterOfMassHeightCommand()
+   public void handleBodyHeightCommand(QuadrupedBodyHeightCommand command)
    {
+      controlBodyHeight.set(command.controlBodyHeight());
 
+      double currentTime = robotTimestamp.getDoubleValue();
+      double timeShift = command.isExpressedInAbsoluteTime() ? 0.0 : currentTime;
+      EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();
+      euclideanTrajectory.getTrajectoryPointList().addTimeOffset(timeShift);
+
+      if (euclideanTrajectory.getTrajectoryPoint(0).getTime() > 1.0e-5 + currentTime)
+      {
+         centerOfMassHeightTrajectory.getPosition(desiredPosition);
+         desiredVelocity.setToZero(worldFrame);
+
+         desiredPosition.changeFrame(supportFrame);
+         desiredVelocity.changeFrame(supportFrame);
+
+         centerOfMassHeightTrajectory.clear();
+         centerOfMassHeightTrajectory.appendWaypoint(currentTime, desiredPosition, desiredVelocity);
+      }
+      else
+      {
+         centerOfMassHeightTrajectory.clear();
+      }
+
+      for (int i = 0; i < euclideanTrajectory.getNumberOfTrajectoryPoints(); i++)
+      {
+         FrameEuclideanTrajectoryPoint trajectoryPoint = euclideanTrajectory.getTrajectoryPoint(i);
+         trajectoryPoint.changeFrame(supportFrame);
+
+         centerOfMassHeightTrajectory.appendWaypoint(trajectoryPoint);
+      }
+
+      centerOfMassHeightTrajectory.initialize();
    }
 
    public double computeDesiredCenterOfMassHeightAcceleration()
