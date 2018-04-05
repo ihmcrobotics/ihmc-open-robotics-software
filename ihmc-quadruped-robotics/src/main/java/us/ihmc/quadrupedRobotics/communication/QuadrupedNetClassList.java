@@ -48,7 +48,7 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(QueueableMessage.class);
       registerPacketField(EuclideanTrajectoryMessage.class);
       registerPacketField(FrameInformation.class);
-      
+
       registerPacketField(SelectionMatrix3DMessage.class);
       registerPacketField(WeightMatrix3DMessage.class);
 
