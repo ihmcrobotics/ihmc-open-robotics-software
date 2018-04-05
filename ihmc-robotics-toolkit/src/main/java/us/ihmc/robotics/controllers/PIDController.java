@@ -1,6 +1,7 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -86,6 +87,16 @@ public class PIDController extends AbstractPIDController
          maxFeedback.set(Double.POSITIVE_INFINITY);
       else
          maxFeedback.set(max);
+   }
+
+   public void setGains(PIDGainsReadOnly pidGainsReadOnly)
+   {
+      setProportionalGain(pidGainsReadOnly.getKp());
+      setDerivativeGain(pidGainsReadOnly.getKd());
+      setPositionDeadband(pidGainsReadOnly.getPositionDeadband());
+      setIntegralGain(pidGainsReadOnly.getKi());
+      setIntegralLeakRatio(pidGainsReadOnly.getIntegralLeakRatio());
+      setMaxIntegralError(pidGainsReadOnly.getMaxIntegralError());
    }
 
    public void setProportionalGain(double proportionalGain)

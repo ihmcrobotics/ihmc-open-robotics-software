@@ -1,5 +1,6 @@
 package us.ihmc.robotics.controllers;
 
+import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -65,6 +66,13 @@ public class PDController extends AbstractPDController
    public double getPositionDeadband()
    {
       return positionDeadband.getValue();
+   }
+
+   public void setGains(PDGainsReadOnly pdGainsReadOnly)
+   {
+      setProportionalGain(pdGainsReadOnly.getKp());
+      setDerivativeGain(pdGainsReadOnly.getKd());
+      setPositionDeadband(pdGainsReadOnly.getPositionDeadband());
    }
 
    public void setProportionalGain(double proportionalGain)

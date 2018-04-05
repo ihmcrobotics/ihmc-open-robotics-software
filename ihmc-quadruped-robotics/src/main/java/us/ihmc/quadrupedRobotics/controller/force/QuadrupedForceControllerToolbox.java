@@ -14,6 +14,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -150,5 +151,10 @@ public class QuadrupedForceControllerToolbox
    public List<ContactablePlaneBody> getContactablePlaneBodies()
    {
       return contactablePlaneBodies;
+   }
+
+   public CenterOfMassJacobian getCenterOfMassJacobian()
+   {
+      return taskSpaceEstimator.getComJacobian();
    }
 }

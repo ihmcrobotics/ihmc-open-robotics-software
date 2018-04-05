@@ -280,7 +280,7 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
    }
 
    @Override
-   public ReferenceFrame getBodyFrame()
+   public MovingReferenceFrame getBodyFrame()
    {
       return bodyFrame;
    }

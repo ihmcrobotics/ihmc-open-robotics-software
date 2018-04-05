@@ -15,6 +15,7 @@ public class QuadrupedControlManagerFactory
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final QuadrupedForceControllerToolbox toolbox;
+   private final QuadrupedPhysicalProperties physicalProperties;
    private final QuadrupedPostureInputProviderInterface postureProvider;
    private final YoGraphicsListRegistry graphicsListRegistry;
 
@@ -27,6 +28,7 @@ public class QuadrupedControlManagerFactory
                                          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.toolbox = toolbox;
+      this.physicalProperties = physicalProperties;
       this.postureProvider = new QuadrupedPostureInputProvider(physicalProperties, globalDataProducer, registry);
       this.graphicsListRegistry = graphicsListRegistry;
 
@@ -56,7 +58,7 @@ public class QuadrupedControlManagerFactory
       if (balanceManager != null)
          return balanceManager;
 
-      balanceManager = new QuadrupedBalanceManager(toolbox, postureProvider, registry, toolbox.getRuntimeEnvironment().getGraphicsListRegistry());
+      balanceManager = new QuadrupedBalanceManager(toolbox, physicalProperties, postureProvider, registry, toolbox.getRuntimeEnvironment().getGraphicsListRegistry());
       return balanceManager;
    }
 

@@ -32,16 +32,8 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
    private final YoDouble yoComVelocityInputX;
    private final YoDouble yoComVelocityInputY;
    private final YoDouble yoComVelocityInputZ;
-   private final YoDouble yoBodyOrientationInputYaw;
-   private final YoDouble yoBodyOrientationInputPitch;
-   private final YoDouble yoBodyOrientationInputRoll;
-   private final YoDouble yoBodyAngularRateInputX;
-   private final YoDouble yoBodyAngularRateInputY;
-   private final YoDouble yoBodyAngularRateInputZ;
    private final Point3D comPositionInput;
    private final Vector3D comVelocityInput;
-   private final Quaternion bodyOrientationInput;
-   private final Vector3D bodyAngularRateInput;
 
    public QuadrupedPostureInputProvider(QuadrupedPhysicalProperties physicalProperties, GlobalDataProducer globalDataProducer, YoVariableRegistry parentRegistry)
    {
@@ -53,16 +45,8 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
       yoComVelocityInputX = new YoDouble("comVelocityInputX", registry);
       yoComVelocityInputY = new YoDouble("comVelocityInputY", registry);
       yoComVelocityInputZ = new YoDouble("comVelocityInputZ", registry);
-      yoBodyOrientationInputYaw = new YoDouble("bodyOrientationInputYaw", registry);
-      yoBodyOrientationInputPitch = new YoDouble("bodyOrientationInputPitch", registry);
-      yoBodyOrientationInputRoll = new YoDouble("bodyOrientationInputRoll", registry);
-      yoBodyAngularRateInputX = new YoDouble("bodyAngularRateInputX", registry);
-      yoBodyAngularRateInputY = new YoDouble("bodyAngularRateInputY", registry);
-      yoBodyAngularRateInputZ = new YoDouble("bodyAngularRateInputZ", registry);
       comPositionInput = new Point3D();
       comVelocityInput = new Vector3D();
-      bodyOrientationInput = new Quaternion();
-      bodyAngularRateInput = new Vector3D();
 
       Vector3D defaultComPositionLowerLimits = new Vector3D(-Double.MAX_VALUE, - Double.MAX_VALUE, 0.2);
       Vector3D negativeMaximumLimit = new Vector3D(- Double.MAX_VALUE, - Double.MAX_VALUE, - Double.MAX_VALUE);
