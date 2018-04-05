@@ -6,8 +6,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class QuadrupedControlManagerFactory
@@ -16,7 +14,6 @@ public class QuadrupedControlManagerFactory
 
    private final QuadrupedForceControllerToolbox toolbox;
    private final QuadrupedPhysicalProperties physicalProperties;
-   private final QuadrupedPostureInputProviderInterface postureProvider;
    private final YoGraphicsListRegistry graphicsListRegistry;
 
    private QuadrupedFeetManager feetManager;
@@ -24,12 +21,11 @@ public class QuadrupedControlManagerFactory
    private QuadrupedBalanceManager balanceManager;
    private QuadrupedJointSpaceManager jointSpaceManager;
 
-   public QuadrupedControlManagerFactory(QuadrupedForceControllerToolbox toolbox, QuadrupedPhysicalProperties physicalProperties, GlobalDataProducer globalDataProducer,
+   public QuadrupedControlManagerFactory(QuadrupedForceControllerToolbox toolbox, QuadrupedPhysicalProperties physicalProperties,
                                          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.toolbox = toolbox;
       this.physicalProperties = physicalProperties;
-      this.postureProvider = new QuadrupedPostureInputProvider(physicalProperties, globalDataProducer, registry);
       this.graphicsListRegistry = graphicsListRegistry;
 
       parentRegistry.addChild(registry);
@@ -58,7 +54,7 @@ public class QuadrupedControlManagerFactory
       if (balanceManager != null)
          return balanceManager;
 
-      balanceManager = new QuadrupedBalanceManager(toolbox, physicalProperties, postureProvider, registry, toolbox.getRuntimeEnvironment().getGraphicsListRegistry());
+      balanceManager = new QuadrupedBalanceManager(toolbox, physicalProperties, registry, toolbox.getRuntimeEnvironment().getGraphicsListRegistry());
       return balanceManager;
    }
 
