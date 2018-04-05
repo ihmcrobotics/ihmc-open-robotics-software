@@ -5,6 +5,7 @@ import gnu.trove.list.array.*;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -43,8 +44,22 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(us.ihmc.idl.CDR.class);
       registerPacketField(ArrayList.class);
 
+      // Trajectory message fields
+      registerPacketField(QueueableMessage.class);
+      registerPacketField(EuclideanTrajectoryMessage.class);
+      registerPacketField(FrameInformation.class);
+      
+      registerPacketField(SelectionMatrix3DMessage.class);
+      registerPacketField(WeightMatrix3DMessage.class);
+
+      registerPacketField(Pose3D.class);
+
+
+
 
       registerPacketField(QuadrupedTimedStepListMessagePubSubType.class);
+      registerPacketField(QueueableMessagePubSubType.class);
+
 
 
 
