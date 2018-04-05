@@ -100,6 +100,7 @@ public class LogCrawler implements Runnable
       {
          readLogFile(logFile);
          playbackListener.onStart(this, robot);
+         System.out.println("Crawling " + logFile.getName());
          while (!robot.readAndProcessALogLineReturnTrueIfDone(dt))
          {
             playbackListener.update(robot.getTime());
