@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.utils.NameBasedHashCodeTools;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
@@ -775,6 +776,37 @@ public abstract class PacketValidityChecker
    }
 
    public static String validatePelvisHeightTrajectoryMessage(PelvisHeightTrajectoryMessage message)
+   {
+      String errorMessage = validatePacket(message);
+      if (errorMessage != null)
+         return message.getClass().getSimpleName() + " " + errorMessage;
+
+      EuclideanTrajectoryPointMessage previousTrajectoryPoint = null;
+
+      if (message.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().isEmpty())
+      {
+         String messageClassName = message.getClass().getSimpleName();
+         errorMessage = "Received " + messageClassName + " with no waypoint.";
+         return errorMessage;
+      }
+
+      for (int i = 0; i < message.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().size(); i++)
+      {
+         EuclideanTrajectoryPointMessage waypoint = message.getEuclideanTrajectory().getTaskspaceTrajectoryPoints().get(i);
+         errorMessage = validateEuclideanTrajectoryPointMessage(waypoint, previousTrajectoryPoint, false);
+         if (errorMessage != null)
+         {
+            String messageClassName = message.getClass().getSimpleName();
+            errorMessage = "The " + messageClassName + "'s " + i + "th waypoint " + errorMessage;
+            return errorMessage;
+         }
+         previousTrajectoryPoint = waypoint;
+      }
+
+      return null;
+   }
+
+   public static String validateQuadrupedBodyHeightMessage(QuadrupedBodyHeightMessage message)
    {
       String errorMessage = validatePacket(message);
       if (errorMessage != null)
