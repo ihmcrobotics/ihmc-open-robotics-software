@@ -11,12 +11,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedBodyOrientationController;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
+import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
-import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
+import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -27,14 +27,17 @@ public class QuadrupedBodyOrientationManager
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final QuadrupedBodyOrientationController controller;
-   private final YoPID3DGains gains;
-
    private final ParameterizedPID3DGains bodyOrientationGainsParameter;
 
    private final MultipleWaypointsOrientationTrajectoryGenerator bodyOrientationTrajectory;
 
    private final GroundPlaneEstimator groundPlaneEstimator;
+
+   private final ReferenceFrame bodyFrame;
+   private final AxisAngleOrientationController bodyOrientationController;
+   private final YoFrameOrientation yoBodyOrientationSetpoint;
+   private final YoFrameVector yoBodyAngularVelocitySetpoint;
+   private final YoFrameVector yoComTorqueFeedforwardSetpoint;
 
    private final FrameQuaternion desiredBodyOrientation;
    private final FrameQuaternion desiredBodyOrientationOffset;
@@ -62,9 +65,14 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationDefaultGains.setIntegralGains(0.0, 0.0, 0.0, 0.0);
       bodyOrientationGainsParameter = new ParameterizedPID3DGains("_bodyOrientation", GainCoupling.NONE, false, bodyOrientationDefaultGains, registry);
 
-      controller = new QuadrupedBodyOrientationController(controllerToolbox, registry);
+
+      bodyFrame = controllerToolbox.getReferenceFrames().getBodyFrame();
+      bodyOrientationController = new AxisAngleOrientationController("bodyOrientation", bodyFrame, controllerToolbox.getRuntimeEnvironment().getControlDT(), registry);
+      yoBodyOrientationSetpoint = new YoFrameOrientation("bodyOrientationSetpoint", ReferenceFrame.getWorldFrame(), registry);
+      yoBodyAngularVelocitySetpoint = new YoFrameVector("bodyAngularVelocitySetpoint", ReferenceFrame.getWorldFrame(), registry);
+      yoComTorqueFeedforwardSetpoint = new YoFrameVector("comTorqueFeedforwardSetpoint", ReferenceFrame.getWorldFrame(), registry);
+
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
-      gains = controller.getGains();
 
       bodyOrientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("bodyTrajectory", worldFrame, registry);
 
@@ -94,7 +102,8 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationTrajectory.appendWaypoint(currentTime, desiredBodyOrientation, desiredBodyAngularVelocity);
       bodyOrientationTrajectory.initialize();
 
-      controller.reset();
+      bodyOrientationController.reset();
+      bodyOrientationController.resetIntegrator();
    }
 
    public void handleBodyOrientationCommand(QuadrupedBodyOrientationCommand command)
@@ -124,8 +133,6 @@ public class QuadrupedBodyOrientationManager
 
    public void compute(FrameQuaternionReadOnly bodyOrientationDesired)
    {
-      gains.set(bodyOrientationGainsParameter);
-
       bodyOrientationTrajectory.compute(robotTimestamp.getDoubleValue());
 
       desiredBodyOrientation.setIncludingFrame(bodyOrientationDesired);
@@ -141,12 +148,31 @@ public class QuadrupedBodyOrientationManager
 
       desiredBodyFeedForwardTorque.setToZero();
 
-      controller.compute(desiredAngularMomentumRate, desiredBodyOrientation, desiredBodyAngularVelocity, desiredBodyFeedForwardTorque,
-                         controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity());
+      doControl();
 
       desiredAngularMomentumRate.changeFrame(worldFrame);
       angularMomentumCommand.setAngularMomentumRate(desiredAngularMomentumRate);
       angularMomentumCommand.setAngularWeights(bodyAngularWeight);
+   }
+
+   private void doControl()
+   {
+      FrameVector3D estimatedVelocity = controllerToolbox.getTaskSpaceEstimates().getBodyAngularVelocity();
+
+      // compute body torque
+      desiredAngularMomentumRate.setToZero(bodyFrame);
+      desiredBodyOrientation.changeFrame(bodyFrame);
+      desiredBodyAngularVelocity.changeFrame(bodyFrame);
+      estimatedVelocity.changeFrame(bodyFrame);
+      desiredBodyFeedForwardTorque.changeFrame(bodyFrame);
+      bodyOrientationController.setGains(bodyOrientationGainsParameter);
+      bodyOrientationController
+            .compute(desiredAngularMomentumRate, desiredBodyOrientation, desiredBodyAngularVelocity, estimatedVelocity, desiredBodyFeedForwardTorque);
+
+      // update log variables
+      yoBodyOrientationSetpoint.setAndMatchFrame(desiredBodyOrientation);
+      yoBodyAngularVelocitySetpoint.setMatchingFrame(desiredBodyAngularVelocity);
+      yoComTorqueFeedforwardSetpoint.setMatchingFrame(desiredBodyFeedForwardTorque);
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
