@@ -100,10 +100,8 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       controllerToolbox.update();
       QuadrupedTaskSpaceEstimates taskSpaceEstimates = controllerToolbox.getTaskSpaceEstimates();
 
-      // initialize feedback controllers
-      //balanceManager.initialize(taskSpaceEstimates.getComPosition());
-
       bodyOrientationManager.initialize(taskSpaceEstimates.getBodyOrientation());
+      bodyOrientationManager.setDesiredFrameToHoldPosition(controllerToolbox.getReferenceFrames().getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds());
 
       feetManager.registerStepTransitionCallback(this);
       feetManager.reset();
@@ -166,7 +164,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       balanceManager.compute(contactStates);
 
       // update desired body orientation, angular velocity, and torque
-      bodyOrientationManager.compute(stepMessageHandler.getBodyOrientation());
+      bodyOrientationManager.compute();
 
       // update desired contact state and sole forces
       feetManager.compute();
