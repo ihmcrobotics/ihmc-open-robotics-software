@@ -7,6 +7,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTra
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyHeightCommand;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
+import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
@@ -54,7 +55,7 @@ public class QuadrupedCenterOfMassHeightManager
 
    private final double controlDT;
 
-   public QuadrupedCenterOfMassHeightManager(QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedCenterOfMassHeightManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties, YoVariableRegistry parentRegistry)
    {
       this.robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
@@ -73,14 +74,17 @@ public class QuadrupedCenterOfMassHeightManager
 
       linearMomentumZPDController = new PIDController("linearMomentumZPDController", registry);
 
+      FramePoint3D initialPosition = new FramePoint3D(supportFrame, 0.0, 0.0, physicalProperties.getNominalCoMHeight());
+      FrameVector3D initialVelocity = new FrameVector3D(supportFrame);
       centerOfMassHeightTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("centerOfMassHeight", supportFrame, registry);
+      centerOfMassHeightTrajectory.clear();
+      centerOfMassHeightTrajectory.appendWaypoint(0.0, initialPosition, initialVelocity);
+      centerOfMassHeightTrajectory.initialize();
 
       currentHeightInWorld = new YoDouble("currentHeightInWorld", registry);
       currentVelocityInWorld = new YoDouble("currentVelocityInWorld", registry);
       desiredHeightInWorld = new YoDouble("desiredHeightInWorld", registry);
       desiredVelocityInWorld = new YoDouble("desiredVelocityInWorld", registry);
-
-      controlBodyHeight.set(true);
 
       parentRegistry.addChild(registry);
    }
