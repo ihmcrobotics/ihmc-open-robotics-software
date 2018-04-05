@@ -62,9 +62,6 @@ public class QuadrupedTestBehaviors
 
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedStepTeleopManager stepTeleopManager) throws AssertionFailedError
    {
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
-      conductor.simulate();
-
       stepTeleopManager.requestSteppingState();
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 2.0);
