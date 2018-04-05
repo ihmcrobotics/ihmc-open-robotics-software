@@ -19,14 +19,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
@@ -36,8 +32,8 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 
 public class KinematicsToolboxHelper
 {
@@ -272,6 +268,9 @@ public class KinematicsToolboxHelper
       DenseMatrix64F selectionMatrix = new DenseMatrix64F(6, 6);
       command.getMomentumRateCommand().getSelectionMatrix(worldFrame, selectionMatrix);
       DenseMatrix64F weightVector = command.getMomentumRateCommand().getWeightVector();
+      DenseMatrix64F weightMatrix = new DenseMatrix64F(6, 6);
+      for (int i = 0; i < 6; i++)
+         weightMatrix.set(i, i, weightVector.get(i, 0));
 
       DenseMatrix64F error = new DenseMatrix64F(6, 1);
       positionError.get(3, error);
@@ -327,12 +326,8 @@ public class KinematicsToolboxHelper
     * @param selectionMatrix the 6-by-6 selection matrix of the command. Not modified.
     * @return the command quality.
     */
-   private static double computeQualityFromError(DenseMatrix64F error, DenseMatrix64F weightVector, DenseMatrix64F selectionMatrix)
+   private static double computeQualityFromError(DenseMatrix64F error, DenseMatrix64F weightMatrix, DenseMatrix64F selectionMatrix)
    {
-      DenseMatrix64F weightMatrix = new DenseMatrix64F(6, 6);
-      for (int i = 0; i < 6; i++)
-         weightMatrix.set(i, i, weightVector.get(i, 0));
-
       // Applying the weight to the error
       DenseMatrix64F errorWeighted = new DenseMatrix64F(error.getNumRows(), 1);
       CommonOps.mult(weightMatrix, error, errorWeighted);
