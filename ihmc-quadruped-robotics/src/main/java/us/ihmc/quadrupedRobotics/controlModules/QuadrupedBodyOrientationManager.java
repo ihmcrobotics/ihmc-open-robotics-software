@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedBodyOrientationController;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
@@ -87,6 +88,12 @@ public class QuadrupedBodyOrientationManager
       desiredBodyAngularVelocity.setToZero();
       desiredBodyAngularAcceleration.setToZero();
       desiredBodyFeedForwardTorque.setToZero();
+
+      double currentTime = robotTimestamp.getDoubleValue();
+
+      bodyOrientationTrajectory.appendWaypoint(currentTime, desiredBodyOrientation, desiredBodyAngularVelocity);
+      bodyOrientationTrajectory.initialize();
+
       controller.reset();
    }
 
@@ -94,9 +101,25 @@ public class QuadrupedBodyOrientationManager
    {
       double currentTime = robotTimestamp.getDoubleValue();
       double timeShift = command.isExpressedInAbsoluteTime() ? 0.0 : currentTime;
-      command.getSO3Trajectory().getTrajectoryPointList().addTimeOffset(timeShift);
+      SO3TrajectoryControllerCommand so3Trajectory = command.getSO3Trajectory();
+      so3Trajectory.getTrajectoryPointList().addTimeOffset(timeShift);
+
+      if (so3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5 + currentTime)
+      {
+         bodyOrientationTrajectory.getOrientation(desiredBodyOrientation);
+         desiredBodyOrientation.changeFrame(worldFrame);
+         desiredBodyAngularVelocity.setToZero(worldFrame);
+
+         bodyOrientationTrajectory.clear();
+         bodyOrientationTrajectory.appendWaypoint(currentTime, desiredBodyOrientation, desiredBodyAngularVelocity);
+      }
+      else
+      {
+         bodyOrientationTrajectory.clear();
+      }
 
       bodyOrientationTrajectory.appendWaypoints(command.getSO3Trajectory().getTrajectoryPointList());
+      bodyOrientationTrajectory.initialize();
    }
 
    public void compute(FrameQuaternionReadOnly bodyOrientationDesired)
