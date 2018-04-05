@@ -37,6 +37,8 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    private final ConcurrentLinkedQueue<GuiParameter> serverChangedParameters = new ConcurrentLinkedQueue<>();
    private final ConcurrentLinkedQueue<GuiParameter> userChangedParameters = new ConcurrentLinkedQueue<>();
 
+   private boolean isUpdatingYoVariables = false;
+
    @Override
    public void receivedTimestampOnly(long timestamp)
    {
@@ -84,6 +86,11 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
             @Override
             public void notifyOfParameterChange(YoParameter<?> changedParameter)
             {
+               if (isUpdatingYoVariables)
+               {
+                  return;
+               }
+
                String yoName = getUniqueName(changedParameter);
                GuiParameter newGuiParameter = new GuiParameter(guiParametersByYoName.get(yoName));
                newGuiParameter.setValue(changedParameter.getValueAsString());
@@ -126,11 +133,13 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
          parametersToUpdate.put(userChangedParameter.getUniqueName(), userChangedParameter);
       }
 
+      isUpdatingYoVariables = true;
       parametersToUpdate.values().forEach(guiParameter -> {
          String uniqueName = guiParameter.getUniqueName();
          YoVariable<?> yoVariable = yoVariablesByGuiName.get(uniqueName);
          setYoVariableFromGuiParameter(yoVariable, guiParameter);
       });
+      isUpdatingYoVariables = false;
    }
 
    @Override
