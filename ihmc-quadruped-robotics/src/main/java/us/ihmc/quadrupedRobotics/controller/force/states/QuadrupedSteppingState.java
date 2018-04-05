@@ -101,7 +101,7 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
 
       // Initialize input providers.
-      stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), controllerToolbox.getReferenceFrames(), registry);
+      stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), registry);
       commandConsumer = new QuadrupedStepCommandConsumer(commandInputManager, stepMessageHandler, controllerToolbox, controlManagerFactory);
 
       this.stateMachine = buildStateMachine();
