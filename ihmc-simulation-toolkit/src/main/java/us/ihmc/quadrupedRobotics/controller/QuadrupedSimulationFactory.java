@@ -1,11 +1,5 @@
 package us.ihmc.quadrupedRobotics.controller;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.BindException;
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commons.PrintTools;
@@ -35,7 +29,6 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
@@ -64,18 +57,10 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationToolkit.controllers.SpringJointOutputWriter;
 import us.ihmc.simulationToolkit.parameters.SimulatedElasticityParameters;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.RotatablePlaneTerrainProfile;
-import us.ihmc.simulationconstructionset.util.ground.VaryingStairGroundProfile;
+import us.ihmc.simulationconstructionset.util.ground.*;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.DRCKinematicsBasedStateEstimator;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
@@ -83,6 +68,12 @@ import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.util.PeriodicThreadScheduler;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.BindException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class QuadrupedSimulationFactory
 {
@@ -144,6 +135,12 @@ public class QuadrupedSimulationFactory
    private LinearGroundContactModel groundContactModel;
    private QuadrupedSimulationController simulationController;
    private QuadrupedLegInverseKinematicsCalculator legInverseKinematicsCalculator;
+
+   /**
+    * The PacketCommunicator used as input of the controller is either equal to the output PacketCommunicator of the network processor or the behavior module if any.
+    * It is bidirectional meaning that it carries commands to be executed by the controller and that the controller is able to send feedback the other way to whoever is listening to the PacketCommunicator.
+    */
+   private PacketCommunicator controllerPacketCommunicator;
 
    // CREATION
 
@@ -255,7 +252,7 @@ public class QuadrupedSimulationFactory
       {
          try
          {
-            if(useLocalCommunicator.get())
+            if (useLocalCommunicator.get())
             {
                packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList.get());
             }
@@ -265,7 +262,8 @@ public class QuadrupedSimulationFactory
             }
 
             packetCommunicator.connect();
-         }         catch (BindException bindException)
+         }
+         catch (BindException bindException)
          {
             PrintTools.error(this, bindException.getMessage());
             PrintTools.warn(this, "Continuing without networking");
@@ -345,6 +343,12 @@ public class QuadrupedSimulationFactory
       {
          poseCommunicator = null;
       }
+   }
+
+   private void createControllerNetworkSubscriber()
+   {
+      if (useNetworking.get())
+         controllerManager.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("controllerNetworkSubscriber"), packetCommunicator);
    }
 
    private void createGroundContactModel()
@@ -458,7 +462,9 @@ public class QuadrupedSimulationFactory
       createHeadController();
       createInverseKinematicsCalculator();
       createControllerManager();
+      createControllerNetworkSubscriber();
       createPoseCommunicator();
+
       createGroundContactModel();
       createSimulationController();
       setupSDFRobot();

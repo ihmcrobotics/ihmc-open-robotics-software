@@ -1,7 +1,6 @@
 package us.ihmc.quadrupedRobotics.controller.force.states;
 
-import java.util.concurrent.atomic.AtomicReference;
-
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -10,11 +9,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingEventPacket;
-import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedSteppingStatePacket;
+import us.ihmc.quadrupedRobotics.communication.commands.QuadrupedRequestedSteppingStateCommand;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
@@ -25,18 +23,13 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepCommandConsumer;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedPreplannedStepStream;
-import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStreamMultiplexer;
-import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedXGaitStepStream;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPreplannedStepInputProvider;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
-import us.ihmc.quadrupedRobotics.providers.YoQuadrupedXGaitSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventTrigger;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
@@ -44,12 +37,18 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class QuadrupedSteppingState implements QuadrupedController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
    private final QuadrupedStepMessageHandler stepMessageHandler;
+
+   private final QuadrupedStepCommandConsumer commandConsumer;
+
+   private final CommandInputManager commandInputManager;
+   private final StatusMessageOutputManager statusMessageOutputManager;
 
    private final QuadrupedRuntimeEnvironment runtimeEnvironment;
    private final QuadrupedForceControllerToolbox controllerToolbox;
@@ -59,7 +58,6 @@ public class QuadrupedSteppingState implements QuadrupedController
    private final StateMachine<QuadrupedSteppingStateEnum, QuadrupedController> stateMachine;
    private EventTrigger trigger;
 
-   private final QuadrupedSteppingStatePacket quadrupedSteppingStatePacket;
    private final AtomicReference<QuadrupedSteppingRequestedEvent> requestedEvent = new AtomicReference<>();
 
    private final QuadrupedFeetManager feetManager;
@@ -69,15 +67,20 @@ public class QuadrupedSteppingState implements QuadrupedController
 
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
+   private final QuadrupedSteppingStateChangeMessage quadrupedSteppingStateChangeMessage = new QuadrupedSteppingStateChangeMessage();
+
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.VIRTUAL_MODEL);
    private final WholeBodyControllerCore controllerCore;
 
    public QuadrupedSteppingState(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedForceControllerToolbox controllerToolbox,
+                                 CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
                                  QuadrupedControlManagerFactory controlManagerFactory, YoVariableRegistry parentRegistry)
    {
       this.runtimeEnvironment = runtimeEnvironment;
       this.controllerToolbox = controllerToolbox;
+      this.commandInputManager = commandInputManager;
+      this.statusMessageOutputManager = statusMessageOutputManager;
       this.controlManagerFactory = controlManagerFactory;
 
       balanceManager = controlManagerFactory.getOrCreateBalanceManager();
@@ -98,24 +101,8 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCoreOutput = controllerCore.getControllerCoreOutput();
 
       // Initialize input providers.
-      stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), controllerToolbox.getReferenceFrames(), runtimeEnvironment.getGlobalDataProducer(), registry);
-      soleWaypointInputProvider = new QuadrupedSoleWaypointInputProvider(runtimeEnvironment.getGlobalDataProducer(), registry);
-
-      GlobalDataProducer globalDataProducer = runtimeEnvironment.getGlobalDataProducer();
-
-      if (globalDataProducer != null)
-      {
-         globalDataProducer.attachListener(QuadrupedSteppingEventPacket.class, new PacketConsumer<QuadrupedSteppingEventPacket>()
-         {
-            @Override
-            public void receivedPacket(QuadrupedSteppingEventPacket packet)
-            {
-               requestedEvent.set(packet.get());
-            }
-         });
-      }
-
-      this.quadrupedSteppingStatePacket = new QuadrupedSteppingStatePacket();
+      stepMessageHandler = new QuadrupedStepMessageHandler(runtimeEnvironment.getRobotTimestamp(), controllerToolbox.getReferenceFrames(), registry);
+      commandConsumer = new QuadrupedStepCommandConsumer(commandInputManager, stepMessageHandler, controllerToolbox, controlManagerFactory);
 
       this.stateMachine = buildStateMachine();
 
@@ -128,9 +115,10 @@ public class QuadrupedSteppingState implements QuadrupedController
       final QuadrupedController standController = new QuadrupedStandController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedStepController stepController = new QuadrupedStepController(controllerToolbox, controlManagerFactory, stepMessageHandler, registry);
       final QuadrupedController soleWaypointController = new QuadrupedForceBasedSoleWaypointController(controllerToolbox, controlManagerFactory,
-                                                                                                       soleWaypointInputProvider, registry);
+                                                                                                       stepMessageHandler, registry);
 
-      EventBasedStateMachineFactory<QuadrupedSteppingStateEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedSteppingStateEnum.class);
+      EventBasedStateMachineFactory<QuadrupedSteppingStateEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(
+            QuadrupedSteppingStateEnum.class);
       factory.setNamePrefix("stepping").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
       factory.buildYoEventTrigger("stepTrigger", QuadrupedSteppingRequestedEvent.class);
 
@@ -152,6 +140,19 @@ public class QuadrupedSteppingState implements QuadrupedController
       Runnable stepToStandCallback = () -> stepController.halt();
       factory.addCallback(QuadrupedSteppingRequestedEvent.REQUEST_STAND, QuadrupedSteppingStateEnum.STEP, stepToStandCallback);
 
+      factory.addStateChangedListener(new StateChangedListener<QuadrupedSteppingStateEnum>()
+      {
+         @Override
+         public void stateChanged(QuadrupedSteppingStateEnum from, QuadrupedSteppingStateEnum to)
+         {
+            byte fromByte = from == null ? -1 : from.toByte();
+            byte toByte = to == null ? -1 : to.toByte();
+            quadrupedSteppingStateChangeMessage.setInitialSteppingControllerName(fromByte);
+            quadrupedSteppingStateChangeMessage.setEndSteppingControllerName(toByte);
+            statusMessageOutputManager.reportStatusMessage(quadrupedSteppingStateChangeMessage);
+         }
+      });
+
       trigger = factory.buildEventTrigger();
 
       return factory.build(QuadrupedSteppingStateEnum.STAND);
@@ -160,7 +161,12 @@ public class QuadrupedSteppingState implements QuadrupedController
    @Override
    public void onEntry()
    {
+      commandInputManager.flushAllCommands();
 
+      stepMessageHandler.clearFootTrajectory();
+      stepMessageHandler.clearSteps();
+
+      stateMachine.resetToInitialState();
    }
 
    private final FrameVector3D achievedLinearMomentumRate = new FrameVector3D();
@@ -171,6 +177,11 @@ public class QuadrupedSteppingState implements QuadrupedController
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
       balanceManager.computeAchievedCMP(achievedLinearMomentumRate);
 
+      if (commandInputManager.isNewCommandAvailable(QuadrupedRequestedSteppingStateCommand.class))
+      {
+         requestedEvent.set(commandInputManager.pollNewestCommand(QuadrupedRequestedSteppingStateCommand.class).getRequestedSteppingState());
+      }
+
       QuadrupedSteppingRequestedEvent reqEvent = requestedEvent.getAndSet(null);
       if (reqEvent != null)
       {
@@ -178,26 +189,30 @@ public class QuadrupedSteppingState implements QuadrupedController
          trigger.fireEvent(reqEvent);
       }
 
+      commandConsumer.update();
+      commandConsumer.consumeFootCommands();
+
       if (stepMessageHandler.isStepPlanAvailable())
       {
          if (stateMachine.getCurrentStateKey() == QuadrupedSteppingStateEnum.STAND)
          {
-            // trigger step event if preplanned steps are available in stand state
+            // trigger step event steps are available in stand state
             lastEvent.set(QuadrupedSteppingRequestedEvent.REQUEST_STEP);
             trigger.fireEvent(QuadrupedSteppingRequestedEvent.REQUEST_STEP);
+         }
+      }
+      if (stepMessageHandler.hasFootTrajectoryForSolePositionControl())
+      {
+         if (stateMachine.getCurrentStateKey() == QuadrupedSteppingStateEnum.STAND)
+         {
+            // trigger step event if sole waypoints are available in stand state
+            lastEvent.set(QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT);
+            trigger.fireEvent(QuadrupedSteppingRequestedEvent.REQUEST_SOLE_WAYPOINT);
          }
       }
 
       // update controller state machine
       stateMachine.doActionAndTransition();
-
-      // Send state information
-      quadrupedSteppingStatePacket.set(stateMachine.getCurrentStateKey());
-
-      if (runtimeEnvironment.getGlobalDataProducer() != null)
-      {
-         runtimeEnvironment.getGlobalDataProducer().queueDataToSend(quadrupedSteppingStatePacket);
-      }
 
       submitControllerCoreCommands();
 

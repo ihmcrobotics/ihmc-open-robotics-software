@@ -115,4 +115,10 @@ public class QuadrupedHoldPositionState extends QuadrupedFootState
    {
       return feedbackControlCommand;
    }
+
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return getFeedbackControlCommand();
+   }
 }

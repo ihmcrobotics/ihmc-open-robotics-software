@@ -17,6 +17,7 @@ import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXG
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationFactory;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
@@ -79,7 +80,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       QuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
       QuadrupedPhysicalProperties physicalProperties = new GenericQuadrupedPhysicalProperties();
-      NetClassList netClassList = new GenericQuadrupedNetClassList();
+      NetClassList netClassList = new QuadrupedNetClassList();
       QuadrupedSimulationInitialPositionParameters initialPositionParameters = initialPosition.get();
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
