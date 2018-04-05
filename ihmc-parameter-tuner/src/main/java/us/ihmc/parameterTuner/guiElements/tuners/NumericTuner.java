@@ -33,14 +33,9 @@ public abstract class NumericTuner<T extends Number> extends HBox implements Inp
          Platform.runLater(() -> parameter.setMax(max.getValueAsText()));
       });
 
-      // Use the slider value when it gets clicked or dragged and released.
-      slider.valueChangingProperty().addListener((observable, oldValue, newValue) -> {
-         if (!newValue && oldValue)
-         {
-            value.setValue(slider.getNumber());
-         }
+      slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+         value.setValue(slider.getNumber());
       });
-      slider.setOnMouseClicked(mouseEvent -> value.setValue(slider.getNumber()));
 
       parameter.addChangedListener(p -> {
          // This listener will be triggered by an external change and is called from the animation timer.
