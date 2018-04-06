@@ -114,25 +114,33 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
    private final AtlasCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder;
 
+   private boolean useShapeCollision = false;
+
    private final RobotDescription robotDescription;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless)
    {
-      this(atlasVersion, target, headless, null, false);
+      this(atlasVersion, target, headless, null, false, false);
    }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, boolean createAdditionalContactPoints)
    {
-      this(atlasVersion, target, headless, null, createAdditionalContactPoints);
+      this(atlasVersion, target, headless, null, createAdditionalContactPoints, false);
+   }
+
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, boolean createAdditionalContactPoints,
+                          boolean useShapeCollision)
+   {
+      this(atlasVersion, target, headless, null, createAdditionalContactPoints, useShapeCollision);
    }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
    {
-      this(atlasVersion, target, headless, simulationContactPoints, false);
+      this(atlasVersion, target, headless, simulationContactPoints, false, false);
    }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
-                          boolean createAdditionalContactPoints)
+                          boolean createAdditionalContactPoints, boolean useShapeCollision)
    {
       if (SCALE_ATLAS)
       {
@@ -175,6 +183,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
       collisionMeshDefinitionDataHolder = new AtlasCollisionMeshDefinitionDataHolder(jointMap, atlasPhysicalProperties);
 
+      this.useShapeCollision = useShapeCollision;
       robotDescription = createRobotDescription();
    }
 
@@ -188,9 +197,16 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                                                                         useCollisionMeshes);
 
       collisionMeshDefinitionDataHolder.setVisible(false);
-      robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
+      if (useShapeCollision)
+         robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
 
       return robotDescription;
+   }
+
+   @Override
+   public boolean useShapeCollision()
+   {
+      return useShapeCollision;
    }
 
    @Override
