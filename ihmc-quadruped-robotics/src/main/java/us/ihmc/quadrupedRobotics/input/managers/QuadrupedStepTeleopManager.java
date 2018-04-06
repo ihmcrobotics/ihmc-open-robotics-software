@@ -4,6 +4,8 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
@@ -132,8 +134,11 @@ public class QuadrupedStepTeleopManager
       for (int i = 0; i < steps.size(); i++)
          stepMessages.add(QuadrupedMessageTools.createQuadrupedTimedStepMessage(steps.get(i)));
 
-      QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);
-      packetCommunicator.send(message);
+      QuadrupedTimedStepListMessage stepsMessage = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);
+      packetCommunicator.send(stepsMessage);
+
+      QuadrupedBodyOrientationMessage bodyOrientationMessage = QuadrupedMessageTools.createQuadrupedWorldFrameYawMessage(stepStream.getBodyOrientation().getYaw());
+      packetCommunicator.send(bodyOrientationMessage);
    }
 
    public YoQuadrupedXGaitSettings getXGaitSettings()

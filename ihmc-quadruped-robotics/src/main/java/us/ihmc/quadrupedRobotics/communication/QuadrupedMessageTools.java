@@ -1,11 +1,13 @@
 package us.ihmc.quadrupedRobotics.communication;
 
 import controller_msgs.msg.dds.QuadrupedBodyHeightMessage;
+import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.util.TimeInterval;
@@ -51,6 +53,19 @@ public class QuadrupedMessageTools
       message.getQuadrupedStepMessage().setGroundClearance(step.getGroundClearance());
       message.getTimeInterval().setStartTime(step.getTimeInterval().getStartTime());
       message.getTimeInterval().setEndTime(step.getTimeInterval().getEndTime());
+
+      return message;
+   }
+
+   public static QuadrupedBodyOrientationMessage createQuadrupedWorldFrameYawMessage(double desiredBodyYaw)
+   {
+      QuadrupedBodyOrientationMessage message = new QuadrupedBodyOrientationMessage();
+      message.setIsAnOffsetOrientation(false);
+      message.setIsExpressedInAbsoluteTime(true);
+      message.getSo3Trajectory().getSelectionMatrix().setXSelected(false);
+      message.getSo3Trajectory().getSelectionMatrix().setYSelected(false);
+      message.getSo3Trajectory().getSelectionMatrix().setZSelected(true);
+      message.getSo3Trajectory().set(HumanoidMessageTools.createSO3TrajectoryMessage(0.0, new Quaternion(desiredBodyYaw, 0.0, 0.0), ReferenceFrame.getWorldFrame()));
 
       return message;
    }
