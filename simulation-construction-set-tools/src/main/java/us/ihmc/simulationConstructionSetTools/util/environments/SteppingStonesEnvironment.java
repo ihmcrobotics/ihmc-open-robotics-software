@@ -18,6 +18,7 @@ import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.lists.PairList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterface
@@ -32,7 +33,7 @@ public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterfa
 
    private final CombinedTerrainObject3D combinedTerrainObject3D = new CombinedTerrainObject3D(getClass().getSimpleName());
 
-   private final PairList<FramePoint3D, Vector2D> steppingStones = new PairList<>();
+   private final List<FramePoint3D> blockPositions = new ArrayList<>();
 
    public SteppingStonesEnvironment()
    {
@@ -65,6 +66,16 @@ public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterfa
       block7Position.changeFrame(worldFrame);
       endBlockPosition.changeFrame(worldFrame);
 
+      blockPositions.add(baseBlockPosition);
+      blockPositions.add(block1Position);
+      blockPositions.add(block2Position);
+      blockPositions.add(block3Position);
+      blockPositions.add(block4Position);
+      blockPositions.add(block5Position);
+      blockPositions.add(block6Position);
+      blockPositions.add(block7Position);
+      blockPositions.add(endBlockPosition);
+
       addBlock(yaw, baseBlockPosition, new Vector3D(1.5, 2.0, 0.25), steppingStoneColor);
       addBlock(yaw, block1Position, new Vector3D(0.25, 0.25, 0.25), steppingStoneColor);
       addBlock(yaw, block2Position, new Vector3D(0.6, 0.25, 0.25), steppingStoneColor);
@@ -74,6 +85,16 @@ public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterfa
       addBlock(yaw, block6Position, new Vector3D(0.25, 0.25, 0.25), steppingStoneColor);
       addBlock(yaw, block7Position, new Vector3D(0.3, 0.25, 0.25), steppingStoneColor);
       addBlock(yaw, endBlockPosition, new Vector3D(1.5, 2.0, 0.25), steppingStoneColor);
+   }
+
+   public List<FramePoint3D> getBlockPositions()
+   {
+      return blockPositions;
+   }
+
+   public ReferenceFrame getBaseBlockFrame()
+   {
+      return baseBlockFrame;
    }
 
    public Point3D getStartPosition()
