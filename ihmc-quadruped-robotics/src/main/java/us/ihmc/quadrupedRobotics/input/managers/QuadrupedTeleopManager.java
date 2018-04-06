@@ -4,13 +4,12 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
@@ -27,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class QuadrupedStepTeleopManager
+public class QuadrupedTeleopManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final PacketCommunicator packetCommunicator;
@@ -39,19 +38,30 @@ public class QuadrupedStepTeleopManager
 
    private final AtomicBoolean xGaitRequested = new AtomicBoolean();
    private final AtomicBoolean standingRequested = new AtomicBoolean();
-   private final AtomicReference<QuadrupedControllerStateChangeMessage> controllerStateChangeMessage = new AtomicReference<>();
-   private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
    private final AtomicDouble desiredVelocityX = new AtomicDouble();
    private final AtomicDouble desiredVelocityY = new AtomicDouble();
    private final AtomicDouble desiredVelocityZ = new AtomicDouble();
+   private final AtomicDouble desiredCoMHeight = new AtomicDouble();
+   private final AtomicDouble desiredOrientationYaw = new AtomicDouble();
+   private final AtomicDouble desiredOrientationPitch = new AtomicDouble();
+   private final AtomicDouble desiredOrientationRoll = new AtomicDouble();
+   private final AtomicDouble desiredOrientationTime = new AtomicDouble();
+
+   private final AtomicReference<QuadrupedControllerStateChangeMessage> controllerStateChangeMessage = new AtomicReference<>();
+   private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
    private final AtomicLong timestampNanos = new AtomicLong();
 
-   public QuadrupedStepTeleopManager(PacketCommunicator packetCommunicator, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
-                                     QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
+   private final ComPositionPacket comPositionPacket = new ComPositionPacket();
+   private final QuadrupedBodyOrientationMessage offsetBodyOrientationMessage = new QuadrupedBodyOrientationMessage();
+
+   public QuadrupedTeleopManager(PacketCommunicator packetCommunicator, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+                                 double initialCoMHeight, QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
       this.packetCommunicator = packetCommunicator;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
       this.stepStream = new QuadrupedXGaitStepStream(velocityInput, xGaitSettings, referenceFrames, timestamp, registry);
+      desiredCoMHeight.set(initialCoMHeight);
+
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class, controllerStateChangeMessage::set);
       packetCommunicator.attachListener(QuadrupedSteppingStateChangeMessage.class, steppingStateChangeMessage::set);
       packetCommunicator.attachListener(RobotConfigurationData.class, packet -> timestampNanos.set(packet.timestamp_));
@@ -79,6 +89,10 @@ public class QuadrupedStepTeleopManager
       {
          stepStream.process();
          sendSteps();
+      }
+      else if (!walking.getBooleanValue())
+      {
+         sendBodyPose();
       }
    }
 
@@ -139,6 +153,44 @@ public class QuadrupedStepTeleopManager
 
       QuadrupedBodyOrientationMessage bodyOrientationMessage = QuadrupedMessageTools.createQuadrupedWorldFrameYawMessage(stepStream.getBodyOrientation().getYaw());
       packetCommunicator.send(bodyOrientationMessage);
+   }
+
+   public void setDesiredCoMHeight(double desiredCoMHeight)
+   {
+      this.desiredCoMHeight.set(desiredCoMHeight);
+   }
+
+   public void setDesiredBodyOrientation(double yaw, double pitch, double roll, double time)
+   {
+      desiredOrientationYaw.set(yaw);
+      desiredOrientationPitch.set(pitch);
+      desiredOrientationRoll.set(roll);
+      desiredOrientationTime.set(time);
+   }
+
+   private void sendBodyPose()
+   {
+      double comHeight = desiredCoMHeight.getAndSet(Double.NaN);
+      double desiredYaw = desiredOrientationYaw.getAndSet(Double.NaN);
+      double desiredPitch = desiredOrientationPitch.getAndSet(Double.NaN);
+      double desiredRoll = desiredOrientationRoll.getAndSet(Double.NaN);
+      double desiredTime = desiredOrientationTime.getAndSet(Double.NaN);
+
+      if(!Double.isNaN(comHeight))
+      {
+         comPositionPacket.position.set(0.0, 0.0, comHeight);
+         packetCommunicator.send(comPositionPacket);
+      }
+
+      if(!Double.isNaN(desiredYaw))
+      {
+         offsetBodyOrientationMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().clear();
+         offsetBodyOrientationMessage.setIsAnOffsetOrientation(true);
+         SO3TrajectoryPointMessage trajectoryPointMessage = offsetBodyOrientationMessage.getSo3Trajectory().getTaskspaceTrajectoryPoints().add();
+         trajectoryPointMessage.getOrientation().setYawPitchRoll(desiredYaw, desiredPitch, desiredRoll);
+         trajectoryPointMessage.setTime(desiredTime);
+         packetCommunicator.send(offsetBodyOrientationMessage);
+      }
    }
 
    public YoQuadrupedXGaitSettings getXGaitSettings()
