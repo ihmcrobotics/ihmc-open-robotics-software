@@ -52,7 +52,7 @@ public class QuadrupedForceTestYoVariables extends QuadrupedTestYoVariables
    {
       super(scs);
       
-      userTrigger = (YoEnum<QuadrupedForceControllerRequestedEvent>) scs.getVariable("userTrigger");
+      userTrigger = (YoEnum<QuadrupedForceControllerRequestedEvent>) scs.getVariable("requestedControllerState");
       stepTrigger = (YoEnum<QuadrupedSteppingRequestedEvent>) scs.getVariable("stepTrigger");
       forceControllerState = (YoEnum<QuadrupedForceControllerEnum>) scs.getVariable("forceControllerCurrentState");
       steppingState = (YoEnum<QuadrupedSteppingStateEnum>) scs.getVariable("steppingCurrentState");
