@@ -24,8 +24,7 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
@@ -65,8 +64,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<QuadrupedSimulationInitialPositionParameters> initialPosition = new OptionalFactoryField<>("initialPosition");
    private final OptionalFactoryField<Boolean> useNetworking = new OptionalFactoryField<>("useNetworking");
 
-   private QuadrupedStepTeleopManager stepTeleopManager;
-   private QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager;
+   private QuadrupedTeleopManager stepTeleopManager;
 
    @Override
    public GoalOrientedTestConductor createTestConductor() throws IOException
@@ -144,8 +142,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
          PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
          packetCommunicator.connect();
-         stepTeleopManager = new QuadrupedStepTeleopManager(packetCommunicator, xGaitSettings, referenceFrames, teleopRegistry);
-         bodyPoseTeleopManager = new QuadrupedBodyPoseTeleopManager(physicalProperties.getNominalCoMHeight(), packetCommunicator);
+         stepTeleopManager = new QuadrupedTeleopManager(packetCommunicator, xGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, teleopRegistry);
 
          new DefaultParameterReader().readParametersInRegistry(teleopRegistry);
       }
@@ -160,11 +157,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       if(useNetworking.get())
       {
-         goalOrientedTestConductor.getScs().addScript(t ->
-                                                      {
-                                                         stepTeleopManager.update();
-                                                         bodyPoseTeleopManager.update();
-                                                      });
+         goalOrientedTestConductor.getScs().addScript(t -> stepTeleopManager.update());
       }
 
       FactoryTools.disposeFactory(this);
@@ -215,14 +208,8 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    }
 
    @Override
-   public QuadrupedStepTeleopManager getStepTeleopManager()
+   public QuadrupedTeleopManager getStepTeleopManager()
    {
       return stepTeleopManager;
-   }
-
-   @Override
-   public QuadrupedBodyPoseTeleopManager getBodyPoseTeleopManager()
-   {
-      return bodyPoseTeleopManager;
    }
 }

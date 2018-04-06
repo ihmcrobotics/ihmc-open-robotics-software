@@ -2,12 +2,9 @@ package us.ihmc.quadrupedRobotics.input.mode;
 
 import net.java.games.input.Event;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimates;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
-import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
+import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
@@ -38,15 +35,13 @@ public class QuadrupedStepTeleopMode
 
    private final DoubleParameter xGaitBodyOrientationShiftTime = new DoubleParameter("xGaitBodyOrientationShiftTime", registry, 0.1);;
 
-   private final QuadrupedStepTeleopManager stepTeleopManager;
-   private final QuadrupedBodyPoseTeleopManager bodyPoseTeleopManager;
+   private final QuadrupedTeleopManager stepTeleopManager;
    private InputValueIntegrator comZ;
 
    public QuadrupedStepTeleopMode(PacketCommunicator packetCommunicator, QuadrupedPhysicalProperties physicalProperties, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
                                   QuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry)
    {
-      this.stepTeleopManager = new QuadrupedStepTeleopManager(packetCommunicator, defaultXGaitSettings, referenceFrames, registry);
-      this.bodyPoseTeleopManager = new QuadrupedBodyPoseTeleopManager(physicalProperties.getNominalCoMHeight(), packetCommunicator);
+      this.stepTeleopManager = new QuadrupedTeleopManager(packetCommunicator, defaultXGaitSettings, physicalProperties.getNominalCoMHeight(), referenceFrames, registry);
       this.comZ = new InputValueIntegrator(DT, physicalProperties.getNominalCoMHeight());
 
       xGaitStepDuration[0] = new DoubleParameter("xGaitStepDurationMode0", registry, 0.5);
@@ -64,7 +59,7 @@ public class QuadrupedStepTeleopMode
       double bodyRoll = 0.0;
       double bodyPitch = channels.get(XBoxOneMapping.RIGHT_STICK_Y) * pitchScaleParameter.getValue();
       double bodyYaw = channels.get(XBoxOneMapping.RIGHT_STICK_X) * yawScaleParameter.getValue();
-      bodyPoseTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll, xGaitBodyOrientationShiftTime.getValue());
+      stepTeleopManager.setDesiredBodyOrientation(bodyYaw, bodyPitch, bodyRoll, xGaitBodyOrientationShiftTime.getValue());
 
       double comZdot = 0.0;
       if (channels.get(XBoxOneMapping.DPAD) == 0.25)
@@ -75,8 +70,7 @@ public class QuadrupedStepTeleopMode
       {
          comZdot -= zdotScaleParameter.getValue();
       }
-      bodyPoseTeleopManager.setDesiredCoMHeight(comZ.update(comZdot));
-      bodyPoseTeleopManager.update();
+      stepTeleopManager.setDesiredCoMHeight(comZ.update(comZdot));
 
       YoQuadrupedXGaitSettings xGaitSettings = stepTeleopManager.getXGaitSettings();
       double xVelocityMax = 0.5 * xStrideMax.getValue() / (xGaitSettings.getStepDuration() + xGaitSettings.getEndDoubleSupportDuration());
