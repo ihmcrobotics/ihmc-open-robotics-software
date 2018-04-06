@@ -21,6 +21,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -42,6 +43,7 @@ public class AtlasAllocationTest implements AllocationTest
    static
    {
       simulationTestingParameters.setCreateGUI(false);
+      simulationTestingParameters.setKeepSCSUp(false);
    }
 
    private DRCSimulationTestHelper testHelper;
@@ -71,7 +73,7 @@ public class AtlasAllocationTest implements AllocationTest
 
       int warmupSteps = 2;
       testHelper.send(createFootsteps(warmupSteps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.0));
-      testHelper.simulateAndBlockAndCatchExceptions(defaultTransferDuration + warmupSteps * (defaultSwingDuration * defaultTransferDuration) + 0.25);
+      testHelper.simulateAndBlockAndCatchExceptions(3.0);
 
       int steps = 4;
       FootstepDataListMessage footsteps = createFootsteps(steps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.3);
@@ -80,13 +82,15 @@ public class AtlasAllocationTest implements AllocationTest
          try
          {
             testHelper.send(footsteps);
-            testHelper.simulateAndBlockAndCatchExceptions(defaultTransferDuration + steps * (defaultSwingDuration * defaultTransferDuration) + 0.25);
+            testHelper.simulateAndBlockAndCatchExceptions(4.0);
          }
          catch (SimulationExceededMaximumTimeException e)
          {
             Assert.fail(e.getMessage());
          }
       });
+
+      testHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(0.9, -0.1, 0.0, 1.1, 0.1, 5.0));
    }
 
    private FootstepDataListMessage createFootsteps(int steps, double defaultSwingDuration, double defaultTransferDuration, double xLocation, double stepLength)
