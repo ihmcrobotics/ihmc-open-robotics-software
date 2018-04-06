@@ -74,7 +74,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage>
 
    public FootstepDataListMessage()
    {
-      footstep_data_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage>(100,
+      footstep_data_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage>(1,
                                                                                                             controller_msgs.msg.dds.FootstepDataMessage.class,
                                                                                                             new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
       queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
