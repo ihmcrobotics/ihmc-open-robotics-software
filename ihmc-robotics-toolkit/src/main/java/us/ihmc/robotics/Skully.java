@@ -65,15 +65,15 @@ public class Skully
       "            1BBBBBBBBBOBBBBZMBB.SBBr\n" +
       "            L7SBBBBBBBBBBBBBBBGYGBq,\n" +
       "            YMBBBBBBBBBBBBBErrFU.  .\n" +
-      "             BBBBBZBBk NMr. :BX  .Br\n" +
-      "             1BSvi1PBi iOL: 7Bi  BB\n" +
-      "              BM:.:JZr rGU:  i  BBL\n" +
-      "              OBBBU i. iNUJ.   :Bk\n" +
-      "              GBBBB .q:\n" +
-      "              8BBBM,BB7i. :  ,\n" +
-      "              MBBBZUBBJ55BUiBM  7i\n" +
-      "              BBBBBMOqBMBBEMB8.GBu ,:,\n" +
-      "             .BBBBU::rk27r.iU. EBBXi.:\n" +
+      "_____________BBBBBZBBk NMr. :BX  .Br\n" +
+      "|  I am a   |1BSvi1PBi iOL: 7Bi  BB\n" +
+      "| a static  | BM:.:JZr rGU:  i  BBL\n" +
+      "|entity, you| OBBBU i. iNUJ.   :Bk\n" +
+      "|  cannot   | GBBBB .q:\n" +
+      "|create me! | 8BBBM,BB7i. :  ,\n" +
+      "|___________| MBBBZUBBJ55BUiBM  7i\n" +
+      "          \\ | BBBBBMOqBMBBEMB8.GBu ,:,\n" +
+      "           \\| .BBBBU::rk27r.iU. EBBXi.:\n" +
       "             UBBBML7YrFNjrr;.  5m.\n" +
       "             BBBBB8Z2jmBMOPYYrYBqi\n" +
       "             BBBBBBBBBBBBB2LkqBMUUi,.\n" +
@@ -85,7 +85,7 @@ public class Skully
 
    public Skully()
    {
-      throw new RuntimeException("Skully says: 'I am a static entity you can not create me.'");
+      throw new RuntimeException(betterFace);
    }
 
    public static void say(String message)
