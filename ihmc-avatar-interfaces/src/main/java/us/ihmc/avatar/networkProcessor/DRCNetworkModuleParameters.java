@@ -38,6 +38,7 @@ public class DRCNetworkModuleParameters
    private boolean useHeightQuadTreeToolbox;
    private boolean useRemoteObjectDetectionFeedback;
    private boolean useLidarScanLogger;
+   private boolean filterControllerInputMessages;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
@@ -391,5 +392,15 @@ public class DRCNetworkModuleParameters
    public HashMap<NetworkPorts, PacketDestination> getRobotSpecificModuleCommunicatorPorts()
    {
       return extraIntraProcessCommunicatorPorts;
+   }
+
+   public boolean isFilterControllerInputMessages()
+   {
+      return filterControllerInputMessages;
+   }
+
+   public void setFilterControllerInputMessages(boolean filterControllerInputMessages)
+   {
+      this.filterControllerInputMessages = filterControllerInputMessages;
    }
 }
