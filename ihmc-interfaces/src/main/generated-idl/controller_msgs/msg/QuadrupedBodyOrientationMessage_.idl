@@ -31,6 +31,7 @@ module controller_msgs
         /**
          * Indicates if the given trajectory should be considered an "absolute" orientation or an "offset" orientation
          */
+        @defaultValue(value=True)
         boolean is_an_offset_orientation;
         /**
          * The orientation trajectory information.
