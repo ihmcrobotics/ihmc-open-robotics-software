@@ -12,7 +12,6 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
       FrameBasedCommand<HeadHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
-   private final SO3TrajectoryControllerCommand so3Command = new SO3TrajectoryControllerCommand();
    private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
 
    public HeadHybridJointspaceTaskspaceTrajectoryCommand()
@@ -48,16 +47,14 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand
    public void set(HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      so3Command.set(message.getTaskspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.setToOrientationTrajectory(so3Command);
+      taskspaceTrajectoryCommand.setToOrientationTrajectory(message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
    public void set(ReferenceFrameHashCodeResolver resolver, HeadHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getJointspaceTrajectoryMessage());
-      so3Command.set(resolver, message.getTaskspaceTrajectoryMessage());
-      taskspaceTrajectoryCommand.setToOrientationTrajectory(so3Command);
+      taskspaceTrajectoryCommand.setToOrientationTrajectory(resolver, message.getTaskspaceTrajectoryMessage());
    }
 
    @Override
