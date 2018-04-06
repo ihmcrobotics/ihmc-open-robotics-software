@@ -23,6 +23,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
@@ -162,6 +163,7 @@ public class AtlasAllocationTest implements AllocationTest
       methodsToIgnore.add(DenseMatrix64F.class.getName() + ".reshape");
       methodsToIgnore.add(TIntArrayList.class.getName() + ".ensureCapacity");
       methodsToIgnore.add(ConvexPolygon2D.class.getName() + ".setOrCreate");
+      methodsToIgnore.add(FrameConvexPolygon2D.class.getName() + ".setOrCreate");
       methodsToIgnore.add(RecyclingArrayList.class.getName() + ".ensureCapacity");
       return methodsToIgnore;
    }
