@@ -79,7 +79,7 @@ public class OpenHumanoidsSimulator
             simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, false, true);
             System.out.println("Added extra foot contact points.");
          }
-	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, model, simulationContactPoints, false);
+	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false, model, simulationContactPoints);
 
 	      //TODO: Get this stuff from the RobotDescription rather than the SDF stuff...
 	      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
