@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import java.util.ArrayList;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
@@ -13,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -42,6 +41,8 @@ public class OneStepCaptureRegionCalculator
    private final double kinematicStepRange;
    private final SideDependentList<? extends ReferenceFrame> ankleZUpFrames;
    private final SideDependentList<FrameConvexPolygon2D> reachableRegions;
+
+   private final RecyclingArrayList<FramePoint2D> visibleVertices = new RecyclingArrayList<>(MAX_CAPTURE_REGION_POLYGON_POINTS, FramePoint2D.class);
 
    public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -168,9 +169,9 @@ public class OneStepCaptureRegionCalculator
       captureRegionPolygon.clear(supportAnkleZUp);
 
       // 2. Get extreme CoP positions
-      ArrayList<FramePoint2D> extremesOfFeasibleCOP = getAllVisibleVerticesFromOutsideLeftToRightCopy(supportFootPolygon, capturePoint);
+      boolean icpOusideSupport = computeVisibleVerticesFromOutsideLeftToRightCopy(supportFootPolygon, capturePoint);
       FrameConvexPolygon2D reachableRegion = reachableRegions.get(swingSide.getOppositeSide());
-      if (extremesOfFeasibleCOP == null)
+      if (!icpOusideSupport)
       {
          // If the ICP is in the support polygon return the whole reachable region.
          globalTimer.stopMeasurement();
@@ -180,9 +181,9 @@ public class OneStepCaptureRegionCalculator
       }
 
       // 3. For every possible extreme CoP predict the corresponding ICP given the remaining swing time
-      for (int i = 0; i < extremesOfFeasibleCOP.size(); i++)
+      for (int i = 0; i < visibleVertices.size(); i++)
       {
-         FramePoint2D copExtreme = extremesOfFeasibleCOP.get(i);
+         FramePoint2D copExtreme = visibleVertices.get(i);
          copExtreme.changeFrame(supportAnkleZUp);
          CaptureRegionMathTools.predictCapturePoint(capturePoint, copExtreme, swingTimeRemaining, omega0, predictedICP);
          rawCaptureRegion.addVertexMatchingFrame(predictedICP, false);
@@ -293,28 +294,29 @@ public class OneStepCaptureRegionCalculator
     * @param observerFramePoint Point2d
     * @return Point2d[]
     */
-   public ArrayList<FramePoint2D> getAllVisibleVerticesFromOutsideLeftToRightCopy(FrameConvexPolygon2DReadOnly convexPolygon, FramePoint2DReadOnly observerFramePoint)
+   public boolean computeVisibleVerticesFromOutsideLeftToRightCopy(FrameConvexPolygon2DReadOnly convexPolygon, FramePoint2DReadOnly observerFramePoint)
    {
+      visibleVertices.clear();
+
       convexPolygon.checkReferenceFrameMatch(observerFramePoint);
       int lineOfSightStartIndex = convexPolygon.lineOfSightStartIndex(observerFramePoint);
       int lineOfSightEndIndex = convexPolygon.lineOfSightEndIndex(observerFramePoint);
       if (lineOfSightStartIndex == -1 || lineOfSightEndIndex == -1)
-         return null;
+         return false;
 
-      ArrayList<FramePoint2D> ret = new ArrayList<FramePoint2D>();
       int index = lineOfSightEndIndex;
 
       while (true)
       {
-         ret.add(new FramePoint2D(convexPolygon.getVertex(index)));
+         visibleVertices.add().setIncludingFrame(convexPolygon.getVertex(index));
          index = convexPolygon.getPreviousVertexIndex(index);
          if (index == lineOfSightStartIndex)
          {
-            ret.add(new FramePoint2D(convexPolygon.getVertex(index)));
+            visibleVertices.add().setIncludingFrame(convexPolygon.getVertex(index));
             break;
          }
       }
 
-      return ret;
+      return true;
    }
 }
