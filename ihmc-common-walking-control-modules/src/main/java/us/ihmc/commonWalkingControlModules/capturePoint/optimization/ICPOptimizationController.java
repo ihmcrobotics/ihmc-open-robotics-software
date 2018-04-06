@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -22,11 +26,12 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
-import us.ihmc.robotics.math.frames.*;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
+import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -117,7 +122,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoICPControlGains feedbackGains = new YoICPControlGains("", registry);
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
-   private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
+   private final YoBoolean hasNotConvergedInPreviousTick = new YoBoolean(yoNamePrefix + "HasNotConvergedInPreviousTick", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger(yoNamePrefix + "HasNotConvergedCounts", registry);
 
    private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "FootstepMultiplier", registry);
@@ -530,10 +535,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       submitSolverTaskConditions(omega0, includeFootsteps);
 
       qpSolverTimer.startMeasurement();
-      NoConvergenceException noConvergenceException = solveQP();
+      boolean converged = solveQP();
       qpSolverTimer.stopMeasurement();
 
-      extractSolutionsFromSolver(noConvergenceException, includeFootsteps);
+      extractSolutionsFromSolver(converged, includeFootsteps);
 
       modifyCMPFeedbackWeightUsingIntegral();
 
@@ -632,35 +637,31 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDT);
    }
 
-   private NoConvergenceException solveQP()
+   private boolean solveQP()
    {
-      NoConvergenceException noConvergenceException = null;
-      try
+      perfectCoP.set(yoPerfectCoP);
+      boolean converged = solver.compute(icpError, perfectCoP, perfectCMPOffset);
+      if (!converged)
       {
-         perfectCoP.set(yoPerfectCoP);
-         solver.compute(icpError, perfectCoP, perfectCMPOffset);
-      }
-      catch (NoConvergenceException e)
-      {
-         if (!hasNotConvergedInPast.getBooleanValue())
+         if (!hasNotConvergedInPreviousTick.getBooleanValue())
          {
-            e.printStackTrace();
-            PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            PrintTools.warn(this, "The QP has not converged. Only showing this once if it happens repeatedly.");
          }
 
-         hasNotConvergedInPast.set(true);
+         hasNotConvergedInPreviousTick.set(true);
          hasNotConvergedCounts.increment();
-
-         noConvergenceException = e;
+      }
+      {
+         hasNotConvergedInPreviousTick.set(false);
       }
 
-      return noConvergenceException;
+      return converged;
    }
 
-   private void extractSolutionsFromSolver(NoConvergenceException noConvergenceException, boolean includeFootsteps)
+   private void extractSolutionsFromSolver(boolean converged, boolean includeFootsteps)
    {
-      // don't pole the new solutions if there's a no convergence exception
-      if (noConvergenceException == null)
+      // Don't pole the new solutions if the solver has not converged.
+      if (converged)
       {
          numberOfIterations.set(solver.getNumberOfIterations());
 
