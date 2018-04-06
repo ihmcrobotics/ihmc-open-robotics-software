@@ -13,6 +13,7 @@ import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFa
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedControllerCoreOptimizationSettings;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDefaultInitialPosition;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedXGaitSettings;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -27,6 +28,7 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.JointsOnlyStateEstimator;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootSwitchFactory;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -67,6 +69,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
        * Create GenericQuadruped model
        */
       QuadrupedPhysicalProperties physicalProperties = new GenericQuadrupedPhysicalProperties();
+      QuadrupedInitialPositionParameters initialPositionParameters = new GenericQuadrupedDefaultInitialPosition();
       GenericQuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
       GenericQuadrupedControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(
@@ -150,7 +153,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, controllerCoreOptimizationSettings, jointDesiredOutputList,
                                                            registry, yoGraphicsListRegistry, ignoredYoGraphicsListRegistry, dataProducer, contactableFeet,
                                                            contactablePlaneBodies, xGaitSettings, footSwitches, GRAVITY);
-      controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties);
+      controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties, initialPositionParameters);
 
       InputStream resourceAsStream = getClass().getResourceAsStream(modelFactory.getParameterResourceName(QuadrupedControlMode.FORCE));
       ParameterLoaderHelper.loadParameters(this, resourceAsStream, registry);

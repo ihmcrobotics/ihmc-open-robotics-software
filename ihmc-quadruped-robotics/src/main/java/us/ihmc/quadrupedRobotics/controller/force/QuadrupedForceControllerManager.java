@@ -14,6 +14,8 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.force.states.*;
+import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionStandPrepController;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
@@ -65,13 +67,15 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
    private final AtomicReference<QuadrupedForceControllerRequestedEvent> requestedEvent = new AtomicReference<>();
 
-   public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties) throws IOException
+   public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
+                                          QuadrupedInitialPositionParameters initialPositionParameters) throws IOException
    {
-      this(runtimeEnvironment, physicalProperties, QuadrupedForceControllerEnum.JOINT_INITIALIZATION);
+      this(runtimeEnvironment, physicalProperties, initialPositionParameters, QuadrupedForceControllerEnum.JOINT_INITIALIZATION);
    }
 
    public QuadrupedForceControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
-                                          QuadrupedForceControllerEnum initialState) throws IOException
+                                          QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedForceControllerEnum initialState)
+         throws IOException
    {
       this.controllerToolbox = new QuadrupedForceControllerToolbox(runtimeEnvironment, physicalProperties, registry,
                                                                    runtimeEnvironment.getGraphicsListRegistry());
@@ -104,7 +108,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       outputProcessorBuilder.addComponent(stateChangeSmootherComponent);
       outputProcessor = outputProcessorBuilder.build();
 
-      this.stateMachine = buildStateMachine(runtimeEnvironment, initialState);
+      this.stateMachine = buildStateMachine(runtimeEnvironment, initialState, initialPositionParameters);
    }
 
    /**
@@ -235,13 +239,15 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    }
 
    private StateMachine<QuadrupedForceControllerEnum, QuadrupedController> buildStateMachine(QuadrupedRuntimeEnvironment runtimeEnvironment,
-                                                                                             QuadrupedForceControllerEnum initialState)
+                                                                                             QuadrupedForceControllerEnum initialState,
+                                                                                             QuadrupedInitialPositionParameters initialPositionParameters)
    {
       // Initialize controllers.
       final QuadrupedController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
       final QuadrupedController doNothingController = new QuadrupedForceBasedDoNothingController(controlManagerFactory.getOrCreateFeetManager(),
                                                                                                  runtimeEnvironment, registry);
-      final QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(controllerToolbox, controlManagerFactory, registry);
+      //      final QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(controllerToolbox, controlManagerFactory, registry);
+      final QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, initialPositionParameters, registry);
       final QuadrupedController freezeController = new QuadrupedForceBasedFreezeController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedSteppingState steppingController = new QuadrupedSteppingState(runtimeEnvironment, controllerToolbox, commandInputManager,
                                                                                    statusMessageOutputManager, controlManagerFactory, registry);
