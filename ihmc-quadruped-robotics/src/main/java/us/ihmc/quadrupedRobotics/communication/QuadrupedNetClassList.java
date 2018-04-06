@@ -70,6 +70,8 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(StringBuilder.class);
       registerPacketField(StringBuilder[].class);
 
+      registerPacketClass(CenterOfMassTrajectoryMessage.class);
+
       // Video data
       registerPacketClass(VideoPacket.class);
       registerPacketField(VideoPacket.class);
