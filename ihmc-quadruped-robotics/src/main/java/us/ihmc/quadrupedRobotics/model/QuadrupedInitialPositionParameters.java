@@ -17,12 +17,15 @@ public interface QuadrupedInitialPositionParameters
     *           the joint name to lookup.
     * @return the initial angle in radians.
     */
-   public double getInitialJointPosition(QuadrupedJointName joint);
+   double getInitialJointPosition(QuadrupedJointName joint);
 
-   public Point3D getInitialBodyPosition();
+   Point3D getInitialBodyPosition();
 
-   public default QuaternionReadOnly getInitialBodyOrientation()
+   Quaternion getInitialBodyOrientation();
+
+   default void offsetInitialConfiguration(QuadrupedInitialOffsetAndYaw offset)
    {
-      return new Quaternion();
+      getInitialBodyPosition().add(offset.getAdditionalOffset());
+      getInitialBodyOrientation().appendYawRotation(offset.getYaw());
    }
 }
