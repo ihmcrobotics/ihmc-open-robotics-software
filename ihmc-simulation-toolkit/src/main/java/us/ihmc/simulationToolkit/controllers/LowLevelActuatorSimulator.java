@@ -4,7 +4,6 @@ import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelActuatorMode;
 import us.ihmc.sensorProcessing.outputData.LowLevelStateReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -29,7 +28,8 @@ public class LowLevelActuatorSimulator implements RobotController
       this(simulatedJoint, jointDesiredOutput, controlDT, 0.0, 0.0, LowLevelActuatorMode.EFFORT);
    }
 
-   public LowLevelActuatorSimulator(OneDegreeOfFreedomJoint simulatedJoint, LowLevelStateReadOnly jointDesiredOutput, double controlDT, LowLevelActuatorMode actuatorMode)
+   public LowLevelActuatorSimulator(OneDegreeOfFreedomJoint simulatedJoint, LowLevelStateReadOnly jointDesiredOutput, double controlDT,
+                                    LowLevelActuatorMode actuatorMode)
    {
       this(simulatedJoint, jointDesiredOutput, controlDT, 0.0, 0.0, actuatorMode);
    }
@@ -73,10 +73,11 @@ public class LowLevelActuatorSimulator implements RobotController
    @Override
    public void doControl()
    {
+      double outputEffort = 0.0;
+
       switch (actuatorMode)
       {
       case POSITION:
-      {
          if (!actuatorDesireds.isPositionValid())
             throw new RuntimeException("Joint " + simulatedJoint.getName() + " cannot be in position control mode without a valid position.");
 
@@ -88,55 +89,36 @@ public class LowLevelActuatorSimulator implements RobotController
             desiredRate = actuatorDesireds.getVelocity();
          double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
 
-         double outputEffort = jointController.computeForAngles(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
+         outputEffort = jointController.computeForAngles(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
 
-         simulatedJoint.setTau(outputEffort);
-      }
-
-      break;
+         break;
       case VELOCITY:
-      {
          if (!actuatorDesireds.isVelocityValid())
             throw new RuntimeException("Joint " + simulatedJoint.getName() + " cannot be in velocity control mode without a valid velocity.");
-         double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
-         double desiredRate = actuatorDesireds.getVelocity();
+         currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
+         desiredRate = actuatorDesireds.getVelocity();
 
-         double outputEffort = jointController.compute(currentRate, desiredRate, 0.0, 0.0, controlDT);
-
-         simulatedJoint.setTau(outputEffort);
-      }
-      break;
+         outputEffort = jointController.compute(currentRate, desiredRate, 0.0, 0.0, controlDT);
+         break;
       case EFFORT:
-      {
-         double currentPosition = simulatedJoint.getQ();
-         double desiredPosition;
-         if (actuatorDesireds.isPositionValid())
-         {
-            desiredPosition = actuatorDesireds.getPosition();
-         }
-         else
-         {
-            desiredPosition = currentPosition;
-         }
+         currentPosition = simulatedJoint.getQ();
+         desiredPosition = actuatorDesireds.isPositionValid() ? actuatorDesireds.getPosition() : currentPosition;
 
-         double currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
-         double desiredRate = 0.0;
-         if (actuatorDesireds.isVelocityValid())
-            desiredRate = actuatorDesireds.getVelocity();
+         currentRate = simulatedJoint.getQDYoVariable().getDoubleValue();
+         desiredRate = actuatorDesireds.isVelocityValid() ? actuatorDesireds.getVelocity() : 0.0;
 
-         double desiredEffort = jointController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
+         double feedbackEffort = jointController.compute(currentPosition, desiredPosition, currentRate, desiredRate, controlDT);
 
+         outputEffort = feedbackEffort;
          if (actuatorDesireds.isEffortValid())
-            desiredEffort += actuatorDesireds.getEffort();
-
-         simulatedJoint.setTau(desiredEffort);
-      }
-      break;
+            outputEffort += actuatorDesireds.getEffort();
+         break;
       case DISABLED:
-      {
-         simulatedJoint.setTau(0.0);
+         break;
+      default:
+         throw new RuntimeException("This hasn't been implemented yet.");
       }
-      }
+      simulatedJoint.setTau(outputEffort);
    }
 
    @Override

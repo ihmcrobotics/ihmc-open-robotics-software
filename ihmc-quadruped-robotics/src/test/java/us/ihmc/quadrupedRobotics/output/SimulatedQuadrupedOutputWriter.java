@@ -4,6 +4,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.LowLevelStateList;
 import us.ihmc.simulationToolkit.controllers.LowLevelActuatorSimulator;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -20,7 +21,7 @@ public class SimulatedQuadrupedOutputWriter implements OutputWriter
    private final HashMap<OneDoFJoint, QuadrupedJoint> quadrupedJoints = new HashMap<>();
    private final HashMap<OneDoFJoint, LowLevelActuatorSimulator> quadrupedActuators = new HashMap<>();
 
-   public SimulatedQuadrupedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, JointDesiredOutputList jointDesiredOutputList,
+   public SimulatedQuadrupedOutputWriter(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, JointDesiredOutputListReadOnly jointDesiredOutputList,
                                          double controlDT)
    {
       controllerJoints = fullRobotModel.getOneDoFJoints();
