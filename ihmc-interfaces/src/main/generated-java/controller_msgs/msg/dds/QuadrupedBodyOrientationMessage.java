@@ -23,12 +23,12 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
             */
    public boolean is_expressed_in_absolute_time_ = true;
    /**
-    * Indicates if the given trajectory should be considered an "absolute" orientation or an "offset" orientation
-    */
+            * Indicates if the given trajectory should be considered an "absolute" orientation or an "offset" orientation
+            */
    public boolean is_an_offset_orientation_ = true;
    /**
-    * The orientation trajectory information.
-    */
+            * The orientation trajectory information.
+            */
    public controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
 
    public QuadrupedBodyOrientationMessage()
@@ -83,30 +83,25 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
       return is_expressed_in_absolute_time_;
    }
 
-
    /**
-<<<<<<< HEAD
-            * The orientation trajectory information.
+            * Indicates if the given trajectory should be considered an "absolute" orientation or an "offset" orientation
             */
-=======
-    * Indicates if the given trajectory should be considered an "absolute" orientation or an "offset" orientation
-    */
    public void setIsAnOffsetOrientation(boolean is_an_offset_orientation)
    {
       is_an_offset_orientation_ = is_an_offset_orientation;
    }
    /**
-    * Indicates if the given trajectory should be considered an "absolute" orientation or an "offset" orientation
-    */
+            * Indicates if the given trajectory should be considered an "absolute" orientation or an "offset" orientation
+            */
    public boolean getIsAnOffsetOrientation()
    {
       return is_an_offset_orientation_;
    }
 
+
    /**
-    * The orientation trajectory information.
-    */
->>>>>>> Adding a field to QuadrupedBodyOrientationMessage for switching between base and offset orientations
+            * The orientation trajectory information.
+            */
    public controller_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3_trajectory_;
@@ -128,15 +123,9 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_expressed_in_absolute_time_, other.is_expressed_in_absolute_time_, epsilon)) return false;
 
-<<<<<<< HEAD
-      if (!this.so3_trajectory_.epsilonEquals(other.so3_trajectory_, epsilon)) return false;
-=======
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_an_offset_orientation_, other.is_an_offset_orientation_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_an_offset_orientation_, other.is_an_offset_orientation_, epsilon)) return false;
 
-      if (!this.so3_trajectory_.epsilonEquals(other.so3_trajectory_, epsilon))
-         return false;
->>>>>>> Adding a field to QuadrupedBodyOrientationMessage for switching between base and offset orientations
+      if (!this.so3_trajectory_.epsilonEquals(other.so3_trajectory_, epsilon)) return false;
 
       return true;
    }
@@ -154,15 +143,9 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
 
       if(this.is_expressed_in_absolute_time_ != otherMyClass.is_expressed_in_absolute_time_) return false;
 
-<<<<<<< HEAD
-      if (!this.so3_trajectory_.equals(otherMyClass.so3_trajectory_)) return false;
-=======
-      if (this.is_an_offset_orientation_ != otherMyClass.is_an_offset_orientation_)
-         return false;
+      if(this.is_an_offset_orientation_ != otherMyClass.is_an_offset_orientation_) return false;
 
-      if (!this.so3_trajectory_.equals(otherMyClass.so3_trajectory_))
-         return false;
->>>>>>> Adding a field to QuadrupedBodyOrientationMessage for switching between base and offset orientations
+      if (!this.so3_trajectory_.equals(otherMyClass.so3_trajectory_)) return false;
 
       return true;
    }
@@ -176,14 +159,9 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("is_expressed_in_absolute_time=");
-<<<<<<< HEAD
       builder.append(this.is_expressed_in_absolute_time_);      builder.append(", ");
-=======
-      builder.append(this.is_expressed_in_absolute_time_);
-      builder.append(", ");
-      builder.append(this.is_an_offset_orientation_);
-      builder.append(", ");
->>>>>>> Adding a field to QuadrupedBodyOrientationMessage for switching between base and offset orientations
+      builder.append("is_an_offset_orientation=");
+      builder.append(this.is_an_offset_orientation_);      builder.append(", ");
       builder.append("so3_trajectory=");
       builder.append(this.so3_trajectory_);
       builder.append("}");
