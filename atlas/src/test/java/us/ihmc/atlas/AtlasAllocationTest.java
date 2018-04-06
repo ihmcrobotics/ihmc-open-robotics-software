@@ -18,7 +18,6 @@ import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -156,7 +155,6 @@ public class AtlasAllocationTest implements AllocationTest
       // TODO: fix these!
       classesToIgnore.add(StatusMessageOutputManager.class);
       classesToIgnore.add(ConvexPolygonTools.class);
-      classesToIgnore.add(OneStepCaptureRegionCalculator.class);
 
       return classesToIgnore;
    }
