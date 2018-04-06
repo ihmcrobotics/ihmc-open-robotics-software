@@ -1,26 +1,32 @@
 package us.ihmc.quadrupedRobotics.controller.position;
 
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelayQueueConverter;
+import us.ihmc.quadrupedRobotics.communication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlController;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionDoNothingController;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionJointInitializationController;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionStandPrepController;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionStandReadyController;
+import us.ihmc.quadrupedRobotics.controller.position.states.*;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLegInverseKinematicsCalculator;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.tools.thread.CloseableAndDisposable;
+import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
+import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 /**
  * A {@link RobotController} for switching between other robot controllers according to an internal finite state
@@ -28,15 +34,31 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
  * <p/>
  * Users can manually fire events on the {@code userTrigger} YoVariable.
  */
-public class QuadrupedPositionControllerManager implements QuadrupedControllerManager
+public class QuadrupedPositionControllerManager implements QuadrupedControllerManager, CloseableAndDisposable
 {
+   private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
 
    private final StateMachine<QuadrupedPositionControllerState, QuadrupedController> stateMachine;
 
+   private final CommandInputManager commandInputManager;
+   private final StatusMessageOutputManager statusMessageOutputManager;
+
    public QuadrupedPositionControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedSimulationInitialPositionParameters initialPositionParameters, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedLegInverseKinematicsCalculator legIKCalculator)
    {
+      commandInputManager = new CommandInputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands());
+      try
+      {
+         commandInputManager.registerConversionHelper(new ClearDelayQueueConverter(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands()));
+      }
+      catch (InstantiationException | IllegalAccessException e)
+      {
+         e.printStackTrace();
+      }
+      statusMessageOutputManager = new StatusMessageOutputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedStatusMessages());
+
       // Initialize input providers.
       QuadrupedPostureInputProvider postureProvider = new QuadrupedPostureInputProvider(physicalProperties, runtimeEnvironment.getGlobalDataProducer(),
                                                                                         registry);
@@ -111,5 +133,21 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
    public RobotMotionStatusHolder getMotionStatusHolder()
    {
       return motionStatusHolder;
+   }
+
+   public void createControllerNetworkSubscriber(PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
+   {
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, scheduler,
+                                                                                                packetCommunicator);
+      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
+      controllerNetworkSubscriber.addMessageCollector(QuadrupedControllerAPIDefinition.createDefaultMessageIDExtractor());
+      controllerNetworkSubscriber.addMessageValidator(QuadrupedControllerAPIDefinition.createDefaultMessageValidation());
+      closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);
+   }
+
+   @Override
+   public void closeAndDispose()
+   {
+      closeableAndDisposableRegistry.closeAndDispose();
    }
 }

@@ -1,8 +1,5 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
-import java.awt.Color;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
@@ -12,19 +9,24 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.awt.*;
+import java.util.List;
+
 public class QuadrupedFeetManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -77,21 +79,23 @@ public class QuadrupedFeetManager
          footControlModules.get(quadrant).attachStateChangedListener(stateChangedListener);
    }
 
-   public void initializeWaypointTrajectory(QuadrantDependentList<QuadrupedSoleWaypointList> quadrupedSoleWaypointLists, boolean useInitialSoleForceAsFeedforwardTerm)
+   public void initializeWaypointTrajectory(SoleTrajectoryCommand soleTrajectoryCommand, boolean useInitialSoleForceAsFeedforwardTerm)
    {
-      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      initializeWaypointTrajectory(soleTrajectoryCommand.getRobotQuadrant(), soleTrajectoryCommand.getPositionTrajectory().getTrajectoryPointList(),
+                                   useInitialSoleForceAsFeedforwardTerm);
+   }
+
+   public void initializeWaypointTrajectory(RobotQuadrant robotQuadrant, FrameEuclideanTrajectoryPointList trajectoryPointList, boolean useInitialSoleForceAsFeedforwardTerm)
+   {
+      QuadrupedFootControlModule footControlModule = footControlModules.get(robotQuadrant);
+      if (trajectoryPointList.getNumberOfTrajectoryPoints() > 0)
       {
-         QuadrupedSoleWaypointList waypointList = quadrupedSoleWaypointLists.get(robotQuadrant);
-         QuadrupedFootControlModule footControlModule = footControlModules.get(robotQuadrant);
-         if (waypointList.size() > 0)
-         {
-            footControlModule.requestMoveViaWaypoints();
-            footControlModule.initializeWaypointTrajectory(waypointList, useInitialSoleForceAsFeedforwardTerm);
-         }
-         else
-         {
-            footControlModule.requestSupport();
-         }
+         footControlModule.requestMoveViaWaypoints();
+         footControlModule.initializeWaypointTrajectory(trajectoryPointList, useInitialSoleForceAsFeedforwardTerm);
+      }
+      else
+      {
+         footControlModule.requestSupport();
       }
    }
 
@@ -116,6 +120,7 @@ public class QuadrupedFeetManager
    }
 
    private final FramePoint3D tempPoint = new FramePoint3D();
+
    public void adjustStep(QuadrupedStep step)
    {
       step.getGoalPosition(tempPoint);

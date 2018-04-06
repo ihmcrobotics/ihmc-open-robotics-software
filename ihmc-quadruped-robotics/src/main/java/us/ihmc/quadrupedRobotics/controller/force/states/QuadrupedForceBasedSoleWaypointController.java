@@ -7,8 +7,8 @@ import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceController;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
+import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.providers.QuadrupedSoleWaypointInputProvider;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
@@ -38,7 +38,7 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    private final QuadrupedTaskSpaceController.Settings taskSpaceControllerSettings;
    private final QuadrupedTaskSpaceController taskSpaceController;
 
-   private final QuadrupedSoleWaypointInputProvider soleWaypointInputProvider;
+   private final QuadrupedStepMessageHandler stepMessageHandler;
    private final QuadrupedFeetManager feetManager;
 
    private final FullQuadrupedRobotModel fullRobotModel;
@@ -48,11 +48,11 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
    private final JointDesiredOutputList jointDesiredOutputList;
 
    public QuadrupedForceBasedSoleWaypointController(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
-                                                    QuadrupedSoleWaypointInputProvider inputProvider, YoVariableRegistry parentRegistry)
+                                                    QuadrupedStepMessageHandler stepMessageHandler, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.jointDesiredOutputList = controllerToolbox.getRuntimeEnvironment().getJointDesiredOutputList();
-      soleWaypointInputProvider = inputProvider;
+      this.stepMessageHandler = stepMessageHandler;
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
@@ -85,7 +85,11 @@ public class QuadrupedForceBasedSoleWaypointController implements QuadrupedContr
       }
       taskSpaceController.reset();
 
-      feetManager.initializeWaypointTrajectory(soleWaypointInputProvider.get(), useInitialSoleForces.getValue());
+      for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
+      {
+         if (stepMessageHandler.hasFootTrajectoryForSolePositionControl(robotQuadrant))
+            feetManager.initializeWaypointTrajectory(stepMessageHandler.pollFootTrajectoryForSolePositionControl(robotQuadrant), useInitialSoleForces.getValue());
+      }
 
       forceFeedbackControlEnabled.set(requestUseForceFeedbackControlParameter.getValue());
       // Initialize force feedback

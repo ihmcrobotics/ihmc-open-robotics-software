@@ -11,9 +11,9 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbo
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
-import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.YoQuadrupedTimedStep;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -115,9 +115,9 @@ public class QuadrupedFootControlModule
       footStateMachine.addStateChangedListener(stateChangedListener);
    }
 
-   public void initializeWaypointTrajectory(QuadrupedSoleWaypointList quadrupedSoleWaypointList, boolean useInitialSoleForceAsFeedforwardTerm)
+   public void initializeWaypointTrajectory(FrameEuclideanTrajectoryPointList trajectoryPointList, boolean useInitialSoleForceAsFeedforwardTerm)
    {
-      moveViaWaypointsState.handleWaypointList(quadrupedSoleWaypointList);
+      moveViaWaypointsState.handleWaypointList(trajectoryPointList);
       moveViaWaypointsState.initialize(useInitialSoleForceAsFeedforwardTerm);
    }
 
@@ -192,8 +192,8 @@ public class QuadrupedFootControlModule
       for (QuadrupedFootStates state : QuadrupedFootStates.values)
       {
          QuadrupedFootState footState = footStateMachine.getState(state);
-         if (footState != null && footState.getFeedbackControlCommand() != null)
-            ret.addCommand(footState.getFeedbackControlCommand());
+         if (footState != null && footState.createFeedbackControlTemplate() != null)
+            ret.addCommand(footState.createFeedbackControlTemplate());
       }
 
       return ret;
