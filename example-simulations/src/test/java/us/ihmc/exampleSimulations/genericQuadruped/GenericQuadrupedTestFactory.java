@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.genericQuadruped;
 
 import java.io.IOException;
 
+import com.google.caliper.model.Run;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -39,12 +40,16 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import javax.management.RuntimeErrorException;
 
 public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 {
@@ -63,9 +68,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<Boolean> useStateEstimator = new OptionalFactoryField<>("useStateEstimator");
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
+   private final OptionalFactoryField<TerrainObject3D> providedTerrainObject3D = new OptionalFactoryField<>("providedTerrainObject3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<QuadrupedInitialPositionParameters> initialPosition = new OptionalFactoryField<>("initialPosition");
    private final OptionalFactoryField<Boolean> useNetworking = new OptionalFactoryField<>("useNetworking");
+   private final OptionalFactoryField<SimulationConstructionSetParameters> scsParameters = new OptionalFactoryField<>("scsParameters");
 
    private QuadrupedTeleopManager stepTeleopManager;
 
@@ -118,7 +125,10 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setGroundContactParameters(groundContactParameters);
       simulationFactory.setModelFactory(modelFactory);
       simulationFactory.setSDFRobot(sdfRobot);
-      simulationFactory.setSCSParameters(simulationTestingParameters);
+      if (scsParameters.hasValue())
+         simulationFactory.setSCSParameters(scsParameters.get());
+      else
+         simulationFactory.setSCSParameters(simulationTestingParameters);
       simulationFactory.setOutputWriter(outputWriter);
       simulationFactory.setShowPlotter(SHOW_PLOTTER);
       simulationFactory.setUseTrackAndDolly(USE_TRACK_AND_DOLLY);
@@ -141,6 +151,13 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       if (groundContactModelType.hasValue())
       {
          simulationFactory.setGroundContactModelType(groundContactModelType.get());
+      }
+      if (providedTerrainObject3D.hasValue())
+      {
+         if (providedGroundProfile3D.hasValue())
+            throw new RuntimeException("You can only have one of these!");
+
+         simulationFactory.setTerrainObject3D(providedTerrainObject3D.get());
       }
       if (providedGroundProfile3D.hasValue())
       {
@@ -202,6 +219,12 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    }
 
    @Override
+   public void setTerrainObject3D(TerrainObject3D terrainObject3D)
+   {
+      providedTerrainObject3D.set(terrainObject3D);
+   }
+
+   @Override
    public void setUsePushRobotController(boolean usePushRobotController)
    {
       this.usePushRobotController.set(usePushRobotController);
@@ -223,5 +246,11 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    public QuadrupedTeleopManager getStepTeleopManager()
    {
       return stepTeleopManager;
+   }
+
+   @Override
+   public void setScsParameters(SimulationConstructionSetParameters scsParameters)
+   {
+      this.scsParameters.set(scsParameters);
    }
 }

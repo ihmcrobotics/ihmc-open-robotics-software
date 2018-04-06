@@ -1,5 +1,6 @@
 package us.ihmc.quadrupedRobotics.simulation;
 
+import com.jme3.terrain.Terrain;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commons.PrintTools;
@@ -108,6 +109,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<QuadrupedRobotControllerFactory> headControllerFactory = new OptionalFactoryField<>("headControllerFactory");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
+   private final OptionalFactoryField<TerrainObject3D> providedTerrainObject3D = new OptionalFactoryField<>("providedTerrainObject3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
@@ -355,7 +357,7 @@ public class QuadrupedSimulationFactory
 
    private void createGroundContactModel()
    {
-      if (!providedGroundProfile3D.hasValue())
+      if (!providedGroundProfile3D.hasValue() && !providedTerrainObject3D.hasValue())
       {
          switch (groundContactModelType.get())
          {
@@ -381,6 +383,13 @@ public class QuadrupedSimulationFactory
             groundProfile3D = null;
             break;
          }
+      }
+      else if (providedTerrainObject3D.hasValue())
+      {
+         if (providedGroundProfile3D.hasValue())
+            throw new RuntimeException("You can only set either a terrain object or a ground profile.");
+
+         groundProfile3D = providedTerrainObject3D.get();
       }
       else
       {
@@ -480,6 +489,11 @@ public class QuadrupedSimulationFactory
       if (scsBufferSize.hasValue())
       {
          scs.setMaxBufferSize(scsBufferSize.get());
+      }
+
+      if (providedTerrainObject3D.hasValue())
+      {
+         scs.addStaticLinkGraphics(providedTerrainObject3D.get().getLinkGraphics());
       }
 
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -663,6 +677,11 @@ public class QuadrupedSimulationFactory
    public void setGroundProfile3D(GroundProfile3D groundProfile3D)
    {
       providedGroundProfile3D.set(groundProfile3D);
+   }
+
+   public void setTerrainObject3D(TerrainObject3D terrainObject3D)
+   {
+      providedTerrainObject3D.set(terrainObject3D);
    }
 
    public void setUsePushRobotController(boolean usePushRobotController)
