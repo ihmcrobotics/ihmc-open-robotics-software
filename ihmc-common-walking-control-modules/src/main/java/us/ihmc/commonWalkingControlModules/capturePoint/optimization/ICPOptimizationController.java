@@ -122,7 +122,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoICPControlGains feedbackGains = new YoICPControlGains("", registry);
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
-   private final YoBoolean hasNotConvergedInPreviousTick = new YoBoolean(yoNamePrefix + "HasNotConvergedInPreviousTick", registry);
+   private final YoBoolean hasNotConvergedInPast = new YoBoolean(yoNamePrefix + "HasNotConvergedInPast", registry);
    private final YoInteger hasNotConvergedCounts = new YoInteger(yoNamePrefix + "HasNotConvergedCounts", registry);
 
    private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "FootstepMultiplier", registry);
@@ -643,16 +643,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       boolean converged = solver.compute(icpError, perfectCoP, perfectCMPOffset);
       if (!converged)
       {
-         if (!hasNotConvergedInPreviousTick.getBooleanValue())
+         if (!hasNotConvergedInPast.getBooleanValue())
          {
             PrintTools.warn(this, "The QP has not converged. Only showing this once if it happens repeatedly.");
          }
 
-         hasNotConvergedInPreviousTick.set(true);
+         hasNotConvergedInPast.set(true);
          hasNotConvergedCounts.increment();
-      }
-      {
-         hasNotConvergedInPreviousTick.set(false);
       }
 
       return converged;
