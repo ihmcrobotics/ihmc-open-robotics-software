@@ -1,15 +1,16 @@
 package us.ihmc.quadrupedRobotics;
 
-import java.io.IOException;
-
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedTeleopManager;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+
+import java.io.IOException;
 
 public interface QuadrupedTestFactory
 {
@@ -34,4 +35,6 @@ public interface QuadrupedTestFactory
    public void setUseNetworking(boolean useNetworking);
 
    void setScsParameters(SimulationConstructionSetParameters scsParameters);
+
+   void setInitialOffset(QuadrupedInitialOffsetAndYaw initialOffset);
 }
