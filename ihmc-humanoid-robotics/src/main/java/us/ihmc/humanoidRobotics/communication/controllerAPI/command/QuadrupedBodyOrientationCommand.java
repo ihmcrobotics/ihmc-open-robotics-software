@@ -12,7 +12,16 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
       FrameBasedCommand<QuadrupedBodyOrientationMessage>, EpsilonComparable<QuadrupedBodyOrientationCommand>
 {
    private boolean isExpressedInAbsoluteTime;
+
+   /**
+    * Desired body orientation trajectory, expressed in world frame
+    */
    private final SO3TrajectoryControllerCommand so3Trajectory;
+
+   /**
+    * Indicates if the given trajectory should be considered an "absolute" orientation or an "offset" orientation
+    */
+   private boolean isAnOffsetOrientation;
 
    public QuadrupedBodyOrientationCommand()
    {
@@ -22,12 +31,15 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    public QuadrupedBodyOrientationCommand(Random random)
    {
       so3Trajectory = new SO3TrajectoryControllerCommand(random);
+      isExpressedInAbsoluteTime = random.nextBoolean();
+      isAnOffsetOrientation = random.nextBoolean();
    }
 
    @Override
    public void clear()
    {
       isExpressedInAbsoluteTime = true;
+      isAnOffsetOrientation = true;
       so3Trajectory.clear();
    }
 
@@ -35,6 +47,7 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    public void set(QuadrupedBodyOrientationCommand other)
    {
       isExpressedInAbsoluteTime = other.isExpressedInAbsoluteTime;
+      isAnOffsetOrientation = other.isAnOffsetOrientation;
       so3Trajectory.set(other.so3Trajectory);
    }
 
@@ -56,12 +69,18 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    @Override
    public boolean epsilonEquals(QuadrupedBodyOrientationCommand other, double epsilon)
    {
-      return isExpressedInAbsoluteTime == other.isExpressedInAbsoluteTime && so3Trajectory.epsilonEquals(other.so3Trajectory, epsilon);
+      return isExpressedInAbsoluteTime == other.isExpressedInAbsoluteTime && isAnOffsetOrientation == other.isAnOffsetOrientation && so3Trajectory
+            .epsilonEquals(other.so3Trajectory, epsilon);
    }
 
    public boolean isExpressedInAbsoluteTime()
    {
       return isExpressedInAbsoluteTime;
+   }
+
+   public boolean isAnOffsetOrientation()
+   {
+      return isAnOffsetOrientation;
    }
 
    public SO3TrajectoryControllerCommand getSO3Trajectory()
