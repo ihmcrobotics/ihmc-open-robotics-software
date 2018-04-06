@@ -55,6 +55,7 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    public void set(ReferenceFrameHashCodeResolver resolver, QuadrupedBodyOrientationMessage message)
    {
       isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
+      isAnOffsetOrientation = message.getIsAnOffsetOrientation();
       so3Trajectory.set(resolver, message.getSo3Trajectory());
    }
 
@@ -62,6 +63,7 @@ public class QuadrupedBodyOrientationCommand implements Command<QuadrupedBodyOri
    public void set(QuadrupedBodyOrientationMessage message)
    {
       isExpressedInAbsoluteTime = message.getIsExpressedInAbsoluteTime();
+      isAnOffsetOrientation = message.getIsAnOffsetOrientation();
       so3Trajectory.set(message.getSo3Trajectory());
    }
 
