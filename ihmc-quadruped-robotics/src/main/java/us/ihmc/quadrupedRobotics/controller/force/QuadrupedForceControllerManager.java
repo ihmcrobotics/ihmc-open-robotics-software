@@ -32,9 +32,11 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicThreadScheduler;
+import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -49,6 +51,8 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoEnum<QuadrupedForceControllerRequestedEvent> requestedControllerState = new YoEnum<>("requestedControllerState", registry,
+                                                                                                        QuadrupedForceControllerRequestedEvent.class, true);
    private final YoEnum<QuadrupedForceControllerRequestedEvent> lastEvent = new YoEnum<>("lastEvent", registry, QuadrupedForceControllerRequestedEvent.class);
 
    private final RobotMotionStatusHolder motionStatusHolder = new RobotMotionStatusHolder();
@@ -107,6 +111,21 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
       OutputProcessorBuilder outputProcessorBuilder = new OutputProcessorBuilder(runtimeEnvironment.getFullRobotModel());
       outputProcessorBuilder.addComponent(stateChangeSmootherComponent);
       outputProcessor = outputProcessorBuilder.build();
+
+      requestedControllerState.set(null);
+      requestedControllerState.addVariableChangedListener(new VariableChangedListener()
+      {
+         @Override
+         public void notifyOfVariableChange(YoVariable<?> v)
+         {
+            QuadrupedForceControllerRequestedEvent requestedControllerEvent = requestedControllerState.getEnumValue();
+            if (requestedControllerEvent != null)
+            {
+               requestedEvent.set(requestedControllerEvent);
+               requestedControllerState.set(null);
+            }
+         }
+      });
 
       this.stateMachine = buildStateMachine(runtimeEnvironment, initialState, initialPositionParameters);
    }
@@ -290,6 +309,7 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
             .addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE, QuadrupedForceControllerEnum.STAND_PREP, QuadrupedForceControllerEnum.FREEZE);
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_FREEZE, QuadrupedForceControllerEnum.STAND_READY,
                             QuadrupedForceControllerEnum.FREEZE);
+
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_DO_NOTHING, QuadrupedForceControllerEnum.STEPPING,
                             QuadrupedForceControllerEnum.DO_NOTHING);
       factory.addTransition(QuadrupedForceControllerRequestedEvent.REQUEST_DO_NOTHING, QuadrupedForceControllerEnum.FREEZE,
