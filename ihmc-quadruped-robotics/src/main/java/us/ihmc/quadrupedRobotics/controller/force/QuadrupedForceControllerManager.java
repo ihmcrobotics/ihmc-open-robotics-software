@@ -18,6 +18,7 @@ import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionSta
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
+import us.ihmc.quadrupedRobotics.output.JointControlComponent;
 import us.ihmc.quadrupedRobotics.output.OutputProcessorBuilder;
 import us.ihmc.quadrupedRobotics.output.StateChangeSmootherComponent;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
@@ -107,9 +108,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
 
       // Initialize output processor
       StateChangeSmootherComponent stateChangeSmootherComponent = new StateChangeSmootherComponent(runtimeEnvironment, registry);
+      JointControlComponent jointControlComponent = new JointControlComponent(runtimeEnvironment, registry);
       controlManagerFactory.getOrCreateFeetManager().attachStateChangedListener(stateChangeSmootherComponent.createFiniteStateMachineStateChangedListener());
       OutputProcessorBuilder outputProcessorBuilder = new OutputProcessorBuilder(runtimeEnvironment.getFullRobotModel());
       outputProcessorBuilder.addComponent(stateChangeSmootherComponent);
+      outputProcessorBuilder.addComponent(jointControlComponent);
       outputProcessor = outputProcessorBuilder.build();
 
       requestedControllerState.set(null);
