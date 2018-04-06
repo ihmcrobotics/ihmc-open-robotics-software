@@ -40,8 +40,8 @@ public class LowLevelActuatorSimulator implements RobotController
       this.controlDT = controlDT;
       this.actuatorMode = actuatorMode;
       registry = new YoVariableRegistry(simulatedJoint.getName() + name);
-      jointController = new PIDController(simulatedJoint.getName() + "LowLevelJointControllerSimulator", registry);
       gains = new YoPIDGains(simulatedJoint.getName() + "Actuator", registry);
+      jointController = new PIDController(gains, simulatedJoint.getName() + "LowLevelActuatorSimulator", registry);
 
       gains.setKp(kp);
       gains.setKd(kd);
@@ -73,8 +73,6 @@ public class LowLevelActuatorSimulator implements RobotController
    @Override
    public void doControl()
    {
-      jointController.setGains(gains);
-
       switch (actuatorMode)
       {
       case POSITION:
