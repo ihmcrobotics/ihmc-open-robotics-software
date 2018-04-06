@@ -68,8 +68,8 @@ public class AtlasAllocationTest implements AllocationTest
       });
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 82.3, categoriesOverride = {IntegrationCategory.SLOW})
-   @Test(timeout = 410000)
+   @ContinuousIntegrationTest(estimatedDuration = 300.0, categoriesOverride = {IntegrationCategory.SLOW})
+   @Test(timeout = 600000)
    public void testForAllocationsWalking() throws SimulationExceededMaximumTimeException
    {
       double defaultSwingDuration = 0.5;
