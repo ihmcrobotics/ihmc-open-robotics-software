@@ -8,7 +8,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 
-public interface QuadrupedSimulationInitialPositionParameters
+public interface QuadrupedInitialPositionParameters
 {
    /**
     * Maps joint names to initial positions.

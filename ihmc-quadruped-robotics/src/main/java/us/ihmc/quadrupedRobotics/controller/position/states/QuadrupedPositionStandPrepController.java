@@ -8,7 +8,7 @@ import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
@@ -24,7 +24,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DoubleParameter trajectoryTimeParameter = new DoubleParameter("trajectoryTime", registry, 1.0);
-   private final QuadrupedSimulationInitialPositionParameters initialPositionParameters;
+   private final QuadrupedInitialPositionParameters initialPositionParameters;
 
    private final FullQuadrupedRobotModel fullRobotModel;
    private final double dt;
@@ -37,7 +37,7 @@ public class QuadrupedPositionStandPrepController implements QuadrupedController
     */
    private double timeInTrajectory = 0.0;
 
-   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedSimulationInitialPositionParameters initialPositionParameters, YoVariableRegistry parentRegistry)
+   public QuadrupedPositionStandPrepController(QuadrupedRuntimeEnvironment environment, QuadrupedInitialPositionParameters initialPositionParameters, YoVariableRegistry parentRegistry)
    {
       this.initialPositionParameters = initialPositionParameters;
       this.fullRobotModel = environment.getFullRobotModel();

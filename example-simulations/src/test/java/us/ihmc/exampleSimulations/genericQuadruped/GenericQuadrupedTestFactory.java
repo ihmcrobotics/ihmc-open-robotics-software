@@ -27,9 +27,9 @@ import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInforma
 import us.ihmc.quadrupedRobotics.input.QuadrupedTestTeleopScript;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
+import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
-import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -65,7 +65,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private final OptionalFactoryField<QuadrupedGroundContactModelType> groundContactModelType = new OptionalFactoryField<>("groundContactModelType");
    private final OptionalFactoryField<GroundProfile3D> providedGroundProfile3D = new OptionalFactoryField<>("providedGroundProfile3D");
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
-   private final OptionalFactoryField<QuadrupedSimulationInitialPositionParameters> initialPosition = new OptionalFactoryField<>("initialPosition");
+   private final OptionalFactoryField<QuadrupedInitialPositionParameters> initialPosition = new OptionalFactoryField<>("initialPosition");
    private final OptionalFactoryField<Boolean> useNetworking = new OptionalFactoryField<>("useNetworking");
 
    private QuadrupedStepTeleopManager stepTeleopManager;
@@ -84,7 +84,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       QuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
       QuadrupedPhysicalProperties physicalProperties = new GenericQuadrupedPhysicalProperties();
       NetClassList netClassList = new QuadrupedNetClassList();
-      QuadrupedSimulationInitialPositionParameters initialPositionParameters = initialPosition.get();
+      QuadrupedInitialPositionParameters initialPositionParameters = initialPosition.get();
       GroundContactParameters groundContactParameters = new GenericQuadrupedGroundContactParameters();
       QuadrupedSensorInformation sensorInformation = new GenericQuadrupedSensorInformation();
       StateEstimatorParameters stateEstimatorParameters = new GenericQuadrupedStateEstimatorParameters();
@@ -202,7 +202,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    }
 
    @Override
-   public void setInitialPosition(QuadrupedSimulationInitialPositionParameters initialPosition)
+   public void setInitialPosition(QuadrupedInitialPositionParameters initialPosition)
    {
       this.initialPosition.set(initialPosition);
    }

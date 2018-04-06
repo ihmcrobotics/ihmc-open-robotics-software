@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics;
 import junit.framework.AssertionFailedError;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerState;
@@ -14,9 +15,38 @@ public class QuadrupedTestBehaviors
 {
    public static void readyXGait(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedStepTeleopManager stepTeleopManager) throws AssertionFailedError
    {
-      standUp(conductor, variables, stepTeleopManager);
+      standUp(conductor, variables);
+      startBalancing(conductor, variables, stepTeleopManager);
       squareUp(conductor, variables, stepTeleopManager);
    }
+
+   public static void startBalancing(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedStepTeleopManager stepTeleopManager) throws AssertionFailedError
+   {
+      stepTeleopManager.requestSteppingState();
+      conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTimeLimit(variables.getYoTime(), 2.0);
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerEnum.STEPPING));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
+   }
+
+   public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
+   {
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerEnum.DO_NOTHING));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
+
+      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP);
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerEnum.STAND_READY));
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 2.0));
+      conductor.simulate();
+   }
+
+
+
+
+
 
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedPositionTestYoVariables variables) throws AssertionFailedError
    {
@@ -45,6 +75,7 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
    }
 
+   /*
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
@@ -59,6 +90,7 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
    }
+   */
 
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedStepTeleopManager stepTeleopManager) throws AssertionFailedError
    {
