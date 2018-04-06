@@ -22,6 +22,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class QuadrupedXGaitStepStream implements QuadrupedStepStream
 {
@@ -201,7 +202,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
    }
 
    @Override
-   public PreallocatedList<? extends QuadrupedTimedStep> getSteps()
+   public List<? extends QuadrupedTimedStep> getSteps()
    {
       return stepSequence;
    }

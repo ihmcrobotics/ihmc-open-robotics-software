@@ -11,4 +11,16 @@ public enum QuadrupedForceControllerEnum
    FALL;
 
    public static QuadrupedForceControllerEnum[] values = values();
+
+   public byte toByte()
+   {
+      return (byte) ordinal();
+   }
+
+   public static QuadrupedForceControllerEnum fromByte(byte enumAsByte)
+   {
+      if (enumAsByte == -1)
+         return null;
+      return values[enumAsByte];
+   }
 }

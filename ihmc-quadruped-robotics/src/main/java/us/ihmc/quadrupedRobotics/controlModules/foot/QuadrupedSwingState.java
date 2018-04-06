@@ -1,5 +1,7 @@
 package us.ihmc.quadrupedRobotics.controlModules.foot;
 
+import afu.org.checkerframework.checker.oigj.qual.O;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
@@ -227,5 +229,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
          return null;
       else
          return feedbackControlCommand;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> createFeedbackControlTemplate()
+   {
+      return feedbackControlCommand;
    }
 }

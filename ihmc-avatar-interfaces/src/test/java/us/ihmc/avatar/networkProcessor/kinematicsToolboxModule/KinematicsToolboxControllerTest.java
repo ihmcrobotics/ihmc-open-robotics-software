@@ -218,7 +218,7 @@ public class KinematicsToolboxControllerTest
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
          if (VERBOSE)
             PrintTools.info(this, "Solution quality: " + solutionQuality);
-         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 1.0e-4);
+         assertTrue("Poor solution quality: " + solutionQuality, solutionQuality < 1.0e-3);
       }
    }
 
@@ -335,6 +335,7 @@ public class KinematicsToolboxControllerTest
             if (initializationSucceeded.getBooleanValue())
             {
                toolboxController.updateInternal();
+               PrintTools.info("Solution quality: " + toolboxController.getSolution().getSolutionQuality());
                jointAnglesWriter.updateRobotConfigurationBasedOnFullRobotModel();
                numberOfIterations.increment();
             }
