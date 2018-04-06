@@ -9,19 +9,16 @@ public class QuadrupedJoint
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry;
 
-   private final LowLevelState desiredActuatorState;
    private final OneDoFJoint controllerJoint;
-   private final JointDesiredOutputReadOnly jointDesiredSetpoints;
+   private final JointDesiredOutput jointDesiredSetpoints;
 
    private final QuadrupedLowLevelJointController jointController;
 
-   public QuadrupedJoint(LowLevelState desiredActuatorState, OneDoFJoint controllerJoint, JointDesiredOutputReadOnly jointDesiredSetpoints,
-                         double controlDT, YoVariableRegistry parentRegistry)
+   public QuadrupedJoint(OneDoFJoint controllerJoint, JointDesiredOutput jointDesiredSetpoints, double controlDT, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(controllerJoint.getName() + name);
 
       this.controllerJoint = controllerJoint;
-      this.desiredActuatorState = desiredActuatorState;
       this.jointDesiredSetpoints = jointDesiredSetpoints;
       this.jointController = new QuadrupedLowLevelJointController(controllerJoint.getName(), controlDT, registry);
 
@@ -34,7 +31,7 @@ public class QuadrupedJoint
       {
          jointController.resetIntegrators();
       }
-      jointController.update(controllerJoint, jointDesiredSetpoints, desiredActuatorState);
+      jointController.update(controllerJoint, jointDesiredSetpoints);
    }
 
    public LowLevelActuatorMode getDesiredActuatorMode()
