@@ -140,6 +140,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
+                          boolean createAdditionalContactPointsn)
+   {
+      this(atlasVersion, target, headless, simulationContactPoints, createAdditionalContactPointsn, false);
+   }
+   
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
                           boolean createAdditionalContactPoints, boolean useShapeCollision)
    {
       if (SCALE_ATLAS)
