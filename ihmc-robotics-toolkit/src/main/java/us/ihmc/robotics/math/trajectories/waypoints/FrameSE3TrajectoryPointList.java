@@ -32,6 +32,12 @@ public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameS
       newTrajectoryPoint.set(time, position, orientation, linearVelocity, angularVelocity);
    }
 
+   public void addOrientationTrajectoryPoint(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   {
+      FrameSE3TrajectoryPoint newTrajectoryPoint = addAndInitializeTrajectoryPoint();
+      newTrajectoryPoint.setToRotation(time, orientation, angularVelocity);
+   }
+
    @Override
    public void addTrajectoryPoint(FrameSE3TrajectoryPoint trajectoryPoint)
    {
@@ -39,7 +45,7 @@ public class FrameSE3TrajectoryPointList extends FrameTrajectoryPointList<FrameS
       newTrajectoryPoint.set(trajectoryPoint);
    }
 
-   private void addOrientationTrajectoryPoint(FrameSO3TrajectoryPoint trajectoryPoint)
+   public void addOrientationTrajectoryPoint(FrameSO3TrajectoryPoint trajectoryPoint)
    {
       FrameSE3TrajectoryPoint newTrajectoryPoint = addAndInitializeTrajectoryPoint();
       newTrajectoryPoint.setToRotation(trajectoryPoint);

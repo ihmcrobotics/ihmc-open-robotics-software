@@ -152,6 +152,13 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       geometryObject.set(se3TrajectoryPoint);
    }
 
+   public void setToRotation(double time, QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
+   {
+      geometryObject.setTime(time);
+      geometryObject.waypointData.getEuclideanWaypoint().setToZero();
+      geometryObject.waypointData.getSO3Waypoint().set(orientation, angularVelocity);
+   }
+
    public void setToRotation(SO3TrajectoryPointInterface<?> so3TrajectoryPoint)
    {
       geometryObject.setTime(so3TrajectoryPoint.getTime());
