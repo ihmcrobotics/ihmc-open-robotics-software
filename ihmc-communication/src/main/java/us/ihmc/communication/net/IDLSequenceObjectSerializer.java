@@ -57,6 +57,7 @@ public class IDLSequenceObjectSerializer extends Serializer<IDLSequence.Object>
       kryo.writeClass(output, collection.getTopicDataType().getClass());
 
       Serializer serializer = this.serializer;
+
       if (genericType != null)
       {
          if (serializer == null)
@@ -67,12 +68,19 @@ public class IDLSequenceObjectSerializer extends Serializer<IDLSequence.Object>
       if (length == 0)
          return;
 
-      if (serializer != null)
-      {
-         for (int i = 0; i < collection.size(); i++)
-            kryo.writeObject(output, collection.get(i), serializer);
-      }
-      else
+      if (serializer == null)
+         serializer = kryo.getSerializer(collection.get(0).getClass());
+
+      if (serializer == null)
+         serializer = kryo.getDefaultSerializer(collection.get(0).getClass());
+      
+
+//      if (serializer != null)
+//      {
+//         for (int i = 0; i < collection.size(); i++)
+//            kryo.writeObject(output, collection.get(i), serializer);
+//      }
+//      else
       {
          for (int i = 0; i < collection.size(); i++)
             kryo.writeClassAndObject(output, collection.get(i));
@@ -114,12 +122,12 @@ public class IDLSequenceObjectSerializer extends Serializer<IDLSequence.Object>
 
       IDLSequence.Object resultList = new IDLSequence.Object(length, null, topicDataType);
 
-      if (serializer != null)
-      {
-         for (int i = 0; i < length; i++)
-            topicDataType.copy(kryo.readObject(input, elementClass, serializer), resultList.add());
-      }
-      else
+//      if (serializer != null)
+//      {
+//         for (int i = 0; i < length; i++)
+//            topicDataType.copy(kryo.readObject(input, elementClass, serializer), resultList.add());
+//      }
+//      else
       {
          for (int i = 0; i < length; i++)
             topicDataType.copy(kryo.readClassAndObject(input), resultList.add());
