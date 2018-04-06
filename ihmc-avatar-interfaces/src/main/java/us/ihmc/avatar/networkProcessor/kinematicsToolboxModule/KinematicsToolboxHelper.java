@@ -275,7 +275,7 @@ public class KinematicsToolboxHelper
       DenseMatrix64F error = new DenseMatrix64F(6, 1);
       positionError.get(3, error);
 
-      return computeQualityFromError(error, weightVector, selectionMatrix);
+      return computeQualityFromError(error, weightMatrix, selectionMatrix);
    }
 
    /**
