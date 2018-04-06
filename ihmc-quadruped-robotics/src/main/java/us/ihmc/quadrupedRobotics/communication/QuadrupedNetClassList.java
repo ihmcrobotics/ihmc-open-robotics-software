@@ -53,6 +53,7 @@ public class QuadrupedNetClassList extends NetClassList
 
       registerPacketField(SelectionMatrix3DMessage.class);
       registerPacketField(WeightMatrix3DMessage.class);
+      registerPacketField(SO3TrajectoryMessage.class);
 
       registerPacketField(Pose3D.class);
       registerPacketClass(Packet.class);
