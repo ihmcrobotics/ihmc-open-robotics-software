@@ -9,7 +9,6 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -483,7 +482,7 @@ public class InverseDynamicsQPSolver
       MatrixTools.addMatrixBlock(solverInput_f, numberOfDoFs, 0, tempRhoTask_f, 0, 0, rhoSize, 1, -1.0);
    }
 
-   public void solve() throws NoConvergenceException
+   public boolean solve()
    {
       if (!hasWrenchesEquilibriumConstraintBeenSetup)
          throw new RuntimeException("The wrench equilibrium constraint has to be setup before calling solve().");
@@ -517,10 +516,7 @@ public class InverseDynamicsQPSolver
 
       hasWrenchesEquilibriumConstraintBeenSetup = false;
 
-      if (MatrixTools.containsNaN(solverOutput))
-      {
-         throw new NoConvergenceException(numberOfIterations.getIntegerValue());
-      }
+      boolean hasConverged = !MatrixTools.containsNaN(solverOutput);
 
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
       CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
@@ -547,6 +543,8 @@ public class InverseDynamicsQPSolver
 
       solverInput_lb_previous.set(solverInput_lb);
       solverInput_ub_previous.set(solverInput_ub);
+
+      return hasConverged;
    }
 
    private void printForJerry()

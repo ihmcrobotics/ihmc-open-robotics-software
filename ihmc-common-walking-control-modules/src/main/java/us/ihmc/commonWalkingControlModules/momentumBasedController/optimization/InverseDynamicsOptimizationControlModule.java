@@ -1,8 +1,20 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -14,16 +26,16 @@ import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactive
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.tools.exceptions.NoConvergenceException;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class InverseDynamicsOptimizationControlModule
 {
@@ -138,7 +150,7 @@ public class InverseDynamicsOptimizationControlModule
       motionQPInputCalculator.initialize();
    }
 
-   public MomentumModuleSolution compute() throws MomentumControlModuleException
+   public boolean compute()
    {
       wrenchMatrixCalculator.computeMatrices();
       if (VISUALIZE_RHO_BASIS_VECTORS)
@@ -168,24 +180,16 @@ public class InverseDynamicsOptimizationControlModule
          qpSolver.notifyResetActiveSet();
       }
 
-      NoConvergenceException noConvergenceException = null;
-
-      try
-      {
-         qpSolver.solve();
-      }
-      catch (NoConvergenceException e)
+      boolean hasConverged = qpSolver.solve();
+      if (!hasConverged)
       {
          if (!hasNotConvergedInPast.getBooleanValue())
          {
-            e.printStackTrace();
-            PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            PrintTools.warn(this, "The QP has not converged. Only showing this once if it happens repeatedly.");
          }
 
          hasNotConvergedInPast.set(true);
          hasNotConvergedCounts.increment();
-
-         noConvergenceException = e;
       }
 
       DenseMatrix64F qDDotSolution = qpSolver.getJointAccelerations();
@@ -205,11 +209,11 @@ public class InverseDynamicsOptimizationControlModule
       momentumModuleSolution.setJointsToOptimizeFor(jointsToOptimizeFor);
       momentumModuleSolution.setRigidBodiesWithExternalWrench(rigidBodiesWithExternalWrench);
 
-      if (noConvergenceException != null)
-      {
-         throw new MomentumControlModuleException(noConvergenceException, momentumModuleSolution);
-      }
+      return hasConverged;
+   }
 
+   public MomentumModuleSolution getMomentumModuleSolution()
+   {
       return momentumModuleSolution;
    }
 
