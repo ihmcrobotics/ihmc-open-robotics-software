@@ -3,6 +3,8 @@ package us.ihmc.atlas;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.alg.dense.decomposition.chol.CholeskyDecompositionCommon_D64;
+import org.ejml.alg.dense.decomposition.lu.LUDecompositionBase_D64;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.After;
 import org.junit.Assert;
@@ -17,6 +19,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -72,7 +75,7 @@ public class AtlasAllocationTest implements AllocationTest
       double defaultSwingDuration = 0.5;
       double defaultTransferDuration = 0.1;
 
-      int warmupSteps = 2;
+      int warmupSteps = 4;
       testHelper.send(createFootsteps(warmupSteps, defaultSwingDuration, defaultTransferDuration, 0.0, 0.0));
       testHelper.simulateAndBlockAndCatchExceptions(3.0);
 
@@ -145,10 +148,12 @@ public class AtlasAllocationTest implements AllocationTest
    public List<Class<?>> getClassesToIgnore()
    {
       List<Class<?>> classesToIgnore = new ArrayList<>();
+
+      // These are places specific to the simulation and will not show up on the real robot.
       classesToIgnore.add(MirroredYoVariableRegistry.class);
       classesToIgnore.add(MeshDataGenerator.class);
 
-      // TODO: fix these.
+      // TODO: fix these!
       classesToIgnore.add(StatusMessageOutputManager.class);
       classesToIgnore.add(ConvexPolygonTools.class);
       classesToIgnore.add(OneStepCaptureRegionCalculator.class);
@@ -160,11 +165,20 @@ public class AtlasAllocationTest implements AllocationTest
    public List<String> getMethodsToIgnore()
    {
       List<String> methodsToIgnore = new ArrayList<>();
+
+      // These methods are "safe" as they will only allocate to increase their capacity.
       methodsToIgnore.add(DenseMatrix64F.class.getName() + ".reshape");
       methodsToIgnore.add(TIntArrayList.class.getName() + ".ensureCapacity");
       methodsToIgnore.add(ConvexPolygon2D.class.getName() + ".setOrCreate");
       methodsToIgnore.add(FrameConvexPolygon2D.class.getName() + ".setOrCreate");
       methodsToIgnore.add(RecyclingArrayList.class.getName() + ".ensureCapacity");
+      methodsToIgnore.add(LUDecompositionBase_D64.class.getName() + ".decomposeCommonInit");
+      methodsToIgnore.add(CholeskyDecompositionCommon_D64.class.getName() + ".decompose");
+
+      // Ignore the following methods as they are related to printouts.
+      methodsToIgnore.add(Throwable.class.getName() + ".printStackTrace");
+      methodsToIgnore.add(PrintTools.class.getName() + ".print");
+
       return methodsToIgnore;
    }
 
