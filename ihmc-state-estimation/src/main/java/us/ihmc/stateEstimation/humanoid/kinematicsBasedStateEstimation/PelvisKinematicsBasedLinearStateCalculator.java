@@ -101,6 +101,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final Map<RigidBody, FootSwitchInterface> footSwitches;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderFromController;
 
+   private final FramePoint2DBasics[] intersectionPoints = new FramePoint2DBasics[] {new FramePoint2D(), new FramePoint2D()};
+
    public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure, Map<RigidBody, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
          Map<RigidBody, FootSwitchInterface> footSwitches, CenterOfPressureDataHolder centerOfPressureDataHolderFromController, double estimatorDT,
          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -334,10 +336,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
                {
                   FrameLineSegment2D footCenterCoPLineSegment = footCenterCoPLineSegments.get(trustedFoot);
                   footCenterCoPLineSegment.set(footFrame, 0.0, 0.0, tempCoP2d.getX(), tempCoP2d.getY());
-                  // TODO Garbage
-                  FramePoint2DBasics[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
+                  int intersections = footPolygon.intersectionWith(footCenterCoPLineSegment, intersectionPoints[0], intersectionPoints[1]);
 
-                  if (intersectionPoints == null || intersectionPoints.length == 0)
+                  if (intersections == 0)
                   {
                      System.out.println("In " + getClass().getSimpleName() + ": Found no solution for the CoP projection.");
                      tempCoP2d.setToZero(footFrame);
@@ -345,11 +346,11 @@ public class PelvisKinematicsBasedLinearStateCalculator
                   else
                   {
                      tempCoP2d.set(intersectionPoints[0]);
-                     
-                     if (intersectionPoints.length == 2)
+
+                     if (intersections == 2)
                         System.out.println("In " + getClass().getSimpleName() + ": Found two solutions for the CoP projection.");
                   }
-                  
+
 
                }
                else // If foot barely loaded and actual CoP outside, then don't update the raw CoP right below
