@@ -129,6 +129,16 @@ public class PIDController extends AbstractPIDController
       this.maxIntegralError.set(maxIntegralError);
    }
 
+   public void setGains(PIDGainsReadOnly gains)
+   {
+      pdController.setGains(gains);
+
+      setMaximumOutputLimit(gains.getMaximumFeedback());
+      setIntegralLeakRatio(gains.getIntegralLeakRatio());
+      setIntegralGain(gains.getKi());
+      setMaxIntegralError(gains.getMaxIntegralError());
+   }
+
    @Override
    protected AbstractPDController getPDController()
    {
