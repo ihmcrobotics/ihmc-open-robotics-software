@@ -660,15 +660,15 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          node.setTime(defaultPlanningTime * 0.45);
          node.setForceConstraint(zeroForceConstraint);
          node.setForceRateConstraint(initialForceRateConstraint);
-         node.setLinearVelocityObjective(launchVelocity, launchVelocityWeight, launchVelocityConstraintType);
-         node.setPositionObjective(launchPosition, positionWeight, maxPosition, minPosition);
+         //node.setLinearVelocityObjective(launchVelocity, launchVelocityWeight, launchVelocityConstraintType);
+         //node.setPositionObjective(launchPosition, positionWeight, maxPosition, minPosition);
          //node.setPositionInequalities(maxPosition, minPosition);
          motionPlanner.submitNode(node);
 
          node.reset();
          node.setTime(defaultPlanningTime * 0.5);
          node.setForceConstraint(zeroForceConstraint);
-         node.setForceRateObjective(finalForceRateConstraint, forceRateWeight);
+         node.setForceRateConstraint(zeroForceConstraint);
          //node.setPositionObjective(intermediatePosition, positionWeight);
          motionPlanner.submitNode(node);
 
@@ -713,7 +713,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          node.setForceRateConstraint(finalForceRateConstraint);
          node.setPosition(finalPosition, finalPositionConstraintType, finalPositionWeight);
          node.setLinearVelocityConstraint(finalVelocity);
-         //node.setCoPConstraint(finalCoP);
+         node.setCoPConstraint(finalCoP);
          motionPlanner.submitNode(node);
 
          motionPlanner.compute();

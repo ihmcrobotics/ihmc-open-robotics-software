@@ -49,7 +49,7 @@ public class CentroidalXYAxisOptimizationControlModule
       solverInput_bin = new DenseMatrix64F(0, 1);
 
       qpSolver = new JavaQuadProgSolver();
-      qpSolver.setConvergenceThreshold(1e-14);
+      qpSolver.setConvergenceThreshold(1e-16);
       qpSolution = new DenseMatrix64F(0, 1);
       xQPSolution = new DenseMatrix64F(0, 1);
       yQPSolution = new DenseMatrix64F(0, 1);
@@ -117,6 +117,7 @@ public class CentroidalXYAxisOptimizationControlModule
       DenseMatrix64F ybeq = linearHelper.getConstraintbeqMatrix(yAxis);
       angularHelper.processLinearConstraints(xAeq, xbeq, yAeq, ybeq, solverInput_Aeq, solverInput_beq);
       angularHelper.getCoPLocationConstraints(tempMatrix1, tempMatrix2);
+      PrintTools.debug(tempMatrix1.toString() + " " + tempMatrix2.toString());
       int indexToInsertAt = solverInput_Aeq.getNumRows();
       int numberToInsert = tempMatrix1.getNumRows();
       solverInput_Aeq.reshape(indexToInsertAt + numberToInsert, solverInput_Aeq.getNumCols(), true);
@@ -127,7 +128,7 @@ public class CentroidalXYAxisOptimizationControlModule
       angularHelper.getConsolidatedTorqueConstraints(tempMatrix1, tempMatrix2);
       tempMatrix3.reshape(tempMatrix1.getNumRows(), tempMatrix1.getNumRows());
       CommonOps.setIdentity(tempMatrix3);
-      CommonOps.scale(20.0, tempMatrix3);
+      CommonOps.scale(0.12, tempMatrix3);
       tempMatrix4.reshape(tempMatrix1.getNumCols(), tempMatrix1.getNumRows());
       CommonOps.multTransA(tempMatrix1, tempMatrix3, tempMatrix4);
       CommonOps.multAdd(tempMatrix4, tempMatrix1, solverInput_H);
@@ -148,6 +149,7 @@ public class CentroidalXYAxisOptimizationControlModule
       DenseMatrix64F ybin = linearHelper.getConstraintbinMatrix(yAxis);
       angularHelper.processLinearConstraints(xAin, xbin, yAin, ybin, solverInput_Ain, solverInput_bin);
       angularHelper.getConsolidatedCoPSupportPolygonConstraints(tempMatrix1, tempMatrix2);
+      //PrintTools.debug(tempMatrix1.toString() + " " + tempMatrix2.toString());
       int indexToInsertCoPConstraints = solverInput_Ain.getNumRows();
       solverInput_Ain.reshape(indexToInsertCoPConstraints + tempMatrix1.getNumRows(), solverInput_Ain.getNumCols(), true);
       solverInput_bin.reshape(indexToInsertCoPConstraints + tempMatrix1.getNumRows(), 1, true);
