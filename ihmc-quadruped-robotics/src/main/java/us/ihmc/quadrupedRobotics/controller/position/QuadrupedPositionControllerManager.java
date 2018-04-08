@@ -46,7 +46,10 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
 
-   public QuadrupedPositionControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory, QuadrupedPhysicalProperties physicalProperties, QuadrupedInitialPositionParameters initialPositionParameters, QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters, QuadrupedLegInverseKinematicsCalculator legIKCalculator)
+   public QuadrupedPositionControllerManager(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedModelFactory modelFactory,
+                                             QuadrupedPhysicalProperties physicalProperties, QuadrupedInitialPositionParameters initialPositionParameters,
+                                             QuadrupedPositionBasedCrawlControllerParameters crawlControllerParameters,
+                                             QuadrupedLegInverseKinematicsCalculator legIKCalculator)
    {
       commandInputManager = new CommandInputManager(QuadrupedControllerAPIDefinition.getQuadrupedSupportedCommands());
       try
@@ -73,7 +76,8 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
                                                                                       crawlControllerParameters, postureProvider, planarVelocityProvider,
                                                                                       legIKCalculator);
 
-      EventBasedStateMachineFactory<QuadrupedPositionControllerState, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedPositionControllerState.class);
+      EventBasedStateMachineFactory<QuadrupedPositionControllerState, QuadrupedController> factory = new EventBasedStateMachineFactory<>(
+            QuadrupedPositionControllerState.class);
       factory.setNamePrefix("positionControllerState").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
       factory.buildYoEventTrigger("userTrigger", QuadrupedPositionControllerRequestedEvent.class);
 
@@ -139,7 +143,8 @@ public class QuadrupedPositionControllerManager implements QuadrupedControllerMa
    {
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(commandInputManager, statusMessageOutputManager, scheduler,
                                                                                                 packetCommunicator);
-      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
+      controllerNetworkSubscriber
+            .registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class, 9, MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.addMessageCollector(QuadrupedControllerAPIDefinition.createDefaultMessageIDExtractor());
       controllerNetworkSubscriber.addMessageValidator(QuadrupedControllerAPIDefinition.createDefaultMessageValidation());
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerNetworkSubscriber);
