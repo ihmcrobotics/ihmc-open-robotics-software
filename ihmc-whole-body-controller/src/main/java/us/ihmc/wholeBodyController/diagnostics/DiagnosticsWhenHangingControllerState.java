@@ -22,7 +22,6 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -45,6 +44,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.wholeBodyController.JointTorqueOffsetProcessor;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class DiagnosticsWhenHangingControllerState extends HighLevelControllerState implements RobotController, JointTorqueOffsetEstimator
 {
@@ -94,8 +94,8 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    private final YoBoolean updateFootForceSensorOffsets = new YoBoolean("updateFootForceSensorOffsets", registry);
    private final YoBoolean printForceSensorsOffsets = new YoBoolean("printForceSensorsOffsets", registry);
    private final SideDependentList<FootSwitchInterface> footSwitches;
-   private final SideDependentList<YoFrameVector> footForcesRaw = new SideDependentList<>();
-   private final SideDependentList<YoFrameVector> footTorquesRaw = new SideDependentList<>();
+   private final SideDependentList<YoFrameVector3D> footForcesRaw = new SideDependentList<>();
+   private final SideDependentList<YoFrameVector3D> footTorquesRaw = new SideDependentList<>();
    private final YoDouble alphaFootForce = new YoDouble("alphaDiagFootForce", registry);
    private final SideDependentList<AlphaFilteredYoFrameVector> footForcesRawFiltered = new SideDependentList<>();
    private final SideDependentList<AlphaFilteredYoFrameVector> footTorquesRawFiltered = new SideDependentList<>();
@@ -197,10 +197,10 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          ReferenceFrame footSensorFrame = footSwitches.get(robotSide).getMeasurementFrame();
 
-         YoFrameVector footForceRaw = new YoFrameVector(sidePrefix + "DiagFootForceRaw", footSensorFrame, registry);
+         YoFrameVector3D footForceRaw = new YoFrameVector3D(sidePrefix + "DiagFootForceRaw", footSensorFrame, registry);
          footForcesRaw.put(robotSide, footForceRaw);
 
-         YoFrameVector footTorqueRaw = new YoFrameVector(sidePrefix + "DiagFootTorqueRaw", footSensorFrame, registry);
+         YoFrameVector3D footTorqueRaw = new YoFrameVector3D(sidePrefix + "DiagFootTorqueRaw", footSensorFrame, registry);
          footTorquesRaw.put(robotSide, footTorqueRaw);
 
          AlphaFilteredYoFrameVector footForceRawFiltered = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector(sidePrefix + "DiagFootForceRawFilt", "",

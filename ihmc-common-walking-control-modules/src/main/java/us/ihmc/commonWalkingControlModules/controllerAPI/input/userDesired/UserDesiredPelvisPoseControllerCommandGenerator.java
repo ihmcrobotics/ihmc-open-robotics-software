@@ -15,8 +15,8 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class UserDesiredPelvisPoseControllerCommandGenerator
@@ -31,7 +31,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
    private final YoBoolean userStreamPelvisOrientation = new YoBoolean("userStreamPelvisOrientation", registry);
    private final YoBoolean userUpdateDesiredPelvisPose = new YoBoolean("userUpdateDesiredPelvisPose", registry);
    private final YoDouble userDesiredPelvisPoseTrajectoryTime = new YoDouble("userDesiredPelvisPoseTrajectoryTime", registry);
-   private final YoFramePose userDesiredPelvisPose;
+   private final YoFramePoseUsingYawPitchRoll userDesiredPelvisPose;
 
    private final ReferenceFrame midFeetZUpFrame, pelvisFrame;
 
@@ -45,7 +45,7 @@ public class UserDesiredPelvisPoseControllerCommandGenerator
       this.controllerCommandInputManager = controllerCommandInputManager;
       midFeetZUpFrame = commonHumanoidReferenceFrames.getMidFeetZUpFrame();
       pelvisFrame = commonHumanoidReferenceFrames.getPelvisFrame();
-      userDesiredPelvisPose = new YoFramePose("userDesiredPelvisPose", midFeetZUpFrame, registry);
+      userDesiredPelvisPose = new YoFramePoseUsingYawPitchRoll("userDesiredPelvisPose", midFeetZUpFrame, registry);
 
       userUpdateDesiredPelvisPose.addVariableChangedListener(new VariableChangedListener()
       {

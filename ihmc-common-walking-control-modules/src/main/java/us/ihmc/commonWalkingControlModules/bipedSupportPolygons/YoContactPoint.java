@@ -10,14 +10,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class YoContactPoint implements ContactPointInterface
 {
    private final YoVariableRegistry registry;
-   private final YoFramePoint yoPosition;
+   private final YoFramePoint3D yoPosition;
    private final YoBoolean isInContact;
    private final String namePrefix;
    private final PlaneContactState parentContactState;
@@ -43,7 +43,7 @@ public class YoContactPoint implements ContactPointInterface
       //TODO: Check if it is better to create an actual child registry
       registry = parentRegistry;
 
-      yoPosition = new YoFramePoint(namePrefix + "Contact" + index, pointFrame, registry);
+      yoPosition = new YoFramePoint3D(namePrefix + "Contact" + index, pointFrame, registry);
       isInContact = new YoBoolean(namePrefix + "InContact" + index, registry);
    }
 

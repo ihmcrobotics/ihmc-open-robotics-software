@@ -17,11 +17,11 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
 import us.ihmc.quadrupedRobotics.planning.stepStream.QuadrupedStepStream;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedStepController implements QuadrupedController, QuadrupedStepTransitionCallback
 {
@@ -42,7 +42,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
 
    // step planner
    private final GroundPlaneEstimator groundPlaneEstimator;
-   private final QuadrantDependentList<YoFramePoint> groundPlanePositions;
+   private final QuadrantDependentList<YoFramePoint3D> groundPlanePositions;
 
    // inputs
    private final YoBoolean onLiftOffTriggered = new YoBoolean("onLiftOffTriggered", registry);
@@ -67,7 +67,7 @@ public class QuadrupedStepController implements QuadrupedController, QuadrupedSt
       groundPlanePositions = new QuadrantDependentList<>();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         groundPlanePositions.set(robotQuadrant, new YoFramePoint(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
+         groundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
          contactStates.put(robotQuadrant, ContactState.IN_CONTACT);
       }
 

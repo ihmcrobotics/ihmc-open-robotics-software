@@ -2,8 +2,8 @@ package us.ihmc.simulationconstructionset;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
 /**
  * Used to apply a torque to the point
@@ -14,7 +14,7 @@ public class ExternalTorque implements java.io.Serializable
     private static final long serialVersionUID = 3783457908524107434L;
 
     // torque in inertial frame
-    private final YoFrameVector torque;
+    private final YoFrameVector3D torque;
     public YoDouble x, y, z;
 
     protected final String name;
@@ -25,7 +25,7 @@ public class ExternalTorque implements java.io.Serializable
     public ExternalTorque(String name, YoVariableRegistry registry)
     {
         this.name = name;
-        torque = new YoFrameVector(name + "_t", "", ReferenceFrame.getWorldFrame(), registry);
+        torque = new YoFrameVector3D(name + "_t", "", ReferenceFrame.getWorldFrame(), registry);
 
         x = torque.getYoX();
         y = torque.getYoY();
@@ -53,7 +53,7 @@ public class ExternalTorque implements java.io.Serializable
         this.parentJoint = parentJoint;
     }
 
-    public YoFrameVector getYoTorque() {
+    public YoFrameVector3D getYoTorque() {
         return torque;
     }
 

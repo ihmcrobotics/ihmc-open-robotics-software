@@ -21,8 +21,8 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -49,20 +49,20 @@ public class PosePlaybackSCSBridge
 
    // private final YoBoolean plotBalls = new YoBoolean("plotBalls", registry);
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   private final YoFramePoint centerOfMassPosition = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint centerOfMassPosition2d = new YoFramePoint("centerOfMass2d", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D centerOfMassPosition = new YoFramePoint3D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D centerOfMassPosition2d = new YoFramePoint3D("centerOfMass2d", ReferenceFrame.getWorldFrame(), registry);
 
-   private final YoFramePoint leftAnklePosition = new YoFramePoint("leftAnklePosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint rightAnklePosition = new YoFramePoint("rightAnklePosition", ReferenceFrame.getWorldFrame(), registry);
-   private final SideDependentList<YoFramePoint> anklePositions = new SideDependentList<YoFramePoint>(leftAnklePosition, rightAnklePosition);
+   private final YoFramePoint3D leftAnklePosition = new YoFramePoint3D("leftAnklePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D rightAnklePosition = new YoFramePoint3D("rightAnklePosition", ReferenceFrame.getWorldFrame(), registry);
+   private final SideDependentList<YoFramePoint3D> anklePositions = new SideDependentList<YoFramePoint3D>(leftAnklePosition, rightAnklePosition);
 
    private PlaybackPose previousPose;
 
    private final SideDependentList<YoGraphicCoordinateSystem> feetCoordinateSystems = new SideDependentList<YoGraphicCoordinateSystem>();
 
-   private final YoFramePoint leftWristPosition = new YoFramePoint("leftWristPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint rightWristPosition = new YoFramePoint("rightWristPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final SideDependentList<YoFramePoint> wristPositions = new SideDependentList<YoFramePoint>(leftWristPosition, rightWristPosition);
+   private final YoFramePoint3D leftWristPosition = new YoFramePoint3D("leftWristPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D rightWristPosition = new YoFramePoint3D("rightWristPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final SideDependentList<YoFramePoint3D> wristPositions = new SideDependentList<YoFramePoint3D>(leftWristPosition, rightWristPosition);
 
    private final SideDependentList<YoGraphicCoordinateSystem> handCoordinateSystems = new SideDependentList<>();
 

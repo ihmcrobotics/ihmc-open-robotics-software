@@ -40,14 +40,14 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 // TODO 1) add isDoneWalking functionality
@@ -154,7 +154,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
                                                                                                                FootstepData.class);
 
    // Visualization 
-   private final List<YoFramePoint> copWaypointsViz = new ArrayList<>(maxNumberOfCoPWaypoints);
+   private final List<YoFramePoint3D> copWaypointsViz = new ArrayList<>(maxNumberOfCoPWaypoints);
 
    /**
     * Creates CoP planner object. Should be followed by call to {@code initializeParamters()} to
@@ -226,7 +226,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          for (RobotSide robotSide : RobotSide.values)
          {
             String sidePrefix = robotSide.getCamelCaseNameForMiddleOfExpression();
-            YoFrameVector2d copUserOffset = new YoFrameVector2d(fullPrefix + sidePrefix + "CoPConstantOffset" + pointName.toString(), null, registry);
+            YoFrameVector2D copUserOffset = new YoFrameVector2D(fullPrefix + sidePrefix + "CoPConstantOffset" + pointName.toString(), null, registry);
             copParameters.setCoPOffsets(robotSide, copUserOffset);
          }
       }
@@ -352,7 +352,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
       }
       for (int waypointIndex = 0; waypointIndex < maxNumberOfCoPWaypoints; waypointIndex++)
       {
-         YoFramePoint yoCoPWaypoint = new YoFramePoint("CoPWaypointAfterAdjustment" + waypointIndex, worldFrame, registry);
+         YoFramePoint3D yoCoPWaypoint = new YoFramePoint3D("CoPWaypointAfterAdjustment" + waypointIndex, worldFrame, registry);
          YoGraphicPosition copWaypointViz = new YoGraphicPosition("AdjustedCoPWaypointViz" + waypointIndex, yoCoPWaypoint, COP_POINT_SIZE, YoAppearance.Green(),
                                                                   YoGraphicPosition.GraphicType.BALL);
          yoCoPWaypoint.setToNaN();
@@ -384,7 +384,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoFrameVector2d copUserOffset = copPointParametersMap.get(copPointName).getCoPOffsets(robotSide);
+         YoFrameVector2D copUserOffset = copPointParametersMap.get(copPointName).getCoPOffsets(robotSide);
          copUserOffset.setX(offset.getX());
          copUserOffset.setY(robotSide.negateIfLeftSide(offset.getY()));
       }
@@ -1039,7 +1039,7 @@ public class ReferenceCoPTrajectoryGenerator implements ReferenceCoPTrajectoryGe
          return;
       setCoPPointInPolygon(copPointToPlan, copPointParameters.getSupportPolygonName(), copPointName, footstepIndex);
 
-      YoFrameVector2d copOffset = copPointParameters.getCoPOffsets(supportSide);
+      YoFrameVector2D copOffset = copPointParameters.getCoPOffsets(supportSide);
       double copXOffset = copOffset.getX()
             + getStepLengthToCoPOffset(copPointParameters.getStepLengthOffsetPolygon(), copPointParameters.getStepLengthToCoPOffsetFactor());
       if (copPointParameters.getIsConstrainedToMinMax())

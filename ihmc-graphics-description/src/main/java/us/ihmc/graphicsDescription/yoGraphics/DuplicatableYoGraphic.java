@@ -1,9 +1,9 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
@@ -27,20 +27,20 @@ public interface DuplicatableYoGraphic
       return (T) targetVariable;
    }
 
-   default YoFramePoint createYoFramePointInTargetRegistry(YoFramePoint original, YoVariableRegistry targetRegistry)
+   default YoFramePoint3D createYoFramePointInTargetRegistry(YoFramePoint3D original, YoVariableRegistry targetRegistry)
    {
       YoDouble x = getVariableInTargetRegistry(original.getYoX(), targetRegistry);
       YoDouble y = getVariableInTargetRegistry(original.getYoY(), targetRegistry);
       YoDouble z = getVariableInTargetRegistry(original.getYoZ(), targetRegistry);
-      return new YoFramePoint(x, y, z, original.getReferenceFrame());
+      return new YoFramePoint3D(x, y, z, original.getReferenceFrame());
    }
 
-   default YoFrameOrientation createYoFrameOrientationInTargetRegistry(YoFrameOrientation original, YoVariableRegistry targetRegistry)
+   default YoFrameYawPitchRoll createYoFrameOrientationInTargetRegistry(YoFrameYawPitchRoll original, YoVariableRegistry targetRegistry)
    {
       YoDouble yaw = getVariableInTargetRegistry(original.getYaw(), targetRegistry);
       YoDouble pitch = getVariableInTargetRegistry(original.getPitch(), targetRegistry);
       YoDouble roll = getVariableInTargetRegistry(original.getRoll(), targetRegistry);
-      return new YoFrameOrientation(yaw, pitch, roll, original.getReferenceFrame());
+      return new YoFrameYawPitchRoll(yaw, pitch, roll, original.getReferenceFrame());
    }
 
    YoGraphic duplicateOntoRegistry(YoVariableRegistry targetRegistry);

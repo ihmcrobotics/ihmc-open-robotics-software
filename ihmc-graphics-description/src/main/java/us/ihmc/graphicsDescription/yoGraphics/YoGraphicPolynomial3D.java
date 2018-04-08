@@ -23,10 +23,6 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 
@@ -136,7 +132,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
    private final Vector3D[] intermediateAccelerations;
 
    private final boolean hasPoseDefined;
-   private final YoFramePoseUsingQuaternions poseToWorldFrame;
+   private final YoFramePose3D poseToWorldFrame;
 
    private final int numberOfPolynomials;
    private final YoPolynomial3D[] yoPolynomial3Ds;
@@ -170,7 +166,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * Creates a new {@link YoGraphic} to display a 3D trajectory.
     * <p>
     * WARNING: The given {@link YoPolynomial3D}s are assumed to be expressed in world frame. If this
-    * is not the case, one of the constructors with {@link YoFramePoseUsingQuaternions} has to be
+    * is not the case, one of the constructors with {@link YoFramePose3D} has to be
     * used instead.
     * </p>
     * <p>
@@ -221,7 +217,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * @throws RuntimeException if the number of {@link YoPolynomial3D}s differs from the number of
     *            waypoint times.
     */
-   public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseFromTrajectoryFrameToWorldFrame, YoPolynomial3D yoPolynomial3D,
+   public YoGraphicPolynomial3D(String name, YoFramePose3D poseFromTrajectoryFrameToWorldFrame, YoPolynomial3D yoPolynomial3D,
                                 YoDouble trajectoryTime, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
    {
       this(name, poseFromTrajectoryFrameToWorldFrame, singletonList(yoPolynomial3D), singletonList(trajectoryTime), radius, resolution, radialResolution,
@@ -232,12 +228,12 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * Creates a new {@link YoGraphic} to display a 3D trajectory.
     * <p>
     * WARNING: The given {@link YoPolynomial3D}s are assumed to be expressed in world frame. If this
-    * is not the case, on of the constructors with {@link YoFramePoseUsingQuaternions} has to be
+    * is not the case, on of the constructors with {@link YoFramePose3D} has to be
     * used.
     * </p>
     * <p>
     * WARNING: The given {@link YoPolynomial3D}s are assumed to be expressed in world frame. If this
-    * is not the case, one of the constructors with {@link YoFramePoseUsingQuaternions} has to be
+    * is not the case, one of the constructors with {@link YoFramePose3D} has to be
     * used instead.
     * </p>
     * 
@@ -267,7 +263,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * Creates a new {@link YoGraphic} to display a 3D trajectory.
     * <p>
     * WARNING: The given {@link YoPolynomial3D}s are assumed to be expressed in world frame. If this
-    * is not the case, one of the constructors with {@link YoFramePoseUsingQuaternions} has to be
+    * is not the case, one of the constructors with {@link YoFramePose3D} has to be
     * used instead.
     * </p>
     * <p>
@@ -324,7 +320,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * @throws RuntimeException if the number of {@link YoPolynomial3D}s differs from the number of
     *            waypoint times.
     */
-   public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseFromTrajectoryFrameToWorldFrame, List<YoPolynomial3D> yoPolynomial3Ds,
+   public YoGraphicPolynomial3D(String name, YoFramePose3D poseFromTrajectoryFrameToWorldFrame, List<YoPolynomial3D> yoPolynomial3Ds,
                                 List<YoDouble> waypointTimes, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
    {
       this(name, poseFromTrajectoryFrameToWorldFrame, yoPolynomial3Ds.toArray(new YoPolynomial3D[0]), toArray(waypointTimes), radius, resolution,
@@ -357,7 +353,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * @throws RuntimeException if the number of {@link YoPolynomial3D}s differs from the number of
     *            waypoint times.
     */
-   public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseFromTrajectoryFrameToWorldFrame, YoPolynomial3D[] yoPolynomial3Ds,
+   public YoGraphicPolynomial3D(String name, YoFramePose3D poseFromTrajectoryFrameToWorldFrame, YoPolynomial3D[] yoPolynomial3Ds,
                                 YoDouble[] waypointTimes, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
    {
       super(name);
@@ -450,13 +446,13 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
          YoDouble xVariable = (YoDouble) yoVariables[index++];
          YoDouble yVariable = (YoDouble) yoVariables[index++];
          YoDouble zVariable = (YoDouble) yoVariables[index++];
-         YoFramePoint position = new YoFramePoint(xVariable, yVariable, zVariable, ReferenceFrame.getWorldFrame());
+         YoFramePoint3D position = new YoFramePoint3D(xVariable, yVariable, zVariable, ReferenceFrame.getWorldFrame());
          YoDouble qx = (YoDouble) yoVariables[index++];
          YoDouble qy = (YoDouble) yoVariables[index++];
          YoDouble qz = (YoDouble) yoVariables[index++];
          YoDouble qs = (YoDouble) yoVariables[index++];
          YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
-         poseToWorldFrame = new YoFramePoseUsingQuaternions(position, orientation);
+         poseToWorldFrame = new YoFramePose3D(position, orientation);
       }
       else
       {

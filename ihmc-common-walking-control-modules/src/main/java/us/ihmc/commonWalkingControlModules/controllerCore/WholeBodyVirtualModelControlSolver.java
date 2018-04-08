@@ -20,11 +20,11 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.util.List;
 import java.util.Map;
@@ -54,18 +54,18 @@ public class WholeBodyVirtualModelControlSolver
    private final Wrench tempExternalWrench = new Wrench();
    private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(0, 0);
 
-   private final YoFrameVector yoDesiredMomentumRateLinear;
-   private final YoFrameVector yoAchievedMomentumRateLinear;
-   private final YoFrameVector yoDesiredMomentumRateAngular;
-   private final YoFrameVector yoAchievedMomentumRateAngular;
+   private final YoFrameVector3D yoDesiredMomentumRateLinear;
+   private final YoFrameVector3D yoAchievedMomentumRateLinear;
+   private final YoFrameVector3D yoDesiredMomentumRateAngular;
+   private final YoFrameVector3D yoAchievedMomentumRateAngular;
    private final FrameVector3D achievedMomentumRateLinear = new FrameVector3D();
 
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector3D residualRootJointForce = new FrameVector3D();
    private final FrameVector3D residualRootJointTorque = new FrameVector3D();
 
-   private final YoFrameVector yoResidualRootJointForce;
-   private final YoFrameVector yoResidualRootJointTorque;
+   private final YoFrameVector3D yoResidualRootJointForce;
+   private final YoFrameVector3D yoResidualRootJointTorque;
 
    private final JointIndexHandler jointIndexHandler;
    private final WholeBodyControllerBoundCalculator boundCalculator;

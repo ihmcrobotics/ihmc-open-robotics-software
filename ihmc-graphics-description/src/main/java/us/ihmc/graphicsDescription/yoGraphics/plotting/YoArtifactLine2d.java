@@ -7,20 +7,20 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
-import us.ihmc.robotics.math.frames.YoFrameLine2d;
+import us.ihmc.yoVariables.variable.YoFrameLine2D;
 
 public class YoArtifactLine2d extends YoArtifact
 {
    private static final BasicStroke STROKE = new BasicStroke(2);
    
-   private final YoFrameLine2d yoFrameLine2d;
+   private final YoFrameLine2D yoFrameLine2d;
    
    private final Line2D tempLine = new Line2D();
    
-   public YoArtifactLine2d(String name, YoFrameLine2d yoFrameLine2d, Color color)
+   public YoArtifactLine2d(String name, YoFrameLine2D yoFrameLine2d, Color color)
    {
       super(name, new double[0], color,
-            yoFrameLine2d.getYoPointX(), yoFrameLine2d.getYoPointY(), yoFrameLine2d.getYoVectorX(), yoFrameLine2d.getYoVectorY());
+            yoFrameLine2d.getYoPointX(), yoFrameLine2d.getYoPointY(), yoFrameLine2d.getYoDirectionX(), yoFrameLine2d.getYoDirectionY());
       this.yoFrameLine2d = yoFrameLine2d;
    }
 

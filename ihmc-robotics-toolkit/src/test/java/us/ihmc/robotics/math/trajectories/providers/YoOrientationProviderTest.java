@@ -10,7 +10,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 
 public class YoOrientationProviderTest
@@ -20,7 +20,7 @@ public class YoOrientationProviderTest
    private String namePrefix = "namePrefix";
    private ReferenceFrame referenceFrame;
    private YoVariableRegistry registry; 
-   private YoFrameOrientation yoFrameOrientation;
+   private YoFrameYawPitchRoll yoFrameOrientation;
    public FrameQuaternion frameOrientationToPack;
    
    @Before
@@ -28,7 +28,7 @@ public class YoOrientationProviderTest
    {
       referenceFrame =ReferenceFrame.constructARootFrame("rootFrame");
       registry = new YoVariableRegistry("yoVariableRegistry");
-      yoFrameOrientation = new YoFrameOrientation(namePrefix, referenceFrame, registry);
+      yoFrameOrientation = new YoFrameYawPitchRoll(namePrefix, referenceFrame, registry);
       frameOrientationToPack = new FrameQuaternion();
    }
 

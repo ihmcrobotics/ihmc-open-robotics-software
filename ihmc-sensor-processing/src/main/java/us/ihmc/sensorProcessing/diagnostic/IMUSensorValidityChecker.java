@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
 public class IMUSensorValidityChecker implements DiagnosticUpdatable
@@ -12,7 +12,7 @@ public class IMUSensorValidityChecker implements DiagnosticUpdatable
    private final YoFrameTupleValidityChecker angularVelocityChecker;
    private final YoFrameTupleValidityChecker linearAccelerationChecker;
 
-   public IMUSensorValidityChecker(IMUDefinition imuDefinition, YoFrameQuaternion orientation, YoFrameVector angularVelocity, YoFrameVector linearAcceleration, YoVariableRegistry parentRegistry)
+   public IMUSensorValidityChecker(IMUDefinition imuDefinition, YoFrameQuaternion orientation, YoFrameVector3D angularVelocity, YoFrameVector3D linearAcceleration, YoVariableRegistry parentRegistry)
    {
       String imuName = imuDefinition.getName();
       registry = new YoVariableRegistry(imuName + "IMUSensorValidityChecker");
@@ -72,7 +72,7 @@ public class IMUSensorValidityChecker implements DiagnosticUpdatable
       return orientationChecker.variableCannotBeTrusted() || angularVelocityChecker.variableCannotBeTrusted() || linearAccelerationChecker.variableCannotBeTrusted();
    }
 
-   public void verifyYovariableNames(String imuName, YoFrameQuaternion orientation, YoFrameVector angularVelocity, YoFrameVector linearAcceleration)
+   public void verifyYovariableNames(String imuName, YoFrameQuaternion orientation, YoFrameVector3D angularVelocity, YoFrameVector3D linearAcceleration)
    {
       if (!orientation.getYoQx().getName().contains(imuName))
          throw new RuntimeException("The orientation variable: " + orientation.getYoQx().getName() + " may not belong to the IMU: " + imuName);

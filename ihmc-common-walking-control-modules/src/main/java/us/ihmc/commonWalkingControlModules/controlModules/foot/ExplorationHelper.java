@@ -13,10 +13,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -46,7 +46,7 @@ public class ExplorationHelper
    private final YoInteger yoCurrentCorner;
 
    private final FramePoint2D desiredCopInWorld = new FramePoint2D();
-   private final YoFramePoint2d yoDesiredCop;
+   private final YoFramePoint2D yoDesiredCop;
 
    public ExplorationHelper(ContactableFoot contactableFoot, FootControlHelper footControlHelper, String prefix, YoVariableRegistry registry)
    {
@@ -67,7 +67,7 @@ public class ExplorationHelper
       YoGraphicsListRegistry graphicObjectsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
       if (graphicObjectsListRegistry != null)
       {
-         yoDesiredCop = new YoFramePoint2d(prefix + "DesiredExplorationCop", ReferenceFrame.getWorldFrame(), registry);
+         yoDesiredCop = new YoFramePoint2D(prefix + "DesiredExplorationCop", ReferenceFrame.getWorldFrame(), registry);
          String name = prefix + "Desired Center of Pressure for Exploration";
          YoArtifactPosition artifact = new YoArtifactPosition(name, yoDesiredCop.getYoX(), yoDesiredCop.getYoY(), GraphicType.BALL, Color.BLUE, 0.003);
          graphicObjectsListRegistry.registerArtifact(prefix + getClass().getSimpleName(), artifact);

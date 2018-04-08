@@ -5,13 +5,13 @@ import us.ihmc.robotics.partNames.LegJointName;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.*;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
 import us.ihmc.robotics.screwTheory.NumericalMovingReferenceFrame;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.EnumMap;
 
@@ -57,7 +57,7 @@ public class MockQuadrupedReferenceFrames extends AbstractQuadrupedReferenceFram
       initializeCommonValues();
    }
 
-   public void update(QuadrantDependentList<YoFramePoint> yoFootPositions)
+   public void update(QuadrantDependentList<YoFramePoint3D> yoFootPositions)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {

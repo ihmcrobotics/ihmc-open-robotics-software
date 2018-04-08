@@ -6,8 +6,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -17,6 +15,8 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class ForceSensorDistalMassCompensator
 {
@@ -26,25 +26,25 @@ public class ForceSensorDistalMassCompensator
    private final ReferenceFrame sensorFrame;
 
    private final FramePose3D sensorPose;
-   private final YoFramePoint yoSensorPositionInWorld;
+   private final YoFramePoint3D yoSensorPositionInWorld;
 
    private final CenterOfMassCalculator distalMassCalc;
    private final YoDouble distalMass;
    private final AlphaFilteredYoVariable lowPassSensorForceZ;
-   private final YoFrameVector distalMassForceInWorld;
-   private final YoFramePoint distalCoMInWorld;
+   private final YoFrameVector3D distalMassForceInWorld;
+   private final YoFramePoint3D distalCoMInWorld;
 
-   private final YoFrameVector yoSensorToDistalCoMvectorInWorld;
+   private final YoFrameVector3D yoSensorToDistalCoMvectorInWorld;
    private final Wrench distalMassWrench;
 
-   private final YoFrameVector yoSensorForce;
-   private final YoFrameVector yoSensorTorque;
+   private final YoFrameVector3D yoSensorForce;
+   private final YoFrameVector3D yoSensorTorque;
 
-   private final YoFrameVector yoSensorForceFromDistalMass;
-   private final YoFrameVector yoSensorTorqueFromDistalMass;
+   private final YoFrameVector3D yoSensorForceFromDistalMass;
+   private final YoFrameVector3D yoSensorTorqueFromDistalMass;
 
-   private final YoFrameVector yoSensorForceMassCompensated;
-   private final YoFrameVector yoSensorTorqueMassCompensated;
+   private final YoFrameVector3D yoSensorForceMassCompensated;
+   private final YoFrameVector3D yoSensorTorqueMassCompensated;
    
    private final YoBoolean addSimulatedSensorNoise;
 
@@ -56,26 +56,26 @@ public class ForceSensorDistalMassCompensator
       sensorFrame = forceSensorDefinition.getSensorFrame();
 
       sensorPose = new FramePose3D(world);
-      yoSensorPositionInWorld = new YoFramePoint(sensorName + "Position", world, registry);
+      yoSensorPositionInWorld = new YoFramePoint3D(sensorName + "Position", world, registry);
 
       distalMassCalc = new CenterOfMassCalculator(ScrewTools.computeRigidBodiesAfterThisJoint(parentJointOfSensorBody), world);
       distalMass = new YoDouble(sensorName + "DistalMass", registry);
       lowPassSensorForceZ = new AlphaFilteredYoVariable(sensorName + "LowPassFz", registry, AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.0001, dtForLowpassFilter));
-      distalMassForceInWorld = new YoFrameVector(sensorName + "DistalWeight", world, registry);
-      distalCoMInWorld = new YoFramePoint(sensorName + "DistalCoM", world, registry);
+      distalMassForceInWorld = new YoFrameVector3D(sensorName + "DistalWeight", world, registry);
+      distalCoMInWorld = new YoFramePoint3D(sensorName + "DistalCoM", world, registry);
 
-      yoSensorToDistalCoMvectorInWorld = new YoFrameVector(sensorName + "ToDistalCoM", world, registry);
+      yoSensorToDistalCoMvectorInWorld = new YoFrameVector3D(sensorName + "ToDistalCoM", world, registry);
       distalMassWrench = new Wrench(sensorFrame, world);
 
       // Put sensor values in world frame since it's easy to interpret from looking at GUI
-      yoSensorForce = new YoFrameVector(sensorName + "Force", world, registry);
-      yoSensorTorque = new YoFrameVector(sensorName + "Torque", world, registry);
+      yoSensorForce = new YoFrameVector3D(sensorName + "Force", world, registry);
+      yoSensorTorque = new YoFrameVector3D(sensorName + "Torque", world, registry);
 
-      yoSensorForceFromDistalMass = new YoFrameVector(sensorName + "ForceDueToDistalMass", world, registry);
-      yoSensorTorqueFromDistalMass = new YoFrameVector(sensorName + "TorqueDueToDistalMass", world, registry);
+      yoSensorForceFromDistalMass = new YoFrameVector3D(sensorName + "ForceDueToDistalMass", world, registry);
+      yoSensorTorqueFromDistalMass = new YoFrameVector3D(sensorName + "TorqueDueToDistalMass", world, registry);
 
-      yoSensorForceMassCompensated = new YoFrameVector(sensorName + "ForceMassCompensated", world, registry);
-      yoSensorTorqueMassCompensated = new YoFrameVector(sensorName + "TorqueMassCompensated", world, registry);
+      yoSensorForceMassCompensated = new YoFrameVector3D(sensorName + "ForceMassCompensated", world, registry);
+      yoSensorTorqueMassCompensated = new YoFrameVector3D(sensorName + "TorqueMassCompensated", world, registry);
       
       addSimulatedSensorNoise = new YoBoolean(sensorName + "AddSimulatedNoise", registry);
       addSimulatedSensorNoise.set(false);

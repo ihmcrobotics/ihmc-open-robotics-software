@@ -23,16 +23,16 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFoots
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class WalkToLocationBehavior extends AbstractBehavior
 {
@@ -53,15 +53,15 @@ public class WalkToLocationBehavior extends AbstractBehavior
    private final Point3D robotLocation = new Point3D();
    private final Quaternion robotOrientation = new Quaternion();
 
-   private final YoFramePose robotYoPose = new YoFramePose("robotYoPose", worldFrame, registry);
+   private final YoFramePoseUsingYawPitchRoll robotYoPose = new YoFramePoseUsingYawPitchRoll("robotYoPose", worldFrame, registry);
 
    private final YoBoolean hasTargetBeenProvided = new YoBoolean("hasTargetBeenProvided", registry);
    private final YoBoolean hasInputBeenSet = new YoBoolean("hasInputBeenSet", registry);
    private final YoBoolean haveFootstepsBeenGenerated = new YoBoolean("haveFootstepsBeenGenerated", registry);
 
-   private final YoFramePoint targetLocation = new YoFramePoint(getName() + "TargetLocation", worldFrame, registry);
-   private final YoFrameOrientation targetOrientation = new YoFrameOrientation(getName() + "TargetOrientation", worldFrame, registry);
-   private final YoFrameVector walkPathVector = new YoFrameVector(getName(), worldFrame, registry);
+   private final YoFramePoint3D targetLocation = new YoFramePoint3D(getName() + "TargetLocation", worldFrame, registry);
+   private final YoFrameYawPitchRoll targetOrientation = new YoFrameYawPitchRoll(getName() + "TargetOrientation", worldFrame, registry);
+   private final YoFrameVector3D walkPathVector = new YoFrameVector3D(getName(), worldFrame, registry);
    private final YoDouble walkDistance = new YoDouble(getName() + "WalkDistance", registry);
 
    private SimplePathParameters pathType;// = new SimplePathParameters(0.4, 0.30, 0.0, Math.toRadians(10.0), Math.toRadians(5.0), 0.4);

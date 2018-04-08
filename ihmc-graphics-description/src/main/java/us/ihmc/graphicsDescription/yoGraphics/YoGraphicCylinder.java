@@ -10,9 +10,9 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
 {
@@ -20,12 +20,12 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
    private double lineThickness;
    private final AppearanceDefinition appearance;
 
-   public YoGraphicCylinder(String name, YoFramePoint startPoint, YoFrameVector frameVector, AppearanceDefinition appearance)
+   public YoGraphicCylinder(String name, YoFramePoint3D startPoint, YoFrameVector3D frameVector, AppearanceDefinition appearance)
    {
       this(name, startPoint, frameVector, appearance, -1.0);
    }
 
-   public YoGraphicCylinder(String name, YoFramePoint startPoint, YoFrameVector frameVector, AppearanceDefinition appearance, double lineThickness)
+   public YoGraphicCylinder(String name, YoFramePoint3D startPoint, YoFrameVector3D frameVector, AppearanceDefinition appearance, double lineThickness)
    {
       this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), frameVector.getYoX(), frameVector.getYoY(), frameVector.getYoZ(), appearance,
             lineThickness);

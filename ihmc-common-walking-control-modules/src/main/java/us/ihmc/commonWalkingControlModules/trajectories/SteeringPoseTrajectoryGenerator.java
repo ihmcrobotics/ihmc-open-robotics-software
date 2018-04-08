@@ -22,11 +22,11 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -55,24 +55,24 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final YoDouble currentAngleTrackingError;
    private final YoDouble currentAdjustedRelativeAngle;
 
-   private final YoFramePoint yoInitialPosition;
-   private final YoFramePoint yoFinalPosition;
+   private final YoFramePoint3D yoInitialPosition;
+   private final YoFramePoint3D yoFinalPosition;
 
-   private final YoFramePoint yoCurrentPosition;
-   private final YoFrameVector yoCurrentVelocity;
-   private final YoFrameVector yoCurrentAcceleration;
+   private final YoFramePoint3D yoCurrentPosition;
+   private final YoFrameVector3D yoCurrentVelocity;
+   private final YoFrameVector3D yoCurrentAcceleration;
 
    private final YoFrameQuaternion yoInitialOrientation;
    private final YoFrameQuaternion yoFinalOrientation;
 
    private final YoFrameQuaternion yoCurrentOrientation;
-   private final YoFrameVector yoCurrentAngularVelocity;
-   private final YoFrameVector yoCurrentAngularAcceleration;
+   private final YoFrameVector3D yoCurrentAngularVelocity;
+   private final YoFrameVector3D yoCurrentAngularAcceleration;
 
-   private final YoFramePoint yoInitialPositionWorld;
-   private final YoFramePoint yoFinalPositionWorld;
-   private final YoFramePoint yoCurrentPositionWorld;
-   private final YoFramePoint yoCurrentAdjustedPositionWorld;
+   private final YoFramePoint3D yoInitialPositionWorld;
+   private final YoFramePoint3D yoFinalPositionWorld;
+   private final YoFramePoint3D yoCurrentPositionWorld;
+   private final YoFramePoint3D yoCurrentAdjustedPositionWorld;
 
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FramePoint3D currentPosition = new FramePoint3D();
@@ -93,17 +93,17 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    private final FramePoint3D ballPosition = new FramePoint3D();
    private final int numberOfBalls = 50;
 
-   private final YoFramePoint steeringWheelCenter;
-   private final YoFrameVector steeringWheelRotationAxis;
-   private final YoFrameVector steeringWheelZeroAxis;
+   private final YoFramePoint3D steeringWheelCenter;
+   private final YoFrameVector3D steeringWheelRotationAxis;
+   private final YoFrameVector3D steeringWheelZeroAxis;
    private final ReferenceFrame steeringWheelFrame;
    private final FramePose3D steeringWheelFramePose = new FramePose3D();
-   private final YoFramePose yoSteeringWheelFramePose;
+   private final YoFramePoseUsingYawPitchRoll yoSteeringWheelFramePose;
    private final ReferenceFrame trajectoryFrame;
    private ReferenceFrame controlledFrame;
    private final PoseReferenceFrame tangentialSteeringFrame;
    private final FramePose3D tangentialSteeringFramePose = new FramePose3D();
-   private final YoFramePose yoTangentialSteeringFramePose;
+   private final YoFramePoseUsingYawPitchRoll yoTangentialSteeringFramePose;
 
    /** Use a YoBoolean to hide and show visualization with a VariableChangedListener, so it is still working in playback mode. */
    private final YoBoolean showViz;
@@ -135,29 +135,29 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       currentRelativeSteeringAngle = new YoDouble(namePrefix + "CurrentRelativeSteeringAngle", registry);
       finalSteeringAngle = new YoDouble(namePrefix + "FinalSteeringAngle", registry);
 
-      yoInitialPosition = new YoFramePoint(namePrefix + "InitialSteeringPosition", trajectoryFrame, registry);
-      yoFinalPosition = new YoFramePoint(namePrefix + "FinalSteeringPosition", trajectoryFrame, registry);
+      yoInitialPosition = new YoFramePoint3D(namePrefix + "InitialSteeringPosition", trajectoryFrame, registry);
+      yoFinalPosition = new YoFramePoint3D(namePrefix + "FinalSteeringPosition", trajectoryFrame, registry);
 
-      yoCurrentPosition = new YoFramePoint(namePrefix + "CurrentSteeringPosition", trajectoryFrame, registry);
-      yoCurrentVelocity = new YoFrameVector(namePrefix + "CurrentSteeringVelocity", trajectoryFrame, registry);
-      yoCurrentAcceleration = new YoFrameVector(namePrefix + "CurrentSteeringAcceleration", trajectoryFrame, registry);
+      yoCurrentPosition = new YoFramePoint3D(namePrefix + "CurrentSteeringPosition", trajectoryFrame, registry);
+      yoCurrentVelocity = new YoFrameVector3D(namePrefix + "CurrentSteeringVelocity", trajectoryFrame, registry);
+      yoCurrentAcceleration = new YoFrameVector3D(namePrefix + "CurrentSteeringAcceleration", trajectoryFrame, registry);
 
       yoInitialOrientation = new YoFrameQuaternion(namePrefix + "InitialSteeringOrientation", trajectoryFrame, registry);
       yoFinalOrientation = new YoFrameQuaternion(namePrefix + "FinalSteeringOrientation", trajectoryFrame, registry);
 
       yoCurrentOrientation = new YoFrameQuaternion(namePrefix + "CurrentSteeringOrientation", trajectoryFrame, registry);
-      yoCurrentAngularVelocity = new YoFrameVector(namePrefix + "CurrentSteeringAngularVelocity", trajectoryFrame, registry);
-      yoCurrentAngularAcceleration = new YoFrameVector(namePrefix + "CurrentSteeringAngularAcceleration", trajectoryFrame, registry);
+      yoCurrentAngularVelocity = new YoFrameVector3D(namePrefix + "CurrentSteeringAngularVelocity", trajectoryFrame, registry);
+      yoCurrentAngularAcceleration = new YoFrameVector3D(namePrefix + "CurrentSteeringAngularAcceleration", trajectoryFrame, registry);
 
-      yoInitialPositionWorld = new YoFramePoint(namePrefix + "InitialSteeringPositionWorld", worldFrame, registry);
-      yoFinalPositionWorld = new YoFramePoint(namePrefix + "FinalSteeringPositionWorld", worldFrame, registry);
-      yoCurrentPositionWorld = new YoFramePoint(namePrefix + "CurrentSteeringPositionWorld", worldFrame, registry);
-      yoCurrentAdjustedPositionWorld = new YoFramePoint(namePrefix + "CurrentAdjustedSteeringPositionWorld", worldFrame, registry);
+      yoInitialPositionWorld = new YoFramePoint3D(namePrefix + "InitialSteeringPositionWorld", worldFrame, registry);
+      yoFinalPositionWorld = new YoFramePoint3D(namePrefix + "FinalSteeringPositionWorld", worldFrame, registry);
+      yoCurrentPositionWorld = new YoFramePoint3D(namePrefix + "CurrentSteeringPositionWorld", worldFrame, registry);
+      yoCurrentAdjustedPositionWorld = new YoFramePoint3D(namePrefix + "CurrentAdjustedSteeringPositionWorld", worldFrame, registry);
 
-      steeringWheelCenter = new YoFramePoint(namePrefix + "SteeringWheelCenter", trajectoryFrame, registry);
-      steeringWheelRotationAxis = new YoFrameVector(namePrefix + "SteeringWheelRotationAxis", trajectoryFrame, registry);
+      steeringWheelCenter = new YoFramePoint3D(namePrefix + "SteeringWheelCenter", trajectoryFrame, registry);
+      steeringWheelRotationAxis = new YoFrameVector3D(namePrefix + "SteeringWheelRotationAxis", trajectoryFrame, registry);
       steeringWheelRotationAxis.set(0.0, 0.0, 1.0);
-      steeringWheelZeroAxis = new YoFrameVector(namePrefix + "SteeringWheelZeroAxis", trajectoryFrame, registry);
+      steeringWheelZeroAxis = new YoFrameVector3D(namePrefix + "SteeringWheelZeroAxis", trajectoryFrame, registry);
       steeringWheelZeroAxis.set(1.0, 0.0, 0.0);
 
       steeringWheelFrame = new ReferenceFrame("SteeringWheelFrame", trajectoryFrame)
@@ -186,10 +186,10 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
          }
       };
 
-      yoSteeringWheelFramePose = new YoFramePose(namePrefix + "SteeringWheelFrame", worldFrame, registry);
+      yoSteeringWheelFramePose = new YoFramePoseUsingYawPitchRoll(namePrefix + "SteeringWheelFrame", worldFrame, registry);
 
       tangentialSteeringFrame = new PoseReferenceFrame("TangentialSteeringFrame", steeringWheelFrame);
-      yoTangentialSteeringFramePose = new YoFramePose(namePrefix + "TangentialSteeringFramePose", worldFrame, registry);
+      yoTangentialSteeringFramePose = new YoFramePoseUsingYawPitchRoll(namePrefix + "TangentialSteeringFramePose", worldFrame, registry);
 
       if (this.visualize && yoGraphicsListRegistry != null)
       {
@@ -434,7 +434,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double yaw = trimAngleMinusPiToPi(Math.PI / 2.0 + Math.atan2(y, x));
       tangentialSteeringFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
       tangentialSteeringFrame.setPoseAndUpdate(tangentialSteeringFramePose);
-      yoTangentialSteeringFramePose.setAndMatchFrame(tangentialSteeringFramePose);
+      yoTangentialSteeringFramePose.setMatchingFrame(tangentialSteeringFramePose);
    }
 
    private final FramePoint3D currentControlledFramePosition = new FramePoint3D();

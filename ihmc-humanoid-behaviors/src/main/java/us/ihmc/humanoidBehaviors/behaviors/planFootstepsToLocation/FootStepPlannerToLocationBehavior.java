@@ -31,11 +31,11 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class FootStepPlannerToLocationBehavior extends AbstractBehavior
@@ -57,8 +57,8 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
    private final SideDependentList<FootstepStatusMessage> latestFootstepStatus;
    private final SideDependentList<YoEnum<FootstepStatus>> latestFootstepStatusEnum;
-   private final SideDependentList<YoFramePose> actualFootStatusPoses;
-   private final SideDependentList<YoFramePose> desiredFootStatusPoses;
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> actualFootStatusPoses;
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> desiredFootStatusPoses;
 
    private final YoEnum<RobotSide> nextSideToSwing;
    private final YoEnum<RobotSide> currentlySwingingFoot;
@@ -66,7 +66,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    private final YoInteger planarRegionsListCount = new YoInteger(prefix + "PlanarRegionsListCount", registry);
    private final YoDouble headPitchToFindFucdicial = new YoDouble(prefix + "HeadPitchToFindFucdicial", registry);
 
-   private final YoFramePose footstepPlannerInitialStancePose;
+   private final YoFramePoseUsingYawPitchRoll footstepPlannerInitialStancePose;
 
    private final Stopwatch footstepSentTimer;
 
@@ -101,7 +101,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
       nextSideToSwing = new YoEnum<RobotSide>(prefix + "nextSideToSwing", registry, RobotSide.class, true);
       currentlySwingingFoot = new YoEnum<RobotSide>(prefix + "currentlySwingingFoot", registry, RobotSide.class, true);
-      footstepPlannerInitialStancePose = new YoFramePose(prefix + "footstepPlannerInitialStancePose", ReferenceFrame.getWorldFrame(), registry);
+      footstepPlannerInitialStancePose = new YoFramePoseUsingYawPitchRoll(prefix + "footstepPlannerInitialStancePose", ReferenceFrame.getWorldFrame(), registry);
 
       footstepSentTimer = new Stopwatch();
       footstepSentTimer.start();
@@ -111,12 +111,12 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       YoEnum<FootstepStatus> rightFootstepStatus = new YoEnum<FootstepStatus>(prefix + "rightFootstepStatus", registry, FootstepStatus.class);
       latestFootstepStatusEnum = new SideDependentList<>(leftFootstepStatus, rightFootstepStatus);
 
-      YoFramePose desiredLeftFootstepStatusPose = new YoFramePose(prefix + "DesiredLeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePose desiredRightFootstepStatusPose = new YoFramePose(prefix + "DesiredRightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll desiredLeftFootstepStatusPose = new YoFramePoseUsingYawPitchRoll(prefix + "DesiredLeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll desiredRightFootstepStatusPose = new YoFramePoseUsingYawPitchRoll(prefix + "DesiredRightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       desiredFootStatusPoses = new SideDependentList<>(desiredLeftFootstepStatusPose, desiredRightFootstepStatusPose);
 
-      YoFramePose leftFootstepStatusPose = new YoFramePose(prefix + "LeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
-      YoFramePose rightFootstepStatusPose = new YoFramePose(prefix + "RightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll leftFootstepStatusPose = new YoFramePoseUsingYawPitchRoll(prefix + "LeftFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
+      YoFramePoseUsingYawPitchRoll rightFootstepStatusPose = new YoFramePoseUsingYawPitchRoll(prefix + "RightFootstepStatusPose", ReferenceFrame.getWorldFrame(), registry);
       actualFootStatusPoses = new SideDependentList<>(leftFootstepStatusPose, rightFootstepStatusPose);
 
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatusMessage>(40);

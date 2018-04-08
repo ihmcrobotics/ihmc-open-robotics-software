@@ -18,12 +18,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PartialFootholdControlModule
@@ -59,15 +59,15 @@ public class PartialFootholdControlModule
    private final FrameConvexPolygon2D defaultFootPolygon;
    private final FrameConvexPolygon2D shrunkFootPolygon;
    private final FrameConvexPolygon2D shrunkFootPolygonInWorld;
-   private final YoFrameConvexPolygon2d yoShrunkFootPolygon;
+   private final YoFrameConvexPolygon2D yoShrunkFootPolygon;
    private final FrameConvexPolygon2D controllerFootPolygon;
    private final FrameConvexPolygon2D controllerFootPolygonInWorld;
    private final FrameConvexPolygon2D backupFootPolygon;
    private final FrameConvexPolygon2D unsafePolygon;
-   private final YoFrameConvexPolygon2d yoUnsafePolygon;
+   private final YoFrameConvexPolygon2D yoUnsafePolygon;
 
    private final FrameConvexPolygon2D fullSupportAfterShrinking = new FrameConvexPolygon2D();
-   private final YoFrameConvexPolygon2d yoFullSupportAfterShrinking;
+   private final YoFrameConvexPolygon2D yoFullSupportAfterShrinking;
 
    private final YoInteger shrinkMaxLimit;
    private final YoInteger shrinkCounter;
@@ -127,9 +127,9 @@ public class PartialFootholdControlModule
       parentRegistry.addChild(registry);
 
       footholdState = new YoEnum<>(namePrefix + "PartialFootHoldState", registry, PartialFootholdState.class, true);
-      yoUnsafePolygon = new YoFrameConvexPolygon2d(namePrefix + "UnsafeFootPolygon", "", worldFrame, 10, registry);
-      yoShrunkFootPolygon = new YoFrameConvexPolygon2d(namePrefix + "ShrunkFootPolygon", "", worldFrame, 20, registry);
-      yoFullSupportAfterShrinking = new YoFrameConvexPolygon2d(namePrefix + "FullSupportAfterShrinking", "", worldFrame, 20, registry);
+      yoUnsafePolygon = new YoFrameConvexPolygon2D(namePrefix + "UnsafeFootPolygon", "", worldFrame, 10, registry);
+      yoShrunkFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "ShrunkFootPolygon", "", worldFrame, 20, registry);
+      yoFullSupportAfterShrinking = new YoFrameConvexPolygon2D(namePrefix + "FullSupportAfterShrinking", "", worldFrame, 20, registry);
 
       shrinkCounter = new YoInteger(namePrefix + "ShrinkCounter", registry);
 

@@ -16,12 +16,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionInterface
@@ -84,10 +84,10 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final YoInteger pelvisBufferSize;
    
    private final FramePose3D stateEstimatorInWorldFramePose = new FramePose3D(worldFrame);
-   private final YoFramePose yoStateEstimatorInWorldFramePose;
-   private final YoFramePose yoCorrectedPelvisPoseInWorldFrame;
+   private final YoFramePoseUsingYawPitchRoll yoStateEstimatorInWorldFramePose;
+   private final YoFramePoseUsingYawPitchRoll yoCorrectedPelvisPoseInWorldFrame;
    private final FramePose3D iterativeClosestPointInWorldFramePose = new FramePose3D(worldFrame);
-   private final YoFramePose yoIterativeClosestPointPoseInWorldFrame;
+   private final YoFramePoseUsingYawPitchRoll yoIterativeClosestPointPoseInWorldFrame;
    
    private final ReferenceFrame iterativeClosestPointReferenceFrame;
    private final FramePose3D correctedPelvisPoseInWorldFrame = new FramePose3D(worldFrame);
@@ -156,9 +156,9 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       iterativeClosestPointReferenceFrame = outdatedPoseUpdater.getLocalizationReferenceFrameToBeUpdated();
       
       //used only for feedback in SCS
-      yoStateEstimatorInWorldFramePose = new YoFramePose("stateEstimatorInWorldFramePose", worldFrame, registry);
-      yoCorrectedPelvisPoseInWorldFrame = new YoFramePose("correctedPelvisPoseInWorldFrame", worldFrame, registry);
-      yoIterativeClosestPointPoseInWorldFrame = new YoFramePose("iterativeClosestPointPoseInWorldFrame", worldFrame, registry);
+      yoStateEstimatorInWorldFramePose = new YoFramePoseUsingYawPitchRoll("stateEstimatorInWorldFramePose", worldFrame, registry);
+      yoCorrectedPelvisPoseInWorldFrame = new YoFramePoseUsingYawPitchRoll("correctedPelvisPoseInWorldFrame", worldFrame, registry);
+      yoIterativeClosestPointPoseInWorldFrame = new YoFramePoseUsingYawPitchRoll("iterativeClosestPointPoseInWorldFrame", worldFrame, registry);
       
       totalErrorTranslation_X = new YoDouble("totalErrorTranslation_X", registry);
       totalErrorTranslation_Y = new YoDouble("totalErrorTranslation_Y", registry);
