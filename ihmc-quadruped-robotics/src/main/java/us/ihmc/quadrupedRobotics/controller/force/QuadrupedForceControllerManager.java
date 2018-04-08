@@ -266,11 +266,11 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
    {
       // Initialize controllers.
       final QuadrupedController jointInitializationController = new QuadrupedForceBasedJointInitializationController(runtimeEnvironment);
-      final QuadrupedController doNothingController = new QuadrupedForceBasedDoNothingController(controlManagerFactory.getOrCreateFeetManager(),
+      final QuadrupedController doNothingController = new QuadrupedDoNothingController(controlManagerFactory.getOrCreateFeetManager(),
                                                                                                  runtimeEnvironment, registry);
       //      final QuadrupedController standPrepController = new QuadrupedForceBasedStandPrepController(controllerToolbox, controlManagerFactory, registry);
-      final QuadrupedController standPrepController = new QuadrupedPositionStandPrepController(runtimeEnvironment, initialPositionParameters, registry);
-      final QuadrupedController freezeController = new QuadrupedForceBasedFreezeController(controllerToolbox, controlManagerFactory, registry);
+      final QuadrupedController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment, initialPositionParameters, registry);
+      final QuadrupedController freezeController = new QuadrupedFreezeController(controllerToolbox, controlManagerFactory, registry);
       final QuadrupedSteppingState steppingController = new QuadrupedSteppingState(runtimeEnvironment, controllerToolbox, commandInputManager,
                                                                                    statusMessageOutputManager, controlManagerFactory, registry);
       final QuadrupedController fallController = new QuadrupedForceBasedFallController(controllerToolbox, controlManagerFactory, registry);

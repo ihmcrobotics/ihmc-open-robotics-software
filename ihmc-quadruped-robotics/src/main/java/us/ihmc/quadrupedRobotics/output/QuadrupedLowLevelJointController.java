@@ -98,16 +98,13 @@ public class QuadrupedLowLevelJointController
       if (jointSetpoints.hasDesiredTorque())
          desiredEffort += jointSetpoints.getDesiredTorque();
 
-      if (jointSetpoints.hasDesiredVelocity())
-      {
-         double desiredVelocity = jointSetpoints.getDesiredVelocity();
-         if (jointSetpoints.hasVelocityScaling())
-            desiredVelocity *= jointSetpoints.getVelocityScaling();
+      double desiredVelocity = jointSetpoints.hasDesiredVelocity() ? jointSetpoints.getDesiredVelocity() : 0.0;
+      if (jointSetpoints.hasVelocityScaling())
+         desiredVelocity *= jointSetpoints.getVelocityScaling();
 
-         double jointDampingFeedback = jointDamping * (desiredVelocity - jointEstimates.getQd());
-         this.jointDampingFeedback.set(jointDampingFeedback);
-         desiredEffort += jointDampingFeedback;
-      }
+      double jointDampingFeedback = jointDamping * (desiredVelocity - jointEstimates.getQd());
+      this.jointDampingFeedback.set(jointDampingFeedback);
+      desiredEffort += jointDampingFeedback;
 
       if (jointSetpoints.hasDesiredPosition())
       {
