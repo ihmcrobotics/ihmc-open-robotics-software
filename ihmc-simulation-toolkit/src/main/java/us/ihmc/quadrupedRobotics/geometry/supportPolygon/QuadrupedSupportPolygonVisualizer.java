@@ -16,8 +16,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -27,6 +25,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class QuadrupedSupportPolygonVisualizer implements RobotController
 {
@@ -42,14 +42,14 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    private final Robot robot;
    private final FloatingJoint rootJoint;
 
-   private final QuadrantDependentList<YoFramePoint> vertices = new QuadrantDependentList<YoFramePoint>();
+   private final QuadrantDependentList<YoFramePoint3D> vertices = new QuadrantDependentList<YoFramePoint3D>();
    private QuadrupedSupportPolygon supportPolygon = new QuadrupedSupportPolygon();
-   private final YoFrameConvexPolygon2d currentSupportPolygon = new YoFrameConvexPolygon2d("supportPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
+   private final YoFrameConvexPolygon2D currentSupportPolygon = new YoFrameConvexPolygon2D("supportPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoArtifactPolygon currentQuadSupportPolygonArtifact = new YoArtifactPolygon("supportPolygonArtifact", currentSupportPolygon, Color.blue, false);
    
-   private final YoFramePoint centerOfMass = new YoFramePoint("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint desiredCenterOfPressure = new YoFramePoint("desiredCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint snappedDesiredCenterOfPressure = new YoFramePoint("snappedDesiredCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D centerOfMass = new YoFramePoint3D("centerOfMass", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D desiredCenterOfPressure = new YoFramePoint3D("desiredCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D snappedDesiredCenterOfPressure = new YoFramePoint3D("snappedDesiredCenterOfPressure", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition centerOfMassViz = new YoGraphicPosition("centerOfMassViz", centerOfMass, 0.01, YoAppearance.Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
    private final YoGraphicPosition desiredCenterOfPressureViz = new YoGraphicPosition("desiredCenterOfPressureViz", desiredCenterOfPressure, 0.01, YoAppearance.DarkSlateBlue(), GraphicType.BALL_WITH_ROTATED_CROSS);
    private final YoGraphicPosition snappedDesiredCenterOfPressureViz = new YoGraphicPosition("snappedDesiredCenterOfPressureViz", snappedDesiredCenterOfPressure, 0.01, YoAppearance.Orange(), GraphicType.BALL_WITH_ROTATED_CROSS);
@@ -57,20 +57,20 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    private final QuadrupedSupportPolygon tempCommonSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon tempPolygon = new QuadrupedSupportPolygon();
 
-   private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint weightedCentroid = new YoFramePoint("weightedCentroid", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D centroid = new YoFramePoint3D("centroid", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D weightedCentroid = new YoFramePoint3D("weightedCentroid", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint3D centroidFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final FramePoint3D weightedCentroidFramePoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
    private final YoGraphicPosition centroidGraphic = new YoGraphicPosition("centroidGraphic", centroid, 0.03, YoAppearance.Chartreuse());
    private final YoGraphicPosition weightedCentroidGraphic = new YoGraphicPosition("weightedCentroidGraphic", weightedCentroid, 0.01, YoAppearance.Chocolate());
 
-   private final YoFramePoint circleCenter = new YoFramePoint("circleCenter", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D circleCenter = new YoFramePoint3D("circleCenter", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition circleCenterGraphic = new YoGraphicPosition("circleCenterGraphic", circleCenter, 0.03, YoAppearance.Green());
 
    private final YoDouble inscribedCircleRadius = new YoDouble("inscribedCircleRadius", registry);
    private final YoArtifactOval inscribedCircle = new YoArtifactOval("inscribedCircle", circleCenter, inscribedCircleRadius, Color.BLACK);
    
-   private final YoFramePoint miniCircleCenter = new YoFramePoint("miniCircleCenter", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D miniCircleCenter = new YoFramePoint3D("miniCircleCenter", ReferenceFrame.getWorldFrame(), registry);
    
 //   private final YoBoolean miniCircleRadiusSuccess = new YoBoolean("miniCircleRadiusSuccess", registry);
    private final YoDouble miniCircleRadius = new YoDouble("miniCircleRadius", registry);
@@ -87,10 +87,10 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5, 0.0, 0.0);
       FramePoint3D origin = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5, -1.0, 2.0);
       
-      vertices.set(RobotQuadrant.FRONT_LEFT, new YoFramePoint(RobotQuadrant.FRONT_LEFT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
-      vertices.set(RobotQuadrant.FRONT_RIGHT, new YoFramePoint(RobotQuadrant.FRONT_RIGHT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
-      vertices.set(RobotQuadrant.HIND_RIGHT, new YoFramePoint(RobotQuadrant.HIND_RIGHT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
-      vertices.set(RobotQuadrant.HIND_LEFT, new YoFramePoint(RobotQuadrant.HIND_LEFT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
+      vertices.set(RobotQuadrant.FRONT_LEFT, new YoFramePoint3D(RobotQuadrant.FRONT_LEFT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
+      vertices.set(RobotQuadrant.FRONT_RIGHT, new YoFramePoint3D(RobotQuadrant.FRONT_RIGHT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
+      vertices.set(RobotQuadrant.HIND_RIGHT, new YoFramePoint3D(RobotQuadrant.HIND_RIGHT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
+      vertices.set(RobotQuadrant.HIND_LEFT, new YoFramePoint3D(RobotQuadrant.HIND_LEFT.getCamelCaseNameForStartOfExpression(), ReferenceFrame.getWorldFrame(), registry));
       
       vertices.get(RobotQuadrant.FRONT_LEFT).set(0.0, 1.0, 0.0);
       vertices.get(RobotQuadrant.FRONT_RIGHT).set(1.0, 1.0, 0.0);
@@ -214,7 +214,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
    {
       for (RobotQuadrant quadrant : vertices.quadrants())
       {
-         YoFramePoint vertex = vertices.get(quadrant);
+         YoFramePoint3D vertex = vertices.get(quadrant);
          supportPolygon.setFootstep(quadrant, vertex);
       }
       drawSupportPolygon(supportPolygon, currentSupportPolygon);
@@ -247,7 +247,7 @@ public class QuadrupedSupportPolygonVisualizer implements RobotController
       ThreadTools.sleep(10);
    }
    
-   private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
+   private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2D yoFramePolygon)
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       for(RobotQuadrant quadrant : supportPolygon.getSupportingQuadrantsInOrder())

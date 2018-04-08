@@ -17,8 +17,8 @@ import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -49,19 +49,19 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
 
    private final YoBoolean calibrateWristForceSensors;
    private final SideDependentList<YoDouble> wristSubtreeMass;
-   private final SideDependentList<YoFrameVector> wristForcesSubtreeWeightCancelled;
-   private final SideDependentList<YoFrameVector> wristTorquesSubtreeWeightCancelled;
+   private final SideDependentList<YoFrameVector3D> wristForcesSubtreeWeightCancelled;
+   private final SideDependentList<YoFrameVector3D> wristTorquesSubtreeWeightCancelled;
 
-   private final SideDependentList<YoFrameVector> wristForceCalibrationOffsets;
-   private final SideDependentList<YoFrameVector> wristTorqueCalibrationOffsets;
+   private final SideDependentList<YoFrameVector3D> wristForceCalibrationOffsets;
+   private final SideDependentList<YoFrameVector3D> wristTorqueCalibrationOffsets;
 
    private final YoBoolean calibrateFootForceSensors;
    private final AtomicBoolean calibrateFootForceSensorsAtomic = new AtomicBoolean(false);
 
    private final SideDependentList<ForceSensorDefinition> footForceSensorDefinitions;
 
-   private final SideDependentList<YoFrameVector> footForceCalibrationOffsets;
-   private final SideDependentList<YoFrameVector> footTorqueCalibrationOffsets;
+   private final SideDependentList<YoFrameVector3D> footForceCalibrationOffsets;
+   private final SideDependentList<YoFrameVector3D> footTorqueCalibrationOffsets;
 
    private RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = null;
 
@@ -130,8 +130,8 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
             String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
             String namePrefix = sidePrefix + "FootSensor";
 
-            footForceCalibrationOffsets.put(robotSide, new YoFrameVector(namePrefix + "ForceCalibrationOffset", measurementFrame, registry));
-            footTorqueCalibrationOffsets.put(robotSide, new YoFrameVector(namePrefix + "TorqueCalibrationOffset", measurementFrame, registry));
+            footForceCalibrationOffsets.put(robotSide, new YoFrameVector3D(namePrefix + "ForceCalibrationOffset", measurementFrame, registry));
+            footTorqueCalibrationOffsets.put(robotSide, new YoFrameVector3D(namePrefix + "TorqueCalibrationOffset", measurementFrame, registry));
          }
       }
       else
@@ -173,11 +173,11 @@ public class ForceSensorStateUpdater implements ForceSensorCalibrationModule
             String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
             String namePrefix = sidePrefix + "WristSensor";
 
-            wristForcesSubtreeWeightCancelled.put(robotSide, new YoFrameVector(namePrefix + "ForceSubtreeWeightCancelled", measurementFrame, registry));
-            wristTorquesSubtreeWeightCancelled.put(robotSide, new YoFrameVector(namePrefix + "TorqueSubtreeWeightCancelled", measurementFrame, registry));
+            wristForcesSubtreeWeightCancelled.put(robotSide, new YoFrameVector3D(namePrefix + "ForceSubtreeWeightCancelled", measurementFrame, registry));
+            wristTorquesSubtreeWeightCancelled.put(robotSide, new YoFrameVector3D(namePrefix + "TorqueSubtreeWeightCancelled", measurementFrame, registry));
 
-            wristForceCalibrationOffsets.put(robotSide, new YoFrameVector(namePrefix + "ForceCalibrationOffset", measurementFrame, registry));
-            wristTorqueCalibrationOffsets.put(robotSide, new YoFrameVector(namePrefix + "TorqueCalibrationOffset", measurementFrame, registry));
+            wristForceCalibrationOffsets.put(robotSide, new YoFrameVector3D(namePrefix + "ForceCalibrationOffset", measurementFrame, registry));
+            wristTorqueCalibrationOffsets.put(robotSide, new YoFrameVector3D(namePrefix + "TorqueCalibrationOffset", measurementFrame, registry));
 
             RigidBody[] handBodies = ScrewTools.computeRigidBodiesAfterThisJoint(measurementLink.getParentJoint());
             CenterOfMassReferenceFrame subtreeCoMFrame = new CenterOfMassReferenceFrame(namePrefix + "SubtreeCoMFrame", measurementFrame, handBodies);

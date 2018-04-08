@@ -17,13 +17,13 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 public class WrenchMatrixCalculator
 {
@@ -40,10 +40,10 @@ public class WrenchMatrixCalculator
    private final YoDouble rhoWeight = new YoDouble("rhoWeight", registry);
    private final YoDouble rhoRateDefaultWeight = new YoDouble("rhoRateDefaultWeight", registry);
    private final YoDouble rhoRateHighWeight = new YoDouble("rhoRateHighWeight", registry);
-   private final YoFrameVector2d desiredCoPWeight = new YoFrameVector2d("desiredCoPWeight", null, registry);
+   private final YoFrameVector2D desiredCoPWeight = new YoFrameVector2D("desiredCoPWeight", null, registry);
 
-   private final YoFrameVector2d copRateDefaultWeight = new YoFrameVector2d("copRateDefaultWeight", null, registry);
-   private final YoFrameVector2d copRateHighWeight = new YoFrameVector2d("copRateHighWeight", null, registry);
+   private final YoFrameVector2D copRateDefaultWeight = new YoFrameVector2D("copRateDefaultWeight", null, registry);
+   private final YoFrameVector2D copRateHighWeight = new YoFrameVector2D("copRateHighWeight", null, registry);
 
    private final DenseMatrix64F rhoJacobianMatrix;
    private final DenseMatrix64F copJacobianMatrix;

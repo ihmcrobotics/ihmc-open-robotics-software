@@ -6,10 +6,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class BasicPlanarController
 {
@@ -46,7 +46,7 @@ public class BasicPlanarController
    private final PIDController xController;
    private final PIDController yController;
 
-   private final YoFramePoint2d planarForces = new YoFramePoint2d("planarForces", null, registry);
+   private final YoFramePoint2D planarForces = new YoFramePoint2D("planarForces", null, registry);
    private final double controlDT;
    private final CenterOfMassJacobian centerOfMassJacobian;
 

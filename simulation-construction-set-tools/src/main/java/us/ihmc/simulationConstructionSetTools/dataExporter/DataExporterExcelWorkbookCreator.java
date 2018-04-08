@@ -24,7 +24,6 @@ import us.ihmc.euclid.Axis;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -33,6 +32,7 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class DataExporterExcelWorkbookCreator
 {
@@ -216,7 +216,7 @@ public class DataExporterExcelWorkbookCreator
       catch (NullPointerException e)
       {
          GroundContactPoint groundContactPoint = robot.getAllGroundContactPoints().get(0);
-         YoFramePoint yoPosition = groundContactPoint.getYoPosition();
+         YoFramePoint3D yoPosition = groundContactPoint.getYoPosition();
          xPosition = dataBuffer.getEntry(yoPosition.getYoX()).getData();
          yPosition = dataBuffer.getEntry(yoPosition.getYoY()).getData();
          zPosition = dataBuffer.getEntry(yoPosition.getYoZ()).getData();

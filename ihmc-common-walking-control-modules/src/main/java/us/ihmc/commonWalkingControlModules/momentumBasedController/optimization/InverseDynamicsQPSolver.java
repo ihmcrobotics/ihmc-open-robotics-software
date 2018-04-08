@@ -6,12 +6,12 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class InverseDynamicsQPSolver
@@ -22,8 +22,8 @@ public class InverseDynamicsQPSolver
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("qpSolverTimer", 0.5, registry);
 
-   private final YoFrameVector wrenchEquilibriumForceError;
-   private final YoFrameVector wrenchEquilibriumTorqueError;
+   private final YoFrameVector3D wrenchEquilibriumForceError;
+   private final YoFrameVector3D wrenchEquilibriumTorqueError;
 
    private final YoBoolean firstCall = new YoBoolean("firstCall", registry);
    private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
@@ -138,8 +138,8 @@ public class InverseDynamicsQPSolver
 
       if (SETUP_WRENCHES_CONSTRAINT_AS_OBJECTIVE)
       {
-         wrenchEquilibriumForceError = new YoFrameVector("wrenchEquilibriumForceError", null, registry);
-         wrenchEquilibriumTorqueError = new YoFrameVector("wrenchEquilibriumTorqueError", null, registry);
+         wrenchEquilibriumForceError = new YoFrameVector3D("wrenchEquilibriumForceError", null, registry);
+         wrenchEquilibriumTorqueError = new YoFrameVector3D("wrenchEquilibriumTorqueError", null, registry);
       }
       else
       {

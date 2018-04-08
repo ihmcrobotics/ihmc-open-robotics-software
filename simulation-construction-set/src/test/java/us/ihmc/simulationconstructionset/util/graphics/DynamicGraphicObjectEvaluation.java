@@ -15,15 +15,15 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 public class DynamicGraphicObjectEvaluation
 {
@@ -61,9 +61,9 @@ public class DynamicGraphicObjectEvaluation
 
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       int maxNumberOfVertices = polygon.getNumberOfVertices();
-      final YoFrameConvexPolygon2d yoPolygon = new YoFrameConvexPolygon2d("PolyPoints", "", worldFrame, maxNumberOfVertices, registry);
+      final YoFrameConvexPolygon2D yoPolygon = new YoFrameConvexPolygon2D("PolyPoints", "", worldFrame, maxNumberOfVertices, registry);
       yoPolygon.set(polygon);
-      YoFramePose yoPolyOrigin = new YoFramePose("PolyOrigin", worldFrame, registry);
+      YoFramePoseUsingYawPitchRoll yoPolyOrigin = new YoFramePoseUsingYawPitchRoll("PolyOrigin", worldFrame, registry);
       YoGraphicPolygon yoGraphicPolygon = new YoGraphicPolygon("Polygon", yoPolygon, yoPolyOrigin, 3.0, appearance);
       yoPolyOrigin.setXYZ(0.1, 0.2, 1.0);
       yoPolyOrigin.setYawPitchRoll(-0.1, -0.4, -0.3);
@@ -74,8 +74,8 @@ public class DynamicGraphicObjectEvaluation
       yoGraphicText.setYawPitchRoll(0.3, 0.0, 0.0);
 
       // Vector:
-      YoFramePoint yoFramePoint = new YoFramePoint("position", "", worldFrame, registry);
-      YoFrameVector yoFrameVector = new YoFrameVector("vector", "", worldFrame, registry);
+      YoFramePoint3D yoFramePoint = new YoFramePoint3D("position", "", worldFrame, registry);
+      YoFrameVector3D yoFrameVector = new YoFrameVector3D("vector", "", worldFrame, registry);
 
       yoFramePoint.set(0.3, 0.4, 0.2);
       yoFrameVector.set(1.0, 2.0, 3.0);
@@ -83,10 +83,10 @@ public class DynamicGraphicObjectEvaluation
       final YoGraphicVector yoGraphicVector = new YoGraphicVector("Vector", yoFramePoint, yoFrameVector, 1.0, YoAppearance.Yellow());
 
       // YoFrameConvexPolygon2d:
-      final YoFrameConvexPolygon2d yoFramePolygon = new YoFrameConvexPolygon2d("yoPolygon", "", worldFrame, 10, registry);
-      YoFramePoint yoFramePolygonPosition = new YoFramePoint("yoPolygonPosition", "", worldFrame, registry);
+      final YoFrameConvexPolygon2D yoFramePolygon = new YoFrameConvexPolygon2D("yoPolygon", "", worldFrame, 10, registry);
+      YoFramePoint3D yoFramePolygonPosition = new YoFramePoint3D("yoPolygonPosition", "", worldFrame, registry);
       yoFramePolygonPosition.set(2.0, 1.0, 0.3);
-      final YoFrameOrientation yoFramePolygonOrientation = new YoFrameOrientation("yoPolygonOrientation", "", worldFrame, registry);
+      final YoFrameYawPitchRoll yoFramePolygonOrientation = new YoFrameYawPitchRoll("yoPolygonOrientation", "", worldFrame, registry);
       yoFramePolygonOrientation.setYawPitchRoll(1.2, 0.1, 0.4);
       final YoGraphicPolygon yoGraphicYoFramePolygon = new YoGraphicPolygon("YoFramePolygon", yoFramePolygon,
                                                                            yoFramePolygonPosition, yoFramePolygonOrientation, 1.0, YoAppearance.DarkBlue());
@@ -98,10 +98,10 @@ public class DynamicGraphicObjectEvaluation
       boxGhostGraphics.translate(0.0, 0.0, -0.5);
       boxGhostGraphics.addCube(1.0, 1.0, 1.0, transparantBlue);
 
-      YoFramePoint boxPosition = new YoFramePoint("boxPosition", "", worldFrame, registry);
+      YoFramePoint3D boxPosition = new YoFramePoint3D("boxPosition", "", worldFrame, registry);
       double boxSize = 0.3;
       boxPosition.set(boxSize / 2.0, boxSize / 2.0, boxSize / 2.0);
-      YoFrameOrientation boxOrientation = new YoFrameOrientation("boxOrientation", worldFrame, registry);
+      YoFrameYawPitchRoll boxOrientation = new YoFrameYawPitchRoll("boxOrientation", worldFrame, registry);
       YoGraphicShape yoGraphicBoxGhost = new YoGraphicShape("boxGhost", boxGhostGraphics, boxPosition, boxOrientation, boxSize);
 
       YoGraphicsList yoGraphicsList = new YoGraphicsList("Polygon");

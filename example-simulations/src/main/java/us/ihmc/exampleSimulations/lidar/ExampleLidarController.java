@@ -14,9 +14,9 @@ import us.ihmc.jMonkeyEngineToolkit.GPULidarScanBuffer;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -33,7 +33,7 @@ public class ExampleLidarController implements RobotController
    private YoDouble qLidarZ;
    private YoDouble qLidarX;
 
-   private final YoFramePoint point = new YoFramePoint("point", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D point = new YoFramePoint3D("point", ReferenceFrame.getWorldFrame(), registry);
    private final BagOfBalls bagOfBalls;
 
    private PDController pdControllerZ;

@@ -41,11 +41,11 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
 public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDetectorResultPacket>, ConnectionStateListener
 {
@@ -83,9 +83,9 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
 
    private final YoBoolean targetIDHasBeenLocated = new YoBoolean(prefix + "TargetIDHasBeenLocated", registry);
 
-   private final YoFramePoseUsingQuaternions cameraPose = new YoFramePoseUsingQuaternions(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoseUsingQuaternions locatedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoseUsingQuaternions reportedFiducialPoseInWorldFrame = new YoFramePoseUsingQuaternions(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePose3D cameraPose = new YoFramePose3D(prefix + "CameraPoseWorld", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePose3D locatedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "LocatedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePose3D reportedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(), registry);
 
    private final AtomicBoolean detectionRunning = new AtomicBoolean(false);
    private final List<Consumer<DetectionVisualizationPackets>> detectionResultListeners = Collections.synchronizedList(new ArrayList<>());

@@ -11,8 +11,8 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 /**
  * <p>
@@ -129,7 +129,7 @@ public class BagOfBalls
 
       for (int i = 0; i < appearances.size(); i++)
       {
-         YoFramePoint yoFramePoint = new YoFramePoint(name + i, "", worldFrame, registry);
+         YoFramePoint3D yoFramePoint = new YoFramePoint3D(name + i, "", worldFrame, registry);
          YoGraphicPosition newPosition;
          if (graphicType != null)
             newPosition = new YoGraphicPosition(name + i, yoFramePoint, sizeInMeters, appearances.get(i), graphicType);

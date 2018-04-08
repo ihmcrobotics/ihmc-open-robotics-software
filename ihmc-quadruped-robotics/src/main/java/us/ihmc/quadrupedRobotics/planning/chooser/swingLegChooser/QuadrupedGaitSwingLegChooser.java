@@ -9,17 +9,17 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("QuadrupedGaitSwingLegChooser");
-   private final YoFrameVector lastVelocity;
+   private final YoFrameVector3D lastVelocity;
    private final QuadrantDependentList<TranslationReferenceFrame> feetFrames = new QuadrantDependentList<>();
    private final QuadrantDependentList<FramePoint3D> feet = new QuadrantDependentList<>();
    private final FramePoint3D feetCentroid = new FramePoint3D(ReferenceFrame.getWorldFrame());
@@ -29,7 +29,7 @@ public class QuadrupedGaitSwingLegChooser implements NextSwingLegChooser
    
    public QuadrupedGaitSwingLegChooser(CommonQuadrupedReferenceFrames referenceFrames, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      lastVelocity = new YoFrameVector("lastVelocity", referenceFrames.getBodyFrame(), registry);
+      lastVelocity = new YoFrameVector3D("lastVelocity", referenceFrames.getBodyFrame(), registry);
       centroidFrameViz = new YoGraphicReferenceFrame(centroidFrame, registry, 0.5);
       yoGraphicsListRegistry.registerYoGraphic("centroidFrameViz", centroidFrameViz);
       parentRegistry.addChild(registry);

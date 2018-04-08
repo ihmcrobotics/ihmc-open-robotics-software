@@ -8,9 +8,9 @@ import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class RhinoBeetleVirtualModelControlParameters implements HexapodControllerParameters
 {
@@ -25,8 +25,8 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
    private final SymmetricYoPIDSE3Gains bodySpatialGains;
    private final double bodyProportionalGains = 8000.0;
    private final double bodyDampingRatio = 3.0;
-   private final YoFrameVector bodySpatialLinearQPWeight;
-   private final YoFrameVector bodySpatialAngularQPWeight;
+   private final YoFrameVector3D bodySpatialLinearQPWeight;
+   private final YoFrameVector3D bodySpatialAngularQPWeight;
    private final SelectionMatrix6D bodySpatialSelectionMatrix = new SelectionMatrix6D();
 
    public RhinoBeetleVirtualModelControlParameters(YoVariableRegistry parentRegistry)
@@ -35,8 +35,8 @@ public class RhinoBeetleVirtualModelControlParameters implements HexapodControll
       bodySpatialGains.setProportionalGains(bodyProportionalGains);
       bodySpatialGains.setDampingRatios(bodyDampingRatio);
 
-      bodySpatialLinearQPWeight = new YoFrameVector(name + "bodySpatial_linear_QPWeight", ReferenceFrame.getWorldFrame(), registry);
-      bodySpatialAngularQPWeight = new YoFrameVector(name + "bodySpatial_angular_QPWeight", ReferenceFrame.getWorldFrame(), registry);
+      bodySpatialLinearQPWeight = new YoFrameVector3D(name + "bodySpatial_linear_QPWeight", ReferenceFrame.getWorldFrame(), registry);
+      bodySpatialAngularQPWeight = new YoFrameVector3D(name + "bodySpatial_angular_QPWeight", ReferenceFrame.getWorldFrame(), registry);
       bodySpatialAngularQPWeight.set(angularWeight);
       bodySpatialLinearQPWeight.set(linearWeight);
 

@@ -31,7 +31,6 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -57,6 +56,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class VirtualModelControllerTestHelper
 {
@@ -2233,8 +2233,8 @@ public class VirtualModelControllerTestHelper
       private final Vector3D initialForce = new Vector3D();
       private final Vector3D initialTorque = new Vector3D();
 
-      private final YoFrameVector contactForce;
-      private final YoFrameVector contactTorque;
+      private final YoFrameVector3D contactForce;
+      private final YoFrameVector3D contactTorque;
 
       private final YoGraphicVector forceVisualizer;
       private final YoGraphicsList yoGraphicsList;
@@ -2265,8 +2265,8 @@ public class VirtualModelControllerTestHelper
          currentAngularY = new YoDouble("currentAngularY" + suffix, registry);
          currentAngularZ = new YoDouble("currentAngularZ" + suffix, registry);
 
-         contactForce = new YoFrameVector("contactForce" + suffix, worldFrame, registry);
-         contactTorque = new YoFrameVector("contactTorque" + suffix, worldFrame, registry);
+         contactForce = new YoFrameVector3D("contactForce" + suffix, worldFrame, registry);
+         contactTorque = new YoFrameVector3D("contactTorque" + suffix, worldFrame, registry);
 
          yoGraphicsList = new YoGraphicsList("forceGraphicsList" + suffix);
 

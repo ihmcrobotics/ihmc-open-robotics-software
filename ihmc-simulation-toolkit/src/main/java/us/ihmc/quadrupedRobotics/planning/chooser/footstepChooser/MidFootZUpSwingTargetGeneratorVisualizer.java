@@ -24,11 +24,11 @@ import us.ihmc.quadrupedRobotics.planning.chooser.swingLegChooser.QuadrupedGaitS
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
-import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.ParabolicWithFinalVelocityConstrainedPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
@@ -53,7 +53,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
 
    private YoEnum<RobotQuadrant> swingLeg = new YoEnum<RobotQuadrant>("swingLeg", registry, RobotQuadrant.class, true);
 
-   private final YoFrameVector desiredVelocity = new YoFrameVector("desiredVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D desiredVelocity = new YoFrameVector3D("desiredVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble desiredYawRate = new YoDouble("desiredYawRate", registry);
 
    /** Foot Swing **/
@@ -63,22 +63,22 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
    private final YoDouble desiredSwingTime = new YoDouble("desiredSwingTime", registry);
    private final YoDouble swingHeight = new YoDouble("swingHeight", registry);
 
-   private final QuadrantDependentList<YoFramePoint> yoFootPositions = new QuadrantDependentList< YoFramePoint>();
+   private final QuadrantDependentList<YoFramePoint3D> yoFootPositions = new QuadrantDependentList< YoFramePoint3D>();
    private final QuadrantDependentList<YoGraphicPosition> footPositionGraphics = new QuadrantDependentList<YoGraphicPosition>();
 
-   private final YoFramePoint swingTarget = new YoFramePoint("swingTarget", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector finalDesiredVelocity = new YoFrameVector("finalDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D swingTarget = new YoFramePoint3D("swingTarget", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D finalDesiredVelocity = new YoFrameVector3D("finalDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicPosition targetViz = new YoGraphicPosition("swingTarget", swingTarget, 0.01, YoAppearance.Red());
 
-   private final YoFramePoint centroid = new YoFramePoint("centroid", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D centroid = new YoFramePoint3D("centroid", ReferenceFrame.getWorldFrame(), registry);
    private final FramePoint3D temporaryCentroid = new FramePoint3D();
    private final YoGraphicPosition centroidViz = new YoGraphicPosition("centroidViz", centroid, 0.01, YoAppearance.BurlyWood());
    private final YoGraphicLineSegment nominalYawGraphic;
-   private final YoFrameLineSegment2d nominalYawLineSegment = new YoFrameLineSegment2d("nominalYawLineSegment", "", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameLineSegment2D nominalYawLineSegment = new YoFrameLineSegment2D("nominalYawLineSegment", "", ReferenceFrame.getWorldFrame(), registry);
    private final YoArtifactLineSegment2d nominalYawArtifact = new YoArtifactLineSegment2d("nominalYawArtifact", nominalYawLineSegment, Color.YELLOW, 0.02, 0.02);
 
    private final YoDouble nominalYaw = new YoDouble("nominalYaw", registry);
-   YoFramePoint nominalYawEndpoint = new YoFramePoint("nominalYawEndpoint", ReferenceFrame.getWorldFrame(), registry);
+   YoFramePoint3D nominalYawEndpoint = new YoFramePoint3D("nominalYawEndpoint", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoGraphicReferenceFrame leftMidZUpFrameViz;
    private final YoGraphicReferenceFrame rightMidZUpFrameViz;
@@ -89,8 +89,8 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
 
    private final QuadrupedSupportPolygon fourFootSupportPolygon = new QuadrupedSupportPolygon();
    private final QuadrupedSupportPolygon commonSupportPolygon = new QuadrupedSupportPolygon();
-   private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
-   private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
+   private final YoFrameConvexPolygon2D supportPolygon = new YoFrameConvexPolygon2D("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
+   private final YoFrameConvexPolygon2D currentTriplePolygon = new YoFrameConvexPolygon2D("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
    private final QuadrupedSupportPolygon quadrupedSupportPolygon = new QuadrupedSupportPolygon();
    private final YoDouble robotTimestamp;
 
@@ -126,7 +126,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseNameForStartOfExpression();
-         YoFramePoint footPosition = new YoFramePoint(prefix + "footPosition", ReferenceFrame.getWorldFrame(), registry);
+         YoFramePoint3D footPosition = new YoFramePoint3D(prefix + "footPosition", ReferenceFrame.getWorldFrame(), registry);
          yoFootPositions.set(robotQuadrant, footPosition);
 
          AppearanceDefinition yoAppearance = this.getYoAppearance(robotQuadrant);
@@ -261,7 +261,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
 
       for(RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         YoFramePoint yoFootPosition = yoFootPositions.get(robotQuadrant);
+         YoFramePoint3D yoFootPosition = yoFootPositions.get(robotQuadrant);
          FramePoint3D footPosition = new FramePoint3D(yoFootPosition);
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
          fourFootSupportPolygon.setFootstep(robotQuadrant, footPosition);
@@ -288,7 +288,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       ThreadTools.sleep(10);
    }
 
-   private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2d yoFramePolygon)
+   private void drawSupportPolygon(QuadrupedSupportPolygon supportPolygon, YoFrameConvexPolygon2D yoFramePolygon)
    {
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       for(RobotQuadrant quadrant : supportPolygon.getSupportingQuadrantsInOrder())

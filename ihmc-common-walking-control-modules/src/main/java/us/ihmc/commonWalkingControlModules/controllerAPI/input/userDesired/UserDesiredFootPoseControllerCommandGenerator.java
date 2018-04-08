@@ -11,8 +11,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -27,7 +27,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
 
    private final YoEnum<RobotSide> userFootPoseSide = new YoEnum<RobotSide>("userFootPoseSide", registry, RobotSide.class);
 
-   private final YoFramePose userDesiredFootPose;
+   private final YoFramePoseUsingYawPitchRoll userDesiredFootPose;
    
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
 
@@ -35,7 +35,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
    
    public UserDesiredFootPoseControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
    {
-      userDesiredFootPose = new YoFramePose("userDesiredFootPose", ReferenceFrame.getWorldFrame(), registry);
+      userDesiredFootPose = new YoFramePoseUsingYawPitchRoll("userDesiredFootPose", ReferenceFrame.getWorldFrame(), registry);
 
       for (RobotSide robotSide : RobotSide.values())
       {

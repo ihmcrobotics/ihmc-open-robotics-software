@@ -10,11 +10,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 /*
  * FIXME: not rewindable!
@@ -42,8 +42,8 @@ public class BipedSupportPolygons
    private final FrameConvexPolygon2D supportPolygonInMidFeetZUp = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
 
-   private final YoFrameConvexPolygon2d supportPolygonViz;
-   private final SideDependentList<YoFrameConvexPolygon2d> footPolygonsViz = new SideDependentList<>();
+   private final YoFrameConvexPolygon2D supportPolygonViz;
+   private final SideDependentList<YoFrameConvexPolygon2D> footPolygonsViz = new SideDependentList<>();
 
    private final ExecutionTimer timer = new ExecutionTimer(getClass().getSimpleName() + "Timer", registry);
 
@@ -54,7 +54,7 @@ public class BipedSupportPolygons
       this.midFeetZUp = midFeetZUpFrame;
       this.soleZUpFrames = soleZUpFrames;
 
-      supportPolygonViz = new YoFrameConvexPolygon2d("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
+      supportPolygonViz = new YoFrameConvexPolygon2D("combinedPolygon", "", worldFrame, 2 * maxNumberOfContactPointsPerFoot, registry);
 
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
@@ -70,7 +70,7 @@ public class BipedSupportPolygons
          footPolygonsInMidFeetZUp.put(robotSide, new FrameConvexPolygon2D());
          String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         YoFrameConvexPolygon2d footPolygonViz = new YoFrameConvexPolygon2d(robotSidePrefix + "FootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
+         YoFrameConvexPolygon2D footPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "FootPolygon", "", worldFrame, maxNumberOfContactPointsPerFoot, registry);
          footPolygonsViz.put(robotSide, footPolygonViz);
          YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon", footPolygonViz, defaultFeetColors.get(robotSide), false);
          artifactList.add(footPolygonArtifact);
@@ -175,7 +175,7 @@ public class BipedSupportPolygons
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoFrameConvexPolygon2d footPolygonViz = footPolygonsViz.get(robotSide);
+         YoFrameConvexPolygon2D footPolygonViz = footPolygonsViz.get(robotSide);
          FrameConvexPolygon2D footPolygon = footPolygonsInWorldFrame.get(robotSide);
          if (footPolygon.isEmpty())
             footPolygonViz.clear();

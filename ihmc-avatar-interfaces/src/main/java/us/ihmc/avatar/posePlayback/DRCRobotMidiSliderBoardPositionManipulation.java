@@ -27,10 +27,10 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -116,11 +116,11 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private Quaternion qprev;
 
    //   private final YoDouble BaseControlPoint = new YoDouble("BaseControlPoint", registry);
-   private final YoFramePoint[] baseControlPoints = new YoFramePoint[4];
+   private final YoFramePoint3D[] baseControlPoints = new YoFramePoint3D[4];
    private final ArrayList<YoGraphic> baseControlPointsList = new ArrayList<YoGraphic>();
    private final ArrayList<YoGraphic> baseControlLinesList = new ArrayList<YoGraphic>();
 
-   private final YoFramePoint[] baseControlTargetPoints = new YoFramePoint[4];
+   private final YoFramePoint3D[] baseControlTargetPoints = new YoFramePoint3D[4];
    private final ArrayList<YoGraphic> baseControlTargetPointsList = new ArrayList<YoGraphic>();
    private final ArrayList<YoGraphic> baseControlTargetLinesList = new ArrayList<YoGraphic>();
 
@@ -130,8 +130,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private final SideDependentList<NumericalInverseKinematicsCalculator> legInverseKinematicsCalculators = new SideDependentList<NumericalInverseKinematicsCalculator>();
    private final SideDependentList<NumericalInverseKinematicsCalculator> armInverseKinematicsCalculators = new SideDependentList<NumericalInverseKinematicsCalculator>();
 
-   private final SideDependentList<YoFramePose> feetIKs = new SideDependentList<>();
-   private final SideDependentList<YoFramePose> handIKs = new SideDependentList<>();
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> feetIKs = new SideDependentList<>();
+   private final SideDependentList<YoFramePoseUsingYawPitchRoll> handIKs = new SideDependentList<>();
 
    private final FloatingRootJointRobot sdfRobot;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -252,10 +252,10 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       for (RobotSide robotSide : RobotSide.values)
       {
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         YoFramePose footIK = new YoFramePose(sidePrefix + "FootIK", "", HumanoidReferenceFrames.getWorldFrame(), registry);
+         YoFramePoseUsingYawPitchRoll footIK = new YoFramePoseUsingYawPitchRoll(sidePrefix + "FootIK", "", HumanoidReferenceFrames.getWorldFrame(), registry);
          feetIKs.put(robotSide, footIK);
          
-         YoFramePose handIK = new YoFramePose(sidePrefix + "HandIK", "", HumanoidReferenceFrames.getWorldFrame(), registry);
+         YoFramePoseUsingYawPitchRoll handIK = new YoFramePoseUsingYawPitchRoll(sidePrefix + "HandIK", "", HumanoidReferenceFrames.getWorldFrame(), registry);
          handIKs.put(robotSide, handIK);
 
          yoGraphicsListRegistry.registerYoGraphic(listName, new YoGraphicCoordinateSystem(sidePrefix + "FootViz", footIK, scale));
@@ -271,8 +271,8 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    {
       for (int i = 0; i < baseControlPoints.length; i++)
       {
-         baseControlPoints[i] = new YoFramePoint("baseControlPoint" + i, ReferenceFrame.getWorldFrame(), registry);
-         baseControlTargetPoints[i] = new YoFramePoint("baseControlTargetPoint" + i, ReferenceFrame.getWorldFrame(), registry);
+         baseControlPoints[i] = new YoFramePoint3D("baseControlPoint" + i, ReferenceFrame.getWorldFrame(), registry);
+         baseControlTargetPoints[i] = new YoFramePoint3D("baseControlTargetPoint" + i, ReferenceFrame.getWorldFrame(), registry);
       }
       baseControlPoints[0].set(0.18, 0.13, 0.0);
       baseControlPoints[1].set(0.18, -0.13, 0.0);
@@ -524,7 +524,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       {
          placeCartesianTargetsAtActuals();
 
-         YoFramePose yoFramePose = feetIKs.get(robotSide);
+         YoFramePoseUsingYawPitchRoll yoFramePose = feetIKs.get(robotSide);
 
          FramePoint3D footPosition = new FramePoint3D(fullRobotModel.getFoot(robotSide).getBodyFixedFrame());
          footPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -575,7 +575,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       {
          placeCartesianTargetsAtActuals();
 
-         YoFramePose yoFramePose = handIKs.get(robotSide);
+         YoFramePoseUsingYawPitchRoll yoFramePose = handIKs.get(robotSide);
 
          FramePoint3D handPosition = new FramePoint3D(fullRobotModel.getHand(robotSide).getBodyFixedFrame());
          handPosition.changeFrame(ReferenceFrame.getWorldFrame());
@@ -648,7 +648,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       for (int i = 0; i < baseControlPoints.length; i++)
       {
-         YoFramePoint baseControlPoint = baseControlPoints[i];
+         YoFramePoint3D baseControlPoint = baseControlPoints[i];
          sliderBoard.setSlider(sliderChannel++, baseControlPoint.getYoX(), baseControlPoint.getX() - 2, baseControlPoint.getX() + 2);
          sliderBoard.setSlider(sliderChannel++, baseControlPoint.getYoY(), baseControlPoint.getY() - 2, baseControlPoint.getY() + 2);
       }
@@ -660,7 +660,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       for (int i = 0; i < baseControlTargetPoints.length; i++)
       {
-         YoFramePoint baseControlTargetPoint = baseControlTargetPoints[i];
+         YoFramePoint3D baseControlTargetPoint = baseControlTargetPoints[i];
          sliderBoard.setSlider(sliderChannel++, baseControlTargetPoint.getYoX(), baseControlTargetPoint.getX() - 2, baseControlTargetPoint.getX() + 2);
          sliderBoard.setSlider(sliderChannel++, baseControlTargetPoint.getYoY(), baseControlTargetPoint.getY() - 2, baseControlTargetPoint.getY() + 2);
       }
@@ -672,7 +672,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
       for (RobotSide robotSide : RobotSide.values())
       {
-         YoFramePose yoFramePose = feetIKs.get(robotSide);
+         YoFramePoseUsingYawPitchRoll yoFramePose = feetIKs.get(robotSide);
          FramePose3D framePose = new FramePose3D(fullRobotModel.getFoot(robotSide).getBodyFixedFrame());
          framePose.changeFrame(ReferenceFrame.getWorldFrame());
          yoFramePose.set(framePose);
@@ -902,7 +902,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          {
             for (RobotSide robotSide : RobotSide.values())
             {
-               YoFramePose footIK = feetIKs.get(robotSide);
+               YoFramePoseUsingYawPitchRoll footIK = feetIKs.get(robotSide);
                FramePoint3D position = new FramePoint3D(footIK.getPosition());
                FrameQuaternion orientation = footIK.getOrientation().getFrameOrientationCopy();
                FramePose3D framePose = new FramePose3D(position, orientation);
@@ -910,7 +910,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
                framePose.get(desiredTransform);
                legInverseKinematicsCalculators.get(robotSide).solve(desiredTransform);
 
-               YoFramePose handIK = handIKs.get(robotSide);
+               YoFramePoseUsingYawPitchRoll handIK = handIKs.get(robotSide);
                position = new FramePoint3D(handIK.getPosition());
                orientation = handIK.getOrientation().getFrameOrientationCopy();
                framePose = new FramePose3D(position, orientation);
@@ -1017,7 +1017,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       addSupportBaseGraphics(yoGraphicsListRegistry,baseControlTargetPoints,baseControlTargetPointsList,baseControlTargetLinesList,"baseControlTarget",YoAppearance.Red());
    }
 
-   private void addSupportBaseGraphics(YoGraphicsListRegistry yoGraphicsListRegistry,YoFramePoint[] basePoints, ArrayList<YoGraphic> basePointsList, ArrayList<YoGraphic> linesList, String namePrefix,AppearanceDefinition appearance)
+   private void addSupportBaseGraphics(YoGraphicsListRegistry yoGraphicsListRegistry,YoFramePoint3D[] basePoints, ArrayList<YoGraphic> basePointsList, ArrayList<YoGraphic> linesList, String namePrefix,AppearanceDefinition appearance)
    {
       AppearanceDefinition[] colors = { YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Blue(), YoAppearance.Yellow() };
       YoGraphicsList yoGraphicsList = new YoGraphicsList(namePrefix + "Points");

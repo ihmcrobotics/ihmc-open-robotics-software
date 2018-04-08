@@ -19,8 +19,8 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -43,11 +43,11 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final SideDependentList<SelectionMatrix6D> handSelectionMatrices = new SideDependentList<>(new SelectionMatrix6D(), new SelectionMatrix6D());
    private final SelectionMatrix6D chestSelectionMatrix = new SelectionMatrix6D();
    private final SelectionMatrix6D pelvisSelectionMatrix = new SelectionMatrix6D();
-   private final SideDependentList<YoFramePoint> yoDesiredHandPositions = new SideDependentList<>();
+   private final SideDependentList<YoFramePoint3D> yoDesiredHandPositions = new SideDependentList<>();
    private final SideDependentList<YoFrameQuaternion> yoDesiredHandOrientations = new SideDependentList<>();
    private final YoFrameQuaternion yoDesiredChestOrientation;
    private final YoFrameQuaternion yoDesiredPelvisOrientation;
-   private final YoFramePoint yoDesiredPelvisPosition;
+   private final YoFramePoint3D yoDesiredPelvisPosition;
    private final YoDouble trajectoryTime;
 
    private final KinematicsToolboxOutputConverter outputConverter;
@@ -90,7 +90,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       for (RobotSide robotSide : RobotSide.values)
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
-         YoFramePoint desiredHandPosition = new YoFramePoint(behaviorName + "Desired" + side + "Hand", worldFrame, registry);
+         YoFramePoint3D desiredHandPosition = new YoFramePoint3D(behaviorName + "Desired" + side + "Hand", worldFrame, registry);
          yoDesiredHandPositions.put(robotSide, desiredHandPosition);
          YoFrameQuaternion desiredHandOrientation = new YoFrameQuaternion(behaviorName + "Desired" + side + "Hand", worldFrame, registry);
          yoDesiredHandOrientations.put(robotSide, desiredHandOrientation);
@@ -98,7 +98,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       yoDesiredChestOrientation = new YoFrameQuaternion(behaviorName + "DesiredChest", worldFrame, registry);
       yoDesiredPelvisOrientation = new YoFrameQuaternion(behaviorName + "DesiredPelvis", worldFrame, registry);
-      yoDesiredPelvisPosition = new YoFramePoint(behaviorName + "DesiredPelvis", worldFrame, registry);
+      yoDesiredPelvisPosition = new YoFramePoint3D(behaviorName + "DesiredPelvis", worldFrame, registry);
 
       pelvisSelectionMatrix.setToAngularSelectionOnly();
       chestSelectionMatrix.setToAngularSelectionOnly();
@@ -244,7 +244,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoFramePoint yoDesiredHandPosition = yoDesiredHandPositions.get(robotSide);
+         YoFramePoint3D yoDesiredHandPosition = yoDesiredHandPositions.get(robotSide);
          YoFrameQuaternion yoDesiredHandOrientation = yoDesiredHandOrientations.get(robotSide);
 
          if (yoDesiredHandPosition.containsNaN() || yoDesiredHandOrientation.containsNaN())

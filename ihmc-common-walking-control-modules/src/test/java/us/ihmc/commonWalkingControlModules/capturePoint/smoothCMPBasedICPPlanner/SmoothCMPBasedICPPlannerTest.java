@@ -45,8 +45,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -58,6 +56,8 @@ import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFact
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class SmoothCMPBasedICPPlannerTest
@@ -156,8 +156,8 @@ public class SmoothCMPBasedICPPlannerTest
    private double footstepHeight = 0.02;
    private BagOfBalls comTrack, icpTrack, cmpTrack, copTrack;
    private BagOfBalls comInitialCornerPoints, icpInitialCornerPoints, comFinalCornerPoints, icpFinalCornerPoints, copCornerPoints;
-   private List<YoFramePose> nextFootstepPoses;
-   private SideDependentList<YoFramePose> currentFootLocations;
+   private List<YoFramePoseUsingYawPitchRoll> nextFootstepPoses;
+   private SideDependentList<YoFramePoseUsingYawPitchRoll> currentFootLocations;
    private YoGraphicPosition comPositionGraphic, icpPositionGraphic, cmpPositionGraphic, copPositionGraphic;
    private SimulationConstructionSet scs;
    private int SCS_BUFFER_SIZE = 100000;
@@ -266,16 +266,16 @@ public class SmoothCMPBasedICPPlannerTest
 
    private void setupPositionGraphics()
    {
-      YoFramePoint yoCoMPosition = new YoFramePoint("CoMPositionForViz", worldFrame, registry);
+      YoFramePoint3D yoCoMPosition = new YoFramePoint3D("CoMPositionForViz", worldFrame, registry);
       comPositionGraphic = new YoGraphicPosition("CoMPositionGraphic", yoCoMPosition, trackBallSize * 2, new YoAppearanceRGBColor(comPointsColor, 0.0),
                                                  GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoFramePoint yoICPPosition = new YoFramePoint("ICPPositionForViz", worldFrame, registry);
+      YoFramePoint3D yoICPPosition = new YoFramePoint3D("ICPPositionForViz", worldFrame, registry);
       icpPositionGraphic = new YoGraphicPosition("ICPPositionGraphic", yoICPPosition, trackBallSize * 2, new YoAppearanceRGBColor(icpPointsColor, 0.0),
                                                  GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoFramePoint yoCMPPosition = new YoFramePoint("CMPPositionForViz", worldFrame, registry);
+      YoFramePoint3D yoCMPPosition = new YoFramePoint3D("CMPPositionForViz", worldFrame, registry);
       cmpPositionGraphic = new YoGraphicPosition("CMPPositionGraphic", yoCMPPosition, trackBallSize * 2, new YoAppearanceRGBColor(cmpPointsColor, 0.0),
                                                  GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoFramePoint yoCoPPosition = new YoFramePoint("CoPPositionForViz", worldFrame, registry);
+      YoFramePoint3D yoCoPPosition = new YoFramePoint3D("CoPPositionForViz", worldFrame, registry);
       copPositionGraphic = new YoGraphicPosition("CoPPositionGraphic", yoCoPPosition, trackBallSize * 2, new YoAppearanceRGBColor(copPointsColor, 0.0),
                                                  GraphicType.BALL_WITH_ROTATED_CROSS);
       graphicsListRegistry.registerYoGraphic("GraphicPositions", comPositionGraphic);
@@ -295,7 +295,7 @@ public class SmoothCMPBasedICPPlannerTest
       {
          Graphics3DObject footstepGraphic = new Graphics3DObject();
          footstepGraphic.addExtrudedPolygon(contactPointsInFootFrame, footstepHeight, side == RobotSide.LEFT ? leftFootstepColor : rightFootstepColor);
-         YoFramePose footPose = new YoFramePose(side.getCamelCaseName() + "FootPose", worldFrame, registry);
+         YoFramePoseUsingYawPitchRoll footPose = new YoFramePoseUsingYawPitchRoll(side.getCamelCaseName() + "FootPose", worldFrame, registry);
          currentFootLocations.put(side, footPose);
          graphicsListRegistry.registerYoGraphic("currentFootPose", new YoGraphicShape(side.getCamelCaseName() + "FootViz", footstepGraphic, footPose, 1.0));
       }
@@ -308,7 +308,7 @@ public class SmoothCMPBasedICPPlannerTest
       {
          Graphics3DObject nextFootstepGraphic = new Graphics3DObject();
          nextFootstepGraphic.addExtrudedPolygon(contactPointsInFootFrame, footstepHeight, nextFootstepColor);
-         YoFramePose nextFootstepPose = new YoFramePose("NextFootstep" + i + "Pose", worldFrame, registry);
+         YoFramePoseUsingYawPitchRoll nextFootstepPose = new YoFramePoseUsingYawPitchRoll("NextFootstep" + i + "Pose", worldFrame, registry);
          nextFootstepPoses.add(nextFootstepPose);
          graphicsListRegistry.registerYoGraphic("UpcomingFootsteps",
                                                 new YoGraphicShape("NextFootstep" + i + "Viz", nextFootstepGraphic, nextFootstepPose, 1.0));
@@ -698,7 +698,7 @@ public class SmoothCMPBasedICPPlannerTest
    {
       for (RobotSide side : RobotSide.values)
       {
-         YoFramePose footPose = currentFootLocations.get(side);
+         YoFramePoseUsingYawPitchRoll footPose = currentFootLocations.get(side);
          if (contactStates.get(side).inContact())
          {
             footPose.setFromReferenceFrame(feet.get(side).getSoleFrame());

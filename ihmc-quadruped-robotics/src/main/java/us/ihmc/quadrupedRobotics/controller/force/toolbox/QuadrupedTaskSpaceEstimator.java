@@ -8,9 +8,9 @@ import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFra
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.frames.YoFrameOrientation;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -25,16 +25,16 @@ public class QuadrupedTaskSpaceEstimator
    private final RigidBody pelvisRigidBody;
 
    // estimates
-   private final QuadrantDependentList<YoFrameOrientation> yoSoleOrientationEstimate;
-   private final QuadrantDependentList<YoFramePoint> yoSolePositionEstimate;
-   private final QuadrantDependentList<YoFrameVector> yoSoleAngularVelocityEstimate;
-   private final QuadrantDependentList<YoFrameVector> yoSoleLinearVelocityEstimate;
-   private final YoFrameOrientation yoBodyOrientationEstimate;
-   private final YoFramePoint yoBodyPositionEstimate;
-   private final YoFrameVector yoBodyAngularVelocityEstimate;
-   private final YoFrameVector yoBodyLinearVelocityEstimate;
-   private final YoFramePoint yoComPositionEstimate;
-   private final YoFrameVector yoComVelocityEstimate;
+   private final QuadrantDependentList<YoFrameYawPitchRoll> yoSoleOrientationEstimate;
+   private final QuadrantDependentList<YoFramePoint3D> yoSolePositionEstimate;
+   private final QuadrantDependentList<YoFrameVector3D> yoSoleAngularVelocityEstimate;
+   private final QuadrantDependentList<YoFrameVector3D> yoSoleLinearVelocityEstimate;
+   private final YoFrameYawPitchRoll yoBodyOrientationEstimate;
+   private final YoFramePoint3D yoBodyPositionEstimate;
+   private final YoFrameVector3D yoBodyAngularVelocityEstimate;
+   private final YoFrameVector3D yoBodyLinearVelocityEstimate;
+   private final YoFramePoint3D yoComPositionEstimate;
+   private final YoFrameVector3D yoComVelocityEstimate;
 
    // solvers
    private final QuadrupedSoleForceEstimator soleForceEstimator;
@@ -65,17 +65,17 @@ public class QuadrupedTaskSpaceEstimator
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          String prefix = robotQuadrant.getCamelCaseName();
-         yoSoleOrientationEstimate.set(robotQuadrant, new YoFrameOrientation(prefix + "SoleOrientationEstimate", worldFrame, registry));
-         yoSolePositionEstimate.set(robotQuadrant, new YoFramePoint(prefix + "SolePositionEstimate", worldFrame, registry));
-         yoSoleAngularVelocityEstimate.set(robotQuadrant, new YoFrameVector(prefix + "SoleAngularVelocityEstimate", worldFrame, registry));
-         yoSoleLinearVelocityEstimate.set(robotQuadrant, new YoFrameVector(prefix + "SoleLinearVelocityEstimate", worldFrame, registry));
+         yoSoleOrientationEstimate.set(robotQuadrant, new YoFrameYawPitchRoll(prefix + "SoleOrientationEstimate", worldFrame, registry));
+         yoSolePositionEstimate.set(robotQuadrant, new YoFramePoint3D(prefix + "SolePositionEstimate", worldFrame, registry));
+         yoSoleAngularVelocityEstimate.set(robotQuadrant, new YoFrameVector3D(prefix + "SoleAngularVelocityEstimate", worldFrame, registry));
+         yoSoleLinearVelocityEstimate.set(robotQuadrant, new YoFrameVector3D(prefix + "SoleLinearVelocityEstimate", worldFrame, registry));
       }
-      yoBodyOrientationEstimate = new YoFrameOrientation("comPositionEstimate", worldFrame, registry);
-      yoBodyPositionEstimate = new YoFramePoint("bodyPositionEstimate", worldFrame, registry);
-      yoBodyAngularVelocityEstimate = new YoFrameVector("bodyAngularVelocityEstimate", worldFrame, registry);
-      yoBodyLinearVelocityEstimate = new YoFrameVector("bodyLinearVelocityEstimate", worldFrame, registry);
-      yoComPositionEstimate = new YoFramePoint("comPositionEstimate", worldFrame, registry);
-      yoComVelocityEstimate = new YoFrameVector("comVelocityEstimate", worldFrame, registry);
+      yoBodyOrientationEstimate = new YoFrameYawPitchRoll("comPositionEstimate", worldFrame, registry);
+      yoBodyPositionEstimate = new YoFramePoint3D("bodyPositionEstimate", worldFrame, registry);
+      yoBodyAngularVelocityEstimate = new YoFrameVector3D("bodyAngularVelocityEstimate", worldFrame, registry);
+      yoBodyLinearVelocityEstimate = new YoFrameVector3D("bodyLinearVelocityEstimate", worldFrame, registry);
+      yoComPositionEstimate = new YoFramePoint3D("comPositionEstimate", worldFrame, registry);
+      yoComVelocityEstimate = new YoFrameVector3D("comVelocityEstimate", worldFrame, registry);
 
       // graphics
       if (graphicsListRegistry != null)
@@ -83,7 +83,7 @@ public class QuadrupedTaskSpaceEstimator
          for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
          {
             String prefix = robotQuadrant.getCamelCaseName();
-            YoFramePoint yoSolePosition = yoSolePositionEstimate.get(robotQuadrant);
+            YoFramePoint3D yoSolePosition = yoSolePositionEstimate.get(robotQuadrant);
             YoGraphicPosition yoSolePositionGraphic = new YoGraphicPosition(prefix + "SolePositionEstimate", yoSolePosition, 0.01, YoAppearance.Black());
             graphicsListRegistry.registerArtifact(prefix + "SolePositionEstimate", yoSolePositionGraphic.createArtifact());
          }
@@ -137,7 +137,7 @@ public class QuadrupedTaskSpaceEstimator
       estimates.getComVelocity().changeFrame(worldFrame);
 
       // update yovariables
-      yoBodyOrientationEstimate.setAndMatchFrame(estimates.getBodyOrientation());
+      yoBodyOrientationEstimate.setMatchingFrame(estimates.getBodyOrientation());
       yoBodyPositionEstimate.setMatchingFrame(estimates.getBodyPosition());
       yoBodyAngularVelocityEstimate.setMatchingFrame(estimates.getBodyAngularVelocity());
       yoBodyLinearVelocityEstimate.setMatchingFrame(estimates.getBodyLinearVelocity());
@@ -145,7 +145,7 @@ public class QuadrupedTaskSpaceEstimator
       yoComVelocityEstimate.setMatchingFrame(estimates.getComVelocity());
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         yoSoleOrientationEstimate.get(robotQuadrant).setAndMatchFrame(estimates.getSoleOrientation().get(robotQuadrant));
+         yoSoleOrientationEstimate.get(robotQuadrant).setMatchingFrame(estimates.getSoleOrientation().get(robotQuadrant));
          yoSolePositionEstimate.get(robotQuadrant).setMatchingFrame(estimates.getSolePosition(robotQuadrant));
          yoSoleAngularVelocityEstimate.get(robotQuadrant).setMatchingFrame(estimates.getSoleAngularVelocity().get(robotQuadrant));
          yoSoleLinearVelocityEstimate.get(robotQuadrant).setMatchingFrame(estimates.getSoleLinearVelocity().get(robotQuadrant));

@@ -11,9 +11,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 
 
@@ -30,11 +30,11 @@ public class KinematicPoint implements java.io.Serializable
    private final String name;
 
    // The position and velocity are in world frame. AngularVelocity is in body frame of the joint.
-   private final YoFramePoint positionInWorld;
-   private final YoFrameVector velocityInWorld;
-   private final YoFrameVector angularVelocityInWorld;
+   private final YoFramePoint3D positionInWorld;
+   private final YoFrameVector3D velocityInWorld;
+   private final YoFrameVector3D angularVelocityInWorld;
 
-   private final YoFrameVector offsetYoFrameVector;
+   private final YoFrameVector3D offsetYoFrameVector;
 
    protected Joint parentJoint;
 
@@ -69,11 +69,11 @@ public class KinematicPoint implements java.io.Serializable
       this.name = name;
       this.registry = registry;
 
-      positionInWorld = new YoFramePoint(name + "_", "", ReferenceFrame.getWorldFrame(), registry);
-      velocityInWorld = new YoFrameVector(name + "_d", "", ReferenceFrame.getWorldFrame(), registry);
-      angularVelocityInWorld = new YoFrameVector(name + "_w", "", ReferenceFrame.getWorldFrame(), registry);
+      positionInWorld = new YoFramePoint3D(name + "_", "", ReferenceFrame.getWorldFrame(), registry);
+      velocityInWorld = new YoFrameVector3D(name + "_d", "", ReferenceFrame.getWorldFrame(), registry);
+      angularVelocityInWorld = new YoFrameVector3D(name + "_w", "", ReferenceFrame.getWorldFrame(), registry);
 
-      this.offsetYoFrameVector = new YoFrameVector(name + "off", "", ReferenceFrame.getWorldFrame(), registry);
+      this.offsetYoFrameVector = new YoFrameVector3D(name + "off", "", ReferenceFrame.getWorldFrame(), registry);
       if (offset != null)
          offsetYoFrameVector.set(offset);
    }
@@ -273,17 +273,17 @@ public class KinematicPoint implements java.io.Serializable
       this.positionInWorld.set(position);
    }
 
-   public YoFramePoint getYoPosition()
+   public YoFramePoint3D getYoPosition()
    {
       return positionInWorld;
    }
 
-   public YoFrameVector getYoVelocity()
+   public YoFrameVector3D getYoVelocity()
    {
       return velocityInWorld;
    }
 
-   public YoFrameVector getYoAngularVelocity()
+   public YoFrameVector3D getYoAngularVelocity()
    {
       return angularVelocityInWorld;
    }

@@ -28,9 +28,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.frames.YoSpatialVector;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -40,6 +37,9 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SpatialFeedbackController implements FeedbackControllerInterface
 {
@@ -49,15 +49,15 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final YoBoolean isEnabled;
 
-   private final YoFramePoseUsingQuaternions yoDesiredPose;
-   private final YoFramePoseUsingQuaternions yoCurrentPose;
+   private final YoFramePose3D yoDesiredPose;
+   private final YoFramePose3D yoCurrentPose;
 
    private final YoSpatialVector yoErrorVector;
    private final YoFrameQuaternion yoErrorOrientation;
 
-   private final YoFrameVector yoErrorPositionIntegrated;
+   private final YoFrameVector3D yoErrorPositionIntegrated;
    private final YoFrameQuaternion yoErrorOrientationCumulated;
-   private final YoFrameVector yoErrorRotationVectorIntegrated;
+   private final YoFrameVector3D yoErrorRotationVectorIntegrated;
 
    private final YoSpatialVector yoDesiredVelocity;
    private final YoSpatialVector yoCurrentVelocity;
@@ -77,8 +77,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final YoSpatialVector yoFeedbackWrench;
    private final RateLimitedYoSpatialVector rateLimitedFeedbackWrench;
 
-   private final YoFrameVector yoDesiredRotationVector;
-   private final YoFrameVector yoCurrentRotationVector;
+   private final YoFrameVector3D yoDesiredRotationVector;
+   private final YoFrameVector3D yoCurrentRotationVector;
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
@@ -153,8 +153,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       yoDesiredPose = feedbackControllerToolbox.getPose(endEffector, DESIRED, isEnabled);
       yoCurrentPose = feedbackControllerToolbox.getPose(endEffector, CURRENT, isEnabled);
-      YoFrameVector errorPosition = feedbackControllerToolbox.getDataVector(endEffector, ERROR, POSITION, isEnabled);
-      YoFrameVector errorRotationVector = feedbackControllerToolbox.getDataVector(endEffector, ERROR, ROTATION_VECTOR, isEnabled);
+      YoFrameVector3D errorPosition = feedbackControllerToolbox.getDataVector(endEffector, ERROR, POSITION, isEnabled);
+      YoFrameVector3D errorRotationVector = feedbackControllerToolbox.getDataVector(endEffector, ERROR, ROTATION_VECTOR, isEnabled);
       yoErrorVector = new YoSpatialVector(errorPosition, errorRotationVector);
       yoErrorOrientation = feedbackControllerToolbox.getOrientation(endEffector, ERROR, isEnabled);
       yoErrorPositionIntegrated = feedbackControllerToolbox.getDataVector(endEffector, ERROR_INTEGRATED, POSITION, isEnabled);
@@ -265,7 +265,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       command.getIncludingFrame(desiredOrientation, desiredAngularVelocity);
       command.getFeedForwardActionIncludingFrame(feedForwardAngularAction, feedForwardLinearAction);
 
-      yoDesiredPose.setAndMatchFrame(desiredPosition, desiredOrientation);
+      yoDesiredPose.setMatchingFrame(desiredPosition, desiredOrientation);
       yoDesiredPose.getOrientation().getRotationVector(yoDesiredRotationVector);
       yoDesiredVelocity.setAndMatchFrame(desiredLinearVelocity, desiredAngularVelocity);
 

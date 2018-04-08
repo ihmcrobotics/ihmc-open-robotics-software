@@ -22,9 +22,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -35,6 +32,9 @@ import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SphereICPOptimizationController implements GenericSphereController
 {
@@ -47,8 +47,8 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final YoFramePoint2d planarForces = new YoFramePoint2d("planarICPForces", worldFrame, registry);
-   private final YoFrameVector desiredForces = new YoFrameVector("desiredForces", worldFrame, registry);
+   private final YoFramePoint2D planarForces = new YoFramePoint2D("planarICPForces", worldFrame, registry);
+   private final YoFrameVector3D desiredForces = new YoFrameVector3D("desiredForces", worldFrame, registry);
    private final YoBoolean isInDoubleSupport = new YoBoolean("isInDoubleSupport", registry);
    private final ArrayList<Footstep> nextFootsteps = new ArrayList<>();
 
@@ -70,12 +70,12 @@ public class SphereICPOptimizationController implements GenericSphereController
    private final SideDependentList<FootSpoof> contactableFeet;
    private final SideDependentList<FramePose3D> footPosesAtTouchdown;
 
-   private final YoFramePoint icp;
-   private final YoFrameVector icpVelocity;
-   private final YoFramePoint desiredICP;
-   private final YoFrameVector desiredICPVelocity;
+   private final YoFramePoint3D icp;
+   private final YoFrameVector3D icpVelocity;
+   private final YoFramePoint3D desiredICP;
+   private final YoFrameVector3D desiredICPVelocity;
 
-   private final YoFramePoint yoDesiredCMP;
+   private final YoFramePoint3D yoDesiredCMP;
 
    private final ICPOptimizationControllerInterface icpOptimizationController;
    private final YoICPControlGains icpGains;
