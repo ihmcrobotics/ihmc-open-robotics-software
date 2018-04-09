@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -50,9 +51,9 @@ public class ConvexPolygonToolsTest
       FrameConvexPolygon2D polygon2 = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(points2));
 
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
-      FrameConvexPolygon2D combinedPolygon = new FrameConvexPolygon2D();
-      FrameLineSegment2D connectingEdge1 = new FrameLineSegment2D();
-      FrameLineSegment2D connectingEdge2 = new FrameLineSegment2D();
+      FrameConvexPolygon2D combinedPolygon = new FrameConvexPolygon2D(zUpFrame);
+      FrameLineSegment2D connectingEdge1 = new FrameLineSegment2D(zUpFrame);
+      FrameLineSegment2D connectingEdge2 = new FrameLineSegment2D(zUpFrame);
 
       ArrayList<FramePoint2D> pointsThatShouldBeInCombinedPolygon = new ArrayList<FramePoint2D>();
       int numberOfPointsInCombinedPolygon = 10000;
@@ -84,7 +85,7 @@ public class ConvexPolygonToolsTest
       long endTime = System.currentTimeMillis();
       double timePer = (endTime - startTime) / ((double) numTests);
 
-      System.out.println("timePer = " + timePer + " milliseconds per test using combineDisjointPolygons.");
+      PrintTools.info("timePer = " + timePer + " milliseconds per test using combineDisjointPolygons.");
       assertTrue(timePer < 1.5);
 
       startTime = System.currentTimeMillis();
@@ -98,7 +99,7 @@ public class ConvexPolygonToolsTest
       endTime = System.currentTimeMillis();
       timePer = (endTime - startTime) / ((double) numTests);
 
-      System.out.println("timePer = " + timePer + " milliseconds per test using combineWith.");
+      PrintTools.info("timePer = " + timePer + " milliseconds per test using combineWith.");
       assertTrue(timePer < 2.0);
 
       assertTrue(polygon1.isPointInside(connectingEdge1.getFirstEndpoint()));
