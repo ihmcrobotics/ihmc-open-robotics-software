@@ -77,7 +77,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       for (int i = 0; i < convexPolygon2ds.size(); i++)
       {
          ConvexPolygon2D intersection = new ConvexPolygon2D();
-         boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon, intersection);
+         boolean success = new ConvexPolygonTools().computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon, intersection);
          if (success)
          {
             intersectingPolygon2ds.add(intersection);
@@ -237,7 +237,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       for (int i = 0; i < convexPolygon2ds.size(); i++)
       {
          ConvexPolygon2D intersection = new ConvexPolygon2D();
-         boolean success = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon, intersection);
+         boolean success = new ConvexPolygonTools().computeIntersectionOfPolygons(convexPolygon2ds.get(i), captureRegionPolygon, intersection);
          if (success)
          {
             intersectingPolygon2ds.add(intersection);

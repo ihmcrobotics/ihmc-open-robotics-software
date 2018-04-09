@@ -156,6 +156,8 @@ public class SphereICPPlannerVisualizer
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
    public SphereICPPlannerVisualizer()
    {
 
@@ -464,7 +466,7 @@ public class SphereICPPlannerVisualizer
       FrameVector2D randomLineVector = EuclidFrameRandomTools.nextFrameVector2D(random, randomSupportPolygon.getReferenceFrame());
       FrameLine2D randomLine = new FrameLine2D(randomLineOrigin, randomLineVector);
 
-      ConvexPolygonTools.cutPolygonWithLine(randomLine, randomSupportPolygon, RobotSide.generateRandomRobotSide(random));
+      convexPolygonTools.cutPolygonWithLine(randomLine, randomSupportPolygon, RobotSide.generateRandomRobotSide(random));
       randomSupportPolygon.update();
 
       while (randomSupportPolygon.getNumberOfVertices() < 4)
