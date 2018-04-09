@@ -285,9 +285,9 @@ public class ConvexPolygonTools
       boolean DONE = false;
 
       int bridgeCount = 0;
-      bridgeIndicesP.clear();
-      bridgeIndicesQ.clear();
-      bridgeWasOnLeft.clear();
+      bridgeIndicesP.reset();
+      bridgeIndicesQ.reset();
+      bridgeWasOnLeft.reset();
 
       do
       {
@@ -564,7 +564,7 @@ public class ConvexPolygonTools
       }
       while (!finished);
 
-      indicesToPack.clear();
+      indicesToPack.reset();
       indicesToPack.add(indexPStart);
       indicesToPack.add(indexPEnd);
       indicesToPack.add(indexQStart);
