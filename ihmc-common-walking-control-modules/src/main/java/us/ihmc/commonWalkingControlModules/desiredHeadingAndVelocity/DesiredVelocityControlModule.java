@@ -8,6 +8,4 @@ public interface DesiredVelocityControlModule
    public abstract ReferenceFrame getReferenceFrame();
 
    public abstract void getDesiredVelocity(FrameVector2D desiredVelocityToPack);
-
-   public abstract void updateDesiredVelocity();
 }
