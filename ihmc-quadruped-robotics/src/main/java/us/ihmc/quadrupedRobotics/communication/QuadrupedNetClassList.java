@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.communication;
 
 import controller_msgs.msg.dds.*;
+import geometry_msgs.msg.dds.PointPubSubType;
 import gnu.trove.list.array.*;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.Packet;
@@ -47,22 +48,13 @@ public class QuadrupedNetClassList extends NetClassList
       // Trajectory message fields
       registerPacketField(QueueableMessage.class);
       registerPacketField(EuclideanTrajectoryMessage.class);
+      registerPacketField(EuclideanTrajectoryPointMessage.class);
       registerPacketField(FrameInformation.class);
 
       registerPacketField(SelectionMatrix3DMessage.class);
       registerPacketField(WeightMatrix3DMessage.class);
 
       registerPacketField(Pose3D.class);
-
-
-
-
-      registerPacketField(QuadrupedTimedStepListMessagePubSubType.class);
-      registerPacketField(QueueableMessagePubSubType.class);
-
-
-
-
       registerPacketClass(Packet.class);
 
       registerPacketClass(MessageCollection.class);
@@ -96,10 +88,16 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(QuadrupedJointName.class);
       registerPacketField(QuadrupedJointName[].class);
       registerPacketField(double[].class);
+      registerPacketField(SpatialVectorMessage.class);
+      registerPacketField(SpatialVectorMessage[].class);
 
       // Footstep data
       registerPacketField(QuadrupedTimedStepListMessage.class);
       registerPacketClass(QuadrupedTimedStepListMessage.class);
+      registerPacketField(QuadrupedStepMessage.class);
+      registerPacketField(QuadrupedTimedStepMessage.class);
+      registerPacketField(QuadrupedTimedStepMessage[].class);
+      registerPacketField(TimeIntervalMessage.class);
 
       registerPacketField(ArrayList.class);
       registerPacketField(Point3D.class);
@@ -160,5 +158,15 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(double.class);
 
       registerPacketField(String.class);
+
+      registerPacketField(EuclideanTrajectoryPointMessagePubSubType.class);
+      registerPacketField(EuclideanTrajectoryPointMessage[].class);
+      registerPacketField(QuadrupedTimedStepListMessagePubSubType.class);
+      registerPacketField(QueueableMessagePubSubType.class);
+      registerPacketField(SpatialVectorMessagePubSubType.class);
+      registerPacketField(SpatialVectorMessage[].class);
+      registerPacketField(IMUPacketPubSubType.class);
+      registerPacketField(QuadrupedTimedStepMessagePubSubType.class);
+      registerPacketField(PointPubSubType.class);
    }
 }
