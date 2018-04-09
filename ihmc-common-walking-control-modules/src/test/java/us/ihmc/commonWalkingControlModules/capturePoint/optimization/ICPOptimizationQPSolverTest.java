@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
+import static org.junit.Assert.assertTrue;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
@@ -13,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ICPOptimizationQPSolverTest
@@ -23,7 +24,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testStandingWithPerfectTrackingAndAngularMomentum() throws Exception
+   public void testStandingWithPerfectTrackingAndAngularMomentum()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
@@ -33,7 +34,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D();
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.05, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -50,7 +51,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testStandingUnconstrainedWithAndAngularMomentum() throws Exception
+   public void testStandingUnconstrainedWithAndAngularMomentum()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
@@ -60,7 +61,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.05, 0.10);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.05, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -80,7 +81,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testStandingUnconstrained() throws Exception
+   public void testStandingUnconstrained()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
 
@@ -89,7 +90,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.05, 0.10);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.05, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -109,7 +110,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testStandingConstrained() throws Exception
+   public void testStandingConstrained()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -124,7 +125,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -151,7 +152,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testStandingConstrainedWithAngularMomentum() throws Exception
+   public void testStandingConstrainedWithAngularMomentum()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -167,7 +168,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -200,7 +201,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSteppingUnconstrainedFeedbackPreferred() throws Exception
+   public void testSteppingUnconstrainedFeedbackPreferred()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -220,7 +221,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -246,7 +247,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSteppingUnconstrainedFootstepAdjustmentPreferred() throws Exception
+   public void testSteppingUnconstrainedFootstepAdjustmentPreferred()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -266,7 +267,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -291,7 +292,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSteppingUnconstrainedFootstepAdjustmentPreferredWithAngularMomentum() throws Exception
+   public void testSteppingUnconstrainedFootstepAdjustmentPreferredWithAngularMomentum()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -312,7 +313,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.04);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -337,7 +338,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSteppingUnconstrainedWithAdjustment() throws Exception
+   public void testSteppingUnconstrainedWithAdjustment()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -357,7 +358,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.06, 0.10);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -407,7 +408,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSteppingUnconstrainedWithAdjustmentAndAngularMomentum() throws Exception
+   public void testSteppingUnconstrainedWithAdjustmentAndAngularMomentum()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -428,7 +429,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.06, 0.10);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.01);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -478,7 +479,7 @@ public class ICPOptimizationQPSolverTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testSteppingCoPConstrainedWithAdjustment() throws Exception
+   public void testSteppingCoPConstrainedWithAdjustment()
    {
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(0.0, 0.0, 10, false);
       solver.setMaxNumberOfIterations(10);
@@ -502,7 +503,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.04, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.04);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -559,7 +560,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.04, 0.06);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.02, 0.04);
 
-      solver.compute(icpError, perfectCMP);
+      assertTrue(solver.compute(icpError, perfectCMP));
 
       FrameVector2D cmpCoPDifference = new FrameVector2D();
       FrameVector2D copFeedback = new FrameVector2D();
@@ -679,17 +680,7 @@ public class ICPOptimizationQPSolverTest
          FrameVector2D icpError = new FrameVector2D(worldFrame, -0.07380072407166109, -0.05497512056196603);
          FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.020230791294742534, 0.1586256502408977);
 
-         NoConvergenceException exception = null;
-         try
-         {
-            solver.compute(icpError, perfectCMP);
-         }
-         catch (NoConvergenceException e)
-         {
-            exception = e;
-         }
-
-         Assert.assertTrue("There should not have been an exception.", exception == null);
+         assertTrue(solver.compute(icpError, perfectCMP));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -746,17 +737,7 @@ public class ICPOptimizationQPSolverTest
       FrameVector2D icpError = new FrameVector2D(worldFrame, -0.074, -0.055);
       FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.020, 0.159);
 
-      NoConvergenceException exception = null;
-      try
-      {
-         solver.compute(icpError, perfectCMP);
-      }
-      catch (NoConvergenceException e)
-      {
-         exception = e;
-      }
-
-      Assert.assertTrue(exception == null);
+      assertTrue(solver.compute(icpError, perfectCMP));
    }
 }
 

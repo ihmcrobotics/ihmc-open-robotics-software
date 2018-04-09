@@ -24,7 +24,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.exceptions.NoConvergenceException;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -141,7 +140,7 @@ public class ICPOptimizationSolutionHandlerTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testWithinDeadbandResolution() throws NoConvergenceException
+   public void testWithinDeadbandResolution()
    {
       double scale = 1.1;
       double deadbandSize = 0.05;
@@ -168,7 +167,7 @@ public class ICPOptimizationSolutionHandlerTest
       currentICPError.scale(recursionMultiplier);
 
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
-      solver.compute(currentICPError, perfectCMP);
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
       solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep,  solver);
       FrameVector2D copFeedback = new FrameVector2D();
@@ -227,7 +226,7 @@ public class ICPOptimizationSolutionHandlerTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testOutsideDeadbandResolution() throws NoConvergenceException
+   public void testOutsideDeadbandResolution()
    {
       double scale = 1.1;
       double deadbandSize = 0.05;
@@ -254,7 +253,7 @@ public class ICPOptimizationSolutionHandlerTest
       currentICPError.scale(recursionMultiplier);
 
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
-      solver.compute(currentICPError, perfectCMP);
+      assertTrue(solver.compute(currentICPError, perfectCMP));
 
       solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
       FrameVector2D copFeedback = new FrameVector2D();
@@ -338,13 +337,7 @@ public class ICPOptimizationSolutionHandlerTest
       currentICPError.scale(recursionMultiplier);
 
       FramePoint2D perfectCMP = new FramePoint2D(ReferenceFrame.getWorldFrame(), -0.1, 0.0);
-      try
-      {
-         solver.compute(currentICPError, perfectCMP);
-      }
-      catch (NoConvergenceException e)
-      {
-      }
+      solver.compute(currentICPError, perfectCMP);
 
       solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep, solver);
       FrameVector2D copFeedback = new FrameVector2D();

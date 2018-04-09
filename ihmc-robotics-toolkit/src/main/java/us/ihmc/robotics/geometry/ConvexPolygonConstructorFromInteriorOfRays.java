@@ -7,7 +7,6 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
@@ -160,8 +159,11 @@ public class ConvexPolygonConstructorFromInteriorOfRays
          return false;
       }
 
-      polygonToPack.set(Vertex2DSupplier.asVertex2DSupplier(intersectionArrayList));
-      
+      polygonToPack.clear();
+      for (int i = 0; i < intersectionArrayList.size(); i++)
+         polygonToPack.addVertex(intersectionArrayList.get(i));
+      polygonToPack.update();
+
       returnPointsToPool(intersectionPoints);
       return true;
    }
