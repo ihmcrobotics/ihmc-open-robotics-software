@@ -20,8 +20,8 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationFactory;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.input.QuadrupedTestTeleopScript;
@@ -128,7 +128,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
       simulationFactory.setXGaitSettings(xGaitSettings);
-      simulationFactory.setInitialForceControlState(QuadrupedForceControllerEnum.DO_NOTHING);
+      simulationFactory.setInitialForceControlState(QuadrupedControllerEnum.DO_NOTHING);
       simulationFactory.setUseLocalCommunicator(useNetworking.get());
 
       if (groundContactModelType.hasValue())

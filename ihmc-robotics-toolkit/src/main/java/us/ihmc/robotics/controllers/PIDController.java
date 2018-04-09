@@ -89,16 +89,6 @@ public class PIDController extends AbstractPIDController
          maxFeedback.set(max);
    }
 
-   public void setGains(PIDGainsReadOnly pidGainsReadOnly)
-   {
-      setProportionalGain(pidGainsReadOnly.getKp());
-      setDerivativeGain(pidGainsReadOnly.getKd());
-      setPositionDeadband(pidGainsReadOnly.getPositionDeadband());
-      setIntegralGain(pidGainsReadOnly.getKi());
-      setIntegralLeakRatio(pidGainsReadOnly.getIntegralLeakRatio());
-      setMaxIntegralError(pidGainsReadOnly.getMaxIntegralError());
-   }
-
    public void setProportionalGain(double proportionalGain)
    {
       pdController.setProportionalGain(proportionalGain);

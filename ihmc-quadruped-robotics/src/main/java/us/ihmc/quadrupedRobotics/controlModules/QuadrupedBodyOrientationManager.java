@@ -10,7 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedBodyOrientationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.estimator.GroundPlaneEstimator;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -48,14 +48,14 @@ public class QuadrupedBodyOrientationManager
    private ReferenceFrame desiredFrameToHold;
 
    private final YoDouble robotTimestamp;
-   private final QuadrupedForceControllerToolbox controllerToolbox;
+   private final QuadrupedControllerToolbox controllerToolbox;
 
    private final MomentumRateCommand angularMomentumCommand = new MomentumRateCommand();
    private final YoFrameVector3D bodyAngularWeight = new YoFrameVector3D("bodyAngularWeight", worldFrame, registry);
 
    private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
 
-   public QuadrupedBodyOrientationManager(QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public QuadrupedBodyOrientationManager(QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
 

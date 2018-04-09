@@ -5,10 +5,10 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedMessageTools;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettingsReadOnly;
@@ -90,7 +90,7 @@ public class QuadrupedStepTeleopManager
    public void requestSteppingState()
    {
       QuadrupedRequestedControllerStateMessage controllerMessage = new QuadrupedRequestedControllerStateMessage();
-      controllerMessage.setQuadrupedControllerName(QuadrupedForceControllerRequestedEvent.REQUEST_STEPPING.toByte());
+      controllerMessage.setQuadrupedControllerName(QuadrupedControllerRequestedEvent.REQUEST_STEPPING.toByte());
       packetCommunicator.send(controllerMessage);
    }
 
@@ -111,7 +111,7 @@ public class QuadrupedStepTeleopManager
       QuadrupedControllerStateChangeMessage controllerStateChangeMessage = this.controllerStateChangeMessage.get();
       QuadrupedSteppingStateChangeMessage steppingStateChangeMessage = this.steppingStateChangeMessage.get();
 
-      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndControllerName() == QuadrupedForceControllerEnum.STEPPING.toByte()) &&
+      return (controllerStateChangeMessage != null && controllerStateChangeMessage.getEndControllerName() == QuadrupedControllerEnum.STEPPING.toByte()) &&
             (steppingStateChangeMessage != null && steppingStateChangeMessage.getEndSteppingControllerName() == QuadrupedSteppingStateEnum.STEP.toByte());
    }
 

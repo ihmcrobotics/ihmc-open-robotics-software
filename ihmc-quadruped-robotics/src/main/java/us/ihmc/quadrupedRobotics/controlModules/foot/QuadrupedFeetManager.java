@@ -10,9 +10,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajectoryCommand;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallback;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
@@ -32,13 +32,13 @@ public class QuadrupedFeetManager
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final QuadrantDependentList<QuadrupedFootControlModule> footControlModules = new QuadrantDependentList<>();
-   private final QuadrupedForceControllerToolbox toolbox;
+   private final QuadrupedControllerToolbox toolbox;
 
    // support polygon
    private final YoFrameConvexPolygon2D supportPolygon = new YoFrameConvexPolygon2D("supportPolygon", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoArtifactPolygon supportPolygonVisualizer = new YoArtifactPolygon("supportPolygonVisualizer", supportPolygon, Color.black, false, 1);
 
-   public QuadrupedFeetManager(QuadrupedForceControllerToolbox toolbox, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+   public QuadrupedFeetManager(QuadrupedControllerToolbox toolbox, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {

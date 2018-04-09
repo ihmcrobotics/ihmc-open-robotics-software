@@ -15,10 +15,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
-import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerManager;
-import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
+import us.ihmc.quadrupedRobotics.controller.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
@@ -92,8 +89,7 @@ public class QuadrupedSimulationFactory
    private final RequiredFactoryField<QuadrupedModelFactory> modelFactory = new RequiredFactoryField<>("modelFactory");
    private final RequiredFactoryField<SimulationConstructionSetParameters> scsParameters = new RequiredFactoryField<>("scsParameters");
    private final RequiredFactoryField<GroundContactParameters> groundContactParameters = new RequiredFactoryField<>("groundContactParameters");
-   private final RequiredFactoryField<QuadrupedInitialPositionParameters> initialPositionParameters = new RequiredFactoryField<>(
-         "initialPositionParameters");
+   private final RequiredFactoryField<QuadrupedInitialPositionParameters> initialPositionParameters = new RequiredFactoryField<>("initialPositionParameters");
    private final RequiredFactoryField<OutputWriter> outputWriter = new RequiredFactoryField<>("outputWriter");
    private final RequiredFactoryField<Boolean> useNetworking = new RequiredFactoryField<>("useNetworking");
    private final RequiredFactoryField<NetClassList> netClassList = new RequiredFactoryField<>("netClassList");
@@ -115,7 +111,7 @@ public class QuadrupedSimulationFactory
    private final OptionalFactoryField<Boolean> usePushRobotController = new OptionalFactoryField<>("usePushRobotController");
    private final OptionalFactoryField<FootSwitchType> footSwitchType = new OptionalFactoryField<>("footSwitchType");
    private final OptionalFactoryField<Integer> scsBufferSize = new OptionalFactoryField<>("scsBufferSize");
-   private final OptionalFactoryField<QuadrupedForceControllerEnum> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
+   private final OptionalFactoryField<QuadrupedControllerEnum> initialForceControlState = new OptionalFactoryField<>("initialForceControlState");
    private final OptionalFactoryField<Boolean> useLocalCommunicator = new OptionalFactoryField<>("useLocalCommunicator");
 
    // TO CONSTRUCT
@@ -314,14 +310,20 @@ public class QuadrupedSimulationFactory
       {
       case FORCE:
          if (initialForceControlState.hasValue())
-            controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties.get(), initialPositionParameters.get(), initialForceControlState.get());
+            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialPositionParameters.get(),
+                                                               initialForceControlState.get());
          else
-            controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties.get(), initialPositionParameters.get());
+            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties.get(), initialPositionParameters.get());
          break;
       case POSITION:
-         controllerManager = new QuadrupedPositionControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
-                                                                    initialPositionParameters.get(), positionBasedCrawlControllerParameters.get(),
-                                                                    legInverseKinematicsCalculator);
+         if (initialForceControlState.hasValue())
+            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
+                                                               positionBasedCrawlControllerParameters.get(), initialPositionParameters.get(),
+                                                               controlMode.get());
+         else
+            controllerManager = new QuadrupedControllerManager(runtimeEnvironment, modelFactory.get(), physicalProperties.get(),
+                                                               positionBasedCrawlControllerParameters.get(), initialPositionParameters.get(),
+                                                               initialForceControlState.get(), controlMode.get());
          break;
       default:
          controllerManager = null;
@@ -683,7 +685,7 @@ public class QuadrupedSimulationFactory
       this.scsBufferSize.set(scsBufferSize);
    }
 
-   public void setInitialForceControlState(QuadrupedForceControllerEnum initialForceControlState)
+   public void setInitialForceControlState(QuadrupedControllerEnum initialForceControlState)
    {
       this.initialForceControlState.set(initialForceControlState);
    }

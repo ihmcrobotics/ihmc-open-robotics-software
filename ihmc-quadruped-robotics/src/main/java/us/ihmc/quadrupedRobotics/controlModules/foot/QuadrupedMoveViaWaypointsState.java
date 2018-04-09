@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -36,7 +36,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
    private final VirtualForceCommand virtualForceCommand = new VirtualForceCommand();
 
-   private final QuadrupedForceControllerToolbox controllerToolbox;
+   private final QuadrupedControllerToolbox controllerToolbox;
    private final RobotQuadrant robotQuadrant;
 
    private final FramePoint3D desiredFootPosition = new FramePoint3D();
@@ -46,7 +46,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
 
    private double taskStartTime;
 
-   public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedForceControllerToolbox controllerToolbox, YoVariableRegistry registry)
+   public QuadrupedMoveViaWaypointsState(RobotQuadrant robotQuadrant, QuadrupedControllerToolbox controllerToolbox, YoVariableRegistry registry)
    {
       this.robotQuadrant = robotQuadrant;
       this.controllerToolbox = controllerToolbox;
