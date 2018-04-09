@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "AdjustFootstepMessage" defined in "AdjustFootstepMessage_.idl".
- * Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from AdjustFootstepMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * AdjustFootstepMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "AdjustFootstepMessage" defined in "AdjustFootstepMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from AdjustFootstepMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit AdjustFootstepMessage_.idl instead.
+*
+*/
 public class AdjustFootstepMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.AdjustFootstepMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::AdjustFootstepMessage_";
@@ -18,8 +16,7 @@ public class AdjustFootstepMessagePubSubType implements us.ihmc.pubsub.TopicData
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.AdjustFootstepMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.AdjustFootstepMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class AdjustFootstepMessagePubSubType implements us.ihmc.pubsub.TopicData
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.AdjustFootstepMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.AdjustFootstepMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -52,12 +48,11 @@ public class AdjustFootstepMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -73,19 +68,22 @@ public class AdjustFootstepMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLocation(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getPredictedContactPoints2d().size(); ++i0)
+      for(int i0 = 0; i0 < data.getPredictedContactPoints2d().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPredictedContactPoints2d().get(i0), current_alignment);
-      }
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPredictedContactPoints2d().get(i0), current_alignment);}
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -98,10 +96,9 @@ public class AdjustFootstepMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getLocation(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
-      if (data.getPredictedContactPoints2d().size() <= 100)
-         cdr.write_type_e(data.getPredictedContactPoints2d());
-      else
-         throw new RuntimeException("predicted_contact_points_2d field exceeds the maximum length");
+      if(data.getPredictedContactPoints2d().size() <= 100)
+      cdr.write_type_e(data.getPredictedContactPoints2d());else
+          throw new RuntimeException("predicted_contact_points_2d field exceeds the maximum length");
 
       cdr.write_type_6(data.getExecutionDelayTime());
 
@@ -110,13 +107,14 @@ public class AdjustFootstepMessagePubSubType implements us.ihmc.pubsub.TopicData
    public static void read(controller_msgs.msg.dds.AdjustFootstepMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setRobotSide(cdr.read_type_9());
-
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getLocation(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);
-      cdr.read_type_e(data.getPredictedContactPoints2d());
+      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getLocation(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
+      cdr.read_type_e(data.getPredictedContactPoints2d());	
       data.setExecutionDelayTime(cdr.read_type_6());
+      	
 
    }
 
@@ -156,7 +154,6 @@ public class AdjustFootstepMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       return new controller_msgs.msg.dds.AdjustFootstepMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -168,7 +165,7 @@ public class AdjustFootstepMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.AdjustFootstepMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -178,7 +175,7 @@ public class AdjustFootstepMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.AdjustFootstepMessage src, controller_msgs.msg.dds.AdjustFootstepMessage dest)
    {
       staticCopy(src, dest);

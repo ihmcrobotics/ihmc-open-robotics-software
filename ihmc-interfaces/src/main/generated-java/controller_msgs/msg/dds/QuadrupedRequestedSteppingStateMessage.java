@@ -5,22 +5,21 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC quadruped controller API.
- * This message is used to switch the control scheme between different stepping modes.
- */
-public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequestedSteppingStateMessage>
-      implements Settable<QuadrupedRequestedSteppingStateMessage>, EpsilonComparable<QuadrupedRequestedSteppingStateMessage>
+       * This message is part of the IHMC quadruped controller API.
+       * This message is used to switch the control scheme between different stepping modes.
+       */
+public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequestedSteppingStateMessage> implements Settable<QuadrupedRequestedSteppingStateMessage>, EpsilonComparable<QuadrupedRequestedSteppingStateMessage>
 {
    public static final byte REQUEST_STAND = (byte) 0;
    public static final byte REQUEST_STEP = (byte) 1;
    public static final byte REQUEST_SOLE_WAYPOINT = (byte) 2;
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
    /**
-    * Specifies the which state the controller should transition into.
-    */
+            * Specifies the which state the controller should transition into.
+            */
    public byte quadruped_stepping_state_ = (byte) 255;
 
    public QuadrupedRequestedSteppingStateMessage()
@@ -42,50 +41,46 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
-
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
    /**
-    * Specifies the which state the controller should transition into.
-    */
+            * Specifies the which state the controller should transition into.
+            */
    public void setQuadrupedSteppingState(byte quadruped_stepping_state)
    {
       quadruped_stepping_state_ = quadruped_stepping_state;
    }
-
    /**
-    * Specifies the which state the controller should transition into.
-    */
+            * Specifies the which state the controller should transition into.
+            */
    public byte getQuadrupedSteppingState()
    {
       return quadruped_stepping_state_;
    }
 
+
    @Override
    public boolean epsilonEquals(QuadrupedRequestedSteppingStateMessage other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quadruped_stepping_state_, other.quadruped_stepping_state_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.quadruped_stepping_state_, other.quadruped_stepping_state_, epsilon)) return false;
+
 
       return true;
    }
@@ -93,20 +88,16 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof QuadrupedRequestedSteppingStateMessage))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof QuadrupedRequestedSteppingStateMessage)) return false;
 
       QuadrupedRequestedSteppingStateMessage otherMyClass = (QuadrupedRequestedSteppingStateMessage) other;
 
-      if (this.sequence_id_ != otherMyClass.sequence_id_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (this.quadruped_stepping_state_ != otherMyClass.quadruped_stepping_state_)
-         return false;
+      if(this.quadruped_stepping_state_ != otherMyClass.quadruped_stepping_state_) return false;
+
 
       return true;
    }
@@ -118,8 +109,7 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
 
       builder.append("QuadrupedRequestedSteppingStateMessage {");
       builder.append("sequence_id=");
-      builder.append(this.sequence_id_);
-      builder.append(", ");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("quadruped_stepping_state=");
       builder.append(this.quadruped_stepping_state_);
       builder.append("}");

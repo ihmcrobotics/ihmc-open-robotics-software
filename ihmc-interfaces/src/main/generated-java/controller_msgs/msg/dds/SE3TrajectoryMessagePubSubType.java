@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "SE3TrajectoryMessage" defined in "SE3TrajectoryMessage_.idl". Use
- * this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from SE3TrajectoryMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * SE3TrajectoryMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "SE3TrajectoryMessage" defined in "SE3TrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from SE3TrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit SE3TrajectoryMessage_.idl instead.
+*
+*/
 public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.SE3TrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::SE3TrajectoryMessage_";
@@ -18,8 +16,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.SE3TrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.SE3TrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.SE3TrajectoryMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.SE3TrajectoryMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -46,11 +42,9 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 2000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -67,6 +61,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -81,12 +76,11 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getTaskspaceTrajectoryPoints().size(); ++i0)
+      for(int i0 = 0; i0 < data.getTaskspaceTrajectoryPoints().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getTaskspaceTrajectoryPoints().get(i0),
-                                                                                                               current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getTaskspaceTrajectoryPoints().get(i0), current_alignment);}
 
       current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getAngularSelectionMatrix(), current_alignment);
 
@@ -100,9 +94,11 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getControlFramePose(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -111,10 +107,9 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if (data.getTaskspaceTrajectoryPoints().size() <= 2000)
-         cdr.write_type_e(data.getTaskspaceTrajectoryPoints());
-      else
-         throw new RuntimeException("taskspace_trajectory_points field exceeds the maximum length");
+      if(data.getTaskspaceTrajectoryPoints().size() <= 1)
+      cdr.write_type_e(data.getTaskspaceTrajectoryPoints());else
+          throw new RuntimeException("taskspace_trajectory_points field exceeds the maximum length");
 
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getAngularSelectionMatrix(), cdr);
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getLinearSelectionMatrix(), cdr);
@@ -130,17 +125,17 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    public static void read(controller_msgs.msg.dds.SE3TrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      cdr.read_type_e(data.getTaskspaceTrajectoryPoints());
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getAngularSelectionMatrix(), cdr);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getLinearSelectionMatrix(), cdr);
-      controller_msgs.msg.dds.FrameInformationPubSubType.read(data.getFrameInformation(), cdr);
-      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getAngularWeightMatrix(), cdr);
-      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getLinearWeightMatrix(), cdr);
+      	
+      cdr.read_type_e(data.getTaskspaceTrajectoryPoints());	
+      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getAngularSelectionMatrix(), cdr);	
+      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getLinearSelectionMatrix(), cdr);	
+      controller_msgs.msg.dds.FrameInformationPubSubType.read(data.getFrameInformation(), cdr);	
+      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getAngularWeightMatrix(), cdr);	
+      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getLinearWeightMatrix(), cdr);	
       data.setUseCustomControlFrame(cdr.read_type_7());
-
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getControlFramePose(), cdr);
-      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);
+      	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getControlFramePose(), cdr);	
+      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
 
    }
 
@@ -198,7 +193,6 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       return new controller_msgs.msg.dds.SE3TrajectoryMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -210,7 +204,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.SE3TrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -220,7 +214,7 @@ public class SE3TrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.SE3TrajectoryMessage src, controller_msgs.msg.dds.SE3TrajectoryMessage dest)
    {
       staticCopy(src, dest);

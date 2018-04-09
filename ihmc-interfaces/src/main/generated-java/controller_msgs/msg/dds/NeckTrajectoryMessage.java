@@ -5,21 +5,19 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API. This message commands the controller
- * to move the neck in jointspace to the desired joint angles while going through the specified
- * trajectory points. A third order polynomial function is used to interpolate between trajectory
- * points.
- */
+       * This message is part of the IHMC whole-body controller API.
+       * This message commands the controller to move the neck in jointspace to the desired joint angles while going through the specified trajectory points.
+       * A third order polynomial function is used to interpolate between trajectory points.
+       */
 public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> implements Settable<NeckTrajectoryMessage>, EpsilonComparable<NeckTrajectoryMessage>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
    /**
-    * The trajectories for each joint in order from the one closest to the chest to the one the
-    * closest to the head.
-    */
+            * The trajectories for each joint in order from the one closest to the chest to the one the closest to the head.
+            */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
 
    public NeckTrajectoryMessage()
@@ -41,43 +39,39 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
-
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
+
    /**
-    * The trajectories for each joint in order from the one closest to the chest to the one the
-    * closest to the head.
-    */
+            * The trajectories for each joint in order from the one closest to the chest to the one the closest to the head.
+            */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspace_trajectory_;
    }
 
+
    @Override
    public boolean epsilonEquals(NeckTrajectoryMessage other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon))
-         return false;
+      if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon)) return false;
 
       return true;
    }
@@ -85,20 +79,15 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof NeckTrajectoryMessage))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof NeckTrajectoryMessage)) return false;
 
       NeckTrajectoryMessage otherMyClass = (NeckTrajectoryMessage) other;
 
-      if (this.sequence_id_ != otherMyClass.sequence_id_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_))
-         return false;
+      if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_)) return false;
 
       return true;
    }
@@ -110,8 +99,7 @@ public class NeckTrajectoryMessage extends Packet<NeckTrajectoryMessage> impleme
 
       builder.append("NeckTrajectoryMessage {");
       builder.append("sequence_id=");
-      builder.append(this.sequence_id_);
-      builder.append(", ");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("jointspace_trajectory=");
       builder.append(this.jointspace_trajectory_);
       builder.append("}");

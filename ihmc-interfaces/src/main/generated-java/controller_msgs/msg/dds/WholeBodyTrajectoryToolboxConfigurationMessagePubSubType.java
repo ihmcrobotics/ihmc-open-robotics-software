@@ -1,18 +1,14 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "WholeBodyTrajectoryToolboxConfigurationMessage" defined in
- * "WholeBodyTrajectoryToolboxConfigurationMessage_.idl". Use this class to provide the
- * TopicDataType to a Participant.
- *
- * This file was automatically generated from WholeBodyTrajectoryToolboxConfigurationMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * WholeBodyTrajectoryToolboxConfigurationMessage_.idl instead.
- *
- */
-public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
-      implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage>
+* 
+* Topic data type of the struct "WholeBodyTrajectoryToolboxConfigurationMessage" defined in "WholeBodyTrajectoryToolboxConfigurationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from WholeBodyTrajectoryToolboxConfigurationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit WholeBodyTrajectoryToolboxConfigurationMessage_.idl instead.
+*
+*/
+public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::WholeBodyTrajectoryToolboxConfigurationMessage_";
 
@@ -20,8 +16,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -29,9 +24,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload,
-                           controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -55,6 +48,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
 
       current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -69,12 +63,15 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getCdrSerializedSize(data.getInitialConfiguration(),
-                                                                                                                current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getCdrSerializedSize(data.getInitialConfiguration(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -93,12 +90,12 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
    public static void read(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setNumberOfInitialGuesses(cdr.read_type_2());
-
+      	
       data.setMaximumExpansionSize(cdr.read_type_2());
-
-      controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.read(data.getInitialConfiguration(), cdr);
+      	
+      controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.read(data.getInitialConfiguration(), cdr);	
 
    }
 
@@ -122,8 +119,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
 
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage src,
-                                 controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage src, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage dest)
    {
       dest.set(src);
    }
@@ -133,7 +129,6 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
    {
       return new controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -145,7 +140,7 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -155,9 +150,8 @@ public class WholeBodyTrajectoryToolboxConfigurationMessagePubSubType
    {
       read(data, cdr);
    }
-
-   public void copy(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage src,
-                    controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage dest)
+   
+   public void copy(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage src, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage dest)
    {
       staticCopy(src, dest);
    }

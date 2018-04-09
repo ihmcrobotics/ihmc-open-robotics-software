@@ -7,8 +7,8 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class TimeIntervalMessage extends Packet<TimeIntervalMessage> implements Settable<TimeIntervalMessage>, EpsilonComparable<TimeIntervalMessage>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
    public double start_time_;
    public double end_time_;
@@ -34,16 +34,15 @@ public class TimeIntervalMessage extends Packet<TimeIntervalMessage> implements 
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
-
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -53,7 +52,6 @@ public class TimeIntervalMessage extends Packet<TimeIntervalMessage> implements 
    {
       start_time_ = start_time;
    }
-
    public double getStartTime()
    {
       return start_time_;
@@ -63,28 +61,24 @@ public class TimeIntervalMessage extends Packet<TimeIntervalMessage> implements 
    {
       end_time_ = end_time;
    }
-
    public double getEndTime()
    {
       return end_time_;
    }
 
+
    @Override
    public boolean epsilonEquals(TimeIntervalMessage other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.start_time_, other.start_time_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.start_time_, other.start_time_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_time_, other.end_time_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.end_time_, other.end_time_, epsilon)) return false;
+
 
       return true;
    }
@@ -92,23 +86,18 @@ public class TimeIntervalMessage extends Packet<TimeIntervalMessage> implements 
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof TimeIntervalMessage))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof TimeIntervalMessage)) return false;
 
       TimeIntervalMessage otherMyClass = (TimeIntervalMessage) other;
 
-      if (this.sequence_id_ != otherMyClass.sequence_id_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (this.start_time_ != otherMyClass.start_time_)
-         return false;
+      if(this.start_time_ != otherMyClass.start_time_) return false;
 
-      if (this.end_time_ != otherMyClass.end_time_)
-         return false;
+      if(this.end_time_ != otherMyClass.end_time_) return false;
+
 
       return true;
    }
@@ -120,11 +109,9 @@ public class TimeIntervalMessage extends Packet<TimeIntervalMessage> implements 
 
       builder.append("TimeIntervalMessage {");
       builder.append("sequence_id=");
-      builder.append(this.sequence_id_);
-      builder.append(", ");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("start_time=");
-      builder.append(this.start_time_);
-      builder.append(", ");
+      builder.append(this.start_time_);      builder.append(", ");
       builder.append("end_time=");
       builder.append(this.end_time_);
       builder.append("}");

@@ -5,13 +5,13 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC localization module.
- */
+       * This message is part of the IHMC localization module.
+       */
 public class StampedPosePacket extends Packet<StampedPosePacket> implements Settable<StampedPosePacket>, EpsilonComparable<StampedPosePacket>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
    public us.ihmc.euclid.geometry.Pose3D pose_;
    public long timestamp_;
@@ -45,20 +45,20 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
-
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
+
 
    public us.ihmc.euclid.geometry.Pose3D getPose()
    {
@@ -69,7 +69,6 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
    {
       timestamp_ = timestamp;
    }
-
    public long getTimestamp()
    {
       return timestamp_;
@@ -79,7 +78,6 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
    {
       confidence_factor_ = confidence_factor;
    }
-
    public double getConfidenceFactor()
    {
       return confidence_factor_;
@@ -95,33 +93,27 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
    {
       return getFrameId().toString();
    }
-
    public java.lang.StringBuilder getFrameId()
    {
       return frame_id_;
    }
 
+
    @Override
    public boolean epsilonEquals(StampedPosePacket other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!this.pose_.epsilonEquals(other.pose_, epsilon))
-         return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon))
-         return false;
+      if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_factor_, other.confidence_factor_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_factor_, other.confidence_factor_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_id_, other.frame_id_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.frame_id_, other.frame_id_, epsilon)) return false;
+
 
       return true;
    }
@@ -129,28 +121,21 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof StampedPosePacket))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof StampedPosePacket)) return false;
 
       StampedPosePacket otherMyClass = (StampedPosePacket) other;
 
-      if (this.sequence_id_ != otherMyClass.sequence_id_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (!this.pose_.equals(otherMyClass.pose_))
-         return false;
-      if (this.timestamp_ != otherMyClass.timestamp_)
-         return false;
+      if (!this.pose_.equals(otherMyClass.pose_)) return false;
+      if(this.timestamp_ != otherMyClass.timestamp_) return false;
 
-      if (this.confidence_factor_ != otherMyClass.confidence_factor_)
-         return false;
+      if(this.confidence_factor_ != otherMyClass.confidence_factor_) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.frame_id_, otherMyClass.frame_id_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.frame_id_, otherMyClass.frame_id_)) return false;
+
 
       return true;
    }
@@ -162,17 +147,13 @@ public class StampedPosePacket extends Packet<StampedPosePacket> implements Sett
 
       builder.append("StampedPosePacket {");
       builder.append("sequence_id=");
-      builder.append(this.sequence_id_);
-      builder.append(", ");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("pose=");
-      builder.append(this.pose_);
-      builder.append(", ");
+      builder.append(this.pose_);      builder.append(", ");
       builder.append("timestamp=");
-      builder.append(this.timestamp_);
-      builder.append(", ");
+      builder.append(this.timestamp_);      builder.append(", ");
       builder.append("confidence_factor=");
-      builder.append(this.confidence_factor_);
-      builder.append(", ");
+      builder.append(this.confidence_factor_);      builder.append(", ");
       builder.append("frame_id=");
       builder.append(this.frame_id_);
       builder.append("}");

@@ -1,18 +1,14 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "HeadHybridJointspaceTaskspaceTrajectoryMessage" defined in
- * "HeadHybridJointspaceTaskspaceTrajectoryMessage_.idl". Use this class to provide the
- * TopicDataType to a Participant.
- *
- * This file was automatically generated from HeadHybridJointspaceTaskspaceTrajectoryMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * HeadHybridJointspaceTaskspaceTrajectoryMessage_.idl instead.
- *
- */
-public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
-      implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage>
+* 
+* Topic data type of the struct "HeadHybridJointspaceTaskspaceTrajectoryMessage" defined in "HeadHybridJointspaceTaskspaceTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from HeadHybridJointspaceTaskspaceTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit HeadHybridJointspaceTaskspaceTrajectoryMessage_.idl instead.
+*
+*/
+public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::HeadHybridJointspaceTaskspaceTrajectoryMessage_";
 
@@ -20,8 +16,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -29,9 +24,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload,
-                           controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -53,6 +46,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
 
       current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -67,10 +61,11 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getTaskspaceTrajectoryMessage(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointspaceTrajectoryMessage(),
-                                                                                                              current_alignment);
+      current_alignment += controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointspaceTrajectoryMessage(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -86,9 +81,9 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
    public static void read(controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getTaskspaceTrajectoryMessage(), cdr);
-      controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectoryMessage(), cdr);
+      	
+      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getTaskspaceTrajectoryMessage(), cdr);	
+      controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType.read(data.getJointspaceTrajectoryMessage(), cdr);	
 
    }
 
@@ -98,8 +93,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("taskspace_trajectory_message", new controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
 
-      ser.write_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(),
-                       data.getJointspaceTrajectoryMessage());
+      ser.write_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectoryMessage());
 
    }
 
@@ -109,13 +103,11 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("taskspace_trajectory_message", new controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getTaskspaceTrajectoryMessage());
 
-      ser.read_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(),
-                      data.getJointspaceTrajectoryMessage());
+      ser.read_type_a("jointspace_trajectory_message", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectoryMessage());
 
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage src,
-                                 controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage src, controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage dest)
    {
       dest.set(src);
    }
@@ -125,7 +117,6 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
    {
       return new controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -137,7 +128,7 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -147,9 +138,8 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessagePubSubType
    {
       read(data, cdr);
    }
-
-   public void copy(controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage src,
-                    controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage dest)
+   
+   public void copy(controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage src, controller_msgs.msg.dds.HeadHybridJointspaceTaskspaceTrajectoryMessage dest)
    {
       staticCopy(src, dest);
    }

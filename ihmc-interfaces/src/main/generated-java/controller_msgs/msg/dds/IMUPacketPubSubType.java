@@ -1,14 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "IMUPacket" defined in "IMUPacket_.idl". Use this class to provide
- * the TopicDataType to a Participant.
- *
- * This file was automatically generated from IMUPacket_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit IMUPacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "IMUPacket" defined in "IMUPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from IMUPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit IMUPacket_.idl instead.
+*
+*/
 public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.IMUPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::IMUPacket_";
@@ -51,6 +50,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -65,6 +65,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getAngularVelocity(), current_alignment);
@@ -72,6 +73,8 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLinearAcceleration(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -90,11 +93,12 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    public static void read(controller_msgs.msg.dds.IMUPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getAngularVelocity(), cdr);
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearAcceleration(), cdr);
+      	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getAngularVelocity(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearAcceleration(), cdr);	
       data.setTime(cdr.read_type_6());
+      	
 
    }
 
@@ -134,7 +138,6 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    {
       return new controller_msgs.msg.dds.IMUPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -146,7 +149,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.IMUPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -156,7 +159,7 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.IMUPacket src, controller_msgs.msg.dds.IMUPacket dest)
    {
       staticCopy(src, dest);

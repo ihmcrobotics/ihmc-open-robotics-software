@@ -7,8 +7,8 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class FisheyePacket extends Packet<FisheyePacket> implements Settable<FisheyePacket>, EpsilonComparable<FisheyePacket>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
    public controller_msgs.msg.dds.VideoPacket video_packet_;
 
@@ -31,39 +31,36 @@ public class FisheyePacket extends Packet<FisheyePacket> implements Settable<Fis
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
-
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
+
 
    public controller_msgs.msg.dds.VideoPacket getVideoPacket()
    {
       return video_packet_;
    }
 
+
    @Override
    public boolean epsilonEquals(FisheyePacket other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!this.video_packet_.epsilonEquals(other.video_packet_, epsilon))
-         return false;
+      if (!this.video_packet_.epsilonEquals(other.video_packet_, epsilon)) return false;
 
       return true;
    }
@@ -71,20 +68,15 @@ public class FisheyePacket extends Packet<FisheyePacket> implements Settable<Fis
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof FisheyePacket))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof FisheyePacket)) return false;
 
       FisheyePacket otherMyClass = (FisheyePacket) other;
 
-      if (this.sequence_id_ != otherMyClass.sequence_id_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (!this.video_packet_.equals(otherMyClass.video_packet_))
-         return false;
+      if (!this.video_packet_.equals(otherMyClass.video_packet_)) return false;
 
       return true;
    }
@@ -96,8 +88,7 @@ public class FisheyePacket extends Packet<FisheyePacket> implements Settable<Fis
 
       builder.append("FisheyePacket {");
       builder.append("sequence_id=");
-      builder.append(this.sequence_id_);
-      builder.append(", ");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("video_packet=");
       builder.append(this.video_packet_);
       builder.append("}");
