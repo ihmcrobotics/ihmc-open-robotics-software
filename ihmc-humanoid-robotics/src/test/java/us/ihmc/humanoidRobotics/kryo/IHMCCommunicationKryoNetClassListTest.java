@@ -13,8 +13,8 @@ import org.junit.Test;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.idl.PreallocatedList;
-import us.ihmc.idl.RecyclingArrayListPubSub;
+import us.ihmc.idl.IDLSequence;
+import us.ihmc.pubsub.TopicDataType;
 
 public class IHMCCommunicationKryoNetClassListTest
 {
@@ -50,6 +50,7 @@ public class IHMCCommunicationKryoNetClassListTest
       }
    }
 
+   @SuppressWarnings("rawtypes")
    private static void assertAllFieldsAreInSetRecursively(Object holder, Field field, Set<Class<?>> setWithRegisteredFields)
          throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, InstantiationException
    {
@@ -81,11 +82,14 @@ public class IHMCCommunicationKryoNetClassListTest
       if (typeToCheck.isPrimitive() || typeToCheck == Class.class || typeToCheck == String.class)
          return;
 
-      if (PreallocatedList.class.isAssignableFrom(typeToCheck))
+      if (IDLSequence.Object.class.isAssignableFrom(typeToCheck))
       {
          if (fieldInstance == null)
             return;
-         Field listClassField = typeToCheck.getDeclaredField("clazz");
+         Class<? extends TopicDataType> topicDataType = ((IDLSequence.Object) fieldInstance).getTopicDataType().getClass();
+         assertTrue("The class " + topicDataType.getSimpleName() + " is not registered.", setWithRegisteredFields.contains(topicDataType));
+
+         Field listClassField = typeToCheck.getSuperclass().getDeclaredField("clazz");
          listClassField.setAccessible(true);
          typeToCheck = (Class<?>) listClassField.get(fieldInstance);
          fieldInstance = null;
@@ -105,8 +109,6 @@ public class IHMCCommunicationKryoNetClassListTest
       if (Enum.class.isAssignableFrom(typeToCheck))
          return;
       if (ArrayList.class.isAssignableFrom(typeToCheck))
-         return;
-      if (RecyclingArrayListPubSub.class.isAssignableFrom(typeToCheck))
          return;
 
       for (Field subField : typeToCheck.getDeclaredFields())
