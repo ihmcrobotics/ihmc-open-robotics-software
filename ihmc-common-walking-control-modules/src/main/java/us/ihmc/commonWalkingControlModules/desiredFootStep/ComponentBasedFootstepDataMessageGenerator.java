@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.DesiredHeadingControlModule;
@@ -173,11 +174,12 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
       ComponentBasedDesiredFootstepCalculator desiredFootstepCalculator = new ComponentBasedDesiredFootstepCalculator(pelvisZUpFrame, bipedFeet,
             desiredHeadingControlModule, desiredVelocityControlModule, registry);
 
-      desiredFootstepCalculator.setInPlaceWidth(walkingControllerParameters.getSteppingParameters().getInPlaceWidth());
-      desiredFootstepCalculator.setMaxStepLength(walkingControllerParameters.getSteppingParameters().getMaxStepLength());
-      desiredFootstepCalculator.setMinStepWidth(walkingControllerParameters.getSteppingParameters().getMinStepWidth());
-      desiredFootstepCalculator.setMaxStepWidth(walkingControllerParameters.getSteppingParameters().getMaxStepWidth());
-      desiredFootstepCalculator.setStepPitch(walkingControllerParameters.getSteppingParameters().getStepPitch());
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      desiredFootstepCalculator.setInPlaceWidth(steppingParameters.getInPlaceWidth());
+      desiredFootstepCalculator.setMaxStepLength(steppingParameters.getMaxStepLength());
+      desiredFootstepCalculator.setMinStepWidth(steppingParameters.getMinStepWidth());
+      desiredFootstepCalculator.setMaxStepWidth(steppingParameters.getMaxStepWidth());
+      desiredFootstepCalculator.setStepPitch(steppingParameters.getStepPitch());
       return desiredFootstepCalculator;
    }
 
@@ -189,14 +191,14 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
          updatables.get(i).update(time);
       }
 
-      if (walk.getBooleanValue() != walkPrevious.getBooleanValue())
+//      if (walk.getBooleanValue() != walkPrevious.getBooleanValue())
       {
          if (walk.getBooleanValue())
          {
             componentBasedDesiredFootstepCalculator.initialize();
             computeAndSubmitFootsteps();
          }
-         else
+         else if (walk.getBooleanValue() != walkPrevious.getBooleanValue())
          {
             commandInputManager.submitMessage(HumanoidMessageTools.createPauseWalkingMessage(true));
          }

@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 
 public interface DesiredVelocityControlModule
 {
-   public abstract ReferenceFrame getReferenceFrame();
+   ReferenceFrame getReferenceFrame();
 
-   public abstract void getDesiredVelocity(FrameVector2D desiredVelocityToPack);
+   FrameVector2DReadOnly getDesiredVelocity();
 }

@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-
 
 public class ManualDesiredVelocityControlModule implements DesiredVelocityControlModule
 {
@@ -17,16 +16,14 @@ public class ManualDesiredVelocityControlModule implements DesiredVelocityContro
       parentRegistry.addChild(registry);
    }
 
-   public void setDesiredVelocity(FrameVector2D newDesiredVelocity)
+   public void setDesiredVelocity(FrameVector2DReadOnly newDesiredVelocity)
    {
-      newDesiredVelocity.changeFrame(desiredVelocity.getReferenceFrame());
-      desiredVelocity.set(newDesiredVelocity);
+      desiredVelocity.setMatchingFrame(newDesiredVelocity);
    }
 
-   @Override
-   public void getDesiredVelocity(FrameVector2D desiredVelocityToPack)
+   public FrameVector2DReadOnly getDesiredVelocity()
    {
-      desiredVelocityToPack.setIncludingFrame(desiredVelocity);
+      return desiredVelocity;
    }
 
    @Override
