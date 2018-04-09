@@ -53,6 +53,7 @@ public class QuadrupedNetClassList extends NetClassList
 
       registerPacketField(SelectionMatrix3DMessage.class);
       registerPacketField(WeightMatrix3DMessage.class);
+      registerPacketField(SO3TrajectoryMessage.class);
 
       registerPacketField(Pose3D.class);
       registerPacketClass(Packet.class);
@@ -124,16 +125,13 @@ public class QuadrupedNetClassList extends NetClassList
 
 
       // Body Orientation
+      registerPacketField(QuadrupedBodyOrientationMessage.class);
+      registerPacketClass(QuadrupedBodyOrientationMessage.class);
+
       registerPacketClass(ComPositionPacket.class);
       registerPacketField(Point3D.class);
 
       registerPacketClass(ComVelocityPacket.class);
-      registerPacketField(Vector3D.class);
-
-      registerPacketClass(BodyOrientationPacket.class);
-      registerPacketField(Quaternion.class);
-
-      registerPacketClass(BodyAngularRatePacket.class);
       registerPacketField(Vector3D.class);
 
       registerPacketClass(PlanarVelocityPacket.class);

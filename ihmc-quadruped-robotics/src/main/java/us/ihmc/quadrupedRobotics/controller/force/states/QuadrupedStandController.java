@@ -38,7 +38,6 @@ public class QuadrupedStandController implements QuadrupedController
    // planning
    private final GroundPlaneEstimator groundPlaneEstimator;
 
-   private final FrameQuaternion desiredBodyOrientation = new FrameQuaternion();
    private final QuadrupedForceControllerToolbox controllerToolbox;
 
    private final QuadrantDependentList<FramePoint3D> solePositions;
@@ -84,8 +83,7 @@ public class QuadrupedStandController implements QuadrupedController
       balanceManager.compute(contactStates);
 
       // update desired body orientation and angular rate
-      desiredBodyOrientation.setToZero(supportFrame);
-      bodyOrientationManager.compute(desiredBodyOrientation);
+      bodyOrientationManager.compute();
 
       jointSpaceManager.compute();
 
@@ -107,6 +105,8 @@ public class QuadrupedStandController implements QuadrupedController
 
       // update ground plane estimate
       groundPlaneEstimator.compute(solePositions);
+
+      bodyOrientationManager.setDesiredFrameToHoldPosition(supportFrame);
 
       // initialize feedback controllers
       balanceManager.initializeForStanding();

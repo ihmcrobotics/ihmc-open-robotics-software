@@ -146,10 +146,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    private void createSoleWaypointTrajectory()
    {
       quadrupedWaypointsPositionTrajectoryGenerator.clear();
-      for (int i = 0; i < trajectoryPointList.getNumberOfTrajectoryPoints(); ++i)
-      {
-         quadrupedWaypointsPositionTrajectoryGenerator.appendWaypoint(trajectoryPointList.getTrajectoryPoint(i));
-      }
+      quadrupedWaypointsPositionTrajectoryGenerator.appendWaypoints(trajectoryPointList);
       if (trajectoryPointList.getNumberOfTrajectoryPoints() > 0)
       {
          quadrupedWaypointsPositionTrajectoryGenerator.initialize();
