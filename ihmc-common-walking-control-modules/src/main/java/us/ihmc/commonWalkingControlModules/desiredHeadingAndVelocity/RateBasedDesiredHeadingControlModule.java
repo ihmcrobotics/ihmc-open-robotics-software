@@ -35,18 +35,6 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
    }
 
    @Override
-   public double getFinalHeadingTargetAngle()
-   {
-      throw new RuntimeException("Don't use this. It should be removed from the interface");
-   }
-
-   @Override
-   public FrameVector2D getFinalHeadingTarget()
-   {
-      throw new RuntimeException("Don't use this. It should be removed from the interface");
-   }
-
-   @Override
    public ReferenceFrame getDesiredHeadingFrame()
    {
       return desiredHeadingFrame;
@@ -64,13 +52,6 @@ public class RateBasedDesiredHeadingControlModule implements DesiredHeadingContr
    {
       double deltaHeading = desiredHeadingDot.getDoubleValue() * timeFromNow;
       return desiredHeading.getDoubleValue() + deltaHeading;
-   }
-
-   @Override
-   public void setFinalHeadingTarget(FrameVector2D finalHeadingTarget)
-   {
-      finalHeadingTarget.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setFinalHeadingTargetAngle(Math.atan2(finalHeadingTarget.getY(), finalHeadingTarget.getX()));
    }
 
    @Override

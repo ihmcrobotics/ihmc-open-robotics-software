@@ -51,21 +51,6 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    }
 
    @Override
-   public double getFinalHeadingTargetAngle()
-   {
-      return desiredHeadingFinal.getDoubleValue();
-   }
-
-   @Override
-   public FrameVector2D getFinalHeadingTarget()
-   {
-      FrameVector2D finalHeading = new FrameVector2D(ReferenceFrame.getWorldFrame(), Math.cos(desiredHeadingFinal.getDoubleValue()),
-            Math.sin(desiredHeadingFinal.getDoubleValue()));
-
-      return finalHeading;
-   }
-
-   @Override
    public ReferenceFrame getDesiredHeadingFrame()
    {
       return desiredHeadingFrame;
@@ -82,13 +67,6 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
    public void setFinalHeadingTargetAngle(double finalHeadingTargetAngle)
    {
       desiredHeadingFinal.set(finalHeadingTargetAngle);
-   }
-
-   @Override
-   public void setFinalHeadingTarget(FrameVector2D finalHeadingTarget)
-   {
-      finalHeadingTarget.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      setFinalHeadingTargetAngle(Math.atan2(finalHeadingTarget.getY(), finalHeadingTarget.getX()));
    }
 
    @Override
