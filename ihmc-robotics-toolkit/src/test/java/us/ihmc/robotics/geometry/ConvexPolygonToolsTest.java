@@ -25,7 +25,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class ConvexPolygonToolsTest
@@ -50,7 +49,10 @@ public class ConvexPolygonToolsTest
       FrameConvexPolygon2D polygon1 = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(points1));
       FrameConvexPolygon2D polygon2 = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(points2));
 
-      FrameConvexPolygon2dAndConnectingEdges frameConvexPolygon2dAndConnectingEdges = null;
+      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+      FrameConvexPolygon2D combinedPolygon = new FrameConvexPolygon2D();
+      FrameLineSegment2D connectingEdge1 = new FrameLineSegment2D();
+      FrameLineSegment2D connectingEdge2 = new FrameLineSegment2D();
 
       ArrayList<FramePoint2D> pointsThatShouldBeInCombinedPolygon = new ArrayList<FramePoint2D>();
       int numberOfPointsInCombinedPolygon = 10000;
@@ -76,7 +78,7 @@ public class ConvexPolygonToolsTest
       long startTime = System.currentTimeMillis();
       for (int i = 0; i < numTests; i++)
       {
-         frameConvexPolygon2dAndConnectingEdges = ConvexPolygonTools.combineDisjointPolygons(polygon1, polygon2);
+         convexPolygonTools.combineDisjointPolygons(polygon1, polygon2, combinedPolygon, connectingEdge1, connectingEdge2);
       }
 
       long endTime = System.currentTimeMillis();
@@ -90,7 +92,7 @@ public class ConvexPolygonToolsTest
       for (int i = 0; i < numTests; i++)
       {
          @SuppressWarnings("unused")
-         FrameConvexPolygon2D combinedPolygon = new FrameConvexPolygon2D(polygon1, polygon2);
+         FrameConvexPolygon2D expectedCombinedPolygon = new FrameConvexPolygon2D(polygon1, polygon2);
       }
 
       endTime = System.currentTimeMillis();
@@ -98,11 +100,6 @@ public class ConvexPolygonToolsTest
 
       System.out.println("timePer = " + timePer + " milliseconds per test using combineWith.");
       assertTrue(timePer < 2.0);
-
-      FrameConvexPolygon2D combinedPolygon = frameConvexPolygon2dAndConnectingEdges.getFrameConvexPolygon2d();
-
-      FrameLineSegment2D connectingEdge1 = frameConvexPolygon2dAndConnectingEdges.getConnectingEdge1();
-      FrameLineSegment2D connectingEdge2 = frameConvexPolygon2dAndConnectingEdges.getConnectingEdge2();
 
       assertTrue(polygon1.isPointInside(connectingEdge1.getFirstEndpoint()));
       assertTrue(polygon2.isPointInside(connectingEdge1.getSecondEndpoint()));
@@ -236,7 +233,11 @@ public class ConvexPolygonToolsTest
 
          expectedPolygon.update();
 
-         ConvexPolygon2D actualPolygon = ConvexPolygonTools.combineDisjointPolygons(polygon1, polygon2).getConvexPolygon2d();
+         ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+         FrameConvexPolygon2D actualPolygon = new FrameConvexPolygon2D();
+         FrameLineSegment2D connectingEdge1 = new FrameLineSegment2D();
+         FrameLineSegment2D connectingEdge2 = new FrameLineSegment2D();
+         convexPolygonTools.combineDisjointPolygons(polygon1, polygon2, actualPolygon, connectingEdge1, connectingEdge2);
 
          assertTrue("Iteration: " + i + ", expected\n" + expectedPolygon + "\nactual\n" + actualPolygon, expectedPolygon.epsilonEquals(actualPolygon, epsilon));
       }
@@ -424,7 +425,7 @@ public class ConvexPolygonToolsTest
 
       try
       {
-         ConvexPolygonTools.computeMinimumDistancePoints(polygon1, polygon2);
+         new ConvexPolygonTools().computeMinimumDistancePoints(polygon1, polygon2, new Point2D(), new Point2D());
          fail();
       }
 
@@ -435,7 +436,7 @@ public class ConvexPolygonToolsTest
 
       try
       {
-         ConvexPolygonTools.computeMinimumDistancePoints(polygon2, polygon1);
+         new ConvexPolygonTools().computeMinimumDistancePoints(polygon2, polygon1, new Point2D(), new Point2D());
          fail();
       }
 
@@ -454,8 +455,11 @@ public class ConvexPolygonToolsTest
 
       ConvexPolygon2D polygon1 = getPolygon(p1);
       ConvexPolygon2D polygon2 = getPolygon(p2);
-      Point2DReadOnly[] closestPoints = ConvexPolygonTools.computeMinimumDistancePoints(polygon1, polygon2);
-      Point2DReadOnly[] closestPointsReversed = ConvexPolygonTools.computeMinimumDistancePoints(polygon2, polygon1);
+      Point2D[] closestPoints = new Point2D[] {new Point2D(), new Point2D()};
+      Point2D[] closestPointsReversed = new Point2D[] {new Point2D(), new Point2D()};
+      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+      convexPolygonTools.computeMinimumDistancePoints(polygon1, polygon2, closestPoints[0], closestPoints[1]);
+      convexPolygonTools.computeMinimumDistancePoints(polygon2, polygon1, closestPointsReversed[0], closestPointsReversed[1]);
       assertEquals(closestPoints[0].distance(closestPoints[1]), closestPointsReversed[0].distance(closestPointsReversed[1]), epsilon);
       assertEquals(expectedSolution[0], closestPoints[0].getX(), epsilon);
       assertEquals(expectedSolution[1], closestPoints[0].getY(), epsilon);
