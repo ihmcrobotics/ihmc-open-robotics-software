@@ -5,6 +5,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedTaskSpaceController;
@@ -68,7 +69,7 @@ public class QuadrupedFallController implements QuadrupedController, QuadrupedWa
    private final JointDesiredOutputList jointDesiredOutputList;
 
    public QuadrupedFallController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
-                                  YoVariableRegistry parentRegistry)
+                                  QuadrupedControlMode controlMode, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.jointDesiredOutputList = controllerToolbox.getRuntimeEnvironment().getJointDesiredOutputList();
@@ -89,6 +90,7 @@ public class QuadrupedFallController implements QuadrupedController, QuadrupedWa
       fullRobotModel = controllerToolbox.getRuntimeEnvironment().getFullRobotModel();
 
       forceFeedbackControlEnabled = new YoBoolean("forceFeedbackControlEnabled", registry);
+      forceFeedbackControlEnabled.set(controlMode == QuadrupedControlMode.FORCE);
 
       parentRegistry.addChild(registry);
    }
@@ -117,7 +119,7 @@ public class QuadrupedFallController implements QuadrupedController, QuadrupedWa
          {
          case GO_HOME_XYZ:
             solePositionSetpoint.set(quadrant.getEnd().negateIfHindEnd(stanceLengthParameter.getValue() / 2.0),
-                  quadrant.getSide().negateIfRightSide(stanceWidthParameter.getValue() / 2.0), 0.0);
+                                     quadrant.getSide().negateIfRightSide(stanceWidthParameter.getValue() / 2.0), 0.0);
             solePositionSetpoint.add(stanceXOffsetParameter.getValue(), stanceYOffsetParameter.getValue(), -stanceHeightParameter.getValue());
             break;
          case GO_HOME_Z:
@@ -158,7 +160,6 @@ public class QuadrupedFallController implements QuadrupedController, QuadrupedWa
 
       feetManager.registerWaypointCallback(this);
    }
-
 
    @Override
    public void doAction(double timeInState)
