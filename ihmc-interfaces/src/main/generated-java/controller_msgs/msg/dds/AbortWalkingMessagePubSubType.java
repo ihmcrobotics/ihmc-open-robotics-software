@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "AbortWalkingMessage" defined in "AbortWalkingMessage_.idl". Use
- * this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from AbortWalkingMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * AbortWalkingMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "AbortWalkingMessage" defined in "AbortWalkingMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from AbortWalkingMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit AbortWalkingMessage_.idl instead.
+*
+*/
 public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.AbortWalkingMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::AbortWalkingMessage_";
@@ -26,8 +24,7 @@ public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.AbortWalkingMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.AbortWalkingMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -45,6 +42,7 @@ public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -59,6 +57,8 @@ public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -71,6 +71,7 @@ public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    public static void read(controller_msgs.msg.dds.AbortWalkingMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
+      	
 
    }
 
@@ -83,8 +84,7 @@ public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.AbortWalkingMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
-   }
+      data.setSequenceId(ser.read_type_4("sequence_id"));   }
 
    public static void staticCopy(controller_msgs.msg.dds.AbortWalkingMessage src, controller_msgs.msg.dds.AbortWalkingMessage dest)
    {
@@ -96,7 +96,6 @@ public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return new controller_msgs.msg.dds.AbortWalkingMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -108,7 +107,7 @@ public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.AbortWalkingMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -118,7 +117,7 @@ public class AbortWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.AbortWalkingMessage src, controller_msgs.msg.dds.AbortWalkingMessage dest)
    {
       staticCopy(src, dest);

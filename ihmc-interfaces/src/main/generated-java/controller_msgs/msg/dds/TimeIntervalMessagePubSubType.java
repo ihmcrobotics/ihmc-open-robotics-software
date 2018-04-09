@@ -1,13 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- *
- * Topic data type of the struct "TimeIntervalMessage" defined in "TimeIntervalMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from TimeIntervalMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit TimeIntervalMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "TimeIntervalMessage" defined in "TimeIntervalMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from TimeIntervalMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit TimeIntervalMessage_.idl instead.
+*
+*/
 public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.TimeIntervalMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::TimeIntervalMessage_";
@@ -24,8 +24,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.TimeIntervalMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.TimeIntervalMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -47,6 +46,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -61,9 +61,13 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -81,10 +85,11 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    public static void read(controller_msgs.msg.dds.TimeIntervalMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setStartTime(cdr.read_type_6());
-
+      	
       data.setEndTime(cdr.read_type_6());
+      	
 
    }
 
@@ -114,7 +119,6 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return new controller_msgs.msg.dds.TimeIntervalMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -126,7 +130,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.TimeIntervalMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -136,7 +140,7 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.TimeIntervalMessage src, controller_msgs.msg.dds.TimeIntervalMessage dest)
    {
       staticCopy(src, dest);

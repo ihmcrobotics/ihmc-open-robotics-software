@@ -1,18 +1,14 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "WholeBodyTrajectoryToolboxOutputStatus" defined in
- * "WholeBodyTrajectoryToolboxOutputStatus_.idl". Use this class to provide the TopicDataType to a
- * Participant.
- *
- * This file was automatically generated from WholeBodyTrajectoryToolboxOutputStatus_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * WholeBodyTrajectoryToolboxOutputStatus_.idl instead.
- *
- */
-public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
-      implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus>
+* 
+* Topic data type of the struct "WholeBodyTrajectoryToolboxOutputStatus" defined in "WholeBodyTrajectoryToolboxOutputStatus_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from WholeBodyTrajectoryToolboxOutputStatus_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit WholeBodyTrajectoryToolboxOutputStatus_.idl instead.
+*
+*/
+public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::WholeBodyTrajectoryToolboxOutputStatus_";
 
@@ -20,8 +16,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -29,8 +24,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -50,14 +44,11 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (50 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (50 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 50; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -73,17 +64,19 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getTrajectoryTimes().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getRobotConfigurations().size(); ++i0)
+      for(int i0 = 0; i0 < data.getRobotConfigurations().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getCdrSerializedSize(data.getRobotConfigurations().get(i0),
-                                                                                                                   current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.KinematicsToolboxOutputStatusPubSubType.getCdrSerializedSize(data.getRobotConfigurations().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -94,26 +87,24 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
 
       cdr.write_type_2(data.getPlanningResult());
 
-      if (data.getTrajectoryTimes().size() <= 50)
-         cdr.write_type_e(data.getTrajectoryTimes());
-      else
-         throw new RuntimeException("trajectory_times field exceeds the maximum length");
+      if(data.getTrajectoryTimes().size() <= 50)
+      cdr.write_type_e(data.getTrajectoryTimes());else
+          throw new RuntimeException("trajectory_times field exceeds the maximum length");
 
-      if (data.getRobotConfigurations().size() <= 50)
-         cdr.write_type_e(data.getRobotConfigurations());
-      else
-         throw new RuntimeException("robot_configurations field exceeds the maximum length");
+      if(data.getRobotConfigurations().size() <= 50)
+      cdr.write_type_e(data.getRobotConfigurations());else
+          throw new RuntimeException("robot_configurations field exceeds the maximum length");
 
    }
 
    public static void read(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setPlanningResult(cdr.read_type_2());
-
-      cdr.read_type_e(data.getTrajectoryTimes());
-      cdr.read_type_e(data.getRobotConfigurations());
+      	
+      cdr.read_type_e(data.getTrajectoryTimes());	
+      cdr.read_type_e(data.getRobotConfigurations());	
 
    }
 
@@ -135,8 +126,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
       ser.read_type_e("robot_configurations", data.getRobotConfigurations());
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus src,
-                                 controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus dest)
+   public static void staticCopy(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus src, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus dest)
    {
       dest.set(src);
    }
@@ -146,7 +136,6 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
    {
       return new controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -158,7 +147,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -168,7 +157,7 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus src, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus dest)
    {
       staticCopy(src, dest);

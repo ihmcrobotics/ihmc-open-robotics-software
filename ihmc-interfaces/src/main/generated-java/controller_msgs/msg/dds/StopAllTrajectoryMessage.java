@@ -5,15 +5,14 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API. Stop the execution of any trajectory
- * being executed.
- */
-public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
-      implements Settable<StopAllTrajectoryMessage>, EpsilonComparable<StopAllTrajectoryMessage>
+       * This message is part of the IHMC whole-body controller API.
+       * Stop the execution of any trajectory being executed.
+       */
+public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage> implements Settable<StopAllTrajectoryMessage>, EpsilonComparable<StopAllTrajectoryMessage>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public StopAllTrajectoryMessage()
@@ -33,31 +32,28 @@ public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
-
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
+
    @Override
    public boolean epsilonEquals(StopAllTrajectoryMessage other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       return true;
    }
@@ -65,17 +61,14 @@ public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage>
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof StopAllTrajectoryMessage))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof StopAllTrajectoryMessage)) return false;
 
       StopAllTrajectoryMessage otherMyClass = (StopAllTrajectoryMessage) other;
 
-      if (this.sequence_id_ != otherMyClass.sequence_id_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+
 
       return true;
    }

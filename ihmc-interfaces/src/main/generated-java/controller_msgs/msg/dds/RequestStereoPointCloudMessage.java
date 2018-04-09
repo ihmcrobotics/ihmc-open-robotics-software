@@ -5,14 +5,13 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * Use this message to request a new point cloud from the stereo camera.
- */
-public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointCloudMessage>
-      implements Settable<RequestStereoPointCloudMessage>, EpsilonComparable<RequestStereoPointCloudMessage>
+       * Use this message to request a new point cloud from the stereo camera.
+       */
+public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointCloudMessage> implements Settable<RequestStereoPointCloudMessage>, EpsilonComparable<RequestStereoPointCloudMessage>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public RequestStereoPointCloudMessage()
@@ -32,31 +31,28 @@ public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointClo
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
-
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
+
    @Override
    public boolean epsilonEquals(RequestStereoPointCloudMessage other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       return true;
    }
@@ -64,17 +60,14 @@ public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointClo
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof RequestStereoPointCloudMessage))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof RequestStereoPointCloudMessage)) return false;
 
       RequestStereoPointCloudMessage otherMyClass = (RequestStereoPointCloudMessage) other;
 
-      if (this.sequence_id_ != otherMyClass.sequence_id_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+
 
       return true;
    }

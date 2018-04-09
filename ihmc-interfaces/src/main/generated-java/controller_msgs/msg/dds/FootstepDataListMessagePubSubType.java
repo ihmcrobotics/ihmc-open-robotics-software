@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "FootstepDataListMessage" defined in
- * "FootstepDataListMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from FootstepDataListMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * FootstepDataListMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "FootstepDataListMessage" defined in "FootstepDataListMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from FootstepDataListMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit FootstepDataListMessage_.idl instead.
+*
+*/
 public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.FootstepDataListMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::FootstepDataListMessage_";
@@ -18,8 +16,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.FootstepDataListMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.FootstepDataListMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.FootstepDataListMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.FootstepDataListMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -46,11 +42,9 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -67,6 +61,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -81,27 +76,35 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getFootstepDataList().size(); ++i0)
+      for(int i0 = 0; i0 < data.getFootstepDataList().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getFootstepDataList().get(i0), current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getFootstepDataList().get(i0), current_alignment);}
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -110,10 +113,9 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if (data.getFootstepDataList().size() <= 100)
-         cdr.write_type_e(data.getFootstepDataList());
-      else
-         throw new RuntimeException("footstep_data_list field exceeds the maximum length");
+      if(data.getFootstepDataList().size() <= 1)
+      cdr.write_type_e(data.getFootstepDataList());else
+          throw new RuntimeException("footstep_data_list field exceeds the maximum length");
 
       cdr.write_type_9(data.getExecutionTiming());
 
@@ -135,23 +137,23 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    public static void read(controller_msgs.msg.dds.FootstepDataListMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      cdr.read_type_e(data.getFootstepDataList());
+      	
+      cdr.read_type_e(data.getFootstepDataList());	
       data.setExecutionTiming(cdr.read_type_9());
-
+      	
       data.setDefaultSwingDuration(cdr.read_type_6());
-
+      	
       data.setDefaultTransferDuration(cdr.read_type_6());
-
+      	
       data.setFinalTransferDuration(cdr.read_type_6());
-
+      	
       data.setTrustHeightOfFootsteps(cdr.read_type_7());
-
+      	
       data.setAreFootstepsAdjustable(cdr.read_type_7());
-
+      	
       data.setOffsetFootstepsWithExecutionError(cdr.read_type_7());
-
-      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);
+      	
+      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
 
    }
 
@@ -197,7 +199,6 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       return new controller_msgs.msg.dds.FootstepDataListMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -209,7 +210,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.FootstepDataListMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -219,7 +220,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.FootstepDataListMessage src, controller_msgs.msg.dds.FootstepDataListMessage dest)
    {
       staticCopy(src, dest);
