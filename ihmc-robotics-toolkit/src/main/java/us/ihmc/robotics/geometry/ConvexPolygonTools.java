@@ -202,8 +202,8 @@ public class ConvexPolygonTools
       return true;
    }
 
-   private static void getConnectingEdges(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, LineSegment2DBasics connectingEdge1ToPack,
-                                          LineSegment2DBasics connectingEdge2ToPack, int[][] verticesIndices)
+   protected static void getConnectingEdges(ConvexPolygon2DReadOnly polygon1, ConvexPolygon2DReadOnly polygon2, LineSegment2DBasics connectingEdge1ToPack,
+                                            LineSegment2DBasics connectingEdge2ToPack, int[][] verticesIndices)
    {
       connectingEdge1ToPack.set(polygon1.getVertex(verticesIndices[0][0]), polygon2.getVertex(verticesIndices[1][0]));
       connectingEdge2ToPack.set(polygon2.getVertex(verticesIndices[1][1]), polygon1.getVertex(verticesIndices[0][1]));
@@ -574,8 +574,8 @@ public class ConvexPolygonTools
 
    private final Point2D intersection = new Point2D();
 
-   private boolean constructPolygonForIntersection(List<TIntArrayList> crossingIndices, ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ,
-                                                   ConvexPolygon2DBasics intersectingPolygonToPack)
+   protected boolean constructPolygonForIntersection(List<TIntArrayList> crossingIndices, ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ,
+                                                     ConvexPolygon2DBasics intersectingPolygonToPack)
    {
       int startIndexP1 = crossingIndices.get(0).get(0);
       int endIndexP1 = crossingIndices.get(0).get(1);
@@ -1759,5 +1759,16 @@ public class ConvexPolygonTools
       // from the entering point: P(tE) = P0 + tE * dS
       // to the leaving point:    P(tL) = P0 + tL * dS
       return true;
+   }
+
+   private final ConvexPolygon2D intersectionToThrowAway = new ConvexPolygon2D();
+
+   //TODO do something smarter here
+   public double computeIntersectionAreaOfPolygons(ConvexPolygon2DReadOnly polygonP, ConvexPolygon2DReadOnly polygonQ)
+   {
+      if (computeIntersectionOfPolygons(polygonP, polygonQ, intersectionToThrowAway))
+         return intersectionToThrowAway.getArea();
+      else
+         return 0.0;
    }
 }

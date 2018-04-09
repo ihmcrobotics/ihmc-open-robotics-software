@@ -24,7 +24,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.geometry.ConvexPolygonToolbox;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -71,7 +71,7 @@ public class PlanarRegionConstraintProvider
    private final RigidBodyTransform planeTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame planeReferenceFrame;
 
-   private final ConvexPolygonToolbox convexPolygonToolbox = new ConvexPolygonToolbox();
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    private final ConvexPolygon2D tempProjectedPolygon = new ConvexPolygon2D();
 
@@ -299,7 +299,7 @@ public class PlanarRegionConstraintProvider
 
       icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
 
-      double intersectionArea = convexPolygonToolbox.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
+      double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 
       if (intersectionArea > minimumAreaForSearch)
       {
@@ -334,7 +334,7 @@ public class PlanarRegionConstraintProvider
 
          icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
 
-         double intersectionArea = convexPolygonToolbox.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
+         double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 
          if (intersectionArea > maxArea)
          {
