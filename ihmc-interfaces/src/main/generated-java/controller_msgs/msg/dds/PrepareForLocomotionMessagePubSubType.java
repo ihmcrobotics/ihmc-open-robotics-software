@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "PrepareForLocomotionMessage" defined in
- * "PrepareForLocomotionMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from PrepareForLocomotionMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * PrepareForLocomotionMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "PrepareForLocomotionMessage" defined in "PrepareForLocomotionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from PrepareForLocomotionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PrepareForLocomotionMessage_.idl instead.
+*
+*/
 public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PrepareForLocomotionMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PrepareForLocomotionMessage_";
@@ -18,8 +16,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PrepareForLocomotionMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PrepareForLocomotionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -50,6 +46,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -64,9 +61,13 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -84,10 +85,11 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    public static void read(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setPrepareManipulation(cdr.read_type_7());
-
+      	
       data.setPreparePelvis(cdr.read_type_7());
+      	
 
    }
 
@@ -117,7 +119,6 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       return new controller_msgs.msg.dds.PrepareForLocomotionMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -129,7 +130,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.PrepareForLocomotionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -139,7 +140,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.PrepareForLocomotionMessage src, controller_msgs.msg.dds.PrepareForLocomotionMessage dest)
    {
       staticCopy(src, dest);

@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "LegCompliancePacket" defined in "LegCompliancePacket_.idl". Use
- * this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from LegCompliancePacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * LegCompliancePacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "LegCompliancePacket" defined in "LegCompliancePacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from LegCompliancePacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit LegCompliancePacket_.idl instead.
+*
+*/
 public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.LegCompliancePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::LegCompliancePacket_";
@@ -26,8 +24,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.LegCompliancePacket data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.LegCompliancePacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -45,10 +42,10 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -64,10 +61,14 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getMaxVelocityDeltas().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -76,10 +77,9 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if (data.getMaxVelocityDeltas().size() <= 100)
-         cdr.write_type_e(data.getMaxVelocityDeltas());
-      else
-         throw new RuntimeException("max_velocity_deltas field exceeds the maximum length");
+      if(data.getMaxVelocityDeltas().size() <= 100)
+      cdr.write_type_e(data.getMaxVelocityDeltas());else
+          throw new RuntimeException("max_velocity_deltas field exceeds the maximum length");
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -88,9 +88,10 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    public static void read(controller_msgs.msg.dds.LegCompliancePacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      cdr.read_type_e(data.getMaxVelocityDeltas());
+      	
+      cdr.read_type_e(data.getMaxVelocityDeltas());	
       data.setRobotSide(cdr.read_type_9());
+      	
 
    }
 
@@ -120,7 +121,6 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return new controller_msgs.msg.dds.LegCompliancePacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -132,7 +132,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.LegCompliancePacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -142,7 +142,7 @@ public class LegCompliancePacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.LegCompliancePacket src, controller_msgs.msg.dds.LegCompliancePacket dest)
    {
       staticCopy(src, dest);

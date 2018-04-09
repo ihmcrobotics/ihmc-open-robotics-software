@@ -1,16 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "MessageCollectionNotification" defined in
- * "MessageCollectionNotification_.idl". Use this class to provide the TopicDataType to a
- * Participant.
- *
- * This file was automatically generated from MessageCollectionNotification_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * MessageCollectionNotification_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "MessageCollectionNotification" defined in "MessageCollectionNotification_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from MessageCollectionNotification_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit MessageCollectionNotification_.idl instead.
+*
+*/
 public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.MessageCollectionNotification>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::MessageCollectionNotification_";
@@ -19,8 +16,7 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.MessageCollectionNotification data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.MessageCollectionNotification data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -28,8 +24,7 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.MessageCollectionNotification data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.MessageCollectionNotification data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -49,6 +44,7 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -63,7 +59,10 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -79,8 +78,9 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
    public static void read(controller_msgs.msg.dds.MessageCollectionNotification data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setMessageCollectionSequenceId(cdr.read_type_4());
+      	
 
    }
 
@@ -108,7 +108,6 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
    {
       return new controller_msgs.msg.dds.MessageCollectionNotification();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -120,7 +119,7 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.MessageCollectionNotification data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -130,7 +129,7 @@ public class MessageCollectionNotificationPubSubType implements us.ihmc.pubsub.T
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.MessageCollectionNotification src, controller_msgs.msg.dds.MessageCollectionNotification dest)
    {
       staticCopy(src, dest);

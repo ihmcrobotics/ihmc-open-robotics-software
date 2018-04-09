@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "BDIBehaviorCommandPacket" defined in
- * "BDIBehaviorCommandPacket_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from BDIBehaviorCommandPacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * BDIBehaviorCommandPacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "BDIBehaviorCommandPacket" defined in "BDIBehaviorCommandPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from BDIBehaviorCommandPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit BDIBehaviorCommandPacket_.idl instead.
+*
+*/
 public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.BDIBehaviorCommandPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::BDIBehaviorCommandPacket_";
@@ -18,8 +16,7 @@ public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicD
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.BDIBehaviorCommandPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.BDIBehaviorCommandPacket data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicD
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.BDIBehaviorCommandPacket data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.BDIBehaviorCommandPacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -50,6 +46,7 @@ public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -64,9 +61,13 @@ public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -84,10 +85,11 @@ public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicD
    public static void read(controller_msgs.msg.dds.BDIBehaviorCommandPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setAtlasBdiRobotBehavior(cdr.read_type_9());
-
+      	
       data.setStop(cdr.read_type_7());
+      	
 
    }
 
@@ -117,7 +119,6 @@ public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       return new controller_msgs.msg.dds.BDIBehaviorCommandPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -129,7 +130,7 @@ public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.BDIBehaviorCommandPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -139,7 +140,7 @@ public class BDIBehaviorCommandPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.BDIBehaviorCommandPacket src, controller_msgs.msg.dds.BDIBehaviorCommandPacket dest)
    {
       staticCopy(src, dest);

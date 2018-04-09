@@ -1,15 +1,14 @@
 package controller_msgs.msg.dds;
 
 /**
- *
- * Topic data type of the struct "QuadrupedControllerStateChangeMessage" defined in "QuadrupedControllerStateChangeMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from QuadrupedControllerStateChangeMessage_.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit QuadrupedControllerStateChangeMessage_.idl instead.
- *
- */
-public class QuadrupedControllerStateChangeMessagePubSubType
-      implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage>
+* 
+* Topic data type of the struct "QuadrupedControllerStateChangeMessage" defined in "QuadrupedControllerStateChangeMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from QuadrupedControllerStateChangeMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit QuadrupedControllerStateChangeMessage_.idl instead.
+*
+*/
+public class QuadrupedControllerStateChangeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::QuadrupedControllerStateChangeMessage_";
 
@@ -17,8 +16,7 @@ public class QuadrupedControllerStateChangeMessagePubSubType
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -26,8 +24,7 @@ public class QuadrupedControllerStateChangeMessagePubSubType
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -47,6 +44,7 @@ public class QuadrupedControllerStateChangeMessagePubSubType
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -61,7 +59,10 @@ public class QuadrupedControllerStateChangeMessagePubSubType
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,8 +78,9 @@ public class QuadrupedControllerStateChangeMessagePubSubType
    public static void read(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setInitialControllerName(cdr.read_type_9());
-
+      	
       data.setEndControllerName(cdr.read_type_9());
+      	
 
    }
 
@@ -96,8 +98,7 @@ public class QuadrupedControllerStateChangeMessagePubSubType
       data.setEndControllerName(ser.read_type_9("end_controller_name"));
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage src,
-                                 controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage src, controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage dest)
    {
       dest.set(src);
    }
@@ -107,7 +108,6 @@ public class QuadrupedControllerStateChangeMessagePubSubType
    {
       return new controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -119,7 +119,7 @@ public class QuadrupedControllerStateChangeMessagePubSubType
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -129,7 +129,7 @@ public class QuadrupedControllerStateChangeMessagePubSubType
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage src, controller_msgs.msg.dds.QuadrupedControllerStateChangeMessage dest)
    {
       staticCopy(src, dest);
