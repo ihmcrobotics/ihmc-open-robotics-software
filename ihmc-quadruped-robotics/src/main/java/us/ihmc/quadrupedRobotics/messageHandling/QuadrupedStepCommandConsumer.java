@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SoleTrajecto
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBalanceManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedBodyOrientationManager;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 
 public class QuadrupedStepCommandConsumer
 {
@@ -21,7 +21,7 @@ public class QuadrupedStepCommandConsumer
    private final QuadrupedBodyOrientationManager bodyOrientationManager;
 
    public QuadrupedStepCommandConsumer(CommandInputManager commandInputManager, QuadrupedStepMessageHandler stepMessageHandler,
-                                       QuadrupedForceControllerToolbox controllerToolbox, QuadrupedControlManagerFactory managerFactory)
+                                       QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory managerFactory)
    {
       this.stepMessageHandler = stepMessageHandler;
       this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager,

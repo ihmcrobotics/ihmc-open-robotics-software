@@ -22,8 +22,8 @@ import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedNetClassList;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.JointsOnlyStateEstimator;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootSwitchFactory;
@@ -59,7 +59,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
    private static final double DT = 0.001;
    private static final int TEST_ITERATIONS = 10000;
 
-   private QuadrupedForceControllerManager controllerManager;
+   private QuadrupedControllerManager controllerManager;
    private DRCStateEstimatorInterface simulationStateEstimator;
    private QuadrupedRuntimeEnvironment runtimeEnvironment;
 
@@ -153,7 +153,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
       runtimeEnvironment = new QuadrupedRuntimeEnvironment(DT, controllerTime, fullRobotModel, controllerCoreOptimizationSettings, jointDesiredOutputList,
                                                            registry, yoGraphicsListRegistry, ignoredYoGraphicsListRegistry, dataProducer, contactableFeet,
                                                            contactablePlaneBodies, xGaitSettings, footSwitches, GRAVITY);
-      controllerManager = new QuadrupedForceControllerManager(runtimeEnvironment, physicalProperties, initialPositionParameters);
+      controllerManager = new QuadrupedControllerManager(runtimeEnvironment, physicalProperties, initialPositionParameters);
 
       InputStream resourceAsStream = getClass().getResourceAsStream(modelFactory.getParameterResourceName(QuadrupedControlMode.FORCE));
       ParameterLoaderHelper.loadParameters(this, resourceAsStream, registry);
@@ -186,7 +186,7 @@ public class GenericQuadrupedControllerFactoryDummyOutputDemo
 
       YoDouble robotTimestamp = runtimeEnvironment.getRobotTimestamp();
       double robotTimeBeforeWarmUp = robotTimestamp.getDoubleValue();
-      for (QuadrupedForceControllerEnum state : QuadrupedForceControllerEnum.values)
+      for (QuadrupedControllerEnum state : QuadrupedControllerEnum.values)
       {
          QuadrupedController stateImpl = controllerManager.getState(state);
 

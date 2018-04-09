@@ -1,12 +1,11 @@
 package us.ihmc.quadrupedRobotics;
 
 import junit.framework.AssertionFailedError;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedSteppingStateEnum;
-import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerRequestedEvent;
-import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerState;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedSteppingStateEnum;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerRequestedEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedPositionControllerState;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
@@ -25,7 +24,7 @@ public class QuadrupedTestBehaviors
       stepTeleopManager.requestSteppingState();
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 2.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerEnum.STEPPING));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedControllerEnum.STEPPING));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
@@ -33,13 +32,13 @@ public class QuadrupedTestBehaviors
 
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_DO_NOTHING);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerEnum.DO_NOTHING));
+      variables.getUserTrigger().set(QuadrupedControllerRequestedEvent.REQUEST_DO_NOTHING);
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedControllerEnum.DO_NOTHING));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.5));
       conductor.simulate();
 
-      variables.getUserTrigger().set(QuadrupedForceControllerRequestedEvent.REQUEST_STAND_PREP);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerEnum.STAND_READY));
+      variables.getUserTrigger().set(QuadrupedControllerRequestedEvent.REQUEST_STAND_PREP);
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedControllerEnum.STAND_READY));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
    }
@@ -81,7 +80,7 @@ public class QuadrupedTestBehaviors
       stepTeleopManager.requestSteppingState();
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTimeLimit(variables.getYoTime(), 2.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedForceControllerEnum.STEPPING));
+      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedControllerEnum.STEPPING));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();

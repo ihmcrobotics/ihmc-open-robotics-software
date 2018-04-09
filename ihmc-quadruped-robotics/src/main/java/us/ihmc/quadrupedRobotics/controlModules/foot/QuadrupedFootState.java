@@ -4,8 +4,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedStepTransitionCallback;
-import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedWaypointCallback;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallback;
+import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedWaypointCallback;
 import us.ihmc.robotics.stateMachine.extra.EventState;
 
 public abstract class QuadrupedFootState implements EventState

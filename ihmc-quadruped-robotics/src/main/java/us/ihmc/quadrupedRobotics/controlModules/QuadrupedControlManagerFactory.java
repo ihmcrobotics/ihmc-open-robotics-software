@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
-import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerToolbox;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -12,8 +12,8 @@ public class QuadrupedControlManagerFactory
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final QuadrupedForceControllerToolbox toolbox;
    private final QuadrupedPhysicalProperties physicalProperties;
+   private final QuadrupedControllerToolbox toolbox;
    private final YoGraphicsListRegistry graphicsListRegistry;
 
    private QuadrupedFeetManager feetManager;
@@ -21,7 +21,7 @@ public class QuadrupedControlManagerFactory
    private QuadrupedBalanceManager balanceManager;
    private QuadrupedJointSpaceManager jointSpaceManager;
 
-   public QuadrupedControlManagerFactory(QuadrupedForceControllerToolbox toolbox, QuadrupedPhysicalProperties physicalProperties,
+   public QuadrupedControlManagerFactory(QuadrupedControllerToolbox toolbox, QuadrupedPhysicalProperties physicalProperties,
                                          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.toolbox = toolbox;
