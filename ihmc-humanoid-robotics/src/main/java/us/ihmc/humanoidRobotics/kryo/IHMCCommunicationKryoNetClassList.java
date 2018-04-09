@@ -186,7 +186,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.RecyclingArrayListPubSub;
-import us.ihmc.idl.generated.Chat.ChatMessagePubSubType;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.types.ByteBufferPubSubType;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
@@ -287,7 +286,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(DynamicArrayPrimitivesNestedPubSubType.class);
       registerPacketField(NavSatStatusPubSubType.class);
       registerPacketField(HandHybridJointspaceTaskspaceTrajectoryMessagePubSubType.class);
-      registerPacketField(ChatMessagePubSubType.class);
       registerPacketField(HumanoidBehaviorTypePacketPubSubType.class);
       registerPacketField(Vector3StampedPubSubType.class);
       registerPacketField(InteractiveMarkerUpdatePubSubType.class);
