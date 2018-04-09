@@ -125,7 +125,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
          {
             PrintTools.info("clearing the quad tree!");
             quadTree.clearTree(Double.NaN);
-            commandInputManager.flushAllCommands();
+            commandInputManager.clearAllCommands();
             return;
          }
       }

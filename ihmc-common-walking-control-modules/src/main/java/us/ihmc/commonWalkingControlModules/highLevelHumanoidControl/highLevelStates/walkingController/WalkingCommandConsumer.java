@@ -280,10 +280,10 @@ public class WalkingCommandConsumer
    {
       if (yoTime.getDoubleValue() - timeOfLastManipulationAbortRequest.getDoubleValue() < manipulationIgnoreInputsDurationAfterAbort.getDoubleValue())
       {
-         commandConsumerWithDelayBuffers.flushCommands(HandTrajectoryCommand.class);
-         commandConsumerWithDelayBuffers.flushCommands(ArmTrajectoryCommand.class);
-         commandConsumerWithDelayBuffers.flushCommands(ArmDesiredAccelerationsCommand.class);
-         commandConsumerWithDelayBuffers.flushCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
+         commandConsumerWithDelayBuffers.clearCommands(HandTrajectoryCommand.class);
+         commandConsumerWithDelayBuffers.clearCommands(ArmTrajectoryCommand.class);
+         commandConsumerWithDelayBuffers.clearCommands(ArmDesiredAccelerationsCommand.class);
+         commandConsumerWithDelayBuffers.clearCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
          return;
       }
 
