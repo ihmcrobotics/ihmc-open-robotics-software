@@ -82,9 +82,9 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
    {
       this.robotName = robotName;
       this.robotMass = 18.0;
-      this.Ixx = 0.1;
-      this.Iyy = 0.1;
-      this.Izz = 0.1;
+      this.Ixx = 0.6;
+      this.Iyy = 0.7;
+      this.Izz = 0.8;
       this.xRadius = 0.1;
       this.yRadius = 0.2;
       this.zRadius = 0.3;
@@ -483,6 +483,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
       private final FrameVector3D finalPositionWeight = new FrameVector3D();
       private final FramePoint2D initialCoP = new FramePoint2D();
       private final FramePoint2D finalCoP = new FramePoint2D();
+      private final FrameVector3D moment = new FrameVector3D();
 
       private FrameVector3D forceToExert = new FrameVector3D();
       private FramePoint3D copPosition = new FramePoint3D();
@@ -526,6 +527,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
          copProfile.update(time, copPosition);
          //forceToExert.setX(0.0);
          //forceToExert.setY(0.0);
+         moment.cross(forceToExert, copPosition);
          if (forceToExert.containsNaN())
             forceToExert.setZ(0.0);
          if (motionOver)
@@ -536,6 +538,7 @@ public class CentroidalDynamicsRobot implements FullRobotModelFactory
             copPosition.setZ(0.0);
          }
          forcePoint.setForce(forceToExert);
+         forcePoint.setMoment(moment.getX(), moment.getY(), moment.getZ());
          forcePoint.setPosition(copPosition);
       }
 
