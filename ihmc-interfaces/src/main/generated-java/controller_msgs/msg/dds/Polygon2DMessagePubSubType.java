@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "Polygon2DMessage" defined in "Polygon2DMessage_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from Polygon2DMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit Polygon2DMessage_.idl
- * instead.
- *
- */
+* 
+* Topic data type of the struct "Polygon2DMessage" defined in "Polygon2DMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from Polygon2DMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit Polygon2DMessage_.idl instead.
+*
+*/
 public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.Polygon2DMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::Polygon2DMessage_";
@@ -44,11 +42,9 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -64,11 +60,12 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getVertices().size(); ++i0)
+      for(int i0 = 0; i0 < data.getVertices().size(); ++i0)
       {
-         current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getVertices().get(i0), current_alignment);
-      }
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getVertices().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,18 +74,17 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if (data.getVertices().size() <= 100)
-         cdr.write_type_e(data.getVertices());
-      else
-         throw new RuntimeException("vertices field exceeds the maximum length");
+      if(data.getVertices().size() <= 100)
+      cdr.write_type_e(data.getVertices());else
+          throw new RuntimeException("vertices field exceeds the maximum length");
 
    }
 
    public static void read(controller_msgs.msg.dds.Polygon2DMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      cdr.read_type_e(data.getVertices());
+      	
+      cdr.read_type_e(data.getVertices());	
 
    }
 
@@ -116,7 +112,6 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       return new controller_msgs.msg.dds.Polygon2DMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -128,7 +123,7 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.Polygon2DMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -138,7 +133,7 @@ public class Polygon2DMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.Polygon2DMessage src, controller_msgs.msg.dds.Polygon2DMessage dest)
    {
       staticCopy(src, dest);

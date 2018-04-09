@@ -7,8 +7,8 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implements Settable<DrillDetectionPacket>, EpsilonComparable<DrillDetectionPacket>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
    public boolean is_drill_on_;
 
@@ -31,16 +31,15 @@ public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implement
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
-
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -50,25 +49,22 @@ public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implement
    {
       is_drill_on_ = is_drill_on;
    }
-
    public boolean getIsDrillOn()
    {
       return is_drill_on_;
    }
 
+
    @Override
    public boolean epsilonEquals(DrillDetectionPacket other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_drill_on_, other.is_drill_on_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_drill_on_, other.is_drill_on_, epsilon)) return false;
+
 
       return true;
    }
@@ -76,20 +72,16 @@ public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implement
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof DrillDetectionPacket))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof DrillDetectionPacket)) return false;
 
       DrillDetectionPacket otherMyClass = (DrillDetectionPacket) other;
 
-      if (this.sequence_id_ != otherMyClass.sequence_id_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if (this.is_drill_on_ != otherMyClass.is_drill_on_)
-         return false;
+      if(this.is_drill_on_ != otherMyClass.is_drill_on_) return false;
+
 
       return true;
    }
@@ -101,8 +93,7 @@ public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implement
 
       builder.append("DrillDetectionPacket {");
       builder.append("sequence_id=");
-      builder.append(this.sequence_id_);
-      builder.append(", ");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("is_drill_on=");
       builder.append(this.is_drill_on_);
       builder.append("}");

@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "JointspaceTrajectoryMessage" defined in
- * "JointspaceTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from JointspaceTrajectoryMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * JointspaceTrajectoryMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "JointspaceTrajectoryMessage" defined in "JointspaceTrajectoryMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from JointspaceTrajectoryMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit JointspaceTrajectoryMessage_.idl instead.
+*
+*/
 public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.JointspaceTrajectoryMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::JointspaceTrajectoryMessage_";
@@ -18,8 +16,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.JointspaceTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.JointspaceTrajectoryMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.JointspaceTrajectoryMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.JointspaceTrajectoryMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -46,12 +42,11 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 100; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -67,14 +62,14 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getJointTrajectoryMessages().size(); ++i0)
+      for(int i0 = 0; i0 < data.getJointTrajectoryMessages().size(); ++i0)
       {
-         current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointTrajectoryMessages().get(i0),
-                                                                                                                  current_alignment);
-      }
+          current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getCdrSerializedSize(data.getJointTrajectoryMessages().get(i0), current_alignment);}
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,10 +78,9 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    {
       cdr.write_type_4(data.getSequenceId());
 
-      if (data.getJointTrajectoryMessages().size() <= 100)
-         cdr.write_type_e(data.getJointTrajectoryMessages());
-      else
-         throw new RuntimeException("joint_trajectory_messages field exceeds the maximum length");
+      if(data.getJointTrajectoryMessages().size() <= 100)
+      cdr.write_type_e(data.getJointTrajectoryMessages());else
+          throw new RuntimeException("joint_trajectory_messages field exceeds the maximum length");
 
       controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
    }
@@ -94,9 +88,9 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    public static void read(controller_msgs.msg.dds.JointspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      cdr.read_type_e(data.getJointTrajectoryMessages());
-      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);
+      	
+      cdr.read_type_e(data.getJointTrajectoryMessages());	
+      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
 
    }
 
@@ -128,7 +122,6 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    {
       return new controller_msgs.msg.dds.JointspaceTrajectoryMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -140,7 +133,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.JointspaceTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -150,7 +143,7 @@ public class JointspaceTrajectoryMessagePubSubType implements us.ihmc.pubsub.Top
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.JointspaceTrajectoryMessage src, controller_msgs.msg.dds.JointspaceTrajectoryMessage dest)
    {
       staticCopy(src, dest);

@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "ValveLocationPacket" defined in "ValveLocationPacket_.idl". Use
- * this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from ValveLocationPacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * ValveLocationPacket_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "ValveLocationPacket" defined in "ValveLocationPacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from ValveLocationPacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit ValveLocationPacket_.idl instead.
+*
+*/
 public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ValveLocationPacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ValveLocationPacket_";
@@ -26,8 +24,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ValveLocationPacket data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ValveLocationPacket data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -49,6 +46,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -63,9 +61,12 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getValvePoseInWorld(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -82,9 +83,10 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    public static void read(controller_msgs.msg.dds.ValveLocationPacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getValvePoseInWorld(), cdr);
+      	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getValvePoseInWorld(), cdr);	
       data.setValveRadius(cdr.read_type_6());
+      	
 
    }
 
@@ -116,7 +118,6 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return new controller_msgs.msg.dds.ValveLocationPacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -128,7 +129,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.ValveLocationPacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -138,7 +139,7 @@ public class ValveLocationPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.ValveLocationPacket src, controller_msgs.msg.dds.ValveLocationPacket dest)
    {
       staticCopy(src, dest);

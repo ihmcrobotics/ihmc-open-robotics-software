@@ -5,17 +5,15 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 /**
- * This message is part of the IHMC whole-body controller API. This message will request a
- * calibration the wrist force sensors to the IHMC controller (does not do hardware calibration). It
- * is strongly suggested to perform the calibration when the hands are not moving nor interacting
- * with the environment.
- */
-public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWristForceSensorCalibrationPacket>
-      implements Settable<RequestWristForceSensorCalibrationPacket>, EpsilonComparable<RequestWristForceSensorCalibrationPacket>
+       * This message is part of the IHMC whole-body controller API.
+       * This message will request a calibration the wrist force sensors to the IHMC controller (does not do hardware calibration).
+       * It is strongly suggested to perform the calibration when the hands are not moving nor interacting with the environment.
+       */
+public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWristForceSensorCalibrationPacket> implements Settable<RequestWristForceSensorCalibrationPacket>, EpsilonComparable<RequestWristForceSensorCalibrationPacket>
 {
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public RequestWristForceSensorCalibrationPacket()
@@ -35,31 +33,28 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
    }
 
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
-
    /**
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
+
    @Override
    public boolean epsilonEquals(RequestWristForceSensorCalibrationPacket other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       return true;
    }
@@ -67,17 +62,14 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof RequestWristForceSensorCalibrationPacket))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof RequestWristForceSensorCalibrationPacket)) return false;
 
       RequestWristForceSensorCalibrationPacket otherMyClass = (RequestWristForceSensorCalibrationPacket) other;
 
-      if (this.sequence_id_ != otherMyClass.sequence_id_)
-         return false;
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+
 
       return true;
    }

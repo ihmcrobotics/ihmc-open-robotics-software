@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "VehiclePosePacket" defined in "VehiclePosePacket_.idl". Use this
- * class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from VehiclePosePacket_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit VehiclePosePacket_.idl
- * instead.
- *
- */
+* 
+* Topic data type of the struct "VehiclePosePacket" defined in "VehiclePosePacket_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from VehiclePosePacket_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit VehiclePosePacket_.idl instead.
+*
+*/
 public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.VehiclePosePacket>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::VehiclePosePacket_";
@@ -50,6 +48,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -64,11 +63,14 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -86,10 +88,11 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    public static void read(controller_msgs.msg.dds.VehiclePosePacket data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
-      geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);
-      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);
+      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
+      geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
       data.setIndex(cdr.read_type_2());
+      	
 
    }
 
@@ -125,7 +128,6 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       return new controller_msgs.msg.dds.VehiclePosePacket();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -137,7 +139,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.VehiclePosePacket data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -147,7 +149,7 @@ public class VehiclePosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.VehiclePosePacket src, controller_msgs.msg.dds.VehiclePosePacket dest)
    {
       staticCopy(src, dest);

@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "PauseWalkingMessage" defined in "PauseWalkingMessage_.idl". Use
- * this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from PauseWalkingMessage_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * PauseWalkingMessage_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "PauseWalkingMessage" defined in "PauseWalkingMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from PauseWalkingMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PauseWalkingMessage_.idl instead.
+*
+*/
 public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.PauseWalkingMessage>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::PauseWalkingMessage_";
@@ -26,8 +24,7 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PauseWalkingMessage data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.PauseWalkingMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -47,6 +44,7 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -61,7 +59,10 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,8 +78,9 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    public static void read(controller_msgs.msg.dds.PauseWalkingMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
-
+      	
       data.setPause(cdr.read_type_7());
+      	
 
    }
 
@@ -106,7 +108,6 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return new controller_msgs.msg.dds.PauseWalkingMessage();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -118,7 +119,7 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.PauseWalkingMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -128,7 +129,7 @@ public class PauseWalkingMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.PauseWalkingMessage src, controller_msgs.msg.dds.PauseWalkingMessage dest)
    {
       staticCopy(src, dest);

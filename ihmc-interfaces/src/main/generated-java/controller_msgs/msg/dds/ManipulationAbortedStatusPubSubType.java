@@ -1,15 +1,13 @@
 package controller_msgs.msg.dds;
 
 /**
- * 
- * Topic data type of the struct "ManipulationAbortedStatus" defined in
- * "ManipulationAbortedStatus_.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from ManipulationAbortedStatus_.idl by
- * us.ihmc.idl.generator.IDLGenerator. Do not update this file directly, edit
- * ManipulationAbortedStatus_.idl instead.
- *
- */
+* 
+* Topic data type of the struct "ManipulationAbortedStatus" defined in "ManipulationAbortedStatus_.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from ManipulationAbortedStatus_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit ManipulationAbortedStatus_.idl instead.
+*
+*/
 public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.ManipulationAbortedStatus>
 {
    public static final java.lang.String name = "controller_msgs::msg::dds_::ManipulationAbortedStatus_";
@@ -18,8 +16,7 @@ public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.Topic
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.ManipulationAbortedStatus data, us.ihmc.pubsub.common.SerializedPayload serializedPayload)
-         throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.ManipulationAbortedStatus data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -27,8 +24,7 @@ public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.Topic
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ManipulationAbortedStatus data)
-         throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.ManipulationAbortedStatus data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -46,6 +42,7 @@ public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       return current_alignment - initial_alignment;
    }
 
@@ -60,6 +57,8 @@ public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -72,6 +71,7 @@ public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.Topic
    public static void read(controller_msgs.msg.dds.ManipulationAbortedStatus data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
+      	
 
    }
 
@@ -84,8 +84,7 @@ public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ManipulationAbortedStatus data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));
-   }
+      data.setSequenceId(ser.read_type_4("sequence_id"));   }
 
    public static void staticCopy(controller_msgs.msg.dds.ManipulationAbortedStatus src, controller_msgs.msg.dds.ManipulationAbortedStatus dest)
    {
@@ -97,7 +96,6 @@ public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.Topic
    {
       return new controller_msgs.msg.dds.ManipulationAbortedStatus();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -109,7 +107,7 @@ public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.Topic
    {
       return name;
    }
-
+   
    public void serialize(controller_msgs.msg.dds.ManipulationAbortedStatus data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -119,7 +117,7 @@ public class ManipulationAbortedStatusPubSubType implements us.ihmc.pubsub.Topic
    {
       read(data, cdr);
    }
-
+   
    public void copy(controller_msgs.msg.dds.ManipulationAbortedStatus src, controller_msgs.msg.dds.ManipulationAbortedStatus dest)
    {
       staticCopy(src, dest);
