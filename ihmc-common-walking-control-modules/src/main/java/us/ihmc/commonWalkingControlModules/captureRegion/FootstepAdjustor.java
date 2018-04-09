@@ -39,6 +39,8 @@ public class FootstepAdjustor
    private FootstepAdjusterVisualizer footstepAdjusterVisualizer = null;
 //   private SteppingStones steppingStones = null;
 
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
    public FootstepAdjustor(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoVariableRegistry parentRegistry,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -88,7 +90,7 @@ public class FootstepAdjustor
       calculateTouchdownFootPolygon(footstep, desiredSteppingRegion.getReferenceFrame(), touchdownFootPolygon);
       desiredSteppingRegion.checkReferenceFrameMatch(touchdownFootPolygon);
       intersection.clear(desiredSteppingRegion.getReferenceFrame());
-      boolean nextStepInside = ConvexPolygonTools.computeIntersectionOfPolygons(desiredSteppingRegion, touchdownFootPolygon, intersection);
+      boolean nextStepInside = convexPolygonTools.computeIntersectionOfPolygons(desiredSteppingRegion, touchdownFootPolygon, intersection);
 
       if (nextStepInside)
       {
