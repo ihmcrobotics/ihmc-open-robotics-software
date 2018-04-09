@@ -30,7 +30,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.robotics.allocations.AllocationTest;
-import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -154,7 +153,6 @@ public class AtlasAllocationTest implements AllocationTest
 
       // TODO: fix these!
       classesToIgnore.add(StatusMessageOutputManager.class);
-      classesToIgnore.add(ConvexPolygonTools.class);
 
       return classesToIgnore;
    }
