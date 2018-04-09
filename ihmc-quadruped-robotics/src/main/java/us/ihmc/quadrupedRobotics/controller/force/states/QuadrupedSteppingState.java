@@ -161,7 +161,7 @@ public class QuadrupedSteppingState implements QuadrupedController
    @Override
    public void onEntry()
    {
-      commandInputManager.flushAllCommands();
+      commandInputManager.clearAllCommands();
 
       stepMessageHandler.clearFootTrajectory();
       stepMessageHandler.clearSteps();
