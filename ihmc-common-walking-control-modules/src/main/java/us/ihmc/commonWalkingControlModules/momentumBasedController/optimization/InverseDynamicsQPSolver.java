@@ -516,7 +516,10 @@ public class InverseDynamicsQPSolver
 
       hasWrenchesEquilibriumConstraintBeenSetup = false;
 
-      boolean hasConverged = !MatrixTools.containsNaN(solverOutput);
+      if (MatrixTools.containsNaN(solverOutput))
+      {
+         return false;
+      }
 
       CommonOps.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
       CommonOps.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
@@ -544,7 +547,7 @@ public class InverseDynamicsQPSolver
       solverInput_lb_previous.set(solverInput_lb);
       solverInput_ub_previous.set(solverInput_ub);
 
-      return hasConverged;
+      return true;
    }
 
    private void printForJerry()
