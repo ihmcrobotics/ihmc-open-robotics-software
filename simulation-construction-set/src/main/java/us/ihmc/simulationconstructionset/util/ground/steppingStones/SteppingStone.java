@@ -20,7 +20,7 @@ public class SteppingStone
    private final double baseZ;
    private final double height;
    private final ConvexPolygon2D convexPolygon2d;
-   private final ConvexPolygon2D shrunkenPolygon;
+   private final ConvexPolygon2D shrunkenPolygon = new ConvexPolygon2D();
 
    private final ConvexPolygon2D polygonToShrink;
 
@@ -31,7 +31,7 @@ public class SteppingStone
       this.height = height;
       this.convexPolygon2d = new ConvexPolygon2D(convexPolygon2d);
       polygonToShrink = new ConvexPolygon2D(footPolygon);
-      shrunkenPolygon = ConvexPolygonTools.shrinkInto(polygonToShrink, new Point2D(0.0, 0.0), convexPolygon2d);
+      new ConvexPolygonTools().shrinkInto(polygonToShrink, new Point2D(0.0, 0.0), convexPolygon2d, shrunkenPolygon);
    }
 
    public SteppingStone(String name, double baseZ, double height, ArrayList<Point2D> points, ConvexPolygon2D footPolygon)
@@ -41,7 +41,7 @@ public class SteppingStone
       this.height = height;
       convexPolygon2d = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(points));
       polygonToShrink = new ConvexPolygon2D(footPolygon);
-      shrunkenPolygon = ConvexPolygonTools.shrinkInto(polygonToShrink, new Point2D(0.0, 0.0), convexPolygon2d);
+      new ConvexPolygonTools().shrinkInto(polygonToShrink, new Point2D(0.0, 0.0), convexPolygon2d, shrunkenPolygon);
    }
 
    public String getName()

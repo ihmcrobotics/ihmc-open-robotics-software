@@ -53,6 +53,8 @@ public class PlanarRegion
 
    private final ConvexPolygon2D convexHull = new ConvexPolygon2D();
 
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
    /**
     * Create a new, empty planar region.
     */
@@ -213,7 +215,7 @@ public class PlanarRegion
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2D polygonToCheck = convexPolygons.get(i);
-         boolean hasIntersection = ConvexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, projectedPolygon, dummyPolygon);
+         boolean hasIntersection = convexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, projectedPolygon, dummyPolygon);
          if (hasIntersection)
             return true;
       }
@@ -238,7 +240,8 @@ public class PlanarRegion
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
-         ConvexPolygon2D intersectingPolygon = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(i), projectedPolygon);
+         ConvexPolygon2D intersectingPolygon = new ConvexPolygon2D();
+         convexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(i), projectedPolygon, intersectingPolygon);
 
          if (intersectingPolygon != null)
          {
@@ -292,7 +295,8 @@ public class PlanarRegion
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
-         ConvexPolygon2D intersectingPolygon = ConvexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(i), projectedPolygon);
+         ConvexPolygon2D intersectingPolygon = new ConvexPolygon2D();
+         convexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(i), projectedPolygon, intersectingPolygon);
 
          if (intersectingPolygon != null)
          {
