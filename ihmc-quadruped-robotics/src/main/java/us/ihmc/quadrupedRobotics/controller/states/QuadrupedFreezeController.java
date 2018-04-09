@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.controller.states;
 import us.ihmc.quadrupedRobotics.controlModules.QuadrupedControlManagerFactory;
 import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
@@ -34,14 +35,14 @@ public class QuadrupedFreezeController implements QuadrupedController
    private final JointDesiredOutputList jointDesiredOutputList;
 
    public QuadrupedFreezeController(QuadrupedControllerToolbox controllerToolbox, QuadrupedControlManagerFactory controlManagerFactory,
-                                    YoVariableRegistry parentRegistry)
+                                    QuadrupedControlMode controlMode, YoVariableRegistry parentRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       this.jointDesiredOutputList = controllerToolbox.getRuntimeEnvironment().getJointDesiredOutputList();
 
       // Yo variables
       yoUseForceFeedbackControl = new YoBoolean("useForceFeedbackControl", registry);
-      yoUseForceFeedbackControl.set(true);
+      yoUseForceFeedbackControl.set(controlMode == QuadrupedControlMode.FORCE);
 
       feetManager = controlManagerFactory.getOrCreateFeetManager();
       fullRobotModel = controllerToolbox.getRuntimeEnvironment().getFullRobotModel();
@@ -56,14 +57,6 @@ public class QuadrupedFreezeController implements QuadrupedController
 
       // Initialize sole position controller
       feetManager.requestHoldAll();
-
-      // Initialize task space controller
-//      taskSpaceControllerSettings.initialize();
-//      for (RobotQuadrant quadrant : RobotQuadrant.values)
-//      {
-//         taskSpaceControllerSettings.setContactState(quadrant, ContactState.NO_CONTACT);
-//      }
-//      taskSpaceController.reset();
 
       // Initialize force feedback
       jointDesiredOutputList.clear();

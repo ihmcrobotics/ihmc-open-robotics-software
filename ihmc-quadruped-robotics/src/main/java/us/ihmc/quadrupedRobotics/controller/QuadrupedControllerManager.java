@@ -283,11 +283,11 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
                                                                                         QuadrupedControlMode controlMode)
    {
       // Initialize controllers.
-      final QuadrupedController jointInitializationController = new QuadrupedJointInitializationController(runtimeEnvironment);
+      final QuadrupedController jointInitializationController = new QuadrupedJointInitializationController(runtimeEnvironment, controlMode, registry);
       final QuadrupedController doNothingController = new QuadrupedDoNothingController(controlManagerFactory.getOrCreateFeetManager(), runtimeEnvironment,
-                                                                                       registry);
+                                                                                       controlMode, registry);
       final QuadrupedController standPrepController = new QuadrupedStandPrepController(runtimeEnvironment, initialPositionParameters, registry);
-      final QuadrupedController freezeController = new QuadrupedFreezeController(controllerToolbox, controlManagerFactory, registry);
+      final QuadrupedController freezeController = new QuadrupedFreezeController(controllerToolbox, controlManagerFactory, controlMode, registry);
 
       final QuadrupedController steppingController;
       if (controlMode == QuadrupedControlMode.FORCE)
@@ -299,7 +299,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       {
          steppingController = new QuadrupedPositionBasedCrawlController(runtimeEnvironment, modelFactory, physicalProperties, crawlControllerParameters);
       }
-      final QuadrupedController fallController = new QuadrupedFallController(controllerToolbox, controlManagerFactory, registry);
+      final QuadrupedController fallController = new QuadrupedFallController(controllerToolbox, controlManagerFactory, controlMode, registry);
 
       EventBasedStateMachineFactory<QuadrupedControllerEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedControllerEnum.class);
       factory.setNamePrefix("forceController").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());

@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.controller.states;
 
 import java.util.BitSet;
 
+import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.JointRole;
@@ -11,14 +12,20 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
  * This controller sets desired joint angles to their actual values when the joint comes online.
  */
 public class QuadrupedJointInitializationController implements QuadrupedController
 {
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
    private final FullQuadrupedRobotModel fullRobotModel;
    private final JointDesiredOutputList jointDesiredOutputList;
+
+   private final YoBoolean forceFeedbackControlEnabled;
 
    /**
     * A map specifying which joints have been come online and had their desired positions set. Indices align with the {@link FullRobotModel#getOneDoFJoints()}
@@ -26,11 +33,16 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
     */
    private final BitSet initialized;
 
-   public QuadrupedJointInitializationController(QuadrupedRuntimeEnvironment environment)
+   public QuadrupedJointInitializationController(QuadrupedRuntimeEnvironment environment, QuadrupedControlMode controlMode, YoVariableRegistry parentRegistry)
    {
       this.fullRobotModel = environment.getFullRobotModel();
       this.jointDesiredOutputList = environment.getJointDesiredOutputList();
       this.initialized = new BitSet(fullRobotModel.getOneDoFJoints().length);
+
+      forceFeedbackControlEnabled = new YoBoolean("useForceFeedbackControl", registry);
+      forceFeedbackControlEnabled.set(controlMode == QuadrupedControlMode.FORCE);
+
+      parentRegistry.addChild(registry);
    }
 
    @Override
@@ -42,7 +54,10 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
          OneDoFJoint joint = joints[i];
          if (fullRobotModel.getNameForOneDoFJoint(joint).getRole() == JointRole.LEG)
          {
-            jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.EFFORT);
+            if (forceFeedbackControlEnabled.getBooleanValue())
+               jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.EFFORT);
+            else
+               jointDesiredOutputList.getJointDesiredOutput(joint).setControlMode(JointDesiredControlMode.POSITION);
          }
       }
    }
@@ -59,6 +74,8 @@ public class QuadrupedJointInitializationController implements QuadrupedControll
          if (!initialized.get(i) && joint.isOnline())
          {
             jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredTorque(0.0);
+            jointDesiredOutputList.getJointDesiredOutput(joint).setDesiredPosition(joint.getQ());
+
             initialized.set(i);
          }
       }
