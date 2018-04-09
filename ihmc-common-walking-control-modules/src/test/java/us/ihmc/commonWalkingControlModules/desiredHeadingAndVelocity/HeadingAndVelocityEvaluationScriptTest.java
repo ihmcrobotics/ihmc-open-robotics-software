@@ -97,7 +97,7 @@ public class HeadingAndVelocityEvaluationScriptTest
          FrameVector2D desiredHeading = new FrameVector2D();
 
          desiredHeadingControlModule.getDesiredHeading(desiredHeading, 0.0);
-         desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
+         desiredVelocity.setIncludingFrame(desiredVelocityControlModule.getDesiredVelocity());
          double desiredHeadingAngle = desiredHeadingControlModule.getDesiredHeadingAngle();
 
          desiredHeadings.add(desiredHeading);

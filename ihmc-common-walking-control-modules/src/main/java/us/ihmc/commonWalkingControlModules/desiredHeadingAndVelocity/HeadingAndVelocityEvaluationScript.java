@@ -405,7 +405,6 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
    private void updateDesiredVelocityVector()
    {
-      desiredVelocityControlModule.getDesiredVelocity(desiredVelocity);
       desiredVelocity.set(desiredVelocityDirection);
       desiredVelocity.scale(desiredVelocityMagnitude.getDoubleValue());
       desiredVelocityControlModule.setDesiredVelocity(desiredVelocity);
