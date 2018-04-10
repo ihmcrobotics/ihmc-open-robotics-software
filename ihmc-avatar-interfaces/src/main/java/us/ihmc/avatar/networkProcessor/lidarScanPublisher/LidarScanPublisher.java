@@ -311,7 +311,7 @@ public class LidarScanPublisher
                LidarScanMessage message = MessageTools.createLidarScanMessage(robotTimestamp, lidarPosition, lidarOrientation, scanPointBuffer);
 
                PacketDestination destination = PacketDestination.fromOrdinal(requestLidarScanMessage.getSource());
-               message.setDestination(destination);
+               message.setDestination(destination.ordinal());
                packetCommunicator.send(message);
             }
 

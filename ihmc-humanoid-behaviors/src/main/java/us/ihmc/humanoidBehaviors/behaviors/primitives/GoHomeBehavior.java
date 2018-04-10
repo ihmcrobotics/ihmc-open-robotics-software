@@ -87,7 +87,7 @@ public class GoHomeBehavior extends AbstractBehavior
       
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {
-         outgoingMessage.setDestination(PacketDestination.BROADCAST);
+         outgoingMessage.setDestination(PacketDestination.BROADCAST.ordinal());
 
          sendPacketToController(outgoingMessage);
          sendPacket(outgoingMessage);
@@ -104,7 +104,7 @@ public class GoHomeBehavior extends AbstractBehavior
       if (outgoingMessage != null)
       {
          StopAllTrajectoryMessage pausePacket = new StopAllTrajectoryMessage();
-         pausePacket.setDestination(PacketDestination.CONTROLLER);
+         pausePacket.setDestination(PacketDestination.CONTROLLER.ordinal());
          sendPacketToController(pausePacket);
       }
    }

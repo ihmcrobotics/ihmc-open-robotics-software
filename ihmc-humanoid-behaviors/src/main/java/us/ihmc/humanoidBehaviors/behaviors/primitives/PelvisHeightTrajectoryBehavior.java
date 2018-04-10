@@ -48,7 +48,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() && !isAborted.getBooleanValue())
       {      
-         outgoingPelvisHeightTrajectoryMessage.setDestination(PacketDestination.UI);  
+         outgoingPelvisHeightTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());  
          sendPacketToController(outgoingPelvisHeightTrajectoryMessage);
          sendPacket(outgoingPelvisHeightTrajectoryMessage);
          packetHasBeenSent.set(true);

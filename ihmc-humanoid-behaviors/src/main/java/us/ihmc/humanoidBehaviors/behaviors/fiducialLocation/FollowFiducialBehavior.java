@@ -264,10 +264,10 @@ public class FollowFiducialBehavior extends AbstractBehavior
       ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
       HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
 
-      headTrajectoryMessage.setDestination(PacketDestination.UI);
+      headTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());
       sendPacket(headTrajectoryMessage);
 
-      headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER);
+      headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       sendPacketToController(headTrajectoryMessage);
       //      footstepSentTimer.reset();
    }
@@ -321,7 +321,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private void requestPlanarRegionsList()
    {
       RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.SINGLE_UPDATE);
-      requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
+      requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE.ordinal());
       sendPacket(requestPlanarRegionsListMessage);
    }
 
@@ -425,10 +425,10 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private void sendFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
    {
-      footstepDataListMessage.setDestination(PacketDestination.UI);
+      footstepDataListMessage.setDestination(PacketDestination.UI.ordinal());
       sendPacket(footstepDataListMessage);
 
-      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
+      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       sendPacketToController(footstepDataListMessage);
       footstepSentTimer.reset();
    }
