@@ -46,6 +46,11 @@ public class QuadrupedNetClassList extends NetClassList
       registerPacketField(ArrayList.class);
 
       // Trajectory message fields
+      registerPacketField(SO3TrajectoryMessagePubSubType.class);
+      registerPacketField(SO3TrajectoryPointMessagePubSubType.class);
+      registerPacketField(SO3TrajectoryPointMessage.class);
+      registerPacketField(SO3TrajectoryPointMessage[].class);
+
       registerPacketField(QueueableMessage.class);
       registerPacketField(EuclideanTrajectoryMessage.class);
       registerPacketField(EuclideanTrajectoryPointMessage.class);
