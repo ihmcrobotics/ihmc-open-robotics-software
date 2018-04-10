@@ -6,14 +6,14 @@ import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class WalkToFiducialBehavior extends AbstractBehavior
 {
@@ -38,7 +38,7 @@ public class WalkToFiducialBehavior extends AbstractBehavior
       if (!sentPlanningRequest.getBooleanValue())
       {
          FootstepPlanningRequestPacket request = HumanoidMessageTools.createFootstepPlanningRequestPacket(new FramePose3D(ReferenceFrame.getWorldFrame()), RobotSide.LEFT, goalPose, plannerToUse);
-         request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+         request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
          sendPacket(request);
       }
 

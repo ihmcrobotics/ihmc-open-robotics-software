@@ -54,7 +54,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() &&!isAborted.getBooleanValue())
       {
-         outgoingHeadTrajectoryMessage.setDestination(PacketDestination.UI);
+         outgoingHeadTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());
          sendPacket(outgoingHeadTrajectoryMessage);
          sendPacketToController(outgoingHeadTrajectoryMessage);
          

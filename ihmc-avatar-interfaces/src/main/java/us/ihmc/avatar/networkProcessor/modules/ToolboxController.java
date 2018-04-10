@@ -60,7 +60,7 @@ public abstract class ToolboxController
       if (packetDestination == null)
          return;
 
-      statusMessage.setDestination(packetDestination);
+      statusMessage.setDestination(packetDestination.ordinal());
       statusOutputManager.reportStatusMessage(statusMessage);
    }
 

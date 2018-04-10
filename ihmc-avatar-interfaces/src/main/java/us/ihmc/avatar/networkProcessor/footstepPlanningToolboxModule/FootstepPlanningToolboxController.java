@@ -239,7 +239,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
    private void sendMessageToUI(String message)
    {
       TextToSpeechPacket packet = MessageTools.createTextToSpeechPacket(message);
-      packet.setDestination(PacketDestination.UI);
+      packet.setDestination(PacketDestination.UI.ordinal());
       packetCommunicator.send(packet);
    }
 

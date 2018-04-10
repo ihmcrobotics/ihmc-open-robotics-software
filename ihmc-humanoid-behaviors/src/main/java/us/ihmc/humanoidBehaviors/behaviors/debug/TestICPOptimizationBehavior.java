@@ -50,7 +50,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
          return;
 
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime.getDoubleValue(), transferTime.getDoubleValue());
-      footsteps.setDestination(PacketDestination.BROADCAST);
+      footsteps.setDestination(PacketDestination.BROADCAST.ordinal());
 
       ReferenceFrame leftSoleFrame = referenceFrames.getSoleFrame(RobotSide.LEFT);
       ReferenceFrame rightSoleFrame = referenceFrames.getSoleFrame(RobotSide.RIGHT);

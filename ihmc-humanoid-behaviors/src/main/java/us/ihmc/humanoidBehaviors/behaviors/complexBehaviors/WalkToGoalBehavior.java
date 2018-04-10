@@ -189,12 +189,12 @@ public class WalkToGoalBehavior extends AbstractBehavior
          isDone.set(false);
 
          ToolboxStateMessage wakeUp = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
-         wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+         wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
 
          communicationBridge.sendPacket(wakeUp);
 
          ToolboxStateMessage reinitialize = MessageTools.createToolboxStateMessage(ToolboxState.REINITIALIZE);
-         reinitialize.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+         reinitialize.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
 
          communicationBridge.sendPacket(reinitialize);
 
@@ -209,7 +209,7 @@ public class WalkToGoalBehavior extends AbstractBehavior
          FramePose3D finalPose = new FramePose3D(ReferenceFrame.getWorldFrame(), tempFinalPose);
          FootstepPlanningRequestPacket tempPlanningRequestPacket = HumanoidMessageTools.createFootstepPlanningRequestPacket(initialPose, goalSide, finalPose);
          tempPlanningRequestPacket.setTimeout(3.0);
-         tempPlanningRequestPacket.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+         tempPlanningRequestPacket.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
 
          communicationBridge.sendPacket(tempPlanningRequestPacket);
       }

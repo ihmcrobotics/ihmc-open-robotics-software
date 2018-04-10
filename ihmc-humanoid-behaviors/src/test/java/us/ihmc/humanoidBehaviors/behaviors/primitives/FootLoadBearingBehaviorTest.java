@@ -24,7 +24,7 @@ public class FootLoadBearingBehaviorTest
       FootLoadBearingMessage message = HumanoidMessageTools.createFootLoadBearingMessage(RobotSide.LEFT, LoadBearingRequest.LOAD);
 
       PacketDestination destination = PacketDestination.UI;
-      message.setDestination(destination);
+      message.setDestination(destination.ordinal());
 
       footLoadBearingBehavior.setInput(message);
 

@@ -149,7 +149,7 @@ public class StereoVisionPointCloudPublisher
                int[] colors = pointCloudData.getColors();
                StereoVisionPointCloudMessage message = MessageTools.createStereoVisionPointCloudMessage(robotTimestamp, scanPointBuffer, colors);
 
-               message.setDestination(destination);
+               message.setDestination(destination.ordinal());
                packetCommunicator.send(message);
             }
 
