@@ -302,7 +302,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       final QuadrupedController fallController = new QuadrupedFallController(controllerToolbox, controlManagerFactory, controlMode, registry);
 
       EventBasedStateMachineFactory<QuadrupedControllerEnum, QuadrupedController> factory = new EventBasedStateMachineFactory<>(QuadrupedControllerEnum.class);
-      factory.setNamePrefix("forceController").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
+      factory.setNamePrefix("controller").setRegistry(registry).buildYoClock(runtimeEnvironment.getRobotTimestamp());
       factory.buildYoEventTrigger("userTrigger", QuadrupedControllerRequestedEvent.class);
       trigger = factory.buildEventTrigger();
 
