@@ -191,14 +191,14 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
          updatables.get(i).update(time);
       }
 
-//      if (walk.getBooleanValue() != walkPrevious.getBooleanValue())
+      if (walk.getBooleanValue() != walkPrevious.getBooleanValue())
       {
          if (walk.getBooleanValue())
          {
             componentBasedDesiredFootstepCalculator.initialize();
             computeAndSubmitFootsteps();
          }
-         else if (walk.getBooleanValue() != walkPrevious.getBooleanValue())
+         else
          {
             commandInputManager.submitMessage(HumanoidMessageTools.createPauseWalkingMessage(true));
          }
