@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -46,6 +47,11 @@ public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus>
       return sequence_id_;
    }
 
+
+   public static Supplier<ManipulationAbortedStatusPubSubType> getPubSubType()
+   {
+      return ManipulationAbortedStatusPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(ManipulationAbortedStatus other, double epsilon)

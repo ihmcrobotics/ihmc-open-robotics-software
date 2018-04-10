@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Send a request to change the desired PSI of the Atlas hydraulic pump.
@@ -66,6 +67,11 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
       return desired_pump_psi_;
    }
 
+
+   public static Supplier<AtlasDesiredPumpPSIPacketPubSubType> getPubSubType()
+   {
+      return AtlasDesiredPumpPSIPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(AtlasDesiredPumpPSIPacket other, double epsilon)

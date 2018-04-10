@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Old message used for the VRC? Needs to be revised, maybe deleted?
@@ -75,6 +76,11 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Sett
       return index_;
    }
 
+
+   public static Supplier<VehiclePosePacketPubSubType> getPubSubType()
+   {
+      return VehiclePosePacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(VehiclePosePacket other, double epsilon)

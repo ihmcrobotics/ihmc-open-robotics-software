@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Configure a constrained trajectory for a given end-effector.
@@ -126,6 +127,11 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       return weight_;
    }
 
+
+   public static Supplier<WaypointBasedTrajectoryMessagePubSubType> getPubSubType()
+   {
+      return WaypointBasedTrajectoryMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(WaypointBasedTrajectoryMessage other, double epsilon)

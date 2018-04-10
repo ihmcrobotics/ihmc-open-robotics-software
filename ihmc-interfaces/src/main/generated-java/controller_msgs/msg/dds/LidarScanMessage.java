@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message should disappear to be replaced by ROS equivalent.
@@ -85,6 +86,11 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       return scan_;
    }
 
+
+   public static Supplier<LidarScanMessagePubSubType> getPubSubType()
+   {
+      return LidarScanMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(LidarScanMessage other, double epsilon)

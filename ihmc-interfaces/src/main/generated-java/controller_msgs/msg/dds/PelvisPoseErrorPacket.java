@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message part of the localization module
@@ -81,6 +82,11 @@ public class PelvisPoseErrorPacket extends Packet<PelvisPoseErrorPacket> impleme
       return has_map_been_reset_;
    }
 
+
+   public static Supplier<PelvisPoseErrorPacketPubSubType> getPubSubType()
+   {
+      return PelvisPoseErrorPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(PelvisPoseErrorPacket other, double epsilon)

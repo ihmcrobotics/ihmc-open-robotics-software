@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -86,6 +87,11 @@ public class FootTrajectoryMessage extends Packet<FootTrajectoryMessage> impleme
       return se3_trajectory_;
    }
 
+
+   public static Supplier<FootTrajectoryMessagePubSubType> getPubSubType()
+   {
+      return FootTrajectoryMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(FootTrajectoryMessage other, double epsilon)

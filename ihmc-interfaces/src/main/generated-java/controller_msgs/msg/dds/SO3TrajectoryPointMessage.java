@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -99,6 +100,11 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
       return angular_velocity_;
    }
 
+
+   public static Supplier<SO3TrajectoryPointMessagePubSubType> getPubSubType()
+   {
+      return SO3TrajectoryPointMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(SO3TrajectoryPointMessage other, double epsilon)

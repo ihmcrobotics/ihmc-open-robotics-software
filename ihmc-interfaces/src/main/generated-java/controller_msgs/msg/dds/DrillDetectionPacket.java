@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implements Settable<DrillDetectionPacket>, EpsilonComparable<DrillDetectionPacket>
 {
@@ -54,6 +55,11 @@ public class DrillDetectionPacket extends Packet<DrillDetectionPacket> implement
       return is_drill_on_;
    }
 
+
+   public static Supplier<DrillDetectionPacketPubSubType> getPubSubType()
+   {
+      return DrillDetectionPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(DrillDetectionPacket other, double epsilon)

@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * (Obsolete) This message is part of the old IHMC footstep planning module.
@@ -119,6 +120,11 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket> imple
       return path_cost_;
    }
 
+
+   public static Supplier<FootstepPathPlanPacketPubSubType> getPubSubType()
+   {
+      return FootstepPathPlanPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(FootstepPathPlanPacket other, double epsilon)

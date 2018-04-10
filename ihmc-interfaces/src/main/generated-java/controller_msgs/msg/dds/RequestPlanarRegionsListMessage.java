@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC robot environment awareness module.
@@ -71,6 +72,11 @@ public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegions
       return bounding_box_in_world_for_request_;
    }
 
+
+   public static Supplier<RequestPlanarRegionsListMessagePubSubType> getPubSubType()
+   {
+      return RequestPlanarRegionsListMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(RequestPlanarRegionsListMessage other, double epsilon)

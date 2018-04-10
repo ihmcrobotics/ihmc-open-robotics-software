@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket> implements Settable<MultisenseParameterPacket>, EpsilonComparable<MultisenseParameterPacket>
 {
@@ -138,6 +139,11 @@ public class MultisenseParameterPacket extends Packet<MultisenseParameterPacket>
       return auto_white_balance_;
    }
 
+
+   public static Supplier<MultisenseParameterPacketPubSubType> getPubSubType()
+   {
+      return MultisenseParameterPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(MultisenseParameterPacket other, double epsilon)

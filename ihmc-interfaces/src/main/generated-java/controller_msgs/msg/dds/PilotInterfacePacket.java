@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implements Settable<PilotInterfacePacket>, EpsilonComparable<PilotInterfacePacket>
 {
@@ -162,6 +163,11 @@ public class PilotInterfacePacket extends Packet<PilotInterfacePacket> implement
       return current_pilot_state_;
    }
 
+
+   public static Supplier<PilotInterfacePacketPubSubType> getPubSubType()
+   {
+      return PilotInterfacePacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(PilotInterfacePacket other, double epsilon)

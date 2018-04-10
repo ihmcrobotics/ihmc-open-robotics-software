@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message used to configure the exploration for a RRT-based planner.
@@ -94,6 +95,11 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
       return exploration_range_lower_limits_;
    }
 
+
+   public static Supplier<RigidBodyExplorationConfigurationMessagePubSubType> getPubSubType()
+   {
+      return RigidBodyExplorationConfigurationMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(RigidBodyExplorationConfigurationMessage other, double epsilon)

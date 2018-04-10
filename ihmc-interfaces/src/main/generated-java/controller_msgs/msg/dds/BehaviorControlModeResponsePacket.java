@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC humanoid behavior module.
@@ -60,6 +61,11 @@ public class BehaviorControlModeResponsePacket extends Packet<BehaviorControlMod
       return behavior_control_mode_enum_request_;
    }
 
+
+   public static Supplier<BehaviorControlModeResponsePacketPubSubType> getPubSubType()
+   {
+      return BehaviorControlModeResponsePacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(BehaviorControlModeResponsePacket other, double epsilon)

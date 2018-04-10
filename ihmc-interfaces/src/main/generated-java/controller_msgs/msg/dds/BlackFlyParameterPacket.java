@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Atlas specific message
@@ -155,6 +156,11 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket> imp
       return robot_side_;
    }
 
+
+   public static Supplier<BlackFlyParameterPacketPubSubType> getPubSubType()
+   {
+      return BlackFlyParameterPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(BlackFlyParameterPacket other, double epsilon)

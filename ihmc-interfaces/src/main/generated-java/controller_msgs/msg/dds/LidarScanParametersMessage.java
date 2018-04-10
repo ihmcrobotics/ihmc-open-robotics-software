@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message used for simulated LIDAR
@@ -177,6 +178,11 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
       return scan_height_;
    }
 
+
+   public static Supplier<LidarScanParametersMessagePubSubType> getPubSubType()
+   {
+      return LidarScanParametersMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(LidarScanParametersMessage other, double epsilon)

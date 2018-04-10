@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -139,6 +140,11 @@ public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> i
       return z_selected_;
    }
 
+
+   public static Supplier<SelectionMatrix3DMessagePubSubType> getPubSubType()
+   {
+      return SelectionMatrix3DMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(SelectionMatrix3DMessage other, double epsilon)

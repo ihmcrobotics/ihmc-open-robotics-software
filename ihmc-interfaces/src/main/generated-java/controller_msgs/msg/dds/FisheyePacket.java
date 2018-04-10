@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class FisheyePacket extends Packet<FisheyePacket> implements Settable<FisheyePacket>, EpsilonComparable<FisheyePacket>
 {
@@ -51,6 +52,11 @@ public class FisheyePacket extends Packet<FisheyePacket> implements Settable<Fis
       return video_packet_;
    }
 
+
+   public static Supplier<FisheyePacketPubSubType> getPubSubType()
+   {
+      return FisheyePacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(FisheyePacket other, double epsilon)

@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -269,6 +270,11 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
       return queueing_properties_;
    }
 
+
+   public static Supplier<FootstepDataListMessagePubSubType> getPubSubType()
+   {
+      return FootstepDataListMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(FootstepDataListMessage other, double epsilon)

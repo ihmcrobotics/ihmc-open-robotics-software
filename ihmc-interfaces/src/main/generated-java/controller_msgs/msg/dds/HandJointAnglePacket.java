@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message used to report the current joint angles for the fingers of a hand.
@@ -93,6 +94,11 @@ public class HandJointAnglePacket extends Packet<HandJointAnglePacket> implement
       return calibrated_;
    }
 
+
+   public static Supplier<HandJointAnglePacketPubSubType> getPubSubType()
+   {
+      return HandJointAnglePacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(HandJointAnglePacket other, double epsilon)

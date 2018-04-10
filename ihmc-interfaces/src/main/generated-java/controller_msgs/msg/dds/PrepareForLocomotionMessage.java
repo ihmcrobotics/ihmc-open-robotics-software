@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -88,6 +89,11 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
       return prepare_pelvis_;
    }
 
+
+   public static Supplier<PrepareForLocomotionMessagePubSubType> getPubSubType()
+   {
+      return PrepareForLocomotionMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(PrepareForLocomotionMessage other, double epsilon)

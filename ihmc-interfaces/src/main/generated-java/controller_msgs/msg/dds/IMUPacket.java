@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * General purpose packet to carry IMU data. (need to be replace with the ROS IMUData)
@@ -84,6 +85,11 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
       return time_;
    }
 
+
+   public static Supplier<IMUPacketPubSubType> getPubSubType()
+   {
+      return IMUPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(IMUPacket other, double epsilon)

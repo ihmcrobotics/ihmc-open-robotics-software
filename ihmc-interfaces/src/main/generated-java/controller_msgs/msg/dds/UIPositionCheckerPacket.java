@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class UIPositionCheckerPacket extends Packet<UIPositionCheckerPacket> implements Settable<UIPositionCheckerPacket>, EpsilonComparable<UIPositionCheckerPacket>
 {
@@ -60,6 +61,11 @@ public class UIPositionCheckerPacket extends Packet<UIPositionCheckerPacket> imp
       return orientation_;
    }
 
+
+   public static Supplier<UIPositionCheckerPacketPubSubType> getPubSubType()
+   {
+      return UIPositionCheckerPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(UIPositionCheckerPacket other, double epsilon)

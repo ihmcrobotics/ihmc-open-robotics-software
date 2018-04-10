@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPacket>, EpsilonComparable<VideoPacket>
 {
@@ -110,6 +111,11 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
       return intrinsic_parameters_;
    }
 
+
+   public static Supplier<VideoPacketPubSubType> getPubSubType()
+   {
+      return VideoPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(VideoPacket other, double epsilon)

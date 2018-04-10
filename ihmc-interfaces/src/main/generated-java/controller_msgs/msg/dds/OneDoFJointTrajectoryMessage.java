@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -99,6 +100,11 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
       return weight_;
    }
 
+
+   public static Supplier<OneDoFJointTrajectoryMessagePubSubType> getPubSubType()
+   {
+      return OneDoFJointTrajectoryMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(OneDoFJointTrajectoryMessage other, double epsilon)

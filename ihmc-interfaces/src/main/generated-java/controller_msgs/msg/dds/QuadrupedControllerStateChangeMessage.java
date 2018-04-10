@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC quadruped controller API.
@@ -75,6 +76,11 @@ public class QuadrupedControllerStateChangeMessage extends Packet<QuadrupedContr
       return end_controller_name_;
    }
 
+
+   public static Supplier<QuadrupedControllerStateChangeMessagePubSubType> getPubSubType()
+   {
+      return QuadrupedControllerStateChangeMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(QuadrupedControllerStateChangeMessage other, double epsilon)

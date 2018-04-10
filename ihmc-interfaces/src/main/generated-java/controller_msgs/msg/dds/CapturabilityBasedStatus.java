@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -94,6 +95,11 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       return right_foot_support_polygon_2d_;
    }
 
+
+   public static Supplier<CapturabilityBasedStatusPubSubType> getPubSubType()
+   {
+      return CapturabilityBasedStatusPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(CapturabilityBasedStatus other, double epsilon)

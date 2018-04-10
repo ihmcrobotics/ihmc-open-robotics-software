@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket> implements Settable<SimulatedLidarScanPacket>, EpsilonComparable<SimulatedLidarScanPacket>
 {
@@ -73,6 +74,11 @@ public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket> i
       return lidar_scan_parameters_;
    }
 
+
+   public static Supplier<SimulatedLidarScanPacketPubSubType> getPubSubType()
+   {
+      return SimulatedLidarScanPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(SimulatedLidarScanPacket other, double epsilon)

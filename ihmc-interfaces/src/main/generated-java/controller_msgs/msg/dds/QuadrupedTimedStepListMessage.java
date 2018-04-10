@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepListMessage> implements Settable<QuadrupedTimedStepListMessage>, EpsilonComparable<QuadrupedTimedStepListMessage>
 {
@@ -94,6 +95,11 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       return queueing_properties_;
    }
 
+
+   public static Supplier<QuadrupedTimedStepListMessagePubSubType> getPubSubType()
+   {
+      return QuadrupedTimedStepListMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(QuadrupedTimedStepListMessage other, double epsilon)

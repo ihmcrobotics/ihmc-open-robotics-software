@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -78,6 +79,11 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
       return queueing_properties_;
    }
 
+
+   public static Supplier<DesiredAccelerationsMessagePubSubType> getPubSubType()
+   {
+      return DesiredAccelerationsMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(DesiredAccelerationsMessage other, double epsilon)

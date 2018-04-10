@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Atlas specific message.
@@ -59,6 +60,11 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
       return requested_atlas_low_level_control_mode_;
    }
 
+
+   public static Supplier<AtlasLowLevelControlModeMessagePubSubType> getPubSubType()
+   {
+      return AtlasLowLevelControlModeMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(AtlasLowLevelControlModeMessage other, double epsilon)

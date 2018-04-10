@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -47,6 +48,11 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
       return sequence_id_;
    }
 
+
+   public static Supplier<RequestWristForceSensorCalibrationPacketPubSubType> getPubSubType()
+   {
+      return RequestWristForceSensorCalibrationPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(RequestWristForceSensorCalibrationPacket other, double epsilon)

@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC hole-body inverse kinematics module.
@@ -236,6 +237,11 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       return linear_weight_matrix_;
    }
 
+
+   public static Supplier<KinematicsToolboxRigidBodyMessagePubSubType> getPubSubType()
+   {
+      return KinematicsToolboxRigidBodyMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(KinematicsToolboxRigidBodyMessage other, double epsilon)

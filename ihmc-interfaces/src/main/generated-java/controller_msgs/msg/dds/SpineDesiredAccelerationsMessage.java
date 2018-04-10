@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -62,6 +63,11 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
       return desired_accelerations_;
    }
 
+
+   public static Supplier<SpineDesiredAccelerationsMessagePubSubType> getPubSubType()
+   {
+      return SpineDesiredAccelerationsMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(SpineDesiredAccelerationsMessage other, double epsilon)

@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -85,6 +86,11 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
       return so3_trajectory_;
    }
 
+
+   public static Supplier<QuadrupedBodyOrientationMessagePubSubType> getPubSubType()
+   {
+      return QuadrupedBodyOrientationMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(QuadrupedBodyOrientationMessage other, double epsilon)

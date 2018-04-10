@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC robot environment awareness module.
@@ -98,6 +99,11 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
       return convex_polygons_;
    }
 
+
+   public static Supplier<PlanarRegionMessagePubSubType> getPubSubType()
+   {
+      return PlanarRegionMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(PlanarRegionMessage other, double epsilon)

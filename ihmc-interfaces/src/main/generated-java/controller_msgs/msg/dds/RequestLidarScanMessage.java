@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message used to request a new LIDAR scan, and also enable some filters.
@@ -69,6 +70,11 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> imp
       return remove_self_collisions_;
    }
 
+
+   public static Supplier<RequestLidarScanMessagePubSubType> getPubSubType()
+   {
+      return RequestLidarScanMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(RequestLidarScanMessage other, double epsilon)

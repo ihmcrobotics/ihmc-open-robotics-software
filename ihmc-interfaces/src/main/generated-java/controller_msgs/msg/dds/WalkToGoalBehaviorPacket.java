@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC humanoid behavior module.
@@ -111,6 +112,11 @@ public class WalkToGoalBehaviorPacket extends Packet<WalkToGoalBehaviorPacket> i
       return goal_robot_side_;
    }
 
+
+   public static Supplier<WalkToGoalBehaviorPacketPubSubType> getPubSubType()
+   {
+      return WalkToGoalBehaviorPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(WalkToGoalBehaviorPacket other, double epsilon)

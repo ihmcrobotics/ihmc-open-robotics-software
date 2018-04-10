@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Old message, needs to be tested and cleaned up.
@@ -75,6 +76,11 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket> implements Se
       return flag_;
    }
 
+
+   public static Supplier<SnapFootstepPacketPubSubType> getPubSubType()
+   {
+      return SnapFootstepPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(SnapFootstepPacket other, double epsilon)

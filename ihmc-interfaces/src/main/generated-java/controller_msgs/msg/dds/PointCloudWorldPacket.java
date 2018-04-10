@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is obsolete
@@ -89,6 +90,11 @@ public class PointCloudWorldPacket extends Packet<PointCloudWorldPacket> impleme
       return default_ground_height_;
    }
 
+
+   public static Supplier<PointCloudWorldPacketPubSubType> getPubSubType()
+   {
+      return PointCloudWorldPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(PointCloudWorldPacket other, double epsilon)
