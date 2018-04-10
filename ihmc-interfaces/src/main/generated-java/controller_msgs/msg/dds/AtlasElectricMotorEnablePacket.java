@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Specifies a specific electric motor in the Atlas forearm to power on or off.
@@ -93,6 +94,11 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
       return enable_;
    }
 
+
+   public static Supplier<AtlasElectricMotorEnablePacketPubSubType> getPubSubType()
+   {
+      return AtlasElectricMotorEnablePacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(AtlasElectricMotorEnablePacket other, double epsilon)

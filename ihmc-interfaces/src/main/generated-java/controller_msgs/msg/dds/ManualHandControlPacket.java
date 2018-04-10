@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Atlas specific message
@@ -121,6 +122,11 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket> imp
       return control_type_;
    }
 
+
+   public static Supplier<ManualHandControlPacketPubSubType> getPubSubType()
+   {
+      return ManualHandControlPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(ManualHandControlPacket other, double epsilon)

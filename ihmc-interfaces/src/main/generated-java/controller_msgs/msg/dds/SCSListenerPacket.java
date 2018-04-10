@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of IHMC Simulation Construction Set.
@@ -58,6 +59,11 @@ public class SCSListenerPacket extends Packet<SCSListenerPacket> implements Sett
       return is_stopped_;
    }
 
+
+   public static Supplier<SCSListenerPacketPubSubType> getPubSubType()
+   {
+      return SCSListenerPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(SCSListenerPacket other, double epsilon)

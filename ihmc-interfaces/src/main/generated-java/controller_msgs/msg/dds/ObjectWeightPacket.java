@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part the IHMC humanoid behavior module.
@@ -71,6 +72,11 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Se
       return weight_;
    }
 
+
+   public static Supplier<ObjectWeightPacketPubSubType> getPubSubType()
+   {
+      return ObjectWeightPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(ObjectWeightPacket other, double epsilon)

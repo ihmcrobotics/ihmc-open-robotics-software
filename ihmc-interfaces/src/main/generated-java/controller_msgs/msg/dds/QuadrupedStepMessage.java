@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class QuadrupedStepMessage extends Packet<QuadrupedStepMessage> implements Settable<QuadrupedStepMessage>, EpsilonComparable<QuadrupedStepMessage>
 {
@@ -79,6 +80,11 @@ public class QuadrupedStepMessage extends Packet<QuadrupedStepMessage> implement
       return ground_clearance_;
    }
 
+
+   public static Supplier<QuadrupedStepMessagePubSubType> getPubSubType()
+   {
+      return QuadrupedStepMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(QuadrupedStepMessage other, double epsilon)

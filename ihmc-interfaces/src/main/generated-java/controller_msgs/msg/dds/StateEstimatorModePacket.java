@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -59,6 +60,11 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket> i
       return requested_state_estimator_mode_;
    }
 
+
+   public static Supplier<StateEstimatorModePacketPubSubType> getPubSubType()
+   {
+      return StateEstimatorModePacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(StateEstimatorModePacket other, double epsilon)

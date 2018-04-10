@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class TimeIntervalMessage extends Packet<TimeIntervalMessage> implements Settable<TimeIntervalMessage>, EpsilonComparable<TimeIntervalMessage>
 {
@@ -66,6 +67,11 @@ public class TimeIntervalMessage extends Packet<TimeIntervalMessage> implements 
       return end_time_;
    }
 
+
+   public static Supplier<TimeIntervalMessagePubSubType> getPubSubType()
+   {
+      return TimeIntervalMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(TimeIntervalMessage other, double epsilon)

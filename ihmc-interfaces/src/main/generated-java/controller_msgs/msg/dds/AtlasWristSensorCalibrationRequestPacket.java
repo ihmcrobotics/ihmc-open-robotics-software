@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Atlas specific message: request taring of the wrist force/torque sensors.
@@ -68,6 +69,11 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
       return robot_side_;
    }
 
+
+   public static Supplier<AtlasWristSensorCalibrationRequestPacketPubSubType> getPubSubType()
+   {
+      return AtlasWristSensorCalibrationRequestPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(AtlasWristSensorCalibrationRequestPacket other, double epsilon)

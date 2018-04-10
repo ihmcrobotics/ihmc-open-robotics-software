@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class FrameInformation extends Packet<FrameInformation> implements Settable<FrameInformation>, EpsilonComparable<FrameInformation>
 {
@@ -142,6 +143,11 @@ public class FrameInformation extends Packet<FrameInformation> implements Settab
       return data_reference_frame_id_;
    }
 
+
+   public static Supplier<FrameInformationPubSubType> getPubSubType()
+   {
+      return FrameInformationPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(FrameInformation other, double epsilon)

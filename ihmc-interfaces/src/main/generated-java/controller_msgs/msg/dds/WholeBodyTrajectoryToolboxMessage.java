@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message that carries all the information required to configure the IHMC whole-body trajectory planner.
@@ -83,6 +84,11 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
       return reaching_manifolds_;
    }
 
+
+   public static Supplier<WholeBodyTrajectoryToolboxMessagePubSubType> getPubSubType()
+   {
+      return WholeBodyTrajectoryToolboxMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(WholeBodyTrajectoryToolboxMessage other, double epsilon)

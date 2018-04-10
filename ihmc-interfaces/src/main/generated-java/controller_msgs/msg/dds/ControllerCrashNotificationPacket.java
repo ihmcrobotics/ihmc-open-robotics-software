@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message notifying if the IHMC whole-body controller has crashed unexpectedly.
@@ -83,6 +84,11 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
       return stacktrace_;
    }
 
+
+   public static Supplier<ControllerCrashNotificationPacketPubSubType> getPubSubType()
+   {
+      return ControllerCrashNotificationPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(ControllerCrashNotificationPacket other, double epsilon)

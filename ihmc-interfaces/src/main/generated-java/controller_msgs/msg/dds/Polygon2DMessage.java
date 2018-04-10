@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * General purpose message that contains vertices to represent a 2D polygon (z ignored).
@@ -55,6 +56,11 @@ public class Polygon2DMessage extends Packet<Polygon2DMessage> implements Settab
       return vertices_;
    }
 
+
+   public static Supplier<Polygon2DMessagePubSubType> getPubSubType()
+   {
+      return Polygon2DMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(Polygon2DMessage other, double epsilon)

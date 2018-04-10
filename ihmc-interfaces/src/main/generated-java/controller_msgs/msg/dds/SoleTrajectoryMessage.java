@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -87,6 +88,11 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
       return position_trajectory_;
    }
 
+
+   public static Supplier<SoleTrajectoryMessagePubSubType> getPubSubType()
+   {
+      return SoleTrajectoryMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(SoleTrajectoryMessage other, double epsilon)

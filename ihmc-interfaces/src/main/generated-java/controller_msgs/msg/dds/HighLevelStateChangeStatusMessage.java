@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -97,6 +98,11 @@ public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChan
       return end_high_level_controller_name_;
    }
 
+
+   public static Supplier<HighLevelStateChangeStatusMessagePubSubType> getPubSubType()
+   {
+      return HighLevelStateChangeStatusMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(HighLevelStateChangeStatusMessage other, double epsilon)

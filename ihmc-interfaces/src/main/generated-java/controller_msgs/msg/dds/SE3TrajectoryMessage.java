@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -192,6 +193,11 @@ public class SE3TrajectoryMessage extends Packet<SE3TrajectoryMessage> implement
       return queueing_properties_;
    }
 
+
+   public static Supplier<SE3TrajectoryMessagePubSubType> getPubSubType()
+   {
+      return SE3TrajectoryMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(SE3TrajectoryMessage other, double epsilon)

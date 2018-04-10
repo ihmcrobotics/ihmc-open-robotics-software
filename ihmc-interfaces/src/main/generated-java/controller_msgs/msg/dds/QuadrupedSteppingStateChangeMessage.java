@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC quadruped controller API.
@@ -71,6 +72,11 @@ public class QuadrupedSteppingStateChangeMessage extends Packet<QuadrupedSteppin
       return end_stepping_controller_name_;
    }
 
+
+   public static Supplier<QuadrupedSteppingStateChangeMessagePubSubType> getPubSubType()
+   {
+      return QuadrupedSteppingStateChangeMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(QuadrupedSteppingStateChangeMessage other, double epsilon)

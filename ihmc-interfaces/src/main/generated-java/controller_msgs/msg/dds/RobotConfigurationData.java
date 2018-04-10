@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class RobotConfigurationData extends Packet<RobotConfigurationData> implements Settable<RobotConfigurationData>, EpsilonComparable<RobotConfigurationData>
 {
@@ -222,6 +223,11 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       return last_received_packet_robot_timestamp_;
    }
 
+
+   public static Supplier<RobotConfigurationDataPubSubType> getPubSubType()
+   {
+      return RobotConfigurationDataPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(RobotConfigurationData other, double epsilon)

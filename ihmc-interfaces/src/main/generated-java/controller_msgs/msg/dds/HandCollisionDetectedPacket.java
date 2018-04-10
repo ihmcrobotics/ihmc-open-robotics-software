@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message for the IHMC humanoid behavior module.
@@ -71,6 +72,11 @@ public class HandCollisionDetectedPacket extends Packet<HandCollisionDetectedPac
       return collision_severity_level_one_to_three_;
    }
 
+
+   public static Supplier<HandCollisionDetectedPacketPubSubType> getPubSubType()
+   {
+      return HandCollisionDetectedPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(HandCollisionDetectedPacket other, double epsilon)

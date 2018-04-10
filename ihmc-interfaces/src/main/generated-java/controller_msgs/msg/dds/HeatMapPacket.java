@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<HeatMapPacket>, EpsilonComparable<HeatMapPacket>
 {
@@ -96,6 +97,11 @@ public class HeatMapPacket extends Packet<HeatMapPacket> implements Settable<Hea
       return name_;
    }
 
+
+   public static Supplier<HeatMapPacketPubSubType> getPubSubType()
+   {
+      return HeatMapPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(HeatMapPacket other, double epsilon)

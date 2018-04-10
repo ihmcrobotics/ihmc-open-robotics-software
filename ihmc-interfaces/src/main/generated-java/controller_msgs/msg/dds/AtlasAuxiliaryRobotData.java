@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message specific to Atlas, it is reported by the IHMC state estimator.
@@ -307,6 +308,11 @@ public class AtlasAuxiliaryRobotData extends Packet<AtlasAuxiliaryRobotData> imp
       return motor_driver_temperature_;
    }
 
+
+   public static Supplier<AtlasAuxiliaryRobotDataPubSubType> getPubSubType()
+   {
+      return AtlasAuxiliaryRobotDataPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(AtlasAuxiliaryRobotData other, double epsilon)

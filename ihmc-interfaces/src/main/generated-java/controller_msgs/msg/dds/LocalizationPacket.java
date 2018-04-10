@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message part of the localization module
@@ -69,6 +70,11 @@ public class LocalizationPacket extends Packet<LocalizationPacket> implements Se
       return toggle_;
    }
 
+
+   public static Supplier<LocalizationPacketPubSubType> getPubSubType()
+   {
+      return LocalizationPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(LocalizationPacket other, double epsilon)

@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message used to encode the manifold of an object to be used as input by a reaching motion planner.
@@ -112,6 +113,11 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage> imp
       return manifold_upper_limits_;
    }
 
+
+   public static Supplier<ReachingManifoldMessagePubSubType> getPubSubType()
+   {
+      return ReachingManifoldMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(ReachingManifoldMessage other, double epsilon)

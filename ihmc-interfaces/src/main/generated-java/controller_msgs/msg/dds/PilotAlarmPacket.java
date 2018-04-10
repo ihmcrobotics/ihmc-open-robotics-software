@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settable<PilotAlarmPacket>, EpsilonComparable<PilotAlarmPacket>
 {
@@ -66,6 +67,11 @@ public class PilotAlarmPacket extends Packet<PilotAlarmPacket> implements Settab
       return enable_tone_;
    }
 
+
+   public static Supplier<PilotAlarmPacketPubSubType> getPubSubType()
+   {
+      return PilotAlarmPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(PilotAlarmPacket other, double epsilon)

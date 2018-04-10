@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC behavior module
@@ -63,6 +64,11 @@ public class ObjectDetectorResultPacket extends Packet<ObjectDetectorResultPacke
       return bounding_boxes_;
    }
 
+
+   public static Supplier<ObjectDetectorResultPacketPubSubType> getPubSubType()
+   {
+      return ObjectDetectorResultPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(ObjectDetectorResultPacket other, double epsilon)

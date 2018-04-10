@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Use this message for the robot to speak.
@@ -105,6 +106,11 @@ public class TextToSpeechPacket extends Packet<TextToSpeechPacket> implements Se
       return text_to_speak_;
    }
 
+
+   public static Supplier<TextToSpeechPacketPubSubType> getPubSubType()
+   {
+      return TextToSpeechPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(TextToSpeechPacket other, double epsilon)

@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Represents a 6D vector composed of a 3D anuglar vector and a 3D linear vector.
@@ -63,6 +64,11 @@ public class SpatialVectorMessage extends Packet<SpatialVectorMessage> implement
       return linear_part_;
    }
 
+
+   public static Supplier<SpatialVectorMessagePubSubType> getPubSubType()
+   {
+      return SpatialVectorMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(SpatialVectorMessage other, double epsilon)

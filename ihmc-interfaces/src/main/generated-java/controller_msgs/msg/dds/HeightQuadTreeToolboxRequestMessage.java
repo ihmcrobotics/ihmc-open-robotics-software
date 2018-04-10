@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC height quad tree module
@@ -69,6 +70,11 @@ public class HeightQuadTreeToolboxRequestMessage extends Packet<HeightQuadTreeTo
       return request_quad_tree_update_;
    }
 
+
+   public static Supplier<HeightQuadTreeToolboxRequestMessagePubSubType> getPubSubType()
+   {
+      return HeightQuadTreeToolboxRequestMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(HeightQuadTreeToolboxRequestMessage other, double epsilon)

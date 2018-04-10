@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -119,6 +120,11 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
       return contact_normal_in_world_frame_;
    }
 
+
+   public static Supplier<LoadBearingMessagePubSubType> getPubSubType()
+   {
+      return LoadBearingMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(LoadBearingMessage other, double epsilon)

@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements Settable<BoundingBoxesPacket>, EpsilonComparable<BoundingBoxesPacket>
 {
@@ -91,6 +92,11 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket> implements 
       return labels_;
    }
 
+
+   public static Supplier<BoundingBoxesPacketPubSubType> getPubSubType()
+   {
+      return BoundingBoxesPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(BoundingBoxesPacket other, double epsilon)

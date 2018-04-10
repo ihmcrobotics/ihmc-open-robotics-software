@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -65,6 +66,11 @@ public class MessageCollection extends Packet<MessageCollection> implements Sett
       return sequences_;
    }
 
+
+   public static Supplier<MessageCollectionPubSubType> getPubSubType()
+   {
+      return MessageCollectionPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(MessageCollection other, double epsilon)

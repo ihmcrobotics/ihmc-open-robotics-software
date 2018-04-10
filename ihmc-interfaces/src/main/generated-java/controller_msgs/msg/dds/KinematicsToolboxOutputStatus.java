@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
@@ -98,6 +99,11 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       return solution_quality_;
    }
 
+
+   public static Supplier<KinematicsToolboxOutputStatusPubSubType> getPubSubType()
+   {
+      return KinematicsToolboxOutputStatusPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(KinematicsToolboxOutputStatus other, double epsilon)

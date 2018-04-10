@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Atlas specific message.
@@ -79,6 +80,11 @@ public class BDIBehaviorCommandPacket extends Packet<BDIBehaviorCommandPacket> i
       return stop_;
    }
 
+
+   public static Supplier<BDIBehaviorCommandPacketPubSubType> getPubSubType()
+   {
+      return BDIBehaviorCommandPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(BDIBehaviorCommandPacket other, double epsilon)

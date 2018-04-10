@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Message part of the localization module
@@ -67,6 +68,11 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
       return localization_point_map_;
    }
 
+
+   public static Supplier<LocalizationPointMapPacketPubSubType> getPubSubType()
+   {
+      return LocalizationPointMapPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(LocalizationPointMapPacket other, double epsilon)

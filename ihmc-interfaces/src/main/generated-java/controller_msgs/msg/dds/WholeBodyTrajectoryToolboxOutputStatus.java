@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * General purpose message normally used to report the solution of a whole-body trajectory planner.
@@ -99,6 +100,11 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
       return robot_configurations_;
    }
 
+
+   public static Supplier<WholeBodyTrajectoryToolboxOutputStatusPubSubType> getPubSubType()
+   {
+      return WholeBodyTrajectoryToolboxOutputStatusPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(WholeBodyTrajectoryToolboxOutputStatus other, double epsilon)

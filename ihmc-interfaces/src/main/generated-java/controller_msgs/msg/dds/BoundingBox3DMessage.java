@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implements Settable<BoundingBox3DMessage>, EpsilonComparable<BoundingBox3DMessage>
 {
@@ -60,6 +61,11 @@ public class BoundingBox3DMessage extends Packet<BoundingBox3DMessage> implement
       return max_point_;
    }
 
+
+   public static Supplier<BoundingBox3DMessagePubSubType> getPubSubType()
+   {
+      return BoundingBox3DMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(BoundingBox3DMessage other, double epsilon)

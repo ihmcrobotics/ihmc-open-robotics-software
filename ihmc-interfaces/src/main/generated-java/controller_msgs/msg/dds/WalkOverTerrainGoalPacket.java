@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC humanoid behavior module.
@@ -63,6 +64,11 @@ public class WalkOverTerrainGoalPacket extends Packet<WalkOverTerrainGoalPacket>
       return orientation_;
    }
 
+
+   public static Supplier<WalkOverTerrainGoalPacketPubSubType> getPubSubType()
+   {
+      return WalkOverTerrainGoalPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(WalkOverTerrainGoalPacket other, double epsilon)

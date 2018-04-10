@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -61,6 +62,11 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
       return falling_direction_;
    }
 
+
+   public static Supplier<WalkingControllerFailureStatusMessagePubSubType> getPubSubType()
+   {
+      return WalkingControllerFailureStatusMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(WalkingControllerFailureStatusMessage other, double epsilon)

@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Atlas specific message.
@@ -57,6 +58,11 @@ public class AtlasElectricMotorAutoEnableFlagPacket extends Packet<AtlasElectric
       return should_auto_enable_;
    }
 
+
+   public static Supplier<AtlasElectricMotorAutoEnableFlagPacketPubSubType> getPubSubType()
+   {
+      return AtlasElectricMotorAutoEnableFlagPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(AtlasElectricMotorAutoEnableFlagPacket other, double epsilon)

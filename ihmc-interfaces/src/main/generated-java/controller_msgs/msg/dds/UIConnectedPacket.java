@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * TODO: This message is not really used, the feature it provides needs to be fixed or this message needs to be deleted.
@@ -45,6 +46,11 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
       return sequence_id_;
    }
 
+
+   public static Supplier<UIConnectedPacketPubSubType> getPubSubType()
+   {
+      return UIConnectedPacketPubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(UIConnectedPacket other, double epsilon)

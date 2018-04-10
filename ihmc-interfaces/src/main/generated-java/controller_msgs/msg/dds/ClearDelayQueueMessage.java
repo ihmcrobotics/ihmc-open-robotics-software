@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * This message is part of the IHMC whole-body controller API.
@@ -95,6 +96,11 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
       return clear_all_delay_buffers_;
    }
 
+
+   public static Supplier<ClearDelayQueueMessagePubSubType> getPubSubType()
+   {
+      return ClearDelayQueueMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(ClearDelayQueueMessage other, double epsilon)

@@ -3,6 +3,7 @@ package controller_msgs.msg.dds;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import java.util.function.Supplier;
 
 /**
        * Use this message to request a new point cloud from the stereo camera.
@@ -45,6 +46,11 @@ public class RequestStereoPointCloudMessage extends Packet<RequestStereoPointClo
       return sequence_id_;
    }
 
+
+   public static Supplier<RequestStereoPointCloudMessagePubSubType> getPubSubType()
+   {
+      return RequestStereoPointCloudMessagePubSubType::new;
+   }
 
    @Override
    public boolean epsilonEquals(RequestStereoPointCloudMessage other, double epsilon)
