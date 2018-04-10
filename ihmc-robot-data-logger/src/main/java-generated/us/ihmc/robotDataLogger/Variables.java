@@ -1,8 +1,8 @@
 package us.ihmc.robotDataLogger;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class Variables extends Packet<Variables> implements Settable<Variables>, EpsilonComparable<Variables>
 {
@@ -21,18 +21,15 @@ public class Variables extends Packet<Variables> implements Settable<Variables>,
 
    public Variables()
    {
-
       handshake_ = new java.lang.StringBuilder(255);
-
       data_ = new java.lang.StringBuilder(255);
-
       summary_ = new java.lang.StringBuilder(255);
-
       index_ = new java.lang.StringBuilder(255);
    }
 
    public Variables(Variables other)
    {
+      this();
       set(other);
    }
 
@@ -55,26 +52,16 @@ public class Variables extends Packet<Variables> implements Settable<Variables>,
       timestamped_ = other.timestamped_;
 
       compressed_ = other.compressed_;
-   }
 
-   public us.ihmc.robotDataLogger.HandshakeFileType getHandshakeFileType()
-   {
-      return handshakeFileType_;
    }
 
    public void setHandshakeFileType(us.ihmc.robotDataLogger.HandshakeFileType handshakeFileType)
    {
       handshakeFileType_ = handshakeFileType;
    }
-
-   public java.lang.String getHandshakeAsString()
+   public us.ihmc.robotDataLogger.HandshakeFileType getHandshakeFileType()
    {
-      return getHandshake().toString();
-   }
-
-   public java.lang.StringBuilder getHandshake()
-   {
-      return handshake_;
+      return handshakeFileType_;
    }
 
    public void setHandshake(java.lang.String handshake)
@@ -83,16 +70,13 @@ public class Variables extends Packet<Variables> implements Settable<Variables>,
       handshake_.append(handshake);
    }
 
-   // Handshake file name
-   public java.lang.String getDataAsString()
+   public java.lang.String getHandshakeAsString()
    {
-      return getData().toString();
+      return getHandshake().toString();
    }
-
-   // Handshake file name
-   public java.lang.StringBuilder getData()
+   public java.lang.StringBuilder getHandshake()
    {
-      return data_;
+      return handshake_;
    }
 
    // Handshake file name
@@ -102,16 +86,15 @@ public class Variables extends Packet<Variables> implements Settable<Variables>,
       data_.append(data);
    }
 
-   // Data file name
-   public java.lang.String getSummaryAsString()
+   // Handshake file name
+   public java.lang.String getDataAsString()
    {
-      return getSummary().toString();
+      return getData().toString();
    }
-
-   // Data file name
-   public java.lang.StringBuilder getSummary()
+   // Handshake file name
+   public java.lang.StringBuilder getData()
    {
-      return summary_;
+      return data_;
    }
 
    // Data file name
@@ -121,16 +104,15 @@ public class Variables extends Packet<Variables> implements Settable<Variables>,
       summary_.append(summary);
    }
 
-   // Summary file name
-   public java.lang.String getIndexAsString()
+   // Data file name
+   public java.lang.String getSummaryAsString()
    {
-      return getIndex().toString();
+      return getSummary().toString();
    }
-
-   // Summary file name
-   public java.lang.StringBuilder getIndex()
+   // Data file name
+   public java.lang.StringBuilder getSummary()
    {
-      return index_;
+      return summary_;
    }
 
    // Summary file name
@@ -140,10 +122,15 @@ public class Variables extends Packet<Variables> implements Settable<Variables>,
       index_.append(index);
    }
 
-   // Variable index file
-   public boolean getTimestamped()
+   // Summary file name
+   public java.lang.String getIndexAsString()
    {
-      return timestamped_;
+      return getIndex().toString();
+   }
+   // Summary file name
+   public java.lang.StringBuilder getIndex()
+   {
+      return index_;
    }
 
    // Variable index file
@@ -151,11 +138,10 @@ public class Variables extends Packet<Variables> implements Settable<Variables>,
    {
       timestamped_ = timestamped;
    }
-
-   // Does the index contain timestamps
-   public boolean getCompressed()
+   // Variable index file
+   public boolean getTimestamped()
    {
-      return compressed_;
+      return timestamped_;
    }
 
    // Does the index contain timestamps
@@ -163,35 +149,33 @@ public class Variables extends Packet<Variables> implements Settable<Variables>,
    {
       compressed_ = compressed;
    }
+   // Does the index contain timestamps
+   public boolean getCompressed()
+   {
+      return compressed_;
+   }
+
 
    @Override
    public boolean epsilonEquals(Variables other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.handshakeFileType_, other.handshakeFileType_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.handshakeFileType_, other.handshakeFileType_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.handshake_, other.handshake_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.handshake_, other.handshake_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.data_, other.data_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.data_, other.data_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.summary_, other.summary_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.summary_, other.summary_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.index_, other.index_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.index_, other.index_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.timestamped_, other.timestamped_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.timestamped_, other.timestamped_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.compressed_, other.compressed_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.compressed_, other.compressed_, epsilon)) return false;
+
 
       return true;
    }
@@ -199,35 +183,26 @@ public class Variables extends Packet<Variables> implements Settable<Variables>,
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof Variables))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof Variables)) return false;
 
       Variables otherMyClass = (Variables) other;
 
-      if (this.handshakeFileType_ != otherMyClass.handshakeFileType_)
-         return false;
+      if(this.handshakeFileType_ != otherMyClass.handshakeFileType_) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.handshake_, otherMyClass.handshake_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.handshake_, otherMyClass.handshake_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.data_, otherMyClass.data_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.data_, otherMyClass.data_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.summary_, otherMyClass.summary_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.summary_, otherMyClass.summary_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.index_, otherMyClass.index_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.index_, otherMyClass.index_)) return false;
 
-      if (this.timestamped_ != otherMyClass.timestamped_)
-         return false;
+      if(this.timestamped_ != otherMyClass.timestamped_) return false;
 
-      if (this.compressed_ != otherMyClass.compressed_)
-         return false;
+      if(this.compressed_ != otherMyClass.compressed_) return false;
+
 
       return true;
    }
@@ -239,32 +214,19 @@ public class Variables extends Packet<Variables> implements Settable<Variables>,
 
       builder.append("Variables {");
       builder.append("handshakeFileType=");
-      builder.append(this.handshakeFileType_);
-
-      builder.append(", ");
+      builder.append(this.handshakeFileType_);      builder.append(", ");
       builder.append("handshake=");
-      builder.append(this.handshake_);
-
-      builder.append(", ");
+      builder.append(this.handshake_);      builder.append(", ");
       builder.append("data=");
-      builder.append(this.data_);
-
-      builder.append(", ");
+      builder.append(this.data_);      builder.append(", ");
       builder.append("summary=");
-      builder.append(this.summary_);
-
-      builder.append(", ");
+      builder.append(this.summary_);      builder.append(", ");
       builder.append("index=");
-      builder.append(this.index_);
-
-      builder.append(", ");
+      builder.append(this.index_);      builder.append(", ");
       builder.append("timestamped=");
-      builder.append(this.timestamped_);
-
-      builder.append(", ");
+      builder.append(this.timestamped_);      builder.append(", ");
       builder.append("compressed=");
       builder.append(this.compressed_);
-
       builder.append("}");
       return builder.toString();
    }

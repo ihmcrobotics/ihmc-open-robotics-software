@@ -1,8 +1,8 @@
 package us.ihmc.robotDataLogger;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class Model extends Packet<Model> implements Settable<Model>, EpsilonComparable<Model>
 {
@@ -14,23 +14,20 @@ public class Model extends Packet<Model> implements Settable<Model>, EpsilonComp
    // Model file name
    public java.lang.StringBuilder resourceBundle_;
    // Resource bundle zip file name
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder resourceDirectoriesList_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  resourceDirectoriesList_;
 
    public Model()
    {
       loader_ = new java.lang.StringBuilder(255);
-
       path_ = new java.lang.StringBuilder(255);
-
       name_ = new java.lang.StringBuilder(255);
-
       resourceBundle_ = new java.lang.StringBuilder(255);
-
-      resourceDirectoriesList_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder(255, "type_d");
+      resourceDirectoriesList_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (255, "type_d");
    }
 
    public Model(Model other)
    {
+      this();
       set(other);
    }
 
@@ -51,32 +48,19 @@ public class Model extends Packet<Model> implements Settable<Model>, EpsilonComp
       resourceDirectoriesList_.set(other.resourceDirectoriesList_);
    }
 
-   public java.lang.String getLoaderAsString()
-   {
-      return getLoader().toString();
-   }
-
-   public java.lang.StringBuilder getLoader()
-   {
-      return loader_;
-   }
-
    public void setLoader(java.lang.String loader)
    {
       loader_.setLength(0);
       loader_.append(loader);
    }
 
-   // Loader class
-   public java.lang.String getPathAsString()
+   public java.lang.String getLoaderAsString()
    {
-      return getPath().toString();
+      return getLoader().toString();
    }
-
-   // Loader class
-   public java.lang.StringBuilder getPath()
+   public java.lang.StringBuilder getLoader()
    {
-      return path_;
+      return loader_;
    }
 
    // Loader class
@@ -86,16 +70,15 @@ public class Model extends Packet<Model> implements Settable<Model>, EpsilonComp
       path_.append(path);
    }
 
-   // Path
-   public java.lang.String getNameAsString()
+   // Loader class
+   public java.lang.String getPathAsString()
    {
-      return getName().toString();
+      return getPath().toString();
    }
-
-   // Path
-   public java.lang.StringBuilder getName()
+   // Loader class
+   public java.lang.StringBuilder getPath()
    {
-      return name_;
+      return path_;
    }
 
    // Path
@@ -105,16 +88,15 @@ public class Model extends Packet<Model> implements Settable<Model>, EpsilonComp
       name_.append(name);
    }
 
-   // Model file name
-   public java.lang.String getResourceBundleAsString()
+   // Path
+   public java.lang.String getNameAsString()
    {
-      return getResourceBundle().toString();
+      return getName().toString();
    }
-
-   // Model file name
-   public java.lang.StringBuilder getResourceBundle()
+   // Path
+   public java.lang.StringBuilder getName()
    {
-      return resourceBundle_;
+      return name_;
    }
 
    // Model file name
@@ -124,34 +106,41 @@ public class Model extends Packet<Model> implements Settable<Model>, EpsilonComp
       resourceBundle_.append(resourceBundle);
    }
 
+   // Model file name
+   public java.lang.String getResourceBundleAsString()
+   {
+      return getResourceBundle().toString();
+   }
+   // Model file name
+   public java.lang.StringBuilder getResourceBundle()
+   {
+      return resourceBundle_;
+   }
+
+
    // Resource bundle zip file name
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder getResourceDirectoriesList()
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getResourceDirectoriesList()
    {
       return resourceDirectoriesList_;
    }
 
+
    @Override
    public boolean epsilonEquals(Model other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.loader_, other.loader_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.loader_, other.loader_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.path_, other.path_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.path_, other.path_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.resourceBundle_, other.resourceBundle_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.resourceBundle_, other.resourceBundle_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.resourceDirectoriesList_, other.resourceDirectoriesList_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.resourceDirectoriesList_, other.resourceDirectoriesList_, epsilon)) return false;
+
 
       return true;
    }
@@ -159,29 +148,21 @@ public class Model extends Packet<Model> implements Settable<Model>, EpsilonComp
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof Model))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof Model)) return false;
 
       Model otherMyClass = (Model) other;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.loader_, otherMyClass.loader_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.loader_, otherMyClass.loader_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.path_, otherMyClass.path_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.path_, otherMyClass.path_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.resourceBundle_, otherMyClass.resourceBundle_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.resourceBundle_, otherMyClass.resourceBundle_)) return false;
 
-      if (!this.resourceDirectoriesList_.equals(otherMyClass.resourceDirectoriesList_))
-         return false;
+      if (!this.resourceDirectoriesList_.equals(otherMyClass.resourceDirectoriesList_)) return false;
 
       return true;
    }
@@ -193,24 +174,15 @@ public class Model extends Packet<Model> implements Settable<Model>, EpsilonComp
 
       builder.append("Model {");
       builder.append("loader=");
-      builder.append(this.loader_);
-
-      builder.append(", ");
+      builder.append(this.loader_);      builder.append(", ");
       builder.append("path=");
-      builder.append(this.path_);
-
-      builder.append(", ");
+      builder.append(this.path_);      builder.append(", ");
       builder.append("name=");
-      builder.append(this.name_);
-
-      builder.append(", ");
+      builder.append(this.name_);      builder.append(", ");
       builder.append("resourceBundle=");
-      builder.append(this.resourceBundle_);
-
-      builder.append(", ");
+      builder.append(this.resourceBundle_);      builder.append(", ");
       builder.append("resourceDirectoriesList=");
       builder.append(this.resourceDirectoriesList_);
-
       builder.append("}");
       return builder.toString();
    }

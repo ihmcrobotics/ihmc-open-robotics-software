@@ -1,8 +1,8 @@
 package us.ihmc.robotDataLogger;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class VariableChangeRequest extends Packet<VariableChangeRequest> implements Settable<VariableChangeRequest>, EpsilonComparable<VariableChangeRequest>
 {
@@ -11,11 +11,11 @@ public class VariableChangeRequest extends Packet<VariableChangeRequest> impleme
 
    public VariableChangeRequest()
    {
-
    }
 
    public VariableChangeRequest(VariableChangeRequest other)
    {
+      this();
       set(other);
    }
 
@@ -24,41 +24,38 @@ public class VariableChangeRequest extends Packet<VariableChangeRequest> impleme
       variableID_ = other.variableID_;
 
       requestedValue_ = other.requestedValue_;
-   }
 
-   public int getVariableID()
-   {
-      return variableID_;
    }
 
    public void setVariableID(int variableID)
    {
       variableID_ = variableID;
    }
-
-   public double getRequestedValue()
+   public int getVariableID()
    {
-      return requestedValue_;
+      return variableID_;
    }
 
    public void setRequestedValue(double requestedValue)
    {
       requestedValue_ = requestedValue;
    }
+   public double getRequestedValue()
+   {
+      return requestedValue_;
+   }
+
 
    @Override
    public boolean epsilonEquals(VariableChangeRequest other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.variableID_, other.variableID_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.variableID_, other.variableID_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requestedValue_, other.requestedValue_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requestedValue_, other.requestedValue_, epsilon)) return false;
+
 
       return true;
    }
@@ -66,20 +63,16 @@ public class VariableChangeRequest extends Packet<VariableChangeRequest> impleme
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof VariableChangeRequest))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof VariableChangeRequest)) return false;
 
       VariableChangeRequest otherMyClass = (VariableChangeRequest) other;
 
-      if (this.variableID_ != otherMyClass.variableID_)
-         return false;
+      if(this.variableID_ != otherMyClass.variableID_) return false;
 
-      if (this.requestedValue_ != otherMyClass.requestedValue_)
-         return false;
+      if(this.requestedValue_ != otherMyClass.requestedValue_) return false;
+
 
       return true;
    }
@@ -91,12 +84,9 @@ public class VariableChangeRequest extends Packet<VariableChangeRequest> impleme
 
       builder.append("VariableChangeRequest {");
       builder.append("variableID=");
-      builder.append(this.variableID_);
-
-      builder.append(", ");
+      builder.append(this.variableID_);      builder.append(", ");
       builder.append("requestedValue=");
       builder.append(this.requestedValue_);
-
       builder.append("}");
       return builder.toString();
    }
