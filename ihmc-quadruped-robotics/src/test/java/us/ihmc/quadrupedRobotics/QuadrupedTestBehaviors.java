@@ -78,7 +78,7 @@ public class QuadrupedTestBehaviors
    public static void squareUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedStepTeleopManager stepTeleopManager)
    {
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 0.2));
-      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.2));
+      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
       conductor.simulate();
 
       double initialDoubleSupportDuration = stepTeleopManager.getXGaitSettings().getEndDoubleSupportDuration();
@@ -89,12 +89,12 @@ public class QuadrupedTestBehaviors
       stepTeleopManager.requestXGait();
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.2));
+      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.5));
       conductor.simulate();
 
       stepTeleopManager.requestStanding();
-      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.2));
+      conductor.addSustainGoal(QuadrupedTestGoals.bodyHeight(variables, 0.25));
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
