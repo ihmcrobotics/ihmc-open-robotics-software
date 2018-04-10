@@ -34,8 +34,8 @@ public class GenericQuadrupedSimulationFactory
 {
    private static final QuadrupedControlMode CONTROL_MODE = QuadrupedControlMode.FORCE;
    private final QuadrupedGroundContactModelType groundContactModelType = QuadrupedGroundContactModelType.FLAT;
-   private static final double CONTROL_DT = 0.002;
-   private static final double SIMULATION_DT = 0.00006;
+   private static final double CONTROL_DT = 0.001;
+   private static final double SIMULATION_DT = 1e-4;
    private static final double SIMULATION_GRAVITY = -9.81;
    private static final boolean USE_STATE_ESTIMATOR = false;
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);

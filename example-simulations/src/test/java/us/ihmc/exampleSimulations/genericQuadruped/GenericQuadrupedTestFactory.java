@@ -49,8 +49,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final double CONTROL_DT = 0.002;
-   private static final double SIMULATION_DT = 0.00006;
+   private static final double CONTROL_DT = 0.001;
+   private static final double SIMULATION_DT = 1e-4;
    private static final double SIMULATION_GRAVITY = -9.81;
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
    private static final boolean USE_STATE_ESTIMATOR = false;

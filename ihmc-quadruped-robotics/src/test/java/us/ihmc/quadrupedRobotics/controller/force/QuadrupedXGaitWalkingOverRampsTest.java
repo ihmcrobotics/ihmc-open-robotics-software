@@ -6,10 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 
 import junit.framework.AssertionFailedError;
-import us.ihmc.quadrupedRobotics.QuadrupedForceTestYoVariables;
-import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
-import us.ihmc.quadrupedRobotics.QuadrupedTestBehaviors;
-import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
+import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
@@ -120,8 +117,12 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       quadrupedTestFactory.setUseStateEstimator(false);
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
+      conductor.setKeepSCSUp(true);
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
+
+      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
+      conductor.simulate();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
       QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
