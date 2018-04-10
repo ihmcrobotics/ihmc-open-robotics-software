@@ -101,6 +101,8 @@ public class PartialFootholdControlModule
    private final YoBoolean expectingLineContact;
    private final FramePoint2D dummyDesiredCop = new FramePoint2D();
 
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
    public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
                                        WalkingControllerParameters walkingControllerParameters, ExplorationParameters explorationParameters,
                                        YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -283,7 +285,7 @@ public class PartialFootholdControlModule
       if (desiredCopInPolygon && !wasCoPInThatRegion && areaBigEnough)
       {
          backupFootPolygon.set(shrunkFootPolygon);
-         ConvexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkFootPolygon, RobotSide.RIGHT);
+         convexPolygonTools.cutPolygonWithLine(lineOfRotation, shrunkFootPolygon, RobotSide.RIGHT);
          unsafePolygon.changeFrameAndProjectToXYPlane(worldFrame);
          yoUnsafePolygon.set(unsafePolygon);
 
