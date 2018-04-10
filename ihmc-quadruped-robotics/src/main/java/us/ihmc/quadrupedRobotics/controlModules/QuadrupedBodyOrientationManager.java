@@ -50,6 +50,10 @@ public class QuadrupedBodyOrientationManager
    private final FrameVector3D desiredAbsoluteYawVelocity = new FrameVector3D();
    private final FrameVector3D desiredAbsoluteYawAcceleration = new FrameVector3D();
 
+   private final FrameQuaternion desiredAbsoluteBodyOrientation = new FrameQuaternion();
+   private final FrameVector3D desiredAbsoluteBodyVelocity = new FrameVector3D();
+   private final FrameVector3D desiredAbsoluteBodyAcceleration = new FrameVector3D();
+
    private ReferenceFrame desiredFrameToHold;
 
    private final YoDouble robotTimestamp;
@@ -202,34 +206,7 @@ public class QuadrupedBodyOrientationManager
          desiredBodyAngularAcceleration.setZ(desiredAbsoluteYawAcceleration.getZ());
       }
    }
-
-   private void computeSetpoints(ReferenceFrame baseFrame, MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectory)
-   {
-      orientationTrajectory.compute(robotTimestamp.getDoubleValue());
-
-      desiredBodyOrientation.setToZero(baseFrame);
-      desiredBodyOrientation.changeFrame(worldFrame);
-
-      orientationTrajectory.getAngularData(desiredBodyOrientationOffset, desiredBodyAngularVelocity, desiredBodyAngularAcceleration);
-      desiredBodyOrientation.append(desiredBodyOrientationOffset);
-
-      double bodyOrientationYaw = desiredBodyOrientation.getYaw();
-      double bodyOrientationPitch = desiredBodyOrientation.getPitch() + groundPlaneEstimator.getPitch(bodyOrientationYaw);
-      double bodyOrientationRoll = desiredBodyOrientation.getRoll();
-      desiredBodyOrientation.setYawPitchRoll(bodyOrientationYaw, bodyOrientationPitch, bodyOrientationRoll);
-
-      yoComTorqueFeedforwardSetpoint.setToZero();
-
-      feedbackControlCommand.setGains(bodyOrientationGainsParameter);
-      feedbackControlCommand.setFeedForwardAction(yoComTorqueFeedforwardSetpoint);
-      feedbackControlCommand.set(desiredBodyOrientation, desiredBodyAngularVelocity);
-      feedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
-
-      yoBodyOrientationSetpoint.set(desiredBodyOrientation);
-      yoBodyAngularVelocitySetpoint.set(desiredBodyAngularVelocity);
-   }
-
-
+   
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
    {
       return getFeedbackControlCommand();
