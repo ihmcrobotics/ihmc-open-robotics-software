@@ -213,14 +213,14 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
          Quaternion headOrientation = new Quaternion();
          headOrientation.set(orientationAxisAngle);
          HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(), referenceFrames.getChestFrame());
-         headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER);
+         headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
          sendPacket(headTrajectoryMessage);
       }
 
       private void clearPlanarRegionsList()
       {
          RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.CLEAR);
-         requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
+         requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE.ordinal());
          sendPacket(requestPlanarRegionsListMessage);
       }
 
@@ -340,14 +340,14 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       footstepDataListMessage.setDefaultSwingDuration(swingTime.getValue());
       footstepDataListMessage.setDefaultTransferDuration(transferTime.getDoubleValue());
 
-      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
+      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       communicationBridge.sendPacket(footstepDataListMessage);
    }
 
    private void sendPlanningRequest(FramePose3D initialStanceFootPose, RobotSide initialStanceSide)
    {
       ToolboxStateMessage wakeUp = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
-      wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+      wakeUp.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
       communicationBridge.sendPacket(wakeUp);
 
       planId.increment();
@@ -355,7 +355,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       request.getPlanarRegionsListMessage().set(planarRegions.get());
       request.setTimeout(swingTime.getDoubleValue() - 0.25);
       request.setPlannerRequestId(planId.getIntegerValue());
-      request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+      request.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
       communicationBridge.sendPacket(request);
       plannerResult.set(null);
    }

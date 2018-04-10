@@ -210,10 +210,10 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
    private void sendFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
    {
-      footstepDataListMessage.setDestination(PacketDestination.UI);
+      footstepDataListMessage.setDestination(PacketDestination.UI.ordinal());
       sendPacket(footstepDataListMessage);
 
-      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
+      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       sendPacketToController(footstepDataListMessage);
       footstepSentTimer.reset();
    }

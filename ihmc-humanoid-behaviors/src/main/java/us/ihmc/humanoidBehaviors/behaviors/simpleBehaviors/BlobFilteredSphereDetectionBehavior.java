@@ -150,7 +150,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
 //      sendPacket(depthDataStateCommand);
       
       TextToSpeechPacket textToSpeechPacket = MessageTools.createTextToSpeechPacket("<prosody pitch=\"90Hz\" rate=\"-20%\" volume=\"x-loud\">I am looking for balls.</prosody>");
-      textToSpeechPacket.setDestination(PacketDestination.TEXT_TO_SPEECH);
+      textToSpeechPacket.setDestination(PacketDestination.TEXT_TO_SPEECH.ordinal());
       sendPacket(textToSpeechPacket);
    }
 

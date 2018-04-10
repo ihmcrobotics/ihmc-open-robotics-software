@@ -766,7 +766,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
 
    private void terminateToolboxController()
    {
-      toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE);
+      toolboxSolution.setDestination(PacketDestination.BEHAVIOR_MODULE.ordinal());
 
       reportMessage(toolboxSolution);
 

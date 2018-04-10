@@ -173,7 +173,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
          planVisualizationPacket.getFootstepOrder().add(i);
          planVisualizationPacket.getFlag().add((byte) (plan.getFootstepUnknown().get(i) == 1 ? 0 : 2));
       }
-      planVisualizationPacket.setDestination(PacketDestination.NETWORK_PROCESSOR);
+      planVisualizationPacket.setDestination(PacketDestination.NETWORK_PROCESSOR.ordinal());
       sendPacket(planVisualizationPacket);
    }
 
@@ -355,7 +355,7 @@ public class WalkToGoalWithPlanningBehavior extends AbstractBehavior
       stepsRequested = outgoingFootsteps.getFootstepDataList();
       debugPrintln(stepsRequested.size() + " steps sent to controller");
       debugPrintln(stepsRequested.toString());
-      outgoingFootsteps.setDestination(PacketDestination.CONTROLLER);
+      outgoingFootsteps.setDestination(PacketDestination.CONTROLLER.ordinal());
       allStepsCompleted.set(false);
       sendPacketToController(outgoingFootsteps);
       expectedIndex = 0;

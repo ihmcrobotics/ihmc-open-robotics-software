@@ -19,9 +19,9 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.taskExecutor.PipeLine;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PlanPathToLocationBehavior extends AbstractBehavior
 {
@@ -178,7 +178,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
    private void sendPackageToPlanner(Packet<?> packet)
    {
-      packet.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE);
+      packet.setDestination(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE.ordinal());
       communicationBridge.sendPacket(packet);
    }
 
