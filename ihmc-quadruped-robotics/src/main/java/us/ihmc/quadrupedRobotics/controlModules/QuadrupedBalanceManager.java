@@ -247,6 +247,8 @@ public class QuadrupedBalanceManager
 
    public void initializeForStanding()
    {
+      centerOfMassHeightManager.initialize();
+
       initialize();
       dcmPlanner.initializeForStanding();
    }

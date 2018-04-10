@@ -15,6 +15,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoin
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
 import us.ihmc.robotics.screwTheory.MovingReferenceFrame;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -24,6 +25,7 @@ public class QuadrupedCenterOfMassHeightManager
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final DoubleParameter initializationDuration = new DoubleParameter("heightInitializationDuration", registry, 0.5);
 
    private final YoDouble robotTimestamp;
 
@@ -53,11 +55,17 @@ public class QuadrupedCenterOfMassHeightManager
    private final YoDouble desiredVelocityInWorld;
    private final YoDouble currentVelocityInWorld;
 
+   private final QuadrupedPhysicalProperties physicalProperties;
+
+   private final FramePoint3D nominalPosition;
+   private final FrameVector3D nominalVelocity;
+
    private final double controlDT;
 
    public QuadrupedCenterOfMassHeightManager(QuadrupedForceControllerToolbox controllerToolbox, QuadrupedPhysicalProperties physicalProperties,
                                              YoVariableRegistry parentRegistry)
    {
+      this.physicalProperties = physicalProperties;
       this.robotTimestamp = controllerToolbox.getRuntimeEnvironment().getRobotTimestamp();
       this.controlDT = controllerToolbox.getRuntimeEnvironment().getControlDT();
 
@@ -75,12 +83,9 @@ public class QuadrupedCenterOfMassHeightManager
 
       linearMomentumZPDController = new PIDController("linearMomentumZPDController", registry);
 
-      FramePoint3D initialPosition = new FramePoint3D(supportFrame, 0.0, 0.0, physicalProperties.getNominalCoMHeight());
-      FrameVector3D initialVelocity = new FrameVector3D(supportFrame);
+      nominalPosition = new FramePoint3D(supportFrame, 0.0, 0.0, physicalProperties.getNominalCoMHeight());
+      nominalVelocity = new FrameVector3D(supportFrame);
       centerOfMassHeightTrajectory = new MultipleWaypointsPositionTrajectoryGenerator("centerOfMassHeight", supportFrame, registry);
-      centerOfMassHeightTrajectory.clear();
-      centerOfMassHeightTrajectory.appendWaypoint(0.0, initialPosition, initialVelocity);
-      centerOfMassHeightTrajectory.initialize();
 
       currentHeightInWorld = new YoDouble("currentHeightInWorld", registry);
       currentVelocityInWorld = new YoDouble("currentVelocityInWorld", registry);
@@ -126,6 +131,21 @@ public class QuadrupedCenterOfMassHeightManager
       centerOfMassHeightTrajectory.initialize();
    }
 
+   public void initialize()
+   {
+      computeCurrentState();
+
+      currentPosition.changeFrame(supportFrame);
+      currentVelocity.changeFrame(supportFrame);
+
+      double startTime = robotTimestamp.getDoubleValue();
+      double endTime = startTime + initializationDuration.getValue();
+      centerOfMassHeightTrajectory.clear();
+      centerOfMassHeightTrajectory.appendWaypoint(startTime, currentPosition, currentVelocity);
+      centerOfMassHeightTrajectory.appendWaypoint(endTime, nominalPosition, nominalVelocity);
+      centerOfMassHeightTrajectory.initialize();
+   }
+
    public void update()
    {
       centerOfMassHeightTrajectory.compute(robotTimestamp.getDoubleValue());
@@ -135,6 +155,8 @@ public class QuadrupedCenterOfMassHeightManager
       desiredVelocity.changeFrame(worldFrame);
       desiredHeightInWorld.set(desiredPosition.getZ());
       desiredVelocityInWorld.set(desiredVelocity.getZ());
+
+      computeCurrentState();
    }
 
    public double getDesiredHeight(ReferenceFrame referenceFrame)
@@ -144,6 +166,14 @@ public class QuadrupedCenterOfMassHeightManager
    }
 
    public double computeDesiredCenterOfMassHeightAcceleration()
+   {
+      linearMomentumZPDController.setGains(comPositionGainsParameter);
+      return linearMomentumZPDController
+            .compute(currentHeightInWorld.getDoubleValue(), desiredHeightInWorld.getDoubleValue(), currentVelocityInWorld.getDoubleValue(),
+                     desiredVelocityInWorld.getDoubleValue(), controlDT);
+   }
+
+   private void computeCurrentState()
    {
       if (controlBodyHeight.getBooleanValue())
       {
@@ -161,9 +191,5 @@ public class QuadrupedCenterOfMassHeightManager
 
       currentHeightInWorld.set(currentPosition.getZ());
       currentVelocityInWorld.set(currentVelocity.getZ());
-
-      linearMomentumZPDController.setGains(comPositionGainsParameter);
-      return linearMomentumZPDController.compute(currentPosition.getZ(), desiredPosition.getZ(), currentVelocity.getZ(), desiredVelocity.getZ(), controlDT);
    }
-
 }
