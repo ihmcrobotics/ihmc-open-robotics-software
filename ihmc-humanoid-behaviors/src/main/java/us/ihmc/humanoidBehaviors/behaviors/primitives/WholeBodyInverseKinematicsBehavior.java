@@ -19,15 +19,14 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 {
@@ -240,7 +239,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       hasSolverFailed.set(false);
       solutionSentToController = null;
       ToolboxStateMessage message = MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP);
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
       sendPacket(message);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -315,7 +314,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
                SelectionMatrix6D selectionMatrix6D = handSelectionMatrices.get(robotSide);
                handMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getAngularPart()));
                handMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix6D.getLinearPart()));
-               handMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+               handMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
                sendPacket(handMessage);
             }
          }
@@ -324,7 +323,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          {
             chestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(chestSelectionMatrix.getAngularPart()));
             chestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(chestSelectionMatrix.getLinearPart()));
-            chestMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+            chestMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
             sendPacket(chestMessage);
          }
 
@@ -332,7 +331,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          {
             pelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(pelvisSelectionMatrix.getAngularPart()));
             pelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(pelvisSelectionMatrix.getLinearPart()));
-            pelvisMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+            pelvisMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
             sendPacket(pelvisMessage);
          }
       }
@@ -356,7 +355,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
                solutionSentToController = newestSolution;
                outputConverter.setTrajectoryTime(trajectoryTime.getDoubleValue());
                WholeBodyTrajectoryMessage message = new WholeBodyTrajectoryMessage();
-               message.setDestination(PacketDestination.CONTROLLER);
+               message.setDestination(PacketDestination.CONTROLLER.ordinal());
                outputConverter.updateFullRobotModel(newestSolution);
                outputConverter.setMessageToCreate(message);
                outputConverter.computeHandTrajectoryMessages();
@@ -370,7 +369,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          }
          currentSolutionQuality.set(newestSolution.getSolutionQuality());
 
-         newestSolution.setDestination(PacketDestination.UI);
+         newestSolution.setDestination(PacketDestination.UI.ordinal());
          sendPacket(newestSolution);
       }
       else if (hasSentMessageToController.getBooleanValue())
@@ -421,7 +420,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private void deactivateKinematicsToolboxModule()
    {
       ToolboxStateMessage message = MessageTools.createToolboxStateMessage(ToolboxState.SLEEP);
-      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
       sendPacket(message);
    }
 

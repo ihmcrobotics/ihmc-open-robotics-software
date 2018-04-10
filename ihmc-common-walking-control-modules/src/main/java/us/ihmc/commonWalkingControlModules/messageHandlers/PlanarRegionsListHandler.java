@@ -32,7 +32,7 @@ public class PlanarRegionsListHandler
       this.statusOutputManager = requestOutputManager;
 
       planarRegions.clear();
-      planarRegionsRequestMessage.setDestination(PacketDestination.CONTROLLER);
+      planarRegionsRequestMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
 
       parentRegistry.addChild(registry);
    }

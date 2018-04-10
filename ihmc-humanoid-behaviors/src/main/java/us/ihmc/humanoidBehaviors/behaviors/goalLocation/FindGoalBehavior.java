@@ -128,10 +128,10 @@ public class FindGoalBehavior extends AbstractBehavior
       ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
       HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
 
-      headTrajectoryMessage.setDestination(PacketDestination.UI);
+      headTrajectoryMessage.setDestination(PacketDestination.UI.ordinal());
       sendPacket(headTrajectoryMessage);
 
-      headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER);
+      headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       sendPacketToController(headTrajectoryMessage);
 
       headTrajectorySentTimer.reset();

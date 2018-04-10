@@ -133,10 +133,10 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
    private void sendFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
    {
-      footstepDataListMessage.setDestination(PacketDestination.UI);
+      footstepDataListMessage.setDestination(PacketDestination.UI.ordinal());
       sendPacket(footstepDataListMessage);
 
-      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER);
+      footstepDataListMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       sendPacketToController(footstepDataListMessage);
       footstepSentTimer.reset();
    }
@@ -237,7 +237,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    private void requestPlanarRegionsList()
    {
       RequestPlanarRegionsListMessage requestPlanarRegionsListMessage = MessageTools.createRequestPlanarRegionsListMessage(PlanarRegionsRequestType.SINGLE_UPDATE);
-      requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE);
+      requestPlanarRegionsListMessage.setDestination(PacketDestination.REA_MODULE.ordinal());
       sendPacket(requestPlanarRegionsListMessage);
    }
 
