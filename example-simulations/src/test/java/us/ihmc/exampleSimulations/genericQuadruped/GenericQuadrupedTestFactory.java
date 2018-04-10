@@ -24,6 +24,7 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerEnum;
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
+import us.ihmc.quadrupedRobotics.input.QuadrupedTestTeleopScript;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedBodyPoseTeleopManager;
 import us.ihmc.quadrupedRobotics.input.managers.QuadrupedStepTeleopManager;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
@@ -56,6 +57,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
    private static final boolean USE_STATE_ESTIMATOR = false;
    private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = true;
+   private static final int TEST_INPUT_UPDATE_FREQUENCY = (int) (0.05 / SIMULATION_DT);
 
    private final RequiredFactoryField<QuadrupedControlMode> controlMode = new RequiredFactoryField<>("controlMode");
 
@@ -161,11 +163,7 @@ public class GenericQuadrupedTestFactory implements QuadrupedTestFactory
 
       if(useNetworking.get())
       {
-         goalOrientedTestConductor.getScs().addScript(t ->
-                                                      {
-                                                         stepTeleopManager.update();
-                                                         bodyPoseTeleopManager.update();
-                                                      });
+         goalOrientedTestConductor.getScs().addScript(new QuadrupedTestTeleopScript(stepTeleopManager, bodyPoseTeleopManager, TEST_INPUT_UPDATE_FREQUENCY));
       }
 
       FactoryTools.disposeFactory(this);
