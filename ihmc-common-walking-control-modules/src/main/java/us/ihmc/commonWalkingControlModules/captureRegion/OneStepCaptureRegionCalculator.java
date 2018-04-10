@@ -44,6 +44,8 @@ public class OneStepCaptureRegionCalculator
 
    private final RecyclingArrayList<FramePoint2D> visibleVertices = new RecyclingArrayList<>(MAX_CAPTURE_REGION_POLYGON_POINTS, FramePoint2D.class);
 
+   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
    public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -231,7 +233,7 @@ public class OneStepCaptureRegionCalculator
          rawCaptureRegion.update();
          rawCaptureRegion.checkReferenceFrameMatch(reachableRegion);
          captureRegionPolygon.clear(rawCaptureRegion.getReferenceFrame());
-         ConvexPolygonTools.computeIntersectionOfPolygons(rawCaptureRegion, reachableRegion, captureRegionPolygon);
+         convexPolygonTools.computeIntersectionOfPolygons(rawCaptureRegion, reachableRegion, captureRegionPolygon);
       }
 
       captureRegionPolygon.update();
