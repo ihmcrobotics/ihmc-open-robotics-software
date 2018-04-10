@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserD
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.ComponentBasedFootstepDataMessageGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -99,6 +100,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final SideDependentList<String> footContactSensorNames;
    private final SideDependentList<String> wristSensorNames;
 
+   private YoGraphicsListRegistry yoGraphicsListRegistry;
+
    private HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters;
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean createQueuedControllerCommandGenerator = false;
@@ -171,6 +174,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                                                        controlDT, useHeadingAndVelocityScript,
                                                                                                                        heightMapForFootstepZ, registry);
          controllerToolbox.addUpdatable(footstepGenerator);
+         ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator(registry, yoGraphicsListRegistry);
+         continuousStepGenerator.createFootstepStatusListener(statusMessageOutputManager);
+         continuousStepGenerator.createYoComponentProviders();
+         continuousStepGenerator.createFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
+         continuousStepGenerator.configureWith(walkingControllerParameters);
+         continuousStepGenerator.setFootstepMessenger(commandInputManager::submitMessage);
+         controllerToolbox.addUpdatable(continuousStepGenerator);
       }
       else
       {
@@ -334,6 +344,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                         ContactSensorHolder contactSensorHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                         JointDesiredOutputList lowLevelControllerOutput, InverseDynamicsJoint... jointsToIgnore)
    {
+      this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
