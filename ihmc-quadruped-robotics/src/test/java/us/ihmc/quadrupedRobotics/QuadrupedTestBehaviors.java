@@ -67,6 +67,7 @@ public class QuadrupedTestBehaviors
    {
       stepTeleopManager.requestSteppingState();
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
+      conductor.addTerminalGoal(QuadrupedTestGoals.bodyHeight(variables, 0.1));
       conductor.addTimeLimit(variables.getYoTime(), 2.0);
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedControllerEnum.STEPPING));
       conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
@@ -97,7 +98,7 @@ public class QuadrupedTestBehaviors
       stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(initialDoubleSupportDuration);
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(initialEndPhaseShift);
    }
-   
+
 
 
 
