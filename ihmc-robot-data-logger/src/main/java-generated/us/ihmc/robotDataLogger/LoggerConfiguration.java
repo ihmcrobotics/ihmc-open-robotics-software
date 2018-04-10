@@ -1,8 +1,8 @@
 package us.ihmc.robotDataLogger;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class LoggerConfiguration extends Packet<LoggerConfiguration> implements Settable<LoggerConfiguration>, EpsilonComparable<LoggerConfiguration>
 {
@@ -16,6 +16,7 @@ public class LoggerConfiguration extends Packet<LoggerConfiguration> implements 
 
    public LoggerConfiguration(LoggerConfiguration other)
    {
+      this();
       set(other);
    }
 
@@ -25,16 +26,7 @@ public class LoggerConfiguration extends Packet<LoggerConfiguration> implements 
       camerasToCapture_.append(other.camerasToCapture_);
 
       publicBroadcast_ = other.publicBroadcast_;
-   }
 
-   public java.lang.String getCamerasToCaptureAsString()
-   {
-      return getCamerasToCapture().toString();
-   }
-
-   public java.lang.StringBuilder getCamerasToCapture()
-   {
-      return camerasToCapture_;
    }
 
    public void setCamerasToCapture(java.lang.String camerasToCapture)
@@ -43,29 +35,35 @@ public class LoggerConfiguration extends Packet<LoggerConfiguration> implements 
       camerasToCapture_.append(camerasToCapture);
    }
 
-   public boolean getPublicBroadcast()
+   public java.lang.String getCamerasToCaptureAsString()
    {
-      return publicBroadcast_;
+      return getCamerasToCapture().toString();
+   }
+   public java.lang.StringBuilder getCamerasToCapture()
+   {
+      return camerasToCapture_;
    }
 
    public void setPublicBroadcast(boolean publicBroadcast)
    {
       publicBroadcast_ = publicBroadcast;
    }
+   public boolean getPublicBroadcast()
+   {
+      return publicBroadcast_;
+   }
+
 
    @Override
    public boolean epsilonEquals(LoggerConfiguration other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.camerasToCapture_, other.camerasToCapture_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.camerasToCapture_, other.camerasToCapture_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.publicBroadcast_, other.publicBroadcast_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.publicBroadcast_, other.publicBroadcast_, epsilon)) return false;
+
 
       return true;
    }
@@ -73,20 +71,16 @@ public class LoggerConfiguration extends Packet<LoggerConfiguration> implements 
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof LoggerConfiguration))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof LoggerConfiguration)) return false;
 
       LoggerConfiguration otherMyClass = (LoggerConfiguration) other;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.camerasToCapture_, otherMyClass.camerasToCapture_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.camerasToCapture_, otherMyClass.camerasToCapture_)) return false;
 
-      if (this.publicBroadcast_ != otherMyClass.publicBroadcast_)
-         return false;
+      if(this.publicBroadcast_ != otherMyClass.publicBroadcast_) return false;
+
 
       return true;
    }
@@ -98,12 +92,9 @@ public class LoggerConfiguration extends Packet<LoggerConfiguration> implements 
 
       builder.append("LoggerConfiguration {");
       builder.append("camerasToCapture=");
-      builder.append(this.camerasToCapture_);
-
-      builder.append(", ");
+      builder.append(this.camerasToCapture_);      builder.append(", ");
       builder.append("publicBroadcast=");
       builder.append(this.publicBroadcast_);
-
       builder.append("}");
       return builder.toString();
    }
