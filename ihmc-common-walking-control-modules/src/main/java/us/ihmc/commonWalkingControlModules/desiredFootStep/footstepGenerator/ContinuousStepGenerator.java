@@ -27,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.idl.RecyclingArrayListPubSub;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -60,6 +61,8 @@ public class ContinuousStepGenerator implements Updatable
    private final YoDouble minStepWidth = new YoDouble("minStepWidth", registry);
    private final YoDouble maxStepWidth = new YoDouble("maxStepWidth", registry);
    private final YoDouble maxStepLength = new YoDouble("maxStepLength", registry);
+   private final YoDouble maxAngleTurnOutwards = new YoDouble("maxAngleTurnOutwards", registry);
+   private final YoDouble maxAngleTurnInwards = new YoDouble("maxAngleTurnInwards", registry);
 
    private final YoDouble swingTime = new YoDouble("footstepGeneratorSwingTime", registry);
    private final YoDouble transferTime = new YoDouble("footstepGeneratorTransferTime", registry);
@@ -72,6 +75,7 @@ public class ContinuousStepGenerator implements Updatable
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayListPubSub<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
+   private final FootstepDataMessage firstFootstep = new FootstepDataMessage();
 
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>();
 
@@ -125,8 +129,9 @@ public class ContinuousStepGenerator implements Updatable
          updateSupportFootPose();
       }
 
-      footstepDataListMessage.setDefaultSwingDuration(swingTime.getValue());
-      footstepDataListMessage.setDefaultTransferDuration(transferTime.getValue());
+      footstepDataListMessage.setDefaultSwingDuration(Double.NaN);
+      footstepDataListMessage.setDefaultTransferDuration(Double.NaN);
+      footstepDataListMessage.setFinalTransferDuration(Double.NaN);
 
       int startIndex = updateFirstFootstep ? 0 : 1;
 
@@ -138,13 +143,11 @@ public class ContinuousStepGenerator implements Updatable
          footstepPose2D.getPosition().set(currentSupportFootPosition);
          footstepPose2D.getOrientation().set(currentSupportFootOrientation);
          swingSide = currentSupportSide.getEnumValue().getOppositeSide();
-         updateFirstFootstep = false;
       }
       else
       {
          while (footsteps.size() > 1)
             footsteps.fastRemove(footsteps.size() - 1);
-         FootstepDataMessage firstFootstep = footsteps.get(0);
 
          footstepPose2D.getPosition().set(firstFootstep.getLocation());
          footstepPose2D.getOrientation().set(firstFootstep.getOrientation());
@@ -157,20 +160,25 @@ public class ContinuousStepGenerator implements Updatable
 
          double xDisplacement = MathTools.clamp(stepTime.getValue() * desiredVelocity.getX(), maxStepLength.getValue());
          double yDisplacement = stepTime.getValue() * desiredVelocity.getY() + swingSide.negateIfRightSide(inPlaceWidth.getValue());
+         double headingDisplacement = stepTime.getValue() * desiredHeadingProvider.getHeadingVelocity();
 
          if (swingSide == RobotSide.LEFT)
+         {
             yDisplacement = MathTools.clamp(yDisplacement, minStepWidth.getValue(), maxStepWidth.getValue());
+            headingDisplacement = MathTools.clamp(headingDisplacement, maxAngleTurnInwards.getValue(), maxAngleTurnOutwards.getValue());
+         }
          else
+         {
             yDisplacement = MathTools.clamp(yDisplacement, -maxStepWidth.getValue(), -minStepWidth.getValue());
-
-         double headingDisplacement = stepTime.getValue() * desiredHeadingProvider.getHeadingVelocity();
+            headingDisplacement = MathTools.clamp(headingDisplacement, -maxAngleTurnOutwards.getValue(), -maxAngleTurnInwards.getValue());
+         }
 
          nextFootstepPose2D.set(footstepPose2D);
          nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
          nextFootstepPose2D.appendRotation(headingDisplacement);
 
          nextFootstepPose3D.set(nextFootstepPose2D);
-         nextFootstepPose3D.getPosition().setZ(currentSupportFootPosition.getZ());
+         nextFootstepPose3D.getPosition().setZ(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()).getZ());
 
          int vizualizerIndex = i / 2;
          if (vizualizerIndex < MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE)
@@ -186,6 +194,12 @@ public class ContinuousStepGenerator implements Updatable
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
+      }
+
+      if (updateFirstFootstep)
+      {
+         firstFootstep.set(footsteps.get(0));
+         updateFirstFootstep = false;
       }
 
       if (sendFootsteps && footstepMessenger != null)
@@ -220,9 +234,9 @@ public class ContinuousStepGenerator implements Updatable
 
    public void createYoComponentProviders()
    {
-      YoDouble desiredHeading = new YoDouble("desiredHeading", registry);
+      DoubleParameter desiredHeadingVelocity = new DoubleParameter("desiredHeadingVelocity", registry, 0.0);
       YoFrameVector2D desiredVelocity = new YoFrameVector2D("desiredVelocity", ReferenceFrame.getWorldFrame(), registry);
-      setDesiredHeadingProvider(() -> desiredHeading.getValue());
+      setDesiredHeadingProvider(() -> desiredHeadingVelocity.getValue());
       setDesiredVelocityProvider(() -> desiredVelocity);
    }
 
@@ -253,15 +267,23 @@ public class ContinuousStepGenerator implements Updatable
       updateSupportFootPose();
    }
 
+   public void notifyFootstepStarted()
+   {
+      footsteps.remove(0);
+   }
+
    public void createFootstepStatusListener(StatusMessageOutputManager statusMessageOutputManager)
    {
       statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, new StatusMessageListener<FootstepStatusMessage>()
       {
          @Override
-         public void receivedNewMessageStatus(FootstepStatusMessage status)
+         public void receivedNewMessageStatus(FootstepStatusMessage statusMessage)
          {
-            if (FootstepStatus.fromByte(status.getFootstepStatus()) == FootstepStatus.COMPLETED)
-               notifyFootstepCompleted(RobotSide.fromByte(status.getRobotSide()));
+            FootstepStatus status = FootstepStatus.fromByte(statusMessage.getFootstepStatus());
+            if (status == FootstepStatus.COMPLETED)
+               notifyFootstepCompleted(RobotSide.fromByte(statusMessage.getRobotSide()));
+            else if (status == FootstepStatus.STARTED)
+               notifyFootstepStarted();
          }
       });
    }
@@ -275,6 +297,8 @@ public class ContinuousStepGenerator implements Updatable
       minStepWidth.set(steppingParameters.getMinStepWidth());
       maxStepWidth.set(steppingParameters.getMaxStepWidth());
       maxStepLength.set(steppingParameters.getMaxStepLength());
+      maxAngleTurnOutwards.set(steppingParameters.getMaxAngleTurnOutwards());
+      maxAngleTurnInwards.set(-Math.abs(steppingParameters.getMaxAngleTurnInwards())); // Just to make sure of the sign.
    }
 
    public void setFootstepMessenger(FootstepMessenger footstepMessenger)
