@@ -19,17 +19,6 @@ public class QuadrupedTestBehaviors
       squareUp(conductor, variables, stepTeleopManager);
    }
 
-   public static void startBalancing(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedStepTeleopManager stepTeleopManager) throws AssertionFailedError
-   {
-      stepTeleopManager.requestSteppingState();
-      conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
-      conductor.addTimeLimit(variables.getYoTime(), 2.0);
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getForceControllerState(), QuadrupedControllerEnum.STEPPING));
-      conductor.addTerminalGoal(YoVariableTestGoal.enumEquals(variables.getSteppingState(), QuadrupedSteppingStateEnum.STAND));
-      conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
-      conductor.simulate();
-   }
-
    public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables) throws AssertionFailedError
    {
       variables.getUserTrigger().set(QuadrupedControllerRequestedEvent.REQUEST_DO_NOTHING);
@@ -42,7 +31,6 @@ public class QuadrupedTestBehaviors
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
    }
-
 
 
 
@@ -75,7 +63,7 @@ public class QuadrupedTestBehaviors
       conductor.simulate();
    }
 
-   public static void standUp(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedStepTeleopManager stepTeleopManager) throws AssertionFailedError
+   public static void startBalancing(GoalOrientedTestConductor conductor, QuadrupedForceTestYoVariables variables, QuadrupedStepTeleopManager stepTeleopManager) throws AssertionFailedError
    {
       stepTeleopManager.requestSteppingState();
       conductor.addTerminalGoal(QuadrupedTestGoals.notFallen(variables));
@@ -109,4 +97,8 @@ public class QuadrupedTestBehaviors
       stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(initialDoubleSupportDuration);
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(initialEndPhaseShift);
    }
+   
+
+
+
 }

@@ -99,7 +99,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), jointToPushOn);
 
-      QuadrupedTestBehaviors.standUp(conductor, variables, stepTeleopManager);
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
 
       pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 30.0, 1.0);
 
@@ -187,7 +188,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       pusher = new PushRobotTestConductor(conductor.getScs(), "body");
 
-      QuadrupedTestBehaviors.standUp(conductor, variables, stepTeleopManager);
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
 
       pusher.applyForce(new Vector3D(0.0, 1.0, 0.0), 30.0, 1.0);
 
@@ -232,7 +234,8 @@ public abstract class QuadrupedForceBasedStandControllerTest implements Quadrupe
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
       poseTeleopManager = quadrupedTestFactory.getBodyPoseTeleopManager();
 
-      QuadrupedTestBehaviors.standUp(conductor, variables, stepTeleopManager);
+      QuadrupedTestBehaviors.standUp(conductor, variables);
+      QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
 
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));

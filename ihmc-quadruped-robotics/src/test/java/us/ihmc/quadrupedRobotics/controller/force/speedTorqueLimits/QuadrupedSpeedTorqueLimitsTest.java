@@ -101,8 +101,6 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    {
       standupPrecisely(nominalCoMHeight);
       
-      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
-      
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();
@@ -117,8 +115,6 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    public void testXGaitTrottingInPlaceLowerLimit(double nominalCoMHeight)
    {
       standupPrecisely(nominalCoMHeight);
-      
-      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
       
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
@@ -135,9 +131,7 @@ public abstract class QuadrupedSpeedTorqueLimitsTest implements QuadrupedMultiRo
    public void testXGaitWalkingLowerLimit(double nominalCoMHeight)
    {
       standupPrecisely(nominalCoMHeight);
-      
-      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
-      
+
       conductor.addSustainGoal(QuadrupedTestGoals.notFallen(variables));
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 2.0));
       conductor.simulate();

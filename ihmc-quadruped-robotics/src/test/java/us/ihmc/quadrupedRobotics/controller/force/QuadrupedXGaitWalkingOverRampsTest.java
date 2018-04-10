@@ -73,7 +73,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       poseTeleopManager.setDesiredCoMHeight(comHeightForRoughTerrain);
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
 
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 1.0));
@@ -124,7 +123,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       conductor.simulate();
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);
-      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
 
       stepTeleopManager.setDesiredVelocity(0.0, 0.0, 0.0);
       conductor.addTimeLimit(variables.getYoTime(), 5.0);

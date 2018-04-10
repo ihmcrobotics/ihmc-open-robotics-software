@@ -114,8 +114,6 @@ public abstract class QuadrupedXGaitBumpyTerrainWalkingTest implements Quadruped
       conductor.addTerminalGoal(YoVariableTestGoal.doubleGreaterThan(variables.getYoTime(), variables.getYoTime().getDoubleValue() + 0.5));
       conductor.simulate();
       
-      QuadrupedTestBehaviors.enterXGait(conductor, variables, stepTeleopManager);
-
       stepTeleopManager.getXGaitSettings().setEndPhaseShift(180.0);
       stepTeleopManager.getXGaitSettings().setEndDoubleSupportDuration(0.05);
       stepTeleopManager.getXGaitSettings().setStanceWidth(0.35);
