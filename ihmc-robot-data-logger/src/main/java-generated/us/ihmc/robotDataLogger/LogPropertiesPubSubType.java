@@ -1,20 +1,34 @@
 package us.ihmc.robotDataLogger;
 
 /**
- * Topic data type of the struct "LogProperties" defined in "LogProperties.idl". Use this class to provide the TopicDataType to a Participant.
- *
- * This file was automatically generated from LogProperties.idl by us.ihmc.idl.generator.IDLGenerator.
- * Do not update this file directly, edit LogProperties.idl instead.
- */
+* 
+* Topic data type of the struct "LogProperties" defined in "LogProperties.idl". Use this class to provide the TopicDataType to a Participant. 
+*
+* This file was automatically generated from LogProperties.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit LogProperties.idl instead.
+*
+*/
 public class LogPropertiesPubSubType implements us.ihmc.pubsub.TopicDataType<us.ihmc.robotDataLogger.LogProperties>
 {
    public static final java.lang.String name = "us::ihmc::robotDataLogger::LogProperties";
+
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
-   public LogPropertiesPubSubType()
+   @Override
+   public void serialize(us.ihmc.robotDataLogger.LogProperties data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
+      serializeCDR.serialize(serializedPayload);
+      write(data, serializeCDR);
+      serializeCDR.finishSerialize();
+   }
 
+   @Override
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.LogProperties data) throws java.io.IOException
+   {
+      deserializeCDR.deserialize(serializedPayload);
+      read(data, deserializeCDR);
+      deserializeCDR.finishDeserialize();
    }
 
    public static int getMaxCdrSerializedSize()
@@ -27,20 +41,17 @@ public class LogPropertiesPubSubType implements us.ihmc.pubsub.TopicDataType<us.
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-
       current_alignment += us.ihmc.robotDataLogger.VariablesPubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += us.ihmc.robotDataLogger.ModelPubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < 255; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 255; ++i0)
       {
-         current_alignment += us.ihmc.robotDataLogger.CameraPubSubType.getMaxCdrSerializedSize(current_alignment);
-      }
-
+          current_alignment += us.ihmc.robotDataLogger.CameraPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += us.ihmc.robotDataLogger.VideoPubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -59,66 +70,85 @@ public class LogPropertiesPubSubType implements us.ihmc.pubsub.TopicDataType<us.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
       current_alignment += us.ihmc.robotDataLogger.VariablesPubSubType.getCdrSerializedSize(data.getVariables(), current_alignment);
+
       current_alignment += us.ihmc.robotDataLogger.ModelPubSubType.getCdrSerializedSize(data.getModel(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getTimestamp().length() + 1;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for (int i0 = 0; i0 < data.getCameras().size(); ++i0)
+      for(int i0 = 0; i0 < data.getCameras().size(); ++i0)
       {
-         current_alignment += us.ihmc.robotDataLogger.CameraPubSubType.getCdrSerializedSize(data.getCameras().get(i0), current_alignment);
-      }
+          current_alignment += us.ihmc.robotDataLogger.CameraPubSubType.getCdrSerializedSize(data.getCameras().get(i0), current_alignment);}
 
       current_alignment += us.ihmc.robotDataLogger.VideoPubSubType.getCdrSerializedSize(data.getVideo(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(us.ihmc.robotDataLogger.LogProperties data, us.ihmc.idl.CDR cdr)
    {
+      if(data.getVersion().length() <= 255)
+      cdr.write_type_d(data.getVersion());else
+          throw new RuntimeException("version field exceeds the maximum length");
 
-      if (data.getVersion().length() <= 255)
-         cdr.write_type_d(data.getVersion());
-      else
-         throw new RuntimeException("version field exceeds the maximum length");
-
-      if (data.getName().length() <= 255)
-         cdr.write_type_d(data.getName());
-      else
-         throw new RuntimeException("name field exceeds the maximum length");
+      if(data.getName().length() <= 255)
+      cdr.write_type_d(data.getName());else
+          throw new RuntimeException("name field exceeds the maximum length");
 
       us.ihmc.robotDataLogger.VariablesPubSubType.write(data.getVariables(), cdr);
-
       us.ihmc.robotDataLogger.ModelPubSubType.write(data.getModel(), cdr);
+      if(data.getTimestamp().length() <= 255)
+      cdr.write_type_d(data.getTimestamp());else
+          throw new RuntimeException("timestamp field exceeds the maximum length");
 
-      if (data.getTimestamp().length() <= 255)
-         cdr.write_type_d(data.getTimestamp());
-      else
-         throw new RuntimeException("timestamp field exceeds the maximum length");
-
-      if (data.getCameras().size() <= 255)
-         cdr.write_type_e(data.getCameras());
-      else
-         throw new RuntimeException("cameras field exceeds the maximum length");
+      if(data.getCameras().size() <= 255)
+      cdr.write_type_e(data.getCameras());else
+          throw new RuntimeException("cameras field exceeds the maximum length");
 
       us.ihmc.robotDataLogger.VideoPubSubType.write(data.getVideo(), cdr);
    }
 
    public static void read(us.ihmc.robotDataLogger.LogProperties data, us.ihmc.idl.CDR cdr)
    {
+      cdr.read_type_d(data.getVersion());	
+      cdr.read_type_d(data.getName());	
+      us.ihmc.robotDataLogger.VariablesPubSubType.read(data.getVariables(), cdr);	
+      us.ihmc.robotDataLogger.ModelPubSubType.read(data.getModel(), cdr);	
+      cdr.read_type_d(data.getTimestamp());	
+      cdr.read_type_e(data.getCameras());	
+      us.ihmc.robotDataLogger.VideoPubSubType.read(data.getVideo(), cdr);	
 
-      cdr.read_type_d(data.getVersion());
+   }
 
-      cdr.read_type_d(data.getName());
+   @Override
+   public final void serialize(us.ihmc.robotDataLogger.LogProperties data, us.ihmc.idl.InterchangeSerializer ser)
+   {
+      ser.write_type_d("version", data.getVersion());
+      ser.write_type_d("name", data.getName());
+      ser.write_type_a("variables", new us.ihmc.robotDataLogger.VariablesPubSubType(), data.getVariables());
 
-      us.ihmc.robotDataLogger.VariablesPubSubType.read(data.getVariables(), cdr);
+      ser.write_type_a("model", new us.ihmc.robotDataLogger.ModelPubSubType(), data.getModel());
 
-      us.ihmc.robotDataLogger.ModelPubSubType.read(data.getModel(), cdr);
+      ser.write_type_d("timestamp", data.getTimestamp());
+      ser.write_type_e("cameras", data.getCameras());
+      ser.write_type_a("video", new us.ihmc.robotDataLogger.VideoPubSubType(), data.getVideo());
 
-      cdr.read_type_d(data.getTimestamp());
+   }
 
-      cdr.read_type_e(data.getCameras());
+   @Override
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.LogProperties data)
+   {
+      ser.read_type_d("version", data.getVersion());
+      ser.read_type_d("name", data.getName());
+      ser.read_type_a("variables", new us.ihmc.robotDataLogger.VariablesPubSubType(), data.getVariables());
 
-      us.ihmc.robotDataLogger.VideoPubSubType.read(data.getVideo(), cdr);
+      ser.read_type_a("model", new us.ihmc.robotDataLogger.ModelPubSubType(), data.getModel());
+
+      ser.read_type_d("timestamp", data.getTimestamp());
+      ser.read_type_e("cameras", data.getCameras());
+      ser.read_type_a("video", new us.ihmc.robotDataLogger.VideoPubSubType(), data.getVideo());
+
    }
 
    public static void staticCopy(us.ihmc.robotDataLogger.LogProperties src, us.ihmc.robotDataLogger.LogProperties dest)
@@ -127,63 +157,10 @@ public class LogPropertiesPubSubType implements us.ihmc.pubsub.TopicDataType<us.
    }
 
    @Override
-   public void serialize(us.ihmc.robotDataLogger.LogProperties data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
-   {
-      serializeCDR.serialize(serializedPayload);
-      write(data, serializeCDR);
-      serializeCDR.finishSerialize();
-   }
-
-   @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, us.ihmc.robotDataLogger.LogProperties data) throws java.io.IOException
-   {
-      deserializeCDR.deserialize(serializedPayload);
-      read(data, deserializeCDR);
-      deserializeCDR.finishDeserialize();
-   }
-
-   @Override
-   public final void serialize(us.ihmc.robotDataLogger.LogProperties data, us.ihmc.idl.InterchangeSerializer ser)
-   {
-      ser.write_type_d("version", data.getVersion());
-
-      ser.write_type_d("name", data.getName());
-
-      ser.write_type_a("variables", new us.ihmc.robotDataLogger.VariablesPubSubType(), data.getVariables());
-
-      ser.write_type_a("model", new us.ihmc.robotDataLogger.ModelPubSubType(), data.getModel());
-
-      ser.write_type_d("timestamp", data.getTimestamp());
-
-      ser.write_type_e("cameras", data.getCameras());
-
-      ser.write_type_a("video", new us.ihmc.robotDataLogger.VideoPubSubType(), data.getVideo());
-   }
-
-   @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, us.ihmc.robotDataLogger.LogProperties data)
-   {
-      ser.read_type_d("version", data.getVersion());
-
-      ser.read_type_d("name", data.getName());
-
-      ser.read_type_a("variables", new us.ihmc.robotDataLogger.VariablesPubSubType(), data.getVariables());
-
-      ser.read_type_a("model", new us.ihmc.robotDataLogger.ModelPubSubType(), data.getModel());
-
-      ser.read_type_d("timestamp", data.getTimestamp());
-
-      ser.read_type_e("cameras", data.getCameras());
-
-      ser.read_type_a("video", new us.ihmc.robotDataLogger.VideoPubSubType(), data.getVideo());
-   }
-
-   @Override
    public us.ihmc.robotDataLogger.LogProperties createData()
    {
       return new us.ihmc.robotDataLogger.LogProperties();
    }
-
    @Override
    public int getTypeSize()
    {
@@ -195,7 +172,7 @@ public class LogPropertiesPubSubType implements us.ihmc.pubsub.TopicDataType<us.
    {
       return name;
    }
-
+   
    public void serialize(us.ihmc.robotDataLogger.LogProperties data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
@@ -205,7 +182,7 @@ public class LogPropertiesPubSubType implements us.ihmc.pubsub.TopicDataType<us.
    {
       read(data, cdr);
    }
-
+   
    public void copy(us.ihmc.robotDataLogger.LogProperties src, us.ihmc.robotDataLogger.LogProperties dest)
    {
       staticCopy(src, dest);

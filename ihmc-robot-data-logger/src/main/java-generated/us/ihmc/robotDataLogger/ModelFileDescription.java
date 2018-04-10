@@ -1,37 +1,35 @@
 package us.ihmc.robotDataLogger;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class ModelFileDescription extends Packet<ModelFileDescription> implements Settable<ModelFileDescription>, EpsilonComparable<ModelFileDescription>
 {
-   public boolean has_model_;
+   public boolean hasModel_;
    public java.lang.StringBuilder name_;
    public java.lang.StringBuilder modelLoaderClass_;
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder resourceDirectories_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  resourceDirectories_;
    public int modelFileSize_;
    public boolean hasResourceZip_;
    public int resourceZipSize_;
 
    public ModelFileDescription()
    {
-
       name_ = new java.lang.StringBuilder(255);
-
       modelLoaderClass_ = new java.lang.StringBuilder(255);
-
-      resourceDirectories_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder(255, "type_d");
+      resourceDirectories_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (255, "type_d");
    }
 
    public ModelFileDescription(ModelFileDescription other)
    {
+      this();
       set(other);
    }
 
    public void set(ModelFileDescription other)
    {
-      has_model_ = other.has_model_;
+      hasModel_ = other.hasModel_;
 
       name_.setLength(0);
       name_.append(other.name_);
@@ -45,26 +43,16 @@ public class ModelFileDescription extends Packet<ModelFileDescription> implement
       hasResourceZip_ = other.hasResourceZip_;
 
       resourceZipSize_ = other.resourceZipSize_;
+
    }
 
+   public void setHasModel(boolean hasModel)
+   {
+      hasModel_ = hasModel;
+   }
    public boolean getHasModel()
    {
-      return has_model_;
-   }
-
-   public void setHasModel(boolean has_model)
-   {
-      has_model_ = has_model;
-   }
-
-   public java.lang.String getNameAsString()
-   {
-      return getName().toString();
-   }
-
-   public java.lang.StringBuilder getName()
-   {
-      return name_;
+      return hasModel_;
    }
 
    public void setName(java.lang.String name)
@@ -73,14 +61,13 @@ public class ModelFileDescription extends Packet<ModelFileDescription> implement
       name_.append(name);
    }
 
-   public java.lang.String getModelLoaderClassAsString()
+   public java.lang.String getNameAsString()
    {
-      return getModelLoaderClass().toString();
+      return getName().toString();
    }
-
-   public java.lang.StringBuilder getModelLoaderClass()
+   public java.lang.StringBuilder getName()
    {
-      return modelLoaderClass_;
+      return name_;
    }
 
    public void setModelLoaderClass(java.lang.String modelLoaderClass)
@@ -89,69 +76,69 @@ public class ModelFileDescription extends Packet<ModelFileDescription> implement
       modelLoaderClass_.append(modelLoaderClass);
    }
 
-   public us.ihmc.idl.IDLSequence.StringBuilderHolder getResourceDirectories()
+   public java.lang.String getModelLoaderClassAsString()
    {
-      return resourceDirectories_;
+      return getModelLoaderClass().toString();
+   }
+   public java.lang.StringBuilder getModelLoaderClass()
+   {
+      return modelLoaderClass_;
    }
 
-   public int getModelFileSize()
+
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getResourceDirectories()
    {
-      return modelFileSize_;
+      return resourceDirectories_;
    }
 
    public void setModelFileSize(int modelFileSize)
    {
       modelFileSize_ = modelFileSize;
    }
-
-   public boolean getHasResourceZip()
+   public int getModelFileSize()
    {
-      return hasResourceZip_;
+      return modelFileSize_;
    }
 
    public void setHasResourceZip(boolean hasResourceZip)
    {
       hasResourceZip_ = hasResourceZip;
    }
-
-   public int getResourceZipSize()
+   public boolean getHasResourceZip()
    {
-      return resourceZipSize_;
+      return hasResourceZip_;
    }
 
    public void setResourceZipSize(int resourceZipSize)
    {
       resourceZipSize_ = resourceZipSize;
    }
+   public int getResourceZipSize()
+   {
+      return resourceZipSize_;
+   }
+
 
    @Override
    public boolean epsilonEquals(ModelFileDescription other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_model_, other.has_model_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hasModel_, other.hasModel_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.modelLoaderClass_, other.modelLoaderClass_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.modelLoaderClass_, other.modelLoaderClass_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.resourceDirectories_, other.resourceDirectories_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.resourceDirectories_, other.resourceDirectories_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.modelFileSize_, other.modelFileSize_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.modelFileSize_, other.modelFileSize_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hasResourceZip_, other.hasResourceZip_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hasResourceZip_, other.hasResourceZip_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.resourceZipSize_, other.resourceZipSize_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.resourceZipSize_, other.resourceZipSize_, epsilon)) return false;
+
 
       return true;
    }
@@ -159,35 +146,25 @@ public class ModelFileDescription extends Packet<ModelFileDescription> implement
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof ModelFileDescription))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof ModelFileDescription)) return false;
 
       ModelFileDescription otherMyClass = (ModelFileDescription) other;
 
-      if (this.has_model_ != otherMyClass.has_model_)
-         return false;
+      if(this.hasModel_ != otherMyClass.hasModel_) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.modelLoaderClass_, otherMyClass.modelLoaderClass_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.modelLoaderClass_, otherMyClass.modelLoaderClass_)) return false;
 
-      if (!this.resourceDirectories_.equals(otherMyClass.resourceDirectories_))
-         return false;
+      if (!this.resourceDirectories_.equals(otherMyClass.resourceDirectories_)) return false;
+      if(this.modelFileSize_ != otherMyClass.modelFileSize_) return false;
 
-      if (this.modelFileSize_ != otherMyClass.modelFileSize_)
-         return false;
+      if(this.hasResourceZip_ != otherMyClass.hasResourceZip_) return false;
 
-      if (this.hasResourceZip_ != otherMyClass.hasResourceZip_)
-         return false;
+      if(this.resourceZipSize_ != otherMyClass.resourceZipSize_) return false;
 
-      if (this.resourceZipSize_ != otherMyClass.resourceZipSize_)
-         return false;
 
       return true;
    }
@@ -198,33 +175,20 @@ public class ModelFileDescription extends Packet<ModelFileDescription> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("ModelFileDescription {");
-      builder.append("has_model=");
-      builder.append(this.has_model_);
-
-      builder.append(", ");
+      builder.append("hasModel=");
+      builder.append(this.hasModel_);      builder.append(", ");
       builder.append("name=");
-      builder.append(this.name_);
-
-      builder.append(", ");
+      builder.append(this.name_);      builder.append(", ");
       builder.append("modelLoaderClass=");
-      builder.append(this.modelLoaderClass_);
-
-      builder.append(", ");
+      builder.append(this.modelLoaderClass_);      builder.append(", ");
       builder.append("resourceDirectories=");
-      builder.append(this.resourceDirectories_);
-
-      builder.append(", ");
+      builder.append(this.resourceDirectories_);      builder.append(", ");
       builder.append("modelFileSize=");
-      builder.append(this.modelFileSize_);
-
-      builder.append(", ");
+      builder.append(this.modelFileSize_);      builder.append(", ");
       builder.append("hasResourceZip=");
-      builder.append(this.hasResourceZip_);
-
-      builder.append(", ");
+      builder.append(this.hasResourceZip_);      builder.append(", ");
       builder.append("resourceZipSize=");
       builder.append(this.resourceZipSize_);
-
       builder.append("}");
       return builder.toString();
    }

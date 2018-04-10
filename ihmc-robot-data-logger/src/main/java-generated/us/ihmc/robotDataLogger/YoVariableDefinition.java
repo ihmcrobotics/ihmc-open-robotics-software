@@ -1,8 +1,8 @@
 package us.ihmc.robotDataLogger;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public class YoVariableDefinition extends Packet<YoVariableDefinition> implements Settable<YoVariableDefinition>, EpsilonComparable<YoVariableDefinition>
 {
@@ -20,12 +20,12 @@ public class YoVariableDefinition extends Packet<YoVariableDefinition> implement
    public YoVariableDefinition()
    {
       name_ = new java.lang.StringBuilder(255);
-
       description_ = new java.lang.StringBuilder(255);
    }
 
    public YoVariableDefinition(YoVariableDefinition other)
    {
+      this();
       set(other);
    }
 
@@ -52,16 +52,7 @@ public class YoVariableDefinition extends Packet<YoVariableDefinition> implement
       max_ = other.max_;
 
       loadStatus_ = other.loadStatus_;
-   }
 
-   public java.lang.String getNameAsString()
-   {
-      return getName().toString();
-   }
-
-   public java.lang.StringBuilder getName()
-   {
-      return name_;
    }
 
    public void setName(java.lang.String name)
@@ -70,14 +61,13 @@ public class YoVariableDefinition extends Packet<YoVariableDefinition> implement
       name_.append(name);
    }
 
-   public java.lang.String getDescriptionAsString()
+   public java.lang.String getNameAsString()
    {
-      return getDescription().toString();
+      return getName().toString();
    }
-
-   public java.lang.StringBuilder getDescription()
+   public java.lang.StringBuilder getName()
    {
-      return description_;
+      return name_;
    }
 
    public void setDescription(java.lang.String description)
@@ -86,123 +76,114 @@ public class YoVariableDefinition extends Packet<YoVariableDefinition> implement
       description_.append(description);
    }
 
-   public us.ihmc.robotDataLogger.YoType getType()
+   public java.lang.String getDescriptionAsString()
    {
-      return type_;
+      return getDescription().toString();
+   }
+   public java.lang.StringBuilder getDescription()
+   {
+      return description_;
    }
 
    public void setType(us.ihmc.robotDataLogger.YoType type)
    {
       type_ = type;
    }
-
-   public int getRegistry()
+   public us.ihmc.robotDataLogger.YoType getType()
    {
-      return registry_;
+      return type_;
    }
 
    public void setRegistry(int registry)
    {
       registry_ = registry;
    }
-
-   public int getEnumType()
+   public int getRegistry()
    {
-      return enumType_;
+      return registry_;
    }
 
    public void setEnumType(int enumType)
    {
       enumType_ = enumType;
    }
-
-   public boolean getAllowNullValues()
+   public int getEnumType()
    {
-      return allowNullValues_;
+      return enumType_;
    }
 
    public void setAllowNullValues(boolean allowNullValues)
    {
       allowNullValues_ = allowNullValues;
    }
-
-   public boolean getIsParameter()
+   public boolean getAllowNullValues()
    {
-      return isParameter_;
+      return allowNullValues_;
    }
 
    public void setIsParameter(boolean isParameter)
    {
       isParameter_ = isParameter;
    }
-
-   public double getMin()
+   public boolean getIsParameter()
    {
-      return min_;
+      return isParameter_;
    }
 
    public void setMin(double min)
    {
       min_ = min;
    }
-
-   public double getMax()
+   public double getMin()
    {
-      return max_;
+      return min_;
    }
 
    public void setMax(double max)
    {
       max_ = max;
    }
-
-   public us.ihmc.robotDataLogger.LoadStatus getLoadStatus()
+   public double getMax()
    {
-      return loadStatus_;
+      return max_;
    }
 
    public void setLoadStatus(us.ihmc.robotDataLogger.LoadStatus loadStatus)
    {
       loadStatus_ = loadStatus;
    }
+   public us.ihmc.robotDataLogger.LoadStatus getLoadStatus()
+   {
+      return loadStatus_;
+   }
+
 
    @Override
    public boolean epsilonEquals(YoVariableDefinition other, double epsilon)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
+      if(other == null) return false;
+      if(other == this) return true;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.description_, other.description_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.description_, other.description_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.type_, other.type_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.type_, other.type_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.registry_, other.registry_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.registry_, other.registry_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.enumType_, other.enumType_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.enumType_, other.enumType_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.allowNullValues_, other.allowNullValues_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.allowNullValues_, other.allowNullValues_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.isParameter_, other.isParameter_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.isParameter_, other.isParameter_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_, other.min_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_, other.min_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_, other.max_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_, other.max_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.loadStatus_, other.loadStatus_, epsilon))
-         return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsEnum(this.loadStatus_, other.loadStatus_, epsilon)) return false;
+
 
       return true;
    }
@@ -210,44 +191,32 @@ public class YoVariableDefinition extends Packet<YoVariableDefinition> implement
    @Override
    public boolean equals(Object other)
    {
-      if (other == null)
-         return false;
-      if (other == this)
-         return true;
-      if (!(other instanceof YoVariableDefinition))
-         return false;
+      if(other == null) return false;
+      if(other == this) return true;
+      if(!(other instanceof YoVariableDefinition)) return false;
 
       YoVariableDefinition otherMyClass = (YoVariableDefinition) other;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.description_, otherMyClass.description_))
-         return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.description_, otherMyClass.description_)) return false;
 
-      if (this.type_ != otherMyClass.type_)
-         return false;
+      if(this.type_ != otherMyClass.type_) return false;
 
-      if (this.registry_ != otherMyClass.registry_)
-         return false;
+      if(this.registry_ != otherMyClass.registry_) return false;
 
-      if (this.enumType_ != otherMyClass.enumType_)
-         return false;
+      if(this.enumType_ != otherMyClass.enumType_) return false;
 
-      if (this.allowNullValues_ != otherMyClass.allowNullValues_)
-         return false;
+      if(this.allowNullValues_ != otherMyClass.allowNullValues_) return false;
 
-      if (this.isParameter_ != otherMyClass.isParameter_)
-         return false;
+      if(this.isParameter_ != otherMyClass.isParameter_) return false;
 
-      if (this.min_ != otherMyClass.min_)
-         return false;
+      if(this.min_ != otherMyClass.min_) return false;
 
-      if (this.max_ != otherMyClass.max_)
-         return false;
+      if(this.max_ != otherMyClass.max_) return false;
 
-      if (this.loadStatus_ != otherMyClass.loadStatus_)
-         return false;
+      if(this.loadStatus_ != otherMyClass.loadStatus_) return false;
+
 
       return true;
    }
@@ -259,44 +228,25 @@ public class YoVariableDefinition extends Packet<YoVariableDefinition> implement
 
       builder.append("YoVariableDefinition {");
       builder.append("name=");
-      builder.append(this.name_);
-
-      builder.append(", ");
+      builder.append(this.name_);      builder.append(", ");
       builder.append("description=");
-      builder.append(this.description_);
-
-      builder.append(", ");
+      builder.append(this.description_);      builder.append(", ");
       builder.append("type=");
-      builder.append(this.type_);
-
-      builder.append(", ");
+      builder.append(this.type_);      builder.append(", ");
       builder.append("registry=");
-      builder.append(this.registry_);
-
-      builder.append(", ");
+      builder.append(this.registry_);      builder.append(", ");
       builder.append("enumType=");
-      builder.append(this.enumType_);
-
-      builder.append(", ");
+      builder.append(this.enumType_);      builder.append(", ");
       builder.append("allowNullValues=");
-      builder.append(this.allowNullValues_);
-
-      builder.append(", ");
+      builder.append(this.allowNullValues_);      builder.append(", ");
       builder.append("isParameter=");
-      builder.append(this.isParameter_);
-
-      builder.append(", ");
+      builder.append(this.isParameter_);      builder.append(", ");
       builder.append("min=");
-      builder.append(this.min_);
-
-      builder.append(", ");
+      builder.append(this.min_);      builder.append(", ");
       builder.append("max=");
-      builder.append(this.max_);
-
-      builder.append(", ");
+      builder.append(this.max_);      builder.append(", ");
       builder.append("loadStatus=");
       builder.append(this.loadStatus_);
-
       builder.append("}");
       return builder.toString();
    }
