@@ -1,7 +1,8 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.*;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonBState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonAState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonSelectState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonStartState;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickXAxis;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickYAxis;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.RightStickXAxis;
@@ -122,8 +123,7 @@ public class StepGeneratorJavaFXController
       footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
       footPolygon.update();
 
-      messager.registerTopicListener(ButtonAState, state -> startWalking(true));
-      messager.registerTopicListener(ButtonBState, state -> stopWalking(true));
+      messager.registerTopicListener(ButtonAState, state -> toggleWalking(state == ButtonState.PRESSED));
       messager.registerJavaFXSyncedTopicListener(LeftStickYAxis, this::updateForwardVelocity);
       messager.registerJavaFXSyncedTopicListener(LeftStickXAxis, this::updateLateralVelocity);
       messager.registerJavaFXSyncedTopicListener(RightStickXAxis, this::updateHeadingVelocity);
@@ -151,11 +151,17 @@ public class StepGeneratorJavaFXController
       headingVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
    }
 
-   private void startWalking(boolean confirm)
+   private void toggleWalking(boolean confirm)
    {
       if (confirm)
       {
-         continuousStepGenerator.startWalking();
+         continuousStepGenerator.toggleWalking();
+         if (!continuousStepGenerator.isWalking())
+         {
+            PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+            pauseWalkingMessage.setPause(true);
+            packetCommunicator.send(pauseWalkingMessage);
+         }
       }
    }
 
