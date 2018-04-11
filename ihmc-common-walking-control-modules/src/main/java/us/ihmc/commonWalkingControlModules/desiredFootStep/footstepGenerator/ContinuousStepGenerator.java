@@ -238,6 +238,11 @@ public class ContinuousStepGenerator implements Updatable
       currentSupportFootOrientation.set(currentSupportFootPose.getOrientation());
    }
 
+   public void setNumberOfFootstepsToPlan(int number)
+   {
+      numberOfFootstepsToPlan.set(number);
+   }
+
    public void setFootstepTiming(double swingTime, double transferTime)
    {
       this.swingTime.set(swingTime);
