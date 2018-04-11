@@ -16,13 +16,19 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelMomentumController;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotEnvironmentAwareness.geometry.VectorMean;
+import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.screwTheory.*;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -51,8 +57,10 @@ public class WholeBodyVirtualModelControlSolver
 
    private final RigidBody controlRootBody;
 
-   private final Wrench tempExternalWrench = new Wrench();
-   private final DenseMatrix64F tempSelectionMatrix = new DenseMatrix64F(0, 0);
+   private final Wrench tempWrench = new Wrench();
+   private final FrameVector3D tempForce = new FrameVector3D();
+   private final FrameVector3D tempTorque = new FrameVector3D();
+   private final SelectionMatrix6D tempSelectionMatrix = new SelectionMatrix6D();
 
    private final YoFrameVector3D yoDesiredMomentumRateLinear;
    private final YoFrameVector3D yoAchievedMomentumRateLinear;
@@ -69,6 +77,11 @@ public class WholeBodyVirtualModelControlSolver
 
    private final JointIndexHandler jointIndexHandler;
    private final WholeBodyControllerBoundCalculator boundCalculator;
+
+   private final Vector3DReadOnly defaultLinearMomentumWeight = new ParameterVector3D("DefaultVMCRootLinearMomentumRateWeight", new Vector3D(5.0, 5.0, 2.5), registry);
+   private final Vector3DReadOnly defaultAngularMomentumWeight = new ParameterVector3D("DefaultVMCRootAngularMomentumRateWeight", new Vector3D(2.5, 2.5, 1.0), registry);
+
+   private final MomentumRateCommand rootBodyDefaultMomentumCommand = new MomentumRateCommand();
 
    public WholeBodyVirtualModelControlSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -96,6 +109,8 @@ public class WholeBodyVirtualModelControlSolver
 
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
+
+      rootBodyDefaultMomentumCommand.setWeights(defaultAngularMomentumWeight, defaultLinearMomentumWeight);
 
       parentRegistry.addChild(registry);
    }
@@ -199,6 +214,7 @@ public class WholeBodyVirtualModelControlSolver
       while (virtualModelControlCommandList.getNumberOfCommands() > 0)
       {
          VirtualModelControlCommand<?> command = virtualModelControlCommandList.pollCommand();
+         MomentumRateCommand rootMomentum = null;
          switch (command.getCommandType())
          {
          case MOMENTUM:
@@ -212,13 +228,13 @@ public class WholeBodyVirtualModelControlSolver
             optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
             break;
          case VIRTUAL_WRENCH:
-            handleVirtualWrenchCommand((VirtualWrenchCommand) command);
+            rootMomentum = handleVirtualWrenchCommand((VirtualWrenchCommand) command);
             break;
          case VIRTUAL_FORCE:
-            handleVirtualForceCommand((VirtualForceCommand) command);
+            rootMomentum = handleVirtualForceCommand((VirtualForceCommand) command);
             break;
          case VIRTUAL_TORQUE:
-            handleVirtualTorqueCommand((VirtualTorqueCommand) command);
+            rootMomentum = handleVirtualTorqueCommand((VirtualTorqueCommand) command);
             break;
          case JOINTSPACE:
             virtualModelController.addJointTorqueCommand((JointTorqueCommand) command);
@@ -232,6 +248,12 @@ public class WholeBodyVirtualModelControlSolver
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled by the Virtual Model Control solver mode.");
          }
+
+         if (rootMomentum != null)
+         {
+            optimizationControlModule.submitMomentumRateCommand(rootMomentum);
+            recordMomentumRate(rootMomentum);
+         }
       }
    }
 
@@ -242,49 +264,64 @@ public class WholeBodyVirtualModelControlSolver
       MatrixTools.extractAddFixedFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
    }
 
-   private void handleVirtualWrenchCommand(VirtualWrenchCommand commandToSubmit)
+   private MomentumRateCommand handleVirtualWrenchCommand(VirtualWrenchCommand commandToSubmit)
    {
-      virtualModelController.addVirtualEffortCommand(commandToSubmit);
-
       if (commandToSubmit.getEndEffector() == controlRootBody)
       {
-         commandToSubmit.getDesiredWrench(controlFrame, tempExternalWrench);
-         tempExternalWrench.negate();
-         tempExternalWrench.changeFrame(commandToSubmit.getEndEffector().getBodyFixedFrame());
-         optimizationControlModule.submitExternalWrench(commandToSubmit.getEndEffector(), tempExternalWrench);
+         commandToSubmit.getSelectionMatrix(tempSelectionMatrix);
+         commandToSubmit.getDesiredWrench(controlFrame, tempWrench);
+         tempWrench.getAngularPart(tempTorque);
+         tempWrench.getLinearPart(tempForce);
+         tempTorque.changeFrame(worldFrame);
+         tempForce.changeFrame(worldFrame);
+
+         rootBodyDefaultMomentumCommand.setSelectionMatrix(tempSelectionMatrix);
+         rootBodyDefaultMomentumCommand.setWeights(defaultAngularMomentumWeight, defaultLinearMomentumWeight);
+         rootBodyDefaultMomentumCommand.setMomentumRate(tempTorque, tempForce);
+
+         return rootBodyDefaultMomentumCommand;
       }
 
-      commandToSubmit.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
+      virtualModelController.addVirtualEffortCommand(commandToSubmit);
+      return null;
    }
 
-   private void handleVirtualForceCommand(VirtualForceCommand commandToSubmit)
+   private MomentumRateCommand handleVirtualForceCommand(VirtualForceCommand commandToSubmit)
    {
-      virtualModelController.addVirtualEffortCommand(commandToSubmit);
-
       if (commandToSubmit.getEndEffector() == controlRootBody)
       {
-         commandToSubmit.getDesiredWrench(controlFrame, tempExternalWrench);
-         tempExternalWrench.negate();
-         tempExternalWrench.changeFrame(commandToSubmit.getEndEffector().getBodyFixedFrame());
-         optimizationControlModule.submitExternalWrench(commandToSubmit.getEndEffector(), tempExternalWrench);
+         commandToSubmit.getSelectionMatrix(tempSelectionMatrix);
+         commandToSubmit.getDesiredLinearForce(controlFrame, tempForce);
+         tempForce.changeFrame(worldFrame);
+
+         rootBodyDefaultMomentumCommand.setSelectionMatrix(tempSelectionMatrix);
+         rootBodyDefaultMomentumCommand.setLinearWeights(defaultLinearMomentumWeight);
+         rootBodyDefaultMomentumCommand.setLinearMomentumRate(tempForce);
+
+         return rootBodyDefaultMomentumCommand;
       }
 
-      commandToSubmit.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
+      virtualModelController.addVirtualEffortCommand(commandToSubmit);
+      return null;
    }
 
-   private void handleVirtualTorqueCommand(VirtualTorqueCommand commandToSubmit)
+   private MomentumRateCommand handleVirtualTorqueCommand(VirtualTorqueCommand commandToSubmit)
    {
-      virtualModelController.addVirtualEffortCommand(commandToSubmit);
-
       if (commandToSubmit.getEndEffector() == controlRootBody)
       {
-         commandToSubmit.getDesiredWrench(controlFrame, tempExternalWrench);
-         tempExternalWrench.negate();
-         tempExternalWrench.changeFrame(commandToSubmit.getEndEffector().getBodyFixedFrame());
-         optimizationControlModule.submitExternalWrench(commandToSubmit.getEndEffector(), tempExternalWrench);
+         commandToSubmit.getSelectionMatrix(tempSelectionMatrix);
+         commandToSubmit.getDesiredAngularTorque(controlFrame, tempTorque);
+         tempTorque.changeFrame(worldFrame);
+
+         rootBodyDefaultMomentumCommand.setSelectionMatrix(tempSelectionMatrix);
+         rootBodyDefaultMomentumCommand.setAngularWeights(defaultLinearMomentumWeight);
+         rootBodyDefaultMomentumCommand.setAngularWeights(tempTorque);
+
+         return rootBodyDefaultMomentumCommand;
       }
 
-      commandToSubmit.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
+      virtualModelController.addVirtualEffortCommand(commandToSubmit);
+      return null;
    }
 
    private void handleExternalWrenchCommand(ExternalWrenchCommand command)
