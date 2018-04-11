@@ -1,6 +1,11 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import java.io.IOException;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonAState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonBState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickXAxis;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickYAxis;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftTriggerAxis;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,20 +35,19 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.inputDevices.joystick.Joystick;
-import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
-import us.ihmc.tools.inputDevices.joystick.JoystickModel;
-import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
 public class StepGeneratorJavaFXController
 {
    private final SideDependentList<Color> footColors = new SideDependentList<Color>(Color.CRIMSON, Color.YELLOWGREEN);
 
    private final ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator();
-   private final DoubleProperty headingVelocity = new SimpleDoubleProperty(this, "headingVelocityProperty", 0.0);
-   private final Vector2DProperty desiredVelocityProperty = new Vector2DProperty(this, "desiredVelocity", new Vector2D());
+   private final DoubleProperty headingVelocityProperty = new SimpleDoubleProperty(this, "headingVelocityProperty", 0.0);
+   private final DoubleProperty forwardVelocityProperty = new SimpleDoubleProperty(this, "forwardVelocityProperty", 0.0);
+   private final DoubleProperty lateralVelocityProperty = new SimpleDoubleProperty(this, "lateralVelocityProperty", 0.0);
+
    private final AnimationTimer animationTimer;
    private final PacketCommunicator packetCommunicator;
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
@@ -51,17 +55,13 @@ public class StepGeneratorJavaFXController
 
    private final Group rootNode = new Group();
 
-   private final JoystickPlanarVelocityProvider joystickPlanarVelocityProvider;
-
-   private final Joystick joystick;
-
-   public StepGeneratorJavaFXController(WalkingControllerParameters walkingControllerParameters, PacketCommunicator packetCommunicator,
-                                        JavaFXRobotVisualizer javaFXRobotVisualizer)
+   public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters,
+                                        PacketCommunicator packetCommunicator, JavaFXRobotVisualizer javaFXRobotVisualizer)
    {
       this.packetCommunicator = packetCommunicator;
       continuousStepGenerator.setNumberOfFootstepsToPlan(10);
-      continuousStepGenerator.setDesiredHeadingProvider(() -> headingVelocity.get());
-      continuousStepGenerator.setDesiredVelocityProvider(() -> desiredVelocityProperty.get());
+      continuousStepGenerator.setDesiredHeadingProvider(() -> headingVelocityProperty.get());
+      continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocityProperty.get(), lateralVelocityProperty.get()));
       continuousStepGenerator.configureWith(walkingControllerParameters);
       continuousStepGenerator.setSupportFootBasedFootstepAdjustment();
       continuousStepGenerator.setFootstepMessenger(this::visualizeFootstepsAndSend);
@@ -73,9 +73,6 @@ public class StepGeneratorJavaFXController
          @Override
          public void handle(long now)
          {
-            headingVelocity.set(joystickPlanarVelocityProvider.getTurningVelocity());
-            desiredVelocityProperty.set(joystickPlanarVelocityProvider.getVelocity());
-
             update();
 
             List<Node> footstepsToVisualize = footstepsToVisualizeReference.getAndSet(null);
@@ -102,31 +99,48 @@ public class StepGeneratorJavaFXController
       footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
       footPolygon.update();
 
-      try
-      {
-         joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
-         joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1));
-         joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1));
-         joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_TRIGGER, true, 0.1, 3));
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException("error opening joystick: " + e);
-      }
+      messager.registerTopicListener(ButtonAState, state -> startWalking(true));
+      messager.registerTopicListener(ButtonBState, state -> stopWalking(true));
+      messager.registerJavaFXSyncedTopicListener(LeftStickYAxis, this::updateForwardVelocity);
+      messager.registerJavaFXSyncedTopicListener(LeftStickXAxis, this::updateLateralVelocity);
+      messager.registerJavaFXSyncedTopicListener(LeftTriggerAxis, this::updateHeadingVelocity);
+   }
 
-      joystickPlanarVelocityProvider = new JoystickPlanarVelocityProvider(joystick, 0.3, 0.3, Math.PI / 3.0);
+   private void updateForwardVelocity(double alpha)
+   {
+      double minMaxVelocity = 0.3;
+      forwardVelocityProperty.set(minMaxVelocity * alpha);
+   }
 
-      joystick.addJoystickEventListener(event -> {
-         if (event.getComponent().getIdentifier() == XBoxOneMapping.A.getIdentifier())
-            continuousStepGenerator.startWalking();
-         else if (event.getComponent().getIdentifier() == XBoxOneMapping.B.getIdentifier())
-         {
-            continuousStepGenerator.stopWalking();
-            PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-            pauseWalkingMessage.setPause(true);
-            packetCommunicator.send(pauseWalkingMessage);
-         }
-      });
+   private void updateLateralVelocity(double alpha)
+   {
+      double minMaxVelocity = 0.3;
+      lateralVelocityProperty.set(minMaxVelocity * alpha);
+   }
+
+   private void updateHeadingVelocity(double alpha)
+   {
+      double minMaxVelocity = Math.PI / 3.0;
+      headingVelocityProperty.set(-minMaxVelocity * alpha);
+   }
+
+   private void startWalking(boolean confirm)
+   {
+      if (confirm)
+      {
+         continuousStepGenerator.startWalking();
+      }
+   }
+
+   private void stopWalking(boolean confirm)
+   {
+      if (confirm)
+      {
+         continuousStepGenerator.stopWalking();
+         PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+         pauseWalkingMessage.setPause(true);
+         packetCommunicator.send(pauseWalkingMessage);
+      }
    }
 
    private void visualizeFootstepsAndSend(FootstepDataListMessage footstepDataListMessage)
@@ -169,50 +183,10 @@ public class StepGeneratorJavaFXController
    public void stop()
    {
       animationTimer.stop();
-      joystick.shutdown();
    }
 
    public Node getRootNode()
    {
       return rootNode;
-   }
-
-   public class JoystickPlanarVelocityProvider
-   {
-      private double xdot;
-      private double ydot;
-      private double adot;
-
-      public JoystickPlanarVelocityProvider(Joystick joystick, double xdotMax, double ydotMax, double adotMax)
-      {
-         joystick.addJoystickEventListener(event -> {
-            if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_Y.getIdentifier())
-               xdot = xdotMax * event.getValue();
-            else if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_X.getIdentifier())
-               ydot = ydotMax * event.getValue();
-            else if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_TRIGGER.getIdentifier())
-               adot = -adotMax * event.getValue();
-         });
-      }
-
-      public Vector2D getVelocity()
-      {
-         return new Vector2D(xdot, ydot);
-      }
-
-      public double getForwardVelocity()
-      {
-         return xdot;
-      }
-
-      public double getLateralVelocity()
-      {
-         return ydot;
-      }
-
-      public double getTurningVelocity()
-      {
-         return adot;
-      }
    }
 }
