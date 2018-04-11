@@ -117,7 +117,6 @@ public abstract class QuadrupedXGaitWalkingOverRampsTest implements QuadrupedMul
       quadrupedTestFactory.setUseStateEstimator(false);
       quadrupedTestFactory.setUseNetworking(true);
       conductor = quadrupedTestFactory.createTestConductor();
-      conductor.setKeepSCSUp(true);
       variables = new QuadrupedForceTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getStepTeleopManager();
 
