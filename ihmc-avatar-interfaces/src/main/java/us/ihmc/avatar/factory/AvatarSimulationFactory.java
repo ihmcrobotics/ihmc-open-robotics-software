@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -49,7 +50,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
-import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.HybridImpulseSpringDamperCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
@@ -111,7 +112,9 @@ public class AvatarSimulationFactory
       {
          double coefficientOfRestitution = 0.2;
          double coefficientOfFriction = 0.7;
-         CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+         CollisionHandler collisionHandler = new HybridImpulseSpringDamperCollisionHandler(coefficientOfRestitution, coefficientOfFriction,
+                                                                                           simulationConstructionSet.getRootRegistry(),
+                                                                                           new YoGraphicsListRegistry());
          CollisionManager collisionManager = new CollisionManager(commonAvatarEnvironment.get().getTerrainObject3D(), collisionHandler);
          simulationConstructionSet.initializeShapeCollision(collisionManager);
       }
@@ -438,7 +441,7 @@ public class AvatarSimulationFactory
       setupSimulatedRobotTimeProvider();
       setupCMPVisualization();
       setupCOMVisualization();
-      
+
       initializeCollisionManager();
       initializeSimulationConstructionSet();
 
