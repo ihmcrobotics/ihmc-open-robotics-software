@@ -2,6 +2,7 @@ package us.ihmc.atlas.joystickBasedStepping;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -38,6 +39,9 @@ public class JoystickBasedSteppingMainUI
    private final AnimationTimer cameraTracking;
    private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(StepGeneratorJavaFXTopics.API);
    private final XBoxOneJavaFXController xBoxOneJavaFXController;
+
+   @FXML
+   private StepGeneratorParametersPaneController stepGeneratorParametersPaneController;
 
    public JoystickBasedSteppingMainUI(Stage primaryStage, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       WalkingControllerParameters walkingControllerParameters)
@@ -81,11 +85,11 @@ public class JoystickBasedSteppingMainUI
       stepGeneratorJavaFXController = new StepGeneratorJavaFXController(messager, walkingControllerParameters, packetCommunicator, javaFXRobotVisualizer);
       view3dFactory.addNodeToView(stepGeneratorJavaFXController.getRootNode());
 
-      primaryStage.setTitle(getClass().getSimpleName());
-      primaryStage.setMaximized(true);
-      Scene mainScene = new Scene(mainPane, 600, 400);
+      messager.startMessager();
+      stepGeneratorParametersPaneController.initialize(messager, walkingControllerParameters);
 
-      primaryStage.setScene(mainScene);
+      primaryStage.setTitle(getClass().getSimpleName());
+      primaryStage.setScene(new Scene(mainPane, 800, 600));
       primaryStage.setOnCloseRequest(event -> stop());
 
       start();
@@ -93,7 +97,6 @@ public class JoystickBasedSteppingMainUI
 
    public void start() throws Exception
    {
-      messager.startMessager();
       primaryStage.show();
       javaFXRobotVisualizer.start();
       stepGeneratorJavaFXController.start();

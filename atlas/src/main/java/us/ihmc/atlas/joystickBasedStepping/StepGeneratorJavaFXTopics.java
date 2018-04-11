@@ -13,6 +13,10 @@ public class StepGeneratorJavaFXTopics
 
    private static final Category Root = apiFactory.createRootCategory(apiFactory.createCategoryTheme("StepController"));
 
+   private static final CategoryTheme WalkingController = apiFactory.createCategoryTheme("WalkingController");
+   private static final CategoryTheme Swing = apiFactory.createCategoryTheme("Swing");
+   private static final CategoryTheme Transfer = apiFactory.createCategoryTheme("Transfer");
+
    private static final CategoryTheme XBoxOneController = apiFactory.createCategoryTheme("XBoxOneController");
    private static final CategoryTheme Button = apiFactory.createCategoryTheme("Button");
    private static final CategoryTheme A = apiFactory.createCategoryTheme("A");
@@ -29,6 +33,8 @@ public class StepGeneratorJavaFXTopics
    private static final CategoryTheme LeftStick = apiFactory.createCategoryTheme("LeftStick");
    private static final CategoryTheme RightStick = apiFactory.createCategoryTheme("RightStick");
 
+   private static final TypedTopicTheme<Double> Height = apiFactory.createTypedTopicTheme("Height");
+   private static final TypedTopicTheme<Double> Duration = apiFactory.createTypedTopicTheme("Duration");
    private static final TypedTopicTheme<ButtonState> State = apiFactory.createTypedTopicTheme("State");
    private static final TypedTopicTheme<Double> Axis = apiFactory.createTypedTopicTheme("Axis");
 
@@ -50,6 +56,10 @@ public class StepGeneratorJavaFXTopics
    public static final Topic<Double> RightStickYAxis = Root.child(XBoxOneController).child(RightStick).child(Y).topic(Axis);
    public static final Topic<Double> LeftTriggerAxis = Root.child(XBoxOneController).child(LeftTrigger).topic(Axis);
    public static final Topic<Double> RightTriggerAxis = Root.child(XBoxOneController).child(RightTrigger).topic(Axis);
+
+   public static final Topic<Double> WalkingSwingHeight = Root.child(WalkingController).child(Swing).topic(Height);
+   public static final Topic<Double> WalkingSwingDuration = Root.child(WalkingController).child(Swing).topic(Duration);
+   public static final Topic<Double> WalkingTransferDuration = Root.child(WalkingController).child(Transfer).topic(Duration);
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

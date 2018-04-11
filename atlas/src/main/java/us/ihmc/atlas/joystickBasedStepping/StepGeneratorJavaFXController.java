@@ -5,6 +5,9 @@ import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.Butt
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickXAxis;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickYAxis;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftTriggerAxis;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingDuration;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingHeight;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTransferDuration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +58,10 @@ public class StepGeneratorJavaFXController
 
    private final Group rootNode = new Group();
 
+   private AtomicReference<Double> swingHeight;
+   private AtomicReference<Double> swingDuration;
+   private AtomicReference<Double> transferDuration;
+
    public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters,
                                         PacketCommunicator packetCommunicator, JavaFXRobotVisualizer javaFXRobotVisualizer)
    {
@@ -68,12 +75,17 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
       packetCommunicator.attachListener(FootstepStatusMessage.class, continuousStepGenerator::consumeFootstepStatus);
 
+      swingHeight = messager.createInput(WalkingSwingHeight, 0.12);
+      swingDuration = messager.createInput(WalkingSwingDuration, walkingControllerParameters.getDefaultSwingTime());
+      transferDuration = messager.createInput(WalkingTransferDuration, walkingControllerParameters.getDefaultTransferTime());
+
       animationTimer = new AnimationTimer()
       {
          @Override
          public void handle(long now)
          {
-            update();
+            continuousStepGenerator.setFootstepTiming(swingDuration.get(), transferDuration.get());
+            continuousStepGenerator.update(Double.NaN);
 
             List<Node> footstepsToVisualize = footstepsToVisualizeReference.getAndSet(null);
             ObservableList<Node> children = rootNode.getChildren();
@@ -147,7 +159,11 @@ public class StepGeneratorJavaFXController
    {
       List<Node> footstepNode = new ArrayList<>();
       for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i++)
-         footstepNode.add(createFootstep(footstepDataListMessage.getFootstepDataList().get(i)));
+      {
+         FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
+         footstepDataMessage.setSwingHeight(swingHeight.get());
+         footstepNode.add(createFootstep(footstepDataMessage));
+      }
       footstepsToVisualizeReference.set(footstepNode);
 
       packetCommunicator.send(footstepDataListMessage);
@@ -168,11 +184,6 @@ public class StepGeneratorJavaFXController
       MeshView meshView = new MeshView(mesh);
       meshView.setMaterial(new PhongMaterial(footColor));
       return meshView;
-   }
-
-   private void update()
-   {
-      continuousStepGenerator.update(Double.NaN);
    }
 
    public void start()
