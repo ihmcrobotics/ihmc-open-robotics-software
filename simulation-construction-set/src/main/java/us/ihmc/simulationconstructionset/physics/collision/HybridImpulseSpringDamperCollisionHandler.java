@@ -123,6 +123,16 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
 
       parentRegistry.addChild(registry);
    }
+   
+   public void setKp(double value)
+   {
+      kpCollision.set(value); // Memo : 20000 is best for 10 kg.
+   }
+   
+   public void setKd(double value)
+   {
+      kdCollision.set(value);  // Memo : 5000 is best for 10 kg.
+   }
 
    @Override
    public void maintenanceBeforeCollisionDetection()

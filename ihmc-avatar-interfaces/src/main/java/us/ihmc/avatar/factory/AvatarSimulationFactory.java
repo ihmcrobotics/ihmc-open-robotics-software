@@ -115,6 +115,10 @@ public class AvatarSimulationFactory
          CollisionHandler collisionHandler = new HybridImpulseSpringDamperCollisionHandler(coefficientOfRestitution, coefficientOfFriction,
                                                                                            simulationConstructionSet.getRootRegistry(),
                                                                                            new YoGraphicsListRegistry());
+         HybridImpulseSpringDamperCollisionHandler tempHandler = (HybridImpulseSpringDamperCollisionHandler) collisionHandler;
+         tempHandler.setKp(2000000);
+         tempHandler.setKd(200);
+         
          CollisionManager collisionManager = new CollisionManager(commonAvatarEnvironment.get().getTerrainObject3D(), collisionHandler);
          simulationConstructionSet.initializeShapeCollision(collisionManager);
       }
