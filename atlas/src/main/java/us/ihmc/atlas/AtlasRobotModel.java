@@ -35,6 +35,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.PlanarRegionFootstepPlanningParameters;
@@ -144,7 +145,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       this(atlasVersion, target, headless, simulationContactPoints, createAdditionalContactPointsn, false);
    }
-   
+
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
                           boolean createAdditionalContactPoints, boolean useShapeCollision)
    {
@@ -199,12 +200,18 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters,
-                                                                                        useCollisionMeshes);
-
-      collisionMeshDefinitionDataHolder.setVisible(false);
+      RobotDescription robotDescription;
       if (useShapeCollision)
+      {
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, null, useCollisionMeshes);
+         collisionMeshDefinitionDataHolder.setVisible(true);
+
          robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
+      }
+      else
+      {
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters, useCollisionMeshes);
+      }
 
       return robotDescription;
    }

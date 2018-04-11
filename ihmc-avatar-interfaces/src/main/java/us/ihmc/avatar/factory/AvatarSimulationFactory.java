@@ -48,6 +48,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.simulationconstructionset.physics.CollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -95,9 +98,23 @@ public class AvatarSimulationFactory
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private ActualCMPComputer actualCMPComputer;
 
+   private boolean useShapeCollision;
+
    private void createHumanoidFloatingRootJointRobot()
    {
       humanoidFloatingRootJointRobot = robotModel.get().createHumanoidFloatingRootJointRobot(createCollisionMeshes.get());
+   }
+
+   private void initializeCollisionManager()
+   {
+      if (useShapeCollision)
+      {
+         double coefficientOfRestitution = 0.2;
+         double coefficientOfFriction = 0.7;
+         CollisionHandler collisionHandler = new DefaultCollisionHandler(coefficientOfRestitution, coefficientOfFriction);
+         CollisionManager collisionManager = new CollisionManager(commonAvatarEnvironment.get().getTerrainObject3D(), collisionHandler);
+         simulationConstructionSet.initializeShapeCollision(collisionManager);
+      }
    }
 
    private void setupYoVariableServer()
@@ -421,6 +438,8 @@ public class AvatarSimulationFactory
       setupSimulatedRobotTimeProvider();
       setupCMPVisualization();
       setupCOMVisualization();
+      
+      initializeCollisionManager();
       initializeSimulationConstructionSet();
 
       AvatarSimulation avatarSimulation = new AvatarSimulation();
@@ -504,5 +523,10 @@ public class AvatarSimulationFactory
    public void setGravity(double gravity)
    {
       this.gravity.set(gravity);
+   }
+
+   public void setShapeCollision(boolean useShapeCollision)
+   {
+      this.useShapeCollision = useShapeCollision;
    }
 }
