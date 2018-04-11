@@ -2,14 +2,14 @@ package us.ihmc.graphicsDescription;
 
 import java.lang.reflect.Array;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion32;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 /**
  * This class provides an immutable data structure for 3D graphic mesh that is independent from the graphics engine to be used.
@@ -153,11 +153,9 @@ public class MeshDataHolder implements Transformable
     * @param axisAngle the axis-angle describing the rotation to apply to the mesh. Not Modified.
     * @return the rotated mesh.
     */
-   public static MeshDataHolder rotate(MeshDataHolder input, AxisAngle axisAngle)
+   public static MeshDataHolder rotate(MeshDataHolder input, AxisAngleReadOnly axisAngle)
    {
-      RotationMatrix matrix = new RotationMatrix();
-      matrix.set(axisAngle);
-      return rotate(input, matrix);
+      return rotate(input, new RotationMatrix(axisAngle));
    }
 
    /**
@@ -166,11 +164,9 @@ public class MeshDataHolder implements Transformable
     * @param quaternion the quaternion describing the rotation to apply to the mesh. Not Modified.
     * @return the rotated mesh.
     */
-   public static MeshDataHolder rotate(MeshDataHolder input, Quaternion32 quaternion)
+   public static MeshDataHolder rotate(MeshDataHolder input, QuaternionReadOnly quaternion)
    {
-      RotationMatrix matrix = new RotationMatrix();
-      matrix.set(quaternion);
-      return rotate(input, matrix);
+      return rotate(input, new RotationMatrix(quaternion));
    }
 
    /**
