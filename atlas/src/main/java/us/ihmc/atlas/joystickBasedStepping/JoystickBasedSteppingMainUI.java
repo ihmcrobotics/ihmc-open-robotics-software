@@ -1,7 +1,5 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import java.io.IOException;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXMLLoader;
@@ -19,6 +17,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
+import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 
@@ -36,12 +36,15 @@ public class JoystickBasedSteppingMainUI
    private final JavaFXRobotVisualizer javaFXRobotVisualizer;
    private final StepGeneratorJavaFXController stepGeneratorJavaFXController;
    private final AnimationTimer cameraTracking;
+   private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(StepGeneratorJavaFXTopics.API);
+   private final XBoxOneJavaFXController xBoxOneJavaFXController;
 
    public JoystickBasedSteppingMainUI(Stage primaryStage, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       WalkingControllerParameters walkingControllerParameters)
-         throws IOException
+         throws Exception
    {
       this.primaryStage = primaryStage;
+      xBoxOneJavaFXController = new XBoxOneJavaFXController(messager);
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -75,7 +78,7 @@ public class JoystickBasedSteppingMainUI
          }
       };
 
-      stepGeneratorJavaFXController = new StepGeneratorJavaFXController(walkingControllerParameters, packetCommunicator, javaFXRobotVisualizer);
+      stepGeneratorJavaFXController = new StepGeneratorJavaFXController(messager, walkingControllerParameters, packetCommunicator, javaFXRobotVisualizer);
       view3dFactory.addNodeToView(stepGeneratorJavaFXController.getRootNode());
 
       primaryStage.setTitle(getClass().getSimpleName());
@@ -88,8 +91,9 @@ public class JoystickBasedSteppingMainUI
       start();
    }
 
-   public void start() throws IOException
+   public void start() throws Exception
    {
+      messager.startMessager();
       primaryStage.show();
       javaFXRobotVisualizer.start();
       stepGeneratorJavaFXController.start();
@@ -99,6 +103,15 @@ public class JoystickBasedSteppingMainUI
 
    public void stop()
    {
+      try
+      {
+         messager.closeMessager();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+      xBoxOneJavaFXController.stop();
       javaFXRobotVisualizer.stop();
       stepGeneratorJavaFXController.stop();
       cameraTracking.stop();
