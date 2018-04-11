@@ -135,8 +135,9 @@ public class QuadrupedBodyOrientationManager
       if (so3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5 + currentTime)
       {
          trajectoryToSet.getOrientation(desiredBodyOrientation);
+         trajectoryToSet.getAngularVelocity(desiredBodyAngularVelocity);
          desiredBodyOrientation.changeFrame(worldFrame);
-         desiredBodyAngularVelocity.setToZero(worldFrame);
+         desiredBodyAngularVelocity.changeFrame(worldFrame);
 
          trajectoryToSet.clear();
          trajectoryToSet.appendWaypoint(currentTime, desiredBodyOrientation, desiredBodyAngularVelocity);
