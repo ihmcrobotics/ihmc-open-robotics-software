@@ -58,6 +58,7 @@ public class XBoxOneJavaFXController
          break;
       case X:
          messager.submitMessage(ButtonXState, toState(event));
+         break;
       case Y:
          messager.submitMessage(ButtonYState, toState(event));
          break;
