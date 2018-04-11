@@ -333,6 +333,18 @@ public class ContinuousStepGenerator implements Updatable
       maxAngleTurnInwards.set(-Math.abs(steppingParameters.getMaxAngleTurnInwards())); // Just to make sure of the sign.
    }
 
+   public void setStepWidths(double inPlace, double min, double max)
+   {
+      inPlaceWidth.set(inPlace);
+      minStepWidth.set(min);
+      maxStepWidth.set(max);
+   }
+
+   public void setMaxStepLength(double max)
+   {
+      maxStepLength.set(max);
+   }
+
    public void setFootstepMessenger(FootstepMessenger footstepMessenger)
    {
       this.footstepMessenger = footstepMessenger;
