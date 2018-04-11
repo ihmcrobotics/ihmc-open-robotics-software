@@ -3,17 +3,22 @@ package us.ihmc.atlas.joystickBasedStepping;
 import java.io.IOException;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import javafx.animation.AnimationTimer;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 
@@ -30,6 +35,7 @@ public class JoystickBasedSteppingMainUI
 
    private final JavaFXRobotVisualizer javaFXRobotVisualizer;
    private final StepGeneratorJavaFXController stepGeneratorJavaFXController;
+   private final AnimationTimer cameraTracking;
 
    public JoystickBasedSteppingMainUI(Stage primaryStage, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                       WalkingControllerParameters walkingControllerParameters)
@@ -44,7 +50,7 @@ public class JoystickBasedSteppingMainUI
       mainPane = loader.load();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
-      view3dFactory.addCameraController(true);
+      FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
       mainPane.setCenter(subScene);
@@ -52,6 +58,22 @@ public class JoystickBasedSteppingMainUI
       javaFXRobotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
       packetCommunicator.attachListener(RobotConfigurationData.class, javaFXRobotVisualizer::submitNewConfiguration);
       view3dFactory.addNodeToView(javaFXRobotVisualizer.getRootNode());
+
+      Translate rootJointOffset = new Translate();
+      cameraController.prependTransform(rootJointOffset);
+
+      cameraTracking = new AnimationTimer()
+      {
+         @Override
+         public void handle(long now)
+         {
+            FramePoint3D rootJointPosition = new FramePoint3D(javaFXRobotVisualizer.getFullRobotModel().getRootJoint().getFrameAfterJoint());
+            rootJointPosition.changeFrame(ReferenceFrame.getWorldFrame());
+            rootJointOffset.setX(rootJointPosition.getX());
+            rootJointOffset.setY(rootJointPosition.getY());
+            rootJointOffset.setZ(rootJointPosition.getZ());
+         }
+      };
 
       stepGeneratorJavaFXController = new StepGeneratorJavaFXController(walkingControllerParameters, packetCommunicator, javaFXRobotVisualizer);
       view3dFactory.addNodeToView(stepGeneratorJavaFXController.getRootNode());
@@ -71,6 +93,7 @@ public class JoystickBasedSteppingMainUI
       primaryStage.show();
       javaFXRobotVisualizer.start();
       stepGeneratorJavaFXController.start();
+      cameraTracking.start();
       packetCommunicator.connect();
    }
 
@@ -78,6 +101,8 @@ public class JoystickBasedSteppingMainUI
    {
       javaFXRobotVisualizer.stop();
       stepGeneratorJavaFXController.stop();
+      cameraTracking.stop();
+      packetCommunicator.disconnect();
       packetCommunicator.closeConnection();
    }
 }
