@@ -149,9 +149,6 @@ public class QuadrupedTeleopManager
 
       QuadrupedTimedStepListMessage stepsMessage = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(stepMessages, true);
       packetCommunicator.send(stepsMessage);
-
-      QuadrupedBodyOrientationMessage bodyOrientationMessage = QuadrupedMessageTools.createQuadrupedWorldFrameYawMessage(stepStream.getBodyOrientation().getYaw());
-      packetCommunicator.send(bodyOrientationMessage);
    }
 
    public void setDesiredCoMHeight(double desiredCoMHeight)
