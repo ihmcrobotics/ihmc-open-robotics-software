@@ -32,7 +32,6 @@ public class QuadrupedTeleopManager
    private final PacketCommunicator packetCommunicator;
    private final QuadrupedXGaitStepStream stepStream;
    private final YoQuadrupedXGaitSettings xGaitSettings;
-   private final QuadrupedPlanarVelocityInputProvider velocityInput = new QuadrupedPlanarVelocityInputProvider(null, registry);
    private final YoDouble timestamp = new YoDouble("timestamp", registry);
    private final YoBoolean walking = new YoBoolean("walking", registry);
 
@@ -59,7 +58,7 @@ public class QuadrupedTeleopManager
    {
       this.packetCommunicator = packetCommunicator;
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, null, registry);
-      this.stepStream = new QuadrupedXGaitStepStream(velocityInput, xGaitSettings, referenceFrames, timestamp, registry);
+      this.stepStream = new QuadrupedXGaitStepStream(xGaitSettings, referenceFrames, timestamp, registry);
       desiredCoMHeight.set(initialCoMHeight);
 
       packetCommunicator.attachListener(QuadrupedControllerStateChangeMessage.class, controllerStateChangeMessage::set);
@@ -72,7 +71,7 @@ public class QuadrupedTeleopManager
    public void update()
    {
       timestamp.set(Conversions.nanosecondsToSeconds(timestampNanos.get()));
-      velocityInput.set(desiredVelocityX.get(), desiredVelocityY.get(), desiredVelocityZ.get());
+      stepStream.setDesiredPlanarVelocity(desiredVelocityX.get(), desiredVelocityY.get(), desiredVelocityZ.get());
 
       if (xGaitRequested.getAndSet(false) && !isInStepState())
       {

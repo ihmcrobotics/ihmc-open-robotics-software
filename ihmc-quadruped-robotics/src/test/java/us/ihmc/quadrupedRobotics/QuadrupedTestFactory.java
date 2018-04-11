@@ -24,7 +24,6 @@ public interface QuadrupedTestFactory
    public void setGroundProfile3D(GroundProfile3D groundProfile3D);
 
    public void setUsePushRobotController(boolean usePushRobotController);
-import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 
    public void setInitialPosition(QuadrupedInitialPositionParameters initialPosition);
 
