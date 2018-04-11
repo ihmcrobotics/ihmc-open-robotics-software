@@ -34,6 +34,7 @@ public class JavaFXRobotVisualizer
       RobotDescription robotDescription = fullRobotModelFactory.getRobotDescription();
       graphicsRobot = new GraphicsRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription);
       rootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode());
+      rootNode.setMouseTransparent(true);
       addNodesRecursively(graphicsRobot.getRootNode(), rootNode);
       rootNode.update();
 
