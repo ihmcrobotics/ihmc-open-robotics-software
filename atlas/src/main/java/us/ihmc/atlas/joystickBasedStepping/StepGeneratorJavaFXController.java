@@ -56,9 +56,10 @@ public class StepGeneratorJavaFXController
    private final Joystick joystick;
 
    public StepGeneratorJavaFXController(WalkingControllerParameters walkingControllerParameters, PacketCommunicator packetCommunicator,
-                                            JavaFXRobotVisualizer javaFXRobotVisualizer)
+                                        JavaFXRobotVisualizer javaFXRobotVisualizer)
    {
       this.packetCommunicator = packetCommunicator;
+      continuousStepGenerator.setNumberOfFootstepsToPlan(10);
       continuousStepGenerator.setDesiredHeadingProvider(() -> headingVelocity.get());
       continuousStepGenerator.setDesiredVelocityProvider(() -> desiredVelocityProperty.get());
       continuousStepGenerator.configureWith(walkingControllerParameters);
@@ -79,7 +80,7 @@ public class StepGeneratorJavaFXController
 
             List<Node> footstepsToVisualize = footstepsToVisualizeReference.getAndSet(null);
             ObservableList<Node> children = rootNode.getChildren();
-//
+
             if (!continuousStepGenerator.isWalking())
             {
                children.clear();
@@ -147,7 +148,7 @@ public class StepGeneratorJavaFXController
 
    private Node createFootstep(Point3DReadOnly position, QuaternionReadOnly orientation, Color footColor)
    {
-      MeshDataHolder polygon = MeshDataGenerator.ExtrudedPolygon(footPolygon, 0.05);
+      MeshDataHolder polygon = MeshDataGenerator.ExtrudedPolygon(footPolygon, 0.025);
       polygon = MeshDataHolder.rotate(polygon, orientation);
       polygon = MeshDataHolder.translate(polygon, position);
       Mesh mesh = JavaFXMeshDataInterpreter.interpretMeshData(polygon, true);
