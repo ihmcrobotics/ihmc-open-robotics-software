@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
-public interface DesiredHeadingProvider
+public interface DesiredHeadingVelocityProvider
 {
    double getHeadingVelocity();
 }
