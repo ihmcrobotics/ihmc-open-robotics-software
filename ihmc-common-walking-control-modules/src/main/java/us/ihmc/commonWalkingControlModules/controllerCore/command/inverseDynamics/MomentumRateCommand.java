@@ -509,6 +509,11 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       selectionMatrixToPack.set(selectionMatrix);
    }
 
+   public SelectionMatrix6D getSelectionMatrix()
+   {
+      return selectionMatrix;
+   }
+
    /**
     * Gets the reference to the desired rate of change of momentum carried by this command.
     * <p>
