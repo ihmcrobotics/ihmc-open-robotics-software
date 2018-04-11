@@ -8,13 +8,14 @@ import us.ihmc.robotics.robotSide.RobotEnd;
 
 public class QuadrupedPlanarFootstepPlan
 {
-   private final EndDependentList<QuadrupedTimedOrientedStep> currentSteps = new EndDependentList<>();
+   private final EndDependentList<QuadrupedTimedOrientedStep> currentSteps;
    private final PreallocatedList<QuadrupedTimedOrientedStep> plannedSteps;
 
    private final PreallocatedList<QuadrupedTimedOrientedStep> completeStepSequence;
 
    public QuadrupedPlanarFootstepPlan(int planCapacity)
    {
+      currentSteps = new EndDependentList<>(new QuadrupedTimedOrientedStep(), new QuadrupedTimedOrientedStep());
       plannedSteps = new PreallocatedList<>(planCapacity, QuadrupedTimedOrientedStep::new);
       completeStepSequence = new PreallocatedList<>(planCapacity + 2, QuadrupedTimedOrientedStep::new);
    }

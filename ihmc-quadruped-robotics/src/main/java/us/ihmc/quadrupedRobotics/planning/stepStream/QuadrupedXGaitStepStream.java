@@ -138,4 +138,9 @@ public class QuadrupedXGaitStepStream
    {
       return footstepPlan.getCompleteStepSequence(timestamp.getDoubleValue());
    }
+
+   public QuadrupedPlanarFootstepPlan getFootstepPlan()
+   {
+      return footstepPlan;
+   }
 }
