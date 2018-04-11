@@ -1,6 +1,6 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonAState;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.*;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonBState;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickXAxis;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickYAxis;
@@ -16,6 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
@@ -43,6 +44,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -127,6 +129,8 @@ public class StepGeneratorJavaFXController
       messager.registerJavaFXSyncedTopicListener(RightStickXAxis, this::updateHeadingVelocity);
 
       packetCommunicator.attachListener(WalkingControllerFailureStatusMessage.class, packet -> stopWalking(true));
+      messager.registerTopicListener(ButtonSelectState, state -> sendLowLevelControlModeRequest(AtlasLowLevelControlMode.FREEZE));
+      messager.registerTopicListener(ButtonStartState, state -> sendLowLevelControlModeRequest(AtlasLowLevelControlMode.STAND_PREP));
    }
 
    private void updateForwardVelocity(double alpha)
@@ -164,6 +168,13 @@ public class StepGeneratorJavaFXController
          pauseWalkingMessage.setPause(true);
          packetCommunicator.send(pauseWalkingMessage);
       }
+   }
+
+   public void sendLowLevelControlModeRequest(AtlasLowLevelControlMode mode)
+   {
+      AtlasLowLevelControlModeMessage message = new AtlasLowLevelControlModeMessage();
+      message.setRequestedAtlasLowLevelControlMode(mode.toByte());
+      packetCommunicator.send(message);
    }
 
    private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage)
