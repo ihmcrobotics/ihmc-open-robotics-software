@@ -72,7 +72,7 @@ public class ContinuousStepGenerator implements Updatable
 
    private FootPoseProvider footPoseProvider;
    private DesiredVelocityProvider desiredVelocityProvider;
-   private DesiredHeadingProvider desiredHeadingProvider;
+   private DesiredHeadingVelocityProvider desiredHeadingProvider;
    private FootstepMessenger footstepMessenger;
    private FootstepAdjustment footstepAdjustment;
 
@@ -82,9 +82,15 @@ public class ContinuousStepGenerator implements Updatable
 
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>();
 
+   public ContinuousStepGenerator()
+   {
+      this(null, null);
+   }
+
    public ContinuousStepGenerator(YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      parentRegistry.addChild(registry);
+      if (parentRegistry != null)
+         parentRegistry.addChild(registry);
 
       numberOfFootstepsToPlan.set(4);
       minStepWidth.set(0.0);
@@ -93,20 +99,28 @@ public class ContinuousStepGenerator implements Updatable
 
       String graphicListName = "FootstepGenerator";
 
-      for (RobotSide robotSide : RobotSide.values)
+      if (yoGraphicsListRegistry != null)
       {
-         List<FootstepVisualizer> visualizers = new ArrayList<>();
-
-         List<Point2D> footPolygon = FootstepVisualizer.createTrapezoidalFootPolygon(0.12, 0.15, 0.25);
-
-         for (int i = 0; i < MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE; i++)
+         for (RobotSide robotSide : RobotSide.values)
          {
-            String name = robotSide.getCamelCaseNameForStartOfExpression() + "PlannedFootstep" + i;
-            AppearanceDefinition footstepColor = new YoAppearanceRGBColor(defaultFeetColors.get(robotSide), 0.0);
-            visualizers.add(new FootstepVisualizer(name, graphicListName, robotSide, footPolygon, footstepColor, yoGraphicsListRegistry, registry));
-         }
+            List<FootstepVisualizer> visualizers = new ArrayList<>();
 
-         footstepSideDependentVisualizers.put(robotSide, visualizers);
+            List<Point2D> footPolygon = FootstepVisualizer.createTrapezoidalFootPolygon(0.12, 0.15, 0.25);
+
+            for (int i = 0; i < MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE; i++)
+            {
+               String name = robotSide.getCamelCaseNameForStartOfExpression() + "PlannedFootstep" + i;
+               AppearanceDefinition footstepColor = new YoAppearanceRGBColor(defaultFeetColors.get(robotSide), 0.0);
+               visualizers.add(new FootstepVisualizer(name, graphicListName, robotSide, footPolygon, footstepColor, yoGraphicsListRegistry, registry));
+            }
+
+            footstepSideDependentVisualizers.put(robotSide, visualizers);
+         }
+      }
+      else
+      {
+         for (RobotSide robotSide : RobotSide.values)
+            footstepSideDependentVisualizers.put(robotSide, new ArrayList<>());
       }
 
       setSupportFootBasedFootstepAdjustment();
@@ -115,6 +129,7 @@ public class ContinuousStepGenerator implements Updatable
    private final FramePose2D footstepPose2D = new FramePose2D();
    private final FramePose2D nextFootstepPose2D = new FramePose2D();
    private final FramePose3D nextFootstepPose3D = new FramePose3D();
+   private final FramePose3D currentSupportFootPose = new FramePose3D();
 
    private boolean updateFirstFootstep = true;
    /** Hack to slow down the rate at which footsteps are sent. */
@@ -134,9 +149,9 @@ public class ContinuousStepGenerator implements Updatable
          updateSupportFootPose();
       }
 
-      footstepDataListMessage.setDefaultSwingDuration(Double.NaN);
-      footstepDataListMessage.setDefaultTransferDuration(Double.NaN);
-      footstepDataListMessage.setFinalTransferDuration(Double.NaN);
+      footstepDataListMessage.setDefaultSwingDuration(swingTime.getValue());
+      footstepDataListMessage.setDefaultTransferDuration(transferTime.getValue());
+      footstepDataListMessage.setFinalTransferDuration(transferTime.getValue());
 
       int startIndex = updateFirstFootstep ? 0 : 1;
 
@@ -185,9 +200,11 @@ public class ContinuousStepGenerator implements Updatable
          nextFootstepPose3D.set(footstepAdjustment.adjustFootstep(nextFootstepPose2D));
 
          int vizualizerIndex = i / 2;
-         if (vizualizerIndex < MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE)
+         List<FootstepVisualizer> footstepVisualizers = footstepSideDependentVisualizers.get(swingSide);
+
+         if (vizualizerIndex < footstepVisualizers.size())
          {
-            FootstepVisualizer footstepVisualizer = footstepSideDependentVisualizers.get(swingSide).get(vizualizerIndex);
+            FootstepVisualizer footstepVisualizer = footstepVisualizers.get(vizualizerIndex);
             footstepVisualizer.update(nextFootstepPose3D);
          }
 
@@ -215,9 +232,10 @@ public class ContinuousStepGenerator implements Updatable
 
    private void updateSupportFootPose()
    {
-      FramePose3DReadOnly currentFootPose = footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue());
-      currentSupportFootPosition.set(currentFootPose.getPosition());
-      currentSupportFootOrientation.set(currentFootPose.getOrientation());
+      currentSupportFootPose.setIncludingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
+      currentSupportFootPose.changeFrame(worldFrame);
+      currentSupportFootPosition.set(currentSupportFootPose.getPosition());
+      currentSupportFootOrientation.set(currentSupportFootPose.getOrientation());
    }
 
    public void setFootstepTiming(double swingTime, double transferTime)
@@ -226,7 +244,7 @@ public class ContinuousStepGenerator implements Updatable
       this.transferTime.set(transferTime);
    }
 
-   public void setDesiredHeadingProvider(DesiredHeadingProvider desiredHeadingProvider)
+   public void setDesiredHeadingProvider(DesiredHeadingVelocityProvider desiredHeadingProvider)
    {
       this.desiredHeadingProvider = desiredHeadingProvider;
    }
@@ -283,13 +301,18 @@ public class ContinuousStepGenerator implements Updatable
          @Override
          public void receivedNewMessageStatus(FootstepStatusMessage statusMessage)
          {
-            FootstepStatus status = FootstepStatus.fromByte(statusMessage.getFootstepStatus());
-            if (status == FootstepStatus.COMPLETED)
-               notifyFootstepCompleted(RobotSide.fromByte(statusMessage.getRobotSide()));
-            else if (status == FootstepStatus.STARTED)
-               notifyFootstepStarted();
+            consumeFootstepStatus(statusMessage);
          }
       });
+   }
+
+   public void consumeFootstepStatus(FootstepStatusMessage statusMessage)
+   {
+      FootstepStatus status = FootstepStatus.fromByte(statusMessage.getFootstepStatus());
+      if (status == FootstepStatus.COMPLETED)
+         notifyFootstepCompleted(RobotSide.fromByte(statusMessage.getRobotSide()));
+      else if (status == FootstepStatus.STARTED)
+         notifyFootstepStarted();
    }
 
    public void configureWith(WalkingControllerParameters walkingControllerParameters)
@@ -326,7 +349,8 @@ public class ContinuousStepGenerator implements Updatable
          public FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose)
          {
             adjustedPose.getPosition().set(footstepPose.getPosition());
-            FramePose3DReadOnly currentSupportFootPose = footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue());
+            currentSupportFootPose.setIncludingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
+            currentSupportFootPose.changeFrame(worldFrame);
             adjustedPose.setZ(currentSupportFootPose.getZ());
             currentSupportFootPose.getOrientationYawPitchRoll(yawPitchRoll);
             yawPitchRoll[0] = footstepPose.getYaw();
@@ -348,13 +372,19 @@ public class ContinuousStepGenerator implements Updatable
          {
             adjustedPose.getPosition().set(footstepPose.getPosition());
             adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
-            FramePose3DReadOnly currentSupportFootPose = footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue());
+            currentSupportFootPose.setIncludingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
+            currentSupportFootPose.changeFrame(worldFrame);
             currentSupportFootPose.getOrientationYawPitchRoll(yawPitchRoll);
             yawPitchRoll[0] = footstepPose.getYaw();
             adjustedPose.setOrientationYawPitchRoll(yawPitchRoll);
             return adjustedPose;
          }
       });
+   }
+
+   public void toggleWalking()
+   {
+      walk.set(!walk.getValue());
    }
 
    public void startWalking()
@@ -365,5 +395,10 @@ public class ContinuousStepGenerator implements Updatable
    public void stopWalking()
    {
       walk.set(false);
+   }
+
+   public boolean isWalking()
+   {
+      return walk.getBooleanValue();
    }
 }
