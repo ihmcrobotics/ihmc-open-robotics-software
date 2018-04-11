@@ -313,7 +313,7 @@ public class WholeBodyVirtualModelControlSolver
 
          rootBodyDefaultMomentumCommand.setSelectionMatrix(tempSelectionMatrix);
          rootBodyDefaultMomentumCommand.setAngularWeights(defaultLinearMomentumWeight);
-         rootBodyDefaultMomentumCommand.setAngularWeights(tempTorque);
+         rootBodyDefaultMomentumCommand.setAngularMomentumRate(tempTorque);
 
          return rootBodyDefaultMomentumCommand;
       }
