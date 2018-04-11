@@ -105,10 +105,9 @@ public class StepGeneratorJavaFXController
       try
       {
          joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
-         joystick.setStandalone();
          joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1));
          joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1));
-         joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_STICK_X, true, 0.1));
+         joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_TRIGGER, true, 0.1, 3));
       }
       catch (IOException e)
       {
@@ -191,8 +190,8 @@ public class StepGeneratorJavaFXController
                xdot = xdotMax * event.getValue();
             else if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_X.getIdentifier())
                ydot = ydotMax * event.getValue();
-            else if (event.getComponent().getIdentifier() == XBoxOneMapping.RIGHT_STICK_X.getIdentifier())
-               adot = adotMax * event.getValue();
+            else if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_TRIGGER.getIdentifier())
+               adot = -adotMax * event.getValue();
          });
       }
 
