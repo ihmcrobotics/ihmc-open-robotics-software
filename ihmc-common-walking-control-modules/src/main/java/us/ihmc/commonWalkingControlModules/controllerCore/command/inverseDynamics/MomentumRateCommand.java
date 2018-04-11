@@ -71,6 +71,8 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public MomentumRateCommand()
    {
+      weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
+      weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
    }
 
    /**

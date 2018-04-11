@@ -69,6 +69,8 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     */
    public MomentumCommand()
    {
+      weightMatrix.setAngularWeights(0.0, 0.0, 0.0);
+      weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
    }
 
    /**
