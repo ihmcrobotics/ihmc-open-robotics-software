@@ -141,6 +141,7 @@ public class ContinuousStepGenerator implements Updatable
       if (!walk.getValue())
       {
          updateFirstFootstep = true;
+         walkPreviousValue.set(false);
          return;
       }
 
