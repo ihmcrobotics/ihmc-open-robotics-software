@@ -50,6 +50,7 @@ public class QuadrupedBodyOrientationManager
    private final YoDouble robotTimestamp;
    private final QuadrupedControllerToolbox controllerToolbox;
 
+   private final OrientationFeedbackControlCommand feedbackControlCommand = new OrientationFeedbackControlCommand();
    private final MomentumRateCommand angularMomentumCommand = new MomentumRateCommand();
    private final YoFrameVector3D bodyAngularWeight = new YoFrameVector3D("bodyAngularWeight", worldFrame, registry);
 
@@ -73,6 +74,11 @@ public class QuadrupedBodyOrientationManager
       yoBodyOrientationSetpoint = new YoFrameYawPitchRoll("bodyOrientationSetpoint", worldFrame, registry);
       yoBodyAngularVelocitySetpoint = new YoFrameVector3D("bodyAngularVelocitySetpoint", worldFrame, registry);
       yoComTorqueFeedforwardSetpoint = new YoFrameVector3D("comTorqueFeedforwardSetpoint", worldFrame, registry);
+
+
+      feedbackControlCommand.setGains(bodyOrientationDefaultGains);
+      feedbackControlCommand.set(controllerToolbox.getFullRobotModel().getElevator(), controllerToolbox.getFullRobotModel().getBody());
+      feedbackControlCommand.setGainsFrame(bodyFrame);
 
       groundPlaneEstimator = controllerToolbox.getGroundPlaneEstimator();
 
@@ -185,6 +191,14 @@ public class QuadrupedBodyOrientationManager
       bodyOrientationController
             .compute(desiredAngularMomentumRate, desiredBodyOrientation, desiredBodyAngularVelocity, estimatedVelocity, desiredBodyFeedForwardTorque);
 
+      desiredBodyFeedForwardTorque.changeFrame(worldFrame);
+      desiredBodyOrientation.changeFrame(worldFrame);
+      desiredBodyAngularVelocity.changeFrame(worldFrame);
+
+      feedbackControlCommand.setGains(bodyOrientationGainsParameter);
+      feedbackControlCommand.setFeedForwardAction(desiredBodyFeedForwardTorque);
+      feedbackControlCommand.set(desiredBodyOrientation, desiredBodyAngularVelocity);
+      feedbackControlCommand.setWeightsForSolver(bodyAngularWeight);
    }
 
    public FeedbackControlCommand<?> createFeedbackControlTemplate()
@@ -194,11 +208,11 @@ public class QuadrupedBodyOrientationManager
 
    public OrientationFeedbackControlCommand getFeedbackControlCommand()
    {
-      return null;
+      return feedbackControlCommand;
    }
 
    public VirtualModelControlCommand<?> getVirtualModelControlCommand()
    {
-      return angularMomentumCommand;
+      return null;
    }
 }

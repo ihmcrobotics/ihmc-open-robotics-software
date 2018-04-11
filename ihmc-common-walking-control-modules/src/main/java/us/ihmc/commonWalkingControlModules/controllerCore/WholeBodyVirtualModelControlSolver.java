@@ -110,8 +110,6 @@ public class WholeBodyVirtualModelControlSolver
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
 
-      rootBodyDefaultMomentumCommand.setWeights(defaultAngularMomentumWeight, defaultLinearMomentumWeight);
-
       parentRegistry.addChild(registry);
    }
 

@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -101,7 +100,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
                                   YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
-      this.rootBody = toolbox.getRootBody();
+      this.rootBody = toolbox.getRootJoint().getSuccessor();
 
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
