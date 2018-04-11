@@ -52,6 +52,7 @@ public class NetworkPorts
    public static final NetworkPorts VISIBILITY_GRAPHS = new NetworkPorts(6027, "visibility_graphs");
    public static final NetworkPorts WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_PORT = new NetworkPorts(6028, "whole_body_trajectory_toolbox_module");
    public static final NetworkPorts CONTROLLER_FILTER_MODULE_PORT = new NetworkPorts(6029, "controller_filter_module");
+   public static final NetworkPorts JOYSTICK_BASED_CONTINUOUS_STEPPING = new NetworkPorts(6030, "joystick_based_stepping");
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046, "mission_control_server");

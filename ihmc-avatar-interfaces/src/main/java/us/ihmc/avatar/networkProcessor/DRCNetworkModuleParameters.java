@@ -39,6 +39,7 @@ public class DRCNetworkModuleParameters
    private boolean useRemoteObjectDetectionFeedback;
    private boolean useLidarScanLogger;
    private boolean filterControllerInputMessages;
+   private boolean enableJoystickBasedStepping;
 
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
@@ -402,5 +403,15 @@ public class DRCNetworkModuleParameters
    public void setFilterControllerInputMessages(boolean filterControllerInputMessages)
    {
       this.filterControllerInputMessages = filterControllerInputMessages;
+   }
+
+   public boolean isEnableJoystickBasedStepping()
+   {
+      return enableJoystickBasedStepping;
+   }
+
+   public void setEnableJoystickBasedStepping(boolean enableJoystickBasedStepping)
+   {
+      this.enableJoystickBasedStepping = enableJoystickBasedStepping;
    }
 }
