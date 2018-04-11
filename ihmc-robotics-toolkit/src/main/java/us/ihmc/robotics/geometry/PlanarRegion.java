@@ -241,9 +241,7 @@ public class PlanarRegion
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2D intersectingPolygon = new ConvexPolygon2D();
-         convexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(i), projectedPolygon, intersectingPolygon);
-
-         if (intersectingPolygon != null)
+         if (convexPolygonTools.computeIntersectionOfPolygons(convexPolygons.get(i), projectedPolygon, intersectingPolygon))
          {
             intersectionsInPlaneFrameToPack.add(intersectingPolygon);
          }
@@ -1029,7 +1027,7 @@ public class PlanarRegion
     * <p>
     * Assumes the object is originally expressed in world coordinates.
     * </p>
-    * 
+    *
     * @param objectToTransform the object to be transformed. Modified.
     */
    public void transformFromWorldToLocal(Transformable objectToTransform)
@@ -1042,7 +1040,7 @@ public class PlanarRegion
     * <p>
     * Assumes the object is originally expressed in local coordinates of this planar region.
     * </p>
-    * 
+    *
     * @param objectToTransform the object to be transformed. Modified.
     */
    public void transformFromLocalToWorld(Transformable objectToTransform)
