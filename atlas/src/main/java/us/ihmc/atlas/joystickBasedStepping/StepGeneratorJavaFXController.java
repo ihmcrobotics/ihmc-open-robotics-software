@@ -4,13 +4,16 @@ import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.Butt
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.ButtonBState;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickXAxis;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftStickYAxis;
-import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.LeftTriggerAxis;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.RightStickXAxis;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingDuration;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingHeight;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTransferDuration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -29,6 +32,8 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -44,6 +49,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class StepGeneratorJavaFXController
 {
+   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory("FootstepPublisher"));
    private final SideDependentList<Color> footColors = new SideDependentList<Color>(Color.CRIMSON, Color.YELLOWGREEN);
 
    private final ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator();
@@ -58,9 +64,11 @@ public class StepGeneratorJavaFXController
 
    private final Group rootNode = new Group();
 
-   private AtomicReference<Double> swingHeight;
-   private AtomicReference<Double> swingDuration;
-   private AtomicReference<Double> transferDuration;
+   private final AtomicReference<FootstepDataListMessage> footstepsToSendReference = new AtomicReference<>(null);
+
+   private final AtomicReference<Double> swingHeight;
+   private final AtomicReference<Double> swingDuration;
+   private final AtomicReference<Double> transferDuration;
 
    public StepGeneratorJavaFXController(JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters,
                                         PacketCommunicator packetCommunicator, JavaFXRobotVisualizer javaFXRobotVisualizer)
@@ -71,7 +79,7 @@ public class StepGeneratorJavaFXController
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocityProperty.get(), lateralVelocityProperty.get()));
       continuousStepGenerator.configureWith(walkingControllerParameters);
       continuousStepGenerator.setSupportFootBasedFootstepAdjustment();
-      continuousStepGenerator.setFootstepMessenger(this::visualizeFootstepsAndSend);
+      continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(javaFXRobotVisualizer.getFullRobotModel().getSoleFrame(robotSide)));
       packetCommunicator.attachListener(FootstepStatusMessage.class, continuousStepGenerator::consumeFootstepStatus);
 
@@ -115,25 +123,25 @@ public class StepGeneratorJavaFXController
       messager.registerTopicListener(ButtonBState, state -> stopWalking(true));
       messager.registerJavaFXSyncedTopicListener(LeftStickYAxis, this::updateForwardVelocity);
       messager.registerJavaFXSyncedTopicListener(LeftStickXAxis, this::updateLateralVelocity);
-      messager.registerJavaFXSyncedTopicListener(LeftTriggerAxis, this::updateHeadingVelocity);
+      messager.registerJavaFXSyncedTopicListener(RightStickXAxis, this::updateHeadingVelocity);
    }
 
    private void updateForwardVelocity(double alpha)
    {
-      double minMaxVelocity = 0.3;
-      forwardVelocityProperty.set(minMaxVelocity * alpha);
+      double minMaxVelocity = 0.15;
+      forwardVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
    }
 
    private void updateLateralVelocity(double alpha)
    {
-      double minMaxVelocity = 0.3;
-      lateralVelocityProperty.set(minMaxVelocity * alpha);
+      double minMaxVelocity = 0.15;
+      lateralVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
    }
 
    private void updateHeadingVelocity(double alpha)
    {
-      double minMaxVelocity = Math.PI / 3.0;
-      headingVelocityProperty.set(-minMaxVelocity * alpha);
+      double minMaxVelocity = Math.PI / 6.0;
+      headingVelocityProperty.set(minMaxVelocity * MathTools.clamp(alpha, 1.0));
    }
 
    private void startWalking(boolean confirm)
@@ -155,7 +163,7 @@ public class StepGeneratorJavaFXController
       }
    }
 
-   private void visualizeFootstepsAndSend(FootstepDataListMessage footstepDataListMessage)
+   private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage)
    {
       List<Node> footstepNode = new ArrayList<>();
       for (int i = 0; i < footstepDataListMessage.getFootstepDataList().size(); i++)
@@ -165,8 +173,16 @@ public class StepGeneratorJavaFXController
          footstepNode.add(createFootstep(footstepDataMessage));
       }
       footstepsToVisualizeReference.set(footstepNode);
+      footstepsToSendReference.set(new FootstepDataListMessage(footstepDataListMessage));
+   }
 
-      packetCommunicator.send(footstepDataListMessage);
+   private void sendFootsteps()
+   {
+      FootstepDataListMessage footstepsToSend = footstepsToSendReference.getAndSet(null);
+      if (footstepsToSend != null)
+      {
+         packetCommunicator.send(footstepsToSend);
+      }
    }
 
    private Node createFootstep(FootstepDataMessage footstepDataMessage)
@@ -189,11 +205,13 @@ public class StepGeneratorJavaFXController
    public void start()
    {
       animationTimer.start();
+      executorService.scheduleAtFixedRate(this::sendFootsteps, 0, 100, TimeUnit.MILLISECONDS);
    }
 
    public void stop()
    {
       animationTimer.stop();
+      executorService.shutdownNow();
    }
 
    public Node getRootNode()

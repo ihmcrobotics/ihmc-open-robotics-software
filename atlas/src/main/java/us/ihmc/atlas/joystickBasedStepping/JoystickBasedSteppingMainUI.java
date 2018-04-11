@@ -1,5 +1,8 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
+import java.io.IOException;
+
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
@@ -10,6 +13,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -25,7 +29,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 
 public class JoystickBasedSteppingMainUI
 {
-   private static final String HOST = NetworkParameters.getHost(NetworkParameterKeys.robotController);
+   private static final String HOST = NetworkParameters.getHost(NetworkParameterKeys.networkManager);
    private static final NetworkPorts PORT = NetworkPorts.JOYSTICK_BASED_CONTINUOUS_STEPPING;
    private static final IHMCCommunicationKryoNetClassList NET_CLASS_LIST = new IHMCCommunicationKryoNetClassList();
 
@@ -95,7 +99,7 @@ public class JoystickBasedSteppingMainUI
       start();
    }
 
-   public void start() throws Exception
+   public void start() throws IOException
    {
       primaryStage.show();
       javaFXRobotVisualizer.start();
@@ -118,6 +122,10 @@ public class JoystickBasedSteppingMainUI
       javaFXRobotVisualizer.stop();
       stepGeneratorJavaFXController.stop();
       cameraTracking.stop();
+      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
+      pauseWalkingMessage.setPause(true);
+      packetCommunicator.send(pauseWalkingMessage);
+      ThreadTools.sleep(100); // Give some time to send the message.:
       packetCommunicator.disconnect();
       packetCommunicator.closeConnection();
    }
