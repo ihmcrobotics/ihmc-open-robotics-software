@@ -2,6 +2,7 @@ package us.ihmc.atlas.joystickBasedStepping;
 
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingDuration;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingSwingHeight;
+import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
 import static us.ihmc.atlas.joystickBasedStepping.StepGeneratorJavaFXTopics.WalkingTransferDuration;
 
 import javafx.fxml.FXML;
@@ -21,6 +22,9 @@ public class StepGeneratorParametersPaneController
 
    @FXML
    private Slider transferDurationSlider;
+   
+   @FXML
+   private Slider trajectoryDurationSlider;
 
    public StepGeneratorParametersPaneController()
    {
@@ -34,6 +38,7 @@ public class StepGeneratorParametersPaneController
       transferDurationSlider.setValue(walkingControllerParameters.getDefaultTransferTime());
       messager.bindBidirectional(WalkingSwingDuration, swingDurationSlider.valueProperty(), createConverter(), true);
       messager.bindBidirectional(WalkingTransferDuration, transferDurationSlider.valueProperty(), createConverter(), true);
+      messager.bindBidirectional(WalkingTrajectoryDuration, trajectoryDurationSlider.valueProperty(), createConverter(), true);
    }
 
    private PropertyToMessageTypeConverter<Double, Number> createConverter()
