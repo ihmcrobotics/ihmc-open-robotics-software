@@ -5,9 +5,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -77,6 +79,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
    private final VirtualForceCommand virtualModelControlOutput = new VirtualForceCommand();
+   private final MomentumRateCommand virtualModelControlRootOutput = new MomentumRateCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    private final YoPID3DGains gains;
@@ -89,6 +92,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private ReferenceFrame controlBaseFrame;
    private ReferenceFrame linearGainsFrame;
 
+   private final RigidBody rootBody;
    private final RigidBody endEffector;
 
    private final double dt;
@@ -97,6 +101,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
                                   YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
+      this.rootBody = toolbox.getRootBody();
 
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
@@ -298,8 +303,24 @@ public class PointFeedbackController implements FeedbackControllerInterface
       if (!isEnabled())
          return;
 
-      virtualModelControlOutput.setProperties(inverseDynamicsOutput);
+      computeFeedbackForce();
 
+      if (endEffector == rootBody)
+      {
+         desiredLinearForce.changeFrame(worldFrame);
+
+         virtualModelControlRootOutput.setProperties(inverseDynamicsOutput);
+         virtualModelControlRootOutput.setLinearMomentumRate(desiredLinearForce);
+      }
+      else
+      {
+         virtualModelControlOutput.setProperties(inverseDynamicsOutput);
+         virtualModelControlOutput.setLinearForce(controlFrame, desiredLinearForce);
+      }
+   }
+
+   private void computeFeedbackForce()
+   {
       computeProportionalTerm(proportionalFeedback);
       computeDerivativeTerm(derivativeFeedback);
       computeIntegralTerm(integralFeedback);
@@ -315,8 +336,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearForce.changeFrame(controlFrame);
 
       yoDesiredLinearForce.setMatchingFrame(desiredLinearForce);
-
-      virtualModelControlOutput.setLinearForce(controlFrame, desiredLinearForce);
    }
 
    private final SpatialAccelerationVector achievedSpatialAccelerationVector = new SpatialAccelerationVector();
@@ -527,10 +546,10 @@ public class PointFeedbackController implements FeedbackControllerInterface
    }
 
    @Override
-   public VirtualForceCommand getVirtualModelControlOutput()
+   public VirtualModelControlCommand<?> getVirtualModelControlOutput()
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      return virtualModelControlOutput;
+      return (endEffector == rootBody) ? virtualModelControlRootOutput : virtualModelControlOutput;
    }
 }
